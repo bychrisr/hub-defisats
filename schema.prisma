@@ -1,0 +1,185 @@
+// Enums
+enum SocialProvider {
+  google
+  github
+  // outros providers podem ser adicionados conforme necessário
+}
+
+enum PlanType {
+  free
+  basic
+  advanced
+  pro
+}
+
+enum AutomationType {
+  margin_guard
+  tp_sl
+  auto_entry
+}
+
+enum TradeStatus {
+  success
+  app_error
+  exchange_error
+}
+
+enum NotificationType {
+  telegram
+  email
+  whatsapp
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  expired
+  failed
+}
+
+enum AlertSeverity {
+  info
+  warning
+  critical
+}
+
+enum AdminRole {
+  superadmin
+  admin
+}
+
+// Models
+model User {
+  id                     String      @id @default(uuid())
+  email                  String      @unique
+  password_hash          String?
+  social_provider        SocialProvider?
+  social_id              String?
+  ln_markets_api_key     String
+  ln_markets_api_secret  String
+  plan_type              PlanType    @default(free)
+  last_activity_at       DateTime?
+  created_at             DateTime    @default(now())
+  updated_at             DateTime    @default(now())
+  is_active              Boolean     @default(true)
+  session_expires_at     DateTime?
+  
+  /// Users can have only one active LN Markets key pair at a time
+  automations            Automation[]
+  trade_logs             TradeLog[]
+  notifications          Notification[]
+  payments               Payment[]
+  backtest_reports       BacktestReport[]
+  admin_user             AdminUser?
+  user_coupons           UserCoupon[]
+  used_coupon            Coupon?       @relation("UserUsedCoupon", fields: [used_coupon_id], references: [id])
+  used_coupon_id         String?
+
+  @@index([email])
+}
+
+model Automation {
+  id          String        @id @default(uuid())
+  user_id     String
+  type        AutomationType
+  config      Json
+  is_active   Boolean       @default(true)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @default(now())
+  
+  user        User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  trade_logs  TradeLog[]
+}
+
+model TradeLog {
+  id             String      @id @default(uuid())
+  user_id        String
+  automation_id  String?
+  trade_id       String      /// LN Markets trade ID
+  status         TradeStatus
+  error_message  String?
+  executed_at    DateTime
+  created_at     DateTime    @default(now())
+  
+  user           User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  automation     Automation? @relation(fields: [automation_id], references: [id], onDelete: SetNull)
+}
+
+model Notification {
+  id             String           @id @default(uuid())
+  user_id        String
+  type           NotificationType
+  is_enabled     Boolean          @default(true)
+  channel_config Json
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @default(now())
+  
+  user           User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id                 String        @id @default(uuid())
+  user_id            String
+  plan_type          PlanType
+  amount_sats        Int
+  lightning_invoice  String
+  status             PaymentStatus
+  paid_at            DateTime?
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @default(now())
+  
+  user               User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model BacktestReport {
+  id         String   @id @default(uuid())
+  user_id    String
+  config     Json
+  result     Json
+  created_at DateTime @default(now())
+  
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model AdminUser {
+  id         String    @id @default(uuid())
+  user_id    String    @unique
+  role       AdminRole
+  created_at DateTime  @default(now())
+  
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Coupon {
+  id          String      @id @default(uuid())
+  code        String      @unique
+  usage_limit Int         @default(1)
+  used_count  Int         @default(0)
+  plan_type   PlanType
+  expires_at  DateTime?
+  created_at  DateTime    @default(now())
+  
+  user_coupons UserCoupon[] @relation("CouponUserRelation")
+  users_used   User[]       @relation("UserUsedCoupon")
+}
+
+model SystemAlert {
+  id         String       @id @default(uuid())
+  message    String
+  severity   AlertSeverity
+  is_global  Boolean      @default(false)
+  created_at DateTime     @default(now())
+}
+
+/// Join table for User-Coupon N:N relationship
+/// Each user can redeem a coupon once
+model UserCoupon {
+  user_id    String
+  coupon_id  String
+  used_at    DateTime @default(now())
+  
+  user       User     @relation("UserCouponRelation", fields: [user_id], references: [id], onDelete: Cascade)
+  coupon     Coupon   @relation("CouponUserRelation", fields: [coupon_id], references: [id], onDelete: Cascade)
+  
+  @@id([user_id, coupon_id])
+}
