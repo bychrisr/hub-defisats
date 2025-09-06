@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* LN Markets Trading Platform Design System */
+
+@layer base {
+  :root {
+    /* Core Brand Colors */
+    --background: 0 0% 100%;
+    --foreground: 210 24% 16%;
+    
+    /* Primary - Deep Blue (Technology & Trust) */
+    --primary: 216 83% 20%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 216 83% 15%;
+    --primary-light: 216 83% 25%;
+    
+    /* Secondary - Energy Orange */
+    --secondary: 24 95% 53%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-hover: 24 95% 48%;
+    --secondary-light: 24 95% 58%;
+    
+    /* Success - Profit Green */
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 98%;
+    --success-hover: 158 64% 47%;
+    --success-light: 158 64% 57%;
+    
+    /* Destructive - Risk Red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --destructive-hover: 0 84% 55%;
+    --destructive-light: 0 84% 65%;
+    
+    /* Warning - Attention Yellow */
+    --warning: 43 96% 56%;
+    --warning-foreground: 216 83% 20%;
+    --warning-hover: 43 96% 51%;
+    --warning-light: 43 96% 61%;
+    
+    /* Neutral Grays */
+    --muted: 215 20% 65%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 216 83% 20%;
+    
+    /* UI Elements */
+    --card: 0 0% 100%;
+    --card-foreground: 210 24% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 16%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 216 83% 20%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(216 83% 20%), hsl(216 83% 15%));
+    --gradient-success: linear-gradient(135deg, hsl(158 64% 52%), hsl(158 64% 47%));
+    --gradient-hero: linear-gradient(135deg, hsl(216 83% 20%), hsl(24 95% 53%));
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(216 83% 20% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(216 83% 20% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(216 83% 20% / 0.1);
+    --shadow-glow: 0 0 20px hsl(216 83% 20% / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Core Brand Colors - Dark Mode */
+    --background: 216 83% 8%;
+    --foreground: 0 0% 98%;
+    
+    /* Primary - Deep Blue (adjusted for dark) */
+    --primary: 216 83% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 216 83% 30%;
+    --primary-light: 216 83% 35%;
+    
+    /* Secondary - Energy Orange (slightly dimmed) */
+    --secondary: 24 95% 48%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-hover: 24 95% 53%;
+    --secondary-light: 24 95% 43%;
+    
+    /* Success - Profit Green (adjusted) */
+    --success: 158 64% 47%;
+    --success-foreground: 0 0% 98%;
+    --success-hover: 158 64% 52%;
+    --success-light: 158 64% 42%;
+    
+    /* Destructive - Risk Red (adjusted) */
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --destructive-hover: 0 84% 60%;
+    --destructive-light: 0 84% 50%;
+    
+    /* Warning - Attention Yellow (adjusted) */
+    --warning: 43 96% 51%;
+    --warning-foreground: 216 83% 8%;
+    --warning-hover: 43 96% 56%;
+    --warning-light: 43 96% 46%;
+    
+    /* Neutral Grays - Dark Mode */
+    --muted: 215 20% 35%;
+    --muted-foreground: 215 16% 65%;
+    --accent: 216 83% 12%;
+    --accent-foreground: 0 0% 98%;
+    
+    /* UI Elements - Dark Mode */
+    --card: 216 83% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 216 83% 10%;
+    --popover-foreground: 0 0% 98%;
+    --border: 216 83% 15%;
+    --input: 216 83% 15%;
+    --ring: 216 83% 30%;
+    
+    /* Sidebar - Dark Mode */
+    --sidebar-background: 216 83% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 216 83% 25%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 216 83% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 216 83% 15%;
+    --sidebar-ring: 216 83% 30%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  code, pre {
+    font-family: 'JetBrains Mono', 'Fira Code', Monaco, 'Cascadia Code', monospace;
+  }
+}
+
+@layer components {
+  /* Custom button variants */
+  .btn-hero {
+    @apply bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:shadow-glow transition-all duration-300;
+  }
+  
+  .btn-success {
+    @apply bg-success text-success-foreground hover:bg-success/90 border-success;
+  }
+  
+  .btn-warning {
+    @apply bg-warning text-warning-foreground hover:bg-warning/90 border-warning;
+  }
+  
+  /* Card variants */
+  .card-gradient {
+    @apply bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20;
+  }
+  
+  .card-success {
+    @apply bg-success/5 border border-success/20;
+  }
+  
+  .card-danger {
+    @apply bg-destructive/5 border border-destructive/20;
+  }
+  
+  /* Custom animations */
+  .animate-fade-in {
+    @apply opacity-0 animate-in fade-in duration-500;
+  }
+  
+  .animate-slide-in {
+    @apply translate-y-4 opacity-0 animate-in slide-in-from-bottom-4 fade-in duration-500;
+  }
+  
+  /* Status indicators */
+  .status-active {
+    @apply bg-success/20 text-success border-success/30;
+  }
+  
+  .status-inactive {
+    @apply bg-muted/20 text-muted-foreground border-muted/30;
+  }
+  
+  .status-error {
+    @apply bg-destructive/20 text-destructive border-destructive/30;
+  }
+}
