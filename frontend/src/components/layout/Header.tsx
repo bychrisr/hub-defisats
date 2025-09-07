@@ -10,21 +10,47 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAuthStore } from "@/stores/auth";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
 }
 
 export const Header = ({ onToggleSidebar }: HeaderProps) => {
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const handleProfile = () => {
+    navigate('/profile');
+  };
+
+  const handleSettings = () => {
+    navigate('/settings');
+  };
+
+  const getUserInitials = (email: string) => {
+    return email.split('@')[0].substring(0, 2).toUpperCase();
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">LN</span>
+              <span className="text-white font-bold text-sm">HD</span>
             </div>
-            <span className="font-bold text-lg">Margin Guard</span>
+            <span className="font-bold text-lg">Hub-defisats</span>
           </div>
         </div>
 
@@ -35,26 +61,15 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="h-5 w-5" />
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs">
-                  3
+                  0
                 </Badge>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notificações</DropdownMenuLabel>
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <div className="space-y-2 p-2">
-                <div className="p-3 bg-success/10 rounded-lg border border-success/20">
-                  <p className="text-sm font-medium text-success">Margin Guard Ativo</p>
-                  <p className="text-xs text-muted-foreground">Proteção ativada em BTC/USD</p>
-                </div>
-                <div className="p-3 bg-warning/10 rounded-lg border border-warning/20">
-                  <p className="text-sm font-medium text-warning">Margem em 75%</p>
-                  <p className="text-xs text-muted-foreground">Atenção: próximo do limite</p>
-                </div>
-                <div className="p-3 bg-muted/10 rounded-lg">
-                  <p className="text-sm font-medium">Trade executado</p>
-                  <p className="text-xs text-muted-foreground">Stop loss acionado - $150 salvo</p>
-                </div>
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No notifications
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -64,33 +79,36 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatars/01.png" alt="@user" />
-                  <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {user ? getUserInitials(user.email) : 'U'}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">João Silva</p>
+                  <p className="text-sm font-medium leading-none">
+                    {user?.email || 'User'}
+                  </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    joao@example.com
+                    {user?.plan_type.toUpperCase() || 'FREE'} Plan
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleProfile}>
                 <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
+                <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSettings}>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Configurações</span>
+                <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Sair</span>
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

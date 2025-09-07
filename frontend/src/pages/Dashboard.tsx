@@ -1,330 +1,274 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { MetricCard } from "@/components/ui/metric-card";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { 
-  Shield, 
-  TrendingUp, 
-  AlertTriangle, 
-  DollarSign, 
-  Activity,
-  Settings,
-  Eye,
-  RefreshCw
-} from "lucide-react";
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Shield, TrendingUp, Settings, User, BarChart3 } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth';
+import { useAutomationStore } from '@/stores/automation';
 
-const recentTrades = [
-  {
-    id: 1,
-    type: "Stop Loss Acionado",
-    asset: "BTC/USD",
-    amount: "$1,250",
-    saved: "$180",
-    time: "2 min atrás",
-    status: "success" as const,
-  },
-  {
-    id: 2,
-    type: "Margin Guard Ativo",
-    asset: "BTC/USD", 
-    amount: "$2,100",
-    time: "15 min atrás",
-    status: "active" as const,
-  },
-  {
-    id: 3,
-    type: "Take Profit",
-    asset: "ETH/USD",
-    amount: "$890",
-    profit: "$95",
-    time: "1h atrás",
-    status: "success" as const,
-  },
-  {
-    id: 4,
-    type: "Entrada Automatizada",
-    asset: "BTC/USD",
-    amount: "$1,500",
-    time: "3h atrás", 
-    status: "active" as const,
-  },
-];
+export default function Dashboard() {
+  const { user, getProfile, isLoading: authLoading } = useAuthStore();
+  const { automations, fetchAutomations, fetchStats, stats, isLoading: automationLoading } = useAutomationStore();
 
-export const Dashboard = () => {
+  useEffect(() => {
+    if (!user) {
+      getProfile();
+    }
+    fetchAutomations();
+    fetchStats();
+  }, [user, getProfile, fetchAutomations, fetchStats]);
+
+  const isLoading = authLoading || automationLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  const marginGuardAutomation = automations.find(a => a.type === 'margin_guard');
+  const activeAutomations = automations.filter(a => a.is_active);
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Visão geral das suas automações e posições
-          </p>
+    <div className="container mx-auto py-8 px-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600">Welcome back, {user?.email}</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="text-sm">
+              {user?.plan_type.toUpperCase()} Plan
+            </Badge>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Atualizar
-          </Button>
-          <Button size="sm">
-            <Settings className="mr-2 h-4 w-4" />
-            Configurar
-          </Button>
-        </div>
-      </div>
 
-      {/* Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Margem Atual"
-          value="$2,845"
-          change={{ value: "85% da posição", type: "warning" }}
-          icon={DollarSign}
-        />
-        <MetricCard
-          title="Capital Protegido"
-          value="$12,450"
-          change={{ value: "+$1,250 hoje", type: "positive" }}
-          icon={Shield}
-        />
-        <MetricCard
-          title="Trades Salvos"
-          value="23"
-          change={{ value: "Este mês", type: "neutral" }}
-          icon={TrendingUp}
-        />
-        <MetricCard
-          title="Uptime"
-          value="99.8%"
-          change={{ value: "Últimos 30 dias", type: "positive" }}
-          icon={Activity}
-        />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Automation Controls */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Margin Status */}
-          <Card className="card-gradient">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Status da Margem
-                  </CardTitle>
-                  <CardDescription>
-                    Monitoramento em tempo real da sua posição
-                  </CardDescription>
-                </div>
-                <StatusBadge status="warning">Em Alerta</StatusBadge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Margem Utilizada</span>
-                  <span className="font-medium">$2,845 / $3,350 (85%)</span>
-                </div>
-                <Progress value={85} className="h-2" />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Limite seguro: 70%</span>
-                  <span>Liquidação: 95%</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div>
-                  <p className="text-sm text-muted-foreground">Posição Atual</p>
-                  <p className="font-medium">Long BTC/USD</p>
-                  <p className="text-sm">$15,250 (0.12 BTC)</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">P&L Não Realizado</p>
-                  <p className="font-medium text-success">+$234.50</p>
-                  <p className="text-sm text-success">+1.54%</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Automation Toggles */}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Controles de Automação</CardTitle>
-              <CardDescription>
-                Ativar/desativar suas proteções automáticas
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">Margin Guard</h4>
-                    <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-                      Ativo
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Proteção automática contra liquidação
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Limite: 90% • Ação: Reduzir posição em 50%
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Switch checked />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">Take Profit / Stop Loss</h4>
-                    <Badge variant="outline" className="status-active">
-                      Ativo
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Automatizar saídas de posições
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    TP: +8% • SL: -3% • Trailing: Ativo
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Switch checked />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg opacity-60">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">Entradas Automáticas</h4>
-                    <Badge variant="outline" className="status-inactive">
-                      Inativo
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Abrir posições baseado em sinais
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Nenhuma estratégia configurada
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Switch />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Ações Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
-                <Settings className="mr-2 h-4 w-4" />
-                Configurar Automações
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Ver Relatórios
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <Activity className="mr-2 h-4 w-4" />
-                Histórico de Logs
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Alerts */}
-          <Card className="border-warning/20 bg-warning/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-warning">
-                <AlertTriangle className="h-5 w-5" />
-                Alertas
-              </CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Automations</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="p-3 bg-warning/10 rounded-lg border border-warning/20">
-                  <p className="text-sm font-medium">Margem Alta</p>
-                  <p className="text-xs text-muted-foreground">
-                    Sua margem está em 85%. Considere reduzir a posição.
+              <div className="text-2xl font-bold">{stats?.total || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats?.active || 0} active, {stats?.inactive || 0} inactive
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Automations</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.active || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Currently running
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Margin Guard</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {marginGuardAutomation ? 'Active' : 'Inactive'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {marginGuardAutomation ? 'Protecting positions' : 'Not configured'}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Account Status</CardTitle>
+              <User className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {user?.email_verified ? 'Verified' : 'Pending'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Email verification
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>
+                Common tasks and automations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button asChild className="h-auto p-4">
+                  <Link to="/margin-guard">
+                    <div className="flex items-center space-x-3">
+                      <Shield className="h-5 w-5" />
+                      <div className="text-left">
+                        <div className="font-medium">Margin Guard</div>
+                        <div className="text-sm opacity-70">
+                          {marginGuardAutomation ? 'Configure' : 'Set up'} protection
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
+
+                <Button asChild variant="outline" className="h-auto p-4">
+                  <Link to="/automations">
+                    <div className="flex items-center space-x-3">
+                      <Settings className="h-5 w-5" />
+                      <div className="text-left">
+                        <div className="font-medium">All Automations</div>
+                        <div className="text-sm opacity-70">
+                          Manage all automations
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
+
+                <Button asChild variant="outline" className="h-auto p-4">
+                  <Link to="/profile">
+                    <div className="flex items-center space-x-3">
+                      <User className="h-5 w-5" />
+                      <div className="text-left">
+                        <div className="font-medium">Profile</div>
+                        <div className="text-sm opacity-70">
+                          Account settings
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
+
+                <Button asChild variant="outline" className="h-auto p-4">
+                  <Link to="/trades">
+                    <div className="flex items-center space-x-3">
+                      <BarChart3 className="h-5 w-5" />
+                      <div className="text-left">
+                        <div className="font-medium">Trade Logs</div>
+                        <div className="text-sm opacity-70">
+                          View trade history
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>
+                Latest automation activity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {stats?.recentActivity && stats.recentActivity.length > 0 ? (
+                <div className="space-y-3">
+                  {stats.recentActivity.slice(0, 5).map((activity) => (
+                    <div key={activity.id} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-2 h-2 rounded-full ${
+                          activity.is_active ? 'bg-green-500' : 'bg-gray-400'
+                        }`} />
+                        <div>
+                          <div className="text-sm font-medium capitalize">
+                            {activity.type.replace('_', ' ')}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(activity.updated_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                      <Badge variant={activity.is_active ? 'default' : 'secondary'} className="text-xs">
+                        {activity.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">No recent activity</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Create your first automation to get started
                   </p>
                 </div>
-                <div className="p-3 bg-muted/10 rounded-lg">
-                  <p className="text-sm font-medium">API Conectada</p>
-                  <p className="text-xs text-muted-foreground">
-                    Última sincronização: há 30 segundos
-                  </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Automation Types Overview */}
+        {stats && stats.total > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Automation Overview</CardTitle>
+              <CardDescription>
+                Breakdown of your automation types
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <Shield className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <div className="font-medium">Margin Guard</div>
+                      <div className="text-sm text-gray-600">Position protection</div>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold">{stats.byType.margin_guard}</div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <TrendingUp className="h-5 w-5 text-green-500" />
+                    <div>
+                      <div className="font-medium">TP/SL</div>
+                      <div className="text-sm text-gray-600">Take profit / Stop loss</div>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold">{stats.byType.tp_sl}</div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <Settings className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <div className="font-medium">Auto Entry</div>
+                      <div className="text-sm text-gray-600">Automatic entries</div>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold">{stats.byType.auto_entry}</div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+        )}
       </div>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Atividade Recente</CardTitle>
-          <CardDescription>
-            Últimas ações executadas pelas automações
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentTrades.map((trade) => (
-              <div
-                key={trade.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-2 h-2 rounded-full ${
-                    trade.status === 'success' ? 'bg-success' : 'bg-primary'
-                  }`} />
-                  <div>
-                    <p className="font-medium">{trade.type}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {trade.asset} • {trade.amount}
-                      {trade.saved && ` • Salvou ${trade.saved}`}
-                      {trade.profit && ` • Lucro ${trade.profit}`}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <StatusBadge status={trade.status}>
-                    {trade.status === 'success' ? 'Sucesso' : 'Ativo'}
-                  </StatusBadge>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {trade.time}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
-};
+}

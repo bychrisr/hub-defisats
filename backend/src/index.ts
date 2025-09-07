@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { config } from '@/config/env';
 import { authRoutes } from '@/routes/auth.routes';
+import { automationRoutes } from '@/routes/automation.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 
 // Initialize Prisma
@@ -158,6 +159,7 @@ async function registerRoutes() {
 
   // API routes
   await fastify.register(authRoutes, { prefix: '/api/auth' });
+  await fastify.register(automationRoutes, { prefix: '/api' });
 
   // 404 handler
   fastify.setNotFoundHandler({
