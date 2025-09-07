@@ -55,9 +55,15 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 - **Performance**: execução de automações com latência mínima (<200ms ideal).
 - **Disponibilidade**: uptime mínimo de 99,5% (meta inicial).
 - **Segurança**:
-    - Keys da LN Markets criptografadas.
+    - Keys da LN Markets criptografadas com AES-256.
     - Sessão expira após 30min de inatividade (configurável pelo usuário).
     - Logs auditáveis para rastreabilidade completa.
+    - **Autenticação robusta**: JWT + Refresh Tokens, 2FA obrigatório para admins.
+    - **Validação de senhas**: Requisitos mínimos, verificação contra vazamentos (HIBP).
+    - **Proteção contra ataques**: Rate limiting, CAPTCHA, CSRF protection, XSS prevention.
+    - **Criptografia**: bcrypt para senhas, libsodium para dados sensíveis.
+    - **Monitoramento**: Logs de segurança, alertas de atividades suspeitas.
+    - **Compliance**: GDPR, auditoria de acessos, backup criptografado.
 - **Escalabilidade**: arquitetura preparada para mobile (React Native), web (Expo Web) e futuro desktop (Electron).
 - **Pagamentos**: validador automático de invoice Lightning.
     - Reenvio automático de cobrança em caso de expiração/falha.

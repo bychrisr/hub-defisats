@@ -76,6 +76,20 @@ model User {
   is_active              Boolean     @default(true)
   session_expires_at     DateTime?
   
+  // Security fields
+  email_verified         Boolean     @default(false)
+  email_verification_token String?
+  email_verification_expires DateTime?
+  password_reset_token   String?
+  password_reset_expires DateTime?
+  two_factor_enabled     Boolean     @default(false)
+  two_factor_secret      String?
+  two_factor_backup_codes Json?
+  login_attempts         Int         @default(0)
+  locked_until           DateTime?
+  last_login_ip          String?
+  last_login_user_agent  String?
+  
   /// Users can have only one active LN Markets key pair at a time
   automations            Automation[]
   trade_logs             TradeLog[]
@@ -88,6 +102,8 @@ model User {
   used_coupon_id         String?
 
   @@index([email])
+  @@index([email_verification_token])
+  @@index([password_reset_token])
 }
 
 model Automation {

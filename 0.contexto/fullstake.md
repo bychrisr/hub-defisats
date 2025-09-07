@@ -141,8 +141,17 @@ Justificativa:
 
 **Criptografia e Segurança**:
 - **libsodium**: Criptografia de keys LN Markets
+- **bcrypt**: Hashing de senhas com salt rounds 12
 - **argon2**: Hashing de senhas (alternativa ao bcrypt)
 - **Vault**: Gerenciamento de secrets em produção
+- **JWT**: Autenticação com access/refresh tokens
+- **2FA**: Google Authenticator com speakeasy
+- **HIBP**: Verificação de senhas vazadas
+- **CAPTCHA**: reCAPTCHA v3 e hCaptcha
+- **CSRF**: Proteção contra Cross-Site Request Forgery
+- **XSS**: Prevenção com DOMPurify
+- **Rate Limiting**: Proteção contra brute force
+- **Security Headers**: Helmet.js para headers de segurança
 
 **Monitoramento e Alertas**:
 - **Webhooks**: Integração com serviços de notificação (Telegram, Discord)
