@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { PrismaClient, User, SocialProvider } from '@prisma/client';
 import { config } from '@/config/env';
+import { FastifyInstance } from 'fastify';
 import { 
   RegisterRequest, 
   LoginRequest, 
@@ -11,9 +11,11 @@ import {
 
 export class AuthService {
   private prisma: PrismaClient;
+  private fastify: FastifyInstance;
 
-  constructor(prisma: PrismaClient) {
+  constructor(prisma: PrismaClient, fastify: FastifyInstance) {
     this.prisma = prisma;
+    this.fastify = fastify;
   }
 
   /**
@@ -131,7 +133,7 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
     try {
       // Verify refresh token
-      const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret) as any;
+      const decoded = this.fastify.jwt.verify(refreshToken) as any;
       
       // Check if token exists in database
       const tokenRecord = await this.prisma.user.findFirst({
@@ -174,7 +176,7 @@ export class AuthService {
    */
   async validateSession(token: string): Promise<User> {
     try {
-      const decoded = jwt.verify(token, config.jwt.secret) as any;
+      const decoded = this.fastify.jwt.verify(token) as any;
       
       const user = await this.prisma.user.findUnique({
         where: { id: decoded.userId },
@@ -270,17 +272,14 @@ export class AuthService {
    * Generate access token
    */
   private generateAccessToken(user: User): string {
-    return jwt.sign(
+    return this.fastify.jwt.sign(
       {
         userId: user.id,
         email: user.email,
         planType: user.plan_type,
       },
-      config.jwt.secret,
       {
         expiresIn: config.jwt.expiresIn,
-        issuer: 'hub-defisats',
-        audience: 'hub-defisats-api',
       }
     );
   }
@@ -289,16 +288,13 @@ export class AuthService {
    * Generate refresh token
    */
   private generateRefreshToken(user: User): string {
-    return jwt.sign(
+    return this.fastify.jwt.sign(
       {
         userId: user.id,
         type: 'refresh',
       },
-      config.jwt.refreshSecret,
       {
         expiresIn: config.jwt.refreshExpiresIn,
-        issuer: 'hub-defisats',
-        audience: 'hub-defisats-api',
       }
     );
   }

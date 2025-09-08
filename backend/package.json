@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:simple": "tsx watch src/simple-server.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",

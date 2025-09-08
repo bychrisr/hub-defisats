@@ -44,15 +44,6 @@ async function registerPlugins() {
   // JWT
   await fastify.register(import('@fastify/jwt'), {
     secret: config.jwt.secret,
-    sign: {
-      expiresIn: config.jwt.expiresIn,
-      issuer: 'hub-defisats',
-      audience: 'hub-defisats-api',
-    },
-    verify: {
-      issuer: 'hub-defisats',
-      audience: 'hub-defisats-api',
-    },
   });
 
   // Swagger documentation
@@ -74,7 +65,7 @@ async function registerPlugins() {
       },
       servers: [
         {
-          url: config.isDevelopment ? 'http://localhost:3000' : 'https://api.hubdefisats.com',
+          url: config.isDevelopment ? 'http://localhost:3010' : 'https://api.hubdefisats.com',
           description: config.isDevelopment ? 'Development server' : 'Production server',
         },
       ],

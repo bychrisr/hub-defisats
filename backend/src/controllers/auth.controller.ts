@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import { AuthService } from '@/services/auth.service';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -15,8 +15,8 @@ import { z } from 'zod';
 export class AuthController {
   private authService: AuthService;
 
-  constructor(prisma: PrismaClient) {
-    this.authService = new AuthService(prisma);
+  constructor(prisma: PrismaClient, fastify: FastifyInstance) {
+    this.authService = new AuthService(prisma, fastify);
   }
 
   /**

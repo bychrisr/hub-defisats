@@ -12,7 +12,7 @@ import {
 
 export async function authRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
-  const authController = new AuthController(prisma);
+  const authController = new AuthController(prisma, fastify);
 
   // Register route
   fastify.post(

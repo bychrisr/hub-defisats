@@ -48,7 +48,7 @@ const envSchema = z.object({
   LNBITS_ADMIN_KEY: z.string().optional(),
 
   // Monitoring
-  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_DSN: z.string().url().optional().or(z.literal('')),
   PROMETHEUS_PORT: z.string().transform(Number).default('9090'),
 
   // Rate Limiting

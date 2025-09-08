@@ -97,7 +97,7 @@ model User {
   payments               Payment[]
   backtest_reports       BacktestReport[]
   admin_user             AdminUser?
-  user_coupons           UserCoupon[]
+  user_coupons           UserCoupon[] @relation("UserCouponRelation")
   used_coupon            Coupon?       @relation("UserUsedCoupon", fields: [used_coupon_id], references: [id])
   used_coupon_id         String?
 
