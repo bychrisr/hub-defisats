@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff, Info, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Info, CheckCircle, XCircle, Moon, Sun } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
 
@@ -27,9 +27,21 @@ const registerSchema = z.object({
     .regex(/\d/, 'Password must contain at least one number')
     .regex(/[@$!%*?&]/, 'Password must contain at least one special character'),
   confirmPassword: z.string(),
-  ln_markets_api_key: z.string().min(16, 'API key must be at least 16 characters'),
-  ln_markets_api_secret: z.string().min(16, 'API secret must be at least 16 characters'),
-  ln_markets_passphrase: z.string().min(8, 'Passphrase must be at least 8 characters'),
+  ln_markets_api_key: z
+    .string()
+    .min(16, 'API key must be at least 16 characters')
+    .regex(/^[A-Za-z0-9_-]+$/, 'API key can only contain letters, numbers, hyphens, and underscores')
+    .refine((val) => !val.includes('@') && !val.includes('.'), 'API key should not contain email-like characters'),
+  ln_markets_api_secret: z
+    .string()
+    .min(16, 'API secret must be at least 16 characters')
+    .regex(/^[A-Za-z0-9_-]+$/, 'API secret can only contain letters, numbers, hyphens, and underscores')
+    .refine((val) => !val.includes('@') && !val.includes('.'), 'API secret should not contain email-like characters'),
+  ln_markets_passphrase: z
+    .string()
+    .min(8, 'Passphrase must be at least 8 characters')
+    .max(128, 'Passphrase must be at most 128 characters')
+    .regex(/^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]+$/, 'Passphrase contains invalid characters'),
   coupon_code: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -45,8 +57,29 @@ export default function Register() {
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [usernameChecking, setUsernameChecking] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check if user has a preference stored
+    const stored = localStorage.getItem('theme');
+    if (stored) return stored === 'dark';
+    // Default to system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   const { register: registerUser, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
+
+  // Apply theme
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   const {
     register,
@@ -67,6 +100,14 @@ export default function Register() {
       return;
     }
 
+    // Basic format validation first
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username)) {
+      setUsernameAvailable(false);
+      setUsernameChecking(false);
+      return;
+    }
+
     const checkUsername = async () => {
       setUsernameChecking(true);
       try {
@@ -74,7 +115,12 @@ export default function Register() {
         setUsernameAvailable(response.data.available);
       } catch (error: any) {
         console.error('Username check failed:', error);
-        setUsernameAvailable(null);
+        // If it's a format error, show as unavailable
+        if (error.response?.status === 400) {
+          setUsernameAvailable(false);
+        } else {
+          setUsernameAvailable(null);
+        }
       } finally {
         setUsernameChecking(false);
       }
@@ -117,11 +163,27 @@ export default function Register() {
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Theme Toggle */}
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="rounded-full w-10 h-10 p-0"
+          >
+            {isDarkMode ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Hub-defisats</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="text-3xl font-bold text-foreground">Hub-defisats</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             LN Markets Automation Platform
           </p>
         </div>
@@ -271,13 +333,19 @@ export default function Register() {
                 <Input
                   id="ln_markets_api_key"
                   type="text"
-                  placeholder="Enter your LN Markets API key"
+                  placeholder="e.g., abc123def456..."
                   {...register('ln_markets_api_key')}
                   className={errors.ln_markets_api_key ? 'border-red-500' : ''}
                 />
                 {errors.ln_markets_api_key && (
                   <p className="text-sm text-red-500">{errors.ln_markets_api_key.message}</p>
                 )}
+                <div className="flex items-start space-x-2">
+                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
+                  <p className="text-xs text-muted-foreground">
+                    API Key: 16+ caracteres, apenas letras, números, hífens e underscores
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -286,7 +354,7 @@ export default function Register() {
                   <Input
                     id="ln_markets_api_secret"
                     type={showApiSecret ? 'text' : 'password'}
-                    placeholder="Enter your LN Markets API secret"
+                    placeholder="e.g., xyz789ghi012..."
                     {...register('ln_markets_api_secret')}
                     className={errors.ln_markets_api_secret ? 'border-red-500 pr-10' : 'pr-10'}
                   />
@@ -307,6 +375,12 @@ export default function Register() {
                 {errors.ln_markets_api_secret && (
                   <p className="text-sm text-red-500">{errors.ln_markets_api_secret.message}</p>
                 )}
+                <div className="flex items-start space-x-2">
+                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
+                  <p className="text-xs text-muted-foreground">
+                    API Secret: 16+ caracteres, apenas letras, números, hífens e underscores
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -338,8 +412,8 @@ export default function Register() {
                 )}
                 <div className="flex items-start space-x-2">
                   <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                  <p className="text-xs text-gray-600">
-                    Passphrase is required for LN Markets API authentication and is used to generate secure signatures.
+                  <p className="text-xs text-muted-foreground">
+                    Passphrase: 8-128 caracteres, usada para gerar assinaturas HMAC-SHA256 seguras
                   </p>
                 </div>
               </div>
