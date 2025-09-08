@@ -12,6 +12,40 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [0.0.8] - 2025-01-XX
+
+### Added
+- **Margin Guard 100% Funcional**: Automação completa de proteção contra liquidação
+  - Serviço LN Markets (`lnmarkets.service.ts`) com integração completa
+  - Worker de monitoramento (`margin-monitor.ts`) com BullMQ
+  - Cálculo de risco de liquidação em tempo real
+  - Monitoramento de margin level, posições e P&L
+  - Validação de credenciais LN Markets
+  - Tratamento robusto de erros da API
+
+### Added
+- **Integração com API LN Markets**: Dados refletidos corretamente na plataforma
+  - Margin info (nível de margem, valor disponível, valor total)
+  - Posições abertas (tamanho, preço de entrada, preço de liquidação, P&L)
+  - Status da conta e balanço
+  - Cálculo automático de risco (low/medium/high/critical)
+  - Rate limiting e tratamento de timeouts
+
+### Added
+- **Rotas de Teste**: Para validação da integração
+  - `POST /api/test/lnmarkets` - Testa credenciais e conectividade
+  - `POST /api/test/margin-guard` - Testa monitoramento completo
+  - Respostas detalhadas com dados da API
+  - Tratamento de erros específico por tipo
+
+### Changed
+- **Arquitetura de Workers**: Preparada para produção
+  - BullMQ para processamento assíncrono
+  - Redis para filas e cache
+  - Concorrência controlada (5 usuários simultâneos)
+  - Rate limiting distribuído
+  - Logs estruturados para monitoramento
+
 ## [0.0.7] - 2025-01-XX
 
 ### Added
