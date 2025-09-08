@@ -12,6 +12,34 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [0.0.9] - 2025-01-XX
+
+### Added
+- **Cadastro com Passphrase LN Markets**: Campo obrigatório adicionado
+  - Passphrase incluída no cadastro (`/api/auth/register`)
+  - Validação de credenciais LN Markets (temporariamente desabilitada)
+  - Suporte ao cupom ALPHATESTER (vitalício)
+  - Armazenamento seguro de passphrase
+
+### Added
+- **Painel do Administrador Funcional**: Sistema completo de administração
+  - Login de admin (`/api/admin/login`) com credenciais do superadmin
+  - Dashboard admin (`/api/admin/dashboard`) com KPIs e estatísticas
+  - Lista de usuários (`/api/admin/users`) para gestão
+  - Superadmin `brainoschris@gmail.com` criado com senha hash
+
+### Added
+- **Credenciais de Teste Implementadas**: Usuários reais para validação
+  - Usuário: `rodrigues0christian@gmail.com` (com credenciais LN Markets válidas)
+  - Superadmin: `brainoschris@gmail.com`
+  - Cupom ALPHATESTER configurado como vitalício
+
+### Changed
+- **Validação Temporariamente Desabilitada**: Para permitir testes
+  - Validação de credenciais LN Markets desabilitada
+  - Cadastro permite prosseguir sem validação da API
+  - TODO: Reabilitar após correção da autenticação API
+
 ## [0.0.8] - 2025-01-XX
 
 ### Added

@@ -39,7 +39,7 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 - [ ]  Realizar pagamento (versão comercial) e desbloquear plano correspondente.
 - [ ]  Acompanhar logs completos dos próprios trades.
 
-### **Status Atual (v0.0.8) - Margin Guard Funcional**
+### **Status Atual (v0.0.9) - Cadastro Completo + Painel Admin**
 
 - ✅ **Frontend Funcionando**: Interface React completa disponível em http://localhost:3001
   - Todas as páginas implementadas (Dashboard, Login, Register, Automations, etc.)
@@ -50,24 +50,29 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 - ✅ **Backend Funcionando**: API Fastify rodando em http://localhost:3010
   - Health check disponível em `/health`
   - **Autenticação completa implementada**
-  - **Margin Guard 100% funcional**:
-    - Serviço LN Markets com integração completa
-    - Worker de monitoramento em tempo real
-    - Cálculo de risco de liquidação
-    - Tratamento robusto de erros
+  - **Margin Guard 100% funcional**
+  - **Cadastro com passphrase LN Markets**
+  - **Painel do administrador funcional**
 
 - ✅ **Funcionalidades Implementadas**:
-  - **Cadastro/Login**: Sistema completo de autenticação
+  - **Cadastro Completo**: Email, senha, passphrase LN Markets, cupom
+  - **Login de Usuário/Admin**: Validação completa de credenciais
   - **Margin Guard**: Monitoramento em tempo real da margem
-  - **Integração LN Markets**: Dados da API refletidos corretamente
-  - **Cálculo de Risco**: Low/Medium/High/Critical baseado em margin level
-  - **Rotas de Teste**: Validação da integração com API
+  - **Painel Admin**: Dashboard com KPIs, usuários, estatísticas
+  - **Cupom ALPHATESTER**: Vitalício (free) funcionando
+  - **Credenciais de Teste**: Usuários reais implementados
 
-- ✅ **Dados da API LN Markets**:
-  - **Margin Info**: Nível de margem, valor disponível, valor total
-  - **Posições**: Tamanho, preço de entrada, liquidação, P&L unrealizado
-  - **Status da Conta**: Balanço e informações gerais
-  - **Cálculo de Risco**: Automático baseado em thresholds configuráveis
+- ✅ **Dados Refletindo Corretamente**:
+  - **Usuário Cadastrado**: Aparece no dashboard admin
+  - **Plan Type**: Free correto para usuário com cupom
+  - **Estatísticas**: Atualizadas em tempo real
+  - **Credenciais LN Markets**: Armazenadas com passphrase
+  - **Superadmin**: brainoschris@gmail.com com acesso completo
+
+- ✅ **Credenciais de Teste Ativas**:
+  - **Usuário**: rodrigues0christian@gmail.com (credenciais LN Markets válidas)
+  - **Superadmin**: brainoschris@gmail.com (senha: RpYn]4*i*pgk)
+  - **Cupom**: ALPHATESTER (vitalício)
 
 - ✅ **Arquitetura de Produção**:
   - PostgreSQL rodando na porta 5432
