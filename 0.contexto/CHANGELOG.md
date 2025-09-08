@@ -21,6 +21,14 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Fallback gracioso quando API indisponível
 
 ### Added
+- **Campo Passphrase LN Markets**: Campo obrigatório no cadastro
+  - Campo `ln_markets_passphrase` adicionado ao formulário de registro
+  - Validação Zod com mínimo de 8 caracteres
+  - Toggle show/hide para segurança
+  - Texto explicativo sobre necessidade para autenticação HMAC-SHA256
+  - Atualização completa da interface auth store e API types
+
+### Added
 - **Integração LN Markets Aprimorada**: Autenticação HMAC-SHA256 completa
   - Headers de autenticação: `LNM-ACCESS-KEY`, `LNM-ACCESS-SIGNATURE`, `LNM-ACCESS-PASSPHRASE`, `LNM-ACCESS-TIMESTAMP`
   - Método `getRunningTrades()` para `GET /v2/futures/trades?type=running`
