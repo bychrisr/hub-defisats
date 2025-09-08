@@ -23,6 +23,7 @@ const registerSchema = z.object({
   confirmPassword: z.string(),
   ln_markets_api_key: z.string().min(16, 'API key must be at least 16 characters'),
   ln_markets_api_secret: z.string().min(16, 'API secret must be at least 16 characters'),
+  ln_markets_passphrase: z.string().min(8, 'Passphrase must be at least 8 characters'),
   coupon_code: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -35,6 +36,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showApiSecret, setShowApiSecret] = useState(false);
+  const [showPassphrase, setShowPassphrase] = useState(false);
   const { register: registerUser, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
 
@@ -57,6 +59,7 @@ export default function Register() {
         password: data.password,
         ln_markets_api_key: data.ln_markets_api_key,
         ln_markets_api_secret: data.ln_markets_api_secret,
+        ln_markets_passphrase: data.ln_markets_passphrase,
         coupon_code: data.coupon_code || undefined,
       });
       navigate('/dashboard');
@@ -236,6 +239,41 @@ export default function Register() {
                 {errors.ln_markets_api_secret && (
                   <p className="text-sm text-red-500">{errors.ln_markets_api_secret.message}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="ln_markets_passphrase">LN Markets Passphrase</Label>
+                <div className="relative">
+                  <Input
+                    id="ln_markets_passphrase"
+                    type={showPassphrase ? 'text' : 'password'}
+                    placeholder="Enter your LN Markets passphrase"
+                    {...register('ln_markets_passphrase')}
+                    className={errors.ln_markets_passphrase ? 'border-red-500 pr-10' : 'pr-10'}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassphrase(!showPassphrase)}
+                  >
+                    {showPassphrase ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {errors.ln_markets_passphrase && (
+                  <p className="text-sm text-red-500">{errors.ln_markets_passphrase.message}</p>
+                )}
+                <div className="flex items-start space-x-2">
+                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
+                  <p className="text-xs text-gray-600">
+                    Passphrase is required for LN Markets API authentication and is used to generate secure signatures.
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">

@@ -26,6 +26,7 @@ interface AuthActions {
     password: string;
     ln_markets_api_key: string;
     ln_markets_api_secret: string;
+    ln_markets_passphrase: string;
     coupon_code?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
