@@ -39,7 +39,7 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 - [ ]  Realizar pagamento (versão comercial) e desbloquear plano correspondente.
 - [ ]  Acompanhar logs completos dos próprios trades.
 
-### **Status Atual (v0.0.6) - Plataforma Minimamente Acessível**
+### **Status Atual (v0.0.7) - Autenticação Funcional**
 
 - ✅ **Frontend Funcionando**: Interface React completa disponível em http://localhost:3001
   - Todas as páginas implementadas (Dashboard, Login, Register, Automations, etc.)
@@ -49,16 +49,26 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 
 - ✅ **Backend Funcionando**: API Fastify rodando em http://localhost:3010
   - Health check disponível em `/health`
-  - Estrutura de autenticação preparada
-  - Prisma ORM configurado com PostgreSQL
-  - Workers stub criados para desenvolvimento
+  - **Autenticação completa implementada**:
+    - `POST /api/auth/register` - Cadastro de usuários
+    - `POST /api/auth/login` - Login com validação
+    - `GET /api/users/me` - Perfil do usuário
+  - Hash de senhas com bcrypt
+  - Armazenamento em memória (independente do Prisma)
+  - Tratamento de erros adequado
+
+- ✅ **Funcionalidades Básicas**:
+  - **Cadastro de usuários**: Email, senha e chaves LN Markets
+  - **Login**: Validação de credenciais com hash
+  - **Perfil do usuário**: Dados refletindo o que foi cadastrado
+  - **Dashboard acessível**: Após autenticação bem-sucedida
 
 - ✅ **Infraestrutura Completa**:
   - PostgreSQL rodando na porta 5432
   - Redis rodando na porta 6379
   - Docker Compose com todos os serviços
   - Containers sem crashes
-  - Workers preparados para implementação
+  - Workers preparados para desenvolvimento
 
 ### Admin
 

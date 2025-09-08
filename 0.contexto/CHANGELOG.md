@@ -12,6 +12,31 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [0.0.7] - 2025-01-XX
+
+### Added
+- **Autenticação Completa**: Sistema de autenticação funcional
+  - Cadastro de usuários (`POST /api/auth/register`)
+  - Login com validação de senha (`POST /api/auth/login`)
+  - Perfil do usuário (`GET /api/users/me`)
+  - Hash de senhas com bcrypt
+  - Armazenamento em memória (independente do Prisma)
+  - Validação de usuários existentes
+  - Tratamento de erros adequado
+
+### Fixed
+- **Integração Frontend-Backend**: Comunicação estabelecida
+  - Frontend acessível em http://localhost:3001
+  - Backend acessível em http://localhost:3010
+  - URLs de API consistentes
+  - Comunicação entre serviços funcionando
+
+### Changed
+- **Backend Simplificado**: Removida dependência do Prisma por enquanto
+  - Servidor simples com autenticação em memória
+  - Evita problemas de SSL com containers Alpine
+  - Foco em funcionalidade básica primeiro
+
 ## [0.0.6] - 2025-01-XX
 
 ### Fixed
