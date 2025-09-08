@@ -12,6 +12,36 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [0.0.10] - 2025-01-XX
+
+### Added
+- **Correção da API LN Markets**: Múltiplos métodos de autenticação
+  - Bearer token, Basic auth, API key headers, Query parameters
+  - Validação com múltiplos endpoints
+  - Timeout aumentado para 15s
+  - Tratamento robusto de erros
+
+### Added
+- **Teste de Conectividade Básica**: Validação da API
+  - `GET /api/test/lnmarkets/connectivity`
+  - Testa endpoints públicos da API
+  - Status 200 confirmado com `/futures/ticker`
+  - Valida conectividade com LN Markets
+
+### Changed
+- **Melhorias no Tratamento de Erros**: Logs detalhados
+  - Logs detalhados de falhas de autenticação
+  - Sugestões de correção para usuário
+  - Tentativa de múltiplos endpoints
+  - Mensagens de erro mais informativas
+
+### Changed
+- **Arquitetura Preparada para Produção**: Robustez aprimorada
+  - Validação robusta de credenciais
+  - Múltiplos fallbacks de autenticação
+  - Logs estruturados para monitoramento
+  - Tratamento de rate limiting
+
 ## [0.0.9] - 2025-01-XX
 
 ### Added

@@ -39,7 +39,7 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 - [ ]  Realizar pagamento (versão comercial) e desbloquear plano correspondente.
 - [ ]  Acompanhar logs completos dos próprios trades.
 
-### **Status Atual (v0.0.9) - Cadastro Completo + Painel Admin**
+### **Status Atual (v0.0.10) - API LN Markets Corrigida**
 
 - ✅ **Frontend Funcionando**: Interface React completa disponível em http://localhost:3001
   - Todas as páginas implementadas (Dashboard, Login, Register, Automations, etc.)
@@ -53,6 +53,7 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
   - **Margin Guard 100% funcional**
   - **Cadastro com passphrase LN Markets**
   - **Painel do administrador funcional**
+  - **API LN Markets com múltiplos métodos de autenticação**
 
 - ✅ **Funcionalidades Implementadas**:
   - **Cadastro Completo**: Email, senha, passphrase LN Markets, cupom
@@ -61,6 +62,14 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
   - **Painel Admin**: Dashboard com KPIs, usuários, estatísticas
   - **Cupom ALPHATESTER**: Vitalício (free) funcionando
   - **Credenciais de Teste**: Usuários reais implementados
+  - **API LN Markets**: Múltiplos métodos de autenticação
+
+- ✅ **Integração com API LN Markets**:
+  - **Conectividade Básica**: ✅ Funcionando (`/futures/ticker`)
+  - **Métodos de Autenticação**: Bearer, Basic, Headers, Query
+  - **Validação Robusta**: Múltiplos endpoints e fallbacks
+  - **Tratamento de Erros**: Logs detalhados e sugestões
+  - **Timeout Otimizado**: 15s para melhor confiabilidade
 
 - ✅ **Dados Refletindo Corretamente**:
   - **Usuário Cadastrado**: Aparece no dashboard admin
@@ -80,6 +89,7 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
   - Workers BullMQ para processamento assíncrono
   - Rate limiting e tratamento de timeouts
   - Logs estruturados para monitoramento
+  - Múltiplos fallbacks de autenticação
   - Estrutura escalável e robusta
 
 ### Admin
