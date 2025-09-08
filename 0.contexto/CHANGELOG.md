@@ -28,7 +28,8 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Feedback visual com ícones de check/error/loading
   - Validação de formato: 3-20 caracteres, letras/números/underscore
   - Endpoint `GET /api/auth/check-username` para verificação
-  - Prevenção de usernames duplicados
+  - Prevenção de usernames duplicados e formato de email (@)
+  - Autocomplete inteligente para evitar preenchimento com email
   - Atualização completa de tipos e interfaces
 
 ### Added
@@ -44,7 +45,9 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Validação de formato para API Key: 16+ chars, alfanumérico + hífens/underscores
   - Validação de formato para API Secret: mesma regra da API Key
   - Validação de formato para Passphrase: 8-128 chars, caracteres especiais permitidos
-  - Dicas visuais com exemplos de formato correto
+  - Campos em texto plano para fácil copy-paste (sem toggle show/hide)
+  - Validação silenciosa - só mostra erro quando formato é inválido
+  - Placeholders melhorados: "Cole sua API Key/Secret/Passphrase aqui"
   - Prevenção de caracteres inválidos (como @ e .)
   - Feedback imediato de erros de formato
 
