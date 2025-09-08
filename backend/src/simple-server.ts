@@ -47,10 +47,47 @@ fastify.post('/api/auth/register', async (request, reply) => {
       return reply.status(409).send({ error: 'User already exists' });
     }
 
-    // Note: LN Markets credential validation temporarily disabled for testing
-    // TODO: Re-enable after fixing API authentication
+    // Validate LN Markets credentials immediately after registration
     if (ln_markets_api_key && ln_markets_api_secret && ln_markets_passphrase) {
-      console.log('LN Markets credentials provided - validation skipped for now');
+      try {
+        console.log('🔐 Validating LN Markets credentials...');
+
+        const { createLNMarketsService } = await import('./services/lnmarkets.service');
+        const lnMarkets = createLNMarketsService({
+          apiKey: ln_markets_api_key,
+          apiSecret: ln_markets_api_secret,
+          passphrase: ln_markets_passphrase
+        });
+
+        // Test credentials by trying to get user balance
+        const isValid = await lnMarkets.validateCredentials();
+        if (!isValid) {
+          return reply.status(400).send({
+            error: 'INVALID_LN_MARKETS_CREDENTIALS',
+            message: 'As credenciais da LN Markets fornecidas são inválidas. Verifique sua API Key, Secret e Passphrase.'
+          });
+        }
+
+        // Get real user data to confirm everything is working
+        const balance = await lnMarkets.getBalance();
+        const marginInfo = await lnMarkets.getMarginInfo();
+
+        console.log('✅ LN Markets credentials validated successfully');
+        console.log(`💰 Balance: ${balance}`, `📊 Margin Level: ${marginInfo.marginLevel}%`);
+
+      } catch (error) {
+        console.error('❌ LN Markets credential validation failed:', error);
+        return reply.status(400).send({
+          error: 'LN_MARKETS_API_ERROR',
+          message: 'Erro ao validar credenciais LN Markets. Verifique se suas credenciais estão corretas e se a API está acessível.',
+          details: (error as Error).message
+        });
+      }
+    } else {
+      return reply.status(400).send({
+        error: 'MISSING_LN_MARKETS_CREDENTIALS',
+        message: 'API Key, Secret e Passphrase da LN Markets são obrigatórios para o cadastro.'
+      });
     }
 
     // Hash password
@@ -81,7 +118,9 @@ fastify.post('/api/auth/register', async (request, reply) => {
       user_id: user.id,
       email: user.email,
       plan_type: user.plan_type,
-      created_at: user.created_at
+      created_at: user.created_at,
+      ln_markets_validated: true,
+      message: 'Conta criada com sucesso! Credenciais LN Markets validadas e dados da conta confirmados.'
     });
   } catch (error) {
     console.error('Registration error:', error);
