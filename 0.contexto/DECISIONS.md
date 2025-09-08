@@ -286,8 +286,8 @@ Este documento registra as decisões arquiteturais e tecnológicas importantes t
 
 ## ADR-012: Logs de Segurança e Monitoramento
 
-**Data**: 2024-01-XX  
-**Status**: Aceito  
+**Data**: 2024-01-XX
+**Status**: Aceito
 **Contexto**: Auditoria e detecção de ameaças
 
 ### Decisão
@@ -306,3 +306,39 @@ Este documento registra as decisões arquiteturais e tecnológicas importantes t
 - Volume significativo de logs
 - Necessidade de storage e processamento
 - Complexidade de análise de alertas
+
+---
+
+## ADR-013: Margin Monitor Worker com Scheduler Periódico
+
+**Data**: 2025-09-08
+**Status**: Aceito
+**Contexto**: Implementação do worker de monitoramento de margem a cada 5 segundos
+
+### Decisão
+- Worker BullMQ `margin-check` com prioridade alta
+- Scheduler periódico usando `setInterval` a cada 5 segundos
+- Cálculo de margin ratio: `maintenance_margin / (margin + pl)`
+- Níveis de alerta: safe (≤0.8), warning (>0.8), critical (>0.9)
+- Autenticação LN Markets HMAC-SHA256 completa
+- Suporte a múltiplos usuários simultaneamente
+- Fallback gracioso quando API indisponível
+
+### Justificativa
+- **Performance**: BullMQ para processamento assíncrono e rate limiting
+- **Precisão**: Cálculo exato conforme especificação técnica
+- **Escalabilidade**: Suporte a múltiplos usuários sem degradação
+- **Segurança**: Autenticação HMAC-SHA256 oficial da LN Markets
+- **Resiliência**: Fallback gracioso evita crashes do sistema
+- **Conformidade**: Implementação rigorosa do plano técnico
+
+### Alternativas Consideradas
+- **Cron jobs**: Menos preciso para intervalos curtos
+- **WebSocket**: Maior complexidade, dependência de conexão persistente
+- **Polling simples**: Sem controle de concorrência e rate limiting
+
+### Consequências
+- Dependência de Redis para filas BullMQ
+- Monitoramento contínuo consome recursos da API
+- Necessidade de configuração de rate limiting
+- Logs volumosos para múltiplos usuários

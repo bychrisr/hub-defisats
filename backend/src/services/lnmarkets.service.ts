@@ -1,8 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
+import { createHmac } from 'crypto';
 
 export interface LNMarketsCredentials {
   apiKey: string;
   apiSecret: string;
+  passphrase: string;
 }
 
 export interface MarginInfo {
@@ -31,16 +33,19 @@ export class LNMarketsService {
   constructor(credentials: LNMarketsCredentials) {
     this.credentials = credentials;
 
-    // Try different authentication methods
-    const authHeaders = this.buildAuthHeaders();
-
     this.client = axios.create({
       baseURL: 'https://api.lnmarkets.com/v2',
       headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders
+        'Content-Type': 'application/json'
       },
       timeout: 15000, // Increased timeout
+    });
+
+    // Add request interceptor for authentication
+    this.client.interceptors.request.use((config) => {
+      const authHeaders = this.generateAuthHeaders(config.method?.toUpperCase() || 'GET', config.url || '', config.params, config.data);
+      Object.assign(config.headers, authHeaders);
+      return config;
     });
 
     // Add response interceptor for error handling
@@ -61,15 +66,33 @@ export class LNMarketsService {
   }
 
   /**
-   * Build authentication headers trying different methods
+   * Generate LN Markets authentication headers
    */
-  private buildAuthHeaders() {
-    const { apiKey, apiSecret } = this.credentials;
+  private generateAuthHeaders(method: string, path: string, params?: any, data?: any): Record<string, string> {
+    const { apiKey, apiSecret, passphrase } = this.credentials;
+    const timestamp = Date.now().toString();
 
-    // Try different authentication methods
-    // Method 1: Bearer token with colon separator
+    // Build params string
+    let paramsStr = '';
+    if (method === 'GET' || method === 'DELETE') {
+      if (params) {
+        paramsStr = new URLSearchParams(params).toString();
+      }
+    } else if (data) {
+      paramsStr = JSON.stringify(data);
+    }
+
+    // Create signature
+    const message = `${timestamp}${method}${path}${paramsStr}`;
+    const signature = createHmac('sha256', apiSecret)
+      .update(message)
+      .digest('base64');
+
     return {
-      'Authorization': `Bearer ${apiKey}:${apiSecret}`
+      'LNM-ACCESS-KEY': apiKey,
+      'LNM-ACCESS-SIGNATURE': signature,
+      'LNM-ACCESS-PASSPHRASE': passphrase,
+      'LNM-ACCESS-TIMESTAMP': timestamp
     };
   }
 
@@ -151,6 +174,21 @@ export class LNMarketsService {
     } catch (error) {
       console.error('Error fetching positions:', error);
       throw new Error('Failed to fetch positions');
+    }
+  }
+
+  /**
+   * Get running trades
+   */
+  async getRunningTrades(): Promise<any[]> {
+    try {
+      const response = await this.client.get('/futures/trades', {
+        params: { type: 'running' }
+      });
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching running trades:', error);
+      throw new Error('Failed to fetch running trades');
     }
   }
 

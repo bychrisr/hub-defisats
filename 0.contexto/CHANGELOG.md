@@ -8,7 +8,25 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Added
-- N/A
+- **Margin Monitor Worker Completo**: Monitoramento de margem a cada 5 segundos
+  - Implementação completa do worker `margin-monitor.ts`
+  - Cálculo de margin ratio: `maintenance_margin / (margin + pl)`
+  - Níveis de alerta: safe (≤0.8), warning (>0.8), critical (>0.9)
+  - Scheduler periódico automático a cada 5 segundos
+  - Suporte a múltiplos usuários simultaneamente
+  - Fila BullMQ `margin-check` com prioridade alta
+  - Autenticação LN Markets com HMAC-SHA256
+  - Testes unitários e de contrato completos
+  - Tratamento robusto de erros da API
+  - Fallback gracioso quando API indisponível
+
+### Added
+- **Integração LN Markets Aprimorada**: Autenticação HMAC-SHA256 completa
+  - Headers de autenticação: `LNM-ACCESS-KEY`, `LNM-ACCESS-SIGNATURE`, `LNM-ACCESS-PASSPHRASE`, `LNM-ACCESS-TIMESTAMP`
+  - Método `getRunningTrades()` para `GET /v2/futures/trades?type=running`
+  - Interceptor de requisições para assinatura automática
+  - Suporte a passphrase obrigatória
+  - Tratamento de rate limiting e timeouts
 
 ---
 

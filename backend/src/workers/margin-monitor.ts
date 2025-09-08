@@ -1,12 +1,22 @@
-import { Worker } from 'bullmq';
+import { Worker, Queue } from 'bullmq';
 import { Redis } from 'ioredis';
 import { createLNMarketsService, LNMarketsService } from '../services/lnmarkets.service';
 
 // Create Redis connection
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 
+// Create queue for margin monitoring jobs
+const marginCheckQueue = new Queue('margin-check', {
+  connection: redis,
+  defaultJobOptions: {
+    priority: 10, // High priority
+    removeOnComplete: 50,
+    removeOnFail: 50,
+  }
+});
+
 // In-memory storage for user credentials (in production, this would come from database)
-const userCredentials: { [userId: string]: { apiKey: string; apiSecret: string } } = {};
+const userCredentials: { [userId: string]: { apiKey: string; apiSecret: string; passphrase: string } } = {};
 
 // Store LN Markets service instances
 const lnMarketsServices: { [userId: string]: LNMarketsService } = {};
@@ -15,13 +25,13 @@ const lnMarketsServices: { [userId: string]: LNMarketsService } = {};
 interface MarginGuardConfig {
   userId: string;
   enabled: boolean;
-  threshold: number; // Margin level threshold (e.g., 20 for 20%)
+  threshold: number; // Margin ratio threshold (e.g., 0.8 for 80%)
   autoClose: boolean; // Whether to automatically close positions
   notificationEnabled: boolean;
 }
 
 // Create worker
-const worker = new Worker('margin-monitor', async (job) => {
+const worker = new Worker('margin-check', async (job) => {
   const { userId, config } = job.data as { userId: string; config: MarginGuardConfig };
 
   console.log(`🔍 Monitoring margin for user ${userId}`);
@@ -41,49 +51,73 @@ const worker = new Worker('margin-monitor', async (job) => {
       lnMarketsServices[userId] = lnMarkets;
     }
 
-    // Fetch margin information
-    const marginInfo = await lnMarkets.getMarginInfo();
-    const positions = await lnMarkets.getPositions();
+    // Fetch running trades
+    const runningTrades = await lnMarkets.getRunningTrades();
 
-    console.log(`📊 User ${userId} margin level: ${marginInfo.marginLevel?.toFixed(2)}%`);
+    if (runningTrades.length === 0) {
+      console.log(`ℹ️  User ${userId} has no running trades`);
+      return { status: 'processed', tradesCount: 0, alerts: [] };
+    }
 
-    // Calculate liquidation risk
-    const risk = lnMarkets.calculateLiquidationRisk(marginInfo, positions);
+    console.log(`📊 User ${userId} has ${runningTrades.length} running trades`);
 
-    // Check if action is needed
-    if (risk.atRisk && config.enabled) {
-      console.log(`⚠️  ${risk.message}`);
+    const alerts: Array<{ tradeId: string; marginRatio: number; level: string; message: string }> = [];
 
-      // Send notification if enabled
-      if (config.notificationEnabled) {
-        // TODO: Send notification via notification worker
-        console.log(`📱 Sending notification to user ${userId}: ${risk.message}`);
+    // Calculate margin ratio for each trade
+    for (const trade of runningTrades) {
+      const maintenanceMargin = trade.maintenance_margin || 0;
+      const margin = trade.margin || 0;
+      const pl = trade.pl || 0;
+
+      if (maintenanceMargin === 0) {
+        console.warn(`⚠️  Trade ${trade.id} has zero maintenance margin`);
+        continue;
       }
 
-      // Auto-close positions if enabled and risk is critical/high
-      if (config.autoClose && (risk.riskLevel === 'critical' || risk.riskLevel === 'high')) {
-        console.log(`🚨 Auto-closing positions for user ${userId}`);
+      const marginRatio = maintenanceMargin / (margin + pl);
 
-        // Close positions automatically
-        for (const position of positions) {
+      let level: 'safe' | 'warning' | 'critical' = 'safe';
+      if (marginRatio > 0.9) {
+        level = 'critical';
+      } else if (marginRatio > 0.8) {
+        level = 'warning';
+      }
+
+      console.log(`📈 Trade ${trade.id}: Margin Ratio ${marginRatio.toFixed(4)} (${level})`);
+
+      if (level !== 'safe') {
+        const message = `⚠️ Margin ${level.toUpperCase()}: Trade ${trade.id} ratio ${marginRatio.toFixed(4)}`;
+        alerts.push({
+          tradeId: trade.id,
+          marginRatio,
+          level,
+          message
+        });
+
+        // Send notification if enabled
+        if (config.notificationEnabled) {
+          console.log(`📱 Sending notification to user ${userId}: ${message}`);
+          // TODO: Integrate with notification worker
+        }
+
+        // Auto-close if enabled and critical
+        if (config.autoClose && level === 'critical') {
+          console.log(`🚨 Auto-closing trade ${trade.id} for user ${userId}`);
           try {
-            await lnMarkets.closePosition(position.id);
-            console.log(`✅ Closed position ${position.id} for user ${userId}`);
+            await lnMarkets.closePosition(trade.id);
+            console.log(`✅ Closed trade ${trade.id} for user ${userId}`);
           } catch (error) {
-            console.error(`❌ Failed to close position ${position.id}:`, error);
+            console.error(`❌ Failed to close trade ${trade.id}:`, error);
           }
         }
       }
-    } else {
-      console.log(`✅ User ${userId} margin healthy: ${risk.message}`);
     }
 
     return {
       status: 'processed',
-      marginLevel: marginInfo.marginLevel,
-      riskLevel: risk.riskLevel,
-      atRisk: risk.atRisk,
-      positionsCount: positions.length
+      tradesCount: runningTrades.length,
+      alertsCount: alerts.length,
+      alerts
     };
 
   } catch (error) {
@@ -109,8 +143,8 @@ worker.on('failed', (job, err) => {
 });
 
 // Helper function to add user credentials (called when user registers/logs in)
-export function addUserCredentials(userId: string, apiKey: string, apiSecret: string) {
-  userCredentials[userId] = { apiKey, apiSecret };
+export function addUserCredentials(userId: string, apiKey: string, apiSecret: string, passphrase: string) {
+  userCredentials[userId] = { apiKey, apiSecret, passphrase };
   console.log(`🔑 Added credentials for user ${userId}`);
 }
 
@@ -155,18 +189,83 @@ export async function simulateMarginMonitoring(userId: string, config: MarginGua
   }
 }
 
+// Periodic monitoring scheduler
+let monitoringInterval: NodeJS.Timeout | null = null;
+
+export function startPeriodicMonitoring() {
+  if (monitoringInterval) {
+    console.log('📅 Periodic monitoring already running');
+    return;
+  }
+
+  console.log('📅 Starting periodic margin monitoring every 5 seconds');
+
+  monitoringInterval = setInterval(async () => {
+    try {
+      // Get all user IDs with credentials
+      const userIds = Object.keys(userCredentials);
+
+      if (userIds.length === 0) {
+        console.log('ℹ️  No users to monitor');
+        return;
+      }
+
+      console.log(`🔄 Monitoring ${userIds.length} users`);
+
+      // Add monitoring jobs for each user
+      for (const userId of userIds) {
+        const config: MarginGuardConfig = {
+          userId,
+          enabled: true, // Default enabled
+          threshold: 0.8, // Default warning threshold
+          autoClose: false, // Default no auto-close
+          notificationEnabled: true // Default notifications enabled
+        };
+
+        await marginCheckQueue.add('monitor-margin', {
+          userId,
+          config
+        }, {
+          priority: 10,
+          delay: 0,
+          removeOnComplete: 50,
+          removeOnFail: 50
+        });
+      }
+
+    } catch (error) {
+      console.error('❌ Error in periodic monitoring:', error);
+    }
+  }, 5000); // Every 5 seconds
+}
+
+export function stopPeriodicMonitoring() {
+  if (monitoringInterval) {
+    clearInterval(monitoringInterval);
+    monitoringInterval = null;
+    console.log('🛑 Stopped periodic margin monitoring');
+  }
+}
+
 console.log('🚀 Margin monitor worker started');
+
+// Start periodic monitoring by default
+startPeriodicMonitoring();
 
 process.on('SIGTERM', async () => {
   console.log('🛑 Shutting down margin monitor worker...');
+  stopPeriodicMonitoring();
   await worker.close();
+  await marginCheckQueue.close();
   await redis.disconnect();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('🛑 Shutting down margin monitor worker...');
+  stopPeriodicMonitoring();
   await worker.close();
+  await marginCheckQueue.close();
   await redis.disconnect();
   process.exit(0);
 });

@@ -146,21 +146,24 @@ Ter o **Margin Guard 100% funcional**, com logs granulares e notificações via 
 
 ---
 
-### 📌 TAREFA 2.1: WORKER — MARGIN MONITOR (EXECUTA A CADA 5S)  
-**Endpoint LN Markets:** `GET /v2/futures/trades?type=running`  
-**Cálculo de risco:**  
+### ✅ TAREFA 2.1: WORKER — MARGIN MONITOR (EXECUTA A CADA 5S)
+**Endpoint LN Markets:** `GET /v2/futures/trades?type=running`
+**Cálculo de risco:**
 ```ts
 const marginRatio = position.maintenance_margin / (position.margin + position.pl);
 const level = marginRatio > 0.9 ? 'critical' : marginRatio > 0.8 ? 'warning' : 'safe';
 ```
 
-**Arquivo:** `backend/src/workers/margin-monitor.ts`  
+**Arquivo:** `backend/src/workers/margin-monitor.ts`
 **Fila BullMQ:** `margin-check` (prioridade: high)
 
-**Critérios de aceitação técnica:**  
-- [ ] Teste unitário: `should calculate margin ratio correctly`  
-- [ ] Teste de contrato: Simular margin_ratio = 0.92 → dispara alerta  
-- [ ] Fallback: Se API down, loga erro, não crasha worker
+**Critérios de aceitação técnica:**
+- [x] Teste unitário: `should calculate margin ratio correctly`
+- [x] Teste de contrato: Simular margin_ratio = 0.92 → dispara alerta
+- [x] Fallback: Se API down, loga erro, não crasha worker
+- [x] Implementado scheduler periódico a cada 5 segundos
+- [x] Autenticação LN Markets com HMAC-SHA256
+- [x] Suporte a múltiplos usuários simultaneamente
 
 ---
 
