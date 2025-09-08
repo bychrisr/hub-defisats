@@ -5,6 +5,19 @@ const fastify = Fastify({
   logger: true
 });
 
+// Register CORS
+fastify.register(import('@fastify/cors'), {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+});
+
 // Simple in-memory storage for demo purposes
 const users: any[] = [];
 const admins: any[] = [
@@ -206,7 +219,7 @@ fastify.get('/api/admin/users', async (request, reply) => {
 fastify.get('/api/test/lnmarkets/connectivity', async (request, reply) => {
   try {
     const { createLNMarketsService } = await import('./services/lnmarkets.service');
-    const lnMarkets = createLNMarketsService({ apiKey: 'dummy', apiSecret: 'dummy' });
+    const lnMarkets = createLNMarketsService({ apiKey: 'dummy', apiSecret: 'dummy', passphrase: 'dummy' });
 
     const connectivityTest = await lnMarkets.testConnectivity();
 
@@ -229,12 +242,12 @@ fastify.post('/api/test/lnmarkets', async (request, reply) => {
   try {
     const { apiKey, apiSecret, passphrase } = request.body as any;
 
-    if (!apiKey || !apiSecret) {
-      return reply.status(400).send({ error: 'API key and secret are required' });
+    if (!apiKey || !apiSecret || !passphrase) {
+      return reply.status(400).send({ error: 'API key, secret, and passphrase are required' });
     }
 
     const { createLNMarketsService } = await import('./services/lnmarkets.service');
-    const lnMarkets = createLNMarketsService({ apiKey, apiSecret });
+    const lnMarkets = createLNMarketsService({ apiKey, apiSecret, passphrase });
 
     // Test credentials
     const isValid = await lnMarkets.validateCredentials();
@@ -272,18 +285,18 @@ fastify.post('/api/test/margin-guard', async (request, reply) => {
   try {
     const { apiKey, apiSecret, passphrase, userId } = request.body as any;
 
-    if (!apiKey || !apiSecret || !userId) {
-      return reply.status(400).send({ error: 'API key, secret, and userId are required' });
+    if (!apiKey || !apiSecret || !passphrase || !userId) {
+      return reply.status(400).send({ error: 'API key, secret, passphrase, and userId are required' });
     }
 
     const { createLNMarketsService } = await import('./services/lnmarkets.service');
     const { addUserCredentials, simulateMarginMonitoring } = await import('./workers/margin-monitor');
 
     // Add credentials
-    addUserCredentials(userId, apiKey, apiSecret);
+    addUserCredentials(userId, apiKey, apiSecret, passphrase);
 
     // Create service and test
-    const lnMarkets = createLNMarketsService({ apiKey, apiSecret });
+    const lnMarkets = createLNMarketsService({ apiKey, apiSecret, passphrase });
 
     // Test credentials first
     const isValid = await lnMarkets.validateCredentials();
@@ -303,7 +316,7 @@ fastify.post('/api/test/margin-guard', async (request, reply) => {
     await simulateMarginMonitoring(userId, {
       userId,
       enabled: true,
-      threshold: 20,
+      threshold: 0.8,
       autoClose: false,
       notificationEnabled: true
     });
