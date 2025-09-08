@@ -32,6 +32,23 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Atualização completa de tipos e interfaces
 
 ### Added
+- **Toggle Dark/Light Mode**: Alternância de tema funcional
+  - Botão toggle com ícones sol/lua no header
+  - Detecção automática de preferência do sistema
+  - Persistência da escolha no localStorage
+  - Transições suaves entre temas
+  - Suporte completo às variáveis CSS dark mode
+
+### Added
+- **Validação de Formato LN Markets**: Padrões de credenciais no frontend
+  - Validação de formato para API Key: 16+ chars, alfanumérico + hífens/underscores
+  - Validação de formato para API Secret: mesma regra da API Key
+  - Validação de formato para Passphrase: 8-128 chars, caracteres especiais permitidos
+  - Dicas visuais com exemplos de formato correto
+  - Prevenção de caracteres inválidos (como @ e .)
+  - Feedback imediato de erros de formato
+
+### Added
 - **Campo Passphrase LN Markets**: Campo obrigatório no cadastro
   - Campo `ln_markets_passphrase` adicionado ao formulário de registro
   - Validação Zod com mínimo de 8 caracteres
