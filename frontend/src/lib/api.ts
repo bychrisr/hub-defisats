@@ -62,6 +62,7 @@ api.interceptors.response.use(
 export const authAPI = {
   register: (data: {
     email: string;
+    username: string;
     password: string;
     ln_markets_api_key: string;
     ln_markets_api_secret: string;

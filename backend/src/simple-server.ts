@@ -36,15 +36,53 @@ fastify.get('/health', async (request, reply) => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
+// Check username availability
+fastify.get('/api/auth/check-username', async (request, reply) => {
+  try {
+    const { username } = request.query as any;
+
+    if (!username || typeof username !== 'string') {
+      return reply.status(400).send({ error: 'USERNAME_REQUIRED', message: 'Nome de usuário é obrigatório' });
+    }
+
+    // Basic username validation
+    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!usernameRegex.test(username)) {
+      return reply.status(400).send({
+        error: 'INVALID_USERNAME',
+        message: 'Nome de usuário deve ter 3-20 caracteres, apenas letras, números e underscore'
+      });
+    }
+
+    // Check if username exists
+    const existingUser = users.find(u => u.username === username);
+
+    return reply.send({
+      available: !existingUser,
+      username,
+      message: existingUser ? 'Nome de usuário já está em uso' : 'Nome de usuário disponível'
+    });
+  } catch (error) {
+    console.error('Username check error:', error);
+    return reply.status(500).send({ error: 'Erro interno do servidor' });
+  }
+});
+
 // Register endpoint
 fastify.post('/api/auth/register', async (request, reply) => {
   try {
-    const { email, password, ln_markets_api_key, ln_markets_api_secret, ln_markets_passphrase, coupon_code } = request.body as any;
+    const { email, password, username, ln_markets_api_key, ln_markets_api_secret, ln_markets_passphrase, coupon_code } = request.body as any;
 
-    // Check if user already exists
-    const existingUser = users.find(u => u.email === email);
-    if (existingUser) {
-      return reply.status(409).send({ error: 'User already exists' });
+    // Check if user already exists by email
+    const existingUserByEmail = users.find(u => u.email === email);
+    if (existingUserByEmail) {
+      return reply.status(409).send({ error: 'EMAIL_ALREADY_EXISTS', message: 'Este email já está cadastrado' });
+    }
+
+    // Check if username already exists
+    const existingUserByUsername = users.find(u => u.username === username);
+    if (existingUserByUsername) {
+      return reply.status(409).send({ error: 'USERNAME_ALREADY_EXISTS', message: 'Este nome de usuário já está em uso' });
     }
 
     // Validate LN Markets credentials immediately after registration
@@ -103,6 +141,7 @@ fastify.post('/api/auth/register', async (request, reply) => {
     const user = {
       id: `user-${Date.now()}`,
       email,
+      username,
       password_hash: passwordHash,
       ln_markets_api_key,
       ln_markets_api_secret,
@@ -117,6 +156,7 @@ fastify.post('/api/auth/register', async (request, reply) => {
     return reply.send({
       user_id: user.id,
       email: user.email,
+      username: user.username,
       plan_type: user.plan_type,
       created_at: user.created_at,
       ln_markets_validated: true,

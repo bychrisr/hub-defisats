@@ -23,6 +23,7 @@ interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
     email: string;
+    username: string;
     password: string;
     ln_markets_api_key: string;
     ln_markets_api_secret: string;

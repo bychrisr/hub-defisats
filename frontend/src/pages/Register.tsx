@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,11 +8,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff, Info } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Info, CheckCircle, XCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
+import { api } from '@/lib/api';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -37,6 +43,8 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showApiSecret, setShowApiSecret] = useState(false);
   const [showPassphrase, setShowPassphrase] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameChecking, setUsernameChecking] = useState(false);
   const { register: registerUser, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
 
@@ -50,12 +58,38 @@ export default function Register() {
   });
 
   const password = watch('password');
+  const username = watch('username');
+
+  // Check username availability with debouncing
+  useEffect(() => {
+    if (!username || username.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+
+    const checkUsername = async () => {
+      setUsernameChecking(true);
+      try {
+        const response = await api.get(`/api/auth/check-username?username=${encodeURIComponent(username)}`);
+        setUsernameAvailable(response.data.available);
+      } catch (error: any) {
+        console.error('Username check failed:', error);
+        setUsernameAvailable(null);
+      } finally {
+        setUsernameChecking(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(checkUsername, 500); // 500ms debounce
+    return () => clearTimeout(debounceTimer);
+  }, [username]);
 
   const onSubmit = async (data: RegisterForm) => {
     try {
       clearError();
       await registerUser({
         email: data.email,
+        username: data.username,
         password: data.password,
         ln_markets_api_key: data.ln_markets_api_key,
         ln_markets_api_secret: data.ln_markets_api_secret,
@@ -119,6 +153,40 @@ export default function Register() {
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email.message}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <div className="relative">
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Choose a username"
+                    {...register('username')}
+                    className={errors.username ? 'border-red-500 pr-8' : usernameAvailable === false ? 'border-red-500 pr-8' : usernameAvailable === true ? 'border-green-500 pr-8' : 'pr-8'}
+                  />
+                  {usernameChecking ? (
+                    <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-gray-400" />
+                  ) : usernameAvailable === true ? (
+                    <CheckCircle className="absolute right-2 top-2 h-4 w-4 text-green-500" />
+                  ) : usernameAvailable === false ? (
+                    <XCircle className="absolute right-2 top-2 h-4 w-4 text-red-500" />
+                  ) : null}
+                </div>
+                {errors.username && (
+                  <p className="text-sm text-red-500">{errors.username.message}</p>
+                )}
+                {!errors.username && username && username.length >= 3 && (
+                  <p className={`text-sm ${usernameAvailable === true ? 'text-green-600' : usernameAvailable === false ? 'text-red-600' : 'text-gray-600'}`}>
+                    {usernameAvailable === true ? '✓ Username disponível' : usernameAvailable === false ? '✗ Username já está em uso' : 'Verificando disponibilidade...'}
+                  </p>
+                )}
+                <div className="flex items-start space-x-2">
+                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
+                  <p className="text-xs text-gray-600">
+                    Username deve ter 3-20 caracteres, apenas letras, números e underscore (_)
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">
