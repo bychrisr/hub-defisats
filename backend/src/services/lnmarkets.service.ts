@@ -1,94 +1,100 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { config } from '@/config/env';
+import axios, { AxiosInstance } from 'axios';
 
-export interface LNMarketsUser {
-  id: string;
-  username: string;
-  email: string;
-  is_active: boolean;
-  created_at: string;
+export interface LNMarketsCredentials {
+  apiKey: string;
+  apiSecret: string;
 }
 
-export interface LNMarketsPosition {
-  id: string;
-  side: 'long' | 'short';
-  size: number;
-  entry_price: number;
-  current_price: number;
+export interface MarginInfo {
   margin: number;
-  margin_ratio: number;
-  pnl: number;
-  created_at: string;
+  availableMargin: number;
+  marginLevel: number;
+  totalValue: number;
+  totalUnrealizedPnl: number;
+  positions: any[];
 }
 
-export interface LNMarketsBalance {
-  balance: number;
-  margin: number;
-  available_balance: number;
-  margin_ratio: number;
-}
-
-export interface LNMarketsTrade {
+export interface Position {
   id: string;
-  side: 'buy' | 'sell';
+  market: string;
+  side: 'b' | 's';
   size: number;
-  price: number;
-  fee: number;
-  created_at: string;
+  entryPrice: number;
+  liquidationPrice: number;
+  unrealizedPnl: number;
 }
 
 export class LNMarketsService {
-  private api: AxiosInstance;
-  private apiKey: string;
-  private apiSecret: string;
+  private client: AxiosInstance;
+  private credentials: LNMarketsCredentials;
 
-  constructor(apiKey: string, apiSecret: string) {
-    this.apiKey = apiKey;
-    this.apiSecret = apiSecret;
+  constructor(credentials: LNMarketsCredentials) {
+    this.credentials = credentials;
 
-    this.api = axios.create({
-      baseURL: config.lnMarkets.apiUrl,
-      timeout: config.lnMarkets.timeout,
+    this.client = axios.create({
+      baseURL: 'https://api.lnmarkets.com/v2',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Authorization': `Bearer ${credentials.apiKey}:${credentials.apiSecret}`
       },
-    });
-
-    // Add request interceptor for authentication
-    this.api.interceptors.request.use((config) => {
-      if (this.apiKey && this.apiSecret) {
-        config.headers['X-API-Key'] = this.apiKey;
-        config.headers['X-API-Secret'] = this.apiSecret;
-      }
-      return config;
+      timeout: 10000,
     });
 
     // Add response interceptor for error handling
-    this.api.interceptors.response.use(
+    this.client.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error.response) {
-          // API returned an error response
-          const { status, data } = error.response;
-          throw new Error(`LN Markets API Error ${status}: ${data.message || data.error || 'Unknown error'}`);
-        } else if (error.request) {
-          // Request was made but no response received
-          throw new Error('LN Markets API: No response received');
-        } else {
-          // Something else happened
-          throw new Error(`LN Markets API: ${error.message}`);
-        }
+        console.error('LN Markets API Error:', error.response?.data || error.message);
+        throw error;
       }
     );
   }
 
   /**
-   * Validate API keys by making a test request
+   * Get user margin information
    */
-  async validateKeys(): Promise<boolean> {
+  async getMarginInfo(): Promise<MarginInfo> {
     try {
-      await this.getUserInfo();
+      const response = await this.client.get('/futures/user/margin');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching margin info:', error);
+      throw new Error('Failed to fetch margin information');
+    }
+  }
+
+  /**
+   * Get user positions
+   */
+  async getPositions(): Promise<Position[]> {
+    try {
+      const response = await this.client.get('/futures/user/positions');
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching positions:', error);
+      throw new Error('Failed to fetch positions');
+    }
+  }
+
+  /**
+   * Get account balance
+   */
+  async getBalance(): Promise<any> {
+    try {
+      const response = await this.client.get('/futures/user/balance');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      throw new Error('Failed to fetch balance');
+    }
+  }
+
+  /**
+   * Validate API credentials
+   */
+  async validateCredentials(): Promise<boolean> {
+    try {
+      await this.getBalance();
       return true;
     } catch (error) {
       return false;
@@ -96,263 +102,97 @@ export class LNMarketsService {
   }
 
   /**
-   * Get user information
+   * Close position by ID
    */
-  async getUserInfo(): Promise<LNMarketsUser> {
+  async closePosition(positionId: string): Promise<any> {
     try {
-      const response: AxiosResponse<LNMarketsUser> = await this.api.get('/user');
+      const response = await this.client.post(`/futures/position/${positionId}/close`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to get user info: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error closing position:', error);
+      throw new Error('Failed to close position');
     }
   }
 
   /**
-   * Get user balance and margin information
+   * Create market order to reduce position size
    */
-  async getBalance(): Promise<LNMarketsBalance> {
+  async reducePosition(market: string, side: 'b' | 's', size: number): Promise<any> {
     try {
-      const response: AxiosResponse<LNMarketsBalance> = await this.api.get('/balance');
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to get balance: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Get user positions
-   */
-  async getPositions(): Promise<LNMarketsPosition[]> {
-    try {
-      const response: AxiosResponse<LNMarketsPosition[]> = await this.api.get('/positions');
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to get positions: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Get user trade history
-   */
-  async getTradeHistory(limit: number = 100, offset: number = 0): Promise<LNMarketsTrade[]> {
-    try {
-      const response: AxiosResponse<LNMarketsTrade[]> = await this.api.get('/trades', {
-        params: { limit, offset },
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to get trade history: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Create a new position (long or short)
-   */
-  async createPosition(
-    side: 'long' | 'short',
-    size: number,
-    leverage: number = 1
-  ): Promise<LNMarketsPosition> {
-    try {
-      const response: AxiosResponse<LNMarketsPosition> = await this.api.post('/positions', {
+      const response = await this.client.post('/futures/order', {
+        market,
         side,
+        type: 'm', // market order
         size,
-        leverage,
+        reduce_only: true
       });
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to create position: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error reducing position:', error);
+      throw new Error('Failed to reduce position');
     }
   }
 
   /**
-   * Close a position
+   * Get market data
    */
-  async closePosition(positionId: string): Promise<LNMarketsTrade> {
+  async getMarketData(market: string): Promise<any> {
     try {
-      const response: AxiosResponse<LNMarketsTrade> = await this.api.post(`/positions/${positionId}/close`);
+      const response = await this.client.get(`/futures/market/${market}`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to close position: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error fetching market data:', error);
+      throw new Error('Failed to fetch market data');
     }
   }
 
   /**
-   * Close all positions
+   * Calculate liquidation risk
    */
-  async closeAllPositions(): Promise<LNMarketsTrade[]> {
-    try {
-      const response: AxiosResponse<LNMarketsTrade[]> = await this.api.post('/positions/close-all');
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to close all positions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  calculateLiquidationRisk(marginInfo: MarginInfo, positions: Position[]): {
+    atRisk: boolean;
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    message: string;
+  } {
+    if (!marginInfo || !positions) {
+      return { atRisk: false, riskLevel: 'low', message: 'Unable to calculate risk' };
     }
-  }
 
-  /**
-   * Add margin to a position
-   */
-  async addMargin(positionId: string, amount: number): Promise<LNMarketsPosition> {
-    try {
-      const response: AxiosResponse<LNMarketsPosition> = await this.api.post(`/positions/${positionId}/margin`, {
-        amount,
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to add margin: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
+    const marginLevel = marginInfo.marginLevel || 0;
+    const availableMargin = marginInfo.availableMargin || 0;
 
-  /**
-   * Get current Bitcoin price
-   */
-  async getCurrentPrice(): Promise<number> {
-    try {
-      const response: AxiosResponse<{ price: number }> = await this.api.get('/price');
-      return response.data.price;
-    } catch (error) {
-      throw new Error(`Failed to get current price: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
+    // LN Markets typically liquidates at 10% margin level
+    const liquidationThreshold = 10;
 
-  /**
-   * Get price history
-   */
-  async getPriceHistory(
-    timeframe: '1m' | '5m' | '15m' | '1h' | '4h' | '1d' = '1h',
-    limit: number = 100
-  ): Promise<Array<{ timestamp: string; price: number }>> {
-    try {
-      const response: AxiosResponse<Array<{ timestamp: string; price: number }>> = await this.api.get('/price/history', {
-        params: { timeframe, limit },
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to get price history: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Check if user is at risk of liquidation
-   */
-  async isAtRiskOfLiquidation(threshold: number = 0.8): Promise<{
-    isAtRisk: boolean;
-    marginRatio: number;
-    positions: LNMarketsPosition[];
-  }> {
-    try {
-      const [balance, positions] = await Promise.all([
-        this.getBalance(),
-        this.getPositions(),
-      ]);
-
-      const isAtRisk = balance.margin_ratio >= threshold;
-      const riskyPositions = positions.filter(pos => pos.margin_ratio >= threshold);
-
+    if (marginLevel <= liquidationThreshold) {
       return {
-        isAtRisk,
-        marginRatio: balance.margin_ratio,
-        positions: riskyPositions,
+        atRisk: true,
+        riskLevel: 'critical',
+        message: `Critical: Margin level at ${marginLevel.toFixed(2)}% - Immediate liquidation risk!`
       };
-    } catch (error) {
-      throw new Error(`Failed to check liquidation risk: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Execute margin guard protection
-   */
-  async executeMarginGuard(threshold: number = 0.8): Promise<{
-    executed: boolean;
-    action: 'closed_positions' | 'added_margin' | 'no_action';
-    details: any;
-  }> {
-    try {
-      const riskCheck = await this.isAtRiskOfLiquidation(threshold);
-
-      if (!riskCheck.isAtRisk) {
-        return {
-          executed: false,
-          action: 'no_action',
-          details: { marginRatio: riskCheck.marginRatio },
-        };
-      }
-
-      // Close all positions if margin ratio is critical
-      if (riskCheck.marginRatio >= 0.95) {
-        const closedPositions = await this.closeAllPositions();
-        return {
-          executed: true,
-          action: 'closed_positions',
-          details: { closedPositions, marginRatio: riskCheck.marginRatio },
-        };
-      }
-
-      // Try to add margin if possible
-      const balance = await this.getBalance();
-      if (balance.available_balance > 0) {
-        // Add 50% of available balance as margin
-        const marginToAdd = balance.available_balance * 0.5;
-        
-        // Add margin to the most risky position
-        const mostRiskyPosition = riskCheck.positions.reduce((prev, current) => 
-          prev.margin_ratio > current.margin_ratio ? prev : current
-        );
-
-        const updatedPosition = await this.addMargin(mostRiskyPosition.id, marginToAdd);
-        
-        return {
-          executed: true,
-          action: 'added_margin',
-          details: { 
-            positionId: mostRiskyPosition.id, 
-            marginAdded: marginToAdd,
-            updatedPosition,
-            marginRatio: riskCheck.marginRatio,
-          },
-        };
-      }
-
-      // If we can't add margin, close positions
-      const closedPositions = await this.closeAllPositions();
+    } else if (marginLevel <= 20) {
       return {
-        executed: true,
-        action: 'closed_positions',
-        details: { closedPositions, marginRatio: riskCheck.marginRatio },
+        atRisk: true,
+        riskLevel: 'high',
+        message: `High Risk: Margin level at ${marginLevel.toFixed(2)}% - Close positions immediately`
       };
-    } catch (error) {
-      throw new Error(`Failed to execute margin guard: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Test API connection
-   */
-  async testConnection(): Promise<{
-    connected: boolean;
-    latency: number;
-    user?: LNMarketsUser;
-    error?: string;
-  }> {
-    const startTime = Date.now();
-    
-    try {
-      const user = await this.getUserInfo();
-      const latency = Date.now() - startTime;
-      
+    } else if (marginLevel <= 50) {
       return {
-        connected: true,
-        latency,
-        user,
-      };
-    } catch (error) {
-      const latency = Date.now() - startTime;
-      
-      return {
-        connected: false,
-        latency,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        atRisk: true,
+        riskLevel: 'medium',
+        message: `Medium Risk: Margin level at ${marginLevel.toFixed(2)}% - Monitor closely`
       };
     }
+
+    return {
+      atRisk: false,
+      riskLevel: 'low',
+      message: `Low Risk: Margin level at ${marginLevel.toFixed(2)}% - Position healthy`
+    };
   }
+}
+
+// Factory function to create LN Markets service instance
+export function createLNMarketsService(credentials: LNMarketsCredentials): LNMarketsService {
+  return new LNMarketsService(credentials);
 }

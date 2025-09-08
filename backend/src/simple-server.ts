@@ -101,6 +101,93 @@ fastify.get('/api/users/me', async (request, reply) => {
   }
 });
 
+// Test LN Markets API integration
+fastify.post('/api/test/lnmarkets', async (request, reply) => {
+  try {
+    const { apiKey, apiSecret } = request.body as any;
+
+    if (!apiKey || !apiSecret) {
+      return reply.status(400).send({ error: 'API key and secret are required' });
+    }
+
+    const { createLNMarketsService } = await import('./services/lnmarkets.service');
+    const lnMarkets = createLNMarketsService({ apiKey, apiSecret });
+
+    // Test credentials
+    const isValid = await lnMarkets.validateCredentials();
+    if (!isValid) {
+      return reply.status(401).send({ error: 'Invalid LN Markets credentials' });
+    }
+
+    // Get margin info
+    const marginInfo = await lnMarkets.getMarginInfo();
+    const positions = await lnMarkets.getPositions();
+
+    return reply.send({
+      success: true,
+      marginInfo,
+      positions,
+      message: 'LN Markets API integration successful'
+    });
+  } catch (error) {
+    console.error('LN Markets test error:', error);
+    return reply.status(500).send({
+      error: 'LN Markets API test failed',
+      details: (error as Error).message
+    });
+  }
+});
+
+// Test Margin Guard
+fastify.post('/api/test/margin-guard', async (request, reply) => {
+  try {
+    const { apiKey, apiSecret, userId } = request.body as any;
+
+    if (!apiKey || !apiSecret || !userId) {
+      return reply.status(400).send({ error: 'API key, secret, and userId are required' });
+    }
+
+    const { createLNMarketsService } = await import('./services/lnmarkets.service');
+    const { addUserCredentials, simulateMarginMonitoring } = await import('./workers/margin-monitor');
+
+    // Add credentials
+    addUserCredentials(userId, apiKey, apiSecret);
+
+    // Create service and test
+    const lnMarkets = createLNMarketsService({ apiKey, apiSecret });
+
+    // Get current margin status
+    const marginInfo = await lnMarkets.getMarginInfo();
+    const positions = await lnMarkets.getPositions();
+
+    // Calculate risk
+    const risk = lnMarkets.calculateLiquidationRisk(marginInfo, positions);
+
+    // Simulate monitoring
+    await simulateMarginMonitoring(userId, {
+      userId,
+      enabled: true,
+      threshold: 20,
+      autoClose: false,
+      notificationEnabled: true
+    });
+
+    return reply.send({
+      success: true,
+      marginInfo,
+      positions,
+      risk,
+      message: 'Margin Guard test completed'
+    });
+  } catch (error) {
+    console.error('Margin Guard test error:', error);
+    return reply.status(500).send({
+      error: 'Margin Guard test failed',
+      details: (error as Error).message
+    });
+  }
+});
+
 // Start server
 const start = async () => {
   try {
