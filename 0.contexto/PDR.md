@@ -39,6 +39,27 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 - [ ]  Realizar pagamento (versão comercial) e desbloquear plano correspondente.
 - [ ]  Acompanhar logs completos dos próprios trades.
 
+### **Status Atual (v0.0.6) - Plataforma Minimamente Acessível**
+
+- ✅ **Frontend Funcionando**: Interface React completa disponível em http://localhost:3001
+  - Todas as páginas implementadas (Dashboard, Login, Register, Automations, etc.)
+  - Roteamento React Router configurado
+  - Design system com Tailwind CSS
+  - Componentes UI com Radix UI
+
+- ✅ **Backend Funcionando**: API Fastify rodando em http://localhost:3010
+  - Health check disponível em `/health`
+  - Estrutura de autenticação preparada
+  - Prisma ORM configurado com PostgreSQL
+  - Workers stub criados para desenvolvimento
+
+- ✅ **Infraestrutura Completa**:
+  - PostgreSQL rodando na porta 5432
+  - Redis rodando na porta 6379
+  - Docker Compose com todos os serviços
+  - Containers sem crashes
+  - Workers preparados para implementação
+
 ### Admin
 
 - [ ]  Acessar dashboard administrativo como superadmin.
