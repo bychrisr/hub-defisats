@@ -18,7 +18,8 @@ const registerSchema = z.object({
     .string()
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username must be at most 20 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
+    .refine((val) => !val.includes('@'), 'Username cannot contain @ symbol'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -30,18 +31,16 @@ const registerSchema = z.object({
   ln_markets_api_key: z
     .string()
     .min(16, 'API key must be at least 16 characters')
-    .regex(/^[A-Za-z0-9_-]+$/, 'API key can only contain letters, numbers, hyphens, and underscores')
-    .refine((val) => !val.includes('@') && !val.includes('.'), 'API key should not contain email-like characters'),
+    .regex(/^[A-Za-z0-9_-]+$/, 'API key format is invalid'),
   ln_markets_api_secret: z
     .string()
     .min(16, 'API secret must be at least 16 characters')
-    .regex(/^[A-Za-z0-9_-]+$/, 'API secret can only contain letters, numbers, hyphens, and underscores')
-    .refine((val) => !val.includes('@') && !val.includes('.'), 'API secret should not contain email-like characters'),
+    .regex(/^[A-Za-z0-9_-]+$/, 'API secret format is invalid'),
   ln_markets_passphrase: z
     .string()
     .min(8, 'Passphrase must be at least 8 characters')
     .max(128, 'Passphrase must be at most 128 characters')
-    .regex(/^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]+$/, 'Passphrase contains invalid characters'),
+    .regex(/^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]+$/, 'Passphrase format is invalid'),
   coupon_code: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -53,8 +52,6 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showApiSecret, setShowApiSecret] = useState(false);
-  const [showPassphrase, setShowPassphrase] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [usernameChecking, setUsernameChecking] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -209,6 +206,7 @@ export default function Register() {
                   id="email"
                   type="email"
                   placeholder="Enter your email"
+                  autoComplete="email"
                   {...register('email')}
                   className={errors.email ? 'border-red-500' : ''}
                 />
@@ -224,6 +222,7 @@ export default function Register() {
                     id="username"
                     type="text"
                     placeholder="Choose a username"
+                    autoComplete="username"
                     {...register('username')}
                     className={errors.username ? 'border-red-500 pr-8' : usernameAvailable === false ? 'border-red-500 pr-8' : usernameAvailable === true ? 'border-green-500 pr-8' : 'pr-8'}
                   />
@@ -243,12 +242,6 @@ export default function Register() {
                     {usernameAvailable === true ? '✓ Username disponível' : usernameAvailable === false ? '✗ Username já está em uso' : 'Verificando disponibilidade...'}
                   </p>
                 )}
-                <div className="flex items-start space-x-2">
-                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                  <p className="text-xs text-gray-600">
-                    Username deve ter 3-20 caracteres, apenas letras, números e underscore (_)
-                  </p>
-                </div>
               </div>
 
               <div className="space-y-2">
@@ -333,89 +326,41 @@ export default function Register() {
                 <Input
                   id="ln_markets_api_key"
                   type="text"
-                  placeholder="e.g., abc123def456..."
+                  placeholder="Cole sua API Key aqui"
                   {...register('ln_markets_api_key')}
                   className={errors.ln_markets_api_key ? 'border-red-500' : ''}
                 />
                 {errors.ln_markets_api_key && (
                   <p className="text-sm text-red-500">{errors.ln_markets_api_key.message}</p>
                 )}
-                <div className="flex items-start space-x-2">
-                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                  <p className="text-xs text-muted-foreground">
-                    API Key: 16+ caracteres, apenas letras, números, hífens e underscores
-                  </p>
-                </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="ln_markets_api_secret">LN Markets API Secret</Label>
-                <div className="relative">
-                  <Input
-                    id="ln_markets_api_secret"
-                    type={showApiSecret ? 'text' : 'password'}
-                    placeholder="e.g., xyz789ghi012..."
-                    {...register('ln_markets_api_secret')}
-                    className={errors.ln_markets_api_secret ? 'border-red-500 pr-10' : 'pr-10'}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowApiSecret(!showApiSecret)}
-                  >
-                    {showApiSecret ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <Input
+                  id="ln_markets_api_secret"
+                  type="text"
+                  placeholder="Cole sua API Secret aqui"
+                  {...register('ln_markets_api_secret')}
+                  className={errors.ln_markets_api_secret ? 'border-red-500' : ''}
+                />
                 {errors.ln_markets_api_secret && (
                   <p className="text-sm text-red-500">{errors.ln_markets_api_secret.message}</p>
                 )}
-                <div className="flex items-start space-x-2">
-                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                  <p className="text-xs text-muted-foreground">
-                    API Secret: 16+ caracteres, apenas letras, números, hífens e underscores
-                  </p>
-                </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="ln_markets_passphrase">LN Markets Passphrase</Label>
-                <div className="relative">
-                  <Input
-                    id="ln_markets_passphrase"
-                    type={showPassphrase ? 'text' : 'password'}
-                    placeholder="Enter your LN Markets passphrase"
-                    {...register('ln_markets_passphrase')}
-                    className={errors.ln_markets_passphrase ? 'border-red-500 pr-10' : 'pr-10'}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassphrase(!showPassphrase)}
-                  >
-                    {showPassphrase ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <Input
+                  id="ln_markets_passphrase"
+                  type="text"
+                  placeholder="Cole sua passphrase aqui"
+                  {...register('ln_markets_passphrase')}
+                  className={errors.ln_markets_passphrase ? 'border-red-500' : ''}
+                />
                 {errors.ln_markets_passphrase && (
                   <p className="text-sm text-red-500">{errors.ln_markets_passphrase.message}</p>
                 )}
-                <div className="flex items-start space-x-2">
-                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                  <p className="text-xs text-muted-foreground">
-                    Passphrase: 8-128 caracteres, usada para gerar assinaturas HMAC-SHA256 seguras
-                  </p>
-                </div>
               </div>
 
               <div className="space-y-2">
