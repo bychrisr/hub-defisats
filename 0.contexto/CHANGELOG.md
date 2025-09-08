@@ -21,6 +21,17 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Fallback gracioso quando API indisponível
 
 ### Added
+- **Campo Username com Validação em Tempo Real**: Campo obrigatório no cadastro
+  - Campo `username` adicionado ao formulário de registro
+  - Validação em tempo real da disponibilidade via API
+  - Debounced requests (500ms) para evitar sobrecarga
+  - Feedback visual com ícones de check/error/loading
+  - Validação de formato: 3-20 caracteres, letras/números/underscore
+  - Endpoint `GET /api/auth/check-username` para verificação
+  - Prevenção de usernames duplicados
+  - Atualização completa de tipos e interfaces
+
+### Added
 - **Campo Passphrase LN Markets**: Campo obrigatório no cadastro
   - Campo `ln_markets_passphrase` adicionado ao formulário de registro
   - Validação Zod com mínimo de 8 caracteres
