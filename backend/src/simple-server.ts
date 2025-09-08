@@ -202,6 +202,28 @@ fastify.get('/api/admin/users', async (request, reply) => {
   }
 });
 
+// Test LN Markets API connectivity
+fastify.get('/api/test/lnmarkets/connectivity', async (request, reply) => {
+  try {
+    const { createLNMarketsService } = await import('./services/lnmarkets.service');
+    const lnMarkets = createLNMarketsService({ apiKey: 'dummy', apiSecret: 'dummy' });
+
+    const connectivityTest = await lnMarkets.testConnectivity();
+
+    return reply.send({
+      success: connectivityTest.success,
+      message: connectivityTest.message,
+      details: connectivityTest.details
+    });
+  } catch (error) {
+    console.error('Connectivity test error:', error);
+    return reply.status(500).send({
+      error: 'Connectivity test failed',
+      details: (error as Error).message
+    });
+  }
+});
+
 // Test LN Markets API integration
 fastify.post('/api/test/lnmarkets', async (request, reply) => {
   try {
@@ -217,7 +239,10 @@ fastify.post('/api/test/lnmarkets', async (request, reply) => {
     // Test credentials
     const isValid = await lnMarkets.validateCredentials();
     if (!isValid) {
-      return reply.status(401).send({ error: 'Invalid LN Markets credentials' });
+      return reply.status(401).send({
+        error: 'Invalid LN Markets credentials',
+        suggestion: 'Try checking your API key, secret, and passphrase'
+      });
     }
 
     // Get margin info
@@ -236,7 +261,8 @@ fastify.post('/api/test/lnmarkets', async (request, reply) => {
     console.error('LN Markets test error:', error);
     return reply.status(500).send({
       error: 'LN Markets API test failed',
-      details: (error as Error).message
+      details: (error as Error).message,
+      suggestion: 'Check your internet connection and API credentials'
     });
   }
 });

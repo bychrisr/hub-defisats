@@ -31,23 +31,101 @@ export class LNMarketsService {
   constructor(credentials: LNMarketsCredentials) {
     this.credentials = credentials;
 
+    // Try different authentication methods
+    const authHeaders = this.buildAuthHeaders();
+
     this.client = axios.create({
       baseURL: 'https://api.lnmarkets.com/v2',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${credentials.apiKey}:${credentials.apiSecret}`
+        ...authHeaders
       },
-      timeout: 10000,
+      timeout: 15000, // Increased timeout
     });
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
-        console.error('LN Markets API Error:', error.response?.data || error.message);
+        console.error('LN Markets API Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+          url: error.config?.url,
+          method: error.config?.method
+        });
         throw error;
       }
     );
+  }
+
+  /**
+   * Build authentication headers trying different methods
+   */
+  private buildAuthHeaders() {
+    const { apiKey, apiSecret } = this.credentials;
+
+    // Try different authentication methods
+    // Method 1: Bearer token with colon separator
+    return {
+      'Authorization': `Bearer ${apiKey}:${apiSecret}`
+    };
+  }
+
+  /**
+   * Try alternative authentication methods
+   */
+  private async tryAlternativeAuth(endpoint: string): Promise<any> {
+    const { apiKey, apiSecret } = this.credentials;
+
+    // Method 2: Basic auth
+    try {
+      const response = await axios.get(`${this.client.defaults.baseURL}${endpoint}`, {
+        headers: {
+          'Authorization': `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000
+      });
+      console.log('✅ Basic auth successful');
+      return response;
+    } catch (error) {
+      console.log('❌ Basic auth failed');
+    }
+
+    // Method 3: API key in headers
+    try {
+      const response = await axios.get(`${this.client.defaults.baseURL}${endpoint}`, {
+        headers: {
+          'X-API-Key': apiKey,
+          'X-API-Secret': apiSecret,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000
+      });
+      console.log('✅ API key headers successful');
+      return response;
+    } catch (error) {
+      console.log('❌ API key headers failed');
+    }
+
+    // Method 4: Query parameters
+    try {
+      const response = await axios.get(`${this.client.defaults.baseURL}${endpoint}`, {
+        params: {
+          api_key: apiKey,
+          api_secret: apiSecret
+        },
+        timeout: 10000
+      });
+      console.log('✅ Query parameters successful');
+      return response;
+    } catch (error) {
+      console.log('❌ Query parameters failed');
+    }
+
+    throw new Error('All authentication methods failed');
   }
 
   /**
@@ -94,10 +172,79 @@ export class LNMarketsService {
    */
   async validateCredentials(): Promise<boolean> {
     try {
-      await this.getBalance();
-      return true;
-    } catch (error) {
+      // Try multiple endpoints to validate credentials
+      const endpoints = ['/futures/user/balance', '/futures/user/margin', '/futures/user/positions'];
+
+      for (const endpoint of endpoints) {
+        try {
+          // First try with main auth method
+          await this.client.get(endpoint);
+          console.log(`✅ LN Markets API validation successful with endpoint: ${endpoint}`);
+          return true;
+        } catch (error) {
+          console.log(`❌ Main auth failed for ${endpoint}:`, (error as any).response?.status);
+
+          // If main auth fails, try alternative methods
+          try {
+            await this.tryAlternativeAuth(endpoint);
+            console.log(`✅ Alternative auth successful for ${endpoint}`);
+            return true;
+          } catch (altError) {
+            console.log(`❌ Alternative auth also failed for ${endpoint}`);
+            continue; // Try next endpoint
+          }
+        }
+      }
+
+      console.error('❌ All LN Markets API endpoints and auth methods failed');
       return false;
+    } catch (error) {
+      console.error('❌ LN Markets API validation error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Test basic connectivity
+   */
+  async testConnectivity(): Promise<{success: boolean, message: string, details?: any}> {
+    try {
+      // Test with different public endpoints
+      const endpoints = [
+        'https://api.lnmarkets.com/v2/futures/markets',
+        'https://api.lnmarkets.com/v2/futures/ticker',
+        'https://api.lnmarkets.com/v2/health'
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await axios.get(endpoint, { timeout: 5000 });
+          return {
+            success: true,
+            message: `Basic connectivity test successful with ${endpoint}`,
+            details: {
+              status: response.status,
+              endpoint,
+              dataSize: JSON.stringify(response.data).length
+            }
+          };
+        } catch (error) {
+          console.log(`Endpoint ${endpoint} failed:`, (error as any).response?.status);
+          continue;
+        }
+      }
+
+      return {
+        success: false,
+        message: 'All connectivity tests failed',
+        details: 'No public endpoints responded'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Basic connectivity test failed',
+        details: (error as Error).message
+      };
     }
   }
 
