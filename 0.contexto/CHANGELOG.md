@@ -29,6 +29,15 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Atualização completa da interface auth store e API types
 
 ### Added
+- **Validação Imediata de Credenciais LN Markets**: No cadastro
+  - Validação automática das credenciais após registro
+  - Teste de conectividade com API LN Markets
+  - Busca de dados reais (saldo, informações de margem)
+  - Prevenção de cadastro com credenciais inválidas
+  - Mensagens de erro específicas para falhas de autenticação
+  - Confirmação de validação bem-sucedida na resposta
+
+### Added
 - **Integração LN Markets Aprimorada**: Autenticação HMAC-SHA256 completa
   - Headers de autenticação: `LNM-ACCESS-KEY`, `LNM-ACCESS-SIGNATURE`, `LNM-ACCESS-PASSPHRASE`, `LNM-ACCESS-TIMESTAMP`
   - Método `getRunningTrades()` para `GET /v2/futures/trades?type=running`
