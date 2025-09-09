@@ -40,6 +40,14 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Correção de comportamento estranho do campo API Key
   - Melhoria na privacidade e segurança dos dados sensíveis
 
+### Fixed
+- **Validação de Formato LN Markets**: Correção de falsos positivos
+  - Removida validação de regex restritiva no frontend
+  - Mantida apenas validação de comprimento mínimo
+  - Validação de formato delegada ao backend
+  - Correção de rejeição de API keys válidas da LN Markets
+  - Melhoria na experiência do usuário com menos erros falsos
+
 ### Added
 - **Toggle Dark/Light Mode**: Alternância de tema funcional
   - Botão toggle com ícones sol/lua no header
