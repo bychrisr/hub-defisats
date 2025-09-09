@@ -58,6 +58,15 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Correção de métodos de criptografia/descriptografia
   - Melhoria na segurança e confiabilidade do sistema
 
+### Fixed
+- **Debug e Logs LN Markets**: Correção de erro 400 no registro
+  - Adicionado logging detalhado para validação de credenciais
+  - Logs de presença e tamanho das credenciais (sem expor dados)
+  - Logs de respostas da API LN Markets e erros
+  - Rastreamento passo-a-passo do processo de validação
+  - Diagnóstico aprimorado para problemas de integração
+  - Melhoria na depuração e resolução de problemas
+
 ### Added
 - **Toggle Dark/Light Mode**: Alternância de tema funcional
   - Botão toggle com ícones sol/lua no header
