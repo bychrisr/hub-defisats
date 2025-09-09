@@ -42,7 +42,7 @@ export const useValidation = (): UseValidationReturn => {
 
     setIsValidating(true);
     try {
-      const response = await api.post('/api/validation/email', { email });
+      const response = await api.post('/validation/email', { email });
       return response.data;
     } catch (error) {
       console.error('Email validation error:', error);
@@ -62,7 +62,7 @@ export const useValidation = (): UseValidationReturn => {
 
     setIsValidating(true);
     try {
-      const response = await api.post('/api/validation/username', { username });
+      const response = await api.post('/validation/username', { username });
       return response.data;
     } catch (error) {
       console.error('Username validation error:', error);
@@ -82,7 +82,7 @@ export const useValidation = (): UseValidationReturn => {
 
     setIsValidating(true);
     try {
-      const response = await api.post('/api/validation/password', { password });
+      const response = await api.post('/validation/password', { password });
       return response.data;
     } catch (error) {
       console.error('Password validation error:', error);
@@ -102,7 +102,7 @@ export const useValidation = (): UseValidationReturn => {
 
     setIsValidating(true);
     try {
-      const response = await api.post('/api/validation/password-strength', { password });
+      const response = await api.post('/validation/password', { password });
       return response.data;
     } catch (error) {
       console.error('Password strength validation error:', error);
@@ -126,7 +126,7 @@ export const useValidation = (): UseValidationReturn => {
 
     setIsValidating(true);
     try {
-      const response = await api.post('/api/validation/api-keys', {
+      const response = await api.post('/validation/api-keys', {
         api_key: apiKey,
         api_secret: apiSecret,
         passphrase: passphrase
@@ -146,7 +146,7 @@ export const useValidation = (): UseValidationReturn => {
   const validateRegisterForm = useCallback(async (formData: any): Promise<ValidationResult> => {
     setIsValidating(true);
     try {
-      const response = await api.post('/api/validation/register-form', formData);
+      const response = await api.post('/validation/register-form', formData);
       return response.data;
     } catch (error) {
       console.error('Register form validation error:', error);

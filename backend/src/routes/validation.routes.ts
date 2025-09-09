@@ -11,7 +11,7 @@ const passwordValidationSchema = z.object({
 export async function validationRoutes(fastify: FastifyInstance) {
   const prisma = fastify.prisma as PrismaClient;
   // Endpoint para validar senha
-  fastify.post('/api/validation/password', {
+  fastify.post('/validation/password', {
     schema: {
       description: 'Validate password strength and requirements',
       tags: ['Validation'],
@@ -177,7 +177,7 @@ export async function validationRoutes(fastify: FastifyInstance) {
   });
 
   // Endpoint para validar email
-  fastify.post('/api/validation/email', {
+  fastify.post('/validation/email', {
     schema: {
       description: 'Validate email format and availability',
       tags: ['Validation'],
@@ -219,15 +219,27 @@ export async function validationRoutes(fastify: FastifyInstance) {
       } else {
         // Verificar se email já existe
         try {
+          console.log(`🔍 Checking email availability for: ${email}`);
+          console.log(`🔍 Email to search: ${email.toLowerCase()}`);
+          
           const existingUser = await prisma.user.findUnique({
             where: { email: email.toLowerCase() }
           });
+          
+          console.log(`📧 Existing user found:`, existingUser ? 'YES' : 'NO');
+          console.log(`📧 User data:`, existingUser);
+          
           available = !existingUser;
           
           if (!available) {
             suggestions.push('This email is already registered');
+            console.log(`❌ Email ${email} is already registered`);
+          } else {
+            console.log(`✅ Email ${email} is available`);
           }
         } catch (error) {
+          console.error('Error checking email availability:', error);
+          console.error('Error details:', error);
           // Se não conseguir verificar no banco, assumir disponível
           available = true;
         }
@@ -249,7 +261,7 @@ export async function validationRoutes(fastify: FastifyInstance) {
   });
 
   // Endpoint para validar username
-  fastify.post('/api/validation/username', {
+  fastify.post('/validation/username', {
     schema: {
       description: 'Validate username format and availability',
       tags: ['Validation'],
@@ -327,7 +339,7 @@ export async function validationRoutes(fastify: FastifyInstance) {
   });
 
   // Endpoint para validar API keys
-  fastify.post('/api/validation/api-keys', {
+  fastify.post('/validation/api-keys', {
     schema: {
       description: 'Validate LN Markets API keys format',
       tags: ['Validation'],
@@ -420,7 +432,7 @@ export async function validationRoutes(fastify: FastifyInstance) {
   });
 
   // Endpoint para validar formulário completo de registro
-  fastify.post('/api/validation/register-form', {
+  fastify.post('/validation/register-form', {
     schema: {
       description: 'Validate complete registration form',
       tags: ['Validation'],

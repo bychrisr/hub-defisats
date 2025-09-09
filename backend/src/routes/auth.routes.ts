@@ -419,6 +419,57 @@ export async function authRoutes(fastify: FastifyInstance) {
     authController.checkUsername.bind(authController)
   );
 
+  // Check email availability route
+  fastify.post(
+    '/check-email',
+    {
+      schema: {
+        description: 'Check if email is available',
+        tags: ['Authentication'],
+        body: {
+          type: 'object',
+          required: ['email'],
+          properties: {
+            email: { type: 'string', format: 'email' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              available: { type: 'boolean' },
+            },
+          },
+          400: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const { email } = request.body as { email: string };
+
+        // Check if email exists
+        const existingUser = await prisma.user.findUnique({
+          where: { email: email.toLowerCase() },
+        });
+
+        return reply.send({ available: !existingUser });
+      } catch (error) {
+        console.error('Email check error:', error);
+        return reply.status(500).send({
+          error: 'INTERNAL_ERROR',
+          message: 'Failed to check email availability',
+        });
+      }
+    }
+  );
+
   // Refresh token route
   fastify.post(
     '/refresh',

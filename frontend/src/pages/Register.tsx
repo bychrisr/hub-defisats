@@ -26,9 +26,11 @@ import {
 } from 'lucide-react';
 import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator';
 import SimplePasswordValidator from '@/components/SimplePasswordValidator';
+import SimpleEmailValidator from '@/components/SimpleEmailValidator';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
 import { useUsernameValidation } from '@/hooks/useUsernameValidation';
+import { generateTestCredentials } from '@/utils/testDataGenerator';
 
 // Simplified schema - validation now handled by backend
 const registerSchema = z.object({
@@ -58,6 +60,11 @@ export default function Register() {
   const { usernameAvailable, usernameChecking, checkUsername } =
     useUsernameValidation();
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [emailValidation, setEmailValidation] = useState({
+    isValid: false,
+    isAvailable: false,
+    suggestions: [] as string[]
+  });
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check if user has a preference stored
     const stored = localStorage.getItem('theme');
@@ -151,6 +158,15 @@ export default function Register() {
   );
 
   const onSubmit = async (data: RegisterForm) => {
+    // Prevent submission if email is not available
+    if (!emailValidation.isValid || !emailValidation.isAvailable) {
+      setError('email', { 
+        type: 'manual', 
+        message: 'Please wait for email validation to complete or use a different email.' 
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       clearError();
@@ -164,11 +180,47 @@ export default function Register() {
         coupon_code: data.coupon_code || undefined,
       });
       navigate('/dashboard');
-    } catch (error) {
-      // Error is handled by the store
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      
+      // Handle specific error cases
+      if (error.response?.data?.error === 'REGISTRATION_FAILED') {
+        if (error.response.data.message.includes('already exists')) {
+          setError('email', { 
+            type: 'manual', 
+            message: 'An account with this email already exists. Please use a different email or try logging in.' 
+          });
+        } else {
+          setError('root', { 
+            type: 'manual', 
+            message: error.response.data.message || 'Registration failed. Please try again.' 
+          });
+        }
+      } else if (error.response?.data?.error === 'VALIDATION_ERROR') {
+        setError('root', { 
+          type: 'manual', 
+          message: error.response.data.message || 'Please check your input and try again.' 
+        });
+      } else {
+        setError('root', { 
+          type: 'manual', 
+          message: 'Registration failed. Please try again later.' 
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const fillTestData = () => {
+    const testData = generateTestCredentials();
+    setValue('email', testData.email);
+    setValue('username', testData.username);
+    setValue('password', 'Test123#');
+    setValue('confirmPassword', 'Test123#');
+    setValue('ln_markets_api_key', testData.ln_markets_api_key);
+    setValue('ln_markets_api_secret', testData.ln_markets_api_secret);
+    setValue('ln_markets_passphrase', testData.ln_markets_passphrase);
   };
 
   // Password validation now handled by PasswordValidator component
@@ -237,6 +289,14 @@ export default function Register() {
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
                 />
+                {watch('email') && (
+                  <SimpleEmailValidator
+                    email={watch('email')}
+                    onValidationChange={(isValid, isAvailable, suggestions) => {
+                      setEmailValidation({ isValid, isAvailable, suggestions });
+                    }}
+                  />
+                )}
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email.message}</p>
                 )}
@@ -483,26 +543,38 @@ export default function Register() {
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading || isSubmitting}
-                aria-describedby={
-                  Object.keys(errors).length > 0 ? 'form-errors' : undefined
-                }
-                onKeyDown={e => handleKeyDown(e, 'submit')}
-                onFocus={() => setFocusedField('submit')}
-                onBlur={() => setFocusedField(null)}
-              >
-                {isLoading || isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  'Create account'
-                )}
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={fillTestData}
+                  disabled={isLoading || isSubmitting}
+                >
+                  Fill with test data (unique email)
+                </Button>
+                
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading || isSubmitting || !emailValidation.isValid || !emailValidation.isAvailable}
+                  aria-describedby={
+                    Object.keys(errors).length > 0 ? 'form-errors' : undefined
+                  }
+                  onKeyDown={e => handleKeyDown(e, 'submit')}
+                  onFocus={() => setFocusedField('submit')}
+                  onBlur={() => setFocusedField(null)}
+                >
+                  {isLoading || isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    'Create account'
+                  )}
+                </Button>
+              </div>
             </form>
 
             <div className="mt-6 text-center">
