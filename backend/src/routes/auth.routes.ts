@@ -9,10 +9,72 @@ import {
   ErrorResponseSchema,
   ValidationErrorResponseSchema,
 } from '@/types/api-contracts';
+import { testSandboxCredentials } from '@/services/lnmarkets.service';
 
 export async function authRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
   const authController = new AuthController(prisma, fastify);
+
+  // Test sandbox credentials
+  fastify.get('/test-sandbox', {
+    schema: {
+      description: 'Test LN Markets sandbox credentials',
+      tags: ['Testing'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            details: { type: 'object' },
+          },
+        },
+      },
+    },
+  }, async (request, reply) => {
+    try {
+      console.log('🧪 Testing LN Markets sandbox credentials via HTTP endpoint...');
+
+      // Capture console logs
+      const logs: string[] = [];
+      const originalConsoleLog = console.log;
+      const originalConsoleError = console.error;
+
+      console.log = (...args) => {
+        logs.push(`LOG: ${args.join(' ')}`);
+        originalConsoleLog(...args);
+      };
+
+      console.error = (...args) => {
+        logs.push(`ERROR: ${args.join(' ')}`);
+        originalConsoleError(...args);
+      };
+
+      await testSandboxCredentials();
+
+      // Restore console methods
+      console.log = originalConsoleLog;
+      console.error = originalConsoleError;
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Sandbox credentials test completed',
+        details: {
+          logs,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        message: 'Sandbox credentials test failed',
+        details: {
+          error: (error as Error).message,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+  });
 
   // Register route
   fastify.post(

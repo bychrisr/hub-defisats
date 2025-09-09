@@ -408,3 +408,43 @@ export class LNMarketsService {
 export function createLNMarketsService(credentials: LNMarketsCredentials): LNMarketsService {
   return new LNMarketsService(credentials);
 }
+
+// Test function for sandbox credentials
+export async function testSandboxCredentials(): Promise<void> {
+  console.log('🧪 Testing LN Markets sandbox credentials...');
+
+  const sandboxCredentials = {
+    apiKey: 'hC8B4VoDm1X6i2L3qLrdUopNggl3yaJh6S3Zz1tPCoE=',
+    apiSecret: 'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
+    passphrase: 'a6c1bh56jc33',
+  };
+
+  console.log('📋 Sandbox credentials:', {
+    hasApiKey: !!sandboxCredentials.apiKey,
+    hasApiSecret: !!sandboxCredentials.apiSecret,
+    hasPassphrase: !!sandboxCredentials.passphrase,
+    apiKeyLength: sandboxCredentials.apiKey?.length,
+    apiSecretLength: sandboxCredentials.apiSecret?.length,
+    passphraseLength: sandboxCredentials.passphrase?.length,
+  });
+
+  const service = createLNMarketsService(sandboxCredentials);
+
+  try {
+    console.log('🔍 Testing connectivity...');
+    const connectivityTest = await service.testConnectivity();
+    console.log('📡 Connectivity test result:', connectivityTest);
+
+    console.log('✅ Testing credentials validation...');
+    const isValid = await service.validateCredentials();
+    console.log('🎯 Credentials validation result:', isValid);
+
+    if (isValid) {
+      console.log('✅ Sandbox credentials are valid!');
+    } else {
+      console.log('❌ Sandbox credentials validation failed');
+    }
+  } catch (error) {
+    console.error('❌ Test failed:', error);
+  }
+}
