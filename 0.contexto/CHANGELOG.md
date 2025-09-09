@@ -48,6 +48,16 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Correção de rejeição de API keys válidas da LN Markets
   - Melhoria na experiência do usuário com menos erros falsos
 
+### Fixed
+- **Validação de Credenciais LN Markets**: Correção crítica de segurança
+  - Adicionada validação real de credenciais durante registro
+  - Implementada verificação de API Key, Secret e Passphrase
+  - Prevenção de registro com credenciais inválidas
+  - Teste de conectividade com API da LN Markets
+  - Criptografia e armazenamento seguro da passphrase
+  - Correção de métodos de criptografia/descriptografia
+  - Melhoria na segurança e confiabilidade do sistema
+
 ### Added
 - **Toggle Dark/Light Mode**: Alternância de tema funcional
   - Botão toggle com ícones sol/lua no header
