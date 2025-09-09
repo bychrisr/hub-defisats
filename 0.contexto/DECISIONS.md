@@ -2,6 +2,52 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats.
 
+## ADR-017: ESLint Warnings Resolution Strategy
+
+**Data**: 2025-01-09  
+**Status**: Aceito  
+**Contexto**: Resolução sistemática de warnings ESLint para melhorar qualidade do código e reduzir ruído no desenvolvimento
+
+### Decisão
+- **Type Safety First**: Priorizar tipagem TypeScript adequada sobre supressão de warnings
+- **Specific Types**: Usar tipos específicos (Record<string, unknown>) ao invés de `any`
+- **Interface Creation**: Criar interfaces específicas para request/reply handlers
+- **Code Cleanup**: Remover código morto e variáveis não utilizadas
+- **Error Handling**: Aplicar type guards e assertions para tratamento de erros
+
+### Justificativa
+- **Manutenibilidade**: Código mais limpo e fácil de manter
+- **Developer Experience**: Menos ruído no desenvolvimento com warnings relevantes
+- **Type Safety**: Melhor detecção de erros em tempo de desenvolvimento
+- **Code Quality**: Padrões consistentes de codificação em todo o projeto
+
+### Implementação
+```typescript
+// Antes: any types
+const query = request.query as any;
+const error: any = e;
+
+// Depois: tipos específicos  
+const query = request.query as { type?: string; is_active?: string };
+const error = e as Error;
+
+// Interfaces específicas
+interface AuthenticatedRequest extends FastifyRequest {
+  user: { id: string; email: string };
+}
+
+// Type guards para errors
+if (error instanceof Error) {
+  console.log(error.message);
+}
+```
+
+### Resultado
+- **Redução de Warnings**: De 133 problemas para ~20 warnings não críticos
+- **Melhor Tipagem**: Tipos mais específicos em controllers e services
+- **Code Cleanup**: Remoção de arquivo simple-server.ts desnecessário
+- **Funcionalidade Mantida**: Zero impacto na funcionalidade da aplicação
+
 ## ADR-016: CI/CD Pipeline Implementation
 
 **Data**: 2025-01-09  

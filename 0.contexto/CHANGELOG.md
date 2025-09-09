@@ -7,6 +7,26 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-01-09
+
+### Fixed
+- **Resolução de Warnings ESLint**: Correção sistemática de warnings não críticos no backend
+  - Adicionados tipos apropriados para request/reply handlers (AuthenticatedRequest, MockRequest)
+  - Substituição de `any` por tipos específicos (Record<string, unknown>, MetricValue)
+  - Corrigidos patterns de regex no sanitizer (character class ranges)
+  - Removidas variáveis e imports não utilizados em routes e middlewares
+  - Melhorado tratamento de erros com type assertions apropriadas
+  - Aplicados type guards para error handling seguro
+
+### Removed
+- **Arquivo simple-server.ts**: Removido arquivo de teste desnecessário que causava conflitos
+
+### Technical
+- **Qualidade de Código**: Redução significativa de warnings ESLint mantendo funcionalidade
+- **Type Safety**: Melhor tipagem TypeScript em controllers, routes e services  
+- **Code Cleanup**: Remoção de código morto e variáveis não utilizadas
+- **Error Handling**: Tratamento mais robusto de erros com tipos apropriados
+
 ### Added
 - **CI/CD Pipeline Completo**: Implementação completa do pipeline de integração contínua
   - GitHub Actions workflow com testes automatizados para backend e frontend
