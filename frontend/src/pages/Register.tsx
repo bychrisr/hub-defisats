@@ -25,7 +25,7 @@ import {
   Sun,
 } from 'lucide-react';
 import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator';
-import PasswordValidator from '@/components/PasswordValidator';
+import SimplePasswordValidator from '@/components/SimplePasswordValidator';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
 import { useUsernameValidation } from '@/hooks/useUsernameValidation';
@@ -330,14 +330,7 @@ export default function Register() {
                   </Button>
                 </div>
                 {password && (
-                <PasswordValidator
-                  password={password}
-                  showStrength={true}
-                  onValidationChange={(isValid, suggestions) => {
-                    // You can use this callback to update form state if needed
-                    console.log('Password validation:', { isValid, suggestions });
-                  }}
-                />
+                  <SimplePasswordValidator password={password} />
                 )}
                 {errors.password && (
                   <p className="text-sm text-red-500">

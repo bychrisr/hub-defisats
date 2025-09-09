@@ -142,7 +142,7 @@ export default function PasswordValidator({
             <div className="flex items-center space-x-2">
               {getRequirementIcon(validationResult.requirements.special)}
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                One special character (!@#$%^&*()_+-=[]{}|;:,.<>?~\`)
+                One special character
               </span>
             </div>
           </div>
