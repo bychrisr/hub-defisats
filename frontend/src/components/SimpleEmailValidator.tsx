@@ -74,7 +74,7 @@ export default function SimpleEmailValidator({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [email, onValidationChange]);
+  }, [email]);
 
   if (!email || email.length < 5) {
     return null;

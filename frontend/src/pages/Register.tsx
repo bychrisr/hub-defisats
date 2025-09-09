@@ -292,9 +292,9 @@ export default function Register() {
                 {watch('email') && (
                   <SimpleEmailValidator
                     email={watch('email')}
-                    onValidationChange={(isValid, isAvailable, suggestions) => {
+                    onValidationChange={useCallback((isValid: boolean, isAvailable: boolean, suggestions: string[]) => {
                       setEmailValidation({ isValid, isAvailable, suggestions });
-                    }}
+                    }, [])}
                   />
                 )}
                 {errors.email && (
