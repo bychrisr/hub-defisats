@@ -42,6 +42,9 @@ const registerSchema = z.object({
   ln_markets_api_secret: z.string().min(1, 'API secret is required'),
   ln_markets_passphrase: z.string().min(1, 'Passphrase is required'),
   coupon_code: z.string().optional(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -178,6 +181,17 @@ export default function Register() {
     }
     
     console.log('✅ Email validation passed, proceeding with registration');
+
+    // Debug: Validate form data before submission
+    console.log('🔍 Form validation check:');
+    console.log('  - Email:', data.email, '(valid:', !!data.email, ')');
+    console.log('  - Username:', data.username, '(valid:', !!data.username, ')');
+    console.log('  - Password:', data.password ? '***' : 'MISSING', '(valid:', !!data.password, ')');
+    console.log('  - Confirm Password:', data.confirmPassword ? '***' : 'MISSING', '(valid:', !!data.confirmPassword, ')');
+    console.log('  - Passwords match:', data.password === data.confirmPassword);
+    console.log('  - API Key:', data.ln_markets_api_key, '(valid:', !!data.ln_markets_api_key, ')');
+    console.log('  - API Secret:', data.ln_markets_api_secret, '(valid:', !!data.ln_markets_api_secret, ')');
+    console.log('  - Passphrase:', data.ln_markets_passphrase, '(valid:', !!data.ln_markets_passphrase, ')');
 
     setIsSubmitting(true);
     try {
