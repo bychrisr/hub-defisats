@@ -222,7 +222,7 @@ export default function Register() {
                     id="username"
                     type="text"
                     placeholder="Choose a username"
-                    autoComplete="username"
+                    autoComplete="off"
                     {...register('username')}
                     className={errors.username ? 'border-red-500 pr-8' : usernameAvailable === false ? 'border-red-500 pr-8' : usernameAvailable === true ? 'border-green-500 pr-8' : 'pr-8'}
                   />
@@ -327,6 +327,7 @@ export default function Register() {
                   id="ln_markets_api_key"
                   type="text"
                   placeholder="Cole sua API Key aqui"
+                  autoComplete="off"
                   {...register('ln_markets_api_key')}
                   className={errors.ln_markets_api_key ? 'border-red-500' : ''}
                 />
@@ -341,6 +342,7 @@ export default function Register() {
                   id="ln_markets_api_secret"
                   type="text"
                   placeholder="Cole sua API Secret aqui"
+                  autoComplete="off"
                   {...register('ln_markets_api_secret')}
                   className={errors.ln_markets_api_secret ? 'border-red-500' : ''}
                 />
@@ -355,6 +357,7 @@ export default function Register() {
                   id="ln_markets_passphrase"
                   type="text"
                   placeholder="Cole sua passphrase aqui"
+                  autoComplete="off"
                   {...register('ln_markets_passphrase')}
                   className={errors.ln_markets_passphrase ? 'border-red-500' : ''}
                 />
