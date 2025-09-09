@@ -75,6 +75,15 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Teste seguro sem exposição de dados sensíveis
   - Auxílio na resolução de problemas de integração da API
 
+### Fixed
+- **Testes de Credenciais LN Markets**: Diagnóstico completo de problemas
+  - ✅ Teste independente de conectividade com API LN Markets (status 200)
+  - ❌ Teste de autenticação com credenciais da sandbox (status 404)
+  - 🔍 Identificação de problema: credenciais inválidas ou insuficientes
+  - 📊 Scripts de teste standalone para diagnóstico independente
+  - 🔗 Validação de endpoints públicos vs endpoints autenticados
+  - 📝 Logs detalhados para análise de falhas de autenticação
+
 ### Added
 - **Toggle Dark/Light Mode**: Alternância de tema funcional
   - Botão toggle com ícones sol/lua no header
