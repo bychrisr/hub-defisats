@@ -30,17 +30,14 @@ const registerSchema = z.object({
   confirmPassword: z.string(),
   ln_markets_api_key: z
     .string()
-    .min(16, 'API key must be at least 16 characters')
-    .regex(/^[A-Za-z0-9_-]+$/, 'API key format is invalid'),
+    .min(16, 'API key must be at least 16 characters'),
   ln_markets_api_secret: z
     .string()
-    .min(16, 'API secret must be at least 16 characters')
-    .regex(/^[A-Za-z0-9_-]+$/, 'API secret format is invalid'),
+    .min(16, 'API secret must be at least 16 characters'),
   ln_markets_passphrase: z
     .string()
     .min(8, 'Passphrase must be at least 8 characters')
-    .max(128, 'Passphrase must be at most 128 characters')
-    .regex(/^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]+$/, 'Passphrase format is invalid'),
+    .max(128, 'Passphrase must be at most 128 characters'),
   coupon_code: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
