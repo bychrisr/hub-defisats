@@ -420,6 +420,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   );
 
   // Check email availability route
+  console.log('🔧 Registering check-email endpoint');
   fastify.post(
     '/check-email',
     {
@@ -453,13 +454,20 @@ export async function authRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const { email } = request.body as { email: string };
+        console.log(`🔍 Checking email availability for: ${email}`);
 
         // Check if email exists
         const existingUser = await prisma.user.findUnique({
           where: { email: email.toLowerCase() },
         });
 
-        return reply.send({ available: !existingUser });
+        console.log(`📧 Existing user found:`, existingUser ? 'YES' : 'NO');
+        console.log(`📧 User data:`, existingUser);
+
+        const available = !existingUser;
+        console.log(`✅ Email ${email} is ${available ? 'available' : 'not available'}`);
+
+        return reply.send({ available });
       } catch (error) {
         console.error('Email check error:', error);
         return reply.status(500).send({

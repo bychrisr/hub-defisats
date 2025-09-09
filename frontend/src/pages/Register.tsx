@@ -237,18 +237,29 @@ export default function Register() {
   };
 
   const fillTestData = () => {
-    const testData = generateTestCredentials();
-    console.log('🧪 Generated test data:', testData);
+    // Always generate completely unique data
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    
+    const testData = {
+      email: `test_${timestamp}_${random}@example.com`,
+      username: `user_${timestamp}_${random}`,
+      ln_markets_api_key: `test_key_${timestamp}_${random}`,
+      ln_markets_api_secret: `test_secret_${timestamp}_${random}`,
+      ln_markets_passphrase: `testpassphrase_${timestamp}`
+    };
+    
+    console.log('🧪 Generated UNIQUE test data:', testData);
     
     setValue('email', testData.email);
     setValue('username', testData.username);
-    setValue('password', 'Test123#');
-    setValue('confirmPassword', 'Test123#');
+    setValue('password', 'Test123!@#');
+    setValue('confirmPassword', 'Test123!@#');
     setValue('ln_markets_api_key', testData.ln_markets_api_key);
     setValue('ln_markets_api_secret', testData.ln_markets_api_secret);
     setValue('ln_markets_passphrase', testData.ln_markets_passphrase);
     
-    console.log('✅ Test data filled in form');
+    console.log('✅ UNIQUE test data filled in form');
   };
 
   // Password validation now handled by PasswordValidator component
