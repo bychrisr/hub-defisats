@@ -22,7 +22,7 @@ export const useUsernameValidation = (): UseUsernameValidationReturn => {
     setUsernameChecking(true);
     try {
       const response = await api.get(
-        `/auth/check-username?username=${encodeURIComponent(username)}`
+        `/api/auth/check-username?username=${encodeURIComponent(username)}`
       );
       setUsernameAvailable(response.data.available);
     } catch (error) {
