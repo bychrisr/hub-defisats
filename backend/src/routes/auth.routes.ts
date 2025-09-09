@@ -244,7 +244,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/register',
     {
-      preHandler: [registrationRateLimitMiddleware, validateRegisterInput],
+      preHandler: [validateRegisterInput],
       schema: {
         description: 'Register a new user',
         tags: ['Authentication'],
@@ -254,6 +254,7 @@ export async function authRoutes(fastify: FastifyInstance) {
             'email',
             'username',
             'password',
+            'confirmPassword',
             'ln_markets_api_key',
             'ln_markets_api_secret',
             'ln_markets_passphrase',
@@ -262,6 +263,7 @@ export async function authRoutes(fastify: FastifyInstance) {
             email: { type: 'string', format: 'email' },
             username: { type: 'string', minLength: 3, maxLength: 20 },
             password: { type: 'string', minLength: 8 },
+            confirmPassword: { type: 'string', minLength: 8 },
             ln_markets_api_key: { type: 'string', minLength: 16 },
             ln_markets_api_secret: { type: 'string', minLength: 16 },
             ln_markets_passphrase: { type: 'string', minLength: 8 },

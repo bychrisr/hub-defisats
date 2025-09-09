@@ -78,8 +78,20 @@ export async function validateRegisterInput(
         : undefined,
     };
 
+    console.log('🔍 Sanitized body:', {
+      email: sanitizedBody.email,
+      username: sanitizedBody.username,
+      password: sanitizedBody.password ? '***' : 'MISSING',
+      confirmPassword: sanitizedBody.confirmPassword ? '***' : 'MISSING',
+      ln_markets_api_key: sanitizedBody.ln_markets_api_key,
+      ln_markets_api_secret: sanitizedBody.ln_markets_api_secret,
+      ln_markets_passphrase: sanitizedBody.ln_markets_passphrase,
+      coupon_code: sanitizedBody.coupon_code
+    });
+
     // Validar com Zod
     const validatedData = registerSchema.parse(sanitizedBody);
+    console.log('✅ Registration validation passed');
 
     // Substituir o body com dados validados e sanitizados
     request.body = validatedData;
