@@ -2,12 +2,13 @@ import bcrypt from 'bcrypt';
 import { PrismaClient, User, SocialProvider } from '@prisma/client';
 import { config } from '@/config/env';
 import { FastifyInstance } from 'fastify';
-import { 
-  RegisterRequest, 
-  LoginRequest, 
+import {
+  RegisterRequest,
+  LoginRequest,
   AuthResponse,
-  RefreshTokenResponse 
+  RefreshTokenResponse
 } from '@/types/api-contracts';
+import { createLNMarketsService } from './lnmarkets.service';
 
 export class AuthService {
   private prisma: PrismaClient;
@@ -33,6 +34,20 @@ export class AuthService {
       throw new Error('User already exists with this email');
     }
 
+    // Validate LN Markets credentials
+    const lnMarketsCredentials = {
+      apiKey: ln_markets_api_key,
+      apiSecret: ln_markets_api_secret,
+      passphrase: data.ln_markets_passphrase || '', // Add passphrase if available
+    };
+
+    const lnMarketsService = createLNMarketsService(lnMarketsCredentials);
+    const isValidCredentials = await lnMarketsService.validateCredentials();
+
+    if (!isValidCredentials) {
+      throw new Error('Invalid LN Markets API credentials. Please check your API Key, Secret, and Passphrase.');
+    }
+
     // Validate coupon if provided
     let planType = 'free' as const;
     if (coupon_code) {
@@ -46,6 +61,7 @@ export class AuthService {
     // Encrypt LN Markets keys
     const encryptedApiKey = this.encryptData(ln_markets_api_key);
     const encryptedApiSecret = this.encryptData(ln_markets_api_secret);
+    const encryptedPassphrase = this.encryptData(data.ln_markets_passphrase || '');
 
     // Create user
     const user = await this.prisma.user.create({
@@ -54,6 +70,7 @@ export class AuthService {
         password_hash: passwordHash,
         ln_markets_api_key: encryptedApiKey,
         ln_markets_api_secret: encryptedApiSecret,
+        ln_markets_passphrase: encryptedPassphrase,
         plan_type: planType,
         used_coupon_id: coupon_code ? (await this.prisma.coupon.findUnique({ where: { code: coupon_code } }))?.id : null,
       },
@@ -355,19 +372,15 @@ export class AuthService {
   private encryptData(data: string): string {
     // Simple encryption for now - in production, use proper encryption
     const crypto = require('crypto');
-    const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(config.security.encryption.key, 'hex');
+    const algorithm = 'aes-256-cbc';
+    const key = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
     const iv = crypto.randomBytes(16);
-    
-    const cipher = crypto.createCipher(algorithm, key);
-    cipher.setAAD(Buffer.from('hub-defisats', 'utf8'));
-    
+
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
     let encrypted = cipher.update(data, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
-    const authTag = cipher.getAuthTag();
-    
-    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+
+    return iv.toString('hex') + ':' + encrypted;
   }
 
   /**
@@ -375,21 +388,21 @@ export class AuthService {
    */
   public decryptData(encryptedData: string): string {
     const crypto = require('crypto');
-    const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(config.security.encryption.key, 'hex');
-    
+    const algorithm = 'aes-256-cbc';
+    const key = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
+
     const parts = encryptedData.split(':');
-    const iv = Buffer.from(parts[0], 'hex');
-    const authTag = Buffer.from(parts[1], 'hex');
-    const encrypted = parts[2];
-    
-    const decipher = crypto.createDecipher(algorithm, key);
-    decipher.setAAD(Buffer.from('hub-defisats', 'utf8'));
-    decipher.setAuthTag(authTag);
-    
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      throw new Error('Invalid encrypted data format');
+    }
+
+    const iv = Buffer.from(parts[0] as string, 'hex');
+    const encrypted = parts[1] as string;
+
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 }

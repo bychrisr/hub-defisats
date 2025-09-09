@@ -19,6 +19,7 @@ export const RegisterRequestSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   ln_markets_api_key: z.string().min(16, 'LN Markets API key must be at least 16 characters'),
   ln_markets_api_secret: z.string().min(16, 'LN Markets API secret must be at least 16 characters'),
+  ln_markets_passphrase: z.string().min(8, 'LN Markets passphrase must be at least 8 characters'),
   coupon_code: z.string().optional(),
 });
 

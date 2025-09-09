@@ -60,6 +60,7 @@ export default function Register() {
   });
   const { register: registerUser, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Apply theme
   useEffect(() => {
@@ -125,6 +126,7 @@ export default function Register() {
   }, [username]);
 
   const onSubmit = async (data: RegisterForm) => {
+    setIsSubmitting(true);
     try {
       clearError();
       await registerUser({
@@ -139,6 +141,8 @@ export default function Register() {
       navigate('/dashboard');
     } catch (error) {
       // Error is handled by the store
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -382,9 +386,9 @@ export default function Register() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
               >
-                {isLoading ? (
+                {(isLoading || isSubmitting) ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating account...
