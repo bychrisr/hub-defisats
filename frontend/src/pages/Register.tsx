@@ -164,18 +164,36 @@ export default function Register() {
   );
 
   const onSubmit = async (data: RegisterForm) => {
+    // Debug: Log email validation state
+    console.log('📧 Email validation state:', emailValidation);
+    
     // Prevent submission if email is not available
     if (!emailValidation.isValid || !emailValidation.isAvailable) {
+      console.log('❌ Email validation failed, preventing submission');
       setError('email', { 
         type: 'manual', 
         message: 'Please wait for email validation to complete or use a different email.' 
       });
       return;
     }
+    
+    console.log('✅ Email validation passed, proceeding with registration');
 
     setIsSubmitting(true);
     try {
       clearError();
+      
+      // Debug: Log the data being sent
+      console.log('🚀 Registration data being sent:', {
+        email: data.email,
+        username: data.username,
+        password: '***',
+        ln_markets_api_key: data.ln_markets_api_key,
+        ln_markets_api_secret: data.ln_markets_api_secret,
+        ln_markets_passphrase: data.ln_markets_passphrase,
+        coupon_code: data.coupon_code || undefined,
+      });
+      
       await registerUser({
         email: data.email,
         username: data.username,
@@ -220,6 +238,8 @@ export default function Register() {
 
   const fillTestData = () => {
     const testData = generateTestCredentials();
+    console.log('🧪 Generated test data:', testData);
+    
     setValue('email', testData.email);
     setValue('username', testData.username);
     setValue('password', 'Test123#');
@@ -227,6 +247,8 @@ export default function Register() {
     setValue('ln_markets_api_key', testData.ln_markets_api_key);
     setValue('ln_markets_api_secret', testData.ln_markets_api_secret);
     setValue('ln_markets_passphrase', testData.ln_markets_passphrase);
+    
+    console.log('✅ Test data filled in form');
   };
 
   // Password validation now handled by PasswordValidator component
