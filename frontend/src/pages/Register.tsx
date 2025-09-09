@@ -110,6 +110,7 @@ export default function Register() {
     formState: { errors },
     watch,
     setError,
+    setValue,
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
