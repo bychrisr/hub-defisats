@@ -44,7 +44,7 @@ export default function SimpleEmailValidator({
 
         // Testar se email já existe tentando fazer login
         try {
-          const response = await api.post('/auth/check-email', { email });
+          const response = await api.post('/api/auth/check-email', { email });
           const result = {
             valid: true,
             available: response.data.available,
