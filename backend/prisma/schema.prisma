@@ -144,13 +144,11 @@ model TradeLog {
   automation     Automation? @relation(fields: [automation_id], references: [id], onDelete: SetNull)
 
   @@index([user_id])
-  @@index([symbol])
   @@index([status])
   @@index([executed_at])
   @@index([created_at])
   @@index([user_id, status])
   @@index([user_id, executed_at])
-  @@index([symbol, status])
 }
 
 model Notification {
@@ -213,9 +211,7 @@ model Coupon {
   user_coupons UserCoupon[] @relation("CouponUserRelation")
 
   @@index([code])
-  @@index([is_active])
   @@index([expires_at])
-  @@index([code, is_active])
 }
 
 model SystemAlert {

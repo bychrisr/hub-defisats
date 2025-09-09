@@ -6,7 +6,7 @@ export class CookieUtils {
    * Set secure refresh token cookie
    */
   static setRefreshTokenCookie(reply: FastifyReply, token: string): void {
-    reply.setCookie('refresh_token', token, {
+    (reply as any).setCookie('refresh_token', token, {
       httpOnly: true,
       secure: config.isProduction,
       sameSite: 'strict',
@@ -20,7 +20,7 @@ export class CookieUtils {
    * Clear refresh token cookie
    */
   static clearRefreshTokenCookie(reply: FastifyReply): void {
-    reply.clearCookie('refresh_token', {
+    (reply as any).clearCookie('refresh_token', {
       httpOnly: true,
       secure: config.isProduction,
       sameSite: 'strict',
@@ -33,7 +33,7 @@ export class CookieUtils {
    * Set secure session cookie
    */
   static setSessionCookie(reply: FastifyReply, sessionId: string): void {
-    reply.setCookie('session_id', sessionId, {
+    (reply as any).setCookie('session_id', sessionId, {
       httpOnly: true,
       secure: config.isProduction,
       sameSite: 'strict',
@@ -47,7 +47,7 @@ export class CookieUtils {
    * Clear session cookie
    */
   static clearSessionCookie(reply: FastifyReply): void {
-    reply.clearCookie('session_id', {
+    (reply as any).clearCookie('session_id', {
       httpOnly: true,
       secure: config.isProduction,
       sameSite: 'strict',
@@ -60,7 +60,7 @@ export class CookieUtils {
    * Set CSRF token cookie
    */
   static setCSRFTokenCookie(reply: FastifyReply, token: string): void {
-    reply.setCookie('csrf_token', token, {
+    (reply as any).setCookie('csrf_token', token, {
       httpOnly: false, // Needs to be accessible by JavaScript
       secure: config.isProduction,
       sameSite: 'strict',
@@ -74,7 +74,7 @@ export class CookieUtils {
    * Clear CSRF token cookie
    */
   static clearCSRFTokenCookie(reply: FastifyReply): void {
-    reply.clearCookie('csrf_token', {
+    (reply as any).clearCookie('csrf_token', {
       httpOnly: false,
       secure: config.isProduction,
       sameSite: 'strict',

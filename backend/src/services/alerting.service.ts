@@ -61,7 +61,7 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const responseTimeMetric = metricsData.find(
-            m => m.name === 'http_request_duration_seconds'
+            (m: any) => m.name === 'http_request_duration_seconds'
           );
           if (!responseTimeMetric) return false;
 
@@ -82,7 +82,7 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const errorRateMetric = metricsData.find(
-            m => m.name === 'http_requests_total'
+            (m: any) => m.name === 'http_requests_total'
           );
           if (!errorRateMetric) return false;
 
@@ -105,7 +105,7 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const memoryMetric = metricsData.find(
-            m => m.name === 'memory_usage_bytes' && m.labels.type === 'heapUsed'
+            (m: any) => m.name === 'memory_usage_bytes' && m.labels.type === 'heapUsed'
           );
           if (!memoryMetric) return false;
 
@@ -123,7 +123,7 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const cpuMetric = metricsData.find(
-            m => m.name === 'cpu_usage_percent'
+            (m: any) => m.name === 'cpu_usage_percent'
           );
           if (!cpuMetric) return false;
 
@@ -141,13 +141,13 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const authFailuresMetric = metricsData.find(
-            m => m.name === 'auth_failures_total'
+            (m: any) => m.name === 'auth_failures_total'
           );
           if (!authFailuresMetric) return false;
 
           const recentFailures =
             authFailuresMetric.values?.filter((v: MetricValue) => {
-              const timestamp = new Date(v.timestamp);
+              const timestamp = new Date((v as any).timestamp);
               const now = new Date();
               return now.getTime() - timestamp.getTime() < 300000; // últimos 5 minutos
             }).length || 0;
@@ -164,13 +164,13 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const rateLimitMetric = metricsData.find(
-            m => m.name === 'rate_limit_blocks_total'
+            (m: any) => m.name === 'rate_limit_blocks_total'
           );
           if (!rateLimitMetric) return false;
 
           const recentBlocks =
             rateLimitMetric.values?.filter((v: MetricValue) => {
-              const timestamp = new Date(v.timestamp);
+              const timestamp = new Date((v as any).timestamp);
               const now = new Date();
               return now.getTime() - timestamp.getTime() < 600000; // últimos 10 minutos
             }).length || 0;
@@ -188,13 +188,13 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const apiErrorsMetric = metricsData.find(
-            m => m.name === 'lnmarkets_api_errors_total'
+            (m: any) => m.name === 'lnmarkets_api_errors_total'
           );
           if (!apiErrorsMetric) return false;
 
           const recentErrors =
             apiErrorsMetric.values?.filter((v: MetricValue) => {
-              const timestamp = new Date(v.timestamp);
+              const timestamp = new Date((v as any).timestamp);
               const now = new Date();
               return now.getTime() - timestamp.getTime() < 300000; // últimos 5 minutos
             }).length || 0;
@@ -212,13 +212,13 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const workerFailuresMetric = metricsData.find(
-            m => m.name === 'worker_job_failures_total'
+            (m: any) => m.name === 'worker_job_failures_total'
           );
           if (!workerFailuresMetric) return false;
 
           const recentFailures =
             workerFailuresMetric.values?.filter((v: MetricValue) => {
-              const timestamp = new Date(v.timestamp);
+              const timestamp = new Date((v as any).timestamp);
               const now = new Date();
               return now.getTime() - timestamp.getTime() < 600000; // últimos 10 minutos
             }).length || 0;
@@ -315,7 +315,7 @@ export class AlertingService {
     // Implementar notificações aqui
     // Ex: Slack, Discord, email, webhook, etc.
 
-    if (config.monitoring.alerts?.webhook) {
+    if ((config.monitoring as any).alerts?.webhook) {
       try {
         // Exemplo de webhook
         console.log(`📤 Sending alert notification: ${alert.message}`);

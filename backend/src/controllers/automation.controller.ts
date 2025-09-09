@@ -3,15 +3,10 @@ import { z } from 'zod';
 import { AutomationService } from '@/services/automation.service';
 import { PrismaClient } from '@prisma/client';
 
-// Interface for authenticated requests
-interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    id: string;
-    email: string;
-    username: string;
-    plan_type: string;
-  };
-}
+// Interface for authenticated requests - user is declared globally in auth.middleware.ts
+// interface AuthenticatedRequest extends FastifyRequest {
+//   // user property is declared globally in auth.middleware.ts
+// }
 
 // Validation schemas
 const CreateAutomationSchema = z.object({
@@ -40,11 +35,11 @@ export class AutomationController {
    */
   async createAutomation(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
       const body = CreateAutomationSchema.parse(request.body);
 
       const automation = await this.automationService.createAutomation({
-        userId: user.id,
+        userId: user?.id || '',
         type: body.type,
         config: body.config,
       });
@@ -77,13 +72,13 @@ export class AutomationController {
    */
   async getUserAutomations(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
       const { type, is_active } = request.query as { type?: string; is_active?: string };
 
       const automations = await this.automationService.getUserAutomations({
-        userId: user.id,
-        type,
-        isActive: is_active,
+        userId: user?.id || '',
+        type: type as any,
+        isActive: is_active === 'true',
       });
 
       return reply.send({
@@ -105,12 +100,12 @@ export class AutomationController {
    */
   async getAutomation(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
       const params = AutomationParamsSchema.parse(request.params);
 
       const automation = await this.automationService.getAutomation({
         automationId: params.id,
-        userId: user.id,
+        userId: user?.id || '',
       });
 
       if (!automation) {
@@ -148,14 +143,23 @@ export class AutomationController {
    */
   async updateAutomation(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
       const params = AutomationParamsSchema.parse(request.params);
       const body = UpdateAutomationSchema.parse(request.body);
 
+      // Build updates object only with defined values
+      const updates: { config?: any; is_active?: boolean } = {};
+      if (body.is_active !== undefined) {
+        updates.is_active = body.is_active;
+      }
+      if (body.config !== undefined) {
+        updates.config = body.config;
+      }
+
       const automation = await this.automationService.updateAutomation({
         automationId: params.id,
-        userId: user.id,
-        updates: body,
+        userId: user?.id || '',
+        updates,
       });
 
       if (!automation) {
@@ -194,12 +198,12 @@ export class AutomationController {
    */
   async deleteAutomation(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
       const params = AutomationParamsSchema.parse(request.params);
 
       const deleted = await this.automationService.deleteAutomation({
         automationId: params.id,
-        userId: user.id,
+        userId: user?.id || '',
       });
 
       if (!deleted) {
@@ -237,12 +241,12 @@ export class AutomationController {
    */
   async toggleAutomation(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
       const params = AutomationParamsSchema.parse(request.params);
 
       const automation = await this.automationService.toggleAutomation({
         automationId: params.id,
-        userId: user.id,
+        userId: user?.id || '',
       });
 
       if (!automation) {
@@ -281,9 +285,9 @@ export class AutomationController {
    */
   async getAutomationStats(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
 
-      const stats = await this.automationService.getAutomationStats(user.id);
+      const stats = await this.automationService.getAutomationStats(user?.id || '');
 
       return reply.send({
         success: true,

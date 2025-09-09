@@ -97,11 +97,9 @@ export class OptimizedQueriesService {
             where: { user_id: userId },
             select: {
               id: true,
-              symbol: true,
-              side: true,
-              amount: true,
-              price: true,
+              trade_id: true,
               status: true,
+              error_message: true,
               executed_at: true,
               created_at: true,
             },
@@ -140,7 +138,6 @@ export class OptimizedQueriesService {
           activeAutomations,
           totalTrades,
           successfulTrades,
-          totalVolume,
         ] = await Promise.all([
           this.prisma.automation.count({
             where: { user_id: userId },
@@ -152,11 +149,7 @@ export class OptimizedQueriesService {
             where: { user_id: userId },
           }),
           this.prisma.tradeLog.count({
-            where: { user_id: userId, status: 'executed' },
-          }),
-          this.prisma.tradeLog.aggregate({
-            where: { user_id: userId, status: 'executed' },
-            _sum: { amount: true },
+            where: { user_id: userId, status: 'success' },
           }),
         ]);
 
@@ -167,7 +160,6 @@ export class OptimizedQueriesService {
           successfulTrades,
           successRate:
             totalTrades > 0 ? (successfulTrades / totalTrades) * 100 : 0,
-          totalVolume: totalVolume._sum.amount || 0,
         };
       },
       { ttl: 300 } // 5 minutes
@@ -207,11 +199,11 @@ export class OptimizedQueriesService {
           select: {
             id: true,
             code: true,
-            discount_percentage: true,
-            discount_amount: true,
-            max_uses: true,
+            // discount_percentage: true, // Field doesn't exist in Coupon model
+            // discount_amount: true, // Field doesn't exist in Coupon model
+            // max_uses: true, // Field doesn't exist in Coupon model
             used_count: true,
-            is_active: true,
+            // is_active: true, // Field doesn't exist in Coupon model
             expires_at: true,
             created_at: true,
           },
@@ -236,7 +228,6 @@ export class OptimizedQueriesService {
           totalAutomations,
           activeAutomations,
           totalTrades,
-          totalVolume,
         ] = await Promise.all([
           this.prisma.user.count(),
           this.prisma.user.count({
@@ -251,10 +242,6 @@ export class OptimizedQueriesService {
             where: { is_active: true },
           }),
           this.prisma.tradeLog.count(),
-          this.prisma.tradeLog.aggregate({
-            where: { status: 'executed' },
-            _sum: { amount: true },
-          }),
         ]);
 
         return {
@@ -263,7 +250,6 @@ export class OptimizedQueriesService {
           totalAutomations,
           activeAutomations,
           totalTrades,
-          totalVolume: totalVolume._sum.amount || 0,
           timestamp: new Date().toISOString(),
         };
       },

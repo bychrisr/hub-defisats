@@ -1,17 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 
-// Extend FastifyRequest to include user
-declare module 'fastify' {
-  interface FastifyRequest {
-    user?: {
-      id: string;
-      email: string;
-      username: string;
-      plan_type: string;
-    };
-  }
-}
+// User interface is already declared in auth.middleware.ts
 
 const prisma = new PrismaClient();
 
@@ -24,7 +14,7 @@ export async function validateUserResourceAccess(
   resourceUserId: string
 ): Promise<boolean> {
   try {
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
@@ -98,7 +88,7 @@ export async function validateAutomationAccess(
   automationId: string
 ): Promise<boolean> {
   try {
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
@@ -185,7 +175,7 @@ export async function validateTradeLogAccess(
   tradeLogId: string
 ): Promise<boolean> {
   try {
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
@@ -270,7 +260,7 @@ export function requireResourceAccess(
     reply: FastifyReply
   ): Promise<void> => {
     try {
-      const user = request.user;
+      const user = (request as any).user;
       if (!user) {
         return reply.status(401).send({
           error: 'UNAUTHORIZED',

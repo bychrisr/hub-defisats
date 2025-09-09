@@ -15,14 +15,10 @@ interface RegisterRequestBody {
   coupon_code?: string;
 }
 
-interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    id: string;
-    email: string;
-    username: string;
-    plan_type: string;
-  };
-}
+// Interface for authenticated requests - user is declared globally in auth.middleware.ts
+// interface AuthenticatedRequest extends FastifyRequest {
+//   // user property is declared globally in auth.middleware.ts
+// }
 
 // Zod schemas for validation
 const RegisterRequestZodSchema = z.object({
@@ -126,7 +122,7 @@ export class AuthController {
       console.error('❌ Registration error occurred:', error);
 
       // Record failed registration
-      metrics.recordAuthAttempt('register', 'failure', error.message);
+      metrics.recordAuthAttempt('register', 'failure', (error as Error).message);
 
       if (error instanceof z.ZodError) {
         console.log('❌ Validation error:', error.errors);
@@ -136,14 +132,14 @@ export class AuthController {
           validation_errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-            value: err.input,
+            value: (err as any).input,
           })),
         });
         console.log('📤 Sending validation error response');
         return reply.status(400).send(validationResponse);
       }
 
-      console.log('❌ General registration error:', error.message);
+      console.log('❌ General registration error:', (error as Error).message);
       const errorResponse = ErrorResponseZodSchema.parse({
         error: 'REGISTRATION_FAILED',
         message: error instanceof Error ? error.message : 'Registration failed',
@@ -173,7 +169,7 @@ export class AuthController {
       return reply.status(200).send(response);
     } catch (error) {
       // Record failed login
-      metrics.recordAuthAttempt('login', 'failure', error.message);
+      metrics.recordAuthAttempt('login', 'failure', (error as Error).message);
 
       if (error instanceof z.ZodError) {
         const validationResponse = ValidationErrorResponseZodSchema.parse({
@@ -182,7 +178,7 @@ export class AuthController {
           validation_errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-            value: err.input,
+            value: (err as any).input,
           })),
         });
         return reply.status(400).send(validationResponse);
@@ -200,9 +196,9 @@ export class AuthController {
   /**
    * Check username availability
    */
-  async checkUsername(request: FastifyRequest, reply: FastifyReply) {
+  async checkUsername(_request: FastifyRequest, reply: FastifyReply) {
     try {
-      const { username } = request.query as { username: string };
+      const { username } = _request.query as { username: string };
 
       if (!username) {
         return reply.status(400).send({
@@ -228,10 +224,10 @@ export class AuthController {
   async refreshToken(request: FastifyRequest, reply: FastifyReply) {
     try {
       // Get refresh token from cookie
-      const refreshToken = request.cookies?.refresh_token;
+      const refreshToken = (request as any).cookies?.refresh_token;
 
       if (!refreshToken) {
-        const errorResponse = ErrorResponseSchema.parse({
+        const errorResponse = ErrorResponseZodSchema.parse({
           error: 'REFRESH_TOKEN_MISSING',
           message: 'Refresh token is required',
         });
@@ -242,10 +238,10 @@ export class AuthController {
       const result = await this.authService.refreshToken(refreshToken);
 
       // Return response
-      const response = RefreshTokenResponseSchema.parse(result);
+      const response = AuthResponseZodSchema.parse(result);
       return reply.status(200).send(response);
     } catch (error) {
-      const errorResponse = ErrorResponseSchema.parse({
+      const errorResponse = ErrorResponseZodSchema.parse({
         error: 'REFRESH_TOKEN_FAILED',
         message:
           error instanceof Error ? error.message : 'Token refresh failed',
@@ -261,10 +257,10 @@ export class AuthController {
   async logout(request: FastifyRequest, reply: FastifyReply) {
     try {
       // Get user from request (set by auth middleware)
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
 
       if (!user) {
-        const errorResponse = ErrorResponseSchema.parse({
+        const errorResponse = ErrorResponseZodSchema.parse({
           error: 'UNAUTHORIZED',
           message: 'User not authenticated',
         });
@@ -275,9 +271,9 @@ export class AuthController {
       await this.authService.logout(user.id);
 
       // Clear refresh token cookie
-      reply.clearCookie('refresh_token', {
+      (reply as any).clearCookie('refresh_token', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env['NODE_ENV'] === 'production',
         sameSite: 'strict',
         path: '/',
       });
@@ -286,7 +282,7 @@ export class AuthController {
         message: 'Logged out successfully',
       });
     } catch (error) {
-      const errorResponse = ErrorResponseSchema.parse({
+      const errorResponse = ErrorResponseZodSchema.parse({
         error: 'LOGOUT_FAILED',
         message: error instanceof Error ? error.message : 'Logout failed',
       });
@@ -301,10 +297,10 @@ export class AuthController {
   async me(request: FastifyRequest, reply: FastifyReply) {
     try {
       // Get user from request (set by auth middleware)
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as any).user;
 
       if (!user) {
-        const errorResponse = ErrorResponseSchema.parse({
+        const errorResponse = ErrorResponseZodSchema.parse({
           error: 'UNAUTHORIZED',
           message: 'User not authenticated',
         });
@@ -316,11 +312,11 @@ export class AuthController {
         id: user.id,
         email: user.email,
         plan_type: user.plan_type,
-        created_at: user.created_at,
-        last_activity_at: user.last_activity_at,
+        created_at: (user as any).created_at,
+        last_activity_at: (user as any).last_activity_at,
       });
     } catch (error) {
-      const errorResponse = ErrorResponseSchema.parse({
+      const errorResponse = ErrorResponseZodSchema.parse({
         error: 'USER_INFO_FAILED',
         message:
           error instanceof Error ? error.message : 'Failed to get user info',
@@ -333,18 +329,18 @@ export class AuthController {
   /**
    * Social login callback (Google)
    */
-  async googleCallback(request: FastifyRequest, reply: FastifyReply) {
+  async googleCallback(_request: FastifyRequest, reply: FastifyReply) {
     try {
       // This would be implemented with Passport.js
       // For now, return a placeholder response
-      const errorResponse = ErrorResponseSchema.parse({
+      const errorResponse = ErrorResponseZodSchema.parse({
         error: 'NOT_IMPLEMENTED',
         message: 'Google OAuth not yet implemented',
       });
 
       return reply.status(501).send(errorResponse);
     } catch (error) {
-      const errorResponse = ErrorResponseSchema.parse({
+      const errorResponse = ErrorResponseZodSchema.parse({
         error: 'SOCIAL_LOGIN_FAILED',
         message: error instanceof Error ? error.message : 'Social login failed',
       });
@@ -356,18 +352,18 @@ export class AuthController {
   /**
    * Social login callback (GitHub)
    */
-  async githubCallback(request: FastifyRequest, reply: FastifyReply) {
+  async githubCallback(_request: FastifyRequest, reply: FastifyReply) {
     try {
       // This would be implemented with Passport.js
       // For now, return a placeholder response
-      const errorResponse = ErrorResponseSchema.parse({
+      const errorResponse = ErrorResponseZodSchema.parse({
         error: 'NOT_IMPLEMENTED',
         message: 'GitHub OAuth not yet implemented',
       });
 
       return reply.status(501).send(errorResponse);
     } catch (error) {
-      const errorResponse = ErrorResponseSchema.parse({
+      const errorResponse = ErrorResponseZodSchema.parse({
         error: 'SOCIAL_LOGIN_FAILED',
         message: error instanceof Error ? error.message : 'Social login failed',
       });

@@ -270,7 +270,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
           data: dashboardData,
         };
       } catch (error) {
-        fastify.log.error('Error getting dashboard data:', error as Error);
+        fastify.log.error('Error getting dashboard data:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get dashboard data',
@@ -373,7 +373,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
           data: detailedMetrics,
         };
       } catch (error) {
-        fastify.log.error('Error getting detailed metrics:', error as Error);
+        fastify.log.error('Error getting detailed metrics:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get detailed metrics',
@@ -488,7 +488,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
           data: alertsData,
         };
       } catch (error) {
-        fastify.log.error('Error getting alerts dashboard:', error as Error);
+        fastify.log.error('Error getting alerts dashboard:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get alerts dashboard data',

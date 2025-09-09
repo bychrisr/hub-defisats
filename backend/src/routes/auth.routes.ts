@@ -192,7 +192,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
         // Execute registration
         console.log('🚀 Executing registration...');
-        const result = await authController.register(mockRequest, mockReply);
+        const result = await authController.register(mockRequest as any, mockReply as any);
 
         console.log('✅ Registration test completed successfully!');
         return reply.status(200).send({
@@ -207,7 +207,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       } catch (error: unknown) {
         console.log('❌ Registration test failed!');
         console.log('📊 Error details:', {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? (error as Error).message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined,
           response: (error as any)?.response?.data,
         });
@@ -215,14 +215,14 @@ export async function authRoutes(fastify: FastifyInstance) {
         // Handle validation errors
         if (
           error instanceof Error &&
-          error.message &&
-          error.message.includes('Invalid LN Markets API credentials')
+          (error as Error).message &&
+          (error as Error).message.includes('Invalid LN Markets API credentials')
         ) {
           return reply.status(400).send({
             error: 'VALIDATION_ERROR',
             message: 'LN Markets credentials validation failed',
             details: {
-              error: error.message,
+              error: (error as Error).message,
               timestamp: new Date().toISOString(),
             },
           });
@@ -232,7 +232,7 @@ export async function authRoutes(fastify: FastifyInstance) {
           success: false,
           message: 'Registration test failed',
           details: {
-            error: error.message,
+            error: (error as Error).message,
             timestamp: new Date().toISOString(),
           },
         });
@@ -450,7 +450,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/logout',
     {
-      preHandler: [fastify.authenticate],
+      preHandler: [(fastify as any).authenticate],
       schema: {
         description: 'Logout user and invalidate session',
         tags: ['Authentication'],
@@ -479,7 +479,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/me',
     {
-      preHandler: [fastify.authenticate],
+      preHandler: [(fastify as any).authenticate],
       schema: {
         description: 'Get current user information',
         tags: ['Authentication'],

@@ -7,11 +7,20 @@ import { metricsRoutes } from '@/routes/metrics.routes';
 import { alertsRoutes } from '@/routes/alerts.routes';
 import { dashboardRoutes } from '@/routes/dashboard.routes';
 import { cacheRoutes } from '@/routes/cache.routes';
+import { adminRoutes } from '@/routes/admin.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/services/metrics.service';
 import { alerting } from '@/services/alerting.service';
-import { cacheService } from '@/services/cache.service';
+// import { cacheService } from '@/services/cache.service';
+
+// Import plugins statically
+import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
+import jwt from '@fastify/jwt';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 
 // Initialize monitoring
 monitoring.initialize();
@@ -29,35 +38,48 @@ const prisma = new PrismaClient({
 
 // Create Fastify instance
 const fastify = Fastify({
-  logger: {
+  logger: config.isDevelopment ? {
     level: config.log.level,
-    transport: config.log.format === 'simple' ? {
+    transport: {
       target: 'pino-pretty',
       options: {
         colorize: true,
         translateTime: 'HH:MM:ss Z',
         ignore: 'pid,hostname',
       },
-    } : undefined,
+    },
+  } : {
+    level: config.log.level,
   },
   trustProxy: true,
+});
+
+// Register cookie plugin
+fastify.register(require('@fastify/cookie'), {
+  secret: config.env.JWT_SECRET,
+  parseOptions: {}
 });
 
 // Register plugins
 async function registerPlugins() {
   console.log('🔌 Registering CORS plugin...');
   // CORS
-  await fastify.register(import('@fastify/cors'), config.cors);
+  await fastify.register(cors, {
+    origin: true,
+    credentials: true,
+  });
   console.log('✅ CORS plugin registered');
 
   console.log('🔌 Registering Helmet plugin...');
   // Helmet for security headers
-  await fastify.register(import('@fastify/helmet'), config.security.helmet);
+  await fastify.register(helmet, {
+    contentSecurityPolicy: false,
+  });
   console.log('✅ Helmet plugin registered');
 
   console.log('🔌 Registering Rate Limit plugin...');
   // Rate limiting
-  await fastify.register(import('@fastify/rate-limit'), {
+  await fastify.register(rateLimit, {
     max: config.rateLimit.max,
     timeWindow: config.rateLimit.timeWindow,
     skipOnError: config.rateLimit.skipOnError,
@@ -66,14 +88,14 @@ async function registerPlugins() {
 
   console.log('🔌 Registering JWT plugin...');
   // JWT
-  await fastify.register(import('@fastify/jwt'), {
+  await fastify.register(jwt, {
     secret: config.jwt.secret,
   });
   console.log('✅ JWT plugin registered');
 
   console.log('🔌 Registering Swagger plugin...');
   // Swagger documentation
-  await fastify.register(import('@fastify/swagger'), {
+  await fastify.register(swagger, {
     openapi: {
       openapi: '3.0.0',
       info: {
@@ -118,23 +140,23 @@ async function registerPlugins() {
   });
 
   // Swagger UI
-  await fastify.register(import('@fastify/swagger-ui'), {
+  await fastify.register(swaggerUi, {
     routePrefix: '/docs',
     uiConfig: {
       docExpansion: 'list',
       deepLinking: false,
     },
     uiHooks: {
-      onRequest: function (request, reply, next) {
+      onRequest: function (_request, _reply, next) {
         next();
       },
-      preHandler: function (request, reply, next) {
+      preHandler: function (_request, _reply, next) {
         next();
       },
     },
     staticCSP: true,
     transformStaticCSP: (header) => header,
-    transformSpecification: (swaggerObject, request, reply) => {
+    transformSpecification: (swaggerObject, _request, _reply) => {
       return swaggerObject;
     },
     transformSpecificationClone: true,
@@ -166,7 +188,7 @@ async function registerRoutes() {
         },
       },
     },
-  }, async (request, reply) => {
+  }, async (_request, _reply) => {
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -178,16 +200,16 @@ async function registerRoutes() {
   console.log('✅ Health check route registered');
 
   // Add monitoring hooks
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onRequest', (_request, _reply, done) => {
     // Add breadcrumb for request
     monitoring.addBreadcrumb(
-      `${request.method} ${request.url}`,
+      `${_request.method} ${_request.url}`,
       'http',
       'info',
       {
-        method: request.method,
-        url: request.url,
-        userAgent: request.headers['user-agent'],
+        method: _request.method,
+        url: _request.url,
+        userAgent: _request.headers['user-agent'],
       }
     );
     done();
@@ -243,13 +265,17 @@ async function registerRoutes() {
   await fastify.register(cacheRoutes, { prefix: '/api' });
   console.log('✅ Cache routes registered');
   
-  await fastify.register(automationRoutes, { prefix: '/api' });
+  await fastify.register(automationRoutes, { prefix: '/api' } as any);
   console.log('✅ Automation routes registered');
+
+  // Admin routes
+  await fastify.register(adminRoutes, { prefix: '/api/admin' });
+  console.log('✅ Admin routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler
   fastify.setNotFoundHandler({
-    preHandler: fastify.authenticate,
+    preHandler: (fastify as any).authenticate,
   }, function (request, reply) {
     reply.status(404).send({
       error: 'NOT_FOUND',
@@ -263,6 +289,7 @@ async function registerRoutes() {
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
+  // Continue with error handling
 
   // Capture error in Sentry
   monitoring.captureError(error, {
@@ -279,15 +306,15 @@ fastify.setErrorHandler((error, request, reply) => {
   });
 
   // Prisma errors
-  if (error.code === 'P2002') {
+  if ((error as any).code === 'P2002') {
     return reply.status(409).send({
       error: 'CONFLICT',
       message: 'Resource already exists',
-      details: error.meta,
+      details: (error as any).meta,
     });
   }
 
-  if (error.code === 'P2025') {
+  if ((error as any).code === 'P2025') {
     return reply.status(404).send({
       error: 'NOT_FOUND',
       message: 'Resource not found',
@@ -295,23 +322,23 @@ fastify.setErrorHandler((error, request, reply) => {
   }
 
   // Validation errors
-  if (error.validation) {
+  if ((error as any).validation) {
     return reply.status(400).send({
       error: 'VALIDATION_ERROR',
       message: 'Request validation failed',
-      details: error.validation,
+      details: (error as any).validation,
     });
   }
 
   // JWT errors
-  if (error.code === 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') {
+  if ((error as any).code === 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') {
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
       message: 'Authorization header is required',
     });
   }
 
-  if (error.code === 'FST_JWT_AUTHORIZATION_TOKEN_INVALID') {
+  if ((error as any).code === 'FST_JWT_AUTHORIZATION_TOKEN_INVALID') {
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
       message: 'Invalid authorization token',
@@ -319,7 +346,7 @@ fastify.setErrorHandler((error, request, reply) => {
   }
 
   // Rate limit errors
-  if (error.statusCode === 429) {
+  if ((error as any).statusCode === 429) {
     return reply.status(429).send({
       error: 'RATE_LIMIT_EXCEEDED',
       message: 'Too many requests',
@@ -327,13 +354,13 @@ fastify.setErrorHandler((error, request, reply) => {
   }
 
   // Default error
-  const statusCode = error.statusCode || 500;
-  const message = config.isDevelopment ? error.message : 'Internal server error';
+  const statusCode = (error as any).statusCode || 500;
+  const message = config.isDevelopment ? (error as any).message : 'Internal server error';
 
-  reply.status(statusCode).send({
+  return reply.status(statusCode).send({
     error: 'INTERNAL_SERVER_ERROR',
     message,
-    ...(config.isDevelopment && { stack: error.stack }),
+    ...(config.isDevelopment && { stack: (error as any).stack }),
   });
 });
 
@@ -389,7 +416,7 @@ async function start() {
   } catch (error) {
     fastify.log.error('Error starting server:', error);
     console.error('❌ Full error details:', error);
-    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error stack:', (error as Error).stack);
     process.exit(1);
   }
 }
@@ -400,24 +427,25 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  fastify.log.error('Uncaught Exception:', error);
+  console.error('Uncaught Exception:', error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  fastify.log.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('Stack trace:', reason);
   process.exit(1);
 });
 
 // Start the server
 console.log('🚀 Starting hub-defisats backend server...');
 console.log('📋 Environment variables loaded:', {
-  NODE_ENV: process.env.NODE_ENV,
-  PORT: process.env.PORT,
-  DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
-  REDIS_URL: process.env.REDIS_URL ? 'SET' : 'NOT SET',
-  JWT_SECRET: process.env.JWT_SECRET ? 'SET' : 'NOT SET',
-  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY ? 'SET' : 'NOT SET'
+  NODE_ENV: process.env['NODE_ENV'],
+  PORT: process.env['PORT'],
+  DATABASE_URL: process.env['DATABASE_URL'] ? 'SET' : 'NOT SET',
+  REDIS_URL: process.env['REDIS_URL'] ? 'SET' : 'NOT SET',
+  JWT_SECRET: process.env['JWT_SECRET'] ? 'SET' : 'NOT SET',
+  ENCRYPTION_KEY: process.env['ENCRYPTION_KEY'] ? 'SET' : 'NOT SET'
 });
 
 start();

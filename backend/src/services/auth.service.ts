@@ -86,8 +86,8 @@ export class AuthService {
     } catch (error) {
       console.error('❌ LN Markets validation error:', error);
       console.error('❌ Error details:', {
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
       });
       // Re-throw the error to be handled by the controller
       throw error;
@@ -99,7 +99,7 @@ export class AuthService {
     if (coupon_code) {
       console.log('🎫 Coupon code provided:', coupon_code);
       const coupon = await this.validateCoupon(coupon_code);
-      planType = coupon.plan_type;
+      planType = coupon.plan_type as any;
       console.log('✅ Coupon validated, plan type:', planType);
     } else {
       console.log('ℹ️ No coupon code provided, using default plan: free');
@@ -342,6 +342,7 @@ export class AuthService {
         user = await this.prisma.user.create({
           data: {
             email,
+            username: email.split('@')[0] || 'user', // Generate username from email
             social_provider: provider,
             social_id: socialId,
             ln_markets_api_key: '', // Will be set later

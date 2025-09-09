@@ -136,7 +136,7 @@ export class TwoFactorService {
       data: {
         two_factor_enabled: false,
         two_factor_secret: null,
-        two_factor_backup_codes: null,
+        two_factor_backup_codes: null as any,
       },
     });
 

@@ -86,7 +86,7 @@ export class LNMarketsService {
     let paramsStr = '';
     if (method === 'GET' || method === 'DELETE') {
       if (params) {
-        paramsStr = new URLSearchParams(params).toString();
+        paramsStr = new URLSearchParams(params as Record<string, string>).toString();
       }
     } else if (data) {
       paramsStr = JSON.stringify(data);
@@ -260,10 +260,10 @@ export class LNMarketsService {
           return true;
         } catch (error: unknown) {
           console.log(`❌ Main auth failed for ${endpoint}:`, {
-            status: error.response?.status,
-            statusText: error.response?.statusText,
-            data: error.response?.data,
-            message: error.message,
+            status: (error as any).response?.status,
+            statusText: (error as any).response?.statusText,
+            data: (error as any).response?.data,
+            message: (error as Error).message,
           });
 
           // If main auth fails, try alternative methods
@@ -274,10 +274,10 @@ export class LNMarketsService {
             return true;
           } catch (altError: unknown) {
             console.log(`❌ Alternative auth also failed for ${endpoint}:`, {
-              status: altError.response?.status,
-              statusText: altError.response?.statusText,
-              data: altError.response?.data,
-              message: altError.message,
+              status: (altError as any).response?.status,
+              statusText: (altError as any).response?.statusText,
+              data: (altError as any).response?.data,
+              message: (altError as Error).message,
             });
             continue; // Try next endpoint
           }
@@ -288,9 +288,9 @@ export class LNMarketsService {
       return false;
     } catch (error: unknown) {
       console.error('❌ LN Markets API validation error:', {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
+        response: (error as any).response?.data,
       });
       return false;
     }
@@ -336,13 +336,13 @@ export class LNMarketsService {
       return {
         success: false,
         message: 'All connectivity tests failed',
-        details: 'No public endpoints responded',
+        details: { message: 'No public endpoints responded' },
       };
     } catch (error) {
       return {
         success: false,
         message: 'Basic connectivity test failed',
-        details: (error as Error).message,
+        details: { message: (error as Error).message },
       };
     }
   }

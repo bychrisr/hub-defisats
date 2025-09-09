@@ -38,7 +38,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           data: stats,
         };
       } catch (error) {
-        fastify.log.error('Error getting cache stats:', error as Error);
+        fastify.log.error('Error getting cache stats:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get cache statistics',
@@ -70,7 +70,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           message: 'Cache cleared successfully',
         };
       } catch (error) {
-        fastify.log.error('Error clearing cache:', error as Error);
+        fastify.log.error('Error clearing cache:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to clear cache',
@@ -110,7 +110,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           message: `Cache invalidated for pattern: ${pattern}`,
         };
       } catch (error) {
-        fastify.log.error('Error invalidating cache:', error as Error);
+        fastify.log.error('Error invalidating cache:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to invalidate cache',
@@ -136,7 +136,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            data: { type: 'any' },
+            data: {},
           },
         },
         404: {
@@ -165,7 +165,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           data: value,
         };
       } catch (error) {
-        fastify.log.error('Error getting cache value:', error as Error);
+        fastify.log.error('Error getting cache value:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get cache value',
@@ -184,7 +184,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
         required: ['key', 'value'],
         properties: {
           key: { type: 'string' },
-          value: { type: 'any' },
+          value: {},
           ttl: { type: 'number' },
         },
       },
@@ -211,7 +211,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           message: 'Value set in cache successfully',
         };
       } catch (error) {
-        fastify.log.error('Error setting cache value:', error as Error);
+        fastify.log.error('Error setting cache value:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to set cache value',
@@ -251,7 +251,7 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           message: 'Value deleted from cache successfully',
         };
       } catch (error) {
-        fastify.log.error('Error deleting cache value:', error as Error);
+        fastify.log.error('Error deleting cache value:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to delete cache value',

@@ -125,7 +125,7 @@ export class CacheService {
         lines.forEach(line => {
           if (line.includes(':')) {
             const [key, value] = line.split(':');
-            result[key] = value;
+            if (key) result[key] = value;
           }
         });
         return result;
@@ -135,11 +135,11 @@ export class CacheService {
       const statsInfo = parseInfo(stats);
 
       return {
-        used_memory: memoryInfo.used_memory_human || '0B',
-        connected_clients: statsInfo.connected_clients || '0',
-        total_commands_processed: statsInfo.total_commands_processed || '0',
-        keyspace_hits: statsInfo.keyspace_hits || '0',
-        keyspace_misses: statsInfo.keyspace_misses || '0',
+        used_memory: (memoryInfo as any)['used_memory_human'] || '0B',
+        connected_clients: (statsInfo as any)['connected_clients'] || '0',
+        total_commands_processed: (statsInfo as any)['total_commands_processed'] || '0',
+        keyspace_hits: (statsInfo as any)['keyspace_hits'] || '0',
+        keyspace_misses: (statsInfo as any)['keyspace_misses'] || '0',
       };
     } catch (error) {
       console.error('Cache stats error:', error);

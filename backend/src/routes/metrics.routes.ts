@@ -20,7 +20,7 @@ export async function metricsRoutes(fastify: FastifyInstance) {
         reply.type('text/plain; version=0.0.4; charset=utf-8');
         return metricsData;
       } catch (error) {
-        fastify.log.error('Error getting metrics:', error as Error);
+        fastify.log.error('Error getting metrics:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get metrics',
@@ -50,7 +50,7 @@ export async function metricsRoutes(fastify: FastifyInstance) {
           timestamp: new Date().toISOString(),
         };
       } catch (error) {
-        fastify.log.error('Error getting metrics JSON:', error as Error);
+        fastify.log.error('Error getting metrics JSON:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get metrics JSON',
@@ -84,11 +84,11 @@ export async function metricsRoutes(fastify: FastifyInstance) {
           metrics_count: metricsData.length,
         };
       } catch (error) {
-        fastify.log.error('Error checking metrics health:', error as Error);
+        fastify.log.error('Error checking metrics health:', error as any);
         return reply.status(500).send({
           status: 'unhealthy',
           timestamp: new Date().toISOString(),
-          error: (error as Error).message,
+          error: (error as any).message,
         });
       }
     },

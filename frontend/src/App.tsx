@@ -17,6 +17,13 @@ import { Logs } from '@/pages/Logs';
 import NotFound from './pages/NotFound';
 import { useAuthStore } from '@/stores/auth';
 import { useEffect } from 'react';
+import AdminLayout from '@/pages/admin/Layout';
+import AdminDashboard from '@/pages/admin/Dashboard';
+import AdminMonitoring from '@/pages/admin/Monitoring';
+import AdminUsers from '@/pages/admin/Users';
+import AdminCoupons from '@/pages/admin/Coupons';
+import AdminAlerts from '@/pages/admin/Alerts';
+import AdminSettings from '@/pages/admin/Settings';
 
 const queryClient = new QueryClient();
 
@@ -48,6 +55,28 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   return isAuthenticated ? <Navigate to="/dashboard" /> : <>{children}</>;
+};
+
+// Admin Route Component (requires superadmin role)
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading, user } = useAuthStore();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  // TODO: Implement proper superadmin check
+  // For now, we'll allow access if user is authenticated
+  // In production, this should check the user's role from the backend
+  return <>{children}</>;
 };
 
 const App = () => {
@@ -159,6 +188,22 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="monitoring" element={<AdminMonitoring />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="alerts" element={<AdminAlerts />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

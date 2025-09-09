@@ -7,7 +7,7 @@ export class CaptchaService {
     'https://www.google.com/recaptcha/api/siteverify';
 
   constructor() {
-    this.recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY || '';
+    this.recaptchaSecretKey = process.env['RECAPTCHA_SECRET_KEY'] || '';
   }
 
   /**
@@ -79,7 +79,7 @@ export class CaptchaService {
     success: boolean;
     error?: string;
   }> {
-    const hcaptchaSecretKey = process.env.HCAPTCHA_SECRET_KEY;
+    const hcaptchaSecretKey = process.env['HCAPTCHA_SECRET_KEY'];
 
     if (!hcaptchaSecretKey) {
       console.warn('HCAPTCHA_SECRET_KEY not configured, skipping verification');

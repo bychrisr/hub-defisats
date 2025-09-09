@@ -54,7 +54,7 @@ export class CSRFMiddleware {
       return;
     }
 
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       return; // Let auth middleware handle this
     }
@@ -91,7 +91,7 @@ export class CSRFMiddleware {
     request: FastifyRequest,
     _reply: FastifyReply
   ): Promise<string> {
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       throw new Error('User not authenticated');
     }

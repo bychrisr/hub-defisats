@@ -42,7 +42,7 @@ export async function alertsRoutes(fastify: FastifyInstance) {
           data: activeAlerts,
         };
       } catch (error) {
-        fastify.log.error('Error getting active alerts:', error as Error);
+        fastify.log.error('Error getting active alerts:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get active alerts',
@@ -108,7 +108,7 @@ export async function alertsRoutes(fastify: FastifyInstance) {
           data: paginatedAlerts,
         };
       } catch (error) {
-        fastify.log.error('Error getting alerts:', error as Error);
+        fastify.log.error('Error getting alerts:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get alerts',
@@ -165,7 +165,7 @@ export async function alertsRoutes(fastify: FastifyInstance) {
           message: 'Alert resolved successfully',
         };
       } catch (error) {
-        fastify.log.error('Error resolving alert:', error as Error);
+        fastify.log.error('Error resolving alert:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to resolve alert',
@@ -227,7 +227,7 @@ export async function alertsRoutes(fastify: FastifyInstance) {
           data: stats,
         };
       } catch (error) {
-        fastify.log.error('Error getting alert stats:', error as Error);
+        fastify.log.error('Error getting alert stats:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to get alert statistics',
@@ -275,7 +275,7 @@ export async function alertsRoutes(fastify: FastifyInstance) {
           cleaned,
         };
       } catch (error) {
-        fastify.log.error('Error cleaning up alerts:', error as Error);
+        fastify.log.error('Error cleaning up alerts:', error as any);
         return reply.status(500).send({
           error: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to clean up alerts',

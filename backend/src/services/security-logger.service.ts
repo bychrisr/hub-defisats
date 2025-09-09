@@ -71,8 +71,8 @@ export class SecurityLoggerService {
     await this.logSecurityEvent({
       type: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILED',
       email,
-      ipAddress,
-      userAgent,
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       details,
       timestamp: new Date().toISOString(),
       severity: success ? 'LOW' : 'MEDIUM',
@@ -92,8 +92,8 @@ export class SecurityLoggerService {
       type: 'LOGOUT',
       userId,
       email,
-      ipAddress,
-      userAgent,
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       timestamp: new Date().toISOString(),
       severity: 'LOW',
     });
@@ -112,8 +112,8 @@ export class SecurityLoggerService {
       type: 'PASSWORD_CHANGE',
       userId,
       email,
-      ipAddress,
-      userAgent,
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       timestamp: new Date().toISOString(),
       severity: 'HIGH',
     });
@@ -131,8 +131,8 @@ export class SecurityLoggerService {
     await this.logSecurityEvent({
       type: 'PASSWORD_RESET',
       email,
-      ipAddress,
-      userAgent,
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       details: { success },
       timestamp: new Date().toISOString(),
       severity: 'HIGH',
@@ -152,10 +152,10 @@ export class SecurityLoggerService {
   ): Promise<void> {
     await this.logSecurityEvent({
       type: 'SUSPICIOUS_ACTIVITY',
-      userId,
-      email,
-      ipAddress,
-      userAgent,
+      userId: userId || '',
+      email: email || '',
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       details: { activityType: type, ...details },
       timestamp: new Date().toISOString(),
       severity: 'HIGH',
@@ -176,8 +176,8 @@ export class SecurityLoggerService {
     await this.logSecurityEvent({
       type: 'ADMIN_ACTION',
       userId: adminUserId,
-      ipAddress,
-      userAgent,
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       details: { action, targetUserId, ...details },
       timestamp: new Date().toISOString(),
       severity: 'MEDIUM',
@@ -194,8 +194,8 @@ export class SecurityLoggerService {
   ): Promise<void> {
     await this.logSecurityEvent({
       type: 'RATE_LIMIT_EXCEEDED',
-      ipAddress,
-      userAgent,
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       details: { endpoint },
       timestamp: new Date().toISOString(),
       severity: 'MEDIUM',
@@ -213,9 +213,9 @@ export class SecurityLoggerService {
   ): Promise<void> {
     await this.logSecurityEvent({
       type: 'CSRF_VIOLATION',
-      userId,
-      ipAddress,
-      userAgent,
+      userId: userId || '',
+      ipAddress: ipAddress || '',
+      userAgent: userAgent || '',
       details,
       timestamp: new Date().toISOString(),
       severity: 'HIGH',

@@ -8,7 +8,9 @@ RUN apk add --no-cache \
     python3 \
     make \
     g++ \
-    libc6-compat
+    libc6-compat \
+    openssl \
+    openssl-dev
 
 # Copy package files first for better caching
 COPY package*.json ./
@@ -19,11 +21,11 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client with correct binary targets
 RUN npx prisma generate
 
 # Expose port
 EXPOSE 3010
 
 # Start development server
-CMD ["npm", "run", "dev:simple"]
+CMD ["npm", "run", "dev"]

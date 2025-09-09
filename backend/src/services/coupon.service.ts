@@ -292,7 +292,7 @@ export class CouponService {
         ...data,
         expires_at: data.expires_at
           ? new Date(data.expires_at)
-          : data.expires_at,
+          : data.expires_at || null,
       },
     });
 
@@ -334,7 +334,7 @@ export class CouponService {
       code,
       plan_type: planType,
       usage_limit: usageLimit,
-      expires_at: null, // No expiration for testers
+      expires_at: undefined, // No expiration for testers
     });
   }
 

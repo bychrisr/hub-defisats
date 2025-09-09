@@ -14,7 +14,7 @@ export class SecureStorageService {
   private algorithm = 'aes-256-gcm';
   private keyLength = 32;
   private ivLength = 16;
-  private tagLength = 16;
+  // private tagLength = 16; // Unused variable
 
   /**
    * Gerar chave de criptografia a partir da chave de ambiente
@@ -45,7 +45,7 @@ export class SecureStorageService {
       encrypted += cipher.final('hex');
 
       // Obter tag de autenticação
-      const tag = cipher.getAuthTag();
+      const tag = (cipher as any).getAuthTag();
 
       // Combinar IV + tag + dados criptografados
       const result =
@@ -70,14 +70,14 @@ export class SecureStorageService {
         throw new Error('Invalid encrypted data format');
       }
 
-      const iv = Buffer.from(parts[0], 'hex');
-      const tag = Buffer.from(parts[1], 'hex');
+      const iv = Buffer.from(parts[0] || '', 'hex');
+      const tag = Buffer.from(parts[1] || '', 'hex');
       const encrypted = parts[2];
 
       const decipher = createDecipheriv(this.algorithm, key, iv);
-      decipher.setAuthTag(tag);
+      (decipher as any).setAuthTag(tag);
 
-      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      let decrypted = decipher.update(encrypted || '', 'hex', 'utf8');
       decrypted += decipher.final('utf8');
 
       return JSON.parse(decrypted);
@@ -92,9 +92,8 @@ export class SecureStorageService {
    */
   async generateSecureHash(data: string): Promise<string> {
     const key = await this.generateKey();
-    const hash = createCipheriv('aes-256-cbc', key, Buffer.alloc(16))
-      .update(data, 'utf8', 'hex')
-      .final('hex');
+    const cipher = createCipheriv('aes-256-cbc', key, Buffer.alloc(16));
+    const hash = cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
     return hash;
   }
 

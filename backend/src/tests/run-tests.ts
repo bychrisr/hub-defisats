@@ -44,7 +44,7 @@ for (const testFile of testFiles) {
     passedTests++;
   } catch (error) {
     console.log(`❌ ${testFile} failed`);
-    console.log(error.stdout || error.message);
+    console.log((error as any).stdout || (error as Error).message);
     failedTests++;
   }
 

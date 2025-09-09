@@ -29,12 +29,12 @@ export class MonitoringService {
         tracesSampleRate: config.env.NODE_ENV === 'production' ? 0.1 : 1.0,
         profilesSampleRate: config.env.NODE_ENV === 'production' ? 0.1 : 1.0,
         integrations: [
-          new Sentry.Integrations.Http({ tracing: true }),
-          new Sentry.Integrations.Express({ app: undefined }),
-          new Sentry.Integrations.OnUncaughtException({
+          new (Sentry as any).Integrations.Http({ tracing: true }),
+          new (Sentry as any).Integrations.Express({ app: undefined }),
+          new (Sentry as any).Integrations.OnUncaughtException({
             exitEvenIfOtherHandlersAreRegistered: false,
           }),
-          new Sentry.Integrations.OnUnhandledRejection({ mode: 'warn' }),
+          new (Sentry as any).Integrations.OnUnhandledRejection({ mode: 'warn' }),
         ],
         beforeSend(event, _hint) {
           // Filtrar eventos sensíveis
@@ -130,7 +130,7 @@ export class MonitoringService {
       return operation();
     }
 
-    return Sentry.startTransaction(
+    return (Sentry as any).startTransaction(
       {
         name,
         op: 'function',
@@ -154,11 +154,11 @@ export class MonitoringService {
       return;
     }
 
-    Sentry.addBreadcrumb({
+    (Sentry as any).addBreadcrumb({
       message,
       category,
       level,
-      data,
+      data: data || {},
       timestamp: Date.now() / 1000,
     });
   }
@@ -171,10 +171,10 @@ export class MonitoringService {
       return;
     }
 
-    Sentry.setUser({
+    (Sentry as any).setUser({
       id: user.id,
-      email: user.email,
-      username: user.username,
+      email: user.email || '',
+      username: user.username || '',
     });
   }
 
@@ -224,7 +224,7 @@ export class MonitoringService {
       return;
     }
 
-    Sentry.metrics.increment(name, value, {
+    (Sentry as any).metrics?.increment(name, value, {
       unit,
       tags,
     });

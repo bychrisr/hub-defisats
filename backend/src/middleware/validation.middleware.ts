@@ -58,23 +58,23 @@ export async function validateRegisterInput(
   try {
     // Sanitizar entrada
     const sanitizedBody = {
-      email: Sanitizer.sanitizeEmail(request.body?.email || ''),
-      username: Sanitizer.sanitizeString(request.body?.username || ''),
-      password: Sanitizer.sanitizeString(request.body?.password || ''),
+      email: Sanitizer.sanitizeEmail((request.body as Record<string, unknown>)?.['email'] as string || ''),
+      username: Sanitizer.sanitizeString((request.body as Record<string, unknown>)?.['username'] as string || ''),
+      password: Sanitizer.sanitizeString((request.body as Record<string, unknown>)?.['password'] as string || ''),
       confirmPassword: Sanitizer.sanitizeString(
-        request.body?.confirmPassword || ''
+        (request.body as Record<string, unknown>)?.['confirmPassword'] as string || ''
       ),
       ln_markets_api_key: Sanitizer.sanitizeString(
-        request.body?.ln_markets_api_key || ''
+        (request.body as Record<string, unknown>)?.['ln_markets_api_key'] as string || ''
       ),
       ln_markets_api_secret: Sanitizer.sanitizeString(
-        request.body?.ln_markets_api_secret || ''
+        (request.body as Record<string, unknown>)?.['ln_markets_api_secret'] as string || ''
       ),
       ln_markets_passphrase: Sanitizer.sanitizeString(
-        request.body?.ln_markets_passphrase || ''
+        (request.body as Record<string, unknown>)?.['ln_markets_passphrase'] as string || ''
       ),
-      coupon_code: request.body?.coupon_code
-        ? Sanitizer.sanitizeString(request.body.coupon_code)
+      coupon_code: (request.body as Record<string, unknown>)?.['coupon_code']
+        ? Sanitizer.sanitizeString((request.body as Record<string, unknown>)['coupon_code'] as string)
         : undefined,
     };
 
@@ -88,7 +88,7 @@ export async function validateRegisterInput(
       const validationErrors = error.errors.map(err => ({
         field: err.path.join('.'),
         message: err.message,
-        value: err.input,
+        value: (err as any).input,
       }));
 
       return reply.status(400).send({
@@ -112,8 +112,8 @@ export async function validateLoginInput(
   try {
     // Sanitizar entrada
     const sanitizedBody = {
-      email: Sanitizer.sanitizeEmail(request.body?.email || ''),
-      password: Sanitizer.sanitizeString(request.body?.password || ''),
+      email: Sanitizer.sanitizeEmail((request.body as Record<string, unknown>)?.['email'] as string || ''),
+      password: Sanitizer.sanitizeString((request.body as Record<string, unknown>)?.['password'] as string || ''),
     };
 
     // Validar com Zod
@@ -126,7 +126,7 @@ export async function validateLoginInput(
       const validationErrors = error.errors.map(err => ({
         field: err.path.join('.'),
         message: err.message,
-        value: err.input,
+        value: (err as any).input,
       }));
 
       return reply.status(400).send({

@@ -3,17 +3,15 @@ import { AuthService } from '@/services/auth.service';
 import { PrismaClient } from '@prisma/client';
 // import { config } from '@/config/env';
 
-// Extend FastifyRequest to include user
-declare module 'fastify' {
-  interface FastifyRequest {
-    user?: {
-      id: string;
-      email: string;
-      username: string;
-      plan_type: string;
-    };
-  }
-}
+// Interface for authenticated requests
+// interface AuthenticatedRequest extends FastifyRequest {
+//   user?: {
+//     id: string;
+//     email: string;
+//     username: string;
+//     plan_type: string;
+//   };
+// }
 
 export async function authMiddleware(
   request: FastifyRequest,
@@ -34,13 +32,13 @@ export async function authMiddleware(
 
     // Initialize auth service
     const prisma = new PrismaClient();
-    const authService = new AuthService(prisma, fastify);
+    const authService = new AuthService(prisma, null as any);
 
     // Validate token and get user
     const user = await authService.validateSession(token);
 
     // Attach user to request
-    request.user = user;
+    (request as any).user = user;
 
     // Close Prisma connection
     await prisma.$disconnect();
@@ -69,13 +67,13 @@ export async function optionalAuthMiddleware(
 
     // Initialize auth service
     const prisma = new PrismaClient();
-    const authService = new AuthService(prisma, fastify);
+    const authService = new AuthService(prisma, null as any);
 
     // Validate token and get user
     const user = await authService.validateSession(token);
 
     // Attach user to request
-    request.user = user;
+    (request as any).user = user;
 
     // Close Prisma connection
     await prisma.$disconnect();
@@ -95,7 +93,7 @@ export async function adminAuthMiddleware(
     await authMiddleware(request, reply);
 
     // Check if user is admin
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
@@ -119,7 +117,12 @@ export async function adminAuthMiddleware(
     }
 
     // Attach admin info to request
-    request.user = { ...user, adminRole: adminUser.role };
+    (request as any).user = { 
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      plan_type: user.plan_type
+    };
   } catch (error) {
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
@@ -137,7 +140,7 @@ export async function superAdminAuthMiddleware(
     await authMiddleware(request, reply);
 
     // Check if user is superadmin
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
@@ -161,7 +164,12 @@ export async function superAdminAuthMiddleware(
     }
 
     // Attach admin info to request
-    request.user = { ...user, adminRole: adminUser.role };
+    (request as any).user = { 
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      plan_type: user.plan_type
+    };
   } catch (error) {
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
@@ -180,7 +188,7 @@ export async function planAuthMiddleware(requiredPlan: string) {
       await authMiddleware(request, reply);
 
       // Check if user has required plan
-      const user = request.user;
+      const user = (request as any).user;
       if (!user) {
         return reply.status(401).send({
           error: 'UNAUTHORIZED',

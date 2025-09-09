@@ -119,7 +119,7 @@ export class RateLimitMiddleware {
     maxAttempts: number = 10,
     windowMs: number = 3600000
   ): Promise<boolean> {
-    const user = request.user;
+    const user = (request as any).user;
     if (!user) {
       return true; // Se não há usuário, não aplicar rate limit por usuário
     }
@@ -221,11 +221,11 @@ export class RateLimitMiddleware {
     const realIP = request.headers['x-real-ip'];
 
     if (forwarded) {
-      return Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0];
+      return Array.isArray(forwarded) ? (forwarded[0] as string) : ((forwarded as string) || '').split(',')[0]?.trim() || '';
     }
 
     if (realIP) {
-      return Array.isArray(realIP) ? realIP[0] : realIP;
+      return Array.isArray(realIP) ? (realIP[0] as string) : (realIP as string);
     }
 
     return request.ip || 'unknown';
