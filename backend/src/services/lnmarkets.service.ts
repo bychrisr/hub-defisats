@@ -34,7 +34,7 @@ export class LNMarketsService {
     this.credentials = credentials;
 
     this.client = axios.create({
-      baseURL: 'https://api.lnmarkets.com/v2',
+      baseURL: 'https://api.lnmarkets.com',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -156,7 +156,8 @@ export class LNMarketsService {
    */
   async getMarginInfo(): Promise<MarginInfo> {
     try {
-      const response = await this.client.get('/futures/user/margin');
+      // Use the correct endpoint for user information
+      const response = await this.client.get('/v2/user');
       return response.data;
     } catch (error) {
       console.error('Error fetching margin info:', error);
@@ -169,7 +170,7 @@ export class LNMarketsService {
    */
   async getPositions(): Promise<Position[]> {
     try {
-      const response = await this.client.get('/futures/user/positions');
+      const response = await this.client.get('/v2/futures/positions');
       return response.data || [];
     } catch (error) {
       console.error('Error fetching positions:', error);
@@ -182,7 +183,7 @@ export class LNMarketsService {
    */
   async getRunningTrades(): Promise<any[]> {
     try {
-      const response = await this.client.get('/futures/trades', {
+      const response = await this.client.get('/v2/futures/trades', {
         params: { type: 'running' }
       });
       return response.data || [];
@@ -197,7 +198,8 @@ export class LNMarketsService {
    */
   async getBalance(): Promise<any> {
     try {
-      const response = await this.client.get('/futures/user/balance');
+      // Use the correct endpoint for user information
+      const response = await this.client.get('/v2/user');
       return response.data;
     } catch (error) {
       console.error('Error fetching balance:', error);
@@ -221,7 +223,7 @@ export class LNMarketsService {
       });
 
       // Try multiple endpoints to validate credentials
-      const endpoints = ['/futures/user/balance', '/futures/user/margin', '/futures/user/positions'];
+      const endpoints = ['/v2/user', '/v2/futures/positions', '/v2/futures/trades'];
 
       for (const endpoint of endpoints) {
         try {

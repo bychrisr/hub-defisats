@@ -59,10 +59,11 @@ const testKeys = async (apiKey: string, apiSecret: string, passphrase: string) =
 ```
 
 **Critérios de aceitação técnica:**  
-- [ ] Teste unitário: `should return 401 if keys are invalid`  
-- [ ] Teste de contrato: Mock de 401 → retorna `INVALID_LN_MARKETS_KEYS`  
-- [ ] Teste de contrato: Mock de 200 → retorna `success: true`  
-- [ ] Fallback: Se API down, retorna erro controlado (não crasha app)
+- [x] Teste unitário: `should return 401 if keys are invalid`  
+- [x] Teste de contrato: Mock de 401 → retorna `INVALID_LN_MARKETS_KEYS`  
+- [x] Teste de contrato: Mock de 200 → retorna `success: true`  
+- [x] Fallback: Se API down, retorna erro controlado (não crasha app)
+- [x] **IMPLEMENTADO**: Validação LN Markets funcionando 100% com credenciais sandbox
 
 ---
 
@@ -94,9 +95,10 @@ export const decrypt = async (encryptedText: string): Promise<string> => {
 ```
 
 **Critérios de aceitação técnica:**  
-- [ ] Teste unitário: `should encrypt and decrypt correctly`  
-- [ ] Teste de integração: Registrar usuário → verificar no banco → keys em `bytea`  
-- [ ] Validação Zod: `ln_markets_api_key: z.string().min(16)`  
+- [x] Teste unitário: `should encrypt and decrypt correctly`  
+- [x] Teste de integração: Registrar usuário → verificar no banco → keys em `bytea`  
+- [x] Validação Zod: `ln_markets_api_key: z.string().min(16)`
+- [x] **IMPLEMENTADO**: Criptografia funcionando 100% com libsodium-wrappers  
 
 ---
 
@@ -109,9 +111,10 @@ export const decrypt = async (encryptedText: string): Promise<string> => {
 4. Incrementa `used_count`
 
 **Critérios de aceitação técnica:**  
-- [ ] Teste unitário: `should apply ALPHATESTER coupon and set plan_type to free`  
-- [ ] Teste de contrato: Registrar com cupom → GET `/api/users/me` → `plan_type = 'free'`  
-- [ ] Rate limiting: 3 tentativas/hora por IP (Redis)
+- [x] Teste unitário: `should apply ALPHATESTER coupon and set plan_type to free`  
+- [x] Teste de contrato: Registrar com cupom → GET `/api/users/me` → `plan_type = 'free'`  
+- [x] Rate limiting: 3 tentativas/hora por IP (Redis)
+- [x] **IMPLEMENTADO**: Cupom ALPHATESTER funcionando 100% com relacionamento UserCoupon
 
 ---
 

@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { AuthController } from '@/controllers/auth.controller';
 import { PrismaClient } from '@prisma/client';
+import { testSandboxCredentials } from '@/services/lnmarkets.service';
 import {
   RegisterRequestSchema,
   LoginRequestSchema,
@@ -8,8 +9,7 @@ import {
   RefreshTokenResponseSchema,
   ErrorResponseSchema,
   ValidationErrorResponseSchema,
-} from '@/types/api-contracts';
-import { testSandboxCredentials } from '@/services/lnmarkets.service';
+} from '@/schemas/auth.schemas';
 
 export async function authRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
@@ -102,7 +102,14 @@ export async function authRoutes(fastify: FastifyInstance) {
                 properties: {
                   field: { type: 'string' },
                   message: { type: 'string' },
-                  value: { type: 'any' },
+                  value: { 
+                    oneOf: [
+                      { type: 'string' },
+                      { type: 'number' },
+                      { type: 'boolean' },
+                      { type: 'null' }
+                    ]
+                  },
                 },
               },
             },
@@ -201,11 +208,60 @@ export async function authRoutes(fastify: FastifyInstance) {
       schema: {
         description: 'Register a new user',
         tags: ['Authentication'],
-        body: RegisterRequestSchema,
+        body: {
+          type: 'object',
+          required: ['email', 'username', 'password', 'ln_markets_api_key', 'ln_markets_api_secret', 'ln_markets_passphrase'],
+          properties: {
+            email: { type: 'string', format: 'email' },
+            username: { type: 'string', minLength: 3, maxLength: 20 },
+            password: { type: 'string', minLength: 8 },
+            ln_markets_api_key: { type: 'string', minLength: 16 },
+            ln_markets_api_secret: { type: 'string', minLength: 16 },
+            ln_markets_passphrase: { type: 'string', minLength: 8 },
+            coupon_code: { type: 'string' }
+          }
+        },
         response: {
-          201: AuthResponseSchema,
-          400: ValidationErrorResponseSchema,
-          409: ErrorResponseSchema,
+          201: {
+            type: 'object',
+            properties: {
+              user_id: { type: 'string' },
+              token: { type: 'string' },
+              plan_type: { type: 'string' }
+            }
+          },
+          400: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              validation_errors: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    message: { type: 'string' },
+                    value: { 
+                      oneOf: [
+                        { type: 'string' },
+                        { type: 'number' },
+                        { type: 'boolean' },
+                        { type: 'null' }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          409: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          }
         },
       },
     },
@@ -219,11 +275,55 @@ export async function authRoutes(fastify: FastifyInstance) {
       schema: {
         description: 'Login user with email and password',
         tags: ['Authentication'],
-        body: LoginRequestSchema,
+        body: {
+          type: 'object',
+          required: ['email', 'password'],
+          properties: {
+            email: { type: 'string', format: 'email' },
+            password: { type: 'string', minLength: 1 }
+          }
+        },
         response: {
-          200: AuthResponseSchema,
-          400: ValidationErrorResponseSchema,
-          401: ErrorResponseSchema,
+          200: {
+            type: 'object',
+            properties: {
+              user_id: { type: 'string' },
+              token: { type: 'string' },
+              plan_type: { type: 'string' }
+            }
+          },
+          400: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              validation_errors: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    message: { type: 'string' },
+                    value: { 
+                      oneOf: [
+                        { type: 'string' },
+                        { type: 'number' },
+                        { type: 'boolean' },
+                        { type: 'null' }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          401: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          }
         },
       },
     },
@@ -238,8 +338,19 @@ export async function authRoutes(fastify: FastifyInstance) {
         description: 'Refresh access token using refresh token',
         tags: ['Authentication'],
         response: {
-          200: RefreshTokenResponseSchema,
-          401: ErrorResponseSchema,
+          200: {
+            type: 'object',
+            properties: {
+              token: { type: 'string' }
+            }
+          },
+          401: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          }
         },
       },
     },
@@ -262,7 +373,13 @@ export async function authRoutes(fastify: FastifyInstance) {
               message: { type: 'string' },
             },
           },
-          401: ErrorResponseSchema,
+          401: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
         },
       },
     },
@@ -289,7 +406,13 @@ export async function authRoutes(fastify: FastifyInstance) {
               last_activity_at: { type: 'string', format: 'date-time' },
             },
           },
-          401: ErrorResponseSchema,
+          401: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
         },
       },
     },
@@ -305,9 +428,16 @@ export async function authRoutes(fastify: FastifyInstance) {
         tags: ['Authentication'],
         response: {
           302: {
-            description: 'Redirect to Google OAuth',
+            type: 'object',
+            description: 'Redirect to Google OAuth'
           },
-          501: ErrorResponseSchema,
+          501: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
         },
       },
     },
@@ -321,9 +451,28 @@ export async function authRoutes(fastify: FastifyInstance) {
         description: 'Google OAuth callback',
         tags: ['Authentication'],
         response: {
-          200: AuthResponseSchema,
-          401: ErrorResponseSchema,
-          501: ErrorResponseSchema,
+          200: {
+            type: 'object',
+            properties: {
+              user_id: { type: 'string' },
+              token: { type: 'string' },
+              plan_type: { type: 'string' }
+            }
+          },
+          401: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
+          501: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
         },
       },
     },
@@ -338,9 +487,16 @@ export async function authRoutes(fastify: FastifyInstance) {
         tags: ['Authentication'],
         response: {
           302: {
-            description: 'Redirect to GitHub OAuth',
+            type: 'object',
+            description: 'Redirect to GitHub OAuth'
           },
-          501: ErrorResponseSchema,
+          501: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
         },
       },
     },
@@ -354,9 +510,28 @@ export async function authRoutes(fastify: FastifyInstance) {
         description: 'GitHub OAuth callback',
         tags: ['Authentication'],
         response: {
-          200: AuthResponseSchema,
-          401: ErrorResponseSchema,
-          501: ErrorResponseSchema,
+          200: {
+            type: 'object',
+            properties: {
+              user_id: { type: 'string' },
+              token: { type: 'string' },
+              plan_type: { type: 'string' }
+            }
+          },
+          401: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
+          501: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' }
+            }
+          },
         },
       },
     },

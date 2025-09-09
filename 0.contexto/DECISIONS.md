@@ -2,6 +2,85 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats.
 
+## ADR-013: Schema Validation Fix - Fastify + Zod
+
+**Data**: 2025-01-09  
+**Status**: Aceito  
+**Contexto**: Resolução de problemas críticos de schema validation que causavam "socket hang up"
+
+### Decisão
+- **Validação de Schema**: Usar JSON Schema válidos no Fastify em vez de schemas Zod diretos
+- **Validação Manual**: Implementar validação Zod manual no controller
+- **Schemas Separados**: Criar arquivo `src/schemas/auth.schemas.ts` com JSON Schema válidos
+- **Logs Detalhados**: Adicionar logs extensivos em desenvolvimento para diagnóstico
+
+### Justificativa
+- **Problema**: Schemas Zod com `z.any()` causavam erros de serialização no Fastify
+- **Solução**: JSON Schema é nativo do Fastify e mais estável
+- **Flexibilidade**: Validação Zod manual permite mais controle e logs detalhados
+- **Debugging**: Logs extensivos facilitam identificação de problemas
+
+### Implementação
+```typescript
+// src/schemas/auth.schemas.ts
+export const RegisterRequestSchema = {
+  type: 'object',
+  required: ['email', 'username', 'password', 'ln_markets_api_key', 'ln_markets_api_secret', 'ln_markets_passphrase'],
+  properties: {
+    email: { type: 'string', format: 'email' },
+    // ... outros campos
+  },
+  additionalProperties: false
+};
+
+// src/controllers/auth.controller.ts
+const RegisterRequestZodSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  // ... validação manual
+});
+```
+
+### Consequências
+- ✅ **Positivas**: Servidor estável, validação robusta, logs detalhados
+- ⚠️ **Negativas**: Duplicação de schemas (JSON + Zod)
+- 🔄 **Reversível**: Sim, mas requer refatoração
+
+---
+
+## ADR-014: Database Schema Cleanup
+
+**Data**: 2025-01-09  
+**Status**: Aceito  
+**Contexto**: Limpeza de schema Prisma e correção de relacionamentos
+
+### Decisão
+- **Relacionamentos**: Usar tabela `UserCoupon` em vez de campo `used_coupon_id`
+- **Campos**: Remover campos inexistentes como `ln_markets_passphrase`
+- **ENUMs**: Criar todos os tipos ENUM necessários no PostgreSQL
+- **Permissões**: Configurar permissões corretas para usuário `hubdefisats`
+
+### Justificativa
+- **Problema**: Campos inexistentes causavam erros de validação
+- **Relacionamentos**: Tabela de junção é mais flexível e normalizada
+- **ENUMs**: Necessários para tipos de dados do Prisma
+- **Permissões**: Essenciais para operações do banco
+
+### Implementação
+```sql
+-- Criar ENUMs
+CREATE TYPE "PlanType" AS ENUM ('free', 'basic', 'advanced', 'pro');
+
+-- Configurar permissões
+GRANT ALL PRIVILEGES ON SCHEMA public TO hubdefisats;
+```
+
+### Consequências
+- ✅ **Positivas**: Schema limpo, relacionamentos corretos, permissões adequadas
+- ⚠️ **Negativas**: Requer migração de dados existentes
+- 🔄 **Reversível**: Sim, com backup
+
+---
+
 ## ADR-001: Stack Tecnológica Principal
 
 **Data**: 2024-01-XX  

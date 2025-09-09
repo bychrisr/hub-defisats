@@ -23,16 +23,30 @@ export class AuthService {
    * Register a new user
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const { email, password, ln_markets_api_key, ln_markets_api_secret, coupon_code } = data;
+    console.log('🔐 Starting user registration process...');
+    console.log('📋 Registration data received:', {
+      email: data.email,
+      username: data.username,
+      hasPassword: !!data.password,
+      hasApiKey: !!data.ln_markets_api_key,
+      hasApiSecret: !!data.ln_markets_api_secret,
+      hasPassphrase: !!data.ln_markets_passphrase,
+      couponCode: data.coupon_code
+    });
 
+    const { email, username, password, ln_markets_api_key, ln_markets_api_secret, coupon_code } = data;
+
+    console.log('🔍 Checking if user already exists...');
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
+      console.log('❌ User already exists with email:', email);
       throw new Error('User already exists with this email');
     }
+    console.log('✅ User does not exist, proceeding with registration');
 
     // Validate LN Markets credentials
     try {
@@ -57,50 +71,81 @@ export class AuthService {
       console.log('✅ LN Markets credentials validation successful');
     } catch (error) {
       console.error('❌ LN Markets validation error:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
       // Re-throw the error to be handled by the controller
       throw error;
     }
 
     // Validate coupon if provided
+    console.log('🎫 Validating coupon if provided...');
     let planType = 'free' as const;
     if (coupon_code) {
+      console.log('🎫 Coupon code provided:', coupon_code);
       const coupon = await this.validateCoupon(coupon_code);
       planType = coupon.plan_type;
+      console.log('✅ Coupon validated, plan type:', planType);
+    } else {
+      console.log('ℹ️ No coupon code provided, using default plan: free');
     }
 
+    console.log('🔐 Hashing password...');
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
+    console.log('✅ Password hashed successfully');
 
+    console.log('🔐 Encrypting LN Markets credentials...');
     // Encrypt LN Markets keys
     const encryptedApiKey = this.encryptData(ln_markets_api_key);
     const encryptedApiSecret = this.encryptData(ln_markets_api_secret);
-    const encryptedPassphrase = this.encryptData(data.ln_markets_passphrase || '');
+    console.log('✅ LN Markets credentials encrypted successfully');
 
+    console.log('👤 Creating user in database...');
     // Create user
     const user = await this.prisma.user.create({
       data: {
         email,
+        username,
         password_hash: passwordHash,
         ln_markets_api_key: encryptedApiKey,
         ln_markets_api_secret: encryptedApiSecret,
-        ln_markets_passphrase: encryptedPassphrase,
         plan_type: planType,
-        used_coupon_id: coupon_code ? (await this.prisma.coupon.findUnique({ where: { code: coupon_code } }))?.id : null,
       },
     });
+    console.log('✅ User created successfully with ID:', user.id);
 
     // Update coupon usage if used
     if (coupon_code) {
-      await this.updateCouponUsage(coupon_code);
+      console.log('🎫 Updating coupon usage...');
+      const coupon = await this.prisma.coupon.findUnique({ where: { code: coupon_code } });
+      if (coupon) {
+        // Create UserCoupon relationship
+        await this.prisma.userCoupon.create({
+          data: {
+            user_id: user.id,
+            coupon_id: coupon.id,
+          },
+        });
+        // Update coupon usage count
+        await this.updateCouponUsage(coupon_code);
+      }
+      console.log('✅ Coupon usage updated');
     }
 
+    console.log('🎫 Generating JWT tokens...');
     // Generate tokens
     const token = this.generateAccessToken(user);
     const refreshToken = this.generateRefreshToken(user);
+    console.log('✅ JWT tokens generated successfully');
 
+    console.log('💾 Storing refresh token in database...');
     // Store refresh token in database
     await this.storeRefreshToken(user.id, refreshToken);
+    console.log('✅ Refresh token stored successfully');
 
+    console.log('🎉 User registration completed successfully!');
     return {
       user_id: user.id,
       token,

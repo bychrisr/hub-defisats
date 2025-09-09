@@ -4,9 +4,9 @@ async function testCredentialsOnly() {
   console.log('🧪 Testing LN Markets credentials validation only...\n');
 
   const sandboxCredentials = {
-    apiKey: 'hC8B4VoDm1X6i2L3qLrdUopNggl3yaJh6S3Zz1tPCoE=',
-    apiSecret: 'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
-    passphrase: 'a6c1bh56jc33',
+    apiKey: 'Nh8ZdEZtez7ZueIM7wMChr7M+5ohB5MLw3vrXOMUe2s=',
+    apiSecret: 'J/OIBsEO/PYNi0mTWGk3gA3jZohtojMKNoYKcdjrlu4LxLo/Xk+vemAq/Z47NWlzrcYwBVLgWaEHMvITHJsMuA==',
+    passphrase: 'be6931d8gfdi6',
   };
 
   console.log('📋 Testing credentials:');
@@ -35,11 +35,22 @@ async function testCredentialsOnly() {
     const path = '/v2/user';
     const params = '';
 
+    console.log('🔧 Generating signature...');
+    console.log(`   Timestamp: ${timestamp}`);
+    console.log(`   Method: ${method}`);
+    console.log(`   Path: ${path}`);
+    console.log(`   Params: "${params}"`);
+
     // Create signature (same logic as in the service)
     const crypto = require('crypto');
+    const prehashString = `${timestamp}${method}${path}${params}`;
+    console.log(`   Prehash string: "${prehashString}"`);
+
     const signature = crypto.createHmac('sha256', sandboxCredentials.apiSecret)
-      .update(`${timestamp}${method}${path}${params}`)
+      .update(prehashString)
       .digest('base64');
+
+    console.log(`   Generated signature: ${signature}`);
 
     const headers = {
       'LNM-ACCESS-KEY': sandboxCredentials.apiKey,
@@ -48,8 +59,14 @@ async function testCredentialsOnly() {
       'LNM-ACCESS-TIMESTAMP': timestamp.toString(),
     };
 
+    console.log('📡 Headers being sent:');
+    console.log(`   LNM-ACCESS-KEY: ${headers['LNM-ACCESS-KEY']}`);
+    console.log(`   LNM-ACCESS-SIGNATURE: ${headers['LNM-ACCESS-SIGNATURE']}`);
+    console.log(`   LNM-ACCESS-PASSPHRASE: ${headers['LNM-ACCESS-PASSPHRASE']}`);
+    console.log(`   LNM-ACCESS-TIMESTAMP: ${headers['LNM-ACCESS-TIMESTAMP']}`);
+
     console.log('📡 Making authenticated request...');
-    const authResponse = await axios.get('https://api.lnmarkets.com/v2/futures/user/balance', {
+    const authResponse = await axios.get('https://api.lnmarkets.com/v2/user', {
       headers,
       timeout: 10000
     });

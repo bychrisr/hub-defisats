@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS "User" (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     email TEXT UNIQUE NOT NULL,
+    username TEXT UNIQUE NOT NULL,
     password_hash TEXT,
     social_provider TEXT,
     social_id TEXT,

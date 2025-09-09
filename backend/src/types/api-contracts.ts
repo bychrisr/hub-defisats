@@ -16,6 +16,7 @@ import {
 
 export const RegisterRequestSchema = z.object({
   email: z.string().email('Invalid email format'),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be at most 20 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   ln_markets_api_key: z.string().min(16, 'LN Markets API key must be at least 16 characters'),
   ln_markets_api_secret: z.string().min(16, 'LN Markets API secret must be at least 16 characters'),
@@ -343,7 +344,7 @@ export const ErrorResponseSchema = z.object({
 export const ValidationErrorSchema = z.object({
   field: z.string(),
   message: z.string(),
-  value: z.any().optional(),
+  value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
 });
 
 export const ValidationErrorResponseSchema = ErrorResponseSchema.extend({

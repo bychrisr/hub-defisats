@@ -5,9 +5,9 @@ Este documento registra tarefas que dependem de ações externas ao desenvolvime
 ## 🔑 Integrações e APIs
 
 ### LN Markets API
-- [ ] **Configurar conta sandbox** para testes de desenvolvimento
+- [x] **Configurar conta sandbox** para testes de desenvolvimento ✅ RESOLVIDO
 - [ ] **Obter credenciais de produção** para deploy inicial
-- [ ] **Validar rate limits** e documentar limites por endpoint
+- [x] **Validar rate limits** e documentar limites por endpoint ✅ RESOLVIDO
 - [ ] **Testar webhooks** (se disponíveis) para notificações em tempo real
 
 ### Lightning Network
@@ -60,7 +60,7 @@ Este documento registra tarefas que dependem de ações externas ao desenvolvime
 ## 🧪 Testes e Qualidade
 
 ### Dados de Teste
-- [ ] **Criar usuários de teste** com keys LN Markets válidas
+- [x] **Criar usuários de teste** com keys LN Markets válidas ✅ RESOLVIDO
 - [ ] **Simular cenários** de liquidação para testar Margin Guard
 - [ ] **Criar dados históricos** para backtests
 - [ ] **Definir casos de teste** para cada automação
@@ -128,10 +128,10 @@ Este documento registra tarefas que dependem de ações externas ao desenvolvime
 - ✅ **Scripts de Setup**: Automação completa para desenvolvimento
 
 ### Para MVP (Testers)
-- [ ] Conta sandbox LN Markets
+- [x] Conta sandbox LN Markets ✅ RESOLVIDO
 - [ ] Bot Telegram configurado
 - [ ] Domínio e SSL básico
-- [ ] Cupons de teste criados
+- [x] Cupons de teste criados ✅ RESOLVIDO
 
 ### Para Comercialização
 - [ ] Conta produção LN Markets

@@ -18,6 +18,8 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "worker:margin-monitor": "tsx src/workers/margin-monitor.ts",
+    "kill-zombies": "pkill -f 'node.*fastify' || true && pkill -f 'npm.*dev' || true && pkill -f 'tsx.*index' || true && pkill -f 'postgres' || true && pkill -f 'redis-server' || true",
+    "reset-db": "npm run kill-zombies && docker-compose down && docker-compose up -d && npx prisma migrate reset --force && npx prisma db push",
     "worker:automation-executor": "tsx src/workers/automation-executor.ts",
     "worker:notification": "tsx src/workers/notification.ts",
     "worker:payment-validator": "tsx src/workers/payment-validator.ts",

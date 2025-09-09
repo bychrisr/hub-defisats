@@ -5,24 +5,26 @@ async function testRegistration() {
 
   const registrationData = {
     email: `test-${Date.now()}@hubdefisats.com`,
+    username: `test${Date.now().toString().slice(-8)}`, // Max 12 chars
     password: 'TestPassword123!',
-    ln_markets_api_key: 'hC8B4VoDm1X6i2L3qLrdUopNggl3yaJh6S3Zz1tPCoE=',
-    ln_markets_api_secret: 'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
-    ln_markets_passphrase: 'a6c1bh56jc33',
+    ln_markets_api_key: 'Nh8ZdEZtez7ZueIM7wMChr7M+5ohB5MLw3vrXOMUe2s=',
+    ln_markets_api_secret: 'J/OIBsEO/PYNi0mTWGk3gA3jZohtojMKNoYKcdjrlu4LxLo/Xk+vemAq/Z47NWlzrcYwBVLgWaEHMvITHJsMuA==',
+    ln_markets_passphrase: 'be6931d8gfdi6',
     coupon_code: 'ALPHATESTER'
   };
 
   console.log('📋 Registration data:');
   console.log(`   Email: ${registrationData.email}`);
+  console.log(`   Username: ${registrationData.username}`);
   console.log(`   API Key: ${registrationData.ln_markets_api_key.substring(0, 20)}...`);
   console.log(`   API Secret: ${registrationData.ln_markets_api_secret.substring(0, 20)}...`);
   console.log(`   Passphrase: ${registrationData.ln_markets_passphrase}`);
   console.log(`   Coupon: ${registrationData.coupon_code}\n`);
 
   try {
-    console.log('🚀 Sending registration request to http://localhost:3010/api/auth/register...');
+    console.log('🚀 Sending registration request to http://127.0.0.1:3010/api/auth/register...');
 
-    const response = await axios.post('http://localhost:3010/api/auth/register', registrationData, {
+    const response = await axios.post('http://127.0.0.1:3010/api/auth/register', registrationData, {
       headers: {
         'Content-Type': 'application/json'
       },

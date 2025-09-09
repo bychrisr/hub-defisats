@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -64,6 +65,7 @@ enum AdminRole {
 model User {
   id                     String      @id @default(uuid())
   email                  String      @unique
+  username               String      @unique
   password_hash          String?
   social_provider        SocialProvider?
   social_id              String?
@@ -98,8 +100,6 @@ model User {
   backtest_reports       BacktestReport[]
   admin_user             AdminUser?
   user_coupons           UserCoupon[] @relation("UserCouponRelation")
-  used_coupon            Coupon?       @relation("UserUsedCoupon", fields: [used_coupon_id], references: [id])
-  used_coupon_id         String?
 
   @@index([email])
   @@index([email_verification_token])
@@ -188,7 +188,6 @@ model Coupon {
   created_at  DateTime    @default(now())
   
   user_coupons UserCoupon[] @relation("CouponUserRelation")
-  users_used   User[]       @relation("UserUsedCoupon")
 }
 
 model SystemAlert {

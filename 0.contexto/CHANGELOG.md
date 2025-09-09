@@ -7,6 +7,18 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+### Fixed
+- **Schema Validation + Port + Hangup Issues**: Resolvidos problemas críticos de infraestrutura
+  - Corrigido erro "socket hang up" - servidor agora responde corretamente
+  - Corrigido schema de validação Fastify + Zod com JSON Schema válidos
+  - Fixada porta 3010 em todos os arquivos de configuração
+  - Resolvido problema de permissões no banco PostgreSQL
+  - Corrigido schema Prisma removendo campos inexistentes
+  - Criados tipos ENUM necessários no PostgreSQL (PlanType)
+  - Regenerado Prisma Client com schema correto
+  - Implementado relacionamento UserCoupon correto
+  - Adicionados logs extensivos para diagnóstico em desenvolvimento
+
 ### Added
 - **Margin Monitor Worker Completo**: Monitoramento de margem a cada 5 segundos
   - Implementação completa do worker `margin-monitor.ts`
