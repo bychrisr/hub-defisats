@@ -1,12 +1,17 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService } from '@/services/auth.service';
 import { PrismaClient } from '@prisma/client';
-import { config } from '@/config/env';
+// import { config } from '@/config/env';
 
 // Extend FastifyRequest to include user
 declare module 'fastify' {
   interface FastifyRequest {
-    user?: any;
+    user?: {
+      id: string;
+      email: string;
+      username: string;
+      plan_type: string;
+    };
   }
 }
 
@@ -17,7 +22,7 @@ export async function authMiddleware(
   try {
     // Get token from Authorization header
     const authHeader = request.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
@@ -49,12 +54,12 @@ export async function authMiddleware(
 
 export async function optionalAuthMiddleware(
   request: FastifyRequest,
-  reply: FastifyReply
+  _reply: FastifyReply
 ): Promise<void> {
   try {
     // Get token from Authorization header
     const authHeader = request.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       // No token provided, continue without authentication
       return;
@@ -166,7 +171,10 @@ export async function superAdminAuthMiddleware(
 }
 
 export async function planAuthMiddleware(requiredPlan: string) {
-  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  return async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> => {
     try {
       // First, authenticate the user
       await authMiddleware(request, reply);
@@ -188,8 +196,10 @@ export async function planAuthMiddleware(requiredPlan: string) {
         pro: 3,
       };
 
-      const userPlanLevel = planHierarchy[user.plan_type as keyof typeof planHierarchy] || 0;
-      const requiredPlanLevel = planHierarchy[requiredPlan as keyof typeof planHierarchy] || 0;
+      const userPlanLevel =
+        planHierarchy[user.plan_type as keyof typeof planHierarchy] || 0;
+      const requiredPlanLevel =
+        planHierarchy[requiredPlan as keyof typeof planHierarchy] || 0;
 
       if (userPlanLevel < requiredPlanLevel) {
         return reply.status(403).send({
@@ -202,7 +212,8 @@ export async function planAuthMiddleware(requiredPlan: string) {
     } catch (error) {
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
-        message: error instanceof Error ? error.message : 'Authentication failed',
+        message:
+          error instanceof Error ? error.message : 'Authentication failed',
       });
     }
   };

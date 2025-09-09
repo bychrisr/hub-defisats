@@ -1,11 +1,18 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { Worker, Queue } from 'bullmq';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
+// import { Worker, Queue } from 'bullmq';
 import { createLNMarketsService } from '../services/lnmarkets.service';
 import {
   addUserCredentials,
   removeUserCredentials,
   startPeriodicMonitoring,
-  stopPeriodicMonitoring
+  stopPeriodicMonitoring,
 } from '../workers/margin-monitor';
 
 // Mock dependencies
@@ -14,8 +21,8 @@ jest.mock('../services/lnmarkets.service');
 jest.mock('ioredis');
 
 const mockLNMarketsService = {
-  getRunningTrades: jest.fn() as any,
-  closePosition: jest.fn() as any
+  getRunningTrades: jest.fn() as jest.MockedFunction<any>,
+  closePosition: jest.fn() as jest.MockedFunction<any>,
 };
 
 (createLNMarketsService as jest.Mock).mockReturnValue(mockLNMarketsService);
@@ -106,7 +113,7 @@ describe('Margin Monitor Worker', () => {
       const service = createLNMarketsService({
         apiKey: 'test',
         apiSecret: 'test',
-        passphrase: 'test'
+        passphrase: 'test',
       });
 
       await service.getRunningTrades();
@@ -115,15 +122,19 @@ describe('Margin Monitor Worker', () => {
     });
 
     it('should handle API errors gracefully', async () => {
-      mockLNMarketsService.getRunningTrades.mockRejectedValue(new Error('API Error'));
+      mockLNMarketsService.getRunningTrades.mockRejectedValue(
+        new Error('API Error')
+      );
 
       const service = createLNMarketsService({
         apiKey: 'test',
         apiSecret: 'test',
-        passphrase: 'test'
+        passphrase: 'test',
       });
 
-      await expect(service.getRunningTrades()).rejects.toThrow('Failed to fetch running trades');
+      await expect(service.getRunningTrades()).rejects.toThrow(
+        'Failed to fetch running trades'
+      );
     });
   });
 
@@ -134,7 +145,7 @@ describe('Margin Monitor Worker', () => {
       const service = createLNMarketsService({
         apiKey: 'test',
         apiSecret: 'test',
-        passphrase: 'test'
+        passphrase: 'test',
       });
 
       const trades = await service.getRunningTrades();
@@ -148,14 +159,14 @@ describe('Margin Monitor Worker', () => {
           id: 'trade1',
           maintenance_margin: 1000,
           margin: 5000,
-          pl: 2000
+          pl: 2000,
         },
         {
           id: 'trade2',
           maintenance_margin: 950,
           margin: 1000,
-          pl: -50
-        }
+          pl: -50,
+        },
       ];
 
       mockLNMarketsService.getRunningTrades.mockResolvedValue(mockTrades);
@@ -163,7 +174,7 @@ describe('Margin Monitor Worker', () => {
       const service = createLNMarketsService({
         apiKey: 'test',
         apiSecret: 'test',
-        passphrase: 'test'
+        passphrase: 'test',
       });
 
       const trades = await service.getRunningTrades();
@@ -177,8 +188,8 @@ describe('Margin Monitor Worker', () => {
       const error = {
         response: {
           status: 401,
-          data: { error: 'Unauthorized' }
-        }
+          data: { error: 'Unauthorized' },
+        },
       };
 
       mockLNMarketsService.getRunningTrades.mockRejectedValue(error);
@@ -186,22 +197,26 @@ describe('Margin Monitor Worker', () => {
       const service = createLNMarketsService({
         apiKey: 'invalid',
         apiSecret: 'invalid',
-        passphrase: 'invalid'
+        passphrase: 'invalid',
       });
 
       await expect(service.getRunningTrades()).rejects.toThrow();
     });
 
     it('should handle network timeout', async () => {
-      mockLNMarketsService.getRunningTrades.mockRejectedValue(new Error('Timeout'));
+      mockLNMarketsService.getRunningTrades.mockRejectedValue(
+        new Error('Timeout')
+      );
 
       const service = createLNMarketsService({
         apiKey: 'test',
         apiSecret: 'test',
-        passphrase: 'test'
+        passphrase: 'test',
       });
 
-      await expect(service.getRunningTrades()).rejects.toThrow('Failed to fetch running trades');
+      await expect(service.getRunningTrades()).rejects.toThrow(
+        'Failed to fetch running trades'
+      );
     });
   });
 

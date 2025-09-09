@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       // Actions
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await authAPI.login({ email, password });
           const { access_token, refresh_token, user } = response.data;
@@ -75,9 +75,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         }
       },
 
-      register: async (data) => {
+      register: async data => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await authAPI.register(data);
           const { access_token, refresh_token, user } = response.data;
@@ -93,7 +93,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             error: null,
           });
         } catch (error: any) {
-          const errorMessage = error.response?.data?.message || 'Registration failed';
+          const errorMessage =
+            error.response?.data?.message || 'Registration failed';
           set({
             user: null,
             isAuthenticated: false,
@@ -106,7 +107,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       logout: async () => {
         set({ isLoading: true });
-        
+
         try {
           await authAPI.logout();
         } catch (error) {
@@ -115,7 +116,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           // Clear tokens and state
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
-          
+
           set({
             user: null,
             isAuthenticated: false,
@@ -127,7 +128,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       getProfile: async () => {
         set({ isLoading: true });
-        
+
         try {
           const response = await authAPI.getProfile();
           const { user } = response.data;
@@ -139,7 +140,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             error: null,
           });
         } catch (error: any) {
-          const errorMessage = error.response?.data?.message || 'Failed to get profile';
+          const errorMessage =
+            error.response?.data?.message || 'Failed to get profile';
           set({
             user: null,
             isAuthenticated: false,
@@ -155,7 +157,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),

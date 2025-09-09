@@ -5,17 +5,35 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Eye, EyeOff, CheckCircle, XCircle, Shield, Key } from 'lucide-react';
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  XCircle,
+  Shield,
+  Key,
+} from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 
 const profileSchema = z.object({
   email: z.string().email('Invalid email address'),
-  ln_markets_api_key: z.string().min(16, 'API key must be at least 16 characters'),
-  ln_markets_api_secret: z.string().min(16, 'API secret must be at least 16 characters'),
+  ln_markets_api_key: z
+    .string()
+    .min(16, 'API key must be at least 16 characters'),
+  ln_markets_api_secret: z
+    .string()
+    .min(16, 'API secret must be at least 16 characters'),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -105,9 +123,14 @@ export default function Profile() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-            <p className="text-gray-600">Manage your account settings and preferences</p>
+            <p className="text-gray-600">
+              Manage your account settings and preferences
+            </p>
           </div>
-          <Badge variant={getPlanBadgeVariant(user.plan_type)} className="text-sm">
+          <Badge
+            variant={getPlanBadgeVariant(user.plan_type)}
+            className="text-sm"
+          >
             {user.plan_type.toUpperCase()} Plan
           </Badge>
         </div>
@@ -151,7 +174,10 @@ export default function Profile() {
                   <div className="space-y-2">
                     <Label>Account Status</Label>
                     <div className="flex items-center space-x-2">
-                      <Input value={user.is_active ? 'Active' : 'Inactive'} disabled />
+                      <Input
+                        value={user.is_active ? 'Active' : 'Inactive'}
+                        disabled
+                      />
                       {user.is_active ? (
                         <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
@@ -162,7 +188,12 @@ export default function Profile() {
                   <div className="space-y-2">
                     <Label>Email Verified</Label>
                     <div className="flex items-center space-x-2">
-                      <Input value={user.email_verified ? 'Verified' : 'Not Verified'} disabled />
+                      <Input
+                        value={
+                          user.email_verified ? 'Verified' : 'Not Verified'
+                        }
+                        disabled
+                      />
                       {user.email_verified ? (
                         <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
@@ -175,11 +206,17 @@ export default function Profile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Member Since</Label>
-                    <Input value={new Date(user.created_at).toLocaleDateString()} disabled />
+                    <Input
+                      value={new Date(user.created_at).toLocaleDateString()}
+                      disabled
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Last Updated</Label>
-                    <Input value={new Date(user.updated_at).toLocaleDateString()} disabled />
+                    <Input
+                      value={new Date(user.updated_at).toLocaleDateString()}
+                      disabled
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -200,7 +237,9 @@ export default function Profile() {
                     <div className="flex items-center space-x-3">
                       <Shield className="h-5 w-5 text-blue-500" />
                       <div>
-                        <h3 className="font-medium">Two-Factor Authentication</h3>
+                        <h3 className="font-medium">
+                          Two-Factor Authentication
+                        </h3>
                         <p className="text-sm text-gray-600">
                           Add an extra layer of security to your account
                         </p>
@@ -210,7 +249,9 @@ export default function Profile() {
                       {user.two_factor_enabled ? (
                         <>
                           <CheckCircle className="h-5 w-5 text-green-500" />
-                          <span className="text-sm text-green-600">Enabled</span>
+                          <span className="text-sm text-green-600">
+                            Enabled
+                          </span>
                         </>
                       ) : (
                         <>
@@ -257,11 +298,15 @@ export default function Profile() {
                       type="text"
                       placeholder="Enter your LN Markets API key"
                       {...register('ln_markets_api_key')}
-                      className={errors.ln_markets_api_key ? 'border-red-500' : ''}
+                      className={
+                        errors.ln_markets_api_key ? 'border-red-500' : ''
+                      }
                       disabled={!isEditing}
                     />
                     {errors.ln_markets_api_key && (
-                      <p className="text-sm text-red-500">{errors.ln_markets_api_key.message}</p>
+                      <p className="text-sm text-red-500">
+                        {errors.ln_markets_api_key.message}
+                      </p>
                     )}
                   </div>
 
@@ -273,7 +318,11 @@ export default function Profile() {
                         type={showApiSecret ? 'text' : 'password'}
                         placeholder="Enter your LN Markets API secret"
                         {...register('ln_markets_api_secret')}
-                        className={errors.ln_markets_api_secret ? 'border-red-500 pr-10' : 'pr-10'}
+                        className={
+                          errors.ln_markets_api_secret
+                            ? 'border-red-500 pr-10'
+                            : 'pr-10'
+                        }
                         disabled={!isEditing}
                       />
                       <Button
@@ -292,7 +341,9 @@ export default function Profile() {
                       </Button>
                     </div>
                     {errors.ln_markets_api_secret && (
-                      <p className="text-sm text-red-500">{errors.ln_markets_api_secret.message}</p>
+                      <p className="text-sm text-red-500">
+                        {errors.ln_markets_api_secret.message}
+                      </p>
                     )}
                   </div>
 
@@ -332,10 +383,14 @@ export default function Profile() {
                   <div className="flex items-start space-x-2">
                     <Shield className="h-5 w-5 text-yellow-600 mt-0.5" />
                     <div>
-                      <h4 className="font-medium text-yellow-800">Security Notice</h4>
+                      <h4 className="font-medium text-yellow-800">
+                        Security Notice
+                      </h4>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Your API keys are encrypted and stored securely. Never share your API secret with anyone.
-                        If you suspect your keys have been compromised, regenerate them in your LN Markets account.
+                        Your API keys are encrypted and stored securely. Never
+                        share your API secret with anyone. If you suspect your
+                        keys have been compromised, regenerate them in your LN
+                        Markets account.
                       </p>
                     </div>
                   </div>

@@ -2,6 +2,93 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats.
 
+## ADR-016: CI/CD Pipeline Implementation
+
+**Data**: 2025-01-09  
+**Status**: Aceito  
+**Contexto**: Implementação completa do pipeline de integração contínua para automatizar testes, build e deploy
+
+### Decisão
+- **GitHub Actions**: Usar GitHub Actions como plataforma de CI/CD
+- **Multi-stage Pipeline**: Pipeline com jobs separados para backend, frontend, build e deploy
+- **Testes Automatizados**: Jest para frontend, testes customizados para backend
+- **Qualidade de Código**: ESLint + Prettier para ambos os projetos
+- **Segurança**: Trivy vulnerability scanner integrado
+- **Docker**: Build e teste de imagens Docker para ambos os serviços
+- **Deploy Automático**: Deploy automático para staging (develop) e produção (main)
+
+### Justificativa
+- **Automatização**: Reduz erros humanos e acelera o processo de desenvolvimento
+- **Qualidade**: Garante que código com problemas não seja deployado
+- **Segurança**: Identifica vulnerabilidades automaticamente
+- **Consistência**: Ambiente de build padronizado e reproduzível
+- **Feedback Rápido**: Desenvolvedores recebem feedback imediato sobre problemas
+
+### Implementação
+```yaml
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres: # PostgreSQL para testes
+      redis: # Redis para cache e filas
+    steps:
+      - Checkout code
+      - Setup Node.js
+      - Install dependencies
+      - Run database migrations
+      - Run tests (unit, security, performance)
+  
+  frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - Checkout code
+      - Setup Node.js
+      - Install dependencies
+      - Run tests with Jest
+      - Run linting and type-check
+  
+  docker-build:
+    needs: [backend-tests, frontend-tests]
+    steps:
+      - Build backend Docker image
+      - Build frontend Docker image
+  
+  security-scan:
+    needs: [backend-tests, frontend-tests]
+    steps:
+      - Run Trivy vulnerability scanner
+      - Upload results to GitHub Security tab
+  
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: [backend-tests, frontend-tests, docker-build, security-scan]
+    steps:
+      - Deploy to staging environment
+  
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    needs: [backend-tests, frontend-tests, docker-build, security-scan]
+    steps:
+      - Deploy to production environment
+```
+
+### Consequências
+- ✅ **Positivas**: Automação completa, qualidade garantida, deploy confiável
+- ⚠️ **Negativas**: Complexidade inicial, dependência de GitHub Actions
+- 🔄 **Reversível**: Sim, mas requer migração para outra plataforma
+- 📊 **Métricas**: Tempo de build, taxa de sucesso, cobertura de testes
+
+---
+
 ## ADR-013: Schema Validation Fix - Fastify + Zod
 
 **Data**: 2025-01-09  
@@ -44,6 +131,61 @@ const RegisterRequestZodSchema = z.object({
 - ✅ **Positivas**: Servidor estável, validação robusta, logs detalhados
 - ⚠️ **Negativas**: Duplicação de schemas (JSON + Zod)
 - 🔄 **Reversível**: Sim, mas requer refatoração
+
+---
+
+## ADR-015: Security Audit - Production Readiness Assessment
+
+**Data**: 2024-12-19  
+**Status**: Aceito  
+**Contexto**: Auditoria completa de segurança e qualidade para avaliação de prontidão para produção
+
+### Decisão
+- **NÃO APROVAR** a versão atual para produção
+- **Implementar** correções críticas de segurança antes do deploy
+- **Criar** plano de ação estruturado em 3 fases
+- **Estabelecer** critérios de aprovação rigorosos
+
+### Justificativa
+- **8 Vulnerabilidades Críticas**: Logs de dados sensíveis, armazenamento inseguro, falta de validação
+- **Riscos de Segurança**: XSS, SQL Injection, IDOR, CSRF, vazamento de credenciais
+- **Falta de Monitoramento**: Sentry configurado mas não implementado
+- **Cobertura de Testes**: Apenas 15% (insuficiente para produção)
+- **Problemas de Acessibilidade**: Falta de labels ARIA, contraste insuficiente
+
+### Implementação
+```markdown
+# Plano de Ação Estruturado
+
+## Fase 1: Correções Críticas (1-2 dias)
+- Remover logs de dados sensíveis
+- Implementar validação de entrada no backend
+- Corrigir configuração de CORS
+- Implementar headers de segurança
+- Implementar armazenamento seguro de credenciais
+- Implementar validação de IDOR
+- Implementar rate limiting por usuário
+- Implementar Sentry
+
+## Fase 2: Melhorias Importantes (3-5 dias)
+- Implementar coleta de métricas
+- Configurar alertas automáticos
+- Implementar testes de segurança
+- Melhorar acessibilidade
+- Implementar dashboards
+
+## Fase 3: Otimizações (1-2 semanas)
+- Implementar otimizações React
+- Otimizar queries do banco
+- Implementar CI/CD pipeline
+- Documentar API
+- Implementar testes E2E
+```
+
+### Consequências
+- ✅ **Positivas**: Sistema seguro e estável para produção
+- ⚠️ **Negativas**: Delay no deploy, trabalho adicional necessário
+- 🔄 **Reversível**: Não, decisão baseada em auditoria técnica
 
 ---
 

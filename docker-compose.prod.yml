@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: hubdefisats-postgres-prod
+    container_name: hub-defisats-postgres-prod
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -24,7 +24,7 @@ services:
   # Redis Cache & Queue
   redis:
     image: redis:7-alpine
-    container_name: hubdefisats-redis-prod
+    container_name: hub-defisats-redis-prod
     volumes:
       - redis_data:/data
     networks:
@@ -41,7 +41,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: hubdefisats-backend-prod
+    container_name: hub-defisats-backend-prod
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -60,7 +60,7 @@ services:
       SENTRY_DSN: ${SENTRY_DSN}
       PORT: 3000
     ports:
-      - "3000:3000"
+      - "23000:3000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,7 +70,7 @@ services:
       - hubdefisats-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -80,11 +80,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    container_name: hubdefisats-frontend-prod
+    container_name: hub-defisats-frontend-prod
     environment:
       VITE_API_URL: ${VITE_API_URL}
     ports:
-      - "3001:80"
+      - "23001:80"
     depends_on:
       - backend
     networks:
@@ -96,7 +96,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: hubdefisats-margin-monitor-prod
+    container_name: hub-defisats-margin-monitor-prod
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -117,7 +117,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: hubdefisats-automation-executor-prod
+    container_name: hub-defisats-automation-executor-prod
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -138,7 +138,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: hubdefisats-notification-worker-prod
+    container_name: hub-defisats-notification-worker-prod
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -165,7 +165,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: hubdefisats-payment-validator-prod
+    container_name: hub-defisats-payment-validator-prod
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -186,7 +186,7 @@ services:
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: hubdefisats-nginx-prod
+    container_name: hub-defisats-nginx-prod
     ports:
       - "80:80"
       - "443:443"
@@ -205,5 +205,5 @@ volumes:
   redis_data:
 
 networks:
-  hubdefisats-network:
+  hub-defisats-network:
     driver: bridge

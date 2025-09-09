@@ -1,27 +1,37 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Github, Chrome, CheckCircle } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Eye, EyeOff, Github, Chrome, CheckCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
-const signupSchema = z.object({
-  firstName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  lastName: z.string().min(2, "Sobrenome deve ter pelo menos 2 caracteres"),
-  email: z.string().email("Email inválido"),
-  password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
-  confirmPassword: z.string(),
-  terms: z.boolean().refine((val) => val === true, "Você deve aceitar os termos"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Senhas não coincidem",
-  path: ["confirmPassword"],
-});
+const signupSchema = z
+  .object({
+    firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+    lastName: z.string().min(2, 'Sobrenome deve ter pelo menos 2 caracteres'),
+    email: z.string().email('Email inválido'),
+    password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
+    confirmPassword: z.string(),
+    terms: z
+      .boolean()
+      .refine(val => val === true, 'Você deve aceitar os termos'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Senhas não coincidem',
+    path: ['confirmPassword'],
+  });
 
 type SignupForm = z.infer<typeof signupSchema>;
 
@@ -39,19 +49,19 @@ export const Signup = () => {
     resolver: zodResolver(signupSchema),
   });
 
-  const password = watch("password");
+  const password = watch('password');
 
   const onSubmit = async (data: SignupForm) => {
     setIsLoading(true);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log("Signup:", data);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log('Signup:', data);
     setIsLoading(false);
   };
 
   const getPasswordStrength = (password: string) => {
-    if (!password) return { strength: 0, label: "", color: "" };
-    
+    if (!password) return { strength: 0, label: '', color: '' };
+
     let strength = 0;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
@@ -60,21 +70,21 @@ export const Signup = () => {
     if (/[^A-Za-z0-9]/.test(password)) strength++;
 
     const levels = [
-      { label: "Muito fraca", color: "bg-destructive" },
-      { label: "Fraca", color: "bg-destructive" },
-      { label: "Regular", color: "bg-warning" },
-      { label: "Boa", color: "bg-success" },
-      { label: "Muito forte", color: "bg-success" },
+      { label: 'Muito fraca', color: 'bg-destructive' },
+      { label: 'Fraca', color: 'bg-destructive' },
+      { label: 'Regular', color: 'bg-warning' },
+      { label: 'Boa', color: 'bg-success' },
+      { label: 'Muito forte', color: 'bg-success' },
     ];
 
     return {
       strength,
-      label: levels[strength - 1]?.label || "",
-      color: levels[strength - 1]?.color || "",
+      label: levels[strength - 1]?.label || '',
+      color: levels[strength - 1]?.color || '',
     };
   };
 
-  const passwordStrength = getPasswordStrength(password || "");
+  const passwordStrength = getPasswordStrength(password || '');
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
@@ -103,11 +113,13 @@ export const Signup = () => {
                   <Input
                     id="firstName"
                     placeholder="João"
-                    {...register("firstName")}
-                    className={errors.firstName ? "border-destructive" : ""}
+                    {...register('firstName')}
+                    className={errors.firstName ? 'border-destructive' : ''}
                   />
                   {errors.firstName && (
-                    <p className="text-sm text-destructive">{errors.firstName.message}</p>
+                    <p className="text-sm text-destructive">
+                      {errors.firstName.message}
+                    </p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -115,11 +127,13 @@ export const Signup = () => {
                   <Input
                     id="lastName"
                     placeholder="Silva"
-                    {...register("lastName")}
-                    className={errors.lastName ? "border-destructive" : ""}
+                    {...register('lastName')}
+                    className={errors.lastName ? 'border-destructive' : ''}
                   />
                   {errors.lastName && (
-                    <p className="text-sm text-destructive">{errors.lastName.message}</p>
+                    <p className="text-sm text-destructive">
+                      {errors.lastName.message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -130,11 +144,13 @@ export const Signup = () => {
                   id="email"
                   type="email"
                   placeholder="seu@email.com"
-                  {...register("email")}
-                  className={errors.email ? "border-destructive" : ""}
+                  {...register('email')}
+                  className={errors.email ? 'border-destructive' : ''}
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -143,10 +159,12 @@ export const Signup = () => {
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    {...register("password")}
-                    className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                    {...register('password')}
+                    className={
+                      errors.password ? 'border-destructive pr-10' : 'pr-10'
+                    }
                   />
                   <Button
                     type="button"
@@ -162,14 +180,16 @@ export const Signup = () => {
                     )}
                   </Button>
                 </div>
-                
+
                 {password && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 bg-muted rounded-full h-2">
                         <div
                           className={`h-2 rounded-full transition-all ${passwordStrength.color}`}
-                          style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
+                          style={{
+                            width: `${(passwordStrength.strength / 5) * 100}%`,
+                          }}
                         />
                       </div>
                       <span className="text-xs text-muted-foreground">
@@ -178,9 +198,11 @@ export const Signup = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {errors.password && (
-                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -189,10 +211,14 @@ export const Signup = () => {
                 <div className="relative">
                   <Input
                     id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    {...register("confirmPassword")}
-                    className={errors.confirmPassword ? "border-destructive pr-10" : "pr-10"}
+                    {...register('confirmPassword')}
+                    className={
+                      errors.confirmPassword
+                        ? 'border-destructive pr-10'
+                        : 'pr-10'
+                    }
                   />
                   <Button
                     type="button"
@@ -209,29 +235,37 @@ export const Signup = () => {
                   </Button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
 
               <div className="flex items-start space-x-2">
-                <Checkbox id="terms" {...register("terms")} />
+                <Checkbox id="terms" {...register('terms')} />
                 <Label htmlFor="terms" className="text-sm leading-relaxed">
-                  Eu concordo com os{" "}
+                  Eu concordo com os{' '}
                   <a href="#" className="text-primary hover:underline">
                     Termos de Serviço
-                  </a>{" "}
-                  e{" "}
+                  </a>{' '}
+                  e{' '}
                   <a href="#" className="text-primary hover:underline">
                     Política de Privacidade
                   </a>
                 </Label>
               </div>
               {errors.terms && (
-                <p className="text-sm text-destructive">{errors.terms.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.terms.message}
+                </p>
               )}
 
-              <Button type="submit" className="w-full btn-hero" disabled={isLoading}>
-                {isLoading ? "Criando conta..." : "Criar Conta Gratuita"}
+              <Button
+                type="submit"
+                className="w-full btn-hero"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Criando conta...' : 'Criar Conta Gratuita'}
               </Button>
             </form>
 
@@ -271,7 +305,9 @@ export const Signup = () => {
         {/* Benefits */}
         <div className="mt-8 space-y-4">
           <div className="text-center text-sm text-muted-foreground">
-            <p className="font-medium mb-3">O que você ganha ao se cadastrar:</p>
+            <p className="font-medium mb-3">
+              O que você ganha ao se cadastrar:
+            </p>
           </div>
           <div className="grid gap-3">
             <div className="flex items-center gap-3 text-sm">
@@ -295,8 +331,8 @@ export const Signup = () => {
 
         <div className="mt-8 text-center text-xs text-muted-foreground">
           <p>
-            Ao criar uma conta, você pode começar imediatamente. 
-            Não cobramos taxas de setup nem mensalidades durante o período de testes.
+            Ao criar uma conta, você pode começar imediatamente. Não cobramos
+            taxas de setup nem mensalidades durante o período de testes.
           </p>
         </div>
       </div>

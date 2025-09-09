@@ -1,0 +1,47 @@
+name: Dependencies Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Run every Monday
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Check backend dependencies
+      working-directory: ./backend
+      run: |
+        npm ci
+        npm audit --audit-level=moderate
+        npm outdated
+
+    - name: Check frontend dependencies
+      working-directory: ./frontend
+      run: |
+        npm ci
+        npm audit --audit-level=moderate
+        npm outdated
+
+    - name: Check for security vulnerabilities
+      run: |
+        cd backend && npm audit --json > backend-audit.json
+        cd ../frontend && npm audit --json > frontend-audit.json
+
+    - name: Upload audit results
+      uses: actions/upload-artifact@v4
+      with:
+        name: audit-results
+        path: |
+          backend-audit.json
+          frontend-audit.json

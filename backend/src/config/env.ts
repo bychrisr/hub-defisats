@@ -3,7 +3,9 @@ import { z } from 'zod';
 // Environment validation schema
 const envSchema = z.object({
   // Environment
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.string().transform(Number).default('3000'),
 
   // Database
@@ -15,15 +17,22 @@ const envSchema = z.object({
   // JWT
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
   JWT_EXPIRES_IN: z.string().default('15m'),
-  REFRESH_TOKEN_SECRET: z.string().min(32, 'REFRESH_TOKEN_SECRET must be at least 32 characters'),
+  REFRESH_TOKEN_SECRET: z
+    .string()
+    .min(32, 'REFRESH_TOKEN_SECRET must be at least 32 characters'),
   REFRESH_TOKEN_EXPIRES_IN: z.string().default('7d'),
 
   // Encryption
-  ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
+  ENCRYPTION_KEY: z
+    .string()
+    .min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
 
   // LN Markets API
   LN_MARKETS_API_URL: z.string().url().default('https://api.lnmarkets.com'),
-  LN_MARKETS_SANDBOX_URL: z.string().url().default('https://api.lnmarkets.com/sandbox'),
+  LN_MARKETS_SANDBOX_URL: z
+    .string()
+    .url()
+    .default('https://api.lnmarkets.com/sandbox'),
 
   // Social Auth
   GOOGLE_CLIENT_ID: z.string().optional(),
@@ -56,7 +65,7 @@ const envSchema = z.object({
   RATE_LIMIT_TIME_WINDOW: z.string().transform(Number).default('60000'),
 
   // CORS
-  CORS_ORIGIN: z.string().default('http://localhost:3001'),
+  CORS_ORIGIN: z.string().default('http://localhost:13000'),
 
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
@@ -70,24 +79,26 @@ const parseEnv = () => {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const missingVars = error.errors
-        .filter((err) => err.code === 'too_small' && err.minimum === 1)
-        .map((err) => err.path.join('.'));
-      
+        .filter(err => err.code === 'too_small' && err.minimum === 1)
+        .map(err => err.path.join('.'));
+
       const invalidVars = error.errors
-        .filter((err) => err.code !== 'too_small' || err.minimum !== 1)
-        .map((err) => `${err.path.join('.')}: ${err.message}`);
+        .filter(err => err.code !== 'too_small' || err.minimum !== 1)
+        .map(err => `${err.path.join('.')}: ${err.message}`);
 
       console.error('❌ Environment validation failed:');
-      
+
       if (missingVars.length > 0) {
         console.error('Missing required variables:', missingVars.join(', '));
       }
-      
+
       if (invalidVars.length > 0) {
         console.error('Invalid variables:', invalidVars.join(', '));
       }
-      
-      console.error('\nPlease check your .env file and ensure all required variables are set.');
+
+      console.error(
+        '\nPlease check your .env file and ensure all required variables are set.'
+      );
       process.exit(1);
     }
     throw error;
@@ -143,12 +154,33 @@ export const rateLimitConfig = {
 
 // CORS configuration
 export const corsConfig = {
-  origin: isDevelopment 
-    ? [env.CORS_ORIGIN, 'http://localhost:3000', 'http://localhost:3001']
-    : [env.CORS_ORIGIN],
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
+    // Permitir requisições sem origin (ex: mobile apps, Postman)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = isDevelopment
+      ? [env.CORS_ORIGIN] // Apenas a origem configurada
+      : [env.CORS_ORIGIN];
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'X-CSRF-Token',
+  ],
+  exposedHeaders: ['X-CSRF-Token'],
+  maxAge: 86400, // 24 horas
 };
 
 // LN Markets configuration
@@ -261,8 +293,35 @@ export const securityConfig = {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   },
   helmet: {
-    contentSecurityPolicy: isProduction,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", 'https://api.lnmarkets.com'],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    hsts: {
+      maxAge: 31536000, // 1 ano
+      includeSubDomains: true,
+      preload: true,
+    },
+    xFrameOptions: { action: 'deny' },
+    xContentTypeOptions: true,
+    xDnsPrefetchControl: true,
+    xDownloadOptions: true,
+    xPermittedCrossDomainPolicies: false,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     crossOriginEmbedderPolicy: isProduction,
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   },
 };
 

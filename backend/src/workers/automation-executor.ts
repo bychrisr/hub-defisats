@@ -5,13 +5,17 @@ import { Redis } from 'ioredis';
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 
 // Create worker (minimal stub for now)
-const worker = new Worker('automation-executor', async (job) => {
-  console.log('Automation executor job received:', job.data);
-  // TODO: Implement automation execution logic
-  return { status: 'processed' };
-}, { connection: redis });
+const worker = new Worker(
+  'automation-executor',
+  async job => {
+    console.log('Automation executor job received:', job.data);
+    // TODO: Implement automation execution logic
+    return { status: 'processed' };
+  },
+  { connection: redis }
+);
 
-worker.on('completed', (job) => {
+worker.on('completed', job => {
   console.log(`Automation executor job ${job.id} completed`);
 });
 

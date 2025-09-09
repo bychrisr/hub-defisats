@@ -1,21 +1,27 @@
-import { LucideIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { LucideIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface MetricCardProps {
   title: string;
   value: string | number;
   change?: {
     value: string;
-    type: "positive" | "negative" | "neutral" | "warning";
+    type: 'positive' | 'negative' | 'neutral' | 'warning';
   };
   icon?: LucideIcon;
   className?: string;
 }
 
-export const MetricCard = ({ title, value, change, icon: Icon, className }: MetricCardProps) => {
+export const MetricCard = ({
+  title,
+  value,
+  change,
+  icon: Icon,
+  className,
+}: MetricCardProps) => {
   return (
-    <Card className={cn("card-gradient", className)}>
+    <Card className={cn('card-gradient', className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
@@ -26,15 +32,12 @@ export const MetricCard = ({ title, value, change, icon: Icon, className }: Metr
         <div className="text-2xl font-bold">{value}</div>
         {change && (
           <p
-            className={cn(
-              "text-xs",
-              {
-                "text-success": change.type === "positive",
-                "text-destructive": change.type === "negative", 
-                "text-muted-foreground": change.type === "neutral",
-                "text-warning": change.type === "warning",
-              }
-            )}
+            className={cn('text-xs', {
+              'text-success': change.type === 'positive',
+              'text-destructive': change.type === 'negative',
+              'text-muted-foreground': change.type === 'neutral',
+              'text-warning': change.type === 'warning',
+            })}
           >
             {change.value}
           </p>

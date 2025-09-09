@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,51 +6,85 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff, Info, CheckCircle, XCircle, Moon, Sun } from 'lucide-react';
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+  Info,
+  CheckCircle,
+  XCircle,
+  Moon,
+  Sun,
+} from 'lucide-react';
+import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
+import { useUsernameValidation } from '@/hooks/useUsernameValidation';
 
-const registerSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  username: z
-    .string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be at most 20 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
-    .refine((val) => !val.includes('@'), 'Username cannot contain @ symbol'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/\d/, 'Password must contain at least one number')
-    .regex(/[@$!%*?&]/, 'Password must contain at least one special character'),
-  confirmPassword: z.string(),
-  ln_markets_api_key: z
-    .string()
-    .min(16, 'API key must be at least 16 characters'),
-  ln_markets_api_secret: z
-    .string()
-    .min(16, 'API secret must be at least 16 characters'),
-  ln_markets_passphrase: z
-    .string()
-    .min(8, 'Passphrase must be at least 8 characters')
-    .max(128, 'Passphrase must be at most 128 characters'),
-  coupon_code: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    email: z.string().email('Invalid email address'),
+    username: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .max(20, 'Username must be at most 20 characters')
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        'Username can only contain letters, numbers, and underscores'
+      )
+      .refine(val => !val.includes('@'), 'Username cannot contain @ symbol'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/\d/, 'Password must contain at least one number')
+      .regex(
+        /[@$!%*?&]/,
+        'Password must contain at least one special character'
+      ),
+    confirmPassword: z.string(),
+    ln_markets_api_key: z
+      .string()
+      .min(16, 'API key must be at least 16 characters'),
+    ln_markets_api_secret: z
+      .string()
+      .min(16, 'API secret must be at least 16 characters'),
+    ln_markets_passphrase: z
+      .string()
+      .min(8, 'Passphrase must be at least 8 characters')
+      .max(128, 'Passphrase must be at most 128 characters'),
+    coupon_code: z.string().optional(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
-  const [usernameChecking, setUsernameChecking] = useState(false);
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
+
+  const toggleConfirmPasswordVisibility = useCallback(() => {
+    setShowConfirmPassword(prev => !prev);
+  }, []);
+  const { usernameAvailable, usernameChecking, checkUsername } =
+    useUsernameValidation();
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check if user has a preference stored
     const stored = localStorage.getItem('theme');
@@ -58,9 +92,15 @@ export default function Register() {
     // Default to system preference
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
-  const { register: registerUser, isLoading, error, clearError } = useAuthStore();
+  const {
+    register: registerUser,
+    isLoading,
+    error,
+    clearError,
+  } = useAuthStore();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPasswordMismatch, setShowPasswordMismatch] = useState(false);
 
   // Apply theme
   useEffect(() => {
@@ -86,44 +126,56 @@ export default function Register() {
   });
 
   const password = watch('password');
+  const confirmPassword = watch('confirmPassword');
   const username = watch('username');
 
   // Check username availability with debouncing
   useEffect(() => {
     if (!username || username.length < 3) {
-      setUsernameAvailable(null);
       return;
     }
 
     // Basic format validation first
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
     if (!usernameRegex.test(username)) {
-      setUsernameAvailable(false);
-      setUsernameChecking(false);
       return;
     }
 
-    const checkUsername = async () => {
-      setUsernameChecking(true);
-      try {
-        const response = await api.get(`/api/auth/check-username?username=${encodeURIComponent(username)}`);
-        setUsernameAvailable(response.data.available);
-      } catch (error: any) {
-        console.error('Username check failed:', error);
-        // If it's a format error, show as unavailable
-        if (error.response?.status === 400) {
-          setUsernameAvailable(false);
-        } else {
-          setUsernameAvailable(null);
-        }
-      } finally {
-        setUsernameChecking(false);
-      }
-    };
+    const debounceTimer = setTimeout(() => {
+      checkUsername(username);
+    }, 500); // 500ms debounce
 
-    const debounceTimer = setTimeout(checkUsername, 500); // 500ms debounce
     return () => clearTimeout(debounceTimer);
-  }, [username]);
+  }, [username, checkUsername]);
+
+  // Check password match in real-time
+  useEffect(() => {
+    if (confirmPassword && password) {
+      setShowPasswordMismatch(password !== confirmPassword);
+    } else {
+      setShowPasswordMismatch(false);
+    }
+  }, [password, confirmPassword]);
+
+  // Keyboard navigation handlers
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent, fieldName: string) => {
+      if (e.key === 'Tab') {
+        setFocusedField(fieldName);
+      }
+    },
+    []
+  );
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent, action: () => void) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        action();
+      }
+    },
+    []
+  );
 
   const onSubmit = async (data: RegisterForm) => {
     setIsSubmitting(true);
@@ -146,7 +198,7 @@ export default function Register() {
     }
   };
 
-  const getPasswordStrength = (password: string) => {
+  const getPasswordStrength = useCallback((password: string) => {
     let score = 0;
     if (password.length >= 8) score++;
     if (/[a-z]/.test(password)) score++;
@@ -154,11 +206,28 @@ export default function Register() {
     if (/\d/.test(password)) score++;
     if (/[@$!%*?&]/.test(password)) score++;
     return score;
-  };
+  }, []);
 
-  const passwordStrength = password ? getPasswordStrength(password) : 0;
-  const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+  const passwordStrength = useMemo(
+    () => (password ? getPasswordStrength(password) : 0),
+    [password, getPasswordStrength]
+  );
+
+  const strengthLabels = useMemo(
+    () => ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'],
+    []
+  );
+
+  const strengthColors = useMemo(
+    () => [
+      'bg-red-600', // Very Weak - Vermelho mais escuro
+      'bg-orange-600', // Weak - Laranja mais escuro
+      'bg-yellow-600', // Fair - Amarelo mais escuro
+      'bg-emerald-600', // Good - Verde esmeralda mais escuro
+      'bg-green-700', // Strong - Verde mais escuro para melhor contraste
+    ],
+    []
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
@@ -194,7 +263,12 @@ export default function Register() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-4"
+              role="form"
+              aria-label="User registration form"
+            >
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
@@ -202,7 +276,12 @@ export default function Register() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label
+                  htmlFor="email"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -210,6 +289,9 @@ export default function Register() {
                   autoComplete="email"
                   {...register('email')}
                   className={errors.email ? 'border-red-500' : ''}
+                  onKeyDown={e => handleKeyDown(e, 'email')}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
                 />
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -217,7 +299,12 @@ export default function Register() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label
+                  htmlFor="username"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  Username
+                </Label>
                 <div className="relative">
                   <Input
                     id="username"
@@ -225,7 +312,15 @@ export default function Register() {
                     placeholder="Choose a username"
                     autoComplete="off"
                     {...register('username')}
-                    className={errors.username ? 'border-red-500 pr-8' : usernameAvailable === false ? 'border-red-500 pr-8' : usernameAvailable === true ? 'border-green-500 pr-8' : 'pr-8'}
+                    className={
+                      errors.username
+                        ? 'border-red-500 pr-8'
+                        : usernameAvailable === false
+                          ? 'border-red-500 pr-8'
+                          : usernameAvailable === true
+                            ? 'border-green-500 pr-8'
+                            : 'pr-8'
+                    }
                   />
                   {usernameChecking ? (
                     <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-gray-400" />
@@ -236,31 +331,52 @@ export default function Register() {
                   ) : null}
                 </div>
                 {errors.username && (
-                  <p className="text-sm text-red-500">{errors.username.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.username.message}
+                  </p>
                 )}
                 {!errors.username && username && username.length >= 3 && (
-                  <p className={`text-sm ${usernameAvailable === true ? 'text-green-600' : usernameAvailable === false ? 'text-red-600' : 'text-gray-600'}`}>
-                    {usernameAvailable === true ? '✓ Username disponível' : usernameAvailable === false ? '✗ Username já está em uso' : 'Verificando disponibilidade...'}
+                  <p
+                    className={`text-sm ${usernameAvailable === true ? 'text-green-600' : usernameAvailable === false ? 'text-red-600' : 'text-gray-600'}`}
+                  >
+                    {usernameAvailable === true
+                      ? '✓ Username disponível'
+                      : usernameAvailable === false
+                        ? '✗ Username já está em uso'
+                        : 'Verificando disponibilidade...'}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label
+                  htmlFor="password"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     {...register('password')}
-                    className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+                    className={
+                      errors.password ? 'border-red-500 pr-10' : 'pr-10'
+                    }
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={togglePasswordVisibility}
+                    onKeyDown={e => handleKeyPress(e, togglePasswordVisibility)}
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
+                    aria-expanded={showPassword}
+                    tabIndex={0}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -270,45 +386,51 @@ export default function Register() {
                   </Button>
                 </div>
                 {password && (
-                  <div className="space-y-1">
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-1 w-full rounded ${
-                            level <= passwordStrength
-                              ? strengthColors[passwordStrength - 1]
-                              : 'bg-gray-200'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      Password strength: {passwordStrength > 0 ? strengthLabels[passwordStrength - 1] : 'Very Weak'}
-                    </p>
-                  </div>
+                  <PasswordStrengthIndicator
+                    password={password}
+                    strength={passwordStrength}
+                    labels={strengthLabels}
+                    colors={strengthColors}
+                  />
                 )}
                 {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  Confirm Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Confirm your password"
                     {...register('confirmPassword')}
-                    className={errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'}
+                    className={`pr-10 ${errors.confirmPassword || showPasswordMismatch ? 'border-red-500' : ''}`}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={toggleConfirmPasswordVisibility}
+                    onKeyDown={e =>
+                      handleKeyPress(e, toggleConfirmPasswordVisibility)
+                    }
+                    aria-label={
+                      showConfirmPassword
+                        ? 'Hide confirm password'
+                        : 'Show confirm password'
+                    }
+                    aria-expanded={showConfirmPassword}
+                    tabIndex={0}
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -317,13 +439,26 @@ export default function Register() {
                     )}
                   </Button>
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                {showPasswordMismatch && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <XCircle className="h-4 w-4" />
+                    As senhas não coincidem
+                  </p>
+                )}
+                {errors.confirmPassword && !showPasswordMismatch && (
+                  <p className="text-sm text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ln_markets_api_key">LN Markets API Key</Label>
+                <Label
+                  htmlFor="ln_markets_api_key"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  LN Markets API Key
+                </Label>
                 <Input
                   id="ln_markets_api_key"
                   type="text"
@@ -333,42 +468,67 @@ export default function Register() {
                   className={errors.ln_markets_api_key ? 'border-red-500' : ''}
                 />
                 {errors.ln_markets_api_key && (
-                  <p className="text-sm text-red-500">{errors.ln_markets_api_key.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.ln_markets_api_key.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ln_markets_api_secret">LN Markets API Secret</Label>
+                <Label
+                  htmlFor="ln_markets_api_secret"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  LN Markets API Secret
+                </Label>
                 <Input
                   id="ln_markets_api_secret"
                   type="text"
                   placeholder="Cole sua API Secret aqui"
                   autoComplete="off"
                   {...register('ln_markets_api_secret')}
-                  className={errors.ln_markets_api_secret ? 'border-red-500' : ''}
+                  className={
+                    errors.ln_markets_api_secret ? 'border-red-500' : ''
+                  }
                 />
                 {errors.ln_markets_api_secret && (
-                  <p className="text-sm text-red-500">{errors.ln_markets_api_secret.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.ln_markets_api_secret.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ln_markets_passphrase">LN Markets Passphrase</Label>
+                <Label
+                  htmlFor="ln_markets_passphrase"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  LN Markets Passphrase
+                </Label>
                 <Input
                   id="ln_markets_passphrase"
                   type="text"
                   placeholder="Cole sua passphrase aqui"
                   autoComplete="off"
                   {...register('ln_markets_passphrase')}
-                  className={errors.ln_markets_passphrase ? 'border-red-500' : ''}
+                  className={
+                    errors.ln_markets_passphrase ? 'border-red-500' : ''
+                  }
                 />
                 {errors.ln_markets_passphrase && (
-                  <p className="text-sm text-red-500">{errors.ln_markets_passphrase.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.ln_markets_passphrase.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="coupon_code">Coupon Code (Optional)</Label>
+                <Label
+                  htmlFor="coupon_code"
+                  className="text-gray-900 dark:text-gray-100 font-medium"
+                >
+                  Coupon Code (Optional)
+                </Label>
                 <Input
                   id="coupon_code"
                   type="text"
@@ -378,7 +538,8 @@ export default function Register() {
                 <div className="flex items-start space-x-2">
                   <Info className="h-4 w-4 text-blue-500 mt-0.5" />
                   <p className="text-xs text-gray-600">
-                    Coupon codes can unlock premium features or extend your trial period.
+                    Coupon codes can unlock premium features or extend your
+                    trial period.
                   </p>
                 </div>
               </div>
@@ -387,8 +548,14 @@ export default function Register() {
                 type="submit"
                 className="w-full"
                 disabled={isLoading || isSubmitting}
+                aria-describedby={
+                  Object.keys(errors).length > 0 ? 'form-errors' : undefined
+                }
+                onKeyDown={e => handleKeyDown(e, 'submit')}
+                onFocus={() => setFocusedField('submit')}
+                onBlur={() => setFocusedField(null)}
               >
-                {(isLoading || isSubmitting) ? (
+                {isLoading || isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating account...
@@ -404,7 +571,11 @@ export default function Register() {
                 Already have an account?{' '}
                 <Link
                   to="/login"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  onKeyDown={e => handleKeyDown(e, 'login-link')}
+                  onFocus={() => setFocusedField('login-link')}
+                  onBlur={() => setFocusedField(null)}
+                  tabIndex={0}
                 >
                   Sign in
                 </Link>

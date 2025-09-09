@@ -102,6 +102,10 @@ model User {
   user_coupons           UserCoupon[] @relation("UserCouponRelation")
 
   @@index([email])
+  @@index([username])
+  @@index([created_at])
+  @@index([plan_type])
+  @@index([updated_at])
   @@index([email_verification_token])
   @@index([password_reset_token])
 }
@@ -117,6 +121,13 @@ model Automation {
   
   user        User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
   trade_logs  TradeLog[]
+
+  @@index([user_id])
+  @@index([type])
+  @@index([is_active])
+  @@index([created_at])
+  @@index([user_id, type])
+  @@index([user_id, is_active])
 }
 
 model TradeLog {
@@ -131,6 +142,15 @@ model TradeLog {
   
   user           User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   automation     Automation? @relation(fields: [automation_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([symbol])
+  @@index([status])
+  @@index([executed_at])
+  @@index([created_at])
+  @@index([user_id, status])
+  @@index([user_id, executed_at])
+  @@index([symbol, status])
 }
 
 model Notification {
@@ -176,6 +196,9 @@ model AdminUser {
   created_at DateTime  @default(now())
   
   user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([role])
 }
 
 model Coupon {
@@ -188,6 +211,11 @@ model Coupon {
   created_at  DateTime    @default(now())
   
   user_coupons UserCoupon[] @relation("CouponUserRelation")
+
+  @@index([code])
+  @@index([is_active])
+  @@index([expires_at])
+  @@index([code, is_active])
 }
 
 model SystemAlert {

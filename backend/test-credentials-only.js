@@ -10,8 +10,8 @@ async function testCredentialsOnly() {
   };
 
   console.log('📋 Testing credentials:');
-  console.log(`   API Key: ${sandboxCredentials.apiKey.substring(0, 20)}...`);
-  console.log(`   API Secret: ${sandboxCredentials.apiSecret.substring(0, 20)}...`);
+  console.log(`   API Key: ${'*'.repeat(20)}...`);
+  console.log(`   API Secret: ${'*'.repeat(20)}...`);
   console.log(`   Passphrase: ${sandboxCredentials.passphrase}`);
   console.log('');
 
@@ -60,7 +60,7 @@ async function testCredentialsOnly() {
     };
 
     console.log('📡 Headers being sent:');
-    console.log(`   LNM-ACCESS-KEY: ${headers['LNM-ACCESS-KEY']}`);
+    console.log(`   LNM-ACCESS-KEY: ${'*'.repeat(20)}...`);
     console.log(`   LNM-ACCESS-SIGNATURE: ${headers['LNM-ACCESS-SIGNATURE']}`);
     console.log(`   LNM-ACCESS-PASSPHRASE: ${headers['LNM-ACCESS-PASSPHRASE']}`);
     console.log(`   LNM-ACCESS-TIMESTAMP: ${headers['LNM-ACCESS-TIMESTAMP']}`);

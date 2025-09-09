@@ -10,7 +10,7 @@ describe('AutomationService', () => {
   beforeEach(async () => {
     prisma = new PrismaClient();
     automationService = new AutomationService(prisma);
-    
+
     // Create test user
     const testUser = await prisma.user.create({
       data: {
@@ -425,7 +425,10 @@ describe('AutomationService', () => {
         enabled: true,
       };
 
-      const result = await automationService.validateConfig('margin_guard', config);
+      const result = await automationService.validateConfig(
+        'margin_guard',
+        config
+      );
       expect(result.valid).toBe(true);
     });
 
@@ -435,7 +438,10 @@ describe('AutomationService', () => {
         action: 'close_position',
       };
 
-      const result = await automationService.validateConfig('margin_guard', config);
+      const result = await automationService.validateConfig(
+        'margin_guard',
+        config
+      );
       expect(result.valid).toBe(false);
       expect(result.errors).toBeDefined();
     });

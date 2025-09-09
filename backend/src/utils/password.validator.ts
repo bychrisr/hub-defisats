@@ -1,12 +1,16 @@
 import { z } from 'zod';
 
 // Password validation schema
-export const PasswordSchema = z.string()
+export const PasswordSchema = z
+  .string()
   .min(8, 'Password must be at least 8 characters')
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/\d/, 'Password must contain at least one number')
-  .regex(/[@$!%*?&]/, 'Password must contain at least one special character (@$!%*?&)');
+  .regex(
+    /[@$!%*?&]/,
+    'Password must contain at least one special character (@$!%*?&)'
+  );
 
 // Password strength checker
 export function checkPasswordStrength(password: string): {
@@ -70,11 +74,36 @@ export function checkPasswordStrength(password: string): {
 
 // Common password checker
 export const COMMON_PASSWORDS = [
-  'password', '123456', '123456789', 'qwerty', 'abc123', 'password123',
-  'admin', 'letmein', 'welcome', 'monkey', '1234567890', 'password1',
-  'qwerty123', 'dragon', 'master', 'hello', 'freedom', 'whatever',
-  'qazwsx', 'trustno1', '654321', 'jordan23', 'harley', 'password1',
-  'shadow', 'superman', 'qwertyuiop', '123321', 'dragon', '1234567890'
+  'password',
+  '123456',
+  '123456789',
+  'qwerty',
+  'abc123',
+  'password123',
+  'admin',
+  'letmein',
+  'welcome',
+  'monkey',
+  '1234567890',
+  'password1',
+  'qwerty123',
+  'dragon',
+  'master',
+  'hello',
+  'freedom',
+  'whatever',
+  'qazwsx',
+  'trustno1',
+  '654321',
+  'jordan23',
+  'harley',
+  'password1',
+  'shadow',
+  'superman',
+  'qwertyuiop',
+  '123321',
+  'dragon',
+  '1234567890',
 ];
 
 export function isCommonPassword(password: string): boolean {

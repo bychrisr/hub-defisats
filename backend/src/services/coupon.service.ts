@@ -1,4 +1,4 @@
-import { PrismaClient, Coupon, PlanType } from '@prisma/client';
+import { PrismaClient, /* Coupon, */ PlanType } from '@prisma/client';
 import { CreateCouponRequest, CouponResponse } from '@/types/api-contracts';
 
 export class CouponService {
@@ -157,7 +157,7 @@ export class CouponService {
     }
 
     // Use coupon
-    const [updatedCoupon, userCoupon] = await this.prisma.$transaction([
+    const [updatedCoupon] = await this.prisma.$transaction([
       // Update coupon usage count
       this.prisma.coupon.update({
         where: { code },
@@ -290,7 +290,9 @@ export class CouponService {
       where: { id: couponId },
       data: {
         ...data,
-        expires_at: data.expires_at ? new Date(data.expires_at) : data.expires_at,
+        expires_at: data.expires_at
+          ? new Date(data.expires_at)
+          : data.expires_at,
       },
     });
 
@@ -311,20 +313,23 @@ export class CouponService {
   generateCouponCode(prefix: string = '', length: number = 8): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = prefix;
-    
+
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    
+
     return result;
   }
 
   /**
    * Create testers coupon (for MVP)
    */
-  async createTestersCoupon(planType: PlanType = 'pro', usageLimit: number = 30): Promise<CouponResponse> {
+  async createTestersCoupon(
+    planType: PlanType = 'pro',
+    usageLimit: number = 30
+  ): Promise<CouponResponse> {
     const code = this.generateCouponCode('TESTER', 6);
-    
+
     return this.createCoupon({
       code,
       plan_type: planType,
@@ -359,10 +364,7 @@ export class CouponService {
       this.prisma.coupon.count(),
       this.prisma.coupon.count({
         where: {
-          OR: [
-            { expires_at: null },
-            { expires_at: { gt: new Date() } },
-          ],
+          OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
         },
       }),
       this.prisma.coupon.count({

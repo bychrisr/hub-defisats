@@ -5,13 +5,17 @@ import { Redis } from 'ioredis';
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 
 // Create worker (minimal stub for now)
-const worker = new Worker('notification', async (job) => {
-  console.log('Notification job received:', job.data);
-  // TODO: Implement notification sending logic
-  return { status: 'processed' };
-}, { connection: redis });
+const worker = new Worker(
+  'notification',
+  async job => {
+    console.log('Notification job received:', job.data);
+    // TODO: Implement notification sending logic
+    return { status: 'processed' };
+  },
+  { connection: redis }
+);
 
-worker.on('completed', (job) => {
+worker.on('completed', job => {
   console.log(`Notification job ${job.id} completed`);
 });
 

@@ -45,7 +45,7 @@ export class SessionService {
   async validateSession(sessionId: string): Promise<User | null> {
     try {
       const sessionData = await this.redis.get(`session:${sessionId}`);
-      
+
       if (!sessionData) {
         return null;
       }
@@ -95,7 +95,7 @@ export class SessionService {
     try {
       // Get all sessions for user
       const keys = await this.redis.keys(`session:*`);
-      
+
       for (const key of keys) {
         const sessionData = await this.redis.get(key);
         if (sessionData) {
@@ -119,13 +119,15 @@ export class SessionService {
   /**
    * Get active sessions for user
    */
-  async getUserActiveSessions(userId: string): Promise<Array<{
-    sessionId: string;
-    createdAt: string;
-    lastActivity: string;
-    ipAddress?: string;
-    userAgent?: string;
-  }>> {
+  async getUserActiveSessions(userId: string): Promise<
+    Array<{
+      sessionId: string;
+      createdAt: string;
+      lastActivity: string;
+      ipAddress?: string;
+      userAgent?: string;
+    }>
+  > {
     try {
       const keys = await this.redis.keys(`session:*`);
       const sessions = [];
@@ -160,7 +162,7 @@ export class SessionService {
   async cleanExpiredSessions(): Promise<void> {
     try {
       const keys = await this.redis.keys(`session:*`);
-      
+
       for (const key of keys) {
         const ttl = await this.redis.ttl(key);
         if (ttl <= 0) {
@@ -178,7 +180,7 @@ export class SessionService {
   async hasActiveSession(userId: string): Promise<boolean> {
     try {
       const keys = await this.redis.keys(`session:*`);
-      
+
       for (const key of keys) {
         const sessionData = await this.redis.get(key);
         if (sessionData) {
@@ -188,7 +190,7 @@ export class SessionService {
           }
         }
       }
-      
+
       return false;
     } catch (error) {
       console.error('Check active session error:', error);

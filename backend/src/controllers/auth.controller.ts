@@ -2,15 +2,45 @@ import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import { AuthService } from '@/services/auth.service';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { metrics } from '@/services/metrics.service';
+
+// Interfaces
+interface RegisterRequestBody {
+  email?: string;
+  username?: string;
+  password?: string;
+  ln_markets_api_key?: string;
+  ln_markets_api_secret?: string;
+  ln_markets_passphrase?: string;
+  coupon_code?: string;
+}
+
+interface AuthenticatedRequest extends FastifyRequest {
+  user?: {
+    id: string;
+    email: string;
+    username: string;
+    plan_type: string;
+  };
+}
 
 // Zod schemas for validation
 const RegisterRequestZodSchema = z.object({
   email: z.string().email('Invalid email format'),
-  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be at most 20 characters'),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  ln_markets_api_key: z.string().min(16, 'LN Markets API key must be at least 16 characters'),
-  ln_markets_api_secret: z.string().min(16, 'LN Markets API secret must be at least 16 characters'),
-  ln_markets_passphrase: z.string().min(8, 'LN Markets passphrase must be at least 8 characters'),
+  ln_markets_api_key: z
+    .string()
+    .min(16, 'LN Markets API key must be at least 16 characters'),
+  ln_markets_api_secret: z
+    .string()
+    .min(16, 'LN Markets API secret must be at least 16 characters'),
+  ln_markets_passphrase: z
+    .string()
+    .min(8, 'LN Markets passphrase must be at least 8 characters'),
   coupon_code: z.string().optional(),
 });
 
@@ -25,9 +55,9 @@ const AuthResponseZodSchema = z.object({
   plan_type: z.enum(['free', 'basic', 'advanced', 'pro']),
 });
 
-const RefreshTokenResponseZodSchema = z.object({
-  token: z.string(),
-});
+// const RefreshTokenResponseZodSchema = z.object({
+//   token: z.string(),
+// });
 
 const ErrorResponseZodSchema = z.object({
   error: z.string(),
@@ -37,11 +67,15 @@ const ErrorResponseZodSchema = z.object({
 const ValidationErrorResponseZodSchema = z.object({
   error: z.literal('VALIDATION_ERROR'),
   message: z.string(),
-  validation_errors: z.array(z.object({
-    field: z.string(),
-    message: z.string(),
-    value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
-  })),
+  validation_errors: z.array(
+    z.object({
+      field: z.string(),
+      message: z.string(),
+      value: z
+        .union([z.string(), z.number(), z.boolean(), z.null()])
+        .optional(),
+    })
+  ),
 });
 
 export class AuthController {
@@ -56,14 +90,15 @@ export class AuthController {
    */
   async register(request: FastifyRequest, reply: FastifyReply) {
     console.log('📥 Registration request received');
+    const body = request.body as RegisterRequestBody;
     console.log('📋 Request body:', {
-      hasEmail: !!(request.body as any)?.email,
-      hasUsername: !!(request.body as any)?.username,
-      hasPassword: !!(request.body as any)?.password,
-      hasApiKey: !!(request.body as any)?.ln_markets_api_key,
-      hasApiSecret: !!(request.body as any)?.ln_markets_api_secret,
-      hasPassphrase: !!(request.body as any)?.ln_markets_passphrase,
-      hasCoupon: !!(request.body as any)?.coupon_code
+      hasEmail: !!body?.email,
+      hasUsername: !!body?.username,
+      hasPassword: !!body?.password,
+      hasApiKey: !!body?.ln_markets_api_key,
+      hasApiSecret: !!body?.ln_markets_api_secret,
+      hasPassphrase: !!body?.ln_markets_passphrase,
+      hasCoupon: !!body?.coupon_code,
     });
 
     try {
@@ -77,21 +112,28 @@ export class AuthController {
       const result = await this.authService.register(body);
       console.log('✅ User registration completed in service');
 
+      // Record successful registration
+      metrics.recordAuthAttempt('register', 'success');
+
       console.log('📤 Preparing response...');
       // Return response
       const response = AuthResponseZodSchema.parse(result);
       console.log('✅ Response prepared successfully');
-      
+
       console.log('📤 Sending success response...');
       return reply.status(201).send(response);
     } catch (error) {
       console.error('❌ Registration error occurred:', error);
+
+      // Record failed registration
+      metrics.recordAuthAttempt('register', 'failure', error.message);
+
       if (error instanceof z.ZodError) {
         console.log('❌ Validation error:', error.errors);
         const validationResponse = ValidationErrorResponseZodSchema.parse({
           error: 'VALIDATION_ERROR',
           message: 'Request validation failed',
-          validation_errors: error.errors.map((err) => ({
+          validation_errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
             value: err.input,
@@ -123,15 +165,21 @@ export class AuthController {
       // Login user
       const result = await this.authService.login(body);
 
+      // Record successful login
+      metrics.recordAuthAttempt('login', 'success');
+
       // Return response
       const response = AuthResponseZodSchema.parse(result);
       return reply.status(200).send(response);
     } catch (error) {
+      // Record failed login
+      metrics.recordAuthAttempt('login', 'failure', error.message);
+
       if (error instanceof z.ZodError) {
         const validationResponse = ValidationErrorResponseZodSchema.parse({
           error: 'VALIDATION_ERROR',
           message: 'Request validation failed',
-          validation_errors: error.errors.map((err) => ({
+          validation_errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
             value: err.input,
@@ -146,6 +194,31 @@ export class AuthController {
       });
 
       return reply.status(401).send(errorResponse);
+    }
+  }
+
+  /**
+   * Check username availability
+   */
+  async checkUsername(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { username } = request.query as { username: string };
+
+      if (!username) {
+        return reply.status(400).send({
+          error: 'BAD_REQUEST',
+          message: 'Username is required',
+        });
+      }
+
+      const result = await this.authService.checkUsernameAvailability(username);
+      return reply.status(200).send(result);
+    } catch (error) {
+      console.error('Check username error:', error);
+      return reply.status(500).send({
+        error: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to check username availability',
+      });
     }
   }
 
@@ -174,7 +247,8 @@ export class AuthController {
     } catch (error) {
       const errorResponse = ErrorResponseSchema.parse({
         error: 'REFRESH_TOKEN_FAILED',
-        message: error instanceof Error ? error.message : 'Token refresh failed',
+        message:
+          error instanceof Error ? error.message : 'Token refresh failed',
       });
 
       return reply.status(401).send(errorResponse);
@@ -187,7 +261,7 @@ export class AuthController {
   async logout(request: FastifyRequest, reply: FastifyReply) {
     try {
       // Get user from request (set by auth middleware)
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
 
       if (!user) {
         const errorResponse = ErrorResponseSchema.parse({
@@ -227,7 +301,7 @@ export class AuthController {
   async me(request: FastifyRequest, reply: FastifyReply) {
     try {
       // Get user from request (set by auth middleware)
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
 
       if (!user) {
         const errorResponse = ErrorResponseSchema.parse({
@@ -248,7 +322,8 @@ export class AuthController {
     } catch (error) {
       const errorResponse = ErrorResponseSchema.parse({
         error: 'USER_INFO_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to get user info',
+        message:
+          error instanceof Error ? error.message : 'Failed to get user info',
       });
 
       return reply.status(500).send(errorResponse);

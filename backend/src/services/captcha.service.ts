@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { config } from '@/config/env';
+// import { config } from '@/config/env';
 
 export class CaptchaService {
   private readonly recaptchaSecretKey: string;
-  private readonly recaptchaUrl = 'https://www.google.com/recaptcha/api/siteverify';
+  private readonly recaptchaUrl =
+    'https://www.google.com/recaptcha/api/siteverify';
 
   constructor() {
     this.recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY || '';
@@ -12,13 +13,18 @@ export class CaptchaService {
   /**
    * Verify reCAPTCHA token
    */
-  async verifyRecaptcha(token: string, remoteip?: string): Promise<{
+  async verifyRecaptcha(
+    token: string,
+    remoteip?: string
+  ): Promise<{
     success: boolean;
     score?: number;
     error?: string;
   }> {
     if (!this.recaptchaSecretKey) {
-      console.warn('RECAPTCHA_SECRET_KEY not configured, skipping verification');
+      console.warn(
+        'RECAPTCHA_SECRET_KEY not configured, skipping verification'
+      );
       return { success: true }; // Allow in development
     }
 
@@ -66,26 +72,33 @@ export class CaptchaService {
   /**
    * Verify hCaptcha token
    */
-  async verifyHcaptcha(token: string, remoteip?: string): Promise<{
+  async verifyHcaptcha(
+    token: string,
+    remoteip?: string
+  ): Promise<{
     success: boolean;
     error?: string;
   }> {
     const hcaptchaSecretKey = process.env.HCAPTCHA_SECRET_KEY;
-    
+
     if (!hcaptchaSecretKey) {
       console.warn('HCAPTCHA_SECRET_KEY not configured, skipping verification');
       return { success: true }; // Allow in development
     }
 
     try {
-      const response = await axios.post('https://hcaptcha.com/siteverify', null, {
-        params: {
-          secret: hcaptchaSecretKey,
-          response: token,
-          remoteip,
-        },
-        timeout: 10000,
-      });
+      const response = await axios.post(
+        'https://hcaptcha.com/siteverify',
+        null,
+        {
+          params: {
+            secret: hcaptchaSecretKey,
+            response: token,
+            remoteip,
+          },
+          timeout: 10000,
+        }
+      );
 
       const { success, 'error-codes': errorCodes } = response.data;
 

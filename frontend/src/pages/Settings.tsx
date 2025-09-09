@@ -1,26 +1,32 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  User, 
-  Key, 
-  Bell, 
+import { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  User,
+  Key,
+  Bell,
   Shield,
   Eye,
   EyeOff,
   CheckCircle,
   AlertTriangle,
   Upload,
-  Trash2
-} from "lucide-react";
-import { useForm } from "react-hook-form";
+  Trash2,
+} from 'lucide-react';
+import { useForm } from 'react-hook-form';
 
 export const Settings = () => {
   const [showApiKey, setShowApiKey] = useState(false);
@@ -32,7 +38,7 @@ export const Settings = () => {
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     setIsLoading(false);
   };
 
@@ -92,7 +98,7 @@ export const Settings = () => {
                     <Input
                       id="firstName"
                       defaultValue="João"
-                      {...register("firstName")}
+                      {...register('firstName')}
                     />
                   </div>
                   <div className="space-y-2">
@@ -100,7 +106,7 @@ export const Settings = () => {
                     <Input
                       id="lastName"
                       defaultValue="Silva"
-                      {...register("lastName")}
+                      {...register('lastName')}
                     />
                   </div>
                 </div>
@@ -111,7 +117,7 @@ export const Settings = () => {
                     id="email"
                     type="email"
                     defaultValue="joao@example.com"
-                    {...register("email")}
+                    {...register('email')}
                   />
                 </div>
 
@@ -120,7 +126,7 @@ export const Settings = () => {
                   <select
                     id="timezone"
                     className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md"
-                    {...register("timezone")}
+                    {...register('timezone')}
                   >
                     <option value="America/Sao_Paulo">São Paulo (UTC-3)</option>
                     <option value="UTC">UTC (UTC+0)</option>
@@ -129,7 +135,7 @@ export const Settings = () => {
                 </div>
 
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Salvando..." : "Salvar Alterações"}
+                  {isLoading ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
               </form>
             </CardContent>
@@ -150,8 +156,12 @@ export const Settings = () => {
                     Configure suas credenciais para conectar com a LN Markets
                   </CardDescription>
                 </div>
-                <Badge 
-                  className={isConnected ? "bg-success/20 text-success border-success/30" : "bg-destructive/20 text-destructive border-destructive/30"}
+                <Badge
+                  className={
+                    isConnected
+                      ? 'bg-success/20 text-success border-success/30'
+                      : 'bg-destructive/20 text-destructive border-destructive/30'
+                  }
                 >
                   {isConnected ? (
                     <>
@@ -174,8 +184,9 @@ export const Settings = () => {
                   <div>
                     <p className="font-medium text-warning">Segurança</p>
                     <p className="text-sm text-muted-foreground">
-                      Suas API keys são criptografadas e armazenadas com segurança. 
-                      Nunca compartilhamos suas credenciais com terceiros.
+                      Suas API keys são criptografadas e armazenadas com
+                      segurança. Nunca compartilhamos suas credenciais com
+                      terceiros.
                     </p>
                   </div>
                 </div>
@@ -188,7 +199,9 @@ export const Settings = () => {
                     id="environment"
                     className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md"
                   >
-                    <option value="testnet">Testnet (Recomendado para testes)</option>
+                    <option value="testnet">
+                      Testnet (Recomendado para testes)
+                    </option>
                     <option value="mainnet">Mainnet (Produção)</option>
                   </select>
                 </div>
@@ -198,9 +211,13 @@ export const Settings = () => {
                   <div className="relative">
                     <Input
                       id="apiKey"
-                      type={showApiKey ? "text" : "password"}
+                      type={showApiKey ? 'text' : 'password'}
                       placeholder="Sua API Key da LN Markets"
-                      defaultValue={isConnected ? "lnm_test_•••••••••••••••••••••••••••••••••••••••••••••••••••" : ""}
+                      defaultValue={
+                        isConnected
+                          ? 'lnm_test_•••••••••••••••••••••••••••••••••••••••••••••••••••'
+                          : ''
+                      }
                     />
                     <Button
                       type="button"
@@ -223,9 +240,13 @@ export const Settings = () => {
                   <div className="relative">
                     <Input
                       id="secretKey"
-                      type={showSecretKey ? "text" : "password"}
+                      type={showSecretKey ? 'text' : 'password'}
                       placeholder="Sua Secret Key da LN Markets"
-                      defaultValue={isConnected ? "•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••" : ""}
+                      defaultValue={
+                        isConnected
+                          ? '•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'
+                          : ''
+                      }
                     />
                     <Button
                       type="button"
@@ -247,9 +268,7 @@ export const Settings = () => {
                   <Button type="button" variant="outline">
                     Testar Conexão
                   </Button>
-                  <Button type="submit">
-                    Salvar Credenciais
-                  </Button>
+                  <Button type="submit">Salvar Credenciais</Button>
                 </div>
               </form>
 
@@ -268,7 +287,9 @@ export const Settings = () => {
               )}
 
               <div className="text-sm text-muted-foreground">
-                <p className="mb-2">📖 <strong>Como obter suas API Keys:</strong></p>
+                <p className="mb-2">
+                  📖 <strong>Como obter suas API Keys:</strong>
+                </p>
                 <ol className="list-decimal list-inside space-y-1">
                   <li>Acesse sua conta na LN Markets</li>
                   <li>Vá para Configurações → API</li>
@@ -350,14 +371,24 @@ export const Settings = () => {
 
               <div className="space-y-4">
                 <h4 className="font-medium">Canais de Notificação</h4>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="email" defaultChecked className="w-4 h-4" />
+                    <input
+                      type="checkbox"
+                      id="email"
+                      defaultChecked
+                      className="w-4 h-4"
+                    />
                     <Label htmlFor="email">Email</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="push" defaultChecked className="w-4 h-4" />
+                    <input
+                      type="checkbox"
+                      id="push"
+                      defaultChecked
+                      className="w-4 h-4"
+                    />
                     <Label htmlFor="push">Notificações Push</Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -401,7 +432,9 @@ export const Settings = () => {
                     <Input id="newPassword" type="password" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                    <Label htmlFor="confirmPassword">
+                      Confirmar Nova Senha
+                    </Label>
                     <Input id="confirmPassword" type="password" />
                   </div>
                   <Button>Alterar Senha</Button>
@@ -412,7 +445,7 @@ export const Settings = () => {
 
               <div className="space-y-4">
                 <h4 className="font-medium">Opções de Segurança</h4>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">Autenticação de Dois Fatores</p>
@@ -440,7 +473,7 @@ export const Settings = () => {
 
               <div className="space-y-4">
                 <h4 className="font-medium text-destructive">Zona de Perigo</h4>
-                
+
                 <div className="p-4 border border-destructive/20 rounded-lg space-y-4">
                   <div>
                     <p className="font-medium">Excluir Conta</p>

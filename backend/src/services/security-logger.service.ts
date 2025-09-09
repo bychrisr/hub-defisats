@@ -2,9 +2,17 @@ import { Redis } from 'ioredis';
 import { config } from '@/config/env';
 
 export interface SecurityEvent {
-  type: 'LOGIN_SUCCESS' | 'LOGIN_FAILED' | 'LOGOUT' | 'PASSWORD_CHANGE' | 
-        'PASSWORD_RESET' | 'ACCOUNT_LOCKED' | 'SUSPICIOUS_ACTIVITY' | 
-        'ADMIN_ACTION' | 'RATE_LIMIT_EXCEEDED' | 'CSRF_VIOLATION';
+  type:
+    | 'LOGIN_SUCCESS'
+    | 'LOGIN_FAILED'
+    | 'LOGOUT'
+    | 'PASSWORD_CHANGE'
+    | 'PASSWORD_RESET'
+    | 'ACCOUNT_LOCKED'
+    | 'SUSPICIOUS_ACTIVITY'
+    | 'ADMIN_ACTION'
+    | 'RATE_LIMIT_EXCEEDED'
+    | 'CSRF_VIOLATION';
   userId?: string;
   email?: string;
   ipAddress?: string;
@@ -261,7 +269,8 @@ export class SecurityLoggerService {
 
       parsedLogs.forEach(log => {
         eventsByType[log.type] = (eventsByType[log.type] || 0) + 1;
-        eventsBySeverity[log.severity] = (eventsBySeverity[log.severity] || 0) + 1;
+        eventsBySeverity[log.severity] =
+          (eventsBySeverity[log.severity] || 0) + 1;
       });
 
       return {
@@ -295,7 +304,7 @@ export class SecurityLoggerService {
     // This would integrate with your notification system
     // For now, just log to console
     console.error('SECURITY ALERT:', logEntry);
-    
+
     // TODO: Send email/SMS/Slack notification
     // await this.notificationService.sendSecurityAlert(logEntry);
   }

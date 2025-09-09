@@ -7,6 +7,28 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+### Added
+- **CI/CD Pipeline Completo**: Implementação completa do pipeline de integração contínua
+  - GitHub Actions workflow com testes automatizados para backend e frontend
+  - Testes de segurança com Trivy vulnerability scanner
+  - Verificação de qualidade de código com ESLint e Prettier
+  - Build e teste de imagens Docker para ambos os serviços
+  - Deploy automático para staging (branch develop) e produção (branch main)
+  - Verificação de dependências com auditoria de segurança semanal
+  - Configuração Jest para testes do frontend com React Testing Library
+  - Scripts de formatação e type-check para ambos os projetos
+  - Pipeline configurado em `.github/workflows/ci-cd.yml` e `.github/workflows/dependencies.yml`
+
+### Added
+- **Auditoria Completa de Segurança e Qualidade**: Relatório detalhado de vulnerabilidades
+  - Identificadas 8 vulnerabilidades críticas que impedem deploy em produção
+  - Documentados 15 problemas importantes que devem ser corrigidos
+  - Criado plano de ação estruturado em 3 fases (1-2 dias, 3-5 dias, 1-2 semanas)
+  - Checklist completo de funcionalidades, UX/UI, segurança e monitoramento
+  - Sugestões detalhadas de testes de segurança, IDOR e performance
+  - Métricas de progresso e critérios de aprovação para produção
+  - Relatório salvo em `0.contexto/docs/SECURITY_AUDIT_REPORT.md`
+
 ### Fixed
 - **Schema Validation + Port + Hangup Issues**: Resolvidos problemas críticos de infraestrutura
   - Corrigido erro "socket hang up" - servidor agora responde corretamente

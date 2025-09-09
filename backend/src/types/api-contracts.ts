@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { 
-  PlanType, 
-  AutomationType, 
-  TradeStatus, 
-  NotificationType, 
+import {
+  PlanType,
+  AutomationType,
+  TradeStatus,
+  NotificationType,
   PaymentStatus,
-  SocialProvider,
-  AdminRole,
-  AlertSeverity
+  // SocialProvider,
+  // AdminRole,
+  // AlertSeverity,
 } from '@prisma/client';
 
 // ============================================================================
@@ -16,11 +16,20 @@ import {
 
 export const RegisterRequestSchema = z.object({
   email: z.string().email('Invalid email format'),
-  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be at most 20 characters'),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  ln_markets_api_key: z.string().min(16, 'LN Markets API key must be at least 16 characters'),
-  ln_markets_api_secret: z.string().min(16, 'LN Markets API secret must be at least 16 characters'),
-  ln_markets_passphrase: z.string().min(8, 'LN Markets passphrase must be at least 8 characters'),
+  ln_markets_api_key: z
+    .string()
+    .min(16, 'LN Markets API key must be at least 16 characters'),
+  ln_markets_api_secret: z
+    .string()
+    .min(16, 'LN Markets API secret must be at least 16 characters'),
+  ln_markets_passphrase: z
+    .string()
+    .min(8, 'LN Markets passphrase must be at least 8 characters'),
   coupon_code: z.string().optional(),
 });
 
@@ -51,17 +60,21 @@ export const UserResponseSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   plan_type: z.nativeEnum(PlanType),
-  notifications: z.array(z.object({
-    type: z.nativeEnum(NotificationType),
-    is_enabled: z.boolean(),
-    channel_config: z.record(z.any()),
-  })),
-  automations: z.array(z.object({
-    id: z.string().uuid(),
-    type: z.nativeEnum(AutomationType),
-    is_active: z.boolean(),
-    config: z.record(z.any()),
-  })),
+  notifications: z.array(
+    z.object({
+      type: z.nativeEnum(NotificationType),
+      is_enabled: z.boolean(),
+      channel_config: z.record(z.any()),
+    })
+  ),
+  automations: z.array(
+    z.object({
+      id: z.string().uuid(),
+      type: z.nativeEnum(AutomationType),
+      is_active: z.boolean(),
+      config: z.record(z.any()),
+    })
+  ),
 });
 
 export const UpdateUserRequestSchema = z.object({
@@ -155,14 +168,16 @@ export const BacktestResultSchema = z.object({
   total_pnl: z.number(),
   max_drawdown: z.number(),
   win_rate: z.number(),
-  trades: z.array(z.object({
-    date: z.string().datetime(),
-    type: z.enum(['buy', 'sell']),
-    amount: z.number(),
-    price: z.number(),
-    pnl: z.number(),
-    automation_triggered: z.boolean(),
-  })),
+  trades: z.array(
+    z.object({
+      date: z.string().datetime(),
+      type: z.enum(['buy', 'sell']),
+      amount: z.number(),
+      price: z.number(),
+      pnl: z.number(),
+      automation_triggered: z.boolean(),
+    })
+  ),
 });
 
 export const BacktestResponseSchema = z.object({
@@ -203,17 +218,18 @@ export const NotificationResponseSchema = z.object({
   updated_at: z.string().datetime(),
 });
 
-export const NotificationListResponseSchema = z.array(NotificationResponseSchema);
+export const NotificationListResponseSchema = z.array(
+  NotificationResponseSchema
+);
 
 // ============================================================================
 // PAYMENT CONTRACTS
 // ============================================================================
 
 export const CreatePaymentRequestSchema = z.object({
-  plan_type: z.nativeEnum(PlanType).refine(
-    (val) => val !== 'free',
-    'Plan type must be basic, advanced, or pro'
-  ),
+  plan_type: z
+    .nativeEnum(PlanType)
+    .refine(val => val !== 'free', 'Plan type must be basic, advanced, or pro'),
 });
 
 export const PaymentResponseSchema = z.object({
@@ -282,7 +298,14 @@ export const AdminUsersQuerySchema = z.object({
 export const AdminUsersResponseSchema = z.array(AdminUserSchema);
 
 export const CreateCouponRequestSchema = z.object({
-  code: z.string().min(3).max(50).regex(/^[A-Z0-9_-]+$/, 'Code must contain only uppercase letters, numbers, hyphens, and underscores'),
+  code: z
+    .string()
+    .min(3)
+    .max(50)
+    .regex(
+      /^[A-Z0-9_-]+$/,
+      'Code must contain only uppercase letters, numbers, hyphens, and underscores'
+    ),
   plan_type: z.nativeEnum(PlanType),
   usage_limit: z.number().min(1).max(1000).default(1),
   expires_at: z.string().datetime().optional(),
@@ -365,13 +388,21 @@ export type UserResponse = z.infer<typeof UserResponseSchema>;
 export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;
 
 export type AutomationConfig = z.infer<typeof AutomationConfigSchema>;
-export type CreateAutomationRequest = z.infer<typeof CreateAutomationRequestSchema>;
-export type UpdateAutomationRequest = z.infer<typeof UpdateAutomationRequestSchema>;
+export type CreateAutomationRequest = z.infer<
+  typeof CreateAutomationRequestSchema
+>;
+export type UpdateAutomationRequest = z.infer<
+  typeof UpdateAutomationRequestSchema
+>;
 export type AutomationResponse = z.infer<typeof AutomationResponseSchema>;
-export type AutomationListResponse = z.infer<typeof AutomationListResponseSchema>;
+export type AutomationListResponse = z.infer<
+  typeof AutomationListResponseSchema
+>;
 
 export type TradeLogResponse = z.infer<typeof TradeLogResponseSchema>;
-export type TradeLogDetailResponse = z.infer<typeof TradeLogDetailResponseSchema>;
+export type TradeLogDetailResponse = z.infer<
+  typeof TradeLogDetailResponseSchema
+>;
 export type TradeLogListResponse = z.infer<typeof TradeLogListResponseSchema>;
 export type TradeLogQuery = z.infer<typeof TradeLogQuerySchema>;
 
@@ -380,11 +411,19 @@ export type CreateBacktestRequest = z.infer<typeof CreateBacktestRequestSchema>;
 export type BacktestResult = z.infer<typeof BacktestResultSchema>;
 export type BacktestResponse = z.infer<typeof BacktestResponseSchema>;
 
-export type NotificationChannelConfig = z.infer<typeof NotificationChannelConfigSchema>;
-export type CreateNotificationRequest = z.infer<typeof CreateNotificationRequestSchema>;
-export type UpdateNotificationRequest = z.infer<typeof UpdateNotificationRequestSchema>;
+export type NotificationChannelConfig = z.infer<
+  typeof NotificationChannelConfigSchema
+>;
+export type CreateNotificationRequest = z.infer<
+  typeof CreateNotificationRequestSchema
+>;
+export type UpdateNotificationRequest = z.infer<
+  typeof UpdateNotificationRequestSchema
+>;
 export type NotificationResponse = z.infer<typeof NotificationResponseSchema>;
-export type NotificationListResponse = z.infer<typeof NotificationListResponseSchema>;
+export type NotificationListResponse = z.infer<
+  typeof NotificationListResponseSchema
+>;
 
 export type CreatePaymentRequest = z.infer<typeof CreatePaymentRequestSchema>;
 export type PaymentResponse = z.infer<typeof PaymentResponseSchema>;
@@ -393,7 +432,9 @@ export type PaymentStatusResponse = z.infer<typeof PaymentStatusResponseSchema>;
 export type AdminKPI = z.infer<typeof AdminKPISchema>;
 export type AdminUser = z.infer<typeof AdminUserSchema>;
 export type AdminPayment = z.infer<typeof AdminPaymentSchema>;
-export type AdminDashboardResponse = z.infer<typeof AdminDashboardResponseSchema>;
+export type AdminDashboardResponse = z.infer<
+  typeof AdminDashboardResponseSchema
+>;
 export type AdminUsersQuery = z.infer<typeof AdminUsersQuerySchema>;
 export type AdminUsersResponse = z.infer<typeof AdminUsersResponseSchema>;
 export type CreateCouponRequest = z.infer<typeof CreateCouponRequestSchema>;
@@ -402,9 +443,13 @@ export type CouponListResponse = z.infer<typeof CouponListResponseSchema>;
 
 export type WebSocketAuth = z.infer<typeof WebSocketAuthSchema>;
 export type MarginUpdateEvent = z.infer<typeof MarginUpdateEventSchema>;
-export type AutomationExecutedEvent = z.infer<typeof AutomationExecutedEventSchema>;
+export type AutomationExecutedEvent = z.infer<
+  typeof AutomationExecutedEventSchema
+>;
 export type NotificationSentEvent = z.infer<typeof NotificationSentEventSchema>;
 
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 export type ValidationError = z.infer<typeof ValidationErrorSchema>;
-export type ValidationErrorResponse = z.infer<typeof ValidationErrorResponseSchema>;
+export type ValidationErrorResponse = z.infer<
+  typeof ValidationErrorResponseSchema
+>;

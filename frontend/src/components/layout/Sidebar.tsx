@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   Home,
   Settings,
@@ -10,9 +10,9 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -21,33 +21,33 @@ interface SidebarProps {
 
 const navigation = [
   {
-    name: "Dashboard",
-    href: "/dashboard",
+    name: 'Dashboard',
+    href: '/dashboard',
     icon: Home,
   },
   {
-    name: "Margin Guard",
-    href: "/margin-guard",
+    name: 'Margin Guard',
+    href: '/margin-guard',
     icon: Shield,
   },
   {
-    name: "Automations",
-    href: "/automation",
+    name: 'Automations',
+    href: '/automation',
     icon: Settings,
   },
   {
-    name: "Profile",
-    href: "/profile",
+    name: 'Profile',
+    href: '/profile',
     icon: User,
   },
   {
-    name: "Reports",
-    href: "/reports",
+    name: 'Reports',
+    href: '/reports',
     icon: BarChart3,
   },
   {
-    name: "Logs",
-    href: "/logs",
+    name: 'Logs',
+    href: '/logs',
     icon: History,
   },
 ];
@@ -56,8 +56,8 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const location = useLocation();
 
   const isActive = (href: string) => {
-    if (href === "/dashboard") {
-      return location.pathname === "/" || location.pathname === "/dashboard";
+    if (href === '/dashboard') {
+      return location.pathname === '/' || location.pathname === '/dashboard';
     }
     return location.pathname.startsWith(href);
   };
@@ -65,8 +65,8 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] border-r border-border bg-card transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+        'fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] border-r border-border bg-card transition-all duration-300',
+        collapsed ? 'w-16' : 'w-64'
       )}
     >
       <div className="flex h-full flex-col">
@@ -88,7 +88,7 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-2">
-          {navigation.map((item) => {
+          {navigation.map(item => {
             const Icon = item.icon;
             const active = isActive(item.href);
 
@@ -97,10 +97,10 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  "flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                  'flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors',
                   active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />

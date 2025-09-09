@@ -3,7 +3,24 @@ import { PrismaClient } from '@prisma/client';
 import { config } from '@/config/env';
 import { authRoutes } from '@/routes/auth.routes';
 import { automationRoutes } from '@/routes/automation.routes';
+import { metricsRoutes } from '@/routes/metrics.routes';
+import { alertsRoutes } from '@/routes/alerts.routes';
+import { dashboardRoutes } from '@/routes/dashboard.routes';
+import { cacheRoutes } from '@/routes/cache.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
+import { monitoring } from '@/services/monitoring.service';
+import { metrics } from '@/services/metrics.service';
+import { alerting } from '@/services/alerting.service';
+import { cacheService } from '@/services/cache.service';
+
+// Initialize monitoring
+monitoring.initialize();
+
+// Initialize metrics
+metrics.initialize();
+
+// Initialize alerting
+alerting.initialize();
 
 // Initialize Prisma
 const prisma = new PrismaClient({
@@ -74,7 +91,7 @@ async function registerPlugins() {
       },
       servers: [
         {
-          url: config.isDevelopment ? 'http://localhost:3010' : 'https://api.hubdefisats.com',
+          url: config.isDevelopment ? 'http://localhost:13010' : 'https://api.hubdefisats.com',
           description: config.isDevelopment ? 'Development server' : 'Production server',
         },
       ],
@@ -160,10 +177,71 @@ async function registerRoutes() {
   });
   console.log('✅ Health check route registered');
 
+  // Add monitoring hooks
+  fastify.addHook('onRequest', (request, reply, done) => {
+    // Add breadcrumb for request
+    monitoring.addBreadcrumb(
+      `${request.method} ${request.url}`,
+      'http',
+      'info',
+      {
+        method: request.method,
+        url: request.url,
+        userAgent: request.headers['user-agent'],
+      }
+    );
+    done();
+  });
+
+  fastify.addHook('onResponse', (request, reply, done) => {
+    // Capture metrics
+    monitoring.captureMetric('http_requests_total', 1, 'count', {
+      method: request.method,
+      status_code: reply.statusCode.toString(),
+      route: request.url,
+    });
+
+    monitoring.captureMetric('http_request_duration_ms', reply.getResponseTime(), 'millisecond', {
+      method: request.method,
+      route: request.url,
+    });
+
+    // Prometheus metrics
+    metrics.httpRequestsTotal.inc({
+      method: request.method,
+      route: request.url,
+      status_code: reply.statusCode.toString(),
+    });
+
+    metrics.httpRequestDuration.observe({
+      method: request.method,
+      route: request.url,
+      status_code: reply.statusCode.toString(),
+    }, reply.getResponseTime() / 1000);
+
+    done();
+  });
+
   console.log('🛣️ Registering API routes...');
   // API routes
   await fastify.register(authRoutes, { prefix: '/api/auth' });
   console.log('✅ Auth routes registered');
+
+  // Metrics routes
+  await fastify.register(metricsRoutes, { prefix: '/api/metrics' });
+  console.log('✅ Metrics routes registered');
+
+  // Alerts routes
+  await fastify.register(alertsRoutes, { prefix: '/api' });
+  console.log('✅ Alerts routes registered');
+
+  // Dashboard routes
+  await fastify.register(dashboardRoutes, { prefix: '/api' });
+  console.log('✅ Dashboard routes registered');
+
+  // Cache routes
+  await fastify.register(cacheRoutes, { prefix: '/api' });
+  console.log('✅ Cache routes registered');
   
   await fastify.register(automationRoutes, { prefix: '/api' });
   console.log('✅ Automation routes registered');
@@ -185,6 +263,20 @@ async function registerRoutes() {
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
+
+  // Capture error in Sentry
+  monitoring.captureError(error, {
+    request: {
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body: request.body,
+    },
+    user: (request as any).user ? {
+      id: (request as any).user.id,
+      email: (request as any).user.email,
+    } : undefined,
+  });
 
   // Prisma errors
   if (error.code === 'P2002') {

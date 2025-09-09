@@ -19,7 +19,12 @@ const TPSLConfigSchema = z.object({
 });
 
 const AutoEntryConfigSchema = z.object({
-  entry_condition: z.enum(['price_above', 'price_below', 'rsi_oversold', 'rsi_overbought']),
+  entry_condition: z.enum([
+    'price_above',
+    'price_below',
+    'rsi_oversold',
+    'rsi_overbought',
+  ]),
   entry_price: z.number().min(0).optional(),
   rsi_period: z.number().min(5).max(50).optional(),
   rsi_threshold: z.number().min(10).max(90).optional(),
@@ -29,7 +34,10 @@ const AutoEntryConfigSchema = z.object({
 
 // Union schema for all automation configs
 const AutomationConfigSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('margin_guard'), config: MarginGuardConfigSchema }),
+  z.object({
+    type: z.literal('margin_guard'),
+    config: MarginGuardConfigSchema,
+  }),
   z.object({ type: z.literal('tp_sl'), config: TPSLConfigSchema }),
   z.object({ type: z.literal('auto_entry'), config: AutoEntryConfigSchema }),
 ]);
@@ -81,7 +89,9 @@ export class AutomationService {
       return validation.config;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new Error(`Invalid configuration for ${type}: ${error.errors.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Invalid configuration for ${type}: ${error.errors.map(e => e.message).join(', ')}`
+        );
       }
       throw error;
     }
@@ -92,7 +102,10 @@ export class AutomationService {
    */
   async createAutomation(data: CreateAutomationData): Promise<Automation> {
     // Validate configuration
-    const validatedConfig = this.validateAutomationConfig(data.type, data.config);
+    const validatedConfig = this.validateAutomationConfig(
+      data.type,
+      data.config
+    );
 
     // Check if user already has an automation of this type
     const existingAutomation = await this.prisma.automation.findFirst({
@@ -123,7 +136,9 @@ export class AutomationService {
   /**
    * Get user's automations
    */
-  async getUserAutomations(data: GetUserAutomationsData): Promise<Automation[]> {
+  async getUserAutomations(
+    data: GetUserAutomationsData
+  ): Promise<Automation[]> {
     const where: any = {
       user_id: data.userId,
     };
@@ -163,7 +178,9 @@ export class AutomationService {
   /**
    * Update automation
    */
-  async updateAutomation(data: UpdateAutomationData): Promise<Automation | null> {
+  async updateAutomation(
+    data: UpdateAutomationData
+  ): Promise<Automation | null> {
     // Check if automation exists and belongs to user
     const existingAutomation = await this.prisma.automation.findFirst({
       where: {
@@ -179,7 +196,10 @@ export class AutomationService {
     // Validate configuration if provided
     let validatedConfig = data.updates.config;
     if (data.updates.config) {
-      validatedConfig = this.validateAutomationConfig(existingAutomation.type, data.updates.config);
+      validatedConfig = this.validateAutomationConfig(
+        existingAutomation.type,
+        data.updates.config
+      );
     }
 
     // Update automation
@@ -189,7 +209,10 @@ export class AutomationService {
       },
       data: {
         config: validatedConfig || existingAutomation.config,
-        is_active: data.updates.is_active !== undefined ? data.updates.is_active : existingAutomation.is_active,
+        is_active:
+          data.updates.is_active !== undefined
+            ? data.updates.is_active
+            : existingAutomation.is_active,
         updated_at: new Date(),
       },
     });
@@ -214,7 +237,9 @@ export class AutomationService {
   /**
    * Toggle automation status
    */
-  async toggleAutomation(data: ToggleAutomationData): Promise<Automation | null> {
+  async toggleAutomation(
+    data: ToggleAutomationData
+  ): Promise<Automation | null> {
     // Check if automation exists and belongs to user
     const existingAutomation = await this.prisma.automation.findFirst({
       where: {
@@ -345,7 +370,10 @@ export class AutomationService {
   /**
    * Validate automation configuration without creating
    */
-  async validateConfig(type: AutomationType, config: any): Promise<{ valid: boolean; errors?: string[] }> {
+  async validateConfig(
+    type: AutomationType,
+    config: any
+  ): Promise<{ valid: boolean; errors?: string[] }> {
     try {
       this.validateAutomationConfig(type, config);
       return { valid: true };

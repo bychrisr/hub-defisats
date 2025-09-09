@@ -12,7 +12,10 @@ export class TwoFactorService {
   /**
    * Generate 2FA secret for user
    */
-  async generateSecret(userId: string, email: string): Promise<{
+  async generateSecret(
+    userId: string,
+    email: string
+  ): Promise<{
     secret: string;
     qrCodeUrl: string;
     backupCodes: string[];
@@ -105,7 +108,7 @@ export class TwoFactorService {
    */
   async enable2FA(userId: string, token: string): Promise<boolean> {
     const isValid = await this.verifyToken(userId, token);
-    
+
     if (!isValid) {
       return false;
     }
@@ -123,7 +126,7 @@ export class TwoFactorService {
    */
   async disable2FA(userId: string, token: string): Promise<boolean> {
     const isValid = await this.verifyToken(userId, token);
-    
+
     if (!isValid) {
       return false;
     }
@@ -157,7 +160,7 @@ export class TwoFactorService {
    */
   async generateNewBackupCodes(userId: string): Promise<string[]> {
     const backupCodes = this.generateBackupCodes();
-    
+
     await this.prisma.user.update({
       where: { id: userId },
       data: { two_factor_backup_codes: backupCodes },
@@ -187,12 +190,12 @@ export class TwoFactorService {
    */
   private generateBackupCodes(): string[] {
     const codes: string[] = [];
-    
+
     for (let i = 0; i < 10; i++) {
       const code = Math.random().toString(36).substring(2, 10).toUpperCase();
       codes.push(code);
     }
-    
+
     return codes;
   }
 

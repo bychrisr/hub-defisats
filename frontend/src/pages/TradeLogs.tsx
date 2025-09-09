@@ -1,13 +1,39 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, TrendingUp } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
 import axios from 'axios';
 
 interface TradeLog {
@@ -38,7 +64,7 @@ export const TradeLogs = () => {
     trade_id: '',
     status: 'success',
     error_message: '',
-    executed_at: new Date().toISOString()
+    executed_at: new Date().toISOString(),
   });
 
   useEffect(() => {
@@ -62,7 +88,7 @@ export const TradeLogs = () => {
       const data = {
         ...formData,
         automation_id: formData.automation_id || null,
-        error_message: formData.error_message || null
+        error_message: formData.error_message || null,
       };
       if (editingTradeLog) {
         await axios.put(`/api/trade-logs/${editingTradeLog.id}`, data);
@@ -78,7 +104,7 @@ export const TradeLogs = () => {
         trade_id: '',
         status: 'success',
         error_message: '',
-        executed_at: new Date().toISOString()
+        executed_at: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Error saving trade log:', error);
@@ -93,7 +119,7 @@ export const TradeLogs = () => {
       trade_id: tradeLog.trade_id,
       status: tradeLog.status,
       error_message: tradeLog.error_message || '',
-      executed_at: tradeLog.executed_at
+      executed_at: tradeLog.executed_at,
     });
     setDialogOpen(true);
   };
@@ -117,7 +143,7 @@ export const TradeLogs = () => {
       trade_id: '',
       status: 'success',
       error_message: '',
-      executed_at: new Date().toISOString()
+      executed_at: new Date().toISOString(),
     });
     setDialogOpen(true);
   };
@@ -131,7 +157,9 @@ export const TradeLogs = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Trade Logs</h1>
-          <p className="text-muted-foreground">Monitor trading activities and executions</p>
+          <p className="text-muted-foreground">
+            Monitor trading activities and executions
+          </p>
         </div>
         <Button onClick={openCreateDialog}>
           <Plus className="mr-2 h-4 w-4" />
@@ -157,29 +185,47 @@ export const TradeLogs = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tradeLogs.map((tradeLog) => (
+              {tradeLogs.map(tradeLog => (
                 <TableRow key={tradeLog.id}>
                   <TableCell>{tradeLog.user.email}</TableCell>
                   <TableCell>{tradeLog.trade_id}</TableCell>
                   <TableCell>
-                    <Badge variant={tradeLog.status === 'success' ? "default" : "destructive"}>
+                    <Badge
+                      variant={
+                        tradeLog.status === 'success'
+                          ? 'default'
+                          : 'destructive'
+                      }
+                    >
                       {tradeLog.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     {tradeLog.automation ? (
-                      <Badge variant="outline">{tradeLog.automation.type}</Badge>
+                      <Badge variant="outline">
+                        {tradeLog.automation.type}
+                      </Badge>
                     ) : (
                       <span className="text-muted-foreground">Manual</span>
                     )}
                   </TableCell>
-                  <TableCell>{new Date(tradeLog.executed_at).toLocaleString()}</TableCell>
+                  <TableCell>
+                    {new Date(tradeLog.executed_at).toLocaleString()}
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(tradeLog)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(tradeLog)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(tradeLog.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(tradeLog.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -194,9 +240,13 @@ export const TradeLogs = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingTradeLog ? 'Edit Trade Log' : 'Add Trade Log'}</DialogTitle>
+            <DialogTitle>
+              {editingTradeLog ? 'Edit Trade Log' : 'Add Trade Log'}
+            </DialogTitle>
             <DialogDescription>
-              {editingTradeLog ? 'Update trade log details' : 'Record a new trade execution'}
+              {editingTradeLog
+                ? 'Update trade log details'
+                : 'Record a new trade execution'}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -206,7 +256,9 @@ export const TradeLogs = () => {
                 <Input
                   id="user_id"
                   value={formData.user_id}
-                  onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, user_id: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -215,7 +267,9 @@ export const TradeLogs = () => {
                 <Input
                   id="trade_id"
                   value={formData.trade_id}
-                  onChange={(e) => setFormData({ ...formData, trade_id: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, trade_id: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -226,19 +280,28 @@ export const TradeLogs = () => {
                 <Input
                   id="automation_id"
                   value={formData.automation_id}
-                  onChange={(e) => setFormData({ ...formData, automation_id: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, automation_id: e.target.value })
+                  }
                 />
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                <Select
+                  value={formData.status}
+                  onValueChange={value =>
+                    setFormData({ ...formData, status: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="success">Success</SelectItem>
                     <SelectItem value="app_error">App Error</SelectItem>
-                    <SelectItem value="exchange_error">Exchange Error</SelectItem>
+                    <SelectItem value="exchange_error">
+                      Exchange Error
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -248,7 +311,9 @@ export const TradeLogs = () => {
               <Input
                 id="error_message"
                 value={formData.error_message}
-                onChange={(e) => setFormData({ ...formData, error_message: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, error_message: e.target.value })
+                }
               />
             </div>
             <div>
@@ -257,12 +322,21 @@ export const TradeLogs = () => {
                 id="executed_at"
                 type="datetime-local"
                 value={formData.executed_at.slice(0, 16)}
-                onChange={(e) => setFormData({ ...formData, executed_at: new Date(e.target.value).toISOString() })}
+                onChange={e =>
+                  setFormData({
+                    ...formData,
+                    executed_at: new Date(e.target.value).toISOString(),
+                  })
+                }
                 required
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit">

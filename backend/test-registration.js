@@ -16,15 +16,15 @@ async function testRegistration() {
   console.log('📋 Registration data:');
   console.log(`   Email: ${registrationData.email}`);
   console.log(`   Username: ${registrationData.username}`);
-  console.log(`   API Key: ${registrationData.ln_markets_api_key.substring(0, 20)}...`);
-  console.log(`   API Secret: ${registrationData.ln_markets_api_secret.substring(0, 20)}...`);
+  console.log(`   API Key: ${'*'.repeat(20)}...`);
+  console.log(`   API Secret: ${'*'.repeat(20)}...`);
   console.log(`   Passphrase: ${registrationData.ln_markets_passphrase}`);
   console.log(`   Coupon: ${registrationData.coupon_code}\n`);
 
   try {
-    console.log('🚀 Sending registration request to http://127.0.0.1:3010/api/auth/register...');
+    console.log('🚀 Sending registration request to http://127.0.0.1:13010/api/auth/register...');
 
-    const response = await axios.post('http://127.0.0.1:3010/api/auth/register', registrationData, {
+    const response = await axios.post('http://127.0.0.1:13010/api/auth/register', registrationData, {
       headers: {
         'Content-Type': 'application/json'
       },

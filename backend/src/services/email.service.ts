@@ -22,7 +22,7 @@ export class EmailService {
    */
   async sendEmailVerification(email: string, token: string): Promise<void> {
     const verificationUrl = `${config.env.CORS_ORIGIN}/verify-email?token=${token}`;
-    
+
     const mailOptions = {
       from: `"Hub-defisats" <${config.notification.email.user}>`,
       to: email,
@@ -46,7 +46,7 @@ export class EmailService {
    */
   async sendPasswordReset(email: string, token: string): Promise<void> {
     const resetUrl = `${config.env.CORS_ORIGIN}/reset-password?token=${token}`;
-    
+
     const mailOptions = {
       from: `"Hub-defisats" <${config.notification.email.user}>`,
       to: email,

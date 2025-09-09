@@ -1,5 +1,5 @@
-import { Bell, User, Settings, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, User, Settings, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,11 +7,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { useAuthStore } from "@/stores/auth";
-import { useNavigate } from "react-router-dom";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { useAuthStore } from '@/stores/auth';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -106,7 +106,10 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={handleLogout}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Logout</span>
               </DropdownMenuItem>

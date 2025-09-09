@@ -23,7 +23,10 @@ export class PasswordResetService {
   /**
    * Request password reset
    */
-  async requestPasswordReset(email: string, ipAddress?: string): Promise<{
+  async requestPasswordReset(
+    email: string,
+    ipAddress?: string
+  ): Promise<{
     success: boolean;
     message: string;
   }> {
@@ -34,7 +37,8 @@ export class PasswordResetService {
       });
 
       // Always return success message for security
-      const message = 'If the email exists, we have sent a password reset link.';
+      const message =
+        'If the email exists, we have sent a password reset link.';
 
       if (!user) {
         // Log the attempt for security monitoring
@@ -45,15 +49,20 @@ export class PasswordResetService {
       // Check rate limiting
       const rateLimitKey = `password_reset:${ipAddress || 'unknown'}`;
       const attempts = await this.redis.get(rateLimitKey);
-      
+
       if (attempts && parseInt(attempts) >= 3) {
-        await this.logPasswordResetAttempt(email, ipAddress, false, 'Rate limit exceeded');
+        await this.logPasswordResetAttempt(
+          email,
+          ipAddress,
+          false,
+          'Rate limit exceeded'
+        );
         return { success: true, message };
       }
 
       // Generate secure token
       const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+      // const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
       // Store token in Redis
       await this.redis.setex(
@@ -80,21 +89,28 @@ export class PasswordResetService {
       return { success: true, message };
     } catch (error) {
       console.error('Password reset request error:', error);
-      return { success: true, message: 'If the email exists, we have sent a password reset link.' };
+      return {
+        success: true,
+        message: 'If the email exists, we have sent a password reset link.',
+      };
     }
   }
 
   /**
    * Reset password with token
    */
-  async resetPassword(token: string, newPassword: string, ipAddress?: string): Promise<{
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    ipAddress?: string
+  ): Promise<{
     success: boolean;
     message: string;
   }> {
     try {
       // Get token data from Redis
       const tokenData = await this.redis.get(`password_reset:${token}`);
-      
+
       if (!tokenData) {
         return {
           success: false,
@@ -103,7 +119,7 @@ export class PasswordResetService {
       }
 
       const resetData = JSON.parse(tokenData);
-      
+
       // Validate new password
       const passwordValidation = PasswordSchema.safeParse(newPassword);
       if (!passwordValidation.success) {
@@ -114,11 +130,13 @@ export class PasswordResetService {
       }
 
       // Check if password is compromised
-      const isCompromised = await this.hibpService.isPasswordCompromised(newPassword);
+      const isCompromised =
+        await this.hibpService.isPasswordCompromised(newPassword);
       if (isCompromised) {
         return {
           success: false,
-          message: 'This password has been found in data breaches. Please choose a different password.',
+          message:
+            'This password has been found in data breaches. Please choose a different password.',
         };
       }
 
@@ -163,7 +181,7 @@ export class PasswordResetService {
   }> {
     try {
       const tokenData = await this.redis.get(`password_reset:${token}`);
-      
+
       if (!tokenData) {
         return {
           valid: false,
@@ -172,7 +190,7 @@ export class PasswordResetService {
       }
 
       const resetData = JSON.parse(tokenData);
-      
+
       return {
         valid: true,
         email: resetData.email,
@@ -232,7 +250,10 @@ export class PasswordResetService {
       };
 
       // Store in Redis for monitoring
-      await this.redis.lpush('password_reset_completions', JSON.stringify(logData));
+      await this.redis.lpush(
+        'password_reset_completions',
+        JSON.stringify(logData)
+      );
       await this.redis.ltrim('password_reset_completions', 0, 999); // Keep last 1000 logs
 
       console.log('Password reset completion:', logData);

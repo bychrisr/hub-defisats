@@ -12,8 +12,12 @@ export class HIBPService {
   async isPasswordCompromised(password: string): Promise<boolean> {
     try {
       // Create SHA-1 hash of the password
-      const sha1Hash = crypto.createHash('sha1').update(password).digest('hex').toUpperCase();
-      
+      const sha1Hash = crypto
+        .createHash('sha1')
+        .update(password)
+        .digest('hex')
+        .toUpperCase();
+
       // Get first 5 characters (prefix) and remaining characters (suffix)
       const prefix = sha1Hash.substring(0, 5);
       const suffix = sha1Hash.substring(5);
@@ -29,9 +33,9 @@ export class HIBPService {
       // Parse the response to check if our suffix exists
       const hashList = response.data;
       const lines = hashList.split('\n');
-      
+
       for (const line of lines) {
-        const [hashSuffix, count] = line.split(':');
+        const [hashSuffix] = line.split(':');
         if (hashSuffix === suffix) {
           return true; // Password is compromised
         }
@@ -52,7 +56,11 @@ export class HIBPService {
    */
   async getPasswordBreachCount(password: string): Promise<number> {
     try {
-      const sha1Hash = crypto.createHash('sha1').update(password).digest('hex').toUpperCase();
+      const sha1Hash = crypto
+        .createHash('sha1')
+        .update(password)
+        .digest('hex')
+        .toUpperCase();
       const prefix = sha1Hash.substring(0, 5);
       const suffix = sha1Hash.substring(5);
 
@@ -65,7 +73,7 @@ export class HIBPService {
 
       const hashList = response.data;
       const lines = hashList.split('\n');
-      
+
       for (const line of lines) {
         const [hashSuffix, count] = line.split(':');
         if (hashSuffix === suffix) {

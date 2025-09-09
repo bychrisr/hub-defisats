@@ -13,7 +13,7 @@ export interface MarginInfo {
   marginLevel: number;
   totalValue: number;
   totalUnrealizedPnl: number;
-  positions: any[];
+  positions: Position[];
 }
 
 export interface Position {
@@ -36,29 +36,34 @@ export class LNMarketsService {
     this.client = axios.create({
       baseURL: 'https://api.lnmarkets.com',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       timeout: 15000, // Increased timeout
     });
 
     // Add request interceptor for authentication
-    this.client.interceptors.request.use((config) => {
-      const authHeaders = this.generateAuthHeaders(config.method?.toUpperCase() || 'GET', config.url || '', config.params, config.data);
+    this.client.interceptors.request.use(config => {
+      const authHeaders = this.generateAuthHeaders(
+        config.method?.toUpperCase() || 'GET',
+        config.url || '',
+        config.params,
+        config.data
+      );
       Object.assign(config.headers, authHeaders);
       return config;
     });
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         console.error('LN Markets API Error:', {
           status: error.response?.status,
           statusText: error.response?.statusText,
           data: error.response?.data,
           message: error.message,
           url: error.config?.url,
-          method: error.config?.method
+          method: error.config?.method,
         });
         throw error;
       }
@@ -68,7 +73,12 @@ export class LNMarketsService {
   /**
    * Generate LN Markets authentication headers
    */
-  private generateAuthHeaders(method: string, path: string, params?: any, data?: any): Record<string, string> {
+  private generateAuthHeaders(
+    method: string,
+    path: string,
+    params?: Record<string, unknown>,
+    data?: Record<string, unknown>
+  ): Record<string, string> {
     const { apiKey, apiSecret, passphrase } = this.credentials;
     const timestamp = Date.now().toString();
 
@@ -92,7 +102,7 @@ export class LNMarketsService {
       'LNM-ACCESS-KEY': apiKey,
       'LNM-ACCESS-SIGNATURE': signature,
       'LNM-ACCESS-PASSPHRASE': passphrase,
-      'LNM-ACCESS-TIMESTAMP': timestamp
+      'LNM-ACCESS-TIMESTAMP': timestamp,
     };
   }
 
@@ -104,13 +114,16 @@ export class LNMarketsService {
 
     // Method 2: Basic auth
     try {
-      const response = await axios.get(`${this.client.defaults.baseURL}${endpoint}`, {
-        headers: {
-          'Authorization': `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      });
+      const response = await axios.get(
+        `${this.client.defaults.baseURL}${endpoint}`,
+        {
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
       console.log('✅ Basic auth successful');
       return response;
     } catch (error) {
@@ -119,14 +132,17 @@ export class LNMarketsService {
 
     // Method 3: API key in headers
     try {
-      const response = await axios.get(`${this.client.defaults.baseURL}${endpoint}`, {
-        headers: {
-          'X-API-Key': apiKey,
-          'X-API-Secret': apiSecret,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      });
+      const response = await axios.get(
+        `${this.client.defaults.baseURL}${endpoint}`,
+        {
+          headers: {
+            'X-API-Key': apiKey,
+            'X-API-Secret': apiSecret,
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
       console.log('✅ API key headers successful');
       return response;
     } catch (error) {
@@ -135,13 +151,16 @@ export class LNMarketsService {
 
     // Method 4: Query parameters
     try {
-      const response = await axios.get(`${this.client.defaults.baseURL}${endpoint}`, {
-        params: {
-          api_key: apiKey,
-          api_secret: apiSecret
-        },
-        timeout: 10000
-      });
+      const response = await axios.get(
+        `${this.client.defaults.baseURL}${endpoint}`,
+        {
+          params: {
+            api_key: apiKey,
+            api_secret: apiSecret,
+          },
+          timeout: 10000,
+        }
+      );
       console.log('✅ Query parameters successful');
       return response;
     } catch (error) {
@@ -184,7 +203,7 @@ export class LNMarketsService {
   async getRunningTrades(): Promise<any[]> {
     try {
       const response = await this.client.get('/v2/futures/trades', {
-        params: { type: 'running' }
+        params: { type: 'running' },
       });
       return response.data || [];
     } catch (error) {
@@ -223,22 +242,28 @@ export class LNMarketsService {
       });
 
       // Try multiple endpoints to validate credentials
-      const endpoints = ['/v2/user', '/v2/futures/positions', '/v2/futures/trades'];
+      const endpoints = [
+        '/v2/user',
+        '/v2/futures/positions',
+        '/v2/futures/trades',
+      ];
 
       for (const endpoint of endpoints) {
         try {
           console.log(`🔗 Testing endpoint: ${endpoint}`);
           // First try with main auth method
           const response = await this.client.get(endpoint);
-          console.log(`✅ LN Markets API validation successful with endpoint: ${endpoint}`);
+          console.log(
+            `✅ LN Markets API validation successful with endpoint: ${endpoint}`
+          );
           console.log(`📊 Response status: ${response.status}`);
           return true;
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.log(`❌ Main auth failed for ${endpoint}:`, {
             status: error.response?.status,
             statusText: error.response?.statusText,
             data: error.response?.data,
-            message: error.message
+            message: error.message,
           });
 
           // If main auth fails, try alternative methods
@@ -247,12 +272,12 @@ export class LNMarketsService {
             await this.tryAlternativeAuth(endpoint);
             console.log(`✅ Alternative auth successful for ${endpoint}`);
             return true;
-          } catch (altError: any) {
+          } catch (altError: unknown) {
             console.log(`❌ Alternative auth also failed for ${endpoint}:`, {
               status: altError.response?.status,
               statusText: altError.response?.statusText,
               data: altError.response?.data,
-              message: altError.message
+              message: altError.message,
             });
             continue; // Try next endpoint
           }
@@ -261,11 +286,11 @@ export class LNMarketsService {
 
       console.error('❌ All LN Markets API endpoints and auth methods failed');
       return false;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ LN Markets API validation error:', {
         message: error.message,
         stack: error.stack,
-        response: error.response?.data
+        response: error.response?.data,
       });
       return false;
     }
@@ -274,13 +299,17 @@ export class LNMarketsService {
   /**
    * Test basic connectivity
    */
-  async testConnectivity(): Promise<{success: boolean, message: string, details?: any}> {
+  async testConnectivity(): Promise<{
+    success: boolean;
+    message: string;
+    details?: Record<string, unknown>;
+  }> {
     try {
       // Test with different public endpoints
       const endpoints = [
         'https://api.lnmarkets.com/v2/futures/markets',
         'https://api.lnmarkets.com/v2/futures/ticker',
-        'https://api.lnmarkets.com/v2/health'
+        'https://api.lnmarkets.com/v2/health',
       ];
 
       for (const endpoint of endpoints) {
@@ -292,11 +321,14 @@ export class LNMarketsService {
             details: {
               status: response.status,
               endpoint,
-              dataSize: JSON.stringify(response.data).length
-            }
+              dataSize: JSON.stringify(response.data).length,
+            },
           };
         } catch (error) {
-          console.log(`Endpoint ${endpoint} failed:`, (error as any).response?.status);
+          console.log(
+            `Endpoint ${endpoint} failed:`,
+            (error as { response?: { status?: number } }).response?.status
+          );
           continue;
         }
       }
@@ -304,13 +336,13 @@ export class LNMarketsService {
       return {
         success: false,
         message: 'All connectivity tests failed',
-        details: 'No public endpoints responded'
+        details: 'No public endpoints responded',
       };
     } catch (error) {
       return {
         success: false,
         message: 'Basic connectivity test failed',
-        details: (error as Error).message
+        details: (error as Error).message,
       };
     }
   }
@@ -320,7 +352,9 @@ export class LNMarketsService {
    */
   async closePosition(positionId: string): Promise<any> {
     try {
-      const response = await this.client.post(`/futures/position/${positionId}/close`);
+      const response = await this.client.post(
+        `/futures/position/${positionId}/close`
+      );
       return response.data;
     } catch (error) {
       console.error('Error closing position:', error);
@@ -331,14 +365,18 @@ export class LNMarketsService {
   /**
    * Create market order to reduce position size
    */
-  async reducePosition(market: string, side: 'b' | 's', size: number): Promise<any> {
+  async reducePosition(
+    market: string,
+    side: 'b' | 's',
+    size: number
+  ): Promise<any> {
     try {
       const response = await this.client.post('/futures/order', {
         market,
         side,
         type: 'm', // market order
         size,
-        reduce_only: true
+        reduce_only: true,
       });
       return response.data;
     } catch (error) {
@@ -363,17 +401,24 @@ export class LNMarketsService {
   /**
    * Calculate liquidation risk
    */
-  calculateLiquidationRisk(marginInfo: MarginInfo, positions: Position[]): {
+  calculateLiquidationRisk(
+    marginInfo: MarginInfo,
+    positions: Position[]
+  ): {
     atRisk: boolean;
     riskLevel: 'low' | 'medium' | 'high' | 'critical';
     message: string;
   } {
     if (!marginInfo || !positions) {
-      return { atRisk: false, riskLevel: 'low', message: 'Unable to calculate risk' };
+      return {
+        atRisk: false,
+        riskLevel: 'low',
+        message: 'Unable to calculate risk',
+      };
     }
 
     const marginLevel = marginInfo.marginLevel || 0;
-    const availableMargin = marginInfo.availableMargin || 0;
+    // const availableMargin = marginInfo.availableMargin || 0;
 
     // LN Markets typically liquidates at 10% margin level
     const liquidationThreshold = 10;
@@ -382,32 +427,34 @@ export class LNMarketsService {
       return {
         atRisk: true,
         riskLevel: 'critical',
-        message: `Critical: Margin level at ${marginLevel.toFixed(2)}% - Immediate liquidation risk!`
+        message: `Critical: Margin level at ${marginLevel.toFixed(2)}% - Immediate liquidation risk!`,
       };
     } else if (marginLevel <= 20) {
       return {
         atRisk: true,
         riskLevel: 'high',
-        message: `High Risk: Margin level at ${marginLevel.toFixed(2)}% - Close positions immediately`
+        message: `High Risk: Margin level at ${marginLevel.toFixed(2)}% - Close positions immediately`,
       };
     } else if (marginLevel <= 50) {
       return {
         atRisk: true,
         riskLevel: 'medium',
-        message: `Medium Risk: Margin level at ${marginLevel.toFixed(2)}% - Monitor closely`
+        message: `Medium Risk: Margin level at ${marginLevel.toFixed(2)}% - Monitor closely`,
       };
     }
 
     return {
       atRisk: false,
       riskLevel: 'low',
-      message: `Low Risk: Margin level at ${marginLevel.toFixed(2)}% - Position healthy`
+      message: `Low Risk: Margin level at ${marginLevel.toFixed(2)}% - Position healthy`,
     };
   }
 }
 
 // Factory function to create LN Markets service instance
-export function createLNMarketsService(credentials: LNMarketsCredentials): LNMarketsService {
+export function createLNMarketsService(
+  credentials: LNMarketsCredentials
+): LNMarketsService {
   return new LNMarketsService(credentials);
 }
 
@@ -417,7 +464,8 @@ export async function testSandboxCredentials(): Promise<void> {
 
   const sandboxCredentials = {
     apiKey: 'hC8B4VoDm1X6i2L3qLrdUopNggl3yaJh6S3Zz1tPCoE=',
-    apiSecret: 'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
+    apiSecret:
+      'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
     passphrase: 'a6c1bh56jc33',
   };
 

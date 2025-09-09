@@ -1,20 +1,26 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { 
-  Shield, 
-  TrendingUp, 
-  Zap, 
-  BarChart3, 
-  Clock, 
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Shield,
+  TrendingUp,
+  Zap,
+  BarChart3,
+  Clock,
   CheckCircle,
   ArrowRight,
   Bitcoin,
   AlertTriangle,
-  DollarSign
-} from "lucide-react";
+  DollarSign,
+} from 'lucide-react';
 
 export const Landing = () => {
   return (
@@ -49,8 +55,8 @@ export const Landing = () => {
             Nunca mais perca tudo por não fechar uma posição
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Automatize sua proteção contra liquidação na LN Markets. 
-            Margin Guard monitora suas posições 24/7 e age quando você não pode.
+            Automatize sua proteção contra liquidação na LN Markets. Margin
+            Guard monitora suas posições 24/7 e age quando você não pode.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link to="/signup">
@@ -63,7 +69,7 @@ export const Landing = () => {
               Ver Demo
             </Button>
           </div>
-          
+
           {/* Trust Indicators */}
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -86,18 +92,25 @@ export const Landing = () => {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Por que você precisa do Margin Guard?</h2>
-            <p className="text-xl text-muted-foreground">Os problemas que todo trader enfrenta</p>
+            <h2 className="text-3xl font-bold mb-4">
+              Por que você precisa do Margin Guard?
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Os problemas que todo trader enfrenta
+            </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="card-danger">
               <CardHeader>
                 <AlertTriangle className="h-8 w-8 text-destructive mb-2" />
-                <CardTitle className="text-destructive">Liquidação Inesperada</CardTitle>
+                <CardTitle className="text-destructive">
+                  Liquidação Inesperada
+                </CardTitle>
                 <CardDescription>
-                  Você não consegue monitorar suas posições 24/7. 
-                  Uma volatilidade inesperada pode liquidar tudo enquanto você dorme.
+                  Você não consegue monitorar suas posições 24/7. Uma
+                  volatilidade inesperada pode liquidar tudo enquanto você
+                  dorme.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -105,10 +118,12 @@ export const Landing = () => {
             <Card className="card-danger">
               <CardHeader>
                 <DollarSign className="h-8 w-8 text-destructive mb-2" />
-                <CardTitle className="text-destructive">Perda de Capital</CardTitle>
+                <CardTitle className="text-destructive">
+                  Perda de Capital
+                </CardTitle>
                 <CardDescription>
-                  Sem stops automáticos, uma única posição mal gerenciada 
-                  pode acabar com meses de lucros.
+                  Sem stops automáticos, uma única posição mal gerenciada pode
+                  acabar com meses de lucros.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -116,10 +131,12 @@ export const Landing = () => {
             <Card className="card-danger">
               <CardHeader>
                 <Clock className="h-8 w-8 text-destructive mb-2" />
-                <CardTitle className="text-destructive">Falta de Tempo</CardTitle>
+                <CardTitle className="text-destructive">
+                  Falta de Tempo
+                </CardTitle>
                 <CardDescription>
-                  Você tem vida além do trading. Não pode ficar colado 
-                  na tela 24 horas por dia.
+                  Você tem vida além do trading. Não pode ficar colado na tela
+                  24 horas por dia.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -131,9 +148,11 @@ export const Landing = () => {
               <Card className="card-success">
                 <CardHeader>
                   <Shield className="h-8 w-8 text-success mb-2" />
-                  <CardTitle className="text-success">Proteção Automática</CardTitle>
+                  <CardTitle className="text-success">
+                    Proteção Automática
+                  </CardTitle>
                   <CardDescription>
-                    Monitora sua margem em tempo real e fecha posições 
+                    Monitora sua margem em tempo real e fecha posições
                     automaticamente antes da liquidação.
                   </CardDescription>
                 </CardHeader>
@@ -142,7 +161,9 @@ export const Landing = () => {
               <Card className="card-success">
                 <CardHeader>
                   <TrendingUp className="h-8 w-8 text-success mb-2" />
-                  <CardTitle className="text-success">Preserva Capital</CardTitle>
+                  <CardTitle className="text-success">
+                    Preserva Capital
+                  </CardTitle>
                   <CardDescription>
                     Stop loss inteligente que se adapta às condições de mercado
                     para maximizar proteção.
@@ -153,10 +174,12 @@ export const Landing = () => {
               <Card className="card-success">
                 <CardHeader>
                   <Zap className="h-8 w-8 text-success mb-2" />
-                  <CardTitle className="text-success">Execução Rápida</CardTitle>
+                  <CardTitle className="text-success">
+                    Execução Rápida
+                  </CardTitle>
                   <CardDescription>
-                    Reação em milissegundos. Mais rápido que qualquer 
-                    trader manual conseguiria.
+                    Reação em milissegundos. Mais rápido que qualquer trader
+                    manual conseguiria.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -170,16 +193,19 @@ export const Landing = () => {
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Recursos Principais</h2>
-            <p className="text-xl text-muted-foreground">Tudo que você precisa para proteger seus trades</p>
+            <p className="text-xl text-muted-foreground">
+              Tudo que você precisa para proteger seus trades
+            </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
               <CardHeader>
                 <Shield className="h-8 w-8 text-primary mb-2" />
                 <CardTitle>Margin Guard</CardTitle>
                 <CardDescription>
-                  Proteção automática contra liquidação com limites personalizáveis
+                  Proteção automática contra liquidação com limites
+                  personalizáveis
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -224,22 +250,23 @@ export const Landing = () => {
             Proteja seus trades hoje mesmo
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Junte-se a centenas de traders que já protegem seus capitais com Margin Guard
+            Junte-se a centenas de traders que já protegem seus capitais com
+            Margin Guard
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
-            <Input 
-              placeholder="Seu melhor email" 
+            <Input
+              placeholder="Seu melhor email"
               className="bg-white text-foreground"
             />
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-white text-primary hover:bg-white/90 whitespace-nowrap"
             >
               Começar Agora
             </Button>
           </div>
-          
+
           <p className="text-sm mt-4 opacity-75">
             Gratuito para começar. Sem compromisso.
           </p>
@@ -257,9 +284,15 @@ export const Landing = () => {
               <span className="font-bold">Margin Guard</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground">Termos de Uso</a>
-              <a href="#" className="hover:text-foreground">Política de Privacidade</a>
-              <a href="#" className="hover:text-foreground">Suporte</a>
+              <a href="#" className="hover:text-foreground">
+                Termos de Uso
+              </a>
+              <a href="#" className="hover:text-foreground">
+                Política de Privacidade
+              </a>
+              <a href="#" className="hover:text-foreground">
+                Suporte
+              </a>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">

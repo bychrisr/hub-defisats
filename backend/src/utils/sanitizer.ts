@@ -12,16 +12,17 @@ export class Sanitizer {
 
     // Remove null bytes
     let sanitized = input.replace(/\0/g, '');
-    
+
     // Trim whitespace
     sanitized = sanitized.trim();
-    
+
     // Remove control characters except newlines and tabs
+    // eslint-disable-next-line no-control-regex
     sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-    
+
     // Limit length to prevent DoS
     sanitized = sanitized.substring(0, 10000);
-    
+
     return sanitized;
   }
 
@@ -55,11 +56,11 @@ export class Sanitizer {
     if (typeof input === 'string') {
       return this.sanitizeString(input);
     }
-    
+
     if (Array.isArray(input)) {
       return input.map(item => this.sanitizeJson(item));
     }
-    
+
     if (input && typeof input === 'object') {
       const sanitized: any = {};
       for (const [key, value] of Object.entries(input)) {
@@ -68,7 +69,7 @@ export class Sanitizer {
       }
       return sanitized;
     }
-    
+
     return input;
   }
 
@@ -77,11 +78,17 @@ export class Sanitizer {
    */
   static sanitizeSql(input: string): string {
     const sanitized = this.sanitizeString(input);
-    
+
     // Remove SQL injection patterns
     return sanitized
-      .replace(/('|(\\')|(;)|(\-\-)|(\/\*)|(\*\/)|(\|)|(\*)|(%)|(\+)|(\=)|(\<)|(\>)|(\[)|(\])|(\{)|(\})|(\()|(\))|(\^)|(\$)|(\!)|(\@)|(\#)|(\&)|(\~)|(\`)|(\\)/g, '')
-      .replace(/(union|select|insert|update|delete|drop|create|alter|exec|execute|script|javascript|vbscript|onload|onerror|onclick)/gi, '');
+      .replace(
+        /[';\\*|%+=<>\[\]{}()^$!@#&~`-]/g,
+        ''
+      )
+      .replace(
+        /(union|select|insert|update|delete|drop|create|alter|exec|execute|script|javascript|vbscript|onload|onerror|onclick)/gi,
+        ''
+      );
   }
 
   /**
@@ -106,14 +113,16 @@ export class Sanitizer {
    */
   static sanitizeUrl(url: string): string {
     const sanitized = this.sanitizeString(url);
-    
-    if (!validator.isURL(sanitized, {
-      protocols: ['http', 'https'],
-      require_protocol: true,
-    })) {
+
+    if (
+      !validator.isURL(sanitized, {
+        protocols: ['http', 'https'],
+        require_protocol: true,
+      })
+    ) {
       return '';
     }
-    
+
     return sanitized;
   }
 
@@ -132,10 +141,10 @@ export class Sanitizer {
     if (typeof input === 'number') {
       return isNaN(input) ? 0 : input;
     }
-    
+
     const sanitized = this.sanitizeString(input);
     const number = parseFloat(sanitized);
-    
+
     return isNaN(number) ? 0 : number;
   }
 

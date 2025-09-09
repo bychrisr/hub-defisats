@@ -10,8 +10,8 @@ async function testDirectValidation() {
   };
 
   console.log('📋 Testing credentials:');
-  console.log(`   API Key: ${sandboxCredentials.apiKey.substring(0, 20)}...`);
-  console.log(`   API Secret: ${sandboxCredentials.apiSecret.substring(0, 20)}...`);
+  console.log(`   API Key: ${'*'.repeat(20)}...`);
+  console.log(`   API Secret: ${'*'.repeat(20)}...`);
   console.log(`   Passphrase: ${sandboxCredentials.passphrase}`);
   console.log('');
 

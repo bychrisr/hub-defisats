@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { PrismaClient, User, SocialProvider } from '@prisma/client';
 import { config } from '@/config/env';
 import { FastifyInstance } from 'fastify';
@@ -6,17 +7,21 @@ import {
   RegisterRequest,
   LoginRequest,
   AuthResponse,
-  RefreshTokenResponse
+  RefreshTokenResponse,
 } from '@/types/api-contracts';
 import { createLNMarketsService } from './lnmarkets.service';
+import { OptimizedQueriesService } from './optimized-queries.service';
+// import { cacheService } from './cache.service';
 
 export class AuthService {
   private prisma: PrismaClient;
   private fastify: FastifyInstance;
+  private optimizedQueries: OptimizedQueriesService;
 
   constructor(prisma: PrismaClient, fastify: FastifyInstance) {
     this.prisma = prisma;
     this.fastify = fastify;
+    this.optimizedQueries = new OptimizedQueriesService(prisma);
   }
 
   /**
@@ -31,10 +36,17 @@ export class AuthService {
       hasApiKey: !!data.ln_markets_api_key,
       hasApiSecret: !!data.ln_markets_api_secret,
       hasPassphrase: !!data.ln_markets_passphrase,
-      couponCode: data.coupon_code
+      couponCode: data.coupon_code,
     });
 
-    const { email, username, password, ln_markets_api_key, ln_markets_api_secret, coupon_code } = data;
+    const {
+      email,
+      username,
+      password,
+      ln_markets_api_key,
+      ln_markets_api_secret,
+      coupon_code,
+    } = data;
 
     console.log('🔍 Checking if user already exists...');
     // Check if user already exists
@@ -65,7 +77,9 @@ export class AuthService {
 
       if (!isValidCredentials) {
         console.log('❌ LN Markets credentials validation failed');
-        throw new Error('Invalid LN Markets API credentials. Please check your API Key, Secret, and Passphrase.');
+        throw new Error(
+          'Invalid LN Markets API credentials. Please check your API Key, Secret, and Passphrase.'
+        );
       }
 
       console.log('✅ LN Markets credentials validation successful');
@@ -73,7 +87,7 @@ export class AuthService {
       console.error('❌ LN Markets validation error:', error);
       console.error('❌ Error details:', {
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       // Re-throw the error to be handled by the controller
       throw error;
@@ -119,7 +133,9 @@ export class AuthService {
     // Update coupon usage if used
     if (coupon_code) {
       console.log('🎫 Updating coupon usage...');
-      const coupon = await this.prisma.coupon.findUnique({ where: { code: coupon_code } });
+      const coupon = await this.prisma.coupon.findUnique({
+        where: { code: coupon_code },
+      });
       if (coupon) {
         // Create UserCoupon relationship
         await this.prisma.userCoupon.create({
@@ -146,6 +162,10 @@ export class AuthService {
     console.log('✅ Refresh token stored successfully');
 
     console.log('🎉 User registration completed successfully!');
+
+    // Invalidate cache for system stats
+    await this.optimizedQueries.invalidateSystemCache();
+
     return {
       user_id: user.id,
       token,
@@ -169,7 +189,9 @@ export class AuthService {
     }
 
     if (!user.password_hash) {
-      throw new Error('User registered with social login, please use social login');
+      throw new Error(
+        'User registered with social login, please use social login'
+      );
     }
 
     // Verify password
@@ -203,13 +225,24 @@ export class AuthService {
   }
 
   /**
+   * Check if username is available
+   */
+  async checkUsernameAvailability(
+    username: string
+  ): Promise<{ available: boolean }> {
+    const available =
+      await this.optimizedQueries.checkUsernameAvailability(username);
+    return { available };
+  }
+
+  /**
    * Refresh access token
    */
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
     try {
       // Verify refresh token
       const decoded = this.fastify.jwt.verify(refreshToken) as any;
-      
+
       // Check if token exists in database
       const tokenRecord = await this.prisma.user.findFirst({
         where: {
@@ -252,7 +285,7 @@ export class AuthService {
   async validateSession(token: string): Promise<User> {
     try {
       const decoded = this.fastify.jwt.verify(token) as any;
-      
+
       const user = await this.prisma.user.findUnique({
         where: { id: decoded.userId },
       });
@@ -279,7 +312,7 @@ export class AuthService {
     provider: SocialProvider,
     socialId: string,
     email: string,
-    name?: string
+    _name?: string
   ): Promise<AuthResponse> {
     // Find existing user by social ID
     let user = await this.prisma.user.findFirst({
@@ -377,7 +410,10 @@ export class AuthService {
   /**
    * Store refresh token in database
    */
-  private async storeRefreshToken(userId: string, refreshToken: string): Promise<void> {
+  private async storeRefreshToken(
+    userId: string,
+    _refreshToken: string
+  ): Promise<void> {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
@@ -429,7 +465,7 @@ export class AuthService {
    */
   private encryptData(data: string): string {
     // Simple encryption for now - in production, use proper encryption
-    const crypto = require('crypto');
+    // const crypto = require('crypto');
     const algorithm = 'aes-256-cbc';
     const key = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
     const iv = crypto.randomBytes(16);
@@ -445,7 +481,7 @@ export class AuthService {
    * Decrypt sensitive data
    */
   public decryptData(encryptedData: string): string {
-    const crypto = require('crypto');
+    // const crypto = require('crypto');
     const algorithm = 'aes-256-cbc';
     const key = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
 

@@ -2,78 +2,101 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: hubdefisats-postgres-dev
+    container_name: hub-defisats-postgres
     environment:
       POSTGRES_DB: hubdefisats
       POSTGRES_USER: hubdefisats
       POSTGRES_PASSWORD: hubdefisats_dev_password
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hubdefisats -d hubdefisats"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Redis Cache & Queue
   redis:
     image: redis:7-alpine
-    container_name: hubdefisats-redis-dev
+    container_name: hub-defisats-redis
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Backend API
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hubdefisats-backend-dev
+    container_name: hub-defisats-backend
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
       REDIS_URL: redis://redis:6379
       PORT: 3010
     ports:
-      - "3010:3010"
+      - "13010:3010"
     volumes:
       - ./backend:/app
       - /app/node_modules
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     command: npm run dev:simple
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3010/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: hubdefisats-frontend-dev
+    container_name: hub-defisats-frontend
     environment:
-      VITE_API_URL: http://localhost:3010
+      VITE_API_URL: http://localhost:13010
     ports:
-      - "3001:3001"
+      - "13000:3001"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     command: npm run dev
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3001', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Workers
+  # Workers (opcionais para desenvolvimento)
   margin-monitor:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hubdefisats-margin-monitor-dev
+    container_name: hub-defisats-margin-monitor
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -82,17 +105,21 @@ services:
       - ./backend:/app
       - /app/node_modules
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     command: npm run worker:margin-monitor
+    profiles:
+      - workers
 
   automation-executor:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hubdefisats-automation-executor-dev
+    container_name: hub-defisats-automation-executor
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -101,17 +128,21 @@ services:
       - ./backend:/app
       - /app/node_modules
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     command: npm run worker:automation-executor
+    profiles:
+      - workers
 
   notification-worker:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hubdefisats-notification-worker-dev
+    container_name: hub-defisats-notification-worker
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -120,17 +151,21 @@ services:
       - ./backend:/app
       - /app/node_modules
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     command: npm run worker:notification
+    profiles:
+      - workers
 
   payment-validator:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hubdefisats-payment-validator-dev
+    container_name: hub-defisats-payment-validator
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -139,16 +174,20 @@ services:
       - ./backend:/app
       - /app/node_modules
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     command: npm run worker:payment-validator
+    profiles:
+      - workers
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  hubdefisats-network:
+  hub-defisats-network:
     driver: bridge

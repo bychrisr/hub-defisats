@@ -1,28 +1,34 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Shield, 
-  TrendingUp, 
-  Zap, 
+import { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Shield,
+  TrendingUp,
+  Zap,
   AlertTriangle,
   CheckCircle,
   Settings,
-  Info
-} from "lucide-react";
-import { useForm } from "react-hook-form";
+  Info,
+} from 'lucide-react';
+import { useForm } from 'react-hook-form';
 
 interface MarginGuardSettings {
   enabled: boolean;
   threshold: number;
-  action: "reduce" | "close";
+  action: 'reduce' | 'close';
   reduction: number;
 }
 
@@ -38,7 +44,7 @@ export const Automation = () => {
   const [marginGuard, setMarginGuard] = useState<MarginGuardSettings>({
     enabled: true,
     threshold: 90,
-    action: "reduce",
+    action: 'reduce',
     reduction: 50,
   });
 
@@ -55,7 +61,7 @@ export const Automation = () => {
   const handleSave = async () => {
     setIsLoading(true);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     setIsLoading(false);
   };
 
@@ -76,7 +82,7 @@ export const Automation = () => {
           </Button>
           <Button size="sm" onClick={handleSave} disabled={isLoading}>
             <CheckCircle className="mr-2 h-4 w-4" />
-            {isLoading ? "Salvando..." : "Salvar Configurações"}
+            {isLoading ? 'Salvando...' : 'Salvar Configurações'}
           </Button>
         </div>
       </div>
@@ -104,7 +110,7 @@ export const Automation = () => {
                 </div>
                 <Switch
                   checked={marginGuard.enabled}
-                  onCheckedChange={(enabled) =>
+                  onCheckedChange={enabled =>
                     setMarginGuard({ ...marginGuard, enabled })
                   }
                 />
@@ -117,8 +123,9 @@ export const Automation = () => {
                   <div>
                     <p className="font-medium text-warning">Atenção</p>
                     <p className="text-sm text-muted-foreground">
-                      O Margin Guard irá executar ações automáticas quando o limite for atingido. 
-                      Certifique-se de configurar os parâmetros adequadamente.
+                      O Margin Guard irá executar ações automáticas quando o
+                      limite for atingido. Certifique-se de configurar os
+                      parâmetros adequadamente.
                     </p>
                   </div>
                 </div>
@@ -151,15 +158,22 @@ export const Automation = () => {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <Label className="text-base font-medium">Ação ao Atingir Limite</Label>
+                      <Label className="text-base font-medium">
+                        Ação ao Atingir Limite
+                      </Label>
                       <div className="space-y-3">
                         <div className="flex items-center space-x-2">
                           <input
                             type="radio"
                             id="reduce"
                             name="action"
-                            checked={marginGuard.action === "reduce"}
-                            onChange={() => setMarginGuard({ ...marginGuard, action: "reduce" })}
+                            checked={marginGuard.action === 'reduce'}
+                            onChange={() =>
+                              setMarginGuard({
+                                ...marginGuard,
+                                action: 'reduce',
+                              })
+                            }
                             className="w-4 h-4"
                           />
                           <Label htmlFor="reduce" className="cursor-pointer">
@@ -171,8 +185,13 @@ export const Automation = () => {
                             type="radio"
                             id="close"
                             name="action"
-                            checked={marginGuard.action === "close"}
-                            onChange={() => setMarginGuard({ ...marginGuard, action: "close" })}
+                            checked={marginGuard.action === 'close'}
+                            onChange={() =>
+                              setMarginGuard({
+                                ...marginGuard,
+                                action: 'close',
+                              })
+                            }
                             className="w-4 h-4"
                           />
                           <Label htmlFor="close" className="cursor-pointer">
@@ -182,7 +201,7 @@ export const Automation = () => {
                       </div>
                     </div>
 
-                    {marginGuard.action === "reduce" && (
+                    {marginGuard.action === 'reduce' && (
                       <div className="space-y-4">
                         <Label className="text-base font-medium">
                           Percentual de Redução ({marginGuard.reduction}%)
@@ -198,7 +217,8 @@ export const Automation = () => {
                           className="w-full"
                         />
                         <p className="text-sm text-muted-foreground">
-                          Reduzir a posição em {marginGuard.reduction}% quando o limite for atingido
+                          Reduzir a posição em {marginGuard.reduction}% quando o
+                          limite for atingido
                         </p>
                       </div>
                     )}
@@ -210,12 +230,12 @@ export const Automation = () => {
                       <p>Posição atual: Long BTC/USD $15,000</p>
                       <p>Margem atual: 85% ($2,845)</p>
                       <p>
-                        <strong>Se atingir {marginGuard.threshold}%:</strong>{" "}
-                        {marginGuard.action === "reduce"
+                        <strong>Se atingir {marginGuard.threshold}%:</strong>{' '}
+                        {marginGuard.action === 'reduce'
                           ? `Reduzir posição em ${marginGuard.reduction}% (${
                               (15000 * marginGuard.reduction) / 100
                             })`
-                          : "Fechar posição completamente"}
+                          : 'Fechar posição completamente'}
                       </p>
                     </div>
                   </div>
@@ -241,7 +261,7 @@ export const Automation = () => {
                 </div>
                 <Switch
                   checked={tpsl.enabled}
-                  onCheckedChange={(enabled) => setTpsl({ ...tpsl, enabled })}
+                  onCheckedChange={enabled => setTpsl({ ...tpsl, enabled })}
                 />
               </div>
             </CardHeader>
@@ -264,7 +284,8 @@ export const Automation = () => {
                         className="w-full"
                       />
                       <p className="text-sm text-muted-foreground">
-                        Realizar lucros quando a posição atingir +{tpsl.takeProfitPercent}%
+                        Realizar lucros quando a posição atingir +
+                        {tpsl.takeProfitPercent}%
                       </p>
                     </div>
 
@@ -283,7 +304,8 @@ export const Automation = () => {
                         className="w-full"
                       />
                       <p className="text-sm text-muted-foreground">
-                        Limitar perdas quando a posição atingir -{tpsl.stopLossPercent}%
+                        Limitar perdas quando a posição atingir -
+                        {tpsl.stopLossPercent}%
                       </p>
                     </div>
                   </div>
@@ -293,14 +315,17 @@ export const Automation = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base font-medium">Trailing Stop</Label>
+                        <Label className="text-base font-medium">
+                          Trailing Stop
+                        </Label>
                         <p className="text-sm text-muted-foreground">
-                          Ajustar stop loss automaticamente conforme o lucro aumenta
+                          Ajustar stop loss automaticamente conforme o lucro
+                          aumenta
                         </p>
                       </div>
                       <Switch
                         checked={tpsl.trailingEnabled}
-                        onCheckedChange={(trailingEnabled) =>
+                        onCheckedChange={trailingEnabled =>
                           setTpsl({ ...tpsl, trailingEnabled })
                         }
                       />
@@ -322,7 +347,8 @@ export const Automation = () => {
                           className="w-full"
                         />
                         <p className="text-sm text-muted-foreground">
-                          Manter stop loss a {tpsl.trailingDistance}% do preço máximo atingido
+                          Manter stop loss a {tpsl.trailingDistance}% do preço
+                          máximo atingido
                         </p>
                       </div>
                     )}
@@ -356,7 +382,8 @@ export const Automation = () => {
                     Entradas Automáticas
                   </CardTitle>
                   <CardDescription>
-                    Abrir posições automaticamente baseado em sinais (Em desenvolvimento)
+                    Abrir posições automaticamente baseado em sinais (Em
+                    desenvolvimento)
                   </CardDescription>
                 </div>
               </div>
@@ -366,8 +393,9 @@ export const Automation = () => {
                 <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">Em Breve</h3>
                 <p className="text-muted-foreground mb-4">
-                  Esta funcionalidade estará disponível em uma próxima atualização.
-                  Você poderá configurar entradas automáticas baseadas em:
+                  Esta funcionalidade estará disponível em uma próxima
+                  atualização. Você poderá configurar entradas automáticas
+                  baseadas em:
                 </p>
                 <div className="space-y-2 text-sm text-muted-foreground max-w-md mx-auto">
                   <p>• Indicadores técnicos (RSI, MACD, MA)</p>

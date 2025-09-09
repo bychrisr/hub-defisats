@@ -1,15 +1,34 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Shield, TrendingUp, Settings, User, BarChart3 } from 'lucide-react';
+import {
+  Loader2,
+  Shield,
+  TrendingUp,
+  Settings,
+  User,
+  BarChart3,
+} from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 
 export default function Dashboard() {
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
-  const { automations, fetchAutomations, fetchStats, stats, isLoading: automationLoading } = useAutomationStore();
+  const {
+    automations,
+    fetchAutomations,
+    fetchStats,
+    stats,
+    isLoading: automationLoading,
+  } = useAutomationStore();
 
   useEffect(() => {
     if (!user) {
@@ -29,7 +48,9 @@ export default function Dashboard() {
     );
   }
 
-  const marginGuardAutomation = automations.find(a => a.type === 'margin_guard');
+  const marginGuardAutomation = automations.find(
+    a => a.type === 'margin_guard'
+  );
   const activeAutomations = automations.filter(a => a.is_active);
 
   return (
@@ -52,7 +73,9 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Automations</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Automations
+              </CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -65,20 +88,22 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Automations</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Automations
+              </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.active || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently running
-              </p>
+              <p className="text-xs text-muted-foreground">Currently running</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Margin Guard</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Margin Guard
+              </CardTitle>
               <Shield className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -86,14 +111,18 @@ export default function Dashboard() {
                 {marginGuardAutomation ? 'Active' : 'Inactive'}
               </div>
               <p className="text-xs text-muted-foreground">
-                {marginGuardAutomation ? 'Protecting positions' : 'Not configured'}
+                {marginGuardAutomation
+                  ? 'Protecting positions'
+                  : 'Not configured'}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Account Status</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Account Status
+              </CardTitle>
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -112,9 +141,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                Common tasks and automations
-              </CardDescription>
+              <CardDescription>Common tasks and automations</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -125,7 +152,8 @@ export default function Dashboard() {
                       <div className="text-left">
                         <div className="font-medium">Margin Guard</div>
                         <div className="text-sm opacity-70">
-                          {marginGuardAutomation ? 'Configure' : 'Set up'} protection
+                          {marginGuardAutomation ? 'Configure' : 'Set up'}{' '}
+                          protection
                         </div>
                       </div>
                     </div>
@@ -180,19 +208,22 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>
-                Latest automation activity
-              </CardDescription>
+              <CardDescription>Latest automation activity</CardDescription>
             </CardHeader>
             <CardContent>
               {stats?.recentActivity && stats.recentActivity.length > 0 ? (
                 <div className="space-y-3">
-                  {stats.recentActivity.slice(0, 5).map((activity) => (
-                    <div key={activity.id} className="flex items-center justify-between">
+                  {stats.recentActivity.slice(0, 5).map(activity => (
+                    <div
+                      key={activity.id}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center space-x-3">
-                        <div className={`w-2 h-2 rounded-full ${
-                          activity.is_active ? 'bg-green-500' : 'bg-gray-400'
-                        }`} />
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            activity.is_active ? 'bg-green-500' : 'bg-gray-400'
+                          }`}
+                        />
                         <div>
                           <div className="text-sm font-medium capitalize">
                             {activity.type.replace('_', ' ')}
@@ -202,7 +233,10 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <Badge variant={activity.is_active ? 'default' : 'secondary'} className="text-xs">
+                      <Badge
+                        variant={activity.is_active ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
                         {activity.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
@@ -237,10 +271,14 @@ export default function Dashboard() {
                     <Shield className="h-5 w-5 text-blue-500" />
                     <div>
                       <div className="font-medium">Margin Guard</div>
-                      <div className="text-sm text-gray-600">Position protection</div>
+                      <div className="text-sm text-gray-600">
+                        Position protection
+                      </div>
                     </div>
                   </div>
-                  <div className="text-2xl font-bold">{stats.byType.margin_guard}</div>
+                  <div className="text-2xl font-bold">
+                    {stats.byType.margin_guard}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -248,7 +286,9 @@ export default function Dashboard() {
                     <TrendingUp className="h-5 w-5 text-green-500" />
                     <div>
                       <div className="font-medium">TP/SL</div>
-                      <div className="text-sm text-gray-600">Take profit / Stop loss</div>
+                      <div className="text-sm text-gray-600">
+                        Take profit / Stop loss
+                      </div>
                     </div>
                   </div>
                   <div className="text-2xl font-bold">{stats.byType.tp_sl}</div>
@@ -259,10 +299,14 @@ export default function Dashboard() {
                     <Settings className="h-5 w-5 text-purple-500" />
                     <div>
                       <div className="font-medium">Auto Entry</div>
-                      <div className="text-sm text-gray-600">Automatic entries</div>
+                      <div className="text-sm text-gray-600">
+                        Automatic entries
+                      </div>
                     </div>
                   </div>
-                  <div className="text-2xl font-bold">{stats.byType.auto_entry}</div>
+                  <div className="text-2xl font-bold">
+                    {stats.byType.auto_entry}
+                  </div>
                 </div>
               </div>
             </CardContent>
