@@ -29,8 +29,16 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Validação de formato: 3-20 caracteres, letras/números/underscore
   - Endpoint `GET /api/auth/check-username` para verificação
   - Prevenção de usernames duplicados e formato de email (@)
-  - Autocomplete inteligente para evitar preenchimento com email
+  - Autocomplete desabilitado para evitar preenchimento com email
   - Atualização completa de tipos e interfaces
+
+### Fixed
+- **Segurança dos Campos de Credenciais**: Correção crítica de segurança
+  - Adicionado `autocomplete='off'` em todos os campos LN Markets
+  - Prevenção de sugestões de valores anteriores no navegador
+  - Proteção contra exposição de API Keys/Secrets/Passphrases
+  - Correção de comportamento estranho do campo API Key
+  - Melhoria na privacidade e segurança dos dados sensíveis
 
 ### Added
 - **Toggle Dark/Light Mode**: Alternância de tema funcional
