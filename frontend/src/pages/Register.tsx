@@ -106,6 +106,7 @@ export default function Register() {
     handleSubmit,
     formState: { errors },
     watch,
+    setError,
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
