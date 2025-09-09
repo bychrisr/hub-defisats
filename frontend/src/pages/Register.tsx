@@ -254,11 +254,11 @@ export default function Register() {
   const fillTestData = () => {
     // Always generate completely unique data
     const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(2, 8);
+    const random = Math.random().toString(36).substring(2, 6); // Shorter random string
     
     const testData = {
       email: `test_${timestamp}_${random}@example.com`,
-      username: `user_${timestamp}_${random}`,
+      username: `u${timestamp}${random}`, // Shorter username (max 20 chars)
       ln_markets_api_key: `test_key_${timestamp}_${random}`,
       ln_markets_api_secret: `test_secret_${timestamp}_${random}`,
       ln_markets_passphrase: `testpassphrase_${timestamp}`
