@@ -76,6 +76,124 @@ export async function authRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // Test complete registration with sandbox credentials
+  fastify.post('/test-registration', {
+    schema: {
+      description: 'Test complete registration with sandbox credentials',
+      tags: ['Testing'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            details: { type: 'object' },
+          },
+        },
+        400: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+            validation_errors: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  field: { type: 'string' },
+                  message: { type: 'string' },
+                  value: { type: 'any' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, async (request, reply) => {
+    try {
+      console.log('🧪 Testing complete registration with sandbox credentials...');
+
+      // Generate unique email for testing
+      const testEmail = `test-${Date.now()}@hubdefisats.com`;
+
+      const registrationData = {
+        email: testEmail,
+        password: 'TestPassword123!',
+        ln_markets_api_key: 'hC8B4VoDm1X6i2L3qLrdUopNggl3yaJh6S3Zz1tPCoE=',
+        ln_markets_api_secret: 'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
+        ln_markets_passphrase: 'a6c1bh56jc33',
+        coupon_code: 'ALPHATESTER'
+      };
+
+      console.log('📋 Test registration data:');
+      console.log(`   Email: ${registrationData.email}`);
+      console.log(`   API Key: ${registrationData.ln_markets_api_key.substring(0, 20)}...`);
+      console.log(`   API Secret: ${registrationData.ln_markets_api_secret.substring(0, 20)}...`);
+      console.log(`   Passphrase: ${registrationData.ln_markets_passphrase}`);
+      console.log(`   Coupon: ${registrationData.coupon_code}`);
+
+      // Call the actual registration handler
+      const mockRequest = {
+        body: registrationData
+      } as any;
+
+      const mockReply = {
+        status: (code: number) => ({
+          send: (data: any) => {
+            console.log(`📊 Registration response status: ${code}`);
+            console.log('📋 Registration response data:', JSON.stringify(data, null, 2));
+            return data;
+          }
+        })
+      } as any;
+
+      // Execute registration
+      console.log('🚀 Executing registration...');
+      const result = await authController.register(mockRequest, mockReply);
+
+      console.log('✅ Registration test completed successfully!');
+      return reply.status(200).send({
+        success: true,
+        message: 'Registration test completed successfully',
+        details: {
+          email: testEmail,
+          result,
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+    } catch (error: any) {
+      console.log('❌ Registration test failed!');
+      console.log('📊 Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
+      });
+
+      // Handle validation errors
+      if (error.message && error.message.includes('Invalid LN Markets API credentials')) {
+        return reply.status(400).send({
+          error: 'VALIDATION_ERROR',
+          message: 'LN Markets credentials validation failed',
+          details: {
+            error: error.message,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      }
+
+      return reply.status(500).send({
+        success: false,
+        message: 'Registration test failed',
+        details: {
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+  });
+
   // Register route
   fastify.post(
     '/register',
