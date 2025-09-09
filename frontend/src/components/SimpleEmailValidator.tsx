@@ -44,16 +44,23 @@ export default function SimpleEmailValidator({
 
         // Testar se email já existe tentando fazer login
         try {
+          console.log(`🔍 SimpleEmailValidator: Checking email ${email}`);
           const response = await api.post('/api/auth/check-email', { email });
+          console.log(`📧 SimpleEmailValidator: Response for ${email}:`, response.data);
+          
           const result = {
             valid: true,
             available: response.data.available,
             format: true,
             suggestions: response.data.available ? [] : ['This email is already registered']
           };
+          
+          console.log(`✅ SimpleEmailValidator: Result for ${email}:`, result);
           setValidationResult(result);
           onValidationChange?.(result.valid, result.available, result.suggestions);
+          console.log(`📤 SimpleEmailValidator: Called onValidationChange with valid=${result.valid}, available=${result.available}`);
         } catch (error) {
+          console.log(`❌ SimpleEmailValidator: Error checking ${email}:`, error);
           // Se falhar, assumir disponível
           const result = {
             valid: true,
@@ -63,6 +70,7 @@ export default function SimpleEmailValidator({
           };
           setValidationResult(result);
           onValidationChange?.(true, true, []);
+          console.log(`📤 SimpleEmailValidator: Called onValidationChange with valid=true, available=true (fallback)`);
         }
       } catch (error) {
         console.error('Email validation error:', error);
