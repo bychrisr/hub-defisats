@@ -22,7 +22,7 @@ const registerSchema = z
       .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
       .regex(/\d/, 'Password must contain at least one number')
       .regex(
-        /[@$!%*?&]/,
+        /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/,
         'Password must contain at least one special character'
       ),
     confirmPassword: z.string(),

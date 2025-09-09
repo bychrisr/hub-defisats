@@ -8,8 +8,8 @@ export const PasswordSchema = z
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/\d/, 'Password must contain at least one number')
   .regex(
-    /[@$!%*?&]/,
-    'Password must contain at least one special character (@$!%*?&)'
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/,
+    'Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?~`)'
   );
 
 // Password strength checker
@@ -50,10 +50,10 @@ export function checkPasswordStrength(password: string): {
   }
 
   // Special character check
-  if (/[@$!%*?&]/.test(password)) {
+  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)) {
     score += 1;
   } else {
-    feedback.push('At least one special character (@$!%*?&)');
+    feedback.push('At least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?~`)');
   }
 
   // Additional strength checks
@@ -61,7 +61,7 @@ export function checkPasswordStrength(password: string): {
     score += 1;
   }
 
-  if (/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{12,}/.test(password)) {
+  if (/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]).{12,}/.test(password)) {
     score += 1;
   }
 

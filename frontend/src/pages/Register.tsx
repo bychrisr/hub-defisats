@@ -25,49 +25,22 @@ import {
   Sun,
 } from 'lucide-react';
 import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator';
+import PasswordValidator from '@/components/PasswordValidator';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
 import { useUsernameValidation } from '@/hooks/useUsernameValidation';
 
-const registerSchema = z
-  .object({
-    email: z.string().email('Invalid email address'),
-    username: z
-      .string()
-      .min(3, 'Username must be at least 3 characters')
-      .max(20, 'Username must be at most 20 characters')
-      .regex(
-        /^[a-zA-Z0-9_]+$/,
-        'Username can only contain letters, numbers, and underscores'
-      )
-      .refine(val => !val.includes('@'), 'Username cannot contain @ symbol'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/\d/, 'Password must contain at least one number')
-      .regex(
-        /[@$!%*?&]/,
-        'Password must contain at least one special character'
-      ),
-    confirmPassword: z.string(),
-    ln_markets_api_key: z
-      .string()
-      .min(16, 'API key must be at least 16 characters'),
-    ln_markets_api_secret: z
-      .string()
-      .min(16, 'API secret must be at least 16 characters'),
-    ln_markets_passphrase: z
-      .string()
-      .min(8, 'Passphrase must be at least 8 characters')
-      .max(128, 'Passphrase must be at most 128 characters'),
-    coupon_code: z.string().optional(),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+// Simplified schema - validation now handled by backend
+const registerSchema = z.object({
+  email: z.string().min(1, 'Email is required'),
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(1, 'Password is required'),
+  confirmPassword: z.string().min(1, 'Confirm password is required'),
+  ln_markets_api_key: z.string().min(1, 'API key is required'),
+  ln_markets_api_secret: z.string().min(1, 'API secret is required'),
+  ln_markets_passphrase: z.string().min(1, 'Passphrase is required'),
+  coupon_code: z.string().optional(),
+});
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
@@ -198,36 +171,7 @@ export default function Register() {
     }
   };
 
-  const getPasswordStrength = useCallback((password: string) => {
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/\d/.test(password)) score++;
-    if (/[@$!%*?&]/.test(password)) score++;
-    return score;
-  }, []);
-
-  const passwordStrength = useMemo(
-    () => (password ? getPasswordStrength(password) : 0),
-    [password, getPasswordStrength]
-  );
-
-  const strengthLabels = useMemo(
-    () => ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'],
-    []
-  );
-
-  const strengthColors = useMemo(
-    () => [
-      'bg-red-600', // Very Weak - Vermelho mais escuro
-      'bg-orange-600', // Weak - Laranja mais escuro
-      'bg-yellow-600', // Fair - Amarelo mais escuro
-      'bg-emerald-600', // Good - Verde esmeralda mais escuro
-      'bg-green-700', // Strong - Verde mais escuro para melhor contraste
-    ],
-    []
-  );
+  // Password validation now handled by PasswordValidator component
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
@@ -386,12 +330,14 @@ export default function Register() {
                   </Button>
                 </div>
                 {password && (
-                  <PasswordStrengthIndicator
-                    password={password}
-                    strength={passwordStrength}
-                    labels={strengthLabels}
-                    colors={strengthColors}
-                  />
+                <PasswordValidator
+                  password={password}
+                  showStrength={true}
+                  onValidationChange={(isValid, suggestions) => {
+                    // You can use this callback to update form state if needed
+                    console.log('Password validation:', { isValid, suggestions });
+                  }}
+                />
                 )}
                 {errors.password && (
                   <p className="text-sm text-red-500">

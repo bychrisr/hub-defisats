@@ -21,9 +21,7 @@ export const useUsernameValidation = (): UseUsernameValidationReturn => {
 
     setUsernameChecking(true);
     try {
-      const response = await api.get(
-        `/api/auth/check-username?username=${encodeURIComponent(username)}`
-      );
+      const response = await api.post('/api/validation/username', { username });
       setUsernameAvailable(response.data.available);
     } catch (error) {
       console.error('Error checking username:', error);
