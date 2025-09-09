@@ -65,6 +65,11 @@ export default function Register() {
     isAvailable: false,
     suggestions: [] as string[]
   });
+
+  // Memoize the email validation callback to prevent hook order issues
+  const handleEmailValidationChange = useCallback((isValid: boolean, isAvailable: boolean, suggestions: string[]) => {
+    setEmailValidation({ isValid, isAvailable, suggestions });
+  }, []);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check if user has a preference stored
     const stored = localStorage.getItem('theme');
@@ -292,9 +297,7 @@ export default function Register() {
                 {watch('email') && (
                   <SimpleEmailValidator
                     email={watch('email')}
-                    onValidationChange={useCallback((isValid: boolean, isAvailable: boolean, suggestions: string[]) => {
-                      setEmailValidation({ isValid, isAvailable, suggestions });
-                    }, [])}
+                    onValidationChange={handleEmailValidationChange}
                   />
                 )}
                 {errors.email && (
