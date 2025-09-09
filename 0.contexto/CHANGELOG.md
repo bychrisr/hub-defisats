@@ -68,6 +68,14 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Melhoria na depuração e resolução de problemas
 
 ### Added
+- **Endpoint de Teste Sandbox**: Teste seguro de credenciais LN Markets
+  - Novo endpoint `GET /api/auth/test-sandbox` para testar credenciais
+  - Captura e retorno de logs detalhados do processo de validação
+  - Informações de erro e timestamps para diagnóstico
+  - Teste seguro sem exposição de dados sensíveis
+  - Auxílio na resolução de problemas de integração da API
+
+### Added
 - **Toggle Dark/Light Mode**: Alternância de tema funcional
   - Botão toggle com ícones sol/lua no header
   - Detecção automática de preferência do sistema
