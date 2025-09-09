@@ -210,25 +210,48 @@ export class LNMarketsService {
    */
   async validateCredentials(): Promise<boolean> {
     try {
+      console.log('🔍 Starting LN Markets credentials validation...');
+      console.log('📋 Credentials provided:', {
+        hasApiKey: !!this.credentials.apiKey,
+        hasApiSecret: !!this.credentials.apiSecret,
+        hasPassphrase: !!this.credentials.passphrase,
+        apiKeyLength: this.credentials.apiKey?.length,
+        apiSecretLength: this.credentials.apiSecret?.length,
+        passphraseLength: this.credentials.passphrase?.length,
+      });
+
       // Try multiple endpoints to validate credentials
       const endpoints = ['/futures/user/balance', '/futures/user/margin', '/futures/user/positions'];
 
       for (const endpoint of endpoints) {
         try {
+          console.log(`🔗 Testing endpoint: ${endpoint}`);
           // First try with main auth method
-          await this.client.get(endpoint);
+          const response = await this.client.get(endpoint);
           console.log(`✅ LN Markets API validation successful with endpoint: ${endpoint}`);
+          console.log(`📊 Response status: ${response.status}`);
           return true;
-        } catch (error) {
-          console.log(`❌ Main auth failed for ${endpoint}:`, (error as any).response?.status);
+        } catch (error: any) {
+          console.log(`❌ Main auth failed for ${endpoint}:`, {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+            message: error.message
+          });
 
           // If main auth fails, try alternative methods
           try {
+            console.log(`🔄 Trying alternative auth for ${endpoint}...`);
             await this.tryAlternativeAuth(endpoint);
             console.log(`✅ Alternative auth successful for ${endpoint}`);
             return true;
-          } catch (altError) {
-            console.log(`❌ Alternative auth also failed for ${endpoint}`);
+          } catch (altError: any) {
+            console.log(`❌ Alternative auth also failed for ${endpoint}:`, {
+              status: altError.response?.status,
+              statusText: altError.response?.statusText,
+              data: altError.response?.data,
+              message: altError.message
+            });
             continue; // Try next endpoint
           }
         }
@@ -236,8 +259,12 @@ export class LNMarketsService {
 
       console.error('❌ All LN Markets API endpoints and auth methods failed');
       return false;
-    } catch (error) {
-      console.error('❌ LN Markets API validation error:', error);
+    } catch (error: any) {
+      console.error('❌ LN Markets API validation error:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
+      });
       return false;
     }
   }
