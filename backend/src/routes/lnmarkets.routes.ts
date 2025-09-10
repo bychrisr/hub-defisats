@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsService } from '@/services/lnmarkets.service';
+import { LNMarketsAPIService } from '@/services/lnmarkets-api.service';
 
 const prisma = new PrismaClient();
 
@@ -82,26 +82,21 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       }
 
       // Initialize LN Markets service
-      const lnMarketsService = new LNMarketsService({
+      const lnMarketsService = new LNMarketsAPIService({
         apiKey: userProfile.ln_markets_api_key,
         apiSecret: userProfile.ln_markets_api_secret,
         passphrase: userProfile.ln_markets_passphrase,
+        isTestnet: process.env.NODE_ENV === 'development',
       });
 
-      // Get positions and margin info
-      const [positions, marginInfo] = await Promise.all([
-        lnMarketsService.getPositions(),
-        lnMarketsService.getMarginInfo(),
-      ]);
+      // Get positions using the new service
+      const positions = await lnMarketsService.getUserPositions();
 
       console.log('✅ LN MARKETS - Positions retrieved successfully');
 
       return reply.status(200).send({
         success: true,
-        data: {
-          positions,
-          marginInfo,
-        },
+        data: positions || [],
       });
     } catch (error: any) {
       console.error('❌ LN MARKETS - Error getting positions:', error);

@@ -69,19 +69,19 @@ export default function Trades() {
       
       console.log('🔍 TRADES - Fetching LN Markets positions...');
       
-      const response = await api.get('/api/lnmarkets/positions');
+      const response = await api.get('/api/lnmarkets/user/positions');
       const data = response.data;
       
       console.log('✅ TRADES - Received positions:', data);
       
       if (data.success && data.data) {
         // Transform LN Markets data to our interface
-        const transformedPositions: LNPosition[] = data.data.positions.map((pos: any) => ({
+        const transformedPositions: LNPosition[] = data.data.map((pos: any) => ({
           id: pos.id,
-          quantity: pos.size,
-          price: pos.entryPrice,
-          liquidation: pos.liquidationPrice,
-          leverage: 1, // LN Markets doesn't provide leverage in positions
+          quantity: pos.quantity || pos.size,
+          price: pos.price || pos.entryPrice,
+          liquidation: pos.liquidation || pos.liquidationPrice,
+          leverage: pos.leverage || 1,
           margin: 0, // Will be calculated from margin info
           pnl: pos.unrealizedPnl,
           pnlPercentage: 0, // Will be calculated
