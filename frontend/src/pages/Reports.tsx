@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -6,378 +6,447 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MetricCard } from '@/components/ui/metric-card';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { Button } from '@/components/ui/button';
 import {
-  Calendar,
-  Download,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
   Filter,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Activity,
-  BarChart3,
-  Search,
-  Eye,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
 } from 'lucide-react';
+import { apiGet } from '@/lib/fetch';
 
-const trades = [
-  {
-    id: 'TRD001',
-    date: '2024-01-15 14:30:22',
-    type: 'Stop Loss',
-    asset: 'BTC/USD',
-    action: 'Sell',
-    amount: '$1,250.00',
-    price: '$42,850.00',
-    pnl: '-$45.50',
-    pnlPercent: '-3.5%',
-    status: 'executed',
-    automationType: 'Margin Guard',
-  },
-  {
-    id: 'TRD002',
-    date: '2024-01-15 12:15:10',
-    type: 'Take Profit',
-    asset: 'BTC/USD',
-    action: 'Sell',
-    amount: '$890.00',
-    price: '$43,200.00',
-    pnl: '+$67.30',
-    pnlPercent: '+8.2%',
-    status: 'executed',
-    automationType: 'TP/SL',
-  },
-  {
-    id: 'TRD003',
-    date: '2024-01-15 09:45:33',
-    type: 'Margin Protection',
-    asset: 'ETH/USD',
-    action: 'Reduce',
-    amount: '$500.00',
-    price: '$2,650.00',
-    pnl: '+$12.80',
-    pnlPercent: '+2.6%',
-    status: 'executed',
-    automationType: 'Margin Guard',
-  },
-  {
-    id: 'TRD004',
-    date: '2024-01-14 16:22:45',
-    type: 'Stop Loss',
-    asset: 'BTC/USD',
-    action: 'Sell',
-    amount: '$2,100.00',
-    price: '$41,950.00',
-    pnl: '-$89.25',
-    pnlPercent: '-4.1%',
-    status: 'executed',
-    automationType: 'TP/SL',
-  },
-  {
-    id: 'TRD005',
-    date: '2024-01-14 11:05:12',
-    type: 'Take Profit',
-    asset: 'ETH/USD',
-    action: 'Sell',
-    amount: '$750.00',
-    price: '$2,720.00',
-    pnl: '+$85.50',
-    pnlPercent: '+12.9%',
-    status: 'executed',
-    automationType: 'TP/SL',
-  },
-];
+interface TradeLog {
+  id: string;
+  trade_id: string;
+  automation_id?: string;
+  status: 'success' | 'app_error' | 'exchange_error';
+  error_message?: string;
+  executed_at: string;
+  created_at: string;
+  automation?: {
+    id: string;
+    type: string;
+    config: any;
+  };
+}
 
-export const Reports = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
+interface TradeLogsResponse {
+  success: boolean;
+  data: {
+    tradeLogs: TradeLog[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  };
+}
 
-  const filteredTrades = trades.filter(trade => {
-    const matchesSearch =
-      trade.asset.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trade.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trade.id.toLowerCase().includes(searchTerm.toLowerCase());
+interface TradeLogStats {
+  success: boolean;
+  data: {
+    total: number;
+    success: number;
+    errors: number;
+    successRate: number;
+    recent: number;
+    byStatus: Record<string, number>;
+    byAutomation: number;
+  };
+}
 
-    const matchesFilter =
-      selectedFilter === 'all' ||
-      trade.automationType.toLowerCase().includes(selectedFilter.toLowerCase());
-
-    return matchesSearch && matchesFilter;
+export default function Reports() {
+  const [tradeLogs, setTradeLogs] = useState<TradeLog[]>([]);
+  const [stats, setStats] = useState<TradeLogStats['data'] | null>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrev: false,
   });
+  const [filters, setFilters] = useState({
+    status: 'all',
+    automation_id: 'all',
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalTrades = trades.length;
-  const successfulTrades = trades.filter(t => parseFloat(t.pnl) > 0).length;
-  const winRate = ((successfulTrades / totalTrades) * 100).toFixed(1);
-  const totalPnL = trades.reduce(
-    (sum, trade) => sum + parseFloat(trade.pnl.replace(/[+$]/g, '')),
-    0
-  );
+  const fetchTradeLogs = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('🔍 TRADE LOGS - Fetching trade logs...');
+      console.log('📊 Filters:', filters);
+      console.log('📊 Pagination:', pagination);
+
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+      });
+
+      if (filters.status !== 'all') {
+        params.append('status', filters.status);
+      }
+
+      if (filters.automation_id !== 'all') {
+        params.append('automation_id', filters.automation_id);
+      }
+
+      const response = await apiGet(`/api/trade-logs?${params.toString()}`);
+      const data: TradeLogsResponse = await response.json();
+
+      console.log('✅ TRADE LOGS - Received data:', data);
+
+      if (data && data.data && data.data.tradeLogs && data.data.pagination) {
+        setTradeLogs(data.data.tradeLogs);
+        setPagination(data.data.pagination);
+      } else {
+        console.error('❌ TRADE LOGS - Invalid data structure:', data);
+        setError('Invalid response format from server');
+      }
+    } catch (err: any) {
+      console.error('❌ TRADE LOGS - Error fetching trade logs:', err);
+      setError(err.message || 'Failed to fetch trade logs');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      console.log('🔍 TRADE LOG STATS - Fetching stats...');
+      const response = await apiGet('/api/trade-logs/stats');
+      const data: TradeLogStats = await response.json();
+
+      console.log('✅ TRADE LOG STATS - Received stats:', data);
+      
+      if (data && data.data) {
+        setStats(data.data);
+      } else {
+        console.error('❌ TRADE LOG STATS - Invalid stats data:', data);
+      }
+    } catch (err: any) {
+      console.error('❌ TRADE LOG STATS - Error fetching stats:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTradeLogs();
+    fetchStats();
+  }, [filters, pagination.page]);
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'app_error':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'exchange_error':
+        return <AlertCircle className="h-4 w-4 text-orange-500" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <Badge variant="default" className="bg-green-500">Success</Badge>;
+      case 'app_error':
+        return <Badge variant="destructive">App Error</Badge>;
+      case 'exchange_error':
+        return <Badge variant="secondary" className="bg-orange-500">Exchange Error</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  const formatAutomationType = (type: string) => {
+    return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  if (isLoading && tradeLogs.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Relatórios de Trading</h1>
-          <p className="text-muted-foreground">
-            Análise detalhada do desempenho das suas automações
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Calendar className="mr-2 h-4 w-4" />
-            Período
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
-        </div>
-      </div>
-
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Total de Trades"
-          value={totalTrades}
-          change={{ value: '+12 este mês', type: 'positive' }}
-          icon={Activity}
-        />
-        <MetricCard
-          title="Win Rate"
-          value={`${winRate}%`}
-          change={{ value: 'Acima da média', type: 'positive' }}
-          icon={TrendingUp}
-        />
-        <MetricCard
-          title="P&L Total"
-          value={`$${totalPnL.toFixed(2)}`}
-          change={{
-            value: totalPnL > 0 ? '+2.4% hoje' : '-1.2% hoje',
-            type: totalPnL > 0 ? 'positive' : 'negative',
-          }}
-          icon={DollarSign}
-        />
-        <MetricCard
-          title="Capital Protegido"
-          value="$3,247"
-          change={{ value: 'Trades salvos', type: 'positive' }}
-          icon={BarChart3}
-        />
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle>Histórico de Operações</CardTitle>
-              <CardDescription>
-                Todas as execuções das suas automações
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar trades..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="pl-9 w-64"
-                />
-              </div>
-              <select
-                value={selectedFilter}
-                onChange={e => setSelectedFilter(e.target.value)}
-                className="h-10 px-3 py-2 border border-input bg-background rounded-md"
-              >
-                <option value="all">Todos os tipos</option>
-                <option value="margin">Margin Guard</option>
-                <option value="tp">TP/SL</option>
-              </select>
-            </div>
+    <div className="container mx-auto py-8 px-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
+            <p className="text-gray-600">View your automation trade history</p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Table Header */}
-            <div className="grid grid-cols-7 gap-4 py-3 px-4 bg-muted/30 rounded-lg text-sm font-medium">
-              <div>Trade ID</div>
-              <div>Data/Hora</div>
-              <div>Tipo</div>
-              <div>Ativo</div>
-              <div>Valor</div>
-              <div>P&L</div>
-              <div>Ações</div>
-            </div>
+          <Button onClick={fetchTradeLogs} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
 
-            {/* Table Rows */}
-            {filteredTrades.map(trade => (
-              <div
-                key={trade.id}
-                className="grid grid-cols-7 gap-4 py-4 px-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="font-mono text-sm">{trade.id}</div>
-
-                <div className="text-sm">
-                  <div>{trade.date.split(' ')[0]}</div>
-                  <div className="text-muted-foreground text-xs">
-                    {trade.date.split(' ')[1]}
-                  </div>
-                </div>
-
-                <div>
-                  <Badge variant="outline" className="text-xs">
-                    {trade.type}
-                  </Badge>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {trade.automationType}
-                  </div>
-                </div>
-
-                <div className="text-sm">
-                  <div className="font-medium">{trade.asset}</div>
-                  <div className="text-muted-foreground text-xs">
-                    {trade.action} @ ${trade.price}
-                  </div>
-                </div>
-
-                <div className="text-sm font-medium">{trade.amount}</div>
-
-                <div className="text-sm">
-                  <div
-                    className={`font-medium ${
-                      trade.pnl.startsWith('+')
-                        ? 'text-success'
-                        : 'text-destructive'
-                    }`}
-                  >
-                    {trade.pnl}
-                  </div>
-                  <div
-                    className={`text-xs ${
-                      trade.pnlPercent.startsWith('+')
-                        ? 'text-success'
-                        : 'text-destructive'
-                    }`}
-                  >
-                    {trade.pnlPercent}
-                  </div>
-                </div>
-
-                <div>
-                  <Button variant="ghost" size="sm">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-
-            {filteredTrades.length === 0 && (
-              <div className="text-center py-12">
-                <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">
-                  Nenhum trade encontrado
-                </h3>
-                <p className="text-muted-foreground">
-                  {searchTerm || selectedFilter !== 'all'
-                    ? 'Tente ajustar os filtros de busca'
-                    : 'Suas automações ainda não executaram nenhum trade'}
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Trades</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.recent} in last 7 days
                 </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
 
-      {/* Performance Summary */}
-      <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.successRate.toFixed(1)}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.success} successful trades
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Errors</CardTitle>
+                <XCircle className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.errors}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.byStatus.app_error || 0} app, {stats.byStatus.exchange_error || 0} exchange
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Automations</CardTitle>
+                <AlertCircle className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.byAutomation}</div>
+                <p className="text-xs text-muted-foreground">
+                  Active automations
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-success" />
-              Melhores Performances
+            <CardTitle className="flex items-center">
+              <Filter className="h-5 w-5 mr-2" />
+              Filters
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {trades
-                .filter(t => parseFloat(t.pnl) > 0)
-                .sort(
-                  (a, b) =>
-                    parseFloat(b.pnl.replace(/[+$]/g, '')) -
-                    parseFloat(a.pnl.replace(/[+$]/g, ''))
-                )
-                .slice(0, 3)
-                .map(trade => (
-                  <div
-                    key={trade.id}
-                    className="flex items-center justify-between p-3 bg-success/5 border border-success/20 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium text-sm">
-                        {trade.asset} - {trade.type}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {trade.date.split(' ')[0]}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-success">{trade.pnl}</p>
-                      <p className="text-xs text-success">{trade.pnlPercent}</p>
-                    </div>
-                  </div>
-                ))}
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[200px]">
+                <label className="text-sm font-medium mb-2 block">Status</label>
+                <Select
+                  value={filters.status}
+                  onValueChange={(value) => handleFilterChange('status', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="app_error">App Error</SelectItem>
+                    <SelectItem value="exchange_error">Exchange Error</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex-1 min-w-[200px]">
+                <label className="text-sm font-medium mb-2 block">Automation</label>
+                <Select
+                  value={filters.automation_id}
+                  onValueChange={(value) => handleFilterChange('automation_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by automation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Automations</SelectItem>
+                    <SelectItem value="auto_001">Margin Guard</SelectItem>
+                    <SelectItem value="auto_002">TP/SL</SelectItem>
+                    <SelectItem value="auto_003">Auto Entry</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Reports Table */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-destructive" />
-              Proteções Ativadas
-            </CardTitle>
+            <CardTitle>Trade History</CardTitle>
+            <CardDescription>
+              Showing {tradeLogs.length} of {pagination.total} trades
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {trades
-                .filter(
-                  t => t.type.includes('Stop') || t.type.includes('Margin')
-                )
-                .slice(0, 3)
-                .map(trade => (
-                  <div
-                    key={trade.id}
-                    className="flex items-center justify-between p-3 bg-warning/5 border border-warning/20 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium text-sm">
-                        {trade.asset} - {trade.type}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Capital protegido:{' '}
-                        {Math.abs(
-                          parseFloat(trade.pnl.replace(/[+$-]/g, '')) * 3
-                        ).toFixed(2)}
-                      </p>
+            {error ? (
+              <div className="text-center py-8">
+                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-2" />
+                <p className="text-red-600 mb-2">Error loading trade logs</p>
+                <p className="text-sm text-gray-500">{error}</p>
+                <Button onClick={fetchTradeLogs} className="mt-4">
+                  Try Again
+                </Button>
+              </div>
+            ) : tradeLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600">No trade logs found</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Create your first automation to start trading
+                </p>
+              </div>
+            ) : (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Trade ID</TableHead>
+                      <TableHead>Automation</TableHead>
+                      <TableHead>Error Message</TableHead>
+                      <TableHead>Executed At</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tradeLogs.map((tradeLog) => (
+                      <TableRow key={tradeLog.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(tradeLog.status)}
+                            {getStatusBadge(tradeLog.status)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {tradeLog.trade_id}
+                        </TableCell>
+                        <TableCell>
+                          {tradeLog.automation ? (
+                            <div>
+                              <div className="font-medium">
+                                {formatAutomationType(tradeLog.automation.type)}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {tradeLog.automation.id}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-500">Manual</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {tradeLog.error_message ? (
+                            <div className="max-w-xs truncate" title={tradeLog.error_message}>
+                              {tradeLog.error_message}
+                            </div>
+                          ) : (
+                            <span className="text-gray-500">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDate(tradeLog.executed_at)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+
+                {/* Pagination */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-6">
+                    <div className="text-sm text-gray-500">
+                      Page {pagination.page} of {pagination.totalPages}
                     </div>
-                    <div className="text-right">
-                      <StatusBadge status="success">Protegido</StatusBadge>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {trade.date.split(' ')[0]}
-                      </p>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.page - 1)}
+                        disabled={!pagination.hasPrev || isLoading}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.page + 1)}
+                        disabled={!pagination.hasNext || isLoading}
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                ))}
-            </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
     </div>
   );
-};
+}

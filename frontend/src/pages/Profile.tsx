@@ -15,6 +15,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Loader2,
   Eye,
@@ -23,8 +25,12 @@ import {
   XCircle,
   Shield,
   Key,
+  User,
+  Upload,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
+import { api } from '@/lib/api';
 
 const profileSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -34,41 +40,77 @@ const profileSchema = z.object({
   ln_markets_api_secret: z
     .string()
     .min(16, 'API secret must be at least 16 characters'),
+  ln_markets_passphrase: z
+    .string()
+    .min(8, 'Passphrase must be at least 8 characters'),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function Profile() {
   const [showApiSecret, setShowApiSecret] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [showPassphrase, setShowPassphrase] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const { user, getProfile, isLoading, error } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const { user, getProfile, isLoading: authLoading } = useAuthStore();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
   });
+
+  const watchedFields = watch();
 
   useEffect(() => {
     if (user) {
       reset({
         email: user.email,
-        ln_markets_api_key: '••••••••••••••••', // Masked for display
-        ln_markets_api_secret: '••••••••••••••••', // Masked for display
+        ln_markets_api_key: user.ln_markets_api_key || '',
+        ln_markets_api_secret: user.ln_markets_api_secret || '',
+        ln_markets_passphrase: user.ln_markets_passphrase || '',
       });
     }
   }, [user, reset]);
 
   const onSubmit = async (data: ProfileForm) => {
     try {
-      // TODO: Implement profile update API
-      console.log('Profile update:', data);
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Profile update error:', error);
+      setIsLoading(true);
+      setError(null);
+      setSuccess(null);
+
+      console.log('🔍 PROFILE - Updating profile:', {
+        email: data.email,
+        ln_markets_api_key: data.ln_markets_api_key ? '***' : 'not provided',
+        ln_markets_api_secret: data.ln_markets_api_secret ? '***' : 'not provided',
+        ln_markets_passphrase: data.ln_markets_passphrase ? '***' : 'not provided',
+      });
+
+      const response = await api.put('/api/profile', data);
+      const result = response.data;
+
+      if (result.success) {
+        console.log('✅ PROFILE - Profile updated successfully');
+        setSuccess('Profile updated successfully!');
+        setIsEditing(false);
+        // Refresh user data
+        await getProfile();
+      } else {
+        console.error('❌ PROFILE - Error updating profile:', result.message);
+        setError(result.message);
+      }
+    } catch (error: any) {
+      console.error('❌ PROFILE - Error updating profile:', error);
+      setError(error.message || 'Failed to update profile');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,224 +127,209 @@ export default function Profile() {
     }
   };
 
-  const getPlanColor = (planType: string) => {
-    switch (planType) {
-      case 'pro':
-        return 'text-purple-600';
-      case 'advanced':
-        return 'text-blue-600';
-      case 'basic':
-        return 'text-green-600';
-      default:
-        return 'text-gray-600';
+  const getCredentialsStatus = () => {
+    const hasKey = watchedFields.ln_markets_api_key && watchedFields.ln_markets_api_key.length > 0;
+    const hasSecret = watchedFields.ln_markets_api_secret && watchedFields.ln_markets_api_secret.length > 0;
+    const hasPassphrase = watchedFields.ln_markets_passphrase && watchedFields.ln_markets_passphrase.length > 0;
+    
+    if (hasKey && hasSecret && hasPassphrase) {
+      return { status: 'complete', message: 'All credentials configured' };
+    } else if (hasKey || hasSecret || hasPassphrase) {
+      return { status: 'partial', message: 'Some credentials missing' };
+    } else {
+      return { status: 'missing', message: 'No credentials configured' };
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
+  const credentialsStatus = getCredentialsStatus();
 
-  if (!user) {
+  if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Alert>
-          <XCircle className="h-4 w-4" />
-          <AlertDescription>User not found</AlertDescription>
-        </Alert>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading profile...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-            <p className="text-gray-600">
-              Manage your account settings and preferences
-            </p>
-          </div>
-          <Badge
-            variant={getPlanBadgeVariant(user.plan_type)}
-            className="text-sm"
-          >
-            {user.plan_type.toUpperCase()} Plan
-          </Badge>
-        </div>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold">Profile</h1>
+        <p className="text-muted-foreground">
+          Manage your profile, LN Markets credentials, and account settings
+        </p>
+      </div>
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      {/* Success/Error Messages */}
+      {success && (
+        <Alert className="border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            {success}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        <Tabs defaultValue="account" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="api">API Keys</TabsTrigger>
-          </TabsList>
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
 
-          <TabsContent value="account" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Information</CardTitle>
-                <CardDescription>
-                  Your basic account details and plan information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input value={user.email} disabled />
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="credentials">LN Markets</TabsTrigger>
+        </TabsList>
+
+        {/* Profile Tab */}
+        <TabsContent value="profile" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Profile Information
+              </CardTitle>
+              <CardDescription>
+                Your account information and plan details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src="/avatars/01.png" />
+                  <AvatarFallback className="text-lg">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-2">
+                  <Button variant="outline" size="sm" disabled>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Change Photo
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    JPG, PNG up to 2MB
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Email</Label>
+                    <p className="text-lg font-semibold">{user?.email}</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Plan Type</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input value={user.plan_type} disabled />
-                      <Badge variant={getPlanBadgeVariant(user.plan_type)}>
-                        {user.plan_type.toUpperCase()}
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Plan</Label>
+                    <div className="mt-1">
+                      <Badge variant={getPlanBadgeVariant(user?.plan_type || 'free')}>
+                        {user?.plan_type?.toUpperCase() || 'FREE'}
                       </Badge>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Account Status</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        value={user.is_active ? 'Active' : 'Inactive'}
-                        disabled
-                      />
-                      {user.is_active ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Email Verified</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        value={
-                          user.email_verified ? 'Verified' : 'Not Verified'
-                        }
-                        disabled
-                      />
-                      {user.email_verified ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      )}
-                    </div>
-                  </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Member Since</Label>
-                    <Input
-                      value={new Date(user.created_at).toLocaleDateString()}
-                      disabled
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Last Updated</Label>
-                    <Input
-                      value={new Date(user.updated_at).toLocaleDateString()}
-                      disabled
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="security" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
-                <CardDescription>
-                  Manage your account security and authentication
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Shield className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <h3 className="font-medium">
-                          Two-Factor Authentication
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Add an extra layer of security to your account
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {user.two_factor_enabled ? (
-                        <>
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                          <span className="text-sm text-green-600">
-                            Enabled
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="h-5 w-5 text-red-500" />
-                          <span className="text-sm text-red-600">Disabled</span>
-                        </>
-                      )}
-                    </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Member Since</Label>
+                    <p className="text-lg font-semibold">
+                      {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                    </p>
                   </div>
-
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Key className="h-5 w-5 text-green-500" />
-                      <div>
-                        <h3 className="font-medium">Password</h3>
-                        <p className="text-sm text-gray-600">
-                          Last changed: Never (set during registration)
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Change Password
-                    </Button>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Last Activity</Label>
+                    <p className="text-lg font-semibold">
+                      {user?.last_activity_at ? new Date(user.last_activity_at).toLocaleDateString() : 'N/A'}
+                    </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="api" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>LN Markets API Configuration</CardTitle>
-                <CardDescription>
-                  Manage your LN Markets API keys for trading automation
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Credentials Tab */}
+        <TabsContent value="credentials" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                LN Markets Credentials
+              </CardTitle>
+              <CardDescription>
+                Configure your LN Markets API credentials for trading integration
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Credentials Status */}
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center space-x-3">
+                  {credentialsStatus.status === 'complete' ? (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  ) : credentialsStatus.status === 'partial' ? (
+                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  )}
+                  <div>
+                    <p className="font-medium">Credentials Status</p>
+                    <p className="text-sm text-muted-foreground">{credentialsStatus.message}</p>
+                  </div>
+                </div>
+                <Badge 
+                  variant={
+                    credentialsStatus.status === 'complete' ? 'default' : 
+                    credentialsStatus.status === 'partial' ? 'secondary' : 
+                    'destructive'
+                  }
+                >
+                  {credentialsStatus.status.toUpperCase()}
+                </Badge>
+              </div>
+
+              <Separator />
+
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="ln_markets_api_key">API Key</Label>
-                    <Input
-                      id="ln_markets_api_key"
-                      type="text"
-                      placeholder="Enter your LN Markets API key"
-                      {...register('ln_markets_api_key')}
-                      className={
-                        errors.ln_markets_api_key ? 'border-red-500' : ''
-                      }
-                      disabled={!isEditing}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="ln_markets_api_key"
+                        type={showApiKey ? 'text' : 'password'}
+                        placeholder="Enter your LN Markets API key"
+                        autoComplete="off"
+                        {...register('ln_markets_api_key')}
+                        className={
+                          errors.ln_markets_api_key
+                            ? 'border-red-500 pr-10'
+                            : 'pr-10'
+                        }
+                        disabled={!isEditing}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        disabled={!isEditing}
+                      >
+                        {showApiKey ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                     {errors.ln_markets_api_key && (
                       <p className="text-sm text-red-500">
                         {errors.ln_markets_api_key.message}
@@ -317,6 +344,7 @@ export default function Profile() {
                         id="ln_markets_api_secret"
                         type={showApiSecret ? 'text' : 'password'}
                         placeholder="Enter your LN Markets API secret"
+                        autoComplete="off"
                         {...register('ln_markets_api_secret')}
                         className={
                           errors.ln_markets_api_secret
@@ -347,59 +375,84 @@ export default function Profile() {
                     )}
                   </div>
 
-                  <div className="flex space-x-2">
-                    {isEditing ? (
-                      <>
-                        <Button type="submit" disabled={isLoading}>
-                          {isLoading ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Saving...
-                            </>
-                          ) : (
-                            'Save Changes'
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setIsEditing(false);
-                            reset();
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <Button type="button" onClick={() => setIsEditing(true)}>
-                        Edit API Keys
+                  <div className="space-y-2">
+                    <Label htmlFor="ln_markets_passphrase">Passphrase</Label>
+                    <div className="relative">
+                      <Input
+                        id="ln_markets_passphrase"
+                        type={showPassphrase ? 'text' : 'password'}
+                        placeholder="Enter your LN Markets passphrase"
+                        autoComplete="off"
+                        {...register('ln_markets_passphrase')}
+                        className={
+                          errors.ln_markets_passphrase
+                            ? 'border-red-500 pr-10'
+                            : 'pr-10'
+                        }
+                        disabled={!isEditing}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassphrase(!showPassphrase)}
+                        disabled={!isEditing}
+                      >
+                        {showPassphrase ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </Button>
+                    </div>
+                    {errors.ln_markets_passphrase && (
+                      <p className="text-sm text-red-500">
+                        {errors.ln_markets_passphrase.message}
+                      </p>
                     )}
                   </div>
-                </form>
-
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-start space-x-2">
-                    <Shield className="h-5 w-5 text-yellow-600 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-yellow-800">
-                        Security Notice
-                      </h4>
-                      <p className="text-sm text-yellow-700 mt-1">
-                        Your API keys are encrypted and stored securely. Never
-                        share your API secret with anyone. If you suspect your
-                        keys have been compromised, regenerate them in your LN
-                        Markets account.
-                      </p>
-                    </div>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+
+                <Separator />
+
+                <div className="flex space-x-2">
+                  {isEditing ? (
+                    <>
+                      <Button type="submit" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setIsEditing(false);
+                          reset();
+                          setError(null);
+                          setSuccess(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button type="button" onClick={() => setIsEditing(true)}>
+                      Edit Credentials
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

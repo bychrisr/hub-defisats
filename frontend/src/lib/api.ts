@@ -139,4 +139,10 @@ export const automationAPI = {
   getStats: () => api.get('/api/automations/stats'),
 };
 
+// LN Markets API
+export const lnmarketsAPI = {
+  getPositions: () => api.get('/api/lnmarkets/positions'),
+  getMarketData: (market: string) => api.get(`/api/lnmarkets/market-data/${market}`),
+};
+
 export default api;

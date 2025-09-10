@@ -10,6 +10,10 @@ export interface User {
   two_factor_enabled: boolean;
   created_at: string;
   updated_at: string;
+  last_activity_at?: string;
+  ln_markets_api_key?: string;
+  ln_markets_api_secret?: string;
+  ln_markets_passphrase?: string;
   is_admin?: boolean; // Flag para identificar usuários admin
 }
 

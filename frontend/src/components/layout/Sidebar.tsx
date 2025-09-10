@@ -10,6 +10,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,16 @@ const navigation = [
     icon: Home,
   },
   {
+    name: 'Trades',
+    href: '/trades',
+    icon: TrendingUp,
+  },
+  {
+    name: 'Reports',
+    href: '/reports',
+    icon: BarChart3,
+  },
+  {
     name: 'Margin Guard',
     href: '/margin-guard',
     icon: Shield,
@@ -39,11 +50,6 @@ const navigation = [
     name: 'Profile',
     href: '/profile',
     icon: User,
-  },
-  {
-    name: 'Reports',
-    href: '/reports',
-    icon: BarChart3,
   },
   {
     name: 'Logs',

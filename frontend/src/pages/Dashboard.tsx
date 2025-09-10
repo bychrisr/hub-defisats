@@ -189,13 +189,13 @@ export default function Dashboard() {
                 </Button>
 
                 <Button asChild variant="outline" className="h-auto p-4">
-                  <Link to="/trades">
+                  <Link to="/reports">
                     <div className="flex items-center space-x-3">
                       <BarChart3 className="h-5 w-5" />
                       <div className="text-left">
-                        <div className="font-medium">Trade Logs</div>
+                        <div className="font-medium">Reports</div>
                         <div className="text-sm opacity-70">
-                          View trade history
+                          View automation reports
                         </div>
                       </div>
                     </div>

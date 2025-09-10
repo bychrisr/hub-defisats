@@ -11,9 +11,9 @@ import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import MarginGuard from '@/pages/MarginGuard';
 import { Automation } from '@/pages/Automation';
-import { Settings } from '@/pages/Settings';
-import { Reports } from '@/pages/Reports';
 import { Logs } from '@/pages/Logs';
+import Reports from '@/pages/Reports';
+import Trades from '@/pages/Trades';
 import NotFound from './pages/NotFound';
 import { useAuthStore } from '@/stores/auth';
 import { useEffect } from 'react';
@@ -29,9 +29,17 @@ const queryClient = new QueryClient();
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, isInitialized } = useAuthStore();
 
-  if (isLoading) {
+  console.log('🔍 PROTECTED ROUTE - State check:', {
+    isAuthenticated,
+    isLoading,
+    isInitialized
+  });
+
+  // Se não foi inicializado ainda, mostrar loading
+  if (!isInitialized) {
+    console.log('⏳ PROTECTED ROUTE - Not initialized yet, showing loading...');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -39,7 +47,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  // Se não está autenticado, redirecionar para login
+  if (!isAuthenticated) {
+    console.log('❌ PROTECTED ROUTE - Not authenticated, redirecting to login');
+    return <Navigate to="/login" />;
+  }
+
+  console.log('✅ PROTECTED ROUTE - Access granted, rendering content');
+  return <>{children}</>;
 };
 
 // Public Route Component (allow access even if authenticated)
@@ -185,16 +200,6 @@ const App = () => {
               }
             />
             <Route
-              path="/settings/*"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Settings />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/reports"
               element={
                 <ProtectedRoute>
@@ -214,6 +219,26 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+          <Route
+            path="/trades"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Trades />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Reports />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
             {/* Admin Routes */}
             <Route
               path="/admin"
