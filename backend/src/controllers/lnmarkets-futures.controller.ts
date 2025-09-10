@@ -28,17 +28,17 @@ export class LNMarketsFuturesController {
   private async getLNMarketsService(userId: string): Promise<LNMarketsAPIService> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { lnmarkets_api_key: true, lnmarkets_api_secret: true, lnmarkets_passphrase: true }
+      select: { ln_markets_api_key: true, ln_markets_api_secret: true, ln_markets_passphrase: true }
     });
 
-    if (!user?.lnmarkets_api_key || !user?.lnmarkets_api_secret || !user?.lnmarkets_passphrase) {
+    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
       throw new Error('LN Markets credentials not configured');
     }
 
     return new LNMarketsAPIService({
-      apiKey: user.lnmarkets_api_key,
-      apiSecret: user.lnmarkets_api_secret,
-      passphrase: user.lnmarkets_passphrase,
+      apiKey: user.ln_markets_api_key,
+      apiSecret: user.ln_markets_api_secret,
+      passphrase: user.ln_markets_passphrase,
       isTestnet: process.env.NODE_ENV === 'development'
     });
   }
