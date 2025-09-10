@@ -281,7 +281,7 @@ export class LNMarketsAPIService {
   async getUserPositions() {
     return this.makeRequest({
       method: 'GET',
-      path: '/trades',
+      path: '/futures/trades',
       params: { type: 'running' }
     });
   }
