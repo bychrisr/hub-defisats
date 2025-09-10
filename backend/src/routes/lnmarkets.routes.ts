@@ -96,7 +96,9 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
 
       return reply.status(200).send({
         success: true,
-        data: positions || [],
+        data: {
+          positions: positions || [],
+        },
       });
     } catch (error: any) {
       console.error('❌ LN MARKETS - Error getting positions:', error);
@@ -182,10 +184,11 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       }
 
       // Initialize LN Markets service
-      const lnMarketsService = new LNMarketsService({
+      const lnMarketsService = new LNMarketsAPIService({
         apiKey: userProfile.ln_markets_api_key,
         apiSecret: userProfile.ln_markets_api_secret,
         passphrase: userProfile.ln_markets_passphrase,
+        isTestnet: process.env.NODE_ENV === 'development',
       });
 
       // Get market data
