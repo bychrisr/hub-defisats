@@ -65,30 +65,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           localStorage.setItem('access_token', token);
           console.log('✅ Token stored successfully');
 
-          // Verificar se é admin baseado no email
-          const isAdmin = email === 'admin@hub-defisats.com';
+          // Call getProfile to get full user data and set isInitialized
+          console.log('🔄 LOGIN - Calling getProfile after login...');
+          await get().getProfile();
           
-          set({
-            user: {
-              id: user_id,
-              plan_type: plan_type,
-              email: email,
-              email_verified: false,
-              two_factor_enabled: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              is_admin: isAdmin, // Adicionar flag de admin
-            },
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
         } catch (error: any) {
           const errorMessage = error.response?.data?.message || 'Login failed';
           set({
             user: null,
             isAuthenticated: false,
             isLoading: false,
+            isInitialized: true,
             error: errorMessage,
           });
           throw new Error(errorMessage);
@@ -191,33 +178,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             error.response?.data?.message || 'Failed to get profile';
           console.log('❌ AUTH STORE - Error message:', errorMessage);
           
-          // Se o erro for de token expirado, tentar fazer login novamente
-          if (errorMessage.includes('Invalid session') || errorMessage.includes('UNAUTHORIZED')) {
-            console.log('🔄 AUTH STORE - Token expired, attempting to login again...');
-            try {
-              // Tentar fazer login novamente com as credenciais do admin
-              const loginResponse = await authAPI.login({
-                email: 'admin@hub-defisats.com',
-                password: 'AdminPass123!'
-              });
-              
-              console.log('✅ AUTH STORE - Re-login successful');
-              const newUser = loginResponse.data;
-              
-              set({
-                user: {
-                  ...newUser,
-                  is_admin: true,
-                },
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-              });
-              console.log('✅ AUTH STORE - Profile set after re-login');
-              return;
-            } catch (loginError) {
-              console.log('❌ AUTH STORE - Re-login failed:', loginError);
-            }
+          // Se o erro for de token expirado, limpar localStorage
+          if (error.response?.status === 401 || errorMessage.includes('Invalid session') || errorMessage.includes('UNAUTHORIZED')) {
+            console.log('🔑 AUTH STORE - Token expired/invalid, clearing localStorage');
+            localStorage.removeItem('access_token');
           }
           
           set({
