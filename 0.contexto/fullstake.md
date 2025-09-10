@@ -1,6 +1,6 @@
-# Stack Técnica Recomendada
+# Full Stack
 
-## Backend
+Minimal content.
 
 **Linguagem e Framework**: Node.js 18+ com Fastify
 

@@ -34,7 +34,7 @@ export class LNMarketsService {
     this.credentials = credentials;
 
     this.client = axios.create({
-      baseURL: 'https://api.lnmarkets.com',
+      baseURL: 'https://api.lnmarkets.com/v2',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -82,6 +82,9 @@ export class LNMarketsService {
     const { apiKey, apiSecret, passphrase } = this.credentials;
     const timestamp = Date.now().toString();
 
+    // Ensure path includes /v2 prefix for signature
+    const fullPath = path.startsWith('/v2') ? path : `/v2${path}`;
+
     // Build params string
     let paramsStr = '';
     if (method === 'GET' || method === 'DELETE') {
@@ -93,7 +96,7 @@ export class LNMarketsService {
     }
 
     // Create signature
-    const message = `${timestamp}${method}${path}${paramsStr}`;
+    const message = `${timestamp}${method}${fullPath}${paramsStr}`;
     const signature = createHmac('sha256', apiSecret)
       .update(message)
       .digest('base64');
@@ -176,7 +179,7 @@ export class LNMarketsService {
   async getMarginInfo(): Promise<MarginInfo> {
     try {
       // Use the correct endpoint for user information
-      const response = await this.client.get('/v2/user');
+      const response = await this.client.get('/user');
       return response.data;
     } catch (error) {
       console.error('Error fetching margin info:', error);
@@ -189,7 +192,7 @@ export class LNMarketsService {
    */
   async getPositions(): Promise<Position[]> {
     try {
-      const response = await this.client.get('/v2/futures/positions');
+      const response = await this.client.get('/futures/positions');
       return response.data || [];
     } catch (error) {
       console.error('Error fetching positions:', error);
@@ -202,7 +205,7 @@ export class LNMarketsService {
    */
   async getRunningTrades(): Promise<any[]> {
     try {
-      const response = await this.client.get('/v2/futures/trades', {
+      const response = await this.client.get('/futures/trades', {
         params: { type: 'running' },
       });
       return response.data || [];
@@ -218,7 +221,7 @@ export class LNMarketsService {
   async getBalance(): Promise<any> {
     try {
       // Use the correct endpoint for user information
-      const response = await this.client.get('/v2/user');
+      const response = await this.client.get('/user');
       return response.data;
     } catch (error) {
       console.error('Error fetching balance:', error);
@@ -242,12 +245,12 @@ export class LNMarketsService {
       });
 
       // In development, accept test credentials
-      if (process.env.NODE_ENV === 'development') {
-        const isTestCredentials = 
+      if (process.env['NODE_ENV'] === 'development') {
+        const isTestCredentials =
           this.credentials.apiKey?.startsWith('test_') ||
           this.credentials.apiKey?.includes('test') ||
           this.credentials.apiKey?.length >= 16; // Accept any 16+ char key in dev
-        
+
         if (isTestCredentials) {
           console.log('✅ Development mode: Accepting test credentials');
           return true;
@@ -256,9 +259,9 @@ export class LNMarketsService {
 
       // Try multiple endpoints to validate credentials
       const endpoints = [
-        '/v2/user',
-        '/v2/futures/positions',
-        '/v2/futures/trades',
+        '/user',
+        '/futures/positions',
+        '/futures/trades',
       ];
 
       for (const endpoint of endpoints) {
@@ -320,9 +323,9 @@ export class LNMarketsService {
     try {
       // Test with different public endpoints
       const endpoints = [
-        'https://api.lnmarkets.com/v2/futures/markets',
-        'https://api.lnmarkets.com/v2/futures/ticker',
-        'https://api.lnmarkets.com/v2/health',
+        '/futures/markets',
+        '/futures/ticker',
+        '/health',
       ];
 
       for (const endpoint of endpoints) {

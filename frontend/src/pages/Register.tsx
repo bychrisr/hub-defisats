@@ -32,15 +32,15 @@ import { api } from '@/lib/api';
 import { useUsernameValidation } from '@/hooks/useUsernameValidation';
 import { generateTestCredentials } from '@/utils/testDataGenerator';
 
-// Simplified schema - validation now handled by backend
+// Schema with proper validation to match backend requirements
 const registerSchema = z.object({
   email: z.string().min(1, 'Email is required'),
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
-  confirmPassword: z.string().min(1, 'Confirm password is required'),
-  ln_markets_api_key: z.string().min(1, 'API key is required'),
-  ln_markets_api_secret: z.string().min(1, 'API secret is required'),
-  ln_markets_passphrase: z.string().min(1, 'Passphrase is required'),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be at most 20 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string().min(8, 'Confirm password must be at least 8 characters'),
+  ln_markets_api_key: z.string().min(16, 'API key must be at least 16 characters'),
+  ln_markets_api_secret: z.string().min(16, 'API secret must be at least 16 characters'),
+  ln_markets_passphrase: z.string().min(8, 'Passphrase must be at least 8 characters'),
   coupon_code: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",

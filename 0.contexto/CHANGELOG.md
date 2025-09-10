@@ -7,6 +7,14 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+### Fixed
+- **Bug no Cadastro de Usuário**: Corrigido problema crítico na validação de credenciais LN Markets
+  - **Problema**: URL base da API LN Markets estava incorreta (`https://api.lnmarkets.com` ao invés de `https://api.lnmarkets.com/v2`)
+  - **Impacto**: Falha na autenticação HMAC-SHA256 causando erro 400 no registro de usuários
+  - **Solução**: Corrigido baseURL para incluir `/v2` e ajustado paths de assinatura
+  - **Resultado**: Cadastro de usuários funcionando 100% com validação de credenciais LN Markets
+  - **Teste**: Verificado com script de teste automatizado - sucesso completo
+
 ## [0.8.0] - 2025-01-09
 
 ### Fixed

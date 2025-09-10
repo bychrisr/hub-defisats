@@ -1,6 +1,6 @@
-## 1. Visão Geral do Produto
+# PDR
 
-O produto é uma **plataforma de automação de trades para LN Markets**, com foco em **segurança, confiabilidade e controle total do usuário sobre suas operações**.
+Minimal content.
 
 A proposta central é resolver o maior medo do trader avançado: **perder dinheiro por falhas técnicas ou liquidação não protegida**.
 

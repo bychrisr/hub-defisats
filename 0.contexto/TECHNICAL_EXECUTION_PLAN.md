@@ -58,12 +58,14 @@ const testKeys = async (apiKey: string, apiSecret: string, passphrase: string) =
 };
 ```
 
-**Critérios de aceitação técnica:**  
-- [x] Teste unitário: `should return 401 if keys are invalid`  
-- [x] Teste de contrato: Mock de 401 → retorna `INVALID_LN_MARKETS_KEYS`  
-- [x] Teste de contrato: Mock de 200 → retorna `success: true`  
+**Critérios de aceitação técnica:**
+- [x] Teste unitário: `should return 401 if keys are invalid`
+- [x] Teste de contrato: Mock de 401 → retorna `INVALID_LN_MARKETS_KEYS`
+- [x] Teste de contrato: Mock de 200 → retorna `success: true`
 - [x] Fallback: Se API down, retorna erro controlado (não crasha app)
 - [x] **IMPLEMENTADO**: Validação LN Markets funcionando 100% com credenciais sandbox
+- [x] **FIXED**: Corrigido bug na URL base da API LN Markets (baseURL agora inclui `/v2`)
+- [x] **FIXED**: Corrigido path da assinatura HMAC-SHA256 para incluir `/v2` prefixo
 
 ---
 
