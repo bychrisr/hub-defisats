@@ -41,7 +41,14 @@ export default function Login() {
     try {
       clearError();
       await login(data.email, data.password);
-      navigate('/dashboard');
+      
+      // Redirecionar baseado no tipo de usuário
+      const isAdmin = data.email === 'admin@hub-defisats.com';
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       // Error is handled by the store
     }

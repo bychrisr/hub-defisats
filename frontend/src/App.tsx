@@ -73,9 +73,11 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" />;
   }
 
-  // TODO: Implement proper superadmin check
-  // For now, we'll allow access if user is authenticated
-  // In production, this should check the user's role from the backend
+  // Verificar se o usuário é admin
+  if (!user?.is_admin) {
+    return <Navigate to="/dashboard" />;
+  }
+
   return <>{children}</>;
 };
 

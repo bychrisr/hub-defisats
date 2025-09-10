@@ -25,6 +25,12 @@ enum PlanType {
   pro
 }
 
+enum UserRole {
+  user
+  admin
+  superadmin
+}
+
 enum AutomationType {
   margin_guard
   tp_sl
@@ -72,6 +78,7 @@ model User {
   ln_markets_api_key     String
   ln_markets_api_secret  String
   plan_type              PlanType    @default(free)
+  role                   UserRole    @default(user)
   last_activity_at       DateTime?
   created_at             DateTime    @default(now())
   updated_at             DateTime    @default(now())

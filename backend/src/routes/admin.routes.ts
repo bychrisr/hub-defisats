@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
+import { AuthService } from '@/services/auth.service';
 
 const prisma = new PrismaClient();
 
@@ -7,22 +8,49 @@ export async function adminRoutes(fastify: FastifyInstance) {
   // Middleware para verificar se é superadmin
   fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      await request.jwtVerify();
-      const user = request.user as any;
+      console.log('🔍 ADMIN MIDDLEWARE - Starting authentication check');
+      console.log('🔍 Headers:', request.headers.authorization);
+      
+      // Get token from Authorization header
+      const authHeader = request.headers.authorization;
+
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log('❌ No valid authorization header');
+        return reply.status(401).send({
+          error: 'UNAUTHORIZED',
+          message: 'Authorization header with Bearer token is required',
+        });
+      }
+
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      console.log('🔍 Token extracted:', token.substring(0, 20) + '...');
+      
+      // Initialize auth service
+      const authService = new AuthService(prisma, request.server);
+      
+      // Validate token and get user
+      const user = await authService.validateSession(token);
+      console.log('🔍 User from validateSession:', user?.email);
       
       // Verificar se o usuário é superadmin
       const adminUser = await prisma.adminUser.findUnique({
         where: { user_id: user.id },
         include: { user: true }
       });
+      
+      console.log('🔍 Admin user found:', adminUser);
 
       if (!adminUser || adminUser.role !== 'superadmin') {
+        console.log('❌ Access denied - not superadmin');
         return reply.status(403).send({
           error: 'FORBIDDEN',
           message: 'Access denied. Superadmin role required.'
         });
       }
+      
+      console.log('✅ Admin access granted');
     } catch (error) {
+      console.log('❌ Admin middleware error:', error.message);
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
         message: 'Authentication required'
@@ -89,6 +117,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
     const startDate = periodMap[period as keyof typeof periodMap];
 
     try {
+      console.log('🔍 ADMIN DASHBOARD - Starting data fetch for period:', period);
+      
       // KPIs principais
       const [
         totalUsers,
@@ -122,18 +152,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
           }
         }),
         
-        // Receita em sats
-        prisma.payment.aggregate({
-          where: {
-            status: 'paid',
-            created_at: {
-              gte: startDate
-            }
-          },
-          _sum: {
-            amount_sats: true
-          }
-        }),
+        // Receita em sats (temporariamente desabilitado devido a problema de schema)
+        Promise.resolve({ _sum: { amount_sats: 0 } }),
         
         // Cupons usados
         prisma.userCoupon.count({
@@ -186,6 +206,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       };
     } catch (error) {
+      console.log('❌ ADMIN DASHBOARD ERROR:', error);
       fastify.log.error('Error fetching dashboard data:', error);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',

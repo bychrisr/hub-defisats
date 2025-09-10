@@ -284,11 +284,14 @@ export class AuthService {
    */
   async validateSession(token: string): Promise<User> {
     try {
+      console.log('🔍 VALIDATE SESSION - Token:', token.substring(0, 20) + '...');
       const decoded = this.fastify.jwt.verify(token) as any;
+      console.log('🔍 VALIDATE SESSION - Decoded:', decoded);
 
       const user = await this.prisma.user.findUnique({
         where: { id: decoded.userId },
       });
+      console.log('🔍 VALIDATE SESSION - User found:', user?.email);
 
       if (!user || !user.is_active) {
         throw new Error('Invalid session');
@@ -301,6 +304,7 @@ export class AuthService {
 
       return user;
     } catch (error) {
+      console.log('❌ VALIDATE SESSION - Error:', error.message);
       throw new Error('Invalid session');
     }
   }

@@ -110,46 +110,75 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
     },
     handler: async (_request, reply) => {
       try {
+        console.log('🔍 DASHBOARD - Starting dashboard data fetch...');
+        
+        console.log('🔍 DASHBOARD - Getting metrics data...');
         const metricsData = await metrics.getMetricsAsJSON();
+        console.log('✅ DASHBOARD - Metrics data retrieved:', metricsData.length, 'metrics');
+        
+        console.log('🔍 DASHBOARD - Getting active alerts...');
         const activeAlerts = alerting.getActiveAlerts();
+        console.log('✅ DASHBOARD - Active alerts retrieved:', activeAlerts.length);
+        
+        console.log('🔍 DASHBOARD - Getting all alerts...');
         const allAlerts = alerting.getAllAlerts();
+        console.log('✅ DASHBOARD - All alerts retrieved:', allAlerts.length);
 
         // Calcular métricas de HTTP
+        console.log('🔍 DASHBOARD - Calculating HTTP metrics...');
         const httpRequestsMetric = metricsData.find(
           (m: any) => m.name === 'http_requests_total'
         );
+        console.log('✅ DASHBOARD - HTTP requests metric found:', !!httpRequestsMetric);
+        
         const httpDurationMetric = metricsData.find(
           (m: any) => m.name === 'http_request_duration_seconds'
         );
+        console.log('✅ DASHBOARD - HTTP duration metric found:', !!httpDurationMetric);
 
+        console.log('🔍 DASHBOARD - Calculating total requests...');
         const totalRequests =
           httpRequestsMetric?.values?.reduce(
             (sum: number, val: MetricValue) => sum + val.value,
             0
           ) || 0;
+        console.log('✅ DASHBOARD - Total requests:', totalRequests);
+        
+        console.log('🔍 DASHBOARD - Calculating error requests...');
         const errorRequests =
           httpRequestsMetric?.values?.filter(
             (v: MetricValue) => v.labels.status_code && v.labels.status_code >= '400'
           ).length || 0;
+        console.log('✅ DASHBOARD - Error requests:', errorRequests);
+        
         const errorRate =
           totalRequests > 0 ? (errorRequests / totalRequests) * 100 : 0;
+        console.log('✅ DASHBOARD - Error rate:', errorRate);
 
+        console.log('🔍 DASHBOARD - Calculating average response time...');
         const avgResponseTime =
           httpDurationMetric?.values?.reduce(
             (sum: number, val: MetricValue) => sum + val.value,
             0
           ) / (httpDurationMetric?.values?.length || 1) || 0;
+        console.log('✅ DASHBOARD - Average response time:', avgResponseTime);
 
         // Calcular métricas de autenticação
+        console.log('🔍 DASHBOARD - Calculating auth metrics...');
         const authAttemptsMetric = metricsData.find(
           (m: any) => m.name === 'auth_attempts_total'
         );
+        console.log('✅ DASHBOARD - Auth attempts metric found:', !!authAttemptsMetric);
+        
         const authSuccessMetric = metricsData.find(
           (m: any) => m.name === 'auth_success_total'
         );
+        console.log('✅ DASHBOARD - Auth success metric found:', !!authSuccessMetric);
+        
         const authFailuresMetric = metricsData.find(
           (m: any) => m.name === 'auth_failures_total'
         );
+        console.log('✅ DASHBOARD - Auth failures metric found:', !!authFailuresMetric);
 
         const totalAuthAttempts =
           authAttemptsMetric?.values?.reduce(
@@ -172,12 +201,16 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
             : 0;
 
         // Calcular métricas de rate limiting
+        console.log('🔍 DASHBOARD - Calculating rate limit metrics...');
         const rateLimitHitsMetric = metricsData.find(
           (m: any) => m.name === 'rate_limit_hits_total'
         );
+        console.log('✅ DASHBOARD - Rate limit hits metric found:', !!rateLimitHitsMetric);
+        
         const rateLimitBlocksMetric = metricsData.find(
           (m: any) => m.name === 'rate_limit_blocks_total'
         );
+        console.log('✅ DASHBOARD - Rate limit blocks metric found:', !!rateLimitBlocksMetric);
 
         const totalRateLimitHits =
           rateLimitHitsMetric?.values?.reduce(
@@ -195,17 +228,32 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
             : 0;
 
         // Calcular métricas de memória
-        const memoryMetric = metricsData.find(
-          (m: any) => m.name === 'memory_usage_bytes' && m.labels.type === 'heapUsed'
-        );
-        const memoryUsageMB =
-          memoryMetric?.values?.[0]?.value / 1024 / 1024 || 0;
+        console.log('🔍 DASHBOARD - Calculating memory metrics...');
+        let memoryUsageMB = 0;
+        try {
+          const memoryMetric = metricsData.find(
+            (m: any) => m.name === 'memory_usage_bytes' && m.labels && m.labels.type === 'heapUsed'
+          );
+          console.log('✅ DASHBOARD - Memory metric found:', !!memoryMetric);
+          
+          memoryUsageMB =
+            memoryMetric?.values?.[0]?.value / 1024 / 1024 || 0;
+          console.log('✅ DASHBOARD - Memory usage MB:', memoryUsageMB);
+        } catch (error) {
+          console.error('❌ DASHBOARD - Error calculating memory metrics:', error);
+          throw error;
+        }
 
         // Calcular métricas de CPU
+        console.log('🔍 DASHBOARD - Calculating CPU metrics...');
         const cpuMetric = metricsData.find((m: any) => m.name === 'cpu_usage_percent');
+        console.log('✅ DASHBOARD - CPU metric found:', !!cpuMetric);
+        
         const cpuUsage = cpuMetric?.values?.[0]?.value || 0;
+        console.log('✅ DASHBOARD - CPU usage:', cpuUsage);
 
         // Calcular estatísticas de alertas
+        console.log('🔍 DASHBOARD - Calculating alert statistics...');
         const alertStats = {
           active: activeAlerts.length,
           total: allAlerts.length,
@@ -216,6 +264,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
             critical: allAlerts.filter(a => a.severity === 'critical').length,
           },
         };
+        console.log('✅ DASHBOARD - Alert stats calculated:', alertStats);
 
         // Obter alertas recentes (últimos 10)
         const recentAlerts = allAlerts
@@ -228,21 +277,23 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
             timestamp: alert.timestamp.toISOString(),
           }));
 
-        const dashboardData = {
-          system: {
-            uptime: process.uptime(),
-            memory: {
-              used: memoryUsageMB,
-              total: process.memoryUsage().heapTotal / 1024 / 1024,
-              percentage:
-                (memoryUsageMB /
-                  (process.memoryUsage().heapTotal / 1024 / 1024)) *
-                100,
+        console.log('🔍 DASHBOARD - Building dashboard data...');
+        try {
+          const dashboardData = {
+            system: {
+              uptime: process.uptime(),
+              memory: {
+                used: memoryUsageMB,
+                total: process.memoryUsage().heapTotal / 1024 / 1024,
+                percentage:
+                  (memoryUsageMB /
+                    (process.memoryUsage().heapTotal / 1024 / 1024)) *
+                  100,
+              },
+              cpu: cpuUsage,
+              version: '0.0.2',
+              environment: process.env['NODE_ENV'] || 'development',
             },
-            cpu: cpuUsage,
-            version: '0.0.2',
-            environment: process.env['NODE_ENV'] || 'development',
-          },
           metrics: {
             http: {
               totalRequests,
@@ -265,10 +316,15 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
           recentAlerts,
         };
 
-        return {
-          success: true,
-          data: dashboardData,
-        };
+          console.log('✅ DASHBOARD - Dashboard data built successfully');
+          return {
+            success: true,
+            data: dashboardData,
+          };
+        } catch (error) {
+          console.error('❌ DASHBOARD - Error building dashboard data:', error);
+          throw error;
+        }
       } catch (error) {
         fastify.log.error('Error getting dashboard data:', error as any);
         return reply.status(500).send({

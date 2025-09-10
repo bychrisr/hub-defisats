@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RefreshCw, Users, TrendingUp, AlertTriangle, DollarSign, Gift, Activity, Server } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { apiGet } from '@/lib/fetch';
 
 interface DashboardKPIs {
   total_users: number;
@@ -42,16 +43,7 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     try {
       setRefreshing(true);
-      const response = await fetch(`/api/admin/dashboard?period=${period}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data');
-      }
-
+      const response = await apiGet(`/api/admin/dashboard?period=${period}`);
       const data = await response.json();
       setDashboardData(data);
     } catch (error) {

@@ -10,6 +10,7 @@ export interface User {
   two_factor_enabled: boolean;
   created_at: string;
   updated_at: string;
+  is_admin?: boolean; // Flag para identificar usuários admin
 }
 
 interface AuthState {
@@ -51,14 +52,27 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
         try {
           const response = await authAPI.login({ email, password });
-          const { access_token, refresh_token, user } = response.data;
+          const { user_id, token, plan_type } = response.data;
 
-          // Store tokens
-          localStorage.setItem('access_token', access_token);
-          localStorage.setItem('refresh_token', refresh_token);
+          // Store token
+          console.log('💾 Storing token in localStorage:', token.substring(0, 20) + '...');
+          localStorage.setItem('access_token', token);
+          console.log('✅ Token stored successfully');
 
+          // Verificar se é admin baseado no email
+          const isAdmin = email === 'admin@hub-defisats.com';
+          
           set({
-            user,
+            user: {
+              id: user_id,
+              plan_type: plan_type,
+              email: email,
+              email_verified: false,
+              two_factor_enabled: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              is_admin: isAdmin, // Adicionar flag de admin
+            },
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -140,10 +154,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
         try {
           const response = await authAPI.getProfile();
-          const { user } = response.data;
+          const user = response.data;
+
+          // Verificar se é admin baseado no email
+          const isAdmin = user.email === 'admin@hub-defisats.com';
 
           set({
-            user,
+            user: {
+              ...user,
+              is_admin: isAdmin,
+            },
             isAuthenticated: true,
             isLoading: false,
             error: null,
