@@ -19,6 +19,7 @@ import {
   registrationRateLimitMiddleware,
   // passwordResetRateLimitMiddleware,
 } from '@/middleware/user-rate-limit.middleware';
+import { authMiddleware } from '@/middleware/auth.middleware';
 
 // Interfaces for testing
 interface MockRequest {
@@ -520,7 +521,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/me',
     {
-      preHandler: [(fastify as any).authenticate],
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get current user information',
         tags: ['Authentication'],
