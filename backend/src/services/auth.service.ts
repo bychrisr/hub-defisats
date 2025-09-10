@@ -290,6 +290,19 @@ export class AuthService {
 
       const user = await this.prisma.user.findUnique({
         where: { id: decoded.userId },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          plan_type: true,
+          created_at: true,
+          last_activity_at: true,
+          is_active: true,
+          session_expires_at: true,
+          ln_markets_api_key: true,
+          ln_markets_api_secret: true,
+          ln_markets_passphrase: true,
+        },
       });
       console.log('🔍 VALIDATE SESSION - User found:', user?.email);
 

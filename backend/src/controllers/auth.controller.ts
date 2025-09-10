@@ -327,6 +327,9 @@ export class AuthController {
         plan_type: user.plan_type,
         created_at: (user as any).created_at,
         last_activity_at: (user as any).last_activity_at,
+        ln_markets_api_key: (user as any).ln_markets_api_key,
+        ln_markets_api_secret: (user as any).ln_markets_api_secret,
+        ln_markets_passphrase: (user as any).ln_markets_passphrase,
       });
     } catch (error) {
       const errorResponse = ErrorResponseZodSchema.parse({
