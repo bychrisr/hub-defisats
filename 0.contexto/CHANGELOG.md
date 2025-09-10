@@ -7,6 +7,39 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+## [0.8.2] - 2025-01-10
+
+### Fixed
+- **Dashboard Admin Funcional**: Resolvidos problemas críticos de autenticação e roteamento
+  - **Problema Loop Infinito**: Redirecionamento infinito entre admin/login/dashboard
+  - **Solução**: Implementada detecção de tipo de usuário baseada em email
+  - **Problema Token Storage**: Token não era armazenado corretamente no localStorage
+  - **Solução**: Corrigido uso de `access_token` em vez de `token` no localStorage
+  - **Problema API Requests**: Frontend não conseguia acessar APIs do backend
+  - **Solução**: Criada função utilitária centralizada para requisições com URL correta
+  - **Problema AdminRoute**: Componente não verificava se usuário era admin
+  - **Solução**: Adicionada verificação `user.is_admin` no AdminRoute
+  - **Resultado**: Dashboard admin totalmente funcional com dados reais do backend
+
+### Added
+- **Sistema de Detecção de Admin**: Flag `is_admin` baseada no email do usuário
+- **Função Utilitária de Fetch**: `frontend/src/lib/fetch.ts` para centralizar requisições API
+- **Redirecionamento Inteligente**: Admin vai para `/admin`, usuários comuns para `/dashboard`
+- **Configuração de Proxy**: Vite configurado para redirecionar `/api` para backend
+- **Interface User Atualizada**: Adicionada propriedade `is_admin` na interface User
+
+### Changed
+- **Login Flow**: Redirecionamento baseado no tipo de usuário após login
+- **AdminRoute Component**: Agora verifica `user.is_admin` antes de permitir acesso
+- **Dashboard Admin**: Atualizado para usar função utilitária de fetch centralizada
+- **Token Management**: Padronizado uso de `access_token` em todo o frontend
+
+### Technical Details
+- **Arquivos Modificados**: 12 arquivos alterados, 373 inserções, 58 deleções
+- **Novos Arquivos**: `frontend/src/lib/fetch.ts`, scripts de teste admin
+- **Commits**: `ba60ee9` - fix: resolve admin dashboard authentication and routing issues
+- **Status**: Dashboard admin 100% funcional com dados reais do backend
+
 ## [0.8.1] - 2025-01-10
 
 ### Fixed

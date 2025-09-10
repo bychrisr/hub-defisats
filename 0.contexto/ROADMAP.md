@@ -2,6 +2,31 @@
 
 ## **✅ ETAPA 0: SETUP INICIAL & CONTRATOS DE API (COMPLETA)**
 
+## **✅ ETAPA 0.2: DASHBOARD ADMIN FUNCIONAL (COMPLETA)**
+
+### **✅ Tarefa 0.2.1: Resolver Problemas de Autenticação e Roteamento**
+
+- ✅ **Problema Loop Infinito**: Redirecionamento infinito entre admin/login/dashboard
+  - ✅ Implementada detecção de tipo de usuário baseada em email
+  - ✅ Admin redirecionado para `/admin`, usuários comuns para `/dashboard`
+- ✅ **Problema Token Storage**: Token não era armazenado corretamente
+  - ✅ Corrigido uso de `access_token` em vez de `token` no localStorage
+  - ✅ Padronizado token management em todo o frontend
+- ✅ **Problema API Requests**: Frontend não conseguia acessar APIs do backend
+  - ✅ Criada função utilitária centralizada `frontend/src/lib/fetch.ts`
+  - ✅ Configuração de proxy do Vite para redirecionar `/api` para backend
+- ✅ **Problema AdminRoute**: Componente não verificava se usuário era admin
+  - ✅ Adicionada verificação `user.is_admin` no AdminRoute
+  - ✅ Usuários não-admin redirecionados para dashboard comum
+- ✅ **Resultado**: Dashboard admin 100% funcional com dados reais do backend
+
+### **✅ Tarefa 0.2.2: Implementar Sistema de Detecção de Usuário**
+
+- ✅ Adicionada flag `is_admin` na interface User
+- ✅ Implementada detecção automática baseada em email `admin@hub-defisats.com`
+- ✅ Atualizado método `getProfile` para incluir flag `is_admin`
+- ✅ Redirecionamento inteligente após login baseado no tipo de usuário
+
 ## **✅ ETAPA 0.1: CORREÇÃO CRÍTICA - FLUXO DE CADASTRO (COMPLETA)**
 
 ### **✅ Tarefa 0.1.1: Resolver Problemas de Validação e Comunicação Frontend-Backend**

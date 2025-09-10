@@ -2,6 +2,38 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats.
 
+## ADR-020: Admin Dashboard Authentication and Routing System
+
+**Data**: 2025-01-10
+**Status**: Aceito
+**Contexto**: Resolução de problemas críticos de autenticação e roteamento que impediam o funcionamento do dashboard admin
+
+### Decisão
+- **User Type Detection**: Implementada detecção de tipo de usuário baseada em email
+- **Centralized API Fetch**: Criada função utilitária centralizada para requisições API
+- **Token Management Standardization**: Padronizado uso de `access_token` em todo o frontend
+- **Intelligent Routing**: Admin redirecionado para `/admin`, usuários comuns para `/dashboard`
+- **AdminRoute Protection**: Implementada verificação `user.is_admin` no AdminRoute
+- **Vite Proxy Configuration**: Configurado proxy para redirecionar `/api` para backend
+
+### Justificativa
+- **Problema Crítico**: Loop infinito de redirecionamento e erro 500 no dashboard admin
+- **Solução Escalável**: Função utilitária centralizada facilita manutenção e debugging
+- **Segurança**: Verificação de tipo de usuário previne acesso não autorizado
+- **UX Melhorada**: Redirecionamento inteligente baseado no tipo de usuário
+- **Desenvolvimento**: Proxy do Vite facilita desenvolvimento local
+
+### Consequências
+- **Positivas**: Dashboard admin 100% funcional, sistema de autenticação robusto
+- **Manutenção**: Código mais limpo e centralizado para requisições API
+- **Escalabilidade**: Fácil adição de novos tipos de usuário e permissões
+- **Debugging**: Logs centralizados facilitam identificação de problemas
+
+### Implementação
+- **Arquivos**: `frontend/src/lib/fetch.ts`, `frontend/src/stores/auth.ts`, `frontend/src/App.tsx`
+- **Commits**: `ba60ee9` - fix: resolve admin dashboard authentication and routing issues
+- **Status**: Implementado e testado com sucesso
+
 ## ADR-019: Registration Flow Validation and Communication Fix
 
 **Data**: 2025-01-10
