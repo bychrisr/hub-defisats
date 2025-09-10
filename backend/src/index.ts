@@ -6,6 +6,10 @@ import { automationRoutes } from '@/routes/automation.routes';
 import { tradeLogRoutes } from '@/routes/trade-log.routes';
 import { profileRoutes } from '@/routes/profile.routes';
 import { lnmarketsRoutes } from '@/routes/lnmarkets.routes';
+import { lnmarketsFuturesRoutes } from '@/routes/lnmarkets-futures.routes';
+import { lnmarketsOptionsRoutes } from '@/routes/lnmarkets-options.routes';
+import { lnmarketsUserRoutes } from '@/routes/lnmarkets-user.routes';
+import { lnmarketsMarketRoutes } from '@/routes/lnmarkets-market.routes';
 import { metricsRoutes } from '@/routes/metrics.routes';
 import { alertsRoutes } from '@/routes/alerts.routes';
 import { dashboardRoutes } from '@/routes/dashboard.routes';
@@ -303,6 +307,22 @@ async function registerRoutes() {
   // LN Markets routes
   await fastify.register(lnmarketsRoutes, { prefix: '/api/lnmarkets' });
   console.log('✅ LN Markets routes registered');
+
+  // LN Markets Futures routes
+  await fastify.register(lnmarketsFuturesRoutes, { prefix: '/api' });
+  console.log('✅ LN Markets Futures routes registered');
+
+  // LN Markets Options routes
+  await fastify.register(lnmarketsOptionsRoutes, { prefix: '/api' });
+  console.log('✅ LN Markets Options routes registered');
+
+  // LN Markets User routes
+  await fastify.register(lnmarketsUserRoutes, { prefix: '/api' });
+  console.log('✅ LN Markets User routes registered');
+
+  // LN Markets Market Data routes
+  await fastify.register(lnmarketsMarketRoutes, { prefix: '/api' });
+  console.log('✅ LN Markets Market Data routes registered');
 
   // Admin routes
   await fastify.register(adminRoutes, { prefix: '/api/admin' });
