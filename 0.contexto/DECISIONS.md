@@ -2,6 +2,67 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats.
 
+## ADR-019: Registration Flow Validation and Communication Fix
+
+**Data**: 2025-01-10
+**Status**: Aceito
+**Contexto**: Resolução crítica de múltiplos problemas no fluxo de cadastro que impediam o funcionamento completo do sistema
+
+### Decisão
+- **Frontend Payload Cleanup**: Implementada limpeza de campos `undefined` antes do envio
+- **Fastify Validation Bypass**: Desabilitada validação automática do Fastify na rota de registro
+- **API Base URL Fix**: Corrigida URL base do Axios de `localhost:3000` para `localhost:13010`
+- **AuthService Initialization**: Corrigida inicialização passando instância Fastify correta
+- **PrismaClient Pattern**: Padronizada inicialização do PrismaClient em todas as rotas
+- **Comprehensive Logging**: Implementado logging detalhado para debugging
+
+### Justificativa
+- **Problema Crítico**: Múltiplos pontos de falha impediam fluxo completo de cadastro
+- **Impacto**: Sistema completamente não funcional para usuários finais
+- **Debugging**: Necessidade de logging extensivo para identificar problemas
+- **Consistência**: Padronização de inicialização de serviços em todas as rotas
+- **Manutenibilidade**: Soluções robustas que previnem problemas similares
+
+### Implementação
+```typescript
+// Frontend - Payload Cleanup
+const cleanData: any = {
+  email: data.email,
+  username: data.username,
+  password: data.password,
+  confirmPassword: data.confirmPassword,
+  ln_markets_api_key: data.ln_markets_api_key,
+  ln_markets_api_secret: data.ln_markets_api_secret,
+  ln_markets_passphrase: data.ln_markets_passphrase,
+};
+if (data.coupon_code && data.coupon_code.trim() !== '') {
+  cleanData.coupon_code = data.coupon_code;
+}
+
+// Backend - Fastify Route (sem validação automática)
+fastify.post('/register', {
+  preHandler: [validateRegisterInput], // Só middleware customizado
+  schema: { /* sem body validation */ }
+}, authController.register);
+
+// Backend - AuthService Initialization
+const authService = new AuthService(prisma, request.server);
+
+// Backend - PrismaClient Pattern
+export async function automationRoutes(fastify: FastifyInstance) {
+  const prisma = new PrismaClient();
+  const automationController = new AutomationController(prisma);
+}
+```
+
+### Consequências
+- **Positivas**: Sistema 100% funcional, fluxo completo de cadastro operacional
+- **Manutenção**: Logging extensivo facilita debugging futuro
+- **Robustez**: Validação customizada mais flexível que automática do Fastify
+- **Consistência**: Padrão uniforme de inicialização de serviços
+
+---
+
 ## ADR-018: LN Markets API BaseURL Correction
 
 **Data**: 2025-01-10

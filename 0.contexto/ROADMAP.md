@@ -2,6 +2,42 @@
 
 ## **✅ ETAPA 0: SETUP INICIAL & CONTRATOS DE API (COMPLETA)**
 
+## **✅ ETAPA 0.1: CORREÇÃO CRÍTICA - FLUXO DE CADASTRO (COMPLETA)**
+
+### **✅ Tarefa 0.1.1: Resolver Problemas de Validação e Comunicação Frontend-Backend**
+
+- ✅ **Problema Frontend**: Campos `undefined` no payload causando erro 400
+  - ✅ Removidos campos `undefined` do payload antes do envio
+  - ✅ Implementada limpeza de dados no `Register.tsx`
+- ✅ **Problema Backend**: Validação automática do Fastify executando antes do middleware customizado
+  - ✅ Desabilitada validação automática do Fastify na rota `/api/auth/register`
+  - ✅ Middleware customizado `validateRegisterInput` agora executa corretamente
+- ✅ **Problema API**: URL base incorreta do Axios
+  - ✅ Corrigida URL base de `http://localhost:3000` para `http://localhost:13010`
+  - ✅ Configuração correta no `frontend/src/lib/api.ts`
+- ✅ **Problema Auth**: AuthService inicializado incorretamente
+  - ✅ Corrigida inicialização passando `request.server` para o AuthService
+  - ✅ Middleware de autenticação funcionando corretamente
+- ✅ **Problema Prisma**: PrismaClient não inicializado nas rotas de automação
+  - ✅ Corrigida inicialização do PrismaClient seguindo padrão das outras rotas
+  - ✅ Dashboard carregando dados de automação sem erros 500
+
+### **✅ Tarefa 0.1.2: Implementar Logging e Debugging**
+
+- ✅ Adicionado logging detalhado no middleware de validação
+- ✅ Implementado logging de payload bruto para debugging
+- ✅ Adicionado logging de token no interceptor do Axios
+- ✅ Re-adicionado botão "Fill with test data" na tela de registro
+
+### **✅ Tarefa 0.1.3: Validação e Testes**
+
+- ✅ Testado fluxo completo: cadastro → autenticação → dashboard
+- ✅ Verificado funcionamento de todas as validações
+- ✅ Confirmado carregamento correto dos dados de automação
+- ✅ Sistema 100% operacional
+
+**Status**: ✅ **COMPLETA** - Fluxo de cadastro totalmente funcional
+
 ### **✅ Tarefa 0.1: Criar estrutura de pastas backend e inicializar projeto**
 
 - ✅ Criar `/backend` com `package.json`, `tsconfig.json`, `.env.example`

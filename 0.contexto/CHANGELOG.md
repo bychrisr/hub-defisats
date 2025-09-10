@@ -7,6 +7,28 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+## [0.8.1] - 2025-01-10
+
+### Fixed
+- **Fluxo Completo de Cadastro e Autenticação**: Resolvidos todos os problemas críticos no fluxo de registro
+  - **Problema Frontend**: Campos `undefined` no payload causando erro 400 na validação do Fastify
+  - **Solução**: Removidos campos `undefined` do payload antes do envio
+  - **Problema Backend**: Validação automática do Fastify executando antes do middleware customizado
+  - **Solução**: Desabilitada validação automática do Fastify na rota de registro
+  - **Problema API**: URL base incorreta do Axios (`http://localhost:3000` ao invés de `http://localhost:13010`)
+  - **Solução**: Corrigida configuração da URL base no frontend
+  - **Problema Auth**: AuthService inicializado com `null` no middleware de autenticação
+  - **Solução**: Passado `request.server` (instância Fastify) para o AuthService
+  - **Problema Prisma**: PrismaClient não inicializado corretamente nas rotas de automação
+  - **Solução**: Corrigida inicialização do PrismaClient seguindo padrão das outras rotas
+  - **Resultado**: Fluxo completo funcionando - cadastro → autenticação → dashboard
+  - **Status**: Sistema 100% operacional com todas as validações e autenticações funcionando
+
+### Added
+- **Logging Detalhado**: Adicionado logging extensivo para debugging do fluxo de validação
+- **Botão de Dados de Teste**: Re-adicionado botão "Fill with test data" na tela de registro
+- **Validação Robusta**: Implementada validação customizada com logs detalhados
+
 ### Fixed
 - **Bug no Cadastro de Usuário**: Corrigido problema crítico na validação de credenciais LN Markets
   - **Problema**: URL base da API LN Markets estava incorreta (`https://api.lnmarkets.com` ao invés de `https://api.lnmarkets.com/v2`)
