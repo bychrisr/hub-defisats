@@ -12,6 +12,17 @@ export const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   config => {
+    console.log('🔍 AXIOS REQUEST INTERCEPTOR - Request being sent');
+    console.log('📊 Request details:', {
+      method: config.method,
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      headers: config.headers,
+      data: config.data,
+      timestamp: new Date().toISOString()
+    });
+    
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -25,8 +36,28 @@ api.interceptors.request.use(
 
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
-  response => response,
+  response => {
+    console.log('✅ AXIOS RESPONSE INTERCEPTOR - Response received');
+    console.log('📊 Response details:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config.url,
+      data: response.data,
+      timestamp: new Date().toISOString()
+    });
+    return response;
+  },
   async error => {
+    console.log('❌ AXIOS ERROR INTERCEPTOR - Error received');
+    console.log('📊 Error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      data: error.response?.data,
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+    
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
