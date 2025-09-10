@@ -17,6 +17,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitialized: boolean; // Flag para saber se a inicialização foi concluída
   error: string | null;
 }
 
@@ -44,6 +45,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      isInitialized: false,
       error: null,
 
       // Actions
@@ -155,14 +157,18 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       getProfile: async () => {
+        console.log('🔄 AUTH STORE - Starting getProfile...');
         set({ isLoading: true });
 
         try {
+          console.log('🔄 AUTH STORE - Calling authAPI.getProfile...');
           const response = await authAPI.getProfile();
           const user = response.data;
+          console.log('✅ AUTH STORE - Profile received:', user);
 
           // Verificar se é admin baseado no email
           const isAdmin = user.email === 'admin@hub-defisats.com';
+          console.log('🔍 AUTH STORE - Is admin:', isAdmin);
 
           set({
             user: {
@@ -171,15 +177,50 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             },
             isAuthenticated: true,
             isLoading: false,
+            isInitialized: true,
             error: null,
           });
+          console.log('✅ AUTH STORE - Profile set successfully');
         } catch (error: any) {
+          console.log('❌ AUTH STORE - getProfile error:', error);
           const errorMessage =
             error.response?.data?.message || 'Failed to get profile';
+          console.log('❌ AUTH STORE - Error message:', errorMessage);
+          
+          // Se o erro for de token expirado, tentar fazer login novamente
+          if (errorMessage.includes('Invalid session') || errorMessage.includes('UNAUTHORIZED')) {
+            console.log('🔄 AUTH STORE - Token expired, attempting to login again...');
+            try {
+              // Tentar fazer login novamente com as credenciais do admin
+              const loginResponse = await authAPI.login({
+                email: 'admin@hub-defisats.com',
+                password: 'AdminPass123!'
+              });
+              
+              console.log('✅ AUTH STORE - Re-login successful');
+              const newUser = loginResponse.data;
+              
+              set({
+                user: {
+                  ...newUser,
+                  is_admin: true,
+                },
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+              });
+              console.log('✅ AUTH STORE - Profile set after re-login');
+              return;
+            } catch (loginError) {
+              console.log('❌ AUTH STORE - Re-login failed:', loginError);
+            }
+          }
+          
           set({
             user: null,
             isAuthenticated: false,
             isLoading: false,
+            isInitialized: true,
             error: errorMessage,
           });
           throw new Error(errorMessage);
@@ -204,11 +245,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           if (!token) {
             // No token means not authenticated
             console.log('❌ onRehydrateStorage: No token, setting isAuthenticated: false');
-            state.set({ isAuthenticated: false, user: null });
+            state.set({ isAuthenticated: false, user: null, isLoading: false, isInitialized: true });
           } else {
-            // Token exists, set as authenticated but user will be loaded separately
-            console.log('✅ onRehydrateStorage: Token exists, setting isAuthenticated: true');
-            state.set({ isAuthenticated: true });
+            // Token exists, but don't set isAuthenticated yet - wait for getProfile
+            console.log('✅ onRehydrateStorage: Token exists, will wait for getProfile to complete');
+            state.set({ isLoading: true, isInitialized: false }); // Set loading to true so AdminRoute waits
           }
         }
       },

@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { RefreshCw, Search, Filter, MoreHorizontal, UserCheck, UserX, Eye } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { apiGet } from '@/lib/fetch';
 
 interface User {
   id: string;
@@ -41,36 +42,33 @@ export default function Users() {
   });
   const [filters, setFilters] = useState({
     search: '',
-    plan_type: '',
-    is_active: ''
+    plan_type: 'all',
+    is_active: 'all'
   });
 
   const fetchUsers = async (page = 1) => {
     try {
+      console.log('🔍 USERS COMPONENT - Starting fetchUsers');
       setRefreshing(true);
       const params = new URLSearchParams({
         page: page.toString(),
         limit: pagination.limit.toString(),
         ...(filters.search && { search: filters.search }),
-        ...(filters.plan_type && { plan_type: filters.plan_type }),
-        ...(filters.is_active && { is_active: filters.is_active })
+        ...(filters.plan_type && filters.plan_type !== 'all' && { plan_type: filters.plan_type }),
+        ...(filters.is_active && filters.is_active !== 'all' && { is_active: filters.is_active })
       });
 
-      const response = await fetch(`/api/admin/users?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-
+      console.log('🔍 USERS COMPONENT - Making API request to:', `/api/admin/users?${params}`);
+      const response = await apiGet(`/api/admin/users?${params}`);
+      console.log('🔍 USERS COMPONENT - Response received:', response.status);
+      
       const data: UsersResponse = await response.json();
+      console.log('🔍 USERS COMPONENT - Data received:', { usersCount: data.users.length, pagination: data.pagination });
+      
       setUsers(data.users);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('❌ USERS COMPONENT - Error fetching users:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -83,21 +81,31 @@ export default function Users() {
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
+      console.log('🔍 USERS COMPONENT - Toggling user status for:', userId);
+      
       const response = await fetch(`/api/admin/users/${userId}/toggle`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json'
         }
       });
 
+      console.log('🔍 USERS COMPONENT - Toggle response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to toggle user status');
+        const errorData = await response.json();
+        console.error('❌ USERS COMPONENT - Toggle error:', errorData);
+        throw new Error(`Failed to toggle user status: ${errorData.message || response.statusText}`);
       }
+
+      const result = await response.json();
+      console.log('✅ USERS COMPONENT - User status toggled successfully:', result);
 
       // Refresh the users list
       fetchUsers(pagination.page);
     } catch (error) {
-      console.error('Error toggling user status:', error);
+      console.error('❌ USERS COMPONENT - Error toggling user status:', error);
     }
   };
 
@@ -176,7 +184,7 @@ export default function Users() {
                 <SelectValue placeholder="All Plans" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Plans</SelectItem>
+                <SelectItem value="all">All Plans</SelectItem>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="basic">Basic</SelectItem>
                 <SelectItem value="advanced">Advanced</SelectItem>
@@ -189,7 +197,7 @@ export default function Users() {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="true">Active</SelectItem>
                 <SelectItem value="false">Inactive</SelectItem>
               </SelectContent>
@@ -197,7 +205,7 @@ export default function Users() {
 
             <Button 
               variant="outline" 
-              onClick={() => setFilters({ search: '', plan_type: '', is_active: '' })}
+              onClick={() => setFilters({ search: '', plan_type: 'all', is_active: 'all' })}
             >
               Clear Filters
             </Button>

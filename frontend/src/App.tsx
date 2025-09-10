@@ -59,9 +59,18 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Admin Route Component (requires superadmin role)
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const { isAuthenticated, isLoading, isInitialized, user } = useAuthStore();
 
-  if (isLoading) {
+  console.log('🔍 ADMIN ROUTE - State check:', {
+    isAuthenticated,
+    isLoading,
+    isInitialized,
+    user: user ? { id: user.id, email: user.email, is_admin: user.is_admin } : null
+  });
+
+  // Se não foi inicializado ainda, mostrar loading
+  if (!isInitialized) {
+    console.log('⏳ ADMIN ROUTE - Not initialized yet, showing loading...');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -69,33 +78,42 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // Se não está autenticado OU não tem usuário, redirecionar para login
   if (!isAuthenticated || !user) {
+    console.log('❌ ADMIN ROUTE - Not authenticated or no user, redirecting to login');
     return <Navigate to="/login" />;
   }
 
   // Verificar se o usuário é admin
   if (!user.is_admin) {
+    console.log('❌ ADMIN ROUTE - User is not admin, redirecting to dashboard');
     // Se não é admin, redirecionar para dashboard do usuário comum
     return <Navigate to="/dashboard" />;
   }
 
+  console.log('✅ ADMIN ROUTE - Access granted, rendering admin content');
   return <>{children}</>;
 };
 
 const App = () => {
-  const { getProfile } = useAuthStore();
+  const { getProfile, setLoading } = useAuthStore();
 
   useEffect(() => {
     // Try to get profile on app load
     const token = localStorage.getItem('access_token');
     if (token) {
-      getProfile().catch(() => {
-        // If profile fetch fails, clear tokens
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+      console.log('🔄 APP - Token found, calling getProfile...');
+      // Don't call setLoading here - onRehydrateStorage already set it to true
+      getProfile().catch((error) => {
+        console.log('❌ APP - getProfile failed:', error);
+        // Don't clear tokens automatically - let the user decide
+        // The auth store will handle the error state
       });
+    } else {
+      console.log('❌ APP - No token found');
+      setLoading(false);
     }
-  }, [getProfile]);
+  }, [getProfile, setLoading]);
 
   return (
     <QueryClientProvider client={queryClient}>

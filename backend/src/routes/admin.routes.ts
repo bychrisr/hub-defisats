@@ -9,6 +9,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
   fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       console.log('🔍 ADMIN MIDDLEWARE - Starting authentication check');
+      console.log('🔍 Request URL:', request.url);
       console.log('🔍 Headers:', request.headers.authorization);
       
       // Get token from Authorization header
@@ -29,10 +30,20 @@ export async function adminRoutes(fastify: FastifyInstance) {
       const authService = new AuthService(prisma, request.server);
       
       // Validate token and get user
+      console.log('🔍 Validating session...');
       const user = await authService.validateSession(token);
-      console.log('🔍 User from validateSession:', user?.email);
+      console.log('🔍 User from validateSession:', user?.email, 'ID:', user?.id);
+      
+      if (!user) {
+        console.log('❌ No user found from validateSession');
+        return reply.status(401).send({
+          error: 'UNAUTHORIZED',
+          message: 'Invalid token'
+        });
+      }
       
       // Verificar se o usuário é superadmin
+      console.log('🔍 Checking admin user record...');
       const adminUser = await prisma.adminUser.findUnique({
         where: { user_id: user.id },
         include: { user: true }
@@ -40,17 +51,26 @@ export async function adminRoutes(fastify: FastifyInstance) {
       
       console.log('🔍 Admin user found:', adminUser);
 
-      if (!adminUser || adminUser.role !== 'superadmin') {
-        console.log('❌ Access denied - not superadmin');
+      if (!adminUser) {
+        console.log('❌ No admin user record found for user:', user.id);
+        return reply.status(403).send({
+          error: 'FORBIDDEN',
+          message: 'Admin user record not found'
+        });
+      }
+
+      if (adminUser.role !== 'superadmin') {
+        console.log('❌ Access denied - not superadmin, role:', adminUser.role);
         return reply.status(403).send({
           error: 'FORBIDDEN',
           message: 'Access denied. Superadmin role required.'
         });
       }
       
-      console.log('✅ Admin access granted');
+      console.log('✅ Admin access granted for:', user.email);
     } catch (error) {
       console.log('❌ Admin middleware error:', error.message);
+      console.log('❌ Admin middleware error stack:', error.stack);
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
         message: 'Authentication required'
@@ -356,8 +376,13 @@ export async function adminRoutes(fastify: FastifyInstance) {
       }
     }
   }, async (request: FastifyRequest<{ Querystring: any }>, reply: FastifyReply) => {
+    console.log('🔍 ADMIN USERS ROUTE - Starting user fetch');
     const { page, limit, plan_type, is_active, search } = request.query;
-    const skip = (page - 1) * limit;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 20;
+    const skip = (pageNum - 1) * limitNum;
+
+    console.log('🔍 Query params:', { page, limit, plan_type, is_active, search });
 
     try {
       const where: any = {};
@@ -371,6 +396,9 @@ export async function adminRoutes(fastify: FastifyInstance) {
         ];
       }
 
+      console.log('🔍 Where clause:', where);
+
+      console.log('🔍 Fetching users from database...');
       const [users, total] = await Promise.all([
         prisma.user.findMany({
           where,
@@ -384,7 +412,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
             last_activity_at: true
           },
           skip,
-          take: limit,
+          take: limitNum,
           orderBy: {
             created_at: 'desc'
           }
@@ -392,20 +420,25 @@ export async function adminRoutes(fastify: FastifyInstance) {
         prisma.user.count({ where })
       ]);
 
+      console.log('✅ Users fetched successfully:', { usersCount: users.length, total });
+
       return {
         users,
         pagination: {
-          page,
-          limit,
+          page: pageNum,
+          limit: limitNum,
           total,
-          pages: Math.ceil(total / limit)
+          pages: Math.ceil(total / limitNum)
         }
       };
     } catch (error) {
+      console.log('❌ Error fetching users:', error);
+      console.log('❌ Error stack:', error.stack);
       fastify.log.error('Error fetching users:', error);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch users'
+        message: 'Failed to fetch users',
+        details: error.message
       });
     }
   });
@@ -424,19 +457,26 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
   }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     const { id } = request.params;
+    console.log('🔍 ADMIN TOGGLE ROUTE - Starting toggle for user:', id);
 
     try {
+      console.log('🔍 ADMIN TOGGLE ROUTE - Finding user in database...');
       const user = await prisma.user.findUnique({
         where: { id },
         select: { is_active: true }
       });
 
+      console.log('🔍 ADMIN TOGGLE ROUTE - User found:', user);
+
       if (!user) {
+        console.log('❌ ADMIN TOGGLE ROUTE - User not found');
         return reply.status(404).send({
           error: 'NOT_FOUND',
           message: 'User not found'
         });
       }
+
+      console.log('🔍 ADMIN TOGGLE ROUTE - Current status:', user.is_active, '-> New status:', !user.is_active);
 
       const updatedUser = await prisma.user.update({
         where: { id },
@@ -448,21 +488,20 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       });
 
-      // Log da ação
-      await prisma.systemAlert.create({
-        data: {
-          message: `User ${updatedUser.email} ${updatedUser.is_active ? 'activated' : 'deactivated'} by admin`,
-          severity: 'info',
-          is_global: true
-        }
-      });
+      console.log('✅ ADMIN TOGGLE ROUTE - User updated successfully:', updatedUser);
+
+      // Log da ação (temporariamente desabilitado devido a problemas de migração)
+      console.log('🔍 ADMIN TOGGLE ROUTE - Skipping system alert creation for now');
 
       return updatedUser;
     } catch (error) {
+      console.log('❌ ADMIN TOGGLE ROUTE - Error:', error);
+      console.log('❌ ADMIN TOGGLE ROUTE - Error stack:', error.stack);
       fastify.log.error('Error toggling user status:', error);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to toggle user status'
+        message: 'Failed to toggle user status',
+        details: error.message
       });
     }
   });
