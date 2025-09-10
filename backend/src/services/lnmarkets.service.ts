@@ -183,7 +183,7 @@ export class LNMarketsService {
       return response.data;
     } catch (error) {
       console.error('Error fetching margin info:', error);
-      throw new Error('Failed to fetch margin information');
+      throw error; // Propagate the original error
     }
   }
 
@@ -196,7 +196,7 @@ export class LNMarketsService {
       return response.data || [];
     } catch (error) {
       console.error('Error fetching positions:', error);
-      throw new Error('Failed to fetch positions');
+      throw error; // Propagate the original error
     }
   }
 

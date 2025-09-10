@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import { config } from '@/config/env';
 import { authRoutes } from '@/routes/auth.routes';
 import { automationRoutes } from '@/routes/automation.routes';
+import { tradeLogRoutes } from '@/routes/trade-log.routes';
+import { profileRoutes } from '@/routes/profile.routes';
+import { lnmarketsRoutes } from '@/routes/lnmarkets.routes';
 import { metricsRoutes } from '@/routes/metrics.routes';
 import { alertsRoutes } from '@/routes/alerts.routes';
 import { dashboardRoutes } from '@/routes/dashboard.routes';
@@ -288,6 +291,18 @@ async function registerRoutes() {
   
   await fastify.register(automationRoutes, { prefix: '/api' });
   console.log('✅ Automation routes registered');
+
+  // Trade log routes
+  await fastify.register(tradeLogRoutes, { prefix: '/api' });
+  console.log('✅ Trade log routes registered');
+
+  // Profile routes
+  await fastify.register(profileRoutes, { prefix: '/api' });
+  console.log('✅ Profile routes registered');
+
+  // LN Markets routes
+  await fastify.register(lnmarketsRoutes, { prefix: '/api/lnmarkets' });
+  console.log('✅ LN Markets routes registered');
 
   // Admin routes
   await fastify.register(adminRoutes, { prefix: '/api/admin' });
