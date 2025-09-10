@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { AuthController } from '@/controllers/auth.controller';
 import { PrismaClient } from '@prisma/client';
 import { testSandboxCredentials } from '@/services/lnmarkets.service';
@@ -250,23 +250,14 @@ export async function authRoutes(fastify: FastifyInstance) {
         tags: ['Authentication'],
         body: {
           type: 'object',
-          required: [
-            'email',
-            'username',
-            'password',
-            'confirmPassword',
-            'ln_markets_api_key',
-            'ln_markets_api_secret',
-            'ln_markets_passphrase',
-          ],
           properties: {
-            email: { type: 'string', format: 'email' },
-            username: { type: 'string', minLength: 3, maxLength: 20 },
-            password: { type: 'string', minLength: 8 },
-            confirmPassword: { type: 'string', minLength: 8 },
-            ln_markets_api_key: { type: 'string', minLength: 16 },
-            ln_markets_api_secret: { type: 'string', minLength: 16 },
-            ln_markets_passphrase: { type: 'string', minLength: 8 },
+            email: { type: 'string' },
+            username: { type: 'string' },
+            password: { type: 'string' },
+            confirmPassword: { type: 'string' },
+            ln_markets_api_key: { type: 'string' },
+            ln_markets_api_secret: { type: 'string' },
+            ln_markets_passphrase: { type: 'string' },
             coupon_code: { type: 'string' },
           },
         },

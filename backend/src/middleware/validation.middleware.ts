@@ -56,6 +56,29 @@ export async function validateRegisterInput(
   reply: FastifyReply
 ): Promise<void> {
   try {
+    console.log('🔍 VALIDATION MIDDLEWARE - Starting validation');
+    console.log('📊 Request details:', {
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body: request.body,
+      timestamp: new Date().toISOString()
+    });
+    console.log('📋 Request body analysis:', {
+      hasEmail: !!(request.body as any)?.email,
+      hasUsername: !!(request.body as any)?.username,
+      hasPassword: !!(request.body as any)?.password,
+      hasConfirmPassword: !!(request.body as any)?.confirmPassword,
+      hasApiKey: !!(request.body as any)?.ln_markets_api_key,
+      hasApiSecret: !!(request.body as any)?.ln_markets_api_secret,
+      hasPassphrase: !!(request.body as any)?.ln_markets_passphrase,
+      email: (request.body as any)?.email,
+      username: (request.body as any)?.username,
+      apiKeyLength: (request.body as any)?.ln_markets_api_key?.length,
+      apiSecretLength: (request.body as any)?.ln_markets_api_secret?.length,
+      passphraseLength: (request.body as any)?.ln_markets_passphrase?.length,
+    });
+    
     // Sanitizar entrada
     const sanitizedBody = {
       email: Sanitizer.sanitizeEmail((request.body as Record<string, unknown>)?.['email'] as string || ''),

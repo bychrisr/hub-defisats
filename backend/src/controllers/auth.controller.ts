@@ -85,9 +85,17 @@ export class AuthController {
    * Register a new user
    */
   async register(request: FastifyRequest, reply: FastifyReply) {
-    console.log('📥 Registration request received');
+    console.log('🔍 REGISTER CONTROLLER - Request received');
+    console.log('📊 Request details:', {
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body: request.body,
+      timestamp: new Date().toISOString()
+    });
+    
     const body = request.body as RegisterRequestBody;
-    console.log('📋 Request body:', {
+    console.log('📋 Request body analysis:', {
       hasEmail: !!body?.email,
       hasUsername: !!body?.username,
       hasPassword: !!body?.password,
@@ -95,6 +103,11 @@ export class AuthController {
       hasApiSecret: !!body?.ln_markets_api_secret,
       hasPassphrase: !!body?.ln_markets_passphrase,
       hasCoupon: !!body?.coupon_code,
+      email: body?.email,
+      username: body?.username,
+      apiKeyLength: body?.ln_markets_api_key?.length,
+      apiSecretLength: body?.ln_markets_api_secret?.length,
+      passphraseLength: body?.ln_markets_passphrase?.length,
     });
 
     try {
