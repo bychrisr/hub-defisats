@@ -129,14 +129,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       logout: async () => {
+        console.log('🚪 Logout: Starting logout process...');
         set({ isLoading: true });
 
         try {
           await authAPI.logout();
+          console.log('✅ Logout: Backend logout successful');
         } catch (error) {
-          // Ignore logout errors
+          console.log('⚠️ Logout: Backend logout failed, but continuing with local cleanup');
         } finally {
           // Clear tokens and state
+          console.log('🧹 Logout: Clearing localStorage and state...');
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
 
@@ -146,6 +149,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             isLoading: false,
             error: null,
           });
+          
+          console.log('✅ Logout: Logout completed successfully');
         }
       },
 
@@ -188,8 +193,25 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       name: 'auth-storage',
       partialize: state => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
+        // Don't persist isAuthenticated - it should be calculated from token presence
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Check if there's a valid token in localStorage
+          const token = localStorage.getItem('access_token');
+          console.log('🔄 onRehydrateStorage - Token from localStorage:', token ? 'EXISTS' : 'MISSING');
+          
+          if (!token) {
+            // No token means not authenticated
+            console.log('❌ onRehydrateStorage: No token, setting isAuthenticated: false');
+            state.set({ isAuthenticated: false, user: null });
+          } else {
+            // Token exists, set as authenticated but user will be loaded separately
+            console.log('✅ onRehydrateStorage: Token exists, setting isAuthenticated: true');
+            state.set({ isAuthenticated: true });
+          }
+        }
+      },
     }
   )
 );

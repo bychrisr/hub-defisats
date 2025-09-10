@@ -42,9 +42,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// Public Route Component (redirect if authenticated)
+// Public Route Component (allow access even if authenticated)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isLoading } = useAuthStore();
 
   if (isLoading) {
     return (
@@ -54,7 +54,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return isAuthenticated ? <Navigate to="/dashboard" /> : <>{children}</>;
+  return <>{children}</>;
 };
 
 // Admin Route Component (requires superadmin role)
@@ -69,12 +69,13 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" />;
   }
 
   // Verificar se o usuário é admin
-  if (!user?.is_admin) {
+  if (!user.is_admin) {
+    // Se não é admin, redirecionar para dashboard do usuário comum
     return <Navigate to="/dashboard" />;
   }
 
