@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { LNMarketsError } from '@/components/LNMarketsError';
+import { LNMarketsGuard } from '@/components/LNMarketsGuard';
 import {
   Table,
   TableBody,
@@ -105,19 +107,25 @@ export default function Trades() {
       }
     } catch (err: any) {
       console.error('❌ TRADES - Error fetching positions:', err);
+      let errorMessage = 'Failed to fetch positions from LN Markets';
+      
       if (err.response?.status === 400) {
         if (err.response?.data?.error === 'MISSING_CREDENTIALS') {
-          setError('LN Markets credentials not configured. Please update your profile with API credentials.');
+          errorMessage = 'MISSING_CREDENTIALS';
         } else if (err.response?.data?.error === 'INVALID_CREDENTIALS') {
-          setError('Invalid LN Markets API credentials. Please check your API key, secret, and passphrase in your profile.');
+          errorMessage = 'INVALID_CREDENTIALS';
         } else if (err.response?.data?.error === 'INSUFFICIENT_PERMISSIONS') {
-          setError('LN Markets API credentials do not have sufficient permissions. Please check your API key permissions.');
+          errorMessage = 'INSUFFICIENT_PERMISSIONS';
         } else {
-          setError(err.response?.data?.message || 'Failed to fetch positions from LN Markets');
+          errorMessage = err.response?.data?.message || errorMessage;
         }
+      } else if (err.response?.status === 429) {
+        errorMessage = 'RATE_LIMIT';
       } else {
-        setError(err.response?.data?.message || err.message || 'Failed to fetch positions from LN Markets');
+        errorMessage = err.response?.data?.message || err.message || errorMessage;
       }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -168,13 +176,13 @@ export default function Trades() {
   if (error) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Error Loading Positions
-            </h3>
-            <p className="text-gray-600 mb-4">{error}</p>
+        <div className="max-w-2xl mx-auto">
+          <LNMarketsError 
+            error={error}
+            onConfigure={() => window.location.href = '/profile'}
+            showConfigureButton={error.includes('MISSING_CREDENTIALS') || error.includes('INVALID_CREDENTIALS')}
+          />
+          <div className="mt-4 text-center">
             <Button onClick={fetchPositions} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again
@@ -186,8 +194,9 @@ export default function Trades() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <LNMarketsGuard>
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -319,5 +328,6 @@ export default function Trades() {
         </Card>
       </div>
     </div>
+    </LNMarketsGuard>
   );
 }

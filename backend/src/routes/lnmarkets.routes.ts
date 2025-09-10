@@ -103,7 +103,32 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
     } catch (error: any) {
       console.error('❌ LN MARKETS - Error getting positions:', error);
       
-      // Handle specific LN Markets API errors
+      // Handle specific error types
+      if (error.message?.includes('LN Markets credentials not configured')) {
+        return reply.status(400).send({
+          success: false,
+          error: 'MISSING_CREDENTIALS',
+          message: 'LN Markets credentials not configured. Please update your profile with API credentials.',
+        });
+      }
+      
+      if (error.message?.includes('Invalid API credentials')) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INVALID_CREDENTIALS',
+          message: 'Invalid LN Markets API credentials. Please check your API key, secret, and passphrase.',
+        });
+      }
+      
+      if (error.message?.includes('Insufficient permissions')) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INSUFFICIENT_PERMISSIONS',
+          message: 'LN Markets API credentials do not have sufficient permissions.',
+        });
+      }
+      
+      // Handle HTTP status codes
       if (error.response?.status === 401) {
         return reply.status(400).send({
           success: false,
@@ -120,10 +145,18 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         });
       }
       
+      if (error.response?.status === 429) {
+        return reply.status(429).send({
+          success: false,
+          error: 'RATE_LIMIT',
+          message: 'Rate limit exceeded. Please try again later.',
+        });
+      }
+      
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_ERROR',
-        message: 'Failed to get LN Markets positions',
+        message: 'Failed to get LN Markets positions. Please try again later.',
       });
     }
   });
