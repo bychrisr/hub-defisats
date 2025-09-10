@@ -32,7 +32,7 @@ export async function authMiddleware(
 
     // Initialize auth service
     const prisma = new PrismaClient();
-    const authService = new AuthService(prisma, null as any);
+    const authService = new AuthService(prisma, request.server);
 
     // Validate token and get user
     const user = await authService.validateSession(token);
@@ -67,7 +67,7 @@ export async function optionalAuthMiddleware(
 
     // Initialize auth service
     const prisma = new PrismaClient();
-    const authService = new AuthService(prisma, null as any);
+    const authService = new AuthService(prisma, request.server);
 
     // Validate token and get user
     const user = await authService.validateSession(token);

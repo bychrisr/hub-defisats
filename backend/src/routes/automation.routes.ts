@@ -8,10 +8,8 @@ import {
 } from '@/middleware/idor.middleware';
 import { automationRateLimitMiddleware } from '@/middleware/user-rate-limit.middleware';
 
-export async function automationRoutes(
-  fastify: FastifyInstance,
-  prisma: PrismaClient
-) {
+export async function automationRoutes(fastify: FastifyInstance) {
+  const prisma = new PrismaClient();
   const automationController = new AutomationController(prisma);
 
   // Apply authentication middleware to all routes

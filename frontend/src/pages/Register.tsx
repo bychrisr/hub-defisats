@@ -198,26 +198,34 @@ export default function Register() {
     try {
       clearError();
       
-      // Debug: Log the data being sent
-      console.log('🚀 Registration data being sent:', {
-        email: data.email,
-        username: data.username,
-        password: '***',
-        ln_markets_api_key: data.ln_markets_api_key,
-        ln_markets_api_secret: data.ln_markets_api_secret,
-        ln_markets_passphrase: data.ln_markets_passphrase,
-        coupon_code: data.coupon_code || undefined,
-      });
-      
-      await registerUser({
+      // 🚨 STEVE'S FIX: Remove undefined fields to prevent Fastify validation errors
+      const cleanData: any = {
         email: data.email,
         username: data.username,
         password: data.password,
+        confirmPassword: data.confirmPassword, // ← ADICIONAR confirmPassword
         ln_markets_api_key: data.ln_markets_api_key,
         ln_markets_api_secret: data.ln_markets_api_secret,
         ln_markets_passphrase: data.ln_markets_passphrase,
-        coupon_code: data.coupon_code || undefined,
+      };
+
+      // Only add coupon_code if it exists and is not empty
+      if (data.coupon_code && data.coupon_code.trim() !== '') {
+        cleanData.coupon_code = data.coupon_code;
+      }
+
+      // Debug: Log the CLEAN data being sent
+      console.log('🚀 CLEAN Registration data being sent:', {
+        email: cleanData.email,
+        username: cleanData.username,
+        password: '***',
+        ln_markets_api_key: cleanData.ln_markets_api_key,
+        ln_markets_api_secret: cleanData.ln_markets_api_secret,
+        ln_markets_passphrase: cleanData.ln_markets_passphrase,
+        coupon_code: cleanData.coupon_code || 'NOT_SENT',
       });
+      
+      await registerUser(cleanData);
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Registration error:', error);

@@ -57,6 +57,12 @@ export async function validateRegisterInput(
 ): Promise<void> {
   try {
     console.log('🔍 VALIDATION MIDDLEWARE - Starting validation');
+    
+    // 🚨 STEVE'S FIX: Log RAW request body BEFORE any processing
+    console.log('🔍 RAW REQUEST BODY:', JSON.stringify(request.body, null, 2));
+    console.log('🔍 RAW REQUEST BODY TYPE:', typeof request.body);
+    console.log('🔍 RAW REQUEST BODY KEYS:', Object.keys(request.body || {}));
+    
     console.log('📊 Request details:', {
       method: request.method,
       url: request.url,

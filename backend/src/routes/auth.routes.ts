@@ -244,23 +244,12 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/register',
     {
-      preHandler: [validateRegisterInput],
+      preHandler: [validateRegisterInput], // 🚨 STEVE'S FIX: Only custom middleware validation
+      // schema: { ... } ← REMOVED: Let custom middleware handle all validation
       schema: {
         description: 'Register a new user',
         tags: ['Authentication'],
-        body: {
-          type: 'object',
-          properties: {
-            email: { type: 'string' },
-            username: { type: 'string' },
-            password: { type: 'string' },
-            confirmPassword: { type: 'string' },
-            ln_markets_api_key: { type: 'string' },
-            ln_markets_api_secret: { type: 'string' },
-            ln_markets_passphrase: { type: 'string' },
-            coupon_code: { type: 'string' },
-          },
-        },
+        // No body validation - handled by custom middleware
         response: {
           201: {
             type: 'object',

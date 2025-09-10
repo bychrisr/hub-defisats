@@ -286,7 +286,7 @@ async function registerRoutes() {
   await fastify.register(cacheRoutes, { prefix: '/api' });
   console.log('✅ Cache routes registered');
   
-  await fastify.register(automationRoutes, { prefix: '/api' } as any);
+  await fastify.register(automationRoutes, { prefix: '/api' });
   console.log('✅ Automation routes registered');
 
   // Admin routes

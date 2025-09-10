@@ -80,14 +80,23 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
         try {
           const response = await authAPI.register(data);
-          const { access_token, refresh_token, user } = response.data;
+          const { user_id, token, plan_type } = response.data;
 
-          // Store tokens
-          localStorage.setItem('access_token', access_token);
-          localStorage.setItem('refresh_token', refresh_token);
+          // Store token
+          console.log('💾 Storing token in localStorage:', token.substring(0, 20) + '...');
+          localStorage.setItem('access_token', token);
+          console.log('✅ Token stored successfully');
 
           set({
-            user,
+            user: {
+              id: user_id,
+              plan_type: plan_type,
+              email: data.email,
+              email_verified: false,
+              two_factor_enabled: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
             isAuthenticated: true,
             isLoading: false,
             error: null,
