@@ -5,11 +5,12 @@ import { config } from '@/config/env';
 import { metrics } from '@/utils/metrics';
 
 export async function healthRoutes(fastify: FastifyInstance) {
-  const prisma = fastify.prisma as PrismaClient;
-  const redis = fastify.redis as Redis;
+  // Create new instances instead of accessing from fastify
+  const prisma = new PrismaClient();
+  const redis = new Redis(config.redis.url);
 
   // Basic health check
-  fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/health', async (_request: FastifyRequest, reply: FastifyReply) => {
     const startTime = Date.now();
     
     try {
@@ -61,7 +62,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
   });
 
   // Detailed health check
-  fastify.get('/health/detailed', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/health/detailed', async (_request: FastifyRequest, reply: FastifyReply) => {
     const startTime = Date.now();
     
     try {
@@ -106,7 +107,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
           status: 'unhealthy',
           responseTime: 0,
           error: (error as Error).message
-        };
+        } as any;
         health.status = 'degraded';
       }
 
@@ -126,7 +127,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
           status: 'unhealthy',
           responseTime: 0,
           error: (error as Error).message
-        };
+        } as any;
         health.status = 'degraded';
       }
 
@@ -147,7 +148,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
   });
 
   // Metrics endpoint
-  fastify.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
     const startTime = Date.now();
     
     try {
@@ -172,7 +173,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
   });
 
   // Metrics as JSON
-  fastify.get('/metrics/json', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/metrics/json', async (_request: FastifyRequest, reply: FastifyReply) => {
     const startTime = Date.now();
     
     try {

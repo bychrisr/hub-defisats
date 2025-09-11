@@ -294,7 +294,7 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       });
 
       // Get market data
-      const marketData = await lnMarketsService.getMarketData(market);
+      const marketData = await lnMarketsService.getMarketData();
 
       console.log('✅ LN MARKETS - Market data retrieved successfully');
 

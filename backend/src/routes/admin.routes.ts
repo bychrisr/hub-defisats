@@ -69,8 +69,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
       
       console.log('✅ Admin access granted for:', user.email);
     } catch (error) {
-      console.log('❌ Admin middleware error:', error.message);
-      console.log('❌ Admin middleware error stack:', error.stack);
+      console.log('❌ Admin middleware error:', (error as Error).message);
+      console.log('❌ Admin middleware (error as Error).stack:', (error as Error).stack);
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
         message: 'Authentication required'
@@ -227,7 +227,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
       };
     } catch (error) {
       console.log('❌ ADMIN DASHBOARD ERROR:', error);
-      fastify.log.error('Error fetching dashboard data:', error);
+      fastify.log.error('Error fetching dashboard data:', error as any);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to fetch dashboard data'
@@ -253,7 +253,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       // TODO: Implementar métricas reais do Prometheus/Redis
       return {
@@ -272,7 +272,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       };
     } catch (error) {
-      fastify.log.error('Error fetching monitoring data:', error);
+      fastify.log.error('Error fetching monitoring data:', error as any);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to fetch monitoring data'
@@ -306,7 +306,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const alerts = await prisma.systemAlert.findMany({
         orderBy: {
@@ -317,7 +317,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
       return { alerts };
     } catch (error) {
-      fastify.log.error('Error fetching alerts:', error);
+      fastify.log.error('Error fetching alerts:', error as any);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to fetch alerts'
@@ -375,11 +375,11 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, async (request: FastifyRequest<{ Querystring: any }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Querystring: { page?: string; limit?: string; plan_type?: string; is_active?: string; search?: string } }>, reply: FastifyReply) => {
     console.log('🔍 ADMIN USERS ROUTE - Starting user fetch');
     const { page, limit, plan_type, is_active, search } = request.query;
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 20;
+    const pageNum = parseInt(page || '1') || 1;
+    const limitNum = parseInt(limit || '20') || 20;
     const skip = (pageNum - 1) * limitNum;
 
     console.log('🔍 Query params:', { page, limit, plan_type, is_active, search });
@@ -433,12 +433,12 @@ export async function adminRoutes(fastify: FastifyInstance) {
       };
     } catch (error) {
       console.log('❌ Error fetching users:', error);
-      console.log('❌ Error stack:', error.stack);
-      fastify.log.error('Error fetching users:', error);
+      console.log('❌ Error stack:', (error as Error).stack);
+      fastify.log.error('Error fetching users:', error as any);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to fetch users',
-        details: error.message
+        details: (error as Error).message
       });
     }
   });
@@ -496,12 +496,12 @@ export async function adminRoutes(fastify: FastifyInstance) {
       return updatedUser;
     } catch (error) {
       console.log('❌ ADMIN TOGGLE ROUTE - Error:', error);
-      console.log('❌ ADMIN TOGGLE ROUTE - Error stack:', error.stack);
-      fastify.log.error('Error toggling user status:', error);
+      console.log('❌ ADMIN TOGGLE ROUTE - Error stack:', (error as Error).stack);
+      fastify.log.error('Error toggling user status:', error as any);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to toggle user status',
-        details: error.message
+        details: (error as Error).message
       });
     }
   });
@@ -534,7 +534,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const coupons = await prisma.coupon.findMany({
         include: {
@@ -570,7 +570,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
       return { coupons: formattedCoupons };
     } catch (error) {
-      fastify.log.error('Error fetching coupons:', error);
+      fastify.log.error('Error fetching coupons:', error as any);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to fetch coupons'
@@ -622,7 +622,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, async (request: FastifyRequest<{ Body: any }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Body: { code: string; plan_type: string; usage_limit?: number; expires_at?: string } }>, reply: FastifyReply) => {
     const { code, plan_type, usage_limit, expires_at } = request.body;
 
     try {
@@ -630,7 +630,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         data: {
           code,
           plan_type,
-          usage_limit,
+          usage_limit: usage_limit ?? null,
           expires_at: expires_at ? new Date(expires_at) : null
         }
       });
@@ -653,7 +653,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         });
       }
       
-      fastify.log.error('Error creating coupon:', error);
+      fastify.log.error('Error creating coupon:', error as any);
       return reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to create coupon'
@@ -678,7 +678,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (_request: FastifyRequest, _reply: FastifyReply) => {
     // TODO: Implementar configurações reais
     return {
       rate_limiting: {
@@ -726,8 +726,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, async (request: FastifyRequest<{ Body: any }>, reply: FastifyReply) => {
-    const settings = request.body;
+  }, async (_request: FastifyRequest<{ Body: any }>, _reply: FastifyReply) => {
+    // const settings = request.body;
 
     try {
       // TODO: Implementar salvamento real das configurações
@@ -742,8 +742,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
       return { message: 'Settings updated successfully' };
     } catch (error) {
-      fastify.log.error('Error updating settings:', error);
-      return reply.status(500).send({
+      fastify.log.error('Error updating settings:', error as any);
+      return _reply.status(500).send({
         error: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to update settings'
       });

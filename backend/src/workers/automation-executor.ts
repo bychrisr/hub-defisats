@@ -10,7 +10,7 @@ const worker = new Worker(
   async job => {
     console.log('🤖 Automation executor job received:', job.data);
     
-    const { userId, automationId, action, config } = job.data;
+    const { userId, automationId, action } = job.data;
     
     try {
       console.log(`🔄 Executing automation ${automationId} for user ${userId}`);

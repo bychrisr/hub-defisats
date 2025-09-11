@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { AutomationService } from '@/services/automation.service';
 import { PrismaClient } from '@prisma/client';
+import { AutomationType } from '@/types/api-contracts';
 
 // Interface for authenticated requests - user is declared globally in auth.middleware.ts
 // interface AuthenticatedRequest extends FastifyRequest {
@@ -40,7 +41,7 @@ export class AutomationController {
 
       const automation = await this.automationService.createAutomation({
         userId: user?.id || '',
-        type: body.type,
+        type: body.type as AutomationType,
         config: body.config,
       });
 

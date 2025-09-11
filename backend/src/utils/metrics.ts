@@ -137,7 +137,7 @@ class MetricsCollector {
   }
 
   // HTTP Metrics
-  recordHttpRequest(method: string, path: string, statusCode: number, duration: number) {
+  recordHttpRequest(_method: string, _path: string, statusCode: number, duration: number) {
     this.httpRequestTotal++;
     
     if (statusCode >= 400) {

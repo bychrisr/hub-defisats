@@ -16,7 +16,7 @@ import {
 } from '@/middleware/validation.middleware';
 import {
   loginRateLimitMiddleware,
-  registrationRateLimitMiddleware,
+  // registrationRateLimitMiddleware,
   // passwordResetRateLimitMiddleware,
 } from '@/middleware/user-rate-limit.middleware';
 import { authMiddleware } from '@/middleware/auth.middleware';

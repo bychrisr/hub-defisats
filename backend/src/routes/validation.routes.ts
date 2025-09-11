@@ -9,7 +9,7 @@ const passwordValidationSchema = z.object({
 });
 
 export async function validationRoutes(fastify: FastifyInstance) {
-  const prisma = fastify.prisma as PrismaClient;
+  const prisma = new PrismaClient();
   // Endpoint para validar senha
   fastify.post('/validation/password', {
     schema: {

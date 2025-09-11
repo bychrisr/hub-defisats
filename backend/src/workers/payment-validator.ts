@@ -10,7 +10,7 @@ const worker = new Worker(
   async job => {
     console.log('💰 Payment validator job received:', job.data);
     
-    const { paymentId, userId, invoiceId, amount } = job.data;
+    const { paymentId, userId, amount } = job.data;
     
     try {
       console.log(`💳 Validating payment ${paymentId} for user ${userId}`);

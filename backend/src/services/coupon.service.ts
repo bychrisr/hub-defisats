@@ -1,5 +1,5 @@
-import { PrismaClient, /* Coupon, */ PlanType } from '@prisma/client';
-import { CreateCouponRequest, CouponResponse } from '@/types/api-contracts';
+import { PrismaClient } from '@prisma/client';
+import { CreateCouponRequest, CouponResponse, PlanType } from '@/types/api-contracts';
 
 export class CouponService {
   private prisma: PrismaClient;
@@ -12,7 +12,7 @@ export class CouponService {
    * Create a new coupon
    */
   async createCoupon(data: CreateCouponRequest): Promise<CouponResponse> {
-    const { code, plan_type, usage_limit, expires_at } = data;
+    const { code, plan_type, usage_limit, expires_at } = data as { code: string; plan_type: string; usage_limit?: number; expires_at?: string };
 
     // Check if coupon code already exists
     const existingCoupon = await this.prisma.coupon.findUnique({
@@ -28,7 +28,7 @@ export class CouponService {
       data: {
         code,
         plan_type,
-        usage_limit,
+        usage_limit: usage_limit ?? null,
         expires_at: expires_at ? new Date(expires_at) : null,
       },
     });
@@ -36,9 +36,9 @@ export class CouponService {
     return {
       id: coupon.id,
       code: coupon.code,
-      plan_type: coupon.plan_type,
-      usage_limit: coupon.usage_limit,
-      used_count: coupon.used_count,
+      plan_type: coupon.plan_type as PlanType,
+      usage_limit: coupon.usage_limit ?? 0,
+      used_count: coupon.used_count ?? 0,
       expires_at: coupon.expires_at?.toISOString(),
       created_at: coupon.created_at.toISOString(),
     };
@@ -55,9 +55,9 @@ export class CouponService {
     return coupons.map(coupon => ({
       id: coupon.id,
       code: coupon.code,
-      plan_type: coupon.plan_type,
-      usage_limit: coupon.usage_limit,
-      used_count: coupon.used_count,
+      plan_type: coupon.plan_type as PlanType,
+      usage_limit: coupon.usage_limit ?? 0,
+      used_count: coupon.used_count ?? 0,
       expires_at: coupon.expires_at?.toISOString(),
       created_at: coupon.created_at.toISOString(),
     }));
@@ -78,9 +78,9 @@ export class CouponService {
     return {
       id: coupon.id,
       code: coupon.code,
-      plan_type: coupon.plan_type,
-      usage_limit: coupon.usage_limit,
-      used_count: coupon.used_count,
+      plan_type: coupon.plan_type as PlanType,
+      usage_limit: coupon.usage_limit ?? 0,
+      used_count: coupon.used_count ?? 0,
       expires_at: coupon.expires_at?.toISOString(),
       created_at: coupon.created_at.toISOString(),
     };
@@ -113,7 +113,7 @@ export class CouponService {
       }
 
       // Check if usage limit has been reached
-      if (coupon.used_count >= coupon.usage_limit) {
+      if ((coupon.used_count ?? 0) >= (coupon.usage_limit ?? 0)) {
         return {
           valid: false,
           error: 'Coupon usage limit exceeded',
@@ -179,9 +179,9 @@ export class CouponService {
     return {
       id: updatedCoupon.id,
       code: updatedCoupon.code,
-      plan_type: updatedCoupon.plan_type,
-      usage_limit: updatedCoupon.usage_limit,
-      used_count: updatedCoupon.used_count,
+      plan_type: updatedCoupon.plan_type as PlanType,
+      usage_limit: updatedCoupon.usage_limit ?? 0,
+      used_count: updatedCoupon.used_count ?? 0,
       expires_at: updatedCoupon.expires_at?.toISOString(),
       created_at: updatedCoupon.created_at.toISOString(),
     };
@@ -222,7 +222,7 @@ export class CouponService {
     }
 
     return {
-      total_uses: coupon.used_count,
+      total_uses: coupon.used_count ?? 0,
       unique_users: coupon.user_coupons.length,
       recent_uses: coupon.user_coupons.map(uc => ({
         user_id: uc.user.id,
@@ -244,10 +244,10 @@ export class CouponService {
       throw new Error('Coupon not found');
     }
 
-    // Check if coupon has been used
-    if (coupon.used_count > 0) {
-      throw new Error('Cannot delete coupon that has been used');
-    }
+      // Check if coupon has been used
+      if ((coupon.used_count ?? 0) > 0) {
+        throw new Error('Cannot delete coupon that has been used');
+      }
 
     await this.prisma.coupon.delete({
       where: { id: couponId },
@@ -299,9 +299,9 @@ export class CouponService {
     return {
       id: updatedCoupon.id,
       code: updatedCoupon.code,
-      plan_type: updatedCoupon.plan_type,
-      usage_limit: updatedCoupon.usage_limit,
-      used_count: updatedCoupon.used_count,
+      plan_type: updatedCoupon.plan_type as PlanType,
+      usage_limit: updatedCoupon.usage_limit ?? 0,
+      used_count: updatedCoupon.used_count ?? 0,
       expires_at: updatedCoupon.expires_at?.toISOString(),
       created_at: updatedCoupon.created_at.toISOString(),
     };
@@ -325,7 +325,7 @@ export class CouponService {
    * Create testers coupon (for MVP)
    */
   async createTestersCoupon(
-    planType: PlanType = 'pro',
+    planType: PlanType = PlanType.PRO,
     usageLimit: number = 30
   ): Promise<CouponResponse> {
     const code = this.generateCouponCode('TESTER', 6);
@@ -395,7 +395,7 @@ export class CouponService {
       take: 1,
     });
 
-    const mostPopularPlan = planStats[0]?.plan_type || null;
+    const mostPopularPlan = (planStats[0]?.plan_type as PlanType) || null;
 
     return {
       total_coupons: totalCoupons,
@@ -405,8 +405,8 @@ export class CouponService {
       most_popular_plan: mostPopularPlan,
       recent_activity: recentCoupons.map(coupon => ({
         coupon_code: coupon.code,
-        plan_type: coupon.plan_type,
-        used_count: coupon.used_count,
+        plan_type: coupon.plan_type as PlanType,
+        used_count: coupon.used_count ?? 0,
         created_at: coupon.created_at.toISOString(),
       })),
     };

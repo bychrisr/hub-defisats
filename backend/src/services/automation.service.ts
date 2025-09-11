@@ -1,5 +1,6 @@
-import { PrismaClient, Automation, AutomationType } from '@prisma/client';
+import { PrismaClient, Automation } from '@prisma/client';
 import { z } from 'zod';
+import { AutomationType } from '@/types/api-contracts';
 
 // Configuration schemas for each automation type
 const MarginGuardConfigSchema = z.object({
@@ -197,7 +198,7 @@ export class AutomationService {
     let validatedConfig = data.updates.config;
     if (data.updates.config) {
       validatedConfig = this.validateAutomationConfig(
-        existingAutomation.type,
+        existingAutomation.type as AutomationType,
         data.updates.config
       );
     }
@@ -298,7 +299,7 @@ export class AutomationService {
       },
     });
 
-    const byTypeMap: Record<AutomationType, number> = {
+    const byTypeMap: Record<string, number> = {
       margin_guard: 0,
       tp_sl: 0,
       auto_entry: 0,

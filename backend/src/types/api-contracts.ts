@@ -1,14 +1,51 @@
 import { z } from 'zod';
-import {
-  PlanType,
-  AutomationType,
-  TradeStatus,
-  NotificationType,
-  PaymentStatus,
-  // SocialProvider,
-  // AdminRole,
-  // AlertSeverity,
-} from '@prisma/client';
+// import {
+//   PlanType,
+//   // AutomationType,
+//   // TradeStatus,
+//   // NotificationType,
+//   // PaymentStatus,
+//   // SocialProvider,
+//   // AdminRole,
+//   // AlertSeverity,
+// } from '@prisma/client';
+
+// Define PlanType enum since it's not exported from Prisma
+export enum PlanType {
+  FREE = 'free',
+  BASIC = 'basic',
+  ADVANCED = 'advanced',
+  PRO = 'pro',
+}
+
+// Define enums that are not in Prisma schema
+export enum AutomationType {
+  MARGIN_GUARD = 'margin_guard',
+  TAKE_PROFIT = 'take_profit',
+  STOP_LOSS = 'stop_loss',
+  DCA = 'dca',
+}
+
+export enum TradeStatus {
+  PENDING = 'pending',
+  EXECUTED = 'executed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+}
+
+export enum NotificationType {
+  EMAIL = 'email',
+  TELEGRAM = 'telegram',
+  WHATSAPP = 'whatsapp',
+  SMS = 'sms',
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+  EXPIRED = 'expired',
+}
 
 // ============================================================================
 // AUTH CONTRACTS

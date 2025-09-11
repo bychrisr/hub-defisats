@@ -10,7 +10,7 @@ const worker = new Worker(
   async job => {
     console.log('📧 Notification job received:', job.data);
     
-    const { userId, type, channel, message, data } = job.data;
+    const { userId, type, channel, message } = job.data;
     
     try {
       console.log(`📤 Sending ${type} notification to user ${userId} via ${channel}`);

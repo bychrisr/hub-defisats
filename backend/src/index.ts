@@ -434,7 +434,7 @@ async function gracefulShutdown(signal: string) {
     fastify.log.info('Server closed successfully');
     process.exit(0);
   } catch (error) {
-    fastify.log.error('Error during shutdown:', error);
+    fastify.log.error('Error during shutdown:', error as any);
     process.exit(1);
   }
 }
@@ -474,7 +474,7 @@ async function start() {
     console.log(`📚 API documentation available at ${address}/docs`);
     console.log(`🌍 Environment: ${config.env.NODE_ENV}`);
   } catch (error) {
-    fastify.log.error('Error starting server:', error);
+    fastify.log.error('Error starting server:', error as any);
     console.error('❌ Full error details:', error);
     console.error('❌ Error stack:', (error as Error).stack);
     process.exit(1);

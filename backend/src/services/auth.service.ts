@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { PrismaClient, User, SocialProvider } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { config } from '@/config/env';
 import { FastifyInstance } from 'fastify';
 import {
@@ -8,10 +8,18 @@ import {
   LoginRequest,
   AuthResponse,
   RefreshTokenResponse,
+  PlanType,
 } from '@/types/api-contracts';
 import { createLNMarketsService } from './lnmarkets.service';
 import { OptimizedQueriesService } from './optimized-queries.service';
 // import { cacheService } from './cache.service';
+
+// Define SocialProvider enum
+export enum SocialProvider {
+  GOOGLE = 'google',
+  GITHUB = 'github',
+  FACEBOOK = 'facebook',
+}
 
 export class AuthService {
   private prisma: PrismaClient;
@@ -169,7 +177,7 @@ export class AuthService {
     return {
       user_id: user.id,
       token,
-      plan_type: user.plan_type,
+      plan_type: user.plan_type as PlanType,
     };
   }
 
@@ -220,7 +228,7 @@ export class AuthService {
     return {
       user_id: user.id,
       token,
-      plan_type: user.plan_type,
+      plan_type: user.plan_type as PlanType,
     };
   }
 
@@ -315,9 +323,9 @@ export class AuthService {
         throw new Error('Session expired');
       }
 
-      return user;
+      return user as any;
     } catch (error) {
-      console.log('❌ VALIDATE SESSION - Error:', error.message);
+      console.log('❌ VALIDATE SESSION - Error:', (error as Error).message);
       throw new Error('Invalid session');
     }
   }
@@ -390,7 +398,7 @@ export class AuthService {
     return {
       user_id: user.id,
       token,
-      plan_type: user.plan_type,
+      plan_type: user.plan_type as PlanType,
     };
   }
 
@@ -457,7 +465,7 @@ export class AuthService {
       throw new Error('Coupon has expired');
     }
 
-    if (coupon.used_count >= coupon.usage_limit) {
+    if ((coupon.used_count ?? 0) >= (coupon.usage_limit ?? 0)) {
       throw new Error('Coupon usage limit exceeded');
     }
 

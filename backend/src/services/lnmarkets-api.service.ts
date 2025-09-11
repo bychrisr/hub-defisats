@@ -43,7 +43,7 @@ export class LNMarketsAPIService {
 
     // Add request interceptor for authentication
     console.log('🚨 TESTE SIMPLES - REGISTRANDO INTERCEPTOR!');
-    this.client.interceptors.request.use(this.authenticateRequest.bind(this));
+    this.client.interceptors.request.use(this.authenticateRequest.bind(this) as any);
     console.log('🚨 TESTE SIMPLES - INTERCEPTOR REGISTRADO!');
   }
 
@@ -139,9 +139,9 @@ export class LNMarketsAPIService {
     };
     
     console.log('🔐 LN MARKETS AUTH - Final headers:', {
-      'LNM-ACCESS-KEY': config.headers['LNM-ACCESS-KEY'] ? `${config.headers['LNM-ACCESS-KEY'].substring(0, 10)}...` : 'MISSING',
-      'LNM-ACCESS-SIGNATURE': config.headers['LNM-ACCESS-SIGNATURE'] ? `${config.headers['LNM-ACCESS-SIGNATURE'].substring(0, 10)}...` : 'MISSING',
-      'LNM-ACCESS-PASSPHRASE': config.headers['LNM-ACCESS-PASSPHRASE'] ? `${config.headers['LNM-ACCESS-PASSPHRASE'].substring(0, 5)}...` : 'MISSING',
+      'LNM-ACCESS-KEY': config.headers['LNM-ACCESS-KEY'] ? `${String(config.headers['LNM-ACCESS-KEY']).substring(0, 10)}...` : 'MISSING',
+      'LNM-ACCESS-SIGNATURE': config.headers['LNM-ACCESS-SIGNATURE'] ? `${String(config.headers['LNM-ACCESS-SIGNATURE']).substring(0, 10)}...` : 'MISSING',
+      'LNM-ACCESS-PASSPHRASE': config.headers['LNM-ACCESS-PASSPHRASE'] ? `${String(config.headers['LNM-ACCESS-PASSPHRASE']).substring(0, 5)}...` : 'MISSING',
       'LNM-ACCESS-TIMESTAMP': config.headers['LNM-ACCESS-TIMESTAMP']
     });
 

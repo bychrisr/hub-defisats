@@ -7,7 +7,7 @@ const profileController = new ProfileController(prisma);
 
 export async function profileRoutes(fastify: FastifyInstance) {
   // GET /api/profile - Buscar perfil do usuário (sem middleware para debug)
-  fastify.get('/profile', async (request, reply) => {
+  fastify.get('/profile', async (_request, reply) => {
     try {
       console.log('🔍 PROFILE ROUTE - Testing without middleware');
       
