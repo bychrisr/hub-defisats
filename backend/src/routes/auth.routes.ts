@@ -538,6 +538,9 @@ export async function authRoutes(fastify: FastifyInstance) {
               },
               created_at: { type: 'string', format: 'date-time' },
               last_activity_at: { type: 'string', format: 'date-time' },
+              ln_markets_api_key: { type: 'string' },
+              ln_markets_api_secret: { type: 'string' },
+              ln_markets_passphrase: { type: 'string' },
             },
           },
           401: {
