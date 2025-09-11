@@ -42,14 +42,21 @@ export class LNMarketsAPIService {
     
     // Prepare data for signature
     let data = '';
+    let fullPath = path;
+    
     if (method === 'GET' || method === 'DELETE') {
-      data = new URLSearchParams(config.params || {}).toString();
+      // For GET/DELETE, include params in the path for signature
+      if (config.params && Object.keys(config.params).length > 0) {
+        const queryString = new URLSearchParams(config.params).toString();
+        fullPath = `${path}?${queryString}`;
+      }
+      data = ''; // No body data for GET/DELETE
     } else if (config.data) {
       data = JSON.stringify(config.data);
     }
 
-    // Create signature
-    const message = timestamp + method + path + data;
+    // Create signature using full path with params
+    const message = timestamp + method + fullPath + data;
     const signature = crypto
       .createHmac('sha256', this.credentials.apiSecret)
       .update(message)
