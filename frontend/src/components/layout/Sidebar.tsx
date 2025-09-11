@@ -27,7 +27,7 @@ const navigation = [
     icon: Home,
   },
   {
-    name: 'Trades',
+    name: 'Positions',
     href: '/trades',
     icon: TrendingUp,
   },

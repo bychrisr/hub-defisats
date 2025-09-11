@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LNMarketsError } from '@/components/LNMarketsError';
 import { LNMarketsGuard } from '@/components/LNMarketsGuard';
+import SatsIcon from '@/components/SatsIcon';
 import {
   Table,
   TableBody,
@@ -24,6 +25,9 @@ import {
   TrendingUp,
   TrendingDown,
   AlertTriangle,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -46,6 +50,9 @@ interface LNPosition {
   updatedAt: string;
 }
 
+type SortField = 'side' | 'quantity' | 'price' | 'liquidation' | 'leverage' | 'margin' | 'pnl' | 'marginRatio' | 'tradingFees' | 'fundingCost';
+type SortDirection = 'asc' | 'desc';
+
 interface LNPositionsResponse {
   success: boolean;
   data: {
@@ -63,6 +70,69 @@ export default function Trades() {
   const [totalValue, setTotalValue] = useState(0);
   const [totalPnl, setTotalPnl] = useState(0);
   const [totalMargin, setTotalMargin] = useState(0);
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  // Função para ordenar posições
+  const sortPositions = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Função para obter ícone de ordenação
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="h-4 w-4 text-blue-600" />
+      : <ArrowDown className="h-4 w-4 text-blue-600" />;
+  };
+
+  // Função para formatar valores USD de forma mais amigável
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `$${(value / 1000).toFixed(1)}K`;
+    } else {
+      return `$${value.toFixed(0)}`;
+    }
+  };
+
+  // Função para formatar sats com ícone
+  const formatSats = (value: number) => {
+    return (
+      <span className="flex items-center gap-1">
+        {value.toLocaleString()}
+        <SatsIcon size={14} className="text-orange-500" />
+      </span>
+    );
+  };
+
+  // Função para obter posições ordenadas
+  const getSortedPositions = () => {
+    if (!sortField) return positions;
+    
+    return [...positions].sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+      
+      // Tratamento especial para side (string)
+      if (sortField === 'side') {
+        aValue = aValue === 'long' ? 1 : 0;
+        bValue = bValue === 'long' ? 1 : 0;
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
 
   const fetchPositions = async () => {
     try {
@@ -228,7 +298,7 @@ export default function Trades() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Trades</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Positions</h1>
             <p className="text-gray-600">Monitor your active positions on LN Markets</p>
           </div>
           <Button onClick={fetchPositions} variant="outline" size="sm">
@@ -303,28 +373,107 @@ export default function Trades() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Asset</TableHead>
-                      <TableHead>Side</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Liquidation</TableHead>
-                      <TableHead>Leverage</TableHead>
-                      <TableHead>Margin</TableHead>
-                      <TableHead>P&L</TableHead>
-                      <TableHead>Margin Ratio</TableHead>
-                      <TableHead>Fees</TableHead>
-                      <TableHead>Funding</TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('side')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Side
+                          {getSortIcon('side')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('quantity')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Quantity
+                          {getSortIcon('quantity')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('price')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Price
+                          {getSortIcon('price')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('liquidation')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Liquidation
+                          {getSortIcon('liquidation')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('leverage')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Leverage
+                          {getSortIcon('leverage')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('margin')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Margin
+                          {getSortIcon('margin')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('pnl')}
+                      >
+                        <div className="flex items-center gap-2">
+                          P&L
+                          {getSortIcon('pnl')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('marginRatio')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Margin Ratio
+                          {getSortIcon('marginRatio')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('tradingFees')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Fees
+                          {getSortIcon('tradingFees')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => sortPositions('fundingCost')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Funding
+                          {getSortIcon('fundingCost')}
+                        </div>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {positions.map((position) => (
+                    {getSortedPositions().map((position) => (
                       <TableRow key={position.id}>
-                        <TableCell className="font-medium">
-                          {position.asset}
-                        </TableCell>
                         <TableCell>
-                          <Badge variant={position.side === 'long' ? 'default' : 'destructive'}>
-                            {position.side.toUpperCase()}
+                          <Badge 
+                            variant={position.side === 'long' ? 'default' : 'destructive'}
+                            className={position.side === 'long' ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}
+                          >
+                            {position.side === 'long' ? 'LONG' : 'SHORT'}
                           </Badge>
                         </TableCell>
                         <TableCell>{formatCurrency(position.quantity)}</TableCell>
