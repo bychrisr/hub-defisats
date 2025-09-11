@@ -1,13 +1,14 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { LNMarketsAPIService } from '@/services/lnmarkets-api.service';
+import { authMiddleware } from '@/middleware/auth.middleware';
 
 const prisma = new PrismaClient();
 
 export async function lnmarketsRoutes(fastify: FastifyInstance) {
   // GET /api/lnmarkets/positions - Get user positions
   fastify.get('/positions', {
-    preHandler: [(fastify as any).authenticate],
+    preHandler: [authMiddleware],
     schema: {
       description: 'Get LN Markets positions',
       tags: ['LN Markets'],
@@ -59,6 +60,7 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       },
     },
   }, async (request, reply) => {
+    console.log('🚨 TESTE SIMPLES - ENDPOINT POSITIONS CHAMADO!');
     console.log('🎯 LN MARKETS CONTROLLER - Starting positions request');
     try {
       const user = (request as any).user;
@@ -191,7 +193,7 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
 
   // GET /api/lnmarkets/market-data/:market - Get market data
   fastify.get('/market-data/:market', {
-    preHandler: [(fastify as any).authenticate],
+    preHandler: [authMiddleware],
     schema: {
       description: 'Get LN Markets market data',
       tags: ['LN Markets'],
