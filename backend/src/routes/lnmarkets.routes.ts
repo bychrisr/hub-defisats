@@ -59,11 +59,17 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       },
     },
   }, async (request, reply) => {
+    console.log('🎯 LN MARKETS CONTROLLER - Starting positions request');
     try {
       const user = (request as any).user;
-      console.log('🔍 LN MARKETS - Getting positions for user:', user?.id);
+      console.log('🎯 LN MARKETS CONTROLLER - User info:', {
+        id: user?.id,
+        email: user?.email,
+        planType: user?.planType
+      });
 
       // Get user credentials
+      console.log('🎯 LN MARKETS CONTROLLER - Fetching user credentials from database');
       const userProfile = await prisma.user.findUnique({
         where: { id: user.id },
         select: {
@@ -73,7 +79,17 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         },
       });
 
+      console.log('🎯 LN MARKETS CONTROLLER - User profile from DB:', {
+        hasApiKey: !!userProfile?.ln_markets_api_key,
+        hasApiSecret: !!userProfile?.ln_markets_api_secret,
+        hasPassphrase: !!userProfile?.ln_markets_passphrase,
+        apiKeyPreview: userProfile?.ln_markets_api_key ? `${userProfile.ln_markets_api_key.substring(0, 10)}...` : 'MISSING',
+        apiSecretPreview: userProfile?.ln_markets_api_secret ? `${userProfile.ln_markets_api_secret.substring(0, 10)}...` : 'MISSING',
+        passphrasePreview: userProfile?.ln_markets_passphrase ? `${userProfile.ln_markets_passphrase.substring(0, 5)}...` : 'MISSING'
+      });
+
       if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+        console.log('❌ LN MARKETS CONTROLLER - Missing credentials, returning 400');
         return reply.status(400).send({
           success: false,
           error: 'MISSING_CREDENTIALS',
@@ -82,8 +98,7 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       }
 
       // Initialize LN Markets service
-      // Note: Using mainnet by default as user credentials are typically for mainnet
-      // TODO: Add user preference for testnet/mainnet in database
+      console.log('🎯 LN MARKETS CONTROLLER - Initializing LN Markets service');
       const lnMarketsService = new LNMarketsAPIService({
         apiKey: userProfile.ln_markets_api_key,
         apiSecret: userProfile.ln_markets_api_secret,
@@ -91,10 +106,14 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         isTestnet: false, // Force mainnet for now
       });
 
+      console.log('🎯 LN MARKETS CONTROLLER - Service initialized, calling getUserPositions');
       // Get positions using the new service
       const positions = await lnMarketsService.getUserPositions();
 
-      console.log('✅ LN MARKETS - Positions retrieved successfully');
+      console.log('✅ LN MARKETS CONTROLLER - Positions retrieved successfully:', {
+        positionsCount: Array.isArray(positions) ? positions.length : 'not array',
+        positions: positions
+      });
 
       return reply.status(200).send({
         success: true,
@@ -103,7 +122,14 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         },
       });
     } catch (error: any) {
-      console.error('❌ LN MARKETS - Error getting positions:', error);
+      console.error('❌ LN MARKETS CONTROLLER - Error getting positions:', {
+        message: error.message,
+        stack: error.stack,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        fullError: error
+      });
       
       // Handle specific error types
       if (error.message?.includes('LN Markets credentials not configured')) {

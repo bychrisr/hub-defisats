@@ -36,9 +36,24 @@ export class LNMarketsAPIService {
   }
 
   private authenticateRequest(config: AxiosRequestConfig): AxiosRequestConfig {
+    console.log('🔐 LN MARKETS AUTH - Starting authentication process');
+    console.log('🔐 LN MARKETS AUTH - Original config:', {
+      method: config.method,
+      url: config.url,
+      params: config.params,
+      data: config.data
+    });
+    
     const timestamp = Date.now().toString();
     const method = (config.method || 'GET').toUpperCase();
     const path = config.url || '';
+    
+    console.log('🔐 LN MARKETS AUTH - Basic info:', {
+      timestamp,
+      method,
+      path,
+      baseURL: this.baseURL
+    });
     
     // Prepare data for signature
     let data = '';
@@ -49,18 +64,46 @@ export class LNMarketsAPIService {
       if (config.params && Object.keys(config.params).length > 0) {
         const queryString = new URLSearchParams(config.params).toString();
         fullPath = `${path}?${queryString}`;
+        console.log('🔐 LN MARKETS AUTH - GET/DELETE with params:', {
+          originalPath: path,
+          params: config.params,
+          queryString,
+          fullPath
+        });
+      } else {
+        console.log('🔐 LN MARKETS AUTH - GET/DELETE without params');
       }
       data = ''; // No body data for GET/DELETE
     } else if (config.data) {
       data = JSON.stringify(config.data);
+      console.log('🔐 LN MARKETS AUTH - POST/PUT with data:', {
+        data: config.data,
+        jsonData: data
+      });
     }
 
     // Create signature using full path with params
     const message = timestamp + method + fullPath + data;
+    console.log('🔐 LN MARKETS AUTH - Signature components:', {
+      timestamp,
+      method,
+      fullPath,
+      data,
+      message
+    });
+    
     const signature = crypto
       .createHmac('sha256', this.credentials.apiSecret)
       .update(message)
       .digest('base64');
+
+    console.log('🔐 LN MARKETS AUTH - Generated signature:', signature);
+    console.log('🔐 LN MARKETS AUTH - Credentials info:', {
+      apiKey: this.credentials.apiKey ? `${this.credentials.apiKey.substring(0, 10)}...` : 'MISSING',
+      apiSecret: this.credentials.apiSecret ? `${this.credentials.apiSecret.substring(0, 10)}...` : 'MISSING',
+      passphrase: this.credentials.passphrase ? `${this.credentials.passphrase.substring(0, 5)}...` : 'MISSING',
+      isTestnet: this.credentials.isTestnet
+    });
 
     // Add headers
     config.headers = {
@@ -70,6 +113,13 @@ export class LNMarketsAPIService {
       'LNM-ACCESS-PASSPHRASE': this.credentials.passphrase,
       'LNM-ACCESS-TIMESTAMP': timestamp,
     };
+    
+    console.log('🔐 LN MARKETS AUTH - Final headers:', {
+      'LNM-ACCESS-KEY': config.headers['LNM-ACCESS-KEY'] ? `${config.headers['LNM-ACCESS-KEY'].substring(0, 10)}...` : 'MISSING',
+      'LNM-ACCESS-SIGNATURE': config.headers['LNM-ACCESS-SIGNATURE'] ? `${config.headers['LNM-ACCESS-SIGNATURE'].substring(0, 10)}...` : 'MISSING',
+      'LNM-ACCESS-PASSPHRASE': config.headers['LNM-ACCESS-PASSPHRASE'] ? `${config.headers['LNM-ACCESS-PASSPHRASE'].substring(0, 5)}...` : 'MISSING',
+      'LNM-ACCESS-TIMESTAMP': config.headers['LNM-ACCESS-TIMESTAMP']
+    });
 
     // Set content type for POST/PUT requests
     if (method === 'POST' || method === 'PUT') {
@@ -80,10 +130,19 @@ export class LNMarketsAPIService {
   }
 
   async makeRequest<T = any>(request: LNMarketsRequest): Promise<T> {
+    console.log('🚀 LN MARKETS REQUEST - Starting request:', {
+      method: request.method,
+      path: request.path,
+      params: request.params,
+      data: request.data,
+      baseURL: this.baseURL
+    });
+    
     try {
       console.log(`[LNMarketsAPI] Making ${request.method} request to ${request.path}`, {
         data: request.data,
-        params: request.params
+        params: request.params,
+        fullURL: `${this.baseURL}${request.path}`
       });
 
       const response = await this.client.request({
@@ -95,7 +154,9 @@ export class LNMarketsAPIService {
 
       console.log(`[LNMarketsAPI] Request successful:`, {
         status: response.status,
-        data: response.data
+        statusText: response.statusText,
+        data: response.data,
+        headers: response.headers
       });
 
       return response.data;
@@ -103,8 +164,18 @@ export class LNMarketsAPIService {
       console.error(`[LNMarketsAPI] Request failed:`, {
         method: request.method,
         path: request.path,
+        fullURL: `${this.baseURL}${request.path}`,
         error: error.response?.data || error.message,
-        status: error.response?.status
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        headers: error.response?.headers,
+        config: {
+          method: error.config?.method,
+          url: error.config?.url,
+          params: error.config?.params,
+          data: error.config?.data,
+          headers: error.config?.headers
+        }
       });
       throw error;
     }
@@ -286,31 +357,47 @@ export class LNMarketsAPIService {
   }
 
   async getUserPositions() {
+    console.log('🔍 LN MARKETS POSITIONS - Starting getUserPositions');
+    console.log('🔍 LN MARKETS POSITIONS - Service credentials:', {
+      apiKey: this.credentials.apiKey ? `${this.credentials.apiKey.substring(0, 10)}...` : 'MISSING',
+      apiSecret: this.credentials.apiSecret ? `${this.credentials.apiSecret.substring(0, 10)}...` : 'MISSING',
+      passphrase: this.credentials.passphrase ? `${this.credentials.passphrase.substring(0, 5)}...` : 'MISSING',
+      isTestnet: this.credentials.isTestnet,
+      baseURL: this.baseURL
+    });
+    
     try {
-      console.log('🔍 LN MARKETS - Attempting to get user positions from /futures');
+      console.log('🔍 LN MARKETS POSITIONS - Attempting to get user positions from /futures');
       const result = await this.makeRequest({
         method: 'GET',
         path: '/futures',
         params: { type: 'running' }
       });
-      console.log('✅ LN MARKETS - User positions retrieved successfully:', result);
+      console.log('✅ LN MARKETS POSITIONS - User positions retrieved successfully:', result);
       return result;
     } catch (error: any) {
-      console.log('⚠️ LN MARKETS - Error getting user positions:', error.message);
+      console.log('⚠️ LN MARKETS POSITIONS - Error getting user positions:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        fullError: error
+      });
       
       // If endpoint doesn't exist (404) or returns empty, return empty array
       if (error.response?.status === 404 || error.message?.includes('404')) {
-        console.log('📝 LN MARKETS - Endpoint /futures not found, returning empty positions');
+        console.log('📝 LN MARKETS POSITIONS - Endpoint /futures not found, returning empty positions');
         return [];
       }
       
       // If no data returned, return empty array
       if (error.message?.includes('No data') || error.message?.includes('empty')) {
-        console.log('📝 LN MARKETS - No positions data, returning empty array');
+        console.log('📝 LN MARKETS POSITIONS - No positions data, returning empty array');
         return [];
       }
       
       // Re-throw other errors
+      console.log('❌ LN MARKETS POSITIONS - Re-throwing error:', error);
       throw error;
     }
   }
