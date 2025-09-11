@@ -1,0 +1,56 @@
+# Changelog
+
+Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+
+O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
+e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
+
+## [0.2.21] - 2025-09-11
+
+### Corrigido
+- **Schema do Fastify para dados LN Markets**: Corrigido schema de resposta que estava filtrando dados da API LN Markets
+- **Campos de posições**: Adicionados todos os campos reais da API LN Markets no schema (quantity, price, liquidation, margin, pl, leverage, etc.)
+- **Exibição de dados**: Frontend agora recebe dados completos em vez de apenas id e side
+- **Página de trades**: Dados agora são exibidos corretamente com formatação adequada
+
+### Detalhes Técnicos
+- Schema anterior definia apenas campos genéricos (id, market, side, size, entryPrice, liquidationPrice, unrealizedPnl)
+- API LN Markets retorna campos específicos (quantity, price, liquidation, margin, pl, leverage, opening_fee, closing_fee, etc.)
+- Fastify filtra automaticamente dados de resposta baseado no schema definido
+- Solução: Atualizado schema para incluir todos os campos da API LN Markets
+
+## [0.2.20] - 2025-09-11
+
+### Corrigido
+- **Geração de assinatura HMAC-SHA256**: Corrigido path para incluir prefixo /v2
+- **Configuração mainnet/testnet**: Alterado para usar mainnet por padrão
+- **Middleware de autenticação**: Substituído (fastify as any).authenticate por authMiddleware
+- **Tratamento de erros**: Melhorado tratamento de erros específicos da LN Markets
+
+## [0.2.19] - 2025-09-10
+
+### Adicionado
+- **Integração completa com LN Markets API**: Wrapper abrangente para todas as operações disponíveis
+- **Autenticação HMAC-SHA256**: Implementação correta da autenticação da LN Markets
+- **Endpoints de posições**: Rota para buscar posições do usuário
+- **Endpoints de dados de mercado**: Rota para buscar dados de mercado
+- **Tratamento de erros**: Sistema robusto de tratamento de erros específicos da LN Markets
+- **Interface de usuário**: Página de trades com exibição completa de posições
+- **Validação de credenciais**: Sistema de validação e configuração de credenciais LN Markets
+
+### Detalhes Técnicos
+- Serviço principal: `LNMarketsAPIService` com interceptors Axios
+- Controllers especializados: Futures, Options, User, Market Data
+- Rotas REST: `/api/lnmarkets/*` para todas as operações
+- Frontend: Componentes React para exibição e gerenciamento de credenciais
+- Documentação: Swagger/OpenAPI para todos os endpoints
+
+---
+
+**Legenda:**
+- `Adicionado` para novas funcionalidades
+- `Alterado` para mudanças em funcionalidades existentes
+- `Depreciado` para funcionalidades que serão removidas em versões futuras
+- `Removido` para funcionalidades removidas nesta versão
+- `Corrigido` para correções de bugs
+- `Segurança` para vulnerabilidades corrigidas

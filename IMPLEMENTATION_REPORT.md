@@ -277,6 +277,124 @@ LN Markets API
 └── Dados de mercado
 ```
 
+## Problemas Críticos Resolvidos - Análise Detalhada
+
+### **PROBLEMA 1: Schema do Fastify Filtrando Dados da LN Markets**
+
+#### **🔍 Descrição do Problema**
+O frontend estava recebendo apenas `id` e `side` de cada posição, mesmo que o backend estivesse retornando dados completos da API LN Markets. Os dados apareciam "mock-like" na interface.
+
+#### **🔬 Causa Raiz**
+O problema estava no **schema de resposta do Fastify** definido em `backend/src/routes/lnmarkets.routes.ts`. O schema estava definindo apenas campos básicos:
+
+```json
+{
+  "positions": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "market": { "type": "string" },
+        "side": { "type": "string" },
+        "size": { "type": "number" },
+        "entryPrice": { "type": "number" },
+        "liquidationPrice": { "type": "number" },
+        "unrealizedPnl": { "type": "number" }
+      }
+    }
+  }
+}
+```
+
+#### **⚠️ Por que Aconteceu**
+1. **Incompatibilidade de Campos**: O schema foi criado com base em uma estrutura genérica de trading, não na estrutura real da API LN Markets
+2. **Filtragem Automática**: O Fastify filtra automaticamente os dados de resposta baseado no schema definido
+3. **Campos Reais da LN Markets**: A API retorna campos como `quantity`, `price`, `liquidation`, `margin`, `pl`, `leverage`, etc., que não estavam no schema
+
+#### **🔧 Solução Implementada**
+Atualizado o schema para incluir **TODOS** os campos da API LN Markets:
+
+```json
+{
+  "positions": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string" },
+        "type": { "type": "string" },
+        "side": { "type": "string" },
+        "opening_fee": { "type": "number" },
+        "closing_fee": { "type": "number" },
+        "maintenance_margin": { "type": "number" },
+        "quantity": { "type": "number" },
+        "margin": { "type": "number" },
+        "leverage": { "type": "number" },
+        "price": { "type": "number" },
+        "liquidation": { "type": "number" },
+        "stoploss": { "type": "number" },
+        "takeprofit": { "type": "number" },
+        "exit_price": { "type": ["number", "null"] },
+        "pl": { "type": "number" },
+        "creation_ts": { "type": "number" },
+        "market_filled_ts": { "type": "number" },
+        "closed_ts": { "type": ["number", "null"] },
+        "entry_price": { "type": "number" },
+        "entry_margin": { "type": "number" },
+        "open": { "type": "boolean" },
+        "running": { "type": "boolean" },
+        "canceled": { "type": "boolean" },
+        "closed": { "type": "boolean" },
+        "sum_carry_fees": { "type": "number" }
+      }
+    }
+  }
+}
+```
+
+#### **📊 Impacto da Correção**
+- **Antes**: Frontend recebia apenas `{id: "xxx", side: "b"}`
+- **Depois**: Frontend recebe dados completos com todos os campos da LN Markets
+- **Resultado**: Página de trades exibe informações reais e completas
+
+### **PROBLEMA 2: Configuração Mainnet vs Testnet**
+
+#### **🔍 Descrição do Problema**
+Erro 404 ao tentar acessar endpoints da LN Markets, indicando que a aplicação estava usando testnet em vez de mainnet.
+
+#### **🔬 Causa Raiz**
+A configuração estava usando `isTestnet: process.env.NODE_ENV === 'development'`, forçando testnet em ambiente de desenvolvimento.
+
+#### **🔧 Solução Implementada**
+Alterado para `isTestnet: false` para usar mainnet por padrão, já que as credenciais do usuário são de mainnet.
+
+### **PROBLEMA 3: Geração de Assinatura HMAC-SHA256**
+
+#### **🔍 Descrição do Problema**
+Erro "Signature is not valid" da API LN Markets, mesmo com credenciais corretas.
+
+#### **🔬 Causa Raiz**
+1. **Path Incorreto**: Assinatura estava sendo gerada com `/futures` em vez de `/v2/futures`
+2. **Parâmetros na Assinatura**: Query parameters estavam sendo incluídos incorretamente na geração da assinatura
+
+#### **🔧 Solução Implementada**
+1. **Path Corrigido**: `const path = config.url ? `/v2${config.url}` : '';`
+2. **Assinatura Simplificada**: `const message = timestamp + method + path + params;`
+3. **Validação Externa**: Testado com OpenSSL e curl para confirmar correção
+
+### **PROBLEMA 4: Middleware de Autenticação**
+
+#### **🔍 Descrição do Problema**
+Logs de debug não apareciam, indicando que o middleware não estava sendo executado.
+
+#### **🔬 Causa Raiz**
+Uso de `(fastify as any).authenticate` em vez do middleware customizado `authMiddleware`.
+
+#### **🔧 Solução Implementada**
+Substituído por `preHandler: [authMiddleware]` em todas as rotas LN Markets.
+
 ## Conclusão
 
 **TODOS OS PROBLEMAS FORAM RESOLVIDOS COM SUCESSO!**
@@ -287,12 +405,17 @@ O sistema agora está completamente funcional com:
 - ✅ Página de trades funcionando com API real
 - ✅ Tratamento robusto de erros
 - ✅ Interface de usuário completa e responsiva
+- ✅ Schema do Fastify corrigido para dados completos
+- ✅ Configuração mainnet/testnet adequada
+- ✅ Geração de assinatura HMAC-SHA256 correta
+- ✅ Middleware de autenticação funcionando
 
 O sistema está pronto para uso em produção, necessitando apenas de credenciais reais da LN Markets para funcionamento completo.
 
 ---
 
-**Data de Implementação**: 10 de Setembro de 2025  
+**Data de Implementação**: 10-11 de Setembro de 2025  
 **Status**: ✅ COMPLETO  
+**Versão**: v0.2.21  
 **Próxima Revisão**: Após implementação de credenciais reais
 
