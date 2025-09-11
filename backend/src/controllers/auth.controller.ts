@@ -311,6 +311,7 @@ export class AuthController {
     try {
       // Get user from request (set by auth middleware)
       const user = (request as any).user;
+      console.log('🔍 AUTH CONTROLLER - User from request:', user);
 
       if (!user) {
         const errorResponse = ErrorResponseZodSchema.parse({
@@ -320,8 +321,14 @@ export class AuthController {
         return reply.status(401).send(errorResponse);
       }
 
+      console.log('🔍 AUTH CONTROLLER - User credentials:', {
+        ln_markets_api_key: user.ln_markets_api_key,
+        ln_markets_api_secret: user.ln_markets_api_secret,
+        ln_markets_passphrase: user.ln_markets_passphrase,
+      });
+
       // Return user info
-      return reply.status(200).send({
+      const response = {
         id: user.id,
         email: user.email,
         plan_type: user.plan_type,
@@ -330,7 +337,10 @@ export class AuthController {
         ln_markets_api_key: (user as any).ln_markets_api_key,
         ln_markets_api_secret: (user as any).ln_markets_api_secret,
         ln_markets_passphrase: (user as any).ln_markets_passphrase,
-      });
+      };
+      
+      console.log('🔍 AUTH CONTROLLER - Response:', response);
+      return reply.status(200).send(response);
     } catch (error) {
       const errorResponse = ErrorResponseZodSchema.parse({
         error: 'USER_INFO_FAILED',
