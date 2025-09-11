@@ -229,23 +229,6 @@ export default function Trades() {
     fetchPositions();
   }, []);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const formatSats = (value: number) => {
-    return `${value.toLocaleString()} sats`;
-  };
-
-  const formatPercentage = (value: number) => {
-    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
-  };
-
   const getPnlColor = (pnl: number) => {
     if (pnl > 0) return 'text-green-600';
     if (pnl < 0) return 'text-red-600';
