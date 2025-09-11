@@ -60,19 +60,15 @@ export class LNMarketsAPIService {
     let fullPath = path;
     
     if (method === 'GET' || method === 'DELETE') {
-      // For GET/DELETE, include params in the path for signature
-      if (config.params && Object.keys(config.params).length > 0) {
-        const queryString = new URLSearchParams(config.params).toString();
-        fullPath = `${path}?${queryString}`;
-        console.log('🔐 LN MARKETS AUTH - GET/DELETE with params:', {
-          originalPath: path,
-          params: config.params,
-          queryString,
-          fullPath
-        });
-      } else {
-        console.log('🔐 LN MARKETS AUTH - GET/DELETE without params');
-      }
+      // For GET/DELETE, use path without params for signature
+      // Params will be sent as query string by axios
+      fullPath = path; // Use path without params for signature
+      console.log('🔐 LN MARKETS AUTH - GET/DELETE with params:', {
+        originalPath: path,
+        params: config.params,
+        fullPathForSignature: fullPath,
+        note: 'Params sent as query string by axios, not included in signature'
+      });
       data = ''; // No body data for GET/DELETE
     } else if (config.data) {
       data = JSON.stringify(config.data);
