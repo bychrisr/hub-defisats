@@ -5,7 +5,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [0.2.22] - 2025-01-20
+## [0.2.23] - 2025-01-20
 
 ### Adicionado
 - **Arquitetura de Proxy Reverso Global**: Implementado proxy global para gerenciamento centralizado de SSL/TLS

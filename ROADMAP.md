@@ -1,6 +1,6 @@
 # Roadmap do Projeto Hub DeFiSats
 
-## ✅ CONCLUÍDO - v0.2.22 (20/01/2025)
+## ✅ CONCLUÍDO - v0.2.23 (20/01/2025)
 
 ### Arquitetura de Proxy Reverso Global
 - [x] **Proxy global centralizado** - Implementado proxy Nginx para gerenciamento de SSL/TLS
