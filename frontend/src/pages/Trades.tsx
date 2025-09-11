@@ -134,6 +134,11 @@ export default function Trades() {
     });
   };
 
+  // Função para formatar porcentagem
+  const formatPercentage = (value: number) => {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+  };
+
   const fetchPositions = async () => {
     try {
       setIsLoading(true);
