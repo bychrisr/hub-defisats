@@ -75,32 +75,56 @@ export default function Trades() {
       const data = response.data;
       
       console.log('✅ TRADES - Received positions:', data);
+      console.log('🔍 TRADES - Full response data:', JSON.stringify(data, null, 2));
       
       if (data.success && data.data && data.data.positions) {
         // Transform LN Markets data to our interface
-        const transformedPositions: LNPosition[] = data.data.positions.map((pos: any) => ({
-          id: pos.id,
-          quantity: pos.quantity || pos.size,
-          price: pos.price || pos.entryPrice,
-          liquidation: pos.liquidation || pos.liquidationPrice,
-          leverage: pos.leverage || 1,
-          margin: 0, // Will be calculated from margin info
-          pnl: pos.unrealizedPnl,
-          pnlPercentage: 0, // Will be calculated
-          marginRatio: 0, // Will be calculated
-          tradingFees: 0, // Not available in positions
-          fundingCost: 0, // Not available in positions
-          status: 'open' as const,
-          side: pos.side === 'b' ? 'long' as const : 'short' as const,
-          asset: pos.market,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }));
+        const transformedPositions: LNPosition[] = data.data.positions.map((pos: any) => {
+          console.log('🔍 TRADES - Transforming position:', pos);
+          
+          // Calculate P&L percentage
+          const pnlPercentage = pos.margin > 0 ? (pos.pl / pos.margin) * 100 : 0;
+          
+          // Calculate margin ratio (maintenance_margin / (margin + pl))
+          const marginRatio = pos.margin > 0 ? (pos.maintenance_margin / (pos.margin + pos.pl)) * 100 : 0;
+          
+          return {
+            id: pos.id,
+            quantity: pos.quantity || 0,
+            price: pos.price || 0,
+            liquidation: pos.liquidation || 0,
+            leverage: pos.leverage || 1,
+            margin: pos.margin || 0,
+            pnl: pos.pl || 0,
+            pnlPercentage: pnlPercentage,
+            marginRatio: marginRatio,
+            tradingFees: (pos.opening_fee || 0) + (pos.closing_fee || 0),
+            fundingCost: pos.sum_carry_fees || 0,
+            status: pos.running ? 'open' as const : 'closed' as const,
+            side: pos.side === 'b' ? 'long' as const : 'short' as const,
+            asset: 'BTC', // LN Markets only trades BTC futures
+            createdAt: new Date(pos.creation_ts || Date.now()).toISOString(),
+            updatedAt: new Date(pos.market_filled_ts || Date.now()).toISOString(),
+          };
+        });
 
         setPositions(transformedPositions);
-        setTotalValue(data.data.marginInfo?.totalValue || 0);
-        setTotalPnl(data.data.marginInfo?.totalUnrealizedPnl || 0);
-        setTotalMargin(data.data.marginInfo?.margin || 0);
+        
+        // Calculate totals from actual positions data
+        const totalValue = transformedPositions.reduce((sum, pos) => sum + (pos.quantity * pos.price), 0);
+        const totalPnl = transformedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
+        const totalMargin = transformedPositions.reduce((sum, pos) => sum + pos.margin, 0);
+        
+        setTotalValue(totalValue);
+        setTotalPnl(totalPnl);
+        setTotalMargin(totalMargin);
+        
+        console.log('📊 TRADES - Calculated totals:', {
+          totalValue,
+          totalPnl,
+          totalMargin,
+          positionsCount: transformedPositions.length
+        });
       } else {
         console.error('❌ TRADES - Invalid data structure:', data);
         setError('Invalid response format from LN Markets');
@@ -142,6 +166,10 @@ export default function Trades() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
+  };
+
+  const formatSats = (value: number) => {
+    return `${value.toLocaleString()} sats`;
   };
 
   const formatPercentage = (value: number) => {
@@ -229,7 +257,7 @@ export default function Trades() {
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${getPnlColor(totalPnl)}`}>
-                {formatCurrency(totalPnl)}
+                {formatSats(totalPnl)}
               </div>
               <p className="text-xs text-muted-foreground">
                 Unrealized profit/loss
@@ -242,7 +270,7 @@ export default function Trades() {
               <CardTitle className="text-sm font-medium">Total Margin</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(totalMargin)}</div>
+              <div className="text-2xl font-bold">{formatSats(totalMargin)}</div>
               <p className="text-xs text-muted-foreground">
                 Total margin used
               </p>
@@ -299,16 +327,16 @@ export default function Trades() {
                             {position.side.toUpperCase()}
                           </Badge>
                         </TableCell>
-                        <TableCell>{position.quantity} $</TableCell>
+                        <TableCell>{formatCurrency(position.quantity)}</TableCell>
                         <TableCell>{formatCurrency(position.price)}</TableCell>
                         <TableCell>{formatCurrency(position.liquidation)}</TableCell>
                         <TableCell>{position.leverage}x</TableCell>
-                        <TableCell>{formatCurrency(position.margin)}</TableCell>
+                        <TableCell>{formatSats(position.margin)}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-1">
                             {getPnlIcon(position.pnl)}
                             <span className={getPnlColor(position.pnl)}>
-                              {formatCurrency(position.pnl)}
+                              {formatSats(position.pnl)}
                             </span>
                             <span className={`text-sm ${getPnlColor(position.pnl)}`}>
                               ({formatPercentage(position.pnlPercentage)})
@@ -316,8 +344,8 @@ export default function Trades() {
                           </div>
                         </TableCell>
                         <TableCell>{position.marginRatio.toFixed(1)}%</TableCell>
-                        <TableCell>{formatCurrency(position.tradingFees)}</TableCell>
-                        <TableCell>{formatCurrency(position.fundingCost)}</TableCell>
+                        <TableCell>{formatSats(position.tradingFees)}</TableCell>
+                        <TableCell>{formatSats(position.fundingCost)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

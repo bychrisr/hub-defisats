@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -127,7 +127,7 @@ export default function Profile() {
     }
   };
 
-  const getCredentialsStatus = () => {
+  const credentialsStatus = useMemo(() => {
     const hasKey = watchedFields.ln_markets_api_key && watchedFields.ln_markets_api_key.length > 0;
     const hasSecret = watchedFields.ln_markets_api_secret && watchedFields.ln_markets_api_secret.length > 0;
     const hasPassphrase = watchedFields.ln_markets_passphrase && watchedFields.ln_markets_passphrase.length > 0;
@@ -139,9 +139,7 @@ export default function Profile() {
     } else {
       return { status: 'missing', message: 'No credentials configured' };
     }
-  };
-
-  const credentialsStatus = getCredentialsStatus();
+  }, [watchedFields.ln_markets_api_key, watchedFields.ln_markets_api_secret, watchedFields.ln_markets_passphrase]);
 
   if (authLoading) {
     return (
@@ -432,7 +430,8 @@ export default function Profile() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
                           setIsEditing(false);
                           reset();
                           setError(null);
@@ -443,7 +442,13 @@ export default function Profile() {
                       </Button>
                     </>
                   ) : (
-                    <Button type="button" onClick={() => setIsEditing(true)}>
+                    <Button 
+                      type="button" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIsEditing(true);
+                      }}
+                    >
                       Edit Credentials
                     </Button>
                   )}

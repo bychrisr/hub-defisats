@@ -21,10 +21,20 @@ export class LNMarketsAPIService {
   private baseURL: string;
 
   constructor(credentials: LNMarketsCredentials) {
+    console.log('🚨 TESTE SIMPLES - CONSTRUTOR LNMarketsAPIService CHAMADO!');
+    console.log('🚨 TESTE SIMPLES - Credentials:', {
+      hasApiKey: !!credentials.apiKey,
+      hasApiSecret: !!credentials.apiSecret,
+      hasPassphrase: !!credentials.passphrase,
+      isTestnet: credentials.isTestnet
+    });
+    
     this.credentials = credentials;
     this.baseURL = credentials.isTestnet 
       ? 'https://api.testnet4.lnmarkets.com/v2'
       : 'https://api.lnmarkets.com/v2';
+    
+    console.log('🚨 TESTE SIMPLES - BaseURL:', this.baseURL);
     
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -32,10 +42,13 @@ export class LNMarketsAPIService {
     });
 
     // Add request interceptor for authentication
+    console.log('🚨 TESTE SIMPLES - REGISTRANDO INTERCEPTOR!');
     this.client.interceptors.request.use(this.authenticateRequest.bind(this));
+    console.log('🚨 TESTE SIMPLES - INTERCEPTOR REGISTRADO!');
   }
 
   private authenticateRequest(config: AxiosRequestConfig): AxiosRequestConfig {
+    console.log('🚨 TESTE SIMPLES - AUTHENTICATE REQUEST CHAMADO!');
     console.log('🔐 LN MARKETS AUTH - Starting authentication process');
     console.log('🔐 LN MARKETS AUTH - Original config:', {
       method: config.method,
@@ -46,7 +59,12 @@ export class LNMarketsAPIService {
     
     const timestamp = Date.now().toString();
     const method = (config.method || 'GET').toUpperCase();
-    const path = config.url || '';
+    const path = config.url ? `/v2${config.url}` : '';
+    
+    // Limpar credenciais para evitar espaços/caracteres invisíveis
+    const apiKey = this.credentials.apiKey.trim();
+    const apiSecret = this.credentials.apiSecret.trim();
+    const passphrase = this.credentials.passphrase.trim();
     
     console.log('🔐 LN MARKETS AUTH - Basic info:', {
       timestamp,
@@ -55,58 +73,68 @@ export class LNMarketsAPIService {
       baseURL: this.baseURL
     });
     
+    console.log('🔐 LN MARKETS AUTH - Credentials lengths:', {
+      apiKeyLength: apiKey.length,
+      apiSecretLength: apiSecret.length,
+      passphraseLength: passphrase.length
+    });
+    
     // Prepare data for signature
-    let data = '';
-    let fullPath = path;
+    let params = '';
     
     if (method === 'GET' || method === 'DELETE') {
-      // For GET/DELETE, use path without params for signature
-      // Params will be sent as query string by axios
-      fullPath = path; // Use path without params for signature
-      console.log('🔐 LN MARKETS AUTH - GET/DELETE with params:', {
-        originalPath: path,
-        params: config.params,
-        fullPathForSignature: fullPath,
-        note: 'Params sent as query string by axios, not included in signature'
-      });
-      data = ''; // No body data for GET/DELETE
+      // For GET/DELETE, params should be query string for signature
+      if (config.params) {
+        params = new URLSearchParams(config.params).toString();
+        console.log('🔐 LN MARKETS AUTH - GET/DELETE with params:', {
+          originalPath: path,
+          params: config.params,
+          queryString: params,
+          note: 'Params converted to query string for signature'
+        });
+      } else {
+        params = '';
+      }
     } else if (config.data) {
-      data = JSON.stringify(config.data);
+      // For POST/PUT, params should be JSON string
+      params = JSON.stringify(config.data);
       console.log('🔐 LN MARKETS AUTH - POST/PUT with data:', {
         data: config.data,
-        jsonData: data
+        jsonData: params
       });
     }
-
-    // Create signature using full path with params
-    const message = timestamp + method + fullPath + data;
+    
+    // Create signature using: timestamp + method + path + params
+    const message = timestamp + method + path + params;
+    console.log('🔐 LN MARKETS AUTH - Message para assinatura:', `"${message}"`);
     console.log('🔐 LN MARKETS AUTH - Signature components:', {
       timestamp,
       method,
-      fullPath,
-      data,
+      path,
+      params,
       message
     });
     
+    // Gerar assinatura com UTF-8 explícito
     const signature = crypto
-      .createHmac('sha256', this.credentials.apiSecret)
-      .update(message)
+      .createHmac('sha256', apiSecret)
+      .update(message, 'utf8')
       .digest('base64');
 
-    console.log('🔐 LN MARKETS AUTH - Generated signature:', signature);
+    console.log('🔐 LN MARKETS AUTH - Assinatura gerada:', signature);
     console.log('🔐 LN MARKETS AUTH - Credentials info:', {
-      apiKey: this.credentials.apiKey ? `${this.credentials.apiKey.substring(0, 10)}...` : 'MISSING',
-      apiSecret: this.credentials.apiSecret ? `${this.credentials.apiSecret.substring(0, 10)}...` : 'MISSING',
-      passphrase: this.credentials.passphrase ? `${this.credentials.passphrase.substring(0, 5)}...` : 'MISSING',
+      apiKey: apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING',
+      apiSecret: apiSecret ? `${apiSecret.substring(0, 10)}...` : 'MISSING',
+      passphrase: passphrase ? `${passphrase.substring(0, 5)}...` : 'MISSING',
       isTestnet: this.credentials.isTestnet
     });
 
     // Add headers
     config.headers = {
       ...config.headers,
-      'LNM-ACCESS-KEY': this.credentials.apiKey,
+      'LNM-ACCESS-KEY': apiKey,
       'LNM-ACCESS-SIGNATURE': signature,
-      'LNM-ACCESS-PASSPHRASE': this.credentials.passphrase,
+      'LNM-ACCESS-PASSPHRASE': passphrase,
       'LNM-ACCESS-TIMESTAMP': timestamp,
     };
     
@@ -155,6 +183,7 @@ export class LNMarketsAPIService {
         headers: response.headers
       });
 
+      // LN Markets API returns data directly, not wrapped in an object
       return response.data;
     } catch (error: any) {
       console.error(`[LNMarketsAPI] Request failed:`, {
@@ -370,6 +399,23 @@ export class LNMarketsAPIService {
         params: { type: 'running' }
       });
       console.log('✅ LN MARKETS POSITIONS - User positions retrieved successfully:', result);
+      console.log('🔍 LN MARKETS POSITIONS - Result type:', typeof result);
+      console.log('🔍 LN MARKETS POSITIONS - Result is array:', Array.isArray(result));
+      console.log('🔍 LN MARKETS POSITIONS - Result length:', Array.isArray(result) ? result.length : 'not array');
+      if (Array.isArray(result) && result.length > 0) {
+        console.log('🔍 LN MARKETS POSITIONS - First position:', result[0]);
+        console.log('🔍 LN MARKETS POSITIONS - First position keys:', Object.keys(result[0]));
+        console.log('🔍 LN MARKETS POSITIONS - First position values:', {
+          id: result[0].id,
+          side: result[0].side,
+          quantity: result[0].quantity,
+          price: result[0].price,
+          liquidation: result[0].liquidation,
+          margin: result[0].margin,
+          pl: result[0].pl,
+          leverage: result[0].leverage
+        });
+      }
       return result;
     } catch (error: any) {
       console.log('⚠️ LN MARKETS POSITIONS - Error getting user positions:', {

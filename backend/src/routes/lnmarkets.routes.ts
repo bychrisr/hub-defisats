@@ -27,12 +27,31 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
                     type: 'object',
                     properties: {
                       id: { type: 'string' },
-                      market: { type: 'string' },
+                      uid: { type: 'string' },
+                      type: { type: 'string' },
                       side: { type: 'string' },
-                      size: { type: 'number' },
-                      entryPrice: { type: 'number' },
-                      liquidationPrice: { type: 'number' },
-                      unrealizedPnl: { type: 'number' },
+                      opening_fee: { type: 'number' },
+                      closing_fee: { type: 'number' },
+                      maintenance_margin: { type: 'number' },
+                      quantity: { type: 'number' },
+                      margin: { type: 'number' },
+                      leverage: { type: 'number' },
+                      price: { type: 'number' },
+                      liquidation: { type: 'number' },
+                      stoploss: { type: 'number' },
+                      takeprofit: { type: 'number' },
+                      exit_price: { type: ['number', 'null'] },
+                      pl: { type: 'number' },
+                      creation_ts: { type: 'number' },
+                      market_filled_ts: { type: 'number' },
+                      closed_ts: { type: ['number', 'null'] },
+                      entry_price: { type: 'number' },
+                      entry_margin: { type: 'number' },
+                      open: { type: 'boolean' },
+                      running: { type: 'boolean' },
+                      canceled: { type: 'boolean' },
+                      closed: { type: 'boolean' },
+                      sum_carry_fees: { type: 'number' },
                     },
                   },
                 },
@@ -60,8 +79,11 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       },
     },
   }, async (request, reply) => {
-    console.log('🚨 TESTE SIMPLES - ENDPOINT POSITIONS CHAMADO!');
+    console.log('🚨🚨🚨 TESTE SIMPLES - ENDPOINT POSITIONS CHAMADO! 🚨🚨🚨');
     console.log('🎯 LN MARKETS CONTROLLER - Starting positions request');
+    console.log('📊 Request URL:', request.url);
+    console.log('📊 Request method:', request.method);
+    console.log('📊 Request headers:', request.headers);
     try {
       const user = (request as any).user;
       console.log('🎯 LN MARKETS CONTROLLER - User info:', {
@@ -101,12 +123,14 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
 
       // Initialize LN Markets service
       console.log('🎯 LN MARKETS CONTROLLER - Initializing LN Markets service');
+      console.log('🚨 TESTE SIMPLES - ANTES DE CRIAR LNMarketsAPIService!');
       const lnMarketsService = new LNMarketsAPIService({
         apiKey: userProfile.ln_markets_api_key,
         apiSecret: userProfile.ln_markets_api_secret,
         passphrase: userProfile.ln_markets_passphrase,
         isTestnet: false, // Force mainnet for now
       });
+      console.log('🚨 TESTE SIMPLES - DEPOIS DE CRIAR LNMarketsAPIService!');
 
       console.log('🎯 LN MARKETS CONTROLLER - Service initialized, calling getUserPositions');
       // Get positions using the new service
@@ -116,6 +140,21 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         positionsCount: Array.isArray(positions) ? positions.length : 'not array',
         positions: positions
       });
+      
+      // Log detailed info about positions
+      if (Array.isArray(positions) && positions.length > 0) {
+        console.log('🔍 LN MARKETS CONTROLLER - First position details:', {
+          id: positions[0].id,
+          side: positions[0].side,
+          quantity: positions[0].quantity,
+          price: positions[0].price,
+          liquidation: positions[0].liquidation,
+          margin: positions[0].margin,
+          pl: positions[0].pl,
+          leverage: positions[0].leverage,
+          allKeys: Object.keys(positions[0])
+        });
+      }
 
       return reply.status(200).send({
         success: true,
