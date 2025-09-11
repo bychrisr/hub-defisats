@@ -32,7 +32,7 @@ export class LNMarketsOptionsController {
       apiKey: user.ln_markets_api_key,
       apiSecret: user.ln_markets_api_secret,
       passphrase: user.ln_markets_passphrase,
-      isTestnet: process.env.NODE_ENV === 'development'
+      isTestnet: false // Force mainnet for now
     });
   }
 

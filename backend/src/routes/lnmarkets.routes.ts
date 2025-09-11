@@ -82,11 +82,13 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       }
 
       // Initialize LN Markets service
+      // Note: Using mainnet by default as user credentials are typically for mainnet
+      // TODO: Add user preference for testnet/mainnet in database
       const lnMarketsService = new LNMarketsAPIService({
         apiKey: userProfile.ln_markets_api_key,
         apiSecret: userProfile.ln_markets_api_secret,
         passphrase: userProfile.ln_markets_passphrase,
-        isTestnet: process.env.NODE_ENV === 'development',
+        isTestnet: false, // Force mainnet for now
       });
 
       // Get positions using the new service
@@ -221,7 +223,7 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         apiKey: userProfile.ln_markets_api_key,
         apiSecret: userProfile.ln_markets_api_secret,
         passphrase: userProfile.ln_markets_passphrase,
-        isTestnet: process.env.NODE_ENV === 'development',
+        isTestnet: false, // Force mainnet for now
       });
 
       // Get market data
