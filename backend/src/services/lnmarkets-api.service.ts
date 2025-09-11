@@ -279,11 +279,33 @@ export class LNMarketsAPIService {
   }
 
   async getUserPositions() {
-    return this.makeRequest({
-      method: 'GET',
-      path: '/futures/trades',
-      params: { type: 'running' }
-    });
+    try {
+      console.log('🔍 LN MARKETS - Attempting to get user positions from /futures');
+      const result = await this.makeRequest({
+        method: 'GET',
+        path: '/futures',
+        params: { type: 'running' }
+      });
+      console.log('✅ LN MARKETS - User positions retrieved successfully:', result);
+      return result;
+    } catch (error: any) {
+      console.log('⚠️ LN MARKETS - Error getting user positions:', error.message);
+      
+      // If endpoint doesn't exist (404) or returns empty, return empty array
+      if (error.response?.status === 404 || error.message?.includes('404')) {
+        console.log('📝 LN MARKETS - Endpoint /futures not found, returning empty positions');
+        return [];
+      }
+      
+      // If no data returned, return empty array
+      if (error.message?.includes('No data') || error.message?.includes('empty')) {
+        console.log('📝 LN MARKETS - No positions data, returning empty array');
+        return [];
+      }
+      
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   async getUserOrders() {
