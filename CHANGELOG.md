@@ -5,6 +5,27 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.2.22] - 2025-01-20
+
+### Adicionado
+- **Arquitetura de Proxy Reverso Global**: Implementado proxy global para gerenciamento centralizado de SSL/TLS
+- **Separação de responsabilidades**: Nginx interno simplificado para roteamento de aplicação
+- **Rede compartilhada**: Implementada `proxy-network` para comunicação entre proxy e aplicações
+- **Scripts de gerenciamento**: Criado `start-proxy.sh` para facilitar operações do proxy
+- **Documentação de arquitetura**: Adicionada documentação específica sobre proxy architecture
+
+### Alterado
+- **nginx.conf interno**: Removido SSL e redirecionamento HTTP→HTTPS (agora gerenciado pelo proxy global)
+- **docker-compose.prod.yml**: Conectado nginx interno à rede `proxy-network`
+- **Arquitetura de deploy**: Separado proxy global em container independente
+
+### Detalhes Técnicos
+- Proxy global localizado em `~/proxy/` com configuração completa
+- Nginx interno agora escuta apenas na porta 80 (HTTP)
+- SSL termination centralizado no proxy global
+- Headers de segurança movidos para o proxy global
+- Estrutura escalável para múltiplos projetos
+
 ## [0.2.21] - 2025-09-11
 
 ### Corrigido

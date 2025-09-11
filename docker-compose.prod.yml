@@ -181,21 +181,18 @@ services:
     restart: unless-stopped
     command: npm run worker:payment-validator
 
-  # Nginx Reverse Proxy
+  # Nginx Reverse Proxy (Internal)
   nginx:
     image: nginx:alpine
     container_name: hub-defisats-nginx-prod
-    ports:
-      - "80:80"
-      - "443:443"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./infra/certs:/etc/nginx/certs
     depends_on:
       - backend
       - frontend
     networks:
       - hub-defisats-network
+      - proxy-network
     restart: unless-stopped
 
 volumes:
@@ -205,3 +202,5 @@ volumes:
 networks:
   hub-defisats-network:
     driver: bridge
+  proxy-network:
+    external: true

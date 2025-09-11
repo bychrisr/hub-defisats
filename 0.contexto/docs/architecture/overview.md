@@ -10,28 +10,64 @@ O hub-defisats é uma plataforma de automação de trades para LN Markets, const
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   API Gateway   │    │   Core Services │
-│   (Next.js 14)  │◄──►│   (Fastify)     │◄──►│   (Fastify)     │
+│   Internet      │    │   Global Proxy  │    │   Application   │
+│   (HTTPS)       │◄──►│   (Nginx)       │◄──►│   Container     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │                        │
                                 ▼                        ▼
                        ┌─────────────────┐    ┌─────────────────┐
-                       │   Worker        │    │   Database      │
-                       │   Services      │    │   (PostgreSQL)  │
-                       │   (BullMQ)      │    └─────────────────┘
-                       └─────────────────┘              │
-                                │                       │
-                                ▼                       ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │   Cache &       │    │   External      │
-                       │   Queue         │    │   APIs          │
-                       │   (Redis)       │    │   (LN Markets)  │
+                       │   SSL/TLS       │    │   Frontend      │
+                       │   Termination   │    │   (Next.js 14)  │
                        └─────────────────┘    └─────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌─────────────────┐
+                                               │   API Gateway   │
+                                               │   (Fastify)     │
+                                               └─────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌─────────────────┐
+                                               │   Core Services │
+                                               │   (Fastify)     │
+                                               └─────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌─────────────────┐
+                                               │   Worker        │
+                                               │   Services      │
+                                               │   (BullMQ)      │
+                                               └─────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌─────────────────┐
+                                               │   Database      │
+                                               │   (PostgreSQL)  │
+                                               └─────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌─────────────────┐
+                                               │   Cache &       │
+                                               │   Queue         │
+                                               │   (Redis)       │
+                                               └─────────────────┘
 ```
 
 ## Componentes Principais
 
-### 1. Frontend (Next.js 14)
+### 1. Global Proxy (Nginx)
+- **Responsabilidade**: SSL termination, HTTP→HTTPS redirect, roteamento de domínios
+- **Tecnologias**: Nginx Alpine, Docker
+- **Funcionalidades**:
+  - SSL/TLS termination para todos os domínios
+  - Redirecionamento automático HTTP→HTTPS
+  - Roteamento para containers de aplicação
+  - Headers de segurança globais
+  - Rate limiting global
+- **Localização**: `~/proxy/` (container separado)
+- **Rede**: `proxy-network` (compartilhada entre projetos)
+
+### 2. Frontend (Next.js 14)
 - **Responsabilidade**: Interface do usuário, autenticação, visualização de dados
 - **Tecnologias**: Next.js 14, TypeScript, Tailwind CSS, Radix UI
 - **Estado**: Zustand para client state, TanStack Query para server state
@@ -191,10 +227,11 @@ User → Frontend → Payment Service → Lightning Node → Webhook → Payment
 ## Escalabilidade
 
 ### 1. Horizontal Scaling
-- Load balancer (Nginx)
+- Global Proxy (Nginx) para load balancing
 - Múltiplas instâncias de API
 - Workers distribuídos
 - Database read replicas
+- Proxy global escalável para múltiplos projetos
 
 ### 2. Caching Strategy
 - Redis para cache de aplicação
@@ -224,9 +261,11 @@ User → Frontend → Payment Service → Lightning Node → Webhook → Payment
 
 ### 2. Orquestração
 - Docker Compose para desenvolvimento
+- Global Proxy separado para SSL/HTTPS
 - Kubernetes para produção
 - Helm charts para configuração
 - Auto-scaling baseado em métricas
+- Rede compartilhada (proxy-network) entre projetos
 
 ### 3. CI/CD
 - GitHub Actions
