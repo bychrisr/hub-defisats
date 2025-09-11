@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -13,7 +11,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -23,12 +21,12 @@ services:
 
   # Redis Cache & Queue
   redis:
-    image: redis:7-alpine
+    image: redis:7
     container_name: hub-defisats-redis-prod
     volumes:
       - redis_data:/data
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -67,7 +65,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
@@ -82,13 +80,13 @@ services:
       dockerfile: Dockerfile.prod
     container_name: hub-defisats-frontend-prod
     environment:
-      VITE_API_URL: ${VITE_API_URL}
+      VITE_API_URL: https://api.defisats.site
     ports:
       - "23001:80"
     depends_on:
       - backend
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
 
   # Workers
@@ -109,7 +107,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
     command: npm run worker:margin-monitor
 
@@ -130,7 +128,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
     command: npm run worker:automation-executor
 
@@ -157,7 +155,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
     command: npm run worker:notification
 
@@ -179,7 +177,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
     command: npm run worker:payment-validator
 
@@ -197,7 +195,7 @@ services:
       - backend
       - frontend
     networks:
-      - hubdefisats-network
+      - hub-defisats-network
     restart: unless-stopped
 
 volumes:

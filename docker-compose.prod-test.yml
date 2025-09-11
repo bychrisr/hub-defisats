@@ -2,7 +2,7 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: hub-defisats-postgres
+    container_name: hub-defisats-postgres-prod
     environment:
       POSTGRES_DB: hubdefisats
       POSTGRES_USER: hubdefisats
@@ -23,7 +23,7 @@ services:
   # Redis Cache & Queue
   redis:
     image: redis:7
-    container_name: hub-defisats-redis
+    container_name: hub-defisats-redis-prod
     ports:
       - "16379:6379"
     volumes:
@@ -41,14 +41,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hub-defisats-backend
+    container_name: hub-defisats-backend-prod
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
       REDIS_URL: redis://redis:6379
       PORT: 3010
     ports:
-      - "13010:3010"
+      - "23000:3010"
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -71,11 +71,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: hub-defisats-frontend
+    container_name: hub-defisats-frontend-prod
     environment:
-      VITE_API_URL: http://localhost:13010
+      VITE_API_URL: https://api.defisats.site
     ports:
-      - "13000:3001"
+      - "23001:3001"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -96,7 +96,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hub-defisats-margin-monitor
+    container_name: hub-defisats-margin-monitor-prod
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -119,7 +119,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hub-defisats-automation-executor
+    container_name: hub-defisats-automation-executor-prod
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -142,7 +142,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hub-defisats-notification-worker
+    container_name: hub-defisats-notification-worker-prod
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -165,7 +165,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: hub-defisats-payment-validator
+    container_name: hub-defisats-payment-validator-prod
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
