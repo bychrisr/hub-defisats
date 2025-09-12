@@ -106,6 +106,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             },
             isAuthenticated: true,
             isLoading: false,
+            isInitialized: true,
             error: null,
           });
         } catch (error: any) {
@@ -115,6 +116,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             user: null,
             isAuthenticated: false,
             isLoading: false,
+            isInitialized: true,
             error: errorMessage,
           });
           throw new Error(errorMessage);
