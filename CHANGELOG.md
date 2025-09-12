@@ -5,6 +5,33 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Unreleased] - 2025-01-19
+
+### Adicionado
+- **Ambiente de Staging Obrigatório**: Implementado `docker-compose.staging.yml` com portas separadas (23000, 23010)
+- **Banco de dados staging**: `defisats_staging` independente da produção
+- **Script de setup automatizado**: `scripts/setup-staging.sh` para configuração completa do ambiente
+- **Nginx staging**: Configuração específica em `infra/nginx/staging.conf` com headers de ambiente
+- **Validação real de credenciais**: Removida lógica de "aceitar qualquer coisa em dev"
+- **Documentação ADR-017**: Decisão arquitetural para staging obrigatório
+
+### Alterado
+- **Validação LN Markets**: Agora valida SEMPRE credenciais reais, mesmo em desenvolvimento
+- **Processo de deploy**: Staging obrigatório antes de qualquer deploy em produção
+- **Configuração de ambiente**: `env.staging` com credenciais sandbox/testnet
+- **Rate limiting**: Configurações mais permissivas para ambiente de staging
+
+### Corrigido
+- **Validação de credenciais**: Removida lógica que aceitava test credentials em desenvolvimento
+- **Workflow de desenvolvimento**: Estabelecido processo profissional de validação
+
+### Status
+- ✅ **Ambiente de staging configurado**
+- ✅ **Script de setup automatizado**
+- ✅ **Validação real de credenciais**
+- ✅ **Processo de deploy profissional**
+- ⚠️ **Staging obrigatório antes de produção**
+
 ## [0.9.1-prod-test] - 2025-09-12
 
 ### Adicionado

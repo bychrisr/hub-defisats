@@ -201,7 +201,45 @@ backend/src/
 - ✅ Reutilização de componentes
 - ⚠️ Mais arquivos para gerenciar
 
+## 2025-01-19 - ADR-017: Staging Environment Obrigatório
+
+### Problema
+Deploy direto para produção sem validação adequada, causando problemas em ambiente real.
+
+### Decisão
+Implementar ambiente de staging obrigatório antes de qualquer deploy em produção.
+
+### Justificativa
+1. **Validação Real**: Staging permite testar com credenciais reais (sandbox) sem afetar produção
+2. **Redução de Riscos**: Problemas são identificados antes de chegar ao usuário final
+3. **Qualidade**: Maior confiança na estabilidade da aplicação
+4. **Processo**: Estabelece workflow profissional de desenvolvimento
+
+### Implementação
+- **Ambiente Staging**: `docker-compose.staging.yml` com portas separadas (23000, 23010)
+- **Banco Separado**: `defisats_staging` independente da produção
+- **Credenciais Sandbox**: LN Markets testnet/sandbox obrigatório em staging
+- **Validação Real**: Removida lógica de "aceitar qualquer coisa em dev"
+- **Script Automatizado**: `scripts/setup-staging.sh` para configuração automática
+- **Nginx Staging**: Configuração específica com headers de ambiente
+
+### Consequências
+- ✅ **Nunca mais deploy direto para produção**
+- ✅ **Validação com credenciais reais (sandbox)**
+- ✅ **Processo profissional de desenvolvimento**
+- ✅ **Redução significativa de bugs em produção**
+- ⚠️ **Workflow mais rigoroso (obrigatório)**
+
+### Checklist Obrigatório (Staging → Produção)
+- [ ] Testar cadastro com credenciais LN Markets sandbox
+- [ ] Testar Margin Guard com dados reais
+- [ ] Testar notificações (Telegram, Email, WhatsApp)
+- [ ] Testar pagamento Lightning (invoice sandbox)
+- [ ] Verificar logs, métricas, alertas
+- [ ] Validar performance (<200ms)
+- [ ] Validar segurança (headers, CORS, rate limiting)
+
 ---
 
-**Última atualização**: 11 de Setembro de 2025  
-**Próxima revisão**: 18 de Setembro de 2025
+**Última atualização**: 19 de Janeiro de 2025  
+**Próxima revisão**: 26 de Janeiro de 2025

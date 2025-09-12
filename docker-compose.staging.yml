@@ -1,0 +1,207 @@
+services:
+  # PostgreSQL Database (Staging)
+  postgres-staging:
+    image: postgres:15-alpine
+    container_name: hub-defisats-postgres-staging
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_STAGING}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_STAGING}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache & Queue (Staging)
+  redis-staging:
+    image: redis:7
+    container_name: hub-defisats-redis-staging
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API (Staging)
+  backend-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: hub-defisats-backend-staging
+    env_file:
+      - .env.staging
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${DATABASE_URL_STAGING}
+      REDIS_URL: ${REDIS_URL_STAGING}
+      JWT_SECRET: ${JWT_SECRET}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      LN_MARKETS_API_URL: ${LN_MARKETS_API_URL}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      LNBITS_URL: ${LNBITS_URL}
+      LNBITS_ADMIN_KEY: ${LNBITS_ADMIN_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+      PORT: 3010
+    ports:
+      - "23010:3010"  # ← porta staging
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+      redis-staging:
+        condition: service_healthy
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3010/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (Staging)
+  frontend-staging:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: hub-defisats-frontend-staging
+    environment:
+      VITE_API_URL: http://localhost:23010  # ← API staging
+    ports:
+      - "23000:80"  # ← porta staging
+    depends_on:
+      - backend-staging
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+
+  # Workers (Staging)
+  margin-monitor-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: hub-defisats-margin-monitor-staging
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${DATABASE_URL_STAGING}
+      REDIS_URL: ${REDIS_URL_STAGING}
+      LN_MARKETS_API_URL: ${LN_MARKETS_API_URL}
+      SENTRY_DSN: ${SENTRY_DSN}
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+      redis-staging:
+        condition: service_healthy
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+    command: npm run worker:margin-monitor
+
+  automation-executor-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: hub-defisats-automation-executor-staging
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${DATABASE_URL_STAGING}
+      REDIS_URL: ${REDIS_URL_STAGING}
+      LN_MARKETS_API_URL: ${LN_MARKETS_API_URL}
+      SENTRY_DSN: ${SENTRY_DSN}
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+      redis-staging:
+        condition: service_healthy
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+    command: npm run worker:automation-executor
+
+  notification-worker-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: hub-defisats-notification-worker-staging
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${DATABASE_URL_STAGING}
+      REDIS_URL: ${REDIS_URL_STAGING}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+      redis-staging:
+        condition: service_healthy
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+    command: npm run worker:notification
+
+  payment-validator-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: hub-defisats-payment-validator-staging
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${DATABASE_URL_STAGING}
+      REDIS_URL: ${REDIS_URL_STAGING}
+      LNBITS_URL: ${LNBITS_URL}
+      LNBITS_ADMIN_KEY: ${LNBITS_ADMIN_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+      redis-staging:
+        condition: service_healthy
+    networks:
+      - hub-defisats-staging-network
+    restart: unless-stopped
+    command: npm run worker:payment-validator
+
+  # Nginx Reverse Proxy (Staging - Internal)
+  nginx-staging:
+    image: nginx:alpine
+    container_name: hub-defisats-nginx-staging
+    volumes:
+      - ./infra/nginx/staging.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend-staging
+      - frontend-staging
+    networks:
+      - hub-defisats-staging-network
+      - proxy-network
+    restart: unless-stopped
+
+volumes:
+  postgres_staging_data:
+  redis_staging_data:
+
+networks:
+  hub-defisats-staging-network:
+    driver: bridge
+  proxy-network:
+    external: true

@@ -244,18 +244,9 @@ export class LNMarketsService {
         passphraseLength: this.credentials.passphrase?.length,
       });
 
-      // In development, accept test credentials
-      if (process.env['NODE_ENV'] === 'development') {
-        const isTestCredentials =
-          this.credentials.apiKey?.startsWith('test_') ||
-          this.credentials.apiKey?.includes('test') ||
-          this.credentials.apiKey?.length >= 16; // Accept any 16+ char key in dev
-
-        if (isTestCredentials) {
-          console.log('✅ Development mode: Accepting test credentials');
-          return true;
-        }
-      }
+      // ❌ REMOVIDO: Validação de test credentials em dev
+      // Agora validamos SEMPRE as credenciais reais - mesmo em dev/staging
+      // Use credenciais de sandbox/testnet da LN Markets - não invente keys
 
       // Try multiple endpoints to validate credentials
       const endpoints = [
