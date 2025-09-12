@@ -4,7 +4,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   // Environment
   NODE_ENV: z
-    .enum(['development', 'production', 'test'])
+    .enum(['development', 'production', 'test', 'staging'])
     .default('development'),
   PORT: z.string().transform(Number).default('3000'),
 
@@ -57,7 +57,7 @@ const envSchema = z.object({
   LNBITS_ADMIN_KEY: z.string().optional(),
 
   // Monitoring
-  SENTRY_DSN: z.string().url().optional().or(z.literal('')),
+  SENTRY_DSN: z.string().optional().or(z.literal('')),
   PROMETHEUS_PORT: z.string().transform(Number).default('9090'),
 
   // Rate Limiting

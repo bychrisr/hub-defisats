@@ -59,7 +59,7 @@ services:
       SENTRY_DSN: ${SENTRY_DSN}
       PORT: 3010
     ports:
-      - "23010:3010"  # ← porta staging
+      - "23020:3010"  # ← porta staging (alterada para evitar conflito)
     depends_on:
       postgres-staging:
         condition: service_healthy
@@ -83,7 +83,7 @@ services:
     environment:
       VITE_API_URL: http://localhost:23010  # ← API staging
     ports:
-      - "23000:80"  # ← porta staging
+      - "23010:80"  # ← porta staging (alterada para evitar conflito)
     depends_on:
       - backend-staging
     networks:

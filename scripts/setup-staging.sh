@@ -27,14 +27,21 @@ print_error() {
 }
 
 # Check if .env.staging exists
-if [ ! -f "env.staging" ]; then
+if [ ! -f ".env.staging" ]; then
     print_error ".env.staging file not found!"
-    print_status "Please create env.staging based on env.production"
+    print_status "Please create .env.staging based on .env.production"
     exit 1
 fi
 
 print_status "Loading staging environment variables..."
-source env.staging
+if [ -f ".env.staging" ]; then
+    source .env.staging
+    print_success "Environment variables loaded from .env.staging"
+else
+    print_error ".env.staging file not found!"
+    print_status "Please create .env.staging based on .env.production"
+    exit 1
+fi
 
 # Stop any existing staging containers
 print_status "Stopping existing staging containers..."
@@ -46,7 +53,7 @@ docker compose -f docker-compose.staging.yml down 2>/dev/null || true
 
 # Build and start staging services
 print_status "Building and starting staging services..."
-docker compose -f docker-compose.staging.yml up -d --build
+export $(cat .env.staging | grep -v '^#' | xargs) && docker compose -f docker-compose.staging.yml up -d --build
 
 # Wait for services to be ready
 print_status "Waiting for services to be ready..."
@@ -79,16 +86,15 @@ fi
 print_status "Creating staging database if it doesn't exist..."
 docker exec hub-defisats-postgres-staging psql -U $POSTGRES_USER -c "CREATE DATABASE $POSTGRES_DB_STAGING;" 2>/dev/null || print_warning "Database might already exist"
 
-# Run Prisma migrations for staging
+# Run Prisma migrations for staging (inside container)
 print_status "Running Prisma migrations for staging..."
-cd backend
-NODE_ENV=staging npx prisma migrate deploy --schema=./prisma/schema.prisma
+docker exec hub-defisats-backend-staging npx prisma migrate deploy --schema=./prisma/schema.prisma
 if [ $? -eq 0 ]; then
     print_success "Prisma migrations completed successfully"
 else
     print_error "Prisma migrations failed"
     print_status "Trying to push schema instead..."
-    NODE_ENV=staging npx prisma db push --schema=./prisma/schema.prisma
+    docker exec hub-defisats-backend-staging npx prisma db push --schema=./prisma/schema.prisma
     if [ $? -eq 0 ]; then
         print_success "Prisma schema pushed successfully"
     else
@@ -96,7 +102,6 @@ else
         exit 1
     fi
 fi
-cd ..
 
 # Wait a bit more for all services to be fully ready
 print_status "Waiting for all services to be fully ready..."
@@ -108,7 +113,7 @@ max_attempts=10
 attempt=1
 
 while [ $attempt -le $max_attempts ]; do
-    if curl -s http://localhost:23010/api/health >/dev/null 2>&1; then
+    if curl -s http://localhost:23020/api/health >/dev/null 2>&1; then
         print_success "Staging backend is healthy!"
         break
     else
@@ -127,7 +132,7 @@ fi
 
 # Test staging frontend
 print_status "Testing staging frontend..."
-if curl -s http://localhost:23000 >/dev/null 2>&1; then
+if curl -s http://localhost:23010 >/dev/null 2>&1; then
     print_success "Staging frontend is accessible!"
 else
     print_warning "Staging frontend might not be ready yet"
@@ -144,9 +149,9 @@ echo ""
 print_success "🎉 Staging environment is ready!"
 echo ""
 print_status "Access URLs:"
-echo "  Frontend: http://localhost:23000"
-echo "  Backend API: http://localhost:23010"
-echo "  Health Check: http://localhost:23010/api/health"
+echo "  Frontend: http://localhost:23010"
+echo "  Backend API: http://localhost:23020"
+echo "  Health Check: http://localhost:23020/api/health"
 echo ""
 print_status "Database:"
 echo "  Host: localhost"
