@@ -2,6 +2,41 @@
 
 Este documento registra decisões técnicas importantes tomadas durante o desenvolvimento do projeto.
 
+## 2025-09-12 - Resolução de Problemas de Produção
+
+### Problema
+A aplicação apresentava múltiplos problemas ao tentar fazer deploy em produção:
+1. Erro `KeyError: 'ContainerConfig'` do Docker Compose
+2. Variáveis de ambiente não configuradas
+3. Paths do TypeScript não resolvidos em runtime
+4. Dependências SSL do Prisma faltando
+5. Validação de ambiente falhando para URLs opcionais
+
+### Decisão
+Implementar soluções específicas para cada problema identificado:
+
+1. **Script de correção Docker**: Criar `scripts/fix-docker-production.sh` para limpeza completa
+2. **Configuração de ambiente**: Criar `.env.production` com valores válidos
+3. **Resolução de paths**: Implementar `backend/start.sh` com tsconfig-paths
+4. **Dependências SSL**: Adicionar `openssl libc6-compat` ao Dockerfile.prod
+5. **Validação flexível**: Permitir strings vazias para URLs opcionais no schema
+
+### Justificativa
+1. **Problemas de cache**: Docker Compose com imagens corrompidas necessitava limpeza completa
+2. **Configuração centralizada**: Arquivo `.env.production` facilita gerenciamento de variáveis
+3. **Runtime vs Build**: TypeScript paths funcionam em build mas não em runtime sem configuração
+4. **Compatibilidade Prisma**: Prisma requer bibliotecas SSL específicas no Alpine Linux
+5. **Flexibilidade**: URLs opcionais devem permitir valores vazios para funcionalidades desabilitadas
+
+### Implementação
+- Script automatizado para correção de problemas Docker
+- Schema de validação atualizado com `.or(z.literal(''))`
+- Dockerfile otimizado com dependências necessárias
+- Documentação completa das soluções aplicadas
+
+### Resultado
+✅ **Produção 100% funcional** com todos os serviços operacionais
+
 ## 2025-09-11 - Schema do Fastify para LN Markets
 
 ### Problema

@@ -5,6 +5,34 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.0-production] - 2025-09-12
+
+### Adicionado
+- **Script de correção Docker**: `scripts/fix-docker-production.sh` para resolver problemas de produção
+- **Arquivo de ambiente produção**: `.env.production` com variáveis configuradas
+- **Script de inicialização**: `backend/start.sh` para resolver paths do TypeScript
+- **Documentação de soluções**: `PRODUCTION_FIXES_APPLIED.md` com detalhes das correções
+
+### Corrigido
+- **Erro ContainerConfig**: Resolvido problema de imagens Docker corrompidas
+- **Validação de ambiente**: Corrigido schema para permitir URLs opcionais vazias
+- **Paths do TypeScript**: Configurado tsconfig-paths corretamente
+- **Dependências Prisma**: Adicionadas bibliotecas SSL necessárias
+- **Inicialização PostgreSQL**: Removido volume mount problemático do init.sql
+
+### Alterado
+- **Dockerfile.prod**: Adicionadas dependências SSL e script de inicialização
+- **docker-compose.prod.yml**: Removido volume mount do init.sql
+- **env.ts**: Atualizado schema de validação para URLs opcionais
+- **PRODUCTION_READY_SUMMARY.md**: Atualizado status para produção funcional
+
+### Status
+- ✅ **Produção 100% funcional**
+- ✅ Backend: http://localhost:23000
+- ✅ Frontend: http://localhost:23001
+- ✅ PostgreSQL e Redis funcionando
+- ✅ Workers funcionando
+
 ## [0.2.23] - 2025-01-20
 
 ### Adicionado
