@@ -58,8 +58,6 @@ services:
       LNBITS_ADMIN_KEY: ${LNBITS_ADMIN_KEY}
       SENTRY_DSN: ${SENTRY_DSN}
       PORT: 3000
-    ports:
-      - "23000:3000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,8 +80,6 @@ services:
     container_name: hub-defisats-frontend-prod
     environment:
       VITE_API_URL: https://api.defisats.site  
-    ports:
-      - "23001:80"
     depends_on:
       - backend
     networks:
@@ -186,9 +182,6 @@ services:
   nginx:
     image: nginx:alpine
     container_name: hub-defisats-nginx-prod
-    ports:
-      - "80:80"
-      - "443:443"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
