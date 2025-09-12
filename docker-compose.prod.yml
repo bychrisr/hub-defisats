@@ -1,7 +1,3 @@
-# Load environment variables from .env.production
-env_file:
-  - .env.production
-
 services:
   # PostgreSQL Database
   postgres:
@@ -43,6 +39,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     container_name: hub-defisats-backend-prod
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
