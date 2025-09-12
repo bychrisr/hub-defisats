@@ -53,7 +53,7 @@ const envSchema = z.object({
   LND_GRPC_URL: z.string().optional(),
   LND_MACAROON_PATH: z.string().optional(),
   LND_TLS_CERT_PATH: z.string().optional(),
-  LNBITS_URL: z.string().url().optional(),
+  LNBITS_URL: z.string().url().optional().or(z.literal('')),
   LNBITS_ADMIN_KEY: z.string().optional(),
 
   // Monitoring
