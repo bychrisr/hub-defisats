@@ -38,15 +38,25 @@ if [ ! -f ".env.production" ]; then
     echo "✅ Arquivo .env.production criado. Configure as variáveis necessárias."
 fi
 
-# 8. Reconstruir imagens do zero
+# 8. Criar rede proxy-network se não existir
+echo "🌐 Verificando rede proxy-network..."
+if ! docker network ls | grep -q proxy-network; then
+    echo "📡 Criando rede proxy-network..."
+    docker network create proxy-network
+    echo "✅ Rede proxy-network criada."
+else
+    echo "✅ Rede proxy-network já existe."
+fi
+
+# 9. Reconstruir imagens do zero
 echo "🔨 Reconstruindo imagens do zero..."
 docker compose -f docker-compose.prod.yml build --no-cache --pull
 
-# 9. Iniciar serviços
+# 10. Iniciar serviços
 echo "🚀 Iniciando serviços..."
 docker compose -f docker-compose.prod.yml up -d
 
-# 10. Verificar status
+# 11. Verificar status
 echo "📊 Verificando status dos containers..."
 docker compose -f docker-compose.prod.yml ps
 
