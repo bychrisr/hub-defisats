@@ -5,7 +5,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [1.0.0-production] - 2025-09-12
+## [0.9.1-prod-test] - 2025-09-12
 
 ### Adicionado
 - **Script de correção Docker**: `scripts/fix-docker-production.sh` para resolver problemas de produção
@@ -27,11 +27,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - **PRODUCTION_READY_SUMMARY.md**: Atualizado status para produção funcional
 
 ### Status
-- ✅ **Produção 100% funcional**
+- ✅ **Produção funcional (em teste)**
 - ✅ Backend: http://localhost:23000
 - ✅ Frontend: http://localhost:23001
 - ✅ PostgreSQL e Redis funcionando
 - ✅ Workers funcionando
+- ⚠️ **Versão de teste - não final para produção**
 
 ## [0.2.23] - 2025-01-20
 

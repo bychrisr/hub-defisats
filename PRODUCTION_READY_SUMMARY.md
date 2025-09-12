@@ -92,7 +92,7 @@ curl http://localhost:23001
 
 ## 📊 Status de Produção
 
-**Status Atual**: ✅ **PRONTO PARA PRODUÇÃO**
+**Status Atual**: ⚠️ **EM TESTE DE PRODUÇÃO**
 
 - **Infraestrutura**: ✅ 100% Pronta
 - **Frontend**: ✅ 100% Pronto
@@ -102,8 +102,9 @@ curl http://localhost:23001
 
 ## 🎯 Meta de Produção
 
-A plataforma está **100% pronta** para produção! Todos os componentes principais estão funcionando corretamente.
+A plataforma está **funcionando** mas ainda em fase de teste. Todos os componentes principais estão operacionais.
 
-**Status**: ✅ **PRODUÇÃO FUNCIONANDO**
+**Status**: ⚠️ **EM TESTE DE PRODUÇÃO**
 **Backend**: http://localhost:23000
 **Frontend**: http://localhost:23001
+**Versão**: v0.9.1-prod-test
