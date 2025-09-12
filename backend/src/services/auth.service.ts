@@ -53,6 +53,7 @@ export class AuthService {
       password,
       ln_markets_api_key,
       ln_markets_api_secret,
+      ln_markets_passphrase,
       coupon_code,
     } = data;
 
@@ -122,6 +123,7 @@ export class AuthService {
     // Encrypt LN Markets keys
     const encryptedApiKey = this.encryptData(ln_markets_api_key);
     const encryptedApiSecret = this.encryptData(ln_markets_api_secret);
+    const encryptedPassphrase = this.encryptData(ln_markets_passphrase);
     console.log('✅ LN Markets credentials encrypted successfully');
 
     console.log('👤 Creating user in database...');
@@ -133,6 +135,7 @@ export class AuthService {
         password_hash: passwordHash,
         ln_markets_api_key: encryptedApiKey,
         ln_markets_api_secret: encryptedApiSecret,
+        ln_markets_passphrase: encryptedPassphrase,
         plan_type: planType,
       },
     });
