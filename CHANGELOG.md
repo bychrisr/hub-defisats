@@ -5,6 +5,20 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [v0.2.1] - 2025-01-13
+
+### Corrigido
+- **CRÍTICO**: Corrigida dupla transformação que sobrescrevia dados de Margin Ratio, Fees e Funding
+- **Margin Ratio, Trading Fees e Funding Cost**: Agora exibem valores corretos
+- **Dados Zerados**: Resolvido problema de dados zerados após atualizações em tempo real
+- **Consistência de Dados**: Melhorada consistência entre dados iniciais e atualizações periódicas
+- **Sistema de Tempo Real**: Totalmente funcional sem corrupção de dados
+
+### Detalhes Técnicos
+- Corrigido useEffect que sincroniza dados em tempo real para usar valores calculados do contexto
+- Usar marginRatio, tradingFees e fundingCost já calculados pelo RealtimeDataContext
+- Manter consistência entre dados iniciais e atualizações periódicas
+
 ## [v0.2.0] - 2025-01-13
 
 ### Adicionado

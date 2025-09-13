@@ -2,6 +2,51 @@
 
 Este documento registra decisões técnicas importantes tomadas durante o desenvolvimento do projeto.
 
+## 2025-01-13 - Correção de Dupla Transformação (v0.2.1)
+
+### Problema
+Após implementação do sistema de dados em tempo real, foi identificado um problema crítico:
+- **Dupla Transformação**: Dados eram transformados duas vezes, causando sobrescrita
+- **Dados Zerados**: Margin Ratio, Trading Fees e Funding Cost apareciam como "0" após atualizações
+- **Inconsistência**: Dados iniciais corretos, mas atualizações em tempo real corrompiam valores
+- **Logs Mostravam**: Primeira exibição com valores corretos, segunda exibição com valores zerados
+
+### Decisão
+Corrigir o `useEffect` que sincroniza dados em tempo real para usar valores já calculados:
+
+**Antes:**
+```typescript
+marginRatio: pos.leverage > 0 ? (100 / pos.leverage) : 0,
+tradingFees: 0, // Será calculado pelo backend
+fundingCost: 0, // Será calculado pelo backend
+```
+
+**Depois:**
+```typescript
+marginRatio: (pos as any).marginRatio || (pos.leverage > 0 ? (100 / pos.leverage) : 0),
+tradingFees: (pos as any).tradingFees || 0,
+fundingCost: (pos as any).fundingCost || 0,
+```
+
+### Justificativa
+- **Reutilizar Cálculos**: O RealtimeDataContext já calcula corretamente os valores
+- **Evitar Duplicação**: Não recalcular dados já processados
+- **Manter Consistência**: Usar mesma lógica de transformação em todo o sistema
+- **Performance**: Evitar processamento desnecessário
+
+### Implementação
+1. **Modificar useEffect**: Usar valores calculados do contexto em vez de recalcular
+2. **Type Casting**: Usar `(pos as any)` para acessar propriedades não tipadas
+3. **Fallback**: Manter cálculo original como fallback se valores não existirem
+4. **Consistência**: Garantir que dados iniciais e atualizações sejam idênticos
+
+### Consequências
+- ✅ **Dados Corretos**: Margin Ratio, Trading Fees e Funding Cost exibem valores corretos
+- ✅ **Consistência**: Dados iniciais e atualizações em tempo real são idênticos
+- ✅ **Performance**: Reduzido processamento desnecessário
+- ✅ **Manutenibilidade**: Código mais limpo e lógico
+- ✅ **Sistema Funcional**: Sistema de dados em tempo real totalmente operacional
+
 ## 2025-01-13 - Sistema de Dados em Tempo Real (v0.2.0)
 
 ### Problema

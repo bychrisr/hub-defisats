@@ -1,5 +1,15 @@
 # Roadmap do Projeto Hub DeFiSats
 
+## ✅ CONCLUÍDO - v0.2.1 (13/01/2025)
+
+### Correção Crítica de Dados
+- [x] **Dupla Transformação** - Corrigida dupla transformação que sobrescrevia dados calculados
+- [x] **Margin Ratio** - Agora exibe valores corretos baseados em maintenance_margin
+- [x] **Trading Fees** - Calculado corretamente como opening_fee + closing_fee
+- [x] **Funding Cost** - Exibe sum_carry_fees da LN Markets
+- [x] **Consistência de Dados** - Dados iniciais e atualizações em tempo real consistentes
+- [x] **Sistema de Tempo Real** - Totalmente funcional sem corrupção de dados
+
 ## ✅ CONCLUÍDO - v0.2.0 (13/01/2025)
 
 ### Sistema de Dados em Tempo Real
