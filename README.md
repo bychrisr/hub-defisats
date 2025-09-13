@@ -2,8 +2,8 @@
 
 ## 🎯 Status Atual
 
-**Versão**: v0.2.1  
-**Status**: Sistema de Dados em Tempo Real Totalmente Funcional  
+**Versão**: v0.3.0  
+**Status**: Sistema Completo de Administração de Cupons com Analytics  
 **Última Atualização**: 2025-01-13
 
 ## ✅ Funcionalidades Implementadas
@@ -33,6 +33,34 @@
 - ✅ **Dados Corretos**: Margin Ratio, Trading Fees e Funding Cost exibem valores corretos
 - ✅ **Consistência**: Dados iniciais e atualizações em tempo real são idênticos
 - ✅ **Sistema Funcional**: Totalmente operacional sem corrupção de dados
+
+### 🎫 Sistema de Cupons (v0.3.0)
+- ✅ **CRUD Completo** para administração de cupons
+- ✅ **3 Variáveis Principais**: Tempo (fixo/vitalício), Valor (fixo/percentual), Funcionalidade (5 planos)
+- ✅ **Ativação/Desativação** instantânea de cupons
+- ✅ **Dashboard Avançado** com métricas e gráficos interativos
+- ✅ **Analytics Detalhados** (views, clicks, uses, conversão)
+- ✅ **Rastreamento de Novos Usuários** atraídos por cupons
+- ✅ **Receita Economizada** em tempo real
+- ✅ **Interface Responsiva** para desktop e mobile
+- ✅ **Validação Completa** no backend e frontend
+- ✅ **Documentação Detalhada** do sistema
+
+### 🧭 Navegação Responsiva (v0.3.0)
+- ✅ **Menu Desktop** centralizado com perfil de usuário
+- ✅ **Menu Mobile** fixo na parte inferior (estilo CoinGecko)
+- ✅ **Drawer Lateral** para configurações e opções
+- ✅ **Navegação Intuitiva** entre todas as páginas
+- ✅ **Design Consistente** em todos os dispositivos
+- ✅ **Tema Dark/Light** com persistência
+
+### 📈 Gráficos e Visualizações (v0.3.0)
+- ✅ **Gráfico LN Markets Style** com design autêntico
+- ✅ **Dados de Mercado em Tempo Real** via WebSocket
+- ✅ **Integração CoinGecko** para preços BTC
+- ✅ **Charts Interativos** com Recharts
+- ✅ **Visualizações Responsivas** para mobile
+- ✅ **Tema Adaptativo** (dark/light)
 
 ### 🛠️ Infraestrutura
 - ✅ **Backend Node.js** com Fastify

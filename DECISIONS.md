@@ -2,6 +2,51 @@
 
 Este documento registra decisões técnicas importantes tomadas durante o desenvolvimento do projeto.
 
+## 2025-01-13 - Sistema de Cupons e Navegação Responsiva (v0.3.0)
+
+### Decisão: Implementação de Sistema de Cupons Completo
+**Problema**: Necessidade de sistema de cupons com 3 variáveis principais (tempo, valor, funcionalidade) e administração completa.
+
+**Decisão**: Implementar sistema completo com:
+- **Backend**: Prisma schema com `Coupon` e `CouponAnalytics` models
+- **API**: Rotas dedicadas `/api/admin/coupons` com CRUD completo
+- **Validação**: Zod schemas com regras de negócio complexas
+- **Frontend**: Interface administrativa com dashboard e métricas
+- **Analytics**: Rastreamento de views, clicks, uses e conversão
+
+**Justificativa**: Sistema modular e escalável que permite gestão completa de cupons com métricas detalhadas.
+
+### Decisão: Navegação Responsiva Estilo CoinGecko
+**Problema**: Interface não era otimizada para mobile e não seguia padrões modernos de UX.
+
+**Decisão**: Implementar navegação responsiva com:
+- **Desktop**: Menu centralizado com perfil de usuário e notificações
+- **Mobile**: Menu fixo na parte inferior com drawer lateral
+- **Componentes**: `ResponsiveLayout`, `DesktopNavigation`, `MobileNavigation`, `MobileDrawer`
+- **Tema**: Sistema dark/light com persistência
+
+**Justificativa**: Melhora significativa na experiência do usuário e consistência visual.
+
+### Decisão: Gráfico LN Markets Style
+**Problema**: Gráfico não seguia o design da LN Markets conforme solicitado.
+
+**Decisão**: Criar componente `LNMarketsChart` que replica:
+- **Design**: Cores, tipografia e layout idênticos à LN Markets
+- **Dados**: Integração com WebSocket para dados em tempo real
+- **Responsividade**: Adaptação para diferentes tamanhos de tela
+
+**Justificativa**: Consistência visual com a plataforma de referência e melhor experiência do usuário.
+
+### Decisão: Conversão de Schemas Zod para JSON Schema
+**Problema**: Fastify não aceita schemas Zod diretamente, causando erros de serialização.
+
+**Decisão**: Converter todos os schemas Zod para JSON Schema nas rotas:
+- **Manter Zod**: Para validação de dados no service layer
+- **JSON Schema**: Para documentação e validação de rotas Fastify
+- **Dupla Validação**: Zod no service + JSON Schema nas rotas
+
+**Justificativa**: Compatibilidade com Fastify mantendo validação robusta.
+
 ## 2025-01-13 - Correção de Dupla Transformação (v0.2.1)
 
 ### Problema

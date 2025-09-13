@@ -1,5 +1,45 @@
 # Roadmap do Projeto Hub DeFiSats
 
+## ✅ CONCLUÍDO - v0.3.0 (13/01/2025)
+
+### Sistema Completo de Cupons
+- [x] **CRUD Completo** - Create, Read, Update, Delete para cupons
+- [x] **3 Variáveis Principais** - Tempo (fixo/vitalício), Valor (fixo/percentual), Funcionalidade (5 planos)
+- [x] **Validação Complexa** - Regras de negócio com Zod e validação no backend
+- [x] **Ativação/Desativação** - Toggle instantâneo de status de cupons
+- [x] **Dashboard Avançado** - Métricas e gráficos interativos
+- [x] **Analytics Detalhados** - Rastreamento de views, clicks, uses, conversão
+- [x] **Rastreamento de Novos Usuários** - Métricas de aquisição via cupons
+- [x] **Receita Economizada** - Cálculo em tempo real de economia gerada
+
+### Navegação e UI/UX
+- [x] **Menu Desktop** - Centralizado com perfil de usuário e notificações
+- [x] **Menu Mobile** - Fixo na parte inferior (estilo CoinGecko)
+- [x] **Drawer Lateral** - Configurações e opções em drawer deslizante
+- [x] **Navegação Responsiva** - Design consistente em todos os dispositivos
+- [x] **Sistema de Temas** - Dark/Light mode com persistência
+- [x] **Cards Padronizados** - Largura fixa consistente no dashboard
+
+### Gráficos e Visualizações
+- [x] **Gráfico LN Markets Style** - Design autêntico replicando LN Markets
+- [x] **Dados em Tempo Real** - WebSocket para preços ao vivo
+- [x] **Integração CoinGecko** - Preços BTC em tempo real
+- [x] **Charts Interativos** - Recharts com tema adaptativo
+- [x] **Visualizações Responsivas** - Otimizado para mobile
+
+### Infraestrutura e API
+- [x] **Rotas API Dedicadas** - `/api/admin/coupons` com CRUD completo
+- [x] **Schemas JSON** - Convertidos schemas Zod para JSON Schema
+- [x] **Validação Backend** - Validação robusta com mensagens de erro
+- [x] **Middleware de Auth** - Proteção de todas as rotas administrativas
+- [x] **Documentação API** - Swagger/OpenAPI atualizado
+
+### Documentação
+- [x] **Guia do Sistema de Cupons** - `docs/coupon-system.md`
+- [x] **Guia de Administração** - `docs/coupon-admin-system.md`
+- [x] **CHANGELOG Atualizado** - Detalhes completos da v0.3.0
+- [x] **README Atualizado** - Funcionalidades e status atual
+
 ## ✅ CONCLUÍDO - v0.2.1 (13/01/2025)
 
 ### Correção Crítica de Dados

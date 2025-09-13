@@ -5,6 +5,41 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [v0.3.0] - 2025-01-13
+
+### Adicionado
+- **Sistema Completo de Cupons**: CRUD completo para administração de cupons
+- **3 Variáveis Principais**: Tempo (fixo/vitalício), Valor (fixo/percentual), Funcionalidade (5 planos)
+- **Dashboard de Cupons**: Métricas avançadas e gráficos interativos
+- **Analytics Detalhados**: Rastreamento de views, clicks, uses e conversão
+- **Navegação Responsiva**: Menu desktop centralizado e menu mobile fixo (estilo CoinGecko)
+- **Gráfico LN Markets Style**: Design autêntico com dados em tempo real
+- **Integração CoinGecko**: Preços BTC em tempo real
+- **Sistema de Temas**: Dark/Light mode com persistência
+- **Documentação Completa**: Guias detalhados para sistema de cupons
+
+### Alterado
+- **Rota /trades**: Renomeada para /positions
+- **Menu Desktop**: Centralizado com perfil de usuário e notificações
+- **Menu Mobile**: Fixo na parte inferior com drawer lateral
+- **Sistema de Autenticação**: Redirecionamento inteligente para usuários logados
+- **Cards do Dashboard**: Largura fixa padronizada
+- **API de Dados de Mercado**: Endpoint corrigido para LN Markets
+
+### Corrigido
+- **Conflito de Rotas**: Resolvido problema de rotas duplicadas de cupons
+- **Schemas Fastify**: Convertidos schemas Zod para JSON Schema
+- **Erro 500**: Corrigido erro de serialização no backend
+- **Conexão Backend**: Backend agora inicia corretamente
+
+### Detalhes Técnicos
+- Adicionado modelo `CouponAnalytics` no Prisma para métricas diárias
+- Implementado `CouponService` com validação complexa
+- Criadas rotas API dedicadas para administração de cupons
+- Adicionado sistema de rastreamento de conversão
+- Implementado dashboard com métricas agregadas
+- Criada navegação responsiva com componentes dedicados
+
 ## [v0.2.1] - 2025-01-13
 
 ### Corrigido

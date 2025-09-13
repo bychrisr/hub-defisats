@@ -2,14 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { CouponService } from '@/services/coupon.service';
-import { 
-  CreateCouponRequestSchema, 
-  UpdateCouponRequestSchema, 
-  CouponToggleActiveRequestSchema,
-  CouponResponseSchema,
-  CouponListResponseSchema,
-  CouponDashboardSchema
-} from '@/types/api-contracts';
 
 export async function couponAdminRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
@@ -24,7 +16,57 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       description: 'Get coupon dashboard with metrics and analytics',
       tags: ['Coupon Admin'],
       response: {
-        200: CouponDashboardSchema
+        200: {
+          type: 'object',
+          properties: {
+            total_coupons: { type: 'number' },
+            active_coupons: { type: 'number' },
+            inactive_coupons: { type: 'number' },
+            total_uses: { type: 'number' },
+            total_revenue_saved: { type: 'number' },
+            total_new_users: { type: 'number' },
+            average_conversion_rate: { type: 'number' },
+            top_coupons: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  code: { type: 'string' },
+                  uses_count: { type: 'number' },
+                  revenue_saved: { type: 'number' },
+                  conversion_rate: { type: 'number' }
+                }
+              }
+            },
+            recent_activity: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  code: { type: 'string' },
+                  action: { type: 'string' },
+                  timestamp: { type: 'string' }
+                }
+              }
+            },
+            daily_metrics: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  date: { type: 'string' },
+                  views: { type: 'number' },
+                  clicks: { type: 'number' },
+                  uses: { type: 'number' },
+                  new_users: { type: 'number' },
+                  revenue_saved: { type: 'number' }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }, async (request, reply) => {
@@ -48,7 +90,38 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       description: 'Get all coupons',
       tags: ['Coupon Admin'],
       response: {
-        200: CouponListResponseSchema
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  code: { type: 'string' },
+                  plan_type: { type: 'string' },
+                  usage_limit: { type: 'number' },
+                  used_count: { type: 'number' },
+                  expires_at: { type: 'string' },
+                  created_at: { type: 'string' },
+                  updated_at: { type: 'string' },
+                  value_type: { type: 'string' },
+                  value_amount: { type: 'number' },
+                  time_type: { type: 'string' },
+                  time_days: { type: 'number' },
+                  is_active: { type: 'boolean' },
+                  description: { type: 'string' },
+                  created_by: { type: 'string' },
+                  total_revenue_saved: { type: 'number' },
+                  new_users_count: { type: 'number' },
+                  conversion_rate: { type: 'number' }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }, async (request, reply) => {
@@ -79,7 +152,35 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
         required: ['id']
       },
       response: {
-        200: CouponResponseSchema,
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                code: { type: 'string' },
+                plan_type: { type: 'string' },
+                usage_limit: { type: 'number' },
+                used_count: { type: 'number' },
+                expires_at: { type: 'string' },
+                created_at: { type: 'string' },
+                updated_at: { type: 'string' },
+                value_type: { type: 'string' },
+                value_amount: { type: 'number' },
+                time_type: { type: 'string' },
+                time_days: { type: 'number' },
+                is_active: { type: 'boolean' },
+                description: { type: 'string' },
+                created_by: { type: 'string' },
+                total_revenue_saved: { type: 'number' },
+                new_users_count: { type: 'number' },
+                conversion_rate: { type: 'number' }
+              }
+            }
+          }
+        },
         404: {
           type: 'object',
           properties: {
@@ -103,7 +204,11 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
         });
       }
 
-      return reply.status(200).send(coupon);
+      console.log('✅ COUPON ADMIN - Coupon retrieved:', coupon.code);
+      return reply.status(200).send({
+        success: true,
+        data: coupon
+      });
     } catch (error: any) {
       console.error('❌ COUPON ADMIN - Error getting coupon:', error);
       return reply.status(500).send({
@@ -120,9 +225,52 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
     schema: {
       description: 'Create a new coupon',
       tags: ['Coupon Admin'],
-      body: CreateCouponRequestSchema,
+      body: {
+        type: 'object',
+        required: ['code', 'plan_type', 'value_type', 'value_amount', 'time_type'],
+        properties: {
+          code: { type: 'string', minLength: 3, maxLength: 50 },
+          plan_type: { type: 'string', enum: ['free', 'basic', 'advanced', 'pro', 'lifetime'] },
+          usage_limit: { type: 'number', minimum: 1, maximum: 1000 },
+          expires_at: { type: 'string', format: 'date-time' },
+          value_type: { type: 'string', enum: ['fixed', 'percentage'] },
+          value_amount: { type: 'number', minimum: 1, maximum: 1000000 },
+          time_type: { type: 'string', enum: ['fixed', 'lifetime'] },
+          time_days: { type: 'number', minimum: 1, maximum: 3650 },
+          description: { type: 'string' },
+          is_active: { type: 'boolean' }
+        }
+      },
       response: {
-        201: CouponResponseSchema,
+        201: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                code: { type: 'string' },
+                plan_type: { type: 'string' },
+                usage_limit: { type: 'number' },
+                used_count: { type: 'number' },
+                expires_at: { type: 'string' },
+                created_at: { type: 'string' },
+                updated_at: { type: 'string' },
+                value_type: { type: 'string' },
+                value_amount: { type: 'number' },
+                time_type: { type: 'string' },
+                time_days: { type: 'number' },
+                is_active: { type: 'boolean' },
+                description: { type: 'string' },
+                created_by: { type: 'string' },
+                total_revenue_saved: { type: 'number' },
+                new_users_count: { type: 'number' },
+                conversion_rate: { type: 'number' }
+              }
+            }
+          }
+        },
         400: {
           type: 'object',
           properties: {
@@ -141,7 +289,10 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       const coupon = await couponService.createCoupon(couponData, user.id);
       
       console.log('✅ COUPON ADMIN - Coupon created:', coupon.code);
-      return reply.status(201).send(coupon);
+      return reply.status(201).send({
+        success: true,
+        data: coupon
+      });
     } catch (error: any) {
       console.error('❌ COUPON ADMIN - Error creating coupon:', error);
       return reply.status(400).send({
@@ -164,9 +315,51 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
         },
         required: ['id']
       },
-      body: UpdateCouponRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          code: { type: 'string', minLength: 3, maxLength: 50 },
+          plan_type: { type: 'string', enum: ['free', 'basic', 'advanced', 'pro', 'lifetime'] },
+          usage_limit: { type: 'number', minimum: 1, maximum: 1000 },
+          expires_at: { type: 'string', format: 'date-time' },
+          value_type: { type: 'string', enum: ['fixed', 'percentage'] },
+          value_amount: { type: 'number', minimum: 1, maximum: 1000000 },
+          time_type: { type: 'string', enum: ['fixed', 'lifetime'] },
+          time_days: { type: 'number', minimum: 1, maximum: 3650 },
+          description: { type: 'string' },
+          is_active: { type: 'boolean' }
+        }
+      },
       response: {
-        200: CouponResponseSchema,
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                code: { type: 'string' },
+                plan_type: { type: 'string' },
+                usage_limit: { type: 'number' },
+                used_count: { type: 'number' },
+                expires_at: { type: 'string' },
+                created_at: { type: 'string' },
+                updated_at: { type: 'string' },
+                value_type: { type: 'string' },
+                value_amount: { type: 'number' },
+                time_type: { type: 'string' },
+                time_days: { type: 'number' },
+                is_active: { type: 'boolean' },
+                description: { type: 'string' },
+                created_by: { type: 'string' },
+                total_revenue_saved: { type: 'number' },
+                new_users_count: { type: 'number' },
+                conversion_rate: { type: 'number' }
+              }
+            }
+          }
+        },
         404: {
           type: 'object',
           properties: {
@@ -185,18 +378,12 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       const coupon = await couponService.updateCoupon(id, updateData);
       
       console.log('✅ COUPON ADMIN - Coupon updated:', coupon.code);
-      return reply.status(200).send(coupon);
+      return reply.status(200).send({
+        success: true,
+        data: coupon
+      });
     } catch (error: any) {
       console.error('❌ COUPON ADMIN - Error updating coupon:', error);
-      
-      if (error.message === 'Coupon not found') {
-        return reply.status(404).send({
-          success: false,
-          error: 'NOT_FOUND',
-          message: 'Coupon not found'
-        });
-      }
-      
       return reply.status(400).send({
         success: false,
         error: 'VALIDATION_ERROR',
@@ -248,15 +435,6 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       });
     } catch (error: any) {
       console.error('❌ COUPON ADMIN - Error deleting coupon:', error);
-      
-      if (error.message === 'Coupon not found') {
-        return reply.status(404).send({
-          success: false,
-          error: 'NOT_FOUND',
-          message: 'Coupon not found'
-        });
-      }
-      
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_ERROR',
@@ -278,9 +456,27 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
         },
         required: ['id']
       },
-      body: CouponToggleActiveRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          is_active: { type: 'boolean' }
+        }
+      },
       response: {
-        200: CouponResponseSchema,
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                code: { type: 'string' },
+                is_active: { type: 'boolean' }
+              }
+            }
+          }
+        },
         404: {
           type: 'object',
           properties: {
@@ -298,84 +494,21 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       
       const coupon = await couponService.toggleCouponActive(id, is_active);
       
-      console.log('✅ COUPON ADMIN - Coupon status toggled:', coupon.code, is_active ? 'ACTIVE' : 'INACTIVE');
-      return reply.status(200).send(coupon);
+      console.log('✅ COUPON ADMIN - Coupon status toggled:', coupon.code, 'Active:', coupon.is_active);
+      return reply.status(200).send({
+        success: true,
+        data: {
+          id: coupon.id,
+          code: coupon.code,
+          is_active: coupon.is_active
+        }
+      });
     } catch (error: any) {
       console.error('❌ COUPON ADMIN - Error toggling coupon status:', error);
-      
-      if (error.message === 'Coupon not found') {
-        return reply.status(404).send({
-          success: false,
-          error: 'NOT_FOUND',
-          message: 'Coupon not found'
-        });
-      }
-      
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_ERROR',
         message: 'Failed to toggle coupon status',
-        details: error.message
-      });
-    }
-  });
-
-  // Track coupon analytics
-  fastify.post('/:id/track', {
-    schema: {
-      description: 'Track coupon analytics event',
-      tags: ['Coupon Admin'],
-      params: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', format: 'uuid' }
-        },
-        required: ['id']
-      },
-      body: {
-        type: 'object',
-        properties: {
-          event: { 
-            type: 'string', 
-            enum: ['view', 'click', 'use'] 
-          },
-          new_user: { type: 'boolean', default: false },
-          revenue_saved: { type: 'number', default: 0 }
-        },
-        required: ['event']
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    try {
-      const { id } = request.params as { id: string };
-      const { event, new_user = false, revenue_saved = 0 } = request.body as { 
-        event: 'view' | 'click' | 'use';
-        new_user?: boolean;
-        revenue_saved?: number;
-      };
-      
-      await couponService.trackCouponAnalytics(id, event, new_user, revenue_saved);
-      
-      console.log('✅ COUPON ADMIN - Analytics tracked:', id, event);
-      return reply.status(200).send({
-        success: true,
-        message: 'Analytics tracked successfully'
-      });
-    } catch (error: any) {
-      console.error('❌ COUPON ADMIN - Error tracking analytics:', error);
-      return reply.status(500).send({
-        success: false,
-        error: 'INTERNAL_ERROR',
-        message: 'Failed to track analytics',
         details: error.message
       });
     }
