@@ -5,6 +5,45 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [v0.9.0] - 2025-01-19
+
+### Adicionado
+- **Sistema de Design CoinGecko**: Paleta de cores completa inspirada no CoinGecko
+- **Sistema de Temas**: Light/Dark mode com transições suaves
+- **Design Tokens**: Sistema centralizado de cores, tipografia e espaçamentos
+- **Componentes CoinGecko**: PriceChange, CoinGeckoCard, RealtimeStatus
+- **Contexto de Tema**: ThemeContext com hooks para cores e classes
+- **Documentação Visual**: Guia de estilos completo e página de exemplo
+- **Página Design System**: Demonstração interativa de todos os componentes
+- **Transições Globais**: Animações suaves para mudanças de tema
+- **Contraste Melhorado**: Cores otimizadas para acessibilidade
+
+### Alterado
+- **Identidade Visual**: Overhaul completo da paleta de cores
+- **Todas as Páginas**: Atualizadas para usar o novo sistema de cores
+- **Componentes**: Migrados para usar variáveis CSS do tema
+- **Tipografia**: Mantida Inter conforme especificação
+- **Tema Padrão**: Dark como padrão quando não detectar preferência
+- **Navegação**: Corrigidos links quebrados (automations, signup)
+
+### Corrigido
+- **Cores Hardcoded**: Removidas todas as cores fixas (text-gray-*, etc.)
+- **Contraste Dark Mode**: Melhorada legibilidade em modo escuro
+- **Links de Navegação**: Corrigidos links para rotas existentes
+- **Ícone Sats**: Melhor contraste em ambos os temas
+- **Loaders**: Cores adaptáveis ao tema
+- **Páginas de Login/Registro**: Fundos adaptáveis ao tema
+
+### Removido
+- **Cores Antigas**: Sistema de cores anterior removido
+- **Dependências Conflitantes**: Removido lovable-tagger
+- **Classes Hardcoded**: Substituídas por variáveis de tema
+
+### Breaking Changes
+- **Sistema de Cores**: Mudança completa na paleta de cores
+- **Contexto de Tema**: API atualizada com novos hooks
+- **Componentes**: Estilos atualizados para nova identidade visual
+
 ## [Unreleased] - 2025-01-19
 
 ### Adicionado
