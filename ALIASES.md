@@ -6,88 +6,99 @@ Este arquivo contém todos os aliases disponíveis para facilitar o desenvolvime
 
 ### **Desenvolvimento**
 ```bash
-dev-up          # Subir ambiente de desenvolvimento
-dev-down        # Parar ambiente de desenvolvimento
-dev-logs        # Ver logs do desenvolvimento
-dev-restart     # Reiniciar ambiente de desenvolvimento
-dev-status      # Status dos containers de desenvolvimento
+# Comandos completos:
+alias dev-up='docker compose -f docker-compose.dev.yml up -d'
+alias dev-down='docker compose -f docker-compose.dev.yml down'
+alias dev-logs='docker compose -f docker-compose.dev.yml logs -f'
+alias dev-restart='docker compose -f docker-compose.dev.yml restart'
+alias dev-status='docker compose -f docker-compose.dev.yml ps'
 ```
 
 ### **Staging**
 ```bash
-staging-up      # Subir ambiente de staging
-staging-down    # Parar ambiente de staging
-staging-logs    # Ver logs do staging
-staging-restart # Reiniciar ambiente de staging
-staging-status  # Status dos containers de staging
-staging-setup   # Executar script de setup do staging
+# Comandos completos:
+alias staging-up='docker compose -f docker-compose.staging.yml up -d'
+alias staging-down='docker compose -f docker-compose.staging.yml down'
+alias staging-logs='docker compose -f docker-compose.staging.yml logs -f'
+alias staging-restart='docker compose -f docker-compose.staging.yml restart'
+alias staging-status='docker compose -f docker-compose.staging.yml ps'
+alias staging-setup='./scripts/setup-staging.sh'
 ```
 
 ### **Produção**
 ```bash
-prod-up         # Subir ambiente de produção
-prod-down       # Parar ambiente de produção
-prod-logs       # Ver logs de produção
-prod-restart    # Reiniciar ambiente de produção
-prod-status     # Status dos containers de produção
+# Comandos completos:
+alias prod-up='docker compose -f docker-compose.prod.yml up -d'
+alias prod-down='docker compose -f docker-compose.prod.yml down'
+alias prod-logs='docker compose -f docker-compose.prod.yml logs -f'
+alias prod-restart='docker compose -f docker-compose.prod.yml restart'
+alias prod-status='docker compose -f docker-compose.prod.yml ps'
 ```
 
 ## 🔧 **UTILITÁRIOS DOCKER**
 
 ```bash
-docker-clean    # Limpar containers e volumes não utilizados
-docker-all      # Listar todos os containers
-docker-images   # Listar todas as imagens
+# Comandos completos:
+alias docker-clean='docker system prune -f && docker volume prune -f'
+alias docker-all='docker ps -a'
+alias docker-images='docker images'
 ```
 
 ## 🌐 **ACESSO RÁPIDO AOS SERVIÇOS**
 
 ### **Desenvolvimento**
 ```bash
-dev-frontend    # Abrir frontend de desenvolvimento (localhost:3000)
-dev-backend     # Abrir backend de desenvolvimento (localhost:3001)
+# Comandos completos:
+alias dev-frontend='open http://localhost:3000'
+alias dev-backend='open http://localhost:3001'
 ```
 
 ### **Staging**
 ```bash
-staging-frontend # Abrir frontend de staging (localhost:23010)
-staging-backend  # Abrir backend de staging (localhost:23020)
+# Comandos completos:
+alias staging-frontend='open http://localhost:23010'
+alias staging-backend='open http://localhost:23020'
 ```
 
 ### **Produção**
 ```bash
-prod-frontend   # Abrir frontend de produção (localhost:23001)
-prod-backend    # Abrir backend de produção (localhost:23000)
+# Comandos completos:
+alias prod-frontend='open http://localhost:23001'
+alias prod-backend='open http://localhost:23000'
 ```
 
 ## 📊 **LOGS ESPECÍFICOS**
 
 ### **Desenvolvimento**
 ```bash
-dev-backend-logs  # Logs do backend de desenvolvimento
-dev-frontend-logs # Logs do frontend de desenvolvimento
+# Comandos completos:
+alias dev-backend-logs='docker compose -f docker-compose.dev.yml logs -f backend'
+alias dev-frontend-logs='docker compose -f docker-compose.dev.yml logs -f frontend'
 ```
 
 ### **Staging**
 ```bash
-staging-backend-logs  # Logs do backend de staging
-staging-frontend-logs # Logs do frontend de staging
+# Comandos completos:
+alias staging-backend-logs='docker compose -f docker-compose.staging.yml logs -f backend-staging'
+alias staging-frontend-logs='docker compose -f docker-compose.staging.yml logs -f frontend-staging'
 ```
 
 ## 🗄️ **BANCO DE DADOS**
 
 ```bash
-dev-db      # Conectar ao banco de desenvolvimento
-staging-db  # Conectar ao banco de staging
-prod-db     # Conectar ao banco de produção
+# Comandos completos:
+alias dev-db='docker exec -it hub-defisats-postgres-dev psql -U hubdefisats -d defisats_dev'
+alias staging-db='docker exec -it hub-defisats-postgres-staging psql -U hubdefisats -d defisats_staging'
+alias prod-db='docker exec -it hub-defisats-postgres-prod psql -U hubdefisats -d defisats_prod'
 ```
 
 ## 🔄 **PRISMA**
 
 ```bash
-dev-prisma      # Executar comandos Prisma no desenvolvimento
-staging-prisma  # Executar comandos Prisma no staging
-prod-prisma     # Executar comandos Prisma na produção
+# Comandos completos:
+alias dev-prisma='docker exec -it hub-defisats-backend-dev npx prisma'
+alias staging-prisma='docker exec -it hub-defisats-backend-staging npx prisma'
+alias prod-prisma='docker exec -it hub-defisats-backend-prod npx prisma'
 ```
 
 **Exemplos:**
@@ -100,26 +111,29 @@ prod-prisma generate   # Gerar cliente Prisma
 ## 🏥 **HEALTH CHECKS**
 
 ```bash
-dev-health      # Verificar saúde do desenvolvimento
-staging-health  # Verificar saúde do staging
-prod-health     # Verificar saúde da produção
+# Comandos completos:
+alias dev-health='curl -s http://localhost:3001/api/health | jq'
+alias staging-health='curl -s http://localhost:23020/api/health | jq'
+alias prod-health='curl -s http://localhost:23000/api/health | jq'
 ```
 
 ## 📝 **GIT SHORTCUTS**
 
 ```bash
-gs  # git status
-ga  # git add .
-gc  # git commit -m
-gp  # git push origin main
-gl  # git log --oneline -10
+# Comandos completos:
+alias gs='git status'
+alias ga='git add .'
+alias gc='git commit -m'
+alias gp='git push origin main'
+alias gl='git log --oneline -10'
 ```
 
 ## 🏠 **PROJETO**
 
 ```bash
-cd-hub      # Navegar para o diretório do projeto
-hub-status  # Ver status de todos os ambientes
+# Comandos completos:
+alias cd-hub='cd /home/bychrisr/projects/hub-defisats'
+alias hub-status='echo "=== DESENVOLVIMENTO ===" && dev-status && echo "=== STAGING ===" && staging-status && echo "=== PRODUÇÃO ===" && prod-status'
 ```
 
 ## 🎯 **EXEMPLOS DE USO**
