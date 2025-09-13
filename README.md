@@ -2,9 +2,9 @@
 
 ## 🎯 Status Atual
 
-**Versão**: 0.8.2  
-**Status**: Dashboard Admin Funcional  
-**Última Atualização**: 2025-01-10
+**Versão**: v0.2.0  
+**Status**: Sistema de Dados em Tempo Real Implementado  
+**Última Atualização**: 2025-01-13
 
 ## ✅ Funcionalidades Implementadas
 
@@ -21,6 +21,15 @@
 - ✅ **Filtros por período** (1h, 24h, 7d, 30d)
 - ✅ **Atualização automática** de dados
 - ✅ **Interface responsiva** e moderna
+
+### 🔄 Sistema de Dados em Tempo Real (v0.2.0)
+- ✅ **WebSocket Integration** para dados de mercado ao vivo
+- ✅ **Atualização Periódica** automática a cada 5 segundos
+- ✅ **Atualizações Silenciosas** sem recarregar a página
+- ✅ **Dados Reais LN Markets** sem simulação
+- ✅ **Indicador de Status** com melhor contraste e legibilidade
+- ✅ **Feedback Visual** para operações em background
+- ✅ **Gerenciamento de Estado** centralizado com Context API
 
 ### 🛠️ Infraestrutura
 - ✅ **Backend Node.js** com Fastify

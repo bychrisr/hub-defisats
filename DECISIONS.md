@@ -2,6 +2,79 @@
 
 Este documento registra decisões técnicas importantes tomadas durante o desenvolvimento do projeto.
 
+## 2025-01-13 - Sistema de Dados em Tempo Real (v0.2.0)
+
+### Problema
+A aplicação precisava exibir dados de posições da LN Markets em tempo real, mas enfrentava múltiplos problemas:
+1. **Import lightweight-charts**: Erro de importação do pacote
+2. **Compatibilidade Node.js**: Incompatibilidade de versão
+3. **P&L NaN**: Valores de P&L não exibidos corretamente
+4. **Side Invertido**: Posições long/short exibidas incorretamente
+5. **Simulação de Dados**: Sistema de simulação corrompia dados reais
+6. **Atualizações**: Dados não atualizavam automaticamente
+7. **Contraste UI**: Indicador "Tempo Real" com baixo contraste
+
+### Decisão
+Implementar sistema completo de dados em tempo real com correções abrangentes:
+
+1. **WebSocket Integration**: Conexão em tempo real para dados de mercado
+2. **Atualização Periódica**: Sistema de refresh automático a cada 5 segundos
+3. **Atualizações Silenciosas**: Interface atualiza sem recarregar a página
+4. **Dados Reais**: Remover simulação e usar apenas dados da LN Markets API
+5. **Transformação Correta**: Evitar dupla transformação de dados
+6. **UI/UX Melhorada**: Indicadores visuais com melhor contraste
+7. **Gerenciamento de Estado**: Contexto centralizado para dados em tempo real
+
+### Justificativa
+1. **Dados Fidedignos**: Usuário solicitou dados reais da LN Markets sem simulação
+2. **Experiência Fluida**: Atualizações silenciosas melhoram UX
+3. **Performance**: 5 segundos é balance ideal entre responsividade e carga
+4. **Confiabilidade**: Dados reais são mais confiáveis que simulação
+5. **Manutenibilidade**: Código mais limpo sem lógica de simulação
+6. **Acessibilidade**: Melhor contraste melhora legibilidade
+
+### Implementação
+```typescript
+// Sistema de atualização periódica
+useEffect(() => {
+  let intervalId: NodeJS.Timeout;
+  const initialDelay = setTimeout(() => {
+    intervalId = setInterval(() => {
+      fetchPositions(false); // Atualização periódica
+    }, 5000); // 5 segundos
+  }, 3000); // Delay inicial de 3s
+
+  return () => {
+    clearTimeout(initialDelay);
+    if (intervalId) clearInterval(intervalId);
+  };
+}, []);
+
+// Transformação correta de dados
+const loadRealPositions = useCallback((positions: any[]) => {
+  const transformedPositions = positions.map(pos => ({
+    id: pos.id,
+    symbol: 'BTC',
+    side: pos.side === 'b' ? 'long' : 'short', // Correto
+    pnl: typeof pos.pl === 'number' ? pos.pl : 0, // Numérico
+    // ... outros campos
+  }));
+  setData(prev => ({ ...prev, positions: transformedPositions }));
+}, []);
+
+// Indicador com melhor contraste
+className: 'bg-success/20 text-success border-success/30 hover:bg-success/30'
+```
+
+### Consequências
+- ✅ **Dados reais em tempo real** - sem simulação
+- ✅ **Atualizações silenciosas** - UX melhorada
+- ✅ **P&L correto** - valores numéricos válidos
+- ✅ **Side correto** - long/short mapeados corretamente
+- ✅ **Contraste melhorado** - indicador legível
+- ✅ **Performance otimizada** - 5s de intervalo
+- ✅ **Código limpo** - sem lógica de simulação
+
 ## 2025-01-19 - Implementação de Gráficos de Trading
 
 ### Problema

@@ -1,5 +1,33 @@
 # Roadmap do Projeto Hub DeFiSats
 
+## ✅ CONCLUÍDO - v0.2.0 (13/01/2025)
+
+### Sistema de Dados em Tempo Real
+- [x] **WebSocket Integration** - Implementada conexão WebSocket para dados de mercado ao vivo
+- [x] **Atualização Periódica** - Sistema de refresh automático a cada 5 segundos
+- [x] **Atualizações Silenciosas** - Interface atualiza sem recarregar a página
+- [x] **Indicador de Status** - Componente RealtimeStatus com melhor contraste e legibilidade
+- [x] **Feedback Visual** - Indicadores de loading e atualização em background
+- [x] **Integração LN Markets** - Dados reais da API LN Markets sem simulação
+- [x] **Gerenciamento de Estado** - Contexto RealtimeDataContext para dados centralizados
+- [x] **Funções de Transformação** - loadRealPositions e updatePositions para dados corretos
+
+### Correções Críticas
+- [x] **Import lightweight-charts** - Resolvido erro de importação do pacote
+- [x] **Compatibilidade Node.js** - Corrigido problema de versão do Node.js
+- [x] **P&L NaN** - Corrigido exibição de P&L com valores numéricos válidos
+- [x] **Side Invertido** - Corrigido mapeamento de posições long/short
+- [x] **Dupla Transformação** - Evitado processamento duplo de dados da API
+- [x] **Simulação de Dados** - Removida simulação que corrompia dados reais
+- [x] **Erro Fastify 5.x** - Corrigido `reply.getResponseTime` não disponível
+- [x] **Conflito de Cores** - Resolvido problema de contraste no indicador de status
+
+### Melhorias de UX/UI
+- [x] **Sistema de Cores** - Melhorado contraste do indicador "Tempo Real"
+- [x] **Delay Inicial** - Adicionado delay de 3s antes da primeira atualização automática
+- [x] **Responsividade** - Atualizações frequentes sem impacto na performance
+- [x] **Transições Suaves** - Feedback visual adequado para todas as operações
+
 ## ✅ CONCLUÍDO - v0.2.24 (13/01/2025)
 
 ### Sistema de Gráficos de Trading e Temas

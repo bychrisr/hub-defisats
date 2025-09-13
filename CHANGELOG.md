@@ -5,6 +5,49 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [v0.2.0] - 2025-01-13
+
+### Adicionado
+- **Sistema de Dados em Tempo Real**: Implementado WebSocket para dados de mercado ao vivo
+- **Atualização Periódica**: Sistema de refresh automático a cada 5 segundos
+- **Atualizações Silenciosas**: Interface atualiza sem recarregar a página
+- **Indicador de Status**: Componente RealtimeStatus com melhor contraste e legibilidade
+- **Feedback Visual**: Indicadores de loading e atualização em background
+- **Integração LN Markets**: Dados reais da API LN Markets sem simulação
+- **Gerenciamento de Estado**: Contexto RealtimeDataContext para dados centralizados
+- **Funções de Transformação**: loadRealPositions e updatePositions para dados corretos
+
+### Alterado
+- **Configuração de Portas**: Frontend (13000) e Backend (13010) para desenvolvimento
+- **Sistema de Cores**: Melhorado contraste do indicador "Tempo Real"
+- **Atualização de Dados**: Reduzido intervalo de 30s para 5s para maior responsividade
+- **Delay Inicial**: Adicionado delay de 3s antes da primeira atualização automática
+- **Mapeamento de Dados**: Corrigido mapeamento de side (b=long, s=short) e P&L
+- **URLs de API/WebSocket**: Atualizadas para usar porta 13010
+
+### Corrigido
+- **Import lightweight-charts**: Resolvido erro de importação do pacote
+- **Compatibilidade Node.js**: Corrigido problema de versão do Node.js
+- **P&L NaN**: Corrigido exibição de P&L com valores numéricos válidos
+- **Side Invertido**: Corrigido mapeamento de posições long/short
+- **Dupla Transformação**: Evitado processamento duplo de dados da API
+- **Simulação de Dados**: Removida simulação que corrompia dados reais
+- **Erro Fastify 5.x**: Corrigido `reply.getResponseTime` não disponível
+- **Conflito de Cores**: Resolvido problema de contraste no indicador de status
+
+### Removido
+- **Simulação de Dados**: Removido sistema que simulava atualizações de P&L
+- **Dependências Desnecessárias**: Limpeza de pacotes não utilizados
+- **Código de Simulação**: Removidos useEffects que simulavam dados
+
+### Detalhes Técnicos
+- **WebSocket**: Conexão em tempo real para dados de mercado
+- **API Integration**: Integração direta com LN Markets API v2
+- **State Management**: Zustand + Context API para gerenciamento de estado
+- **Error Handling**: Tratamento robusto de erros de conexão
+- **Performance**: Otimizações para atualizações frequentes
+- **UI/UX**: Transições suaves e feedback visual adequado
+
 ## [v0.9.0] - 2025-01-19
 
 ### Adicionado

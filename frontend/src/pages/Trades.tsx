@@ -146,9 +146,9 @@ export default function Trades() {
         margin: pos.margin,
         pnl: pos.pnl,
         pnlPercentage: pos.pnlPercent,
-        marginRatio: pos.margin / (pos.quantity * pos.price),
-        tradingFees: 0, // Será calculado pelo backend
-        fundingCost: 0, // Será calculado pelo backend
+        marginRatio: (pos as any).marginRatio || (pos.leverage > 0 ? (100 / pos.leverage) : 0),
+        tradingFees: (pos as any).tradingFees || 0,
+        fundingCost: (pos as any).fundingCost || 0,
         status: 'open' as const,
         side: pos.side,
         asset: pos.symbol,
@@ -215,13 +215,55 @@ export default function Trades() {
         // Transform LN Markets data to our interface
         const transformedPositions: LNPosition[] = data.data.positions.map((pos: any) => {
           console.log('🔍 TRADES - Transforming position:', pos);
+          console.log('🔍 TRADES - TEST LOG - Position ID:', pos.id);
+          console.log('🔍 TRADES - TEST LOG - Opening Fee:', pos.opening_fee);
+          console.log('🔍 TRADES - TEST LOG - Closing Fee:', pos.closing_fee);
+          console.log('🔍 TRADES - TEST LOG - Sum Carry Fees:', pos.sum_carry_fees);
+          console.log('🔍 TRADES - TEST LOG - Maintenance Margin:', pos.maintenance_margin);
+          
+          // Teste simples
+          console.log('🔍 TRADES - SIMPLE TEST - marginRatio calculation:', {
+            maintenance_margin: pos.maintenance_margin,
+            margin: pos.margin,
+            pl: pos.pl,
+            leverage: pos.leverage
+          });
           
           // Calculate P&L percentage
           const pnlPercentage = pos.margin > 0 ? (pos.pl / pos.margin) * 100 : 0;
           
           // Calculate margin ratio (maintenance_margin / (margin + pl))
-          const marginRatio = pos.margin > 0 ? (pos.maintenance_margin / (pos.margin + pos.pl)) * 100 : 0;
+          // Se maintenance_margin não estiver disponível, calcular baseado no leverage
+          const marginRatio = pos.maintenance_margin > 0 
+            ? (pos.maintenance_margin / (pos.margin + pos.pl)) * 100 
+            : pos.leverage > 0 
+              ? (100 / pos.leverage) 
+              : 0;
           
+          console.log('🔍 TRADES - Margin ratio calculation:', {
+            maintenance_margin: pos.maintenance_margin,
+            margin: pos.margin,
+            pl: pos.pl,
+            leverage: pos.leverage,
+            calculated_marginRatio: marginRatio,
+            formula: pos.maintenance_margin > 0 
+              ? `(${pos.maintenance_margin} / (${pos.margin} + ${pos.pl})) * 100 = ${marginRatio}`
+              : `100 / ${pos.leverage} = ${marginRatio}`
+          });
+          
+          const tradingFees = (pos.opening_fee || 0) + (pos.closing_fee || 0);
+          const fundingCost = pos.sum_carry_fees || 0;
+          
+          console.log('🔍 TRADES - Fees calculation:', {
+            opening_fee: pos.opening_fee,
+            closing_fee: pos.closing_fee,
+            sum_carry_fees: pos.sum_carry_fees,
+            calculated_tradingFees: tradingFees,
+            calculated_fundingCost: fundingCost,
+            formula_trading: `${pos.opening_fee || 0} + ${pos.closing_fee || 0} = ${tradingFees}`,
+            formula_funding: `sum_carry_fees = ${fundingCost}`
+          });
+
           return {
             id: pos.id,
             quantity: pos.quantity || 0,
@@ -232,8 +274,8 @@ export default function Trades() {
             pnl: pos.pl || 0,
             pnlPercentage: pnlPercentage,
             marginRatio: marginRatio,
-            tradingFees: (pos.opening_fee || 0) + (pos.closing_fee || 0),
-            fundingCost: pos.sum_carry_fees || 0,
+            tradingFees: tradingFees,
+            fundingCost: fundingCost,
             status: pos.running ? 'open' as const : 'closed' as const,
             side: pos.side === 'b' ? 'long' as const : 'short' as const, // 'b' = buy = long, 's' = sell = short
             asset: 'BTC', // LN Markets only trades BTC futures
@@ -585,9 +627,24 @@ export default function Trades() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell>{position.marginRatio.toFixed(1)}%</TableCell>
-                        <TableCell>{formatSats(position.tradingFees)}</TableCell>
-                        <TableCell>{formatSats(position.fundingCost)}</TableCell>
+                        <TableCell>
+                          {(() => {
+                            console.log('🔍 TRADES - DISPLAY - marginRatio:', position.marginRatio);
+                            return position.marginRatio.toFixed(1) + '%';
+                          })()}
+                        </TableCell>
+                        <TableCell>
+                          {(() => {
+                            console.log('🔍 TRADES - DISPLAY - tradingFees:', position.tradingFees);
+                            return formatSats(position.tradingFees);
+                          })()}
+                        </TableCell>
+                        <TableCell>
+                          {(() => {
+                            console.log('🔍 TRADES - DISPLAY - fundingCost:', position.fundingCost);
+                            return formatSats(position.fundingCost);
+                          })()}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
