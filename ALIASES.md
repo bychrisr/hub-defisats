@@ -7,7 +7,7 @@ Este arquivo contém todos os aliases disponíveis para facilitar o desenvolvime
 ### **Desenvolvimento**
 ```bash
 # Comandos completos:
-alias dev-up='docker compose -f docker-compose.dev.yml up -d'
+alias dev-up='docker compose -f docker-compose.dev.yml up -d --remove-orphans'
 alias dev-down='docker compose -f docker-compose.dev.yml down'
 alias dev-logs='docker compose -f docker-compose.dev.yml logs -f'
 alias dev-restart='docker compose -f docker-compose.dev.yml restart'
