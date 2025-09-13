@@ -49,6 +49,8 @@ interface RealtimeDataContextType {
   unsubscribeFromSymbol: (symbol: string) => void;
   refreshData: () => void;
   reconnect: () => void;
+  loadRealPositions: (positions: any[]) => void;
+  updatePositions: (positions: any[]) => void;
 }
 
 const RealtimeDataContext = createContext<RealtimeDataContextType | undefined>(undefined);
@@ -65,6 +67,62 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   });
 
   const [subscribedSymbols, setSubscribedSymbols] = useState<Set<string>>(new Set());
+
+  // DISABLED: Simulação que estava corrompendo os dados reais do LN Markets
+  // O problema era que os dados de mercado tinham escala de preço diferente (50k vs 117k)
+  // e isso causava cálculos de P&L absurdos
+  // useEffect(() => {
+  //   if (Object.keys(data.marketData).length > 0 && data.positions.length > 0) {
+  //     const interval = setInterval(() => {
+  //       setData(prev => {
+  //         // Simular atualizações para posições BTC (já que temos dados de mercado BTC)
+  //         const btcMarketData = prev.marketData['BTC'];
+  //         if (btcMarketData && prev.positions.length > 0) {
+  //           // Simular pequena variação de preço
+  //           const priceVariation = (Math.random() - 0.5) * 0.002; // ±0.2%
+  //           const newPrice = btcMarketData.price * (1 + priceVariation);
+  //           
+  //           // Atualizar posições existentes
+  //           const updatedPositions = prev.positions.map(pos => {
+  //             if (pos.symbol === 'BTC') {
+  //               // Calcular novo P&L baseado na mudança de preço
+  //               const priceChange = (newPrice - pos.price) / pos.price;
+  //               const newPnl = pos.pnl + (priceChange * pos.quantity * pos.price);
+  //               const newPnlPercent = pos.margin > 0 ? (newPnl / pos.margin) * 100 : 0;
+  //               
+  //               console.log('📊 REALTIME - Simulando atualização de posição BTC:', {
+  //                 id: pos.id,
+  //                 oldPrice: pos.price,
+  //                 newPrice: newPrice,
+  //                 oldPnl: pos.pnl,
+  //                 newPnl: newPnl,
+  //                 priceChange: priceChange
+  //               });
+  //               
+  //               return {
+  //                 ...pos,
+  //                 price: newPrice,
+  //                 pnl: newPnl,
+  //                 pnlPercent: newPnlPercent,
+  //                 timestamp: Date.now()
+  //               };
+  //             }
+  //             return pos;
+  //           });
+  //           
+  //           return {
+  //             ...prev,
+  //             positions: updatedPositions,
+  //             lastUpdate: Date.now()
+  //           };
+  //         }
+  //         return prev;
+  //       });
+  //     }, 3000); // Atualizar a cada 3 segundos
+  //     
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [data.marketData, data.positions.length]); // Add positions.length to dependencies
 
   // WebSocket para dados em tempo real
   const { isConnected, isConnecting, error, connect, disconnect, sendMessage } = useWebSocket({
@@ -108,17 +166,39 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         case 'position_update':
           console.log('📊 REALTIME - Atualizando posição:', message.data);
-          setData(prev => {
-            const newData = {
-              ...prev,
-              positions: prev.positions.map(pos => 
-                pos.id === message.data.id ? { ...message.data, timestamp: Date.now() } : pos
-              ),
-              lastUpdate: Date.now()
-            };
-            console.log('📊 REALTIME - Posições atualizadas:', newData.positions.length);
-            return newData;
-          });
+          // DISABLED: Esta simulação estava corrompendo os dados reais
+          // O problema era que os dados de mercado tinham escala de preço diferente
+          // e isso causava cálculos de P&L absurdos
+          // setData(prev => {
+          //   const marketData = prev.marketData[message.data.symbol];
+          //   if (marketData) {
+          //     // Calcular novo P&L baseado na mudança de preço
+          //     const priceChange = (marketData.price - message.data.price) / message.data.price;
+          //     const newPnl = message.data.pnl + (priceChange * message.data.quantity * message.data.price);
+          //     const newPnlPercent = message.data.margin > 0 ? (newPnl / message.data.margin) * 100 : 0;
+          //     
+          //     const updatedPosition = {
+          //       ...message.data,
+          //       price: marketData.price,
+          //       pnl: newPnl,
+          //       pnlPercent: newPnlPercent,
+          //       timestamp: Date.now()
+          //     };
+          //     
+          //     console.log('📊 REALTIME - Posição atualizada com dados de mercado:', updatedPosition);
+          //     
+          //     const newData = {
+          //       ...prev,
+          //       positions: prev.positions.map(pos => 
+          //         pos.id === message.data.id ? updatedPosition : pos
+          //       ),
+          //       lastUpdate: Date.now()
+          //     };
+          //     console.log('📊 REALTIME - Posições atualizadas:', newData.positions.length);
+          //     return newData;
+          //   }
+          //   return prev;
+          // });
           break;
 
         case 'position_added':
@@ -307,12 +387,113 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   }, [error, isAuthenticated, reconnect]);
 
+  const loadRealPositions = useCallback((positions: any[]) => {
+    console.log('📊 REALTIME - Carregando posições reais da LN Markets:', positions.length);
+    setData(prev => {
+      const transformedPositions = positions.map(pos => {
+        // Usar dados reais da LN Markets
+        const pnl = typeof pos.pl === 'number' ? pos.pl : 0;
+        const margin = typeof pos.margin === 'number' ? pos.margin : 0;
+        const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
+        const price = typeof pos.price === 'number' ? pos.price : 0;
+        const leverage = typeof pos.leverage === 'number' ? pos.leverage : 1;
+        
+        // Calcular P&L percentual de forma segura
+        const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
+        
+        console.log('📊 REALTIME - Transformando posição LN Markets:', {
+          id: pos.id,
+          side: pos.side,
+          pl: pos.pl,
+          pnl: pnl,
+          margin: margin,
+          pnlPercent: pnlPercent,
+          quantity: quantity,
+          price: price
+        });
+        
+        return {
+          id: pos.id,
+          symbol: 'BTC', // LN Markets only trades BTC futures
+          side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
+          quantity: quantity,
+          price: price,
+          margin: margin,
+          leverage: leverage,
+          pnl: pnl, // Usar o P&L real da LN Markets
+          pnlPercent: pnlPercent,
+          timestamp: Date.now()
+        };
+      });
+      
+      console.log('📊 REALTIME - Posições transformadas:', transformedPositions);
+      
+      return {
+        ...prev,
+        positions: transformedPositions,
+        lastUpdate: Date.now()
+      };
+    });
+  }, []);
+
+  // Função para atualizar posições com dados reais (sem simulação)
+  const updatePositions = useCallback((positions: any[]) => {
+    console.log('🔄 REALTIME - Atualizando posições com dados reais da LN Markets:', positions.length);
+    setData(prev => {
+      const transformedPositions = positions.map(pos => {
+        // Usar dados reais da LN Markets
+        const pnl = typeof pos.pl === 'number' ? pos.pl : 0;
+        const margin = typeof pos.margin === 'number' ? pos.margin : 0;
+        const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
+        const price = typeof pos.price === 'number' ? pos.price : 0;
+        const leverage = typeof pos.leverage === 'number' ? pos.leverage : 1;
+        
+        // Calcular P&L percentual de forma segura
+        const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
+        
+        console.log('🔄 REALTIME - Atualizando posição LN Markets:', {
+          id: pos.id,
+          side: pos.side,
+          pl: pos.pl,
+          pnl: pnl,
+          margin: margin,
+          pnlPercent: pnlPercent,
+          quantity: quantity,
+          price: price
+        });
+        
+        return {
+          id: pos.id,
+          symbol: 'BTC', // LN Markets only trades BTC futures
+          side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
+          quantity: quantity,
+          price: price,
+          margin: margin,
+          leverage: leverage,
+          pnl: pnl, // Usar o P&L real da LN Markets
+          pnlPercent: pnlPercent,
+          timestamp: Date.now()
+        };
+      });
+      
+      console.log('🔄 REALTIME - Posições atualizadas:', transformedPositions);
+      
+      return {
+        ...prev,
+        positions: transformedPositions,
+        lastUpdate: Date.now()
+      };
+    });
+  }, []);
+
   const value: RealtimeDataContextType = {
     data,
     subscribeToSymbol,
     unsubscribeFromSymbol,
     refreshData,
-    reconnect
+    reconnect,
+    loadRealPositions,
+    updatePositions
   };
 
   return (

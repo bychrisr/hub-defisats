@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { LNMarketsError } from '@/components/LNMarketsError';
 import { LNMarketsGuard } from '@/components/LNMarketsGuard';
 import SatsIcon from '@/components/SatsIcon';
-import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
+import { useUserPositions, useUserBalance, useConnectionStatus, useRealtimeData } from '@/contexts/RealtimeDataContext';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import {
   Table,
@@ -70,9 +70,11 @@ export default function Trades() {
   const realtimePositions = useUserPositions();
   const userBalance = useUserBalance();
   const { isConnected } = useConnectionStatus();
+  const { loadRealPositions, updatePositions } = useRealtimeData();
   
   const [positions, setPositions] = useState<LNPosition[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalValue, setTotalValue] = useState(0);
   const [totalPnl, setTotalPnl] = useState(0);
@@ -112,7 +114,15 @@ export default function Trades() {
   };
 
   // Função para formatar sats com ícone
-  const formatSats = (value: number) => {
+  const formatSats = (value: number | undefined) => {
+    if (value === undefined || value === null) {
+      return (
+        <span className="flex items-center gap-1">
+          -
+          <SatsIcon size={18} className="text-secondary" />
+        </span>
+      );
+    }
     return (
       <span className="flex items-center gap-1">
         {value.toLocaleString()}
@@ -121,7 +131,7 @@ export default function Trades() {
     );
   };
 
-  // Sincronizar dados em tempo real
+  // Sincronizar dados em tempo real - apenas quando há mudanças nas posições do contexto
   useEffect(() => {
     if (realtimePositions.length > 0) {
       console.log('📊 TRADES - Atualizando posições em tempo real:', realtimePositions.length);
@@ -183,12 +193,17 @@ export default function Trades() {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 
-  const fetchPositions = async () => {
+  const fetchPositions = async (isInitialLoad = false) => {
     try {
-      setIsLoading(true);
+      // Só mostrar loading no carregamento inicial
+      if (isInitialLoad) {
+        setIsLoading(true);
+      } else {
+        setIsUpdating(true);
+      }
       setError(null);
       
-      console.log('🔍 TRADES - Fetching LN Markets positions...');
+      console.log('🔍 TRADES - Fetching LN Markets positions...', isInitialLoad ? '(Initial Load)' : '(Background Update)');
       
       const response = await api.get('/api/lnmarkets/positions');
       const data = response.data;
@@ -220,7 +235,7 @@ export default function Trades() {
             tradingFees: (pos.opening_fee || 0) + (pos.closing_fee || 0),
             fundingCost: pos.sum_carry_fees || 0,
             status: pos.running ? 'open' as const : 'closed' as const,
-            side: pos.side === 'b' ? 'long' as const : 'short' as const,
+            side: pos.side === 'b' ? 'long' as const : 'short' as const, // 'b' = buy = long, 's' = sell = short
             asset: 'BTC', // LN Markets only trades BTC futures
             createdAt: new Date(pos.creation_ts || Date.now()).toISOString(),
             updatedAt: new Date(pos.market_filled_ts || Date.now()).toISOString(),
@@ -238,6 +253,15 @@ export default function Trades() {
         setTotalValue(totalValue);
         setTotalPnl(totalPnl);
         setTotalMargin(totalMargin);
+
+        // Atualizar contexto de tempo real com dados reais (dados brutos da LN Markets)
+        if (isInitialLoad) {
+          console.log('🔄 TRADES - Carregando posições iniciais no contexto de tempo real');
+          loadRealPositions(data.data.positions); // Passar dados brutos da LN Markets
+        } else {
+          console.log('🔄 TRADES - Atualizando posições no contexto de tempo real (silent)');
+          updatePositions(data.data.positions); // Passar dados brutos da LN Markets
+        }
       } else {
         console.error('❌ TRADES - Invalid data structure:', data);
         setError('Invalid response format from LN Markets');
@@ -264,18 +288,52 @@ export default function Trades() {
       
       setError(errorMessage);
     } finally {
-      setIsLoading(false);
+      // Só parar loading no carregamento inicial
+      if (isInitialLoad) {
+        setIsLoading(false);
+      } else {
+        setIsUpdating(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchPositions();
+    fetchPositions(true); // Carregamento inicial
   }, []);
+
+  // Atualizar posições periodicamente com dados reais da LN Markets
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    // Aguardar 3 segundos após o carregamento inicial antes de começar as atualizações automáticas
+    const initialDelay = setTimeout(() => {
+      intervalId = setInterval(() => {
+        console.log('🔄 TRADES - Atualizando posições automaticamente...');
+        fetchPositions(false); // Atualização periódica
+      }, 5000); // Atualizar a cada 5 segundos (mais responsivo)
+    }, 3000);
+
+    return () => {
+      clearTimeout(initialDelay);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, []);
+
+
+  // REMOVED: Este useEffect estava duplicando a lógica de atualização
+  // A atualização agora é feita diretamente na função fetchPositions
 
   const getPnlColor = (pnl: number) => {
     if (pnl > 0) return 'text-success';
     if (pnl < 0) return 'text-destructive';
     return 'text-text-secondary';
+  };
+
+  // Função wrapper para o botão de refresh
+  const handleRefresh = () => {
+    fetchPositions(false);
   };
 
   const getPnlIcon = (pnl: number) => {
@@ -307,7 +365,7 @@ export default function Trades() {
             showConfigureButton={error.includes('MISSING_CREDENTIALS') || error.includes('INVALID_CREDENTIALS')}
           />
           <div className="mt-4 text-center">
-            <Button onClick={fetchPositions} variant="outline">
+            <Button onClick={handleRefresh} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again
             </Button>
@@ -326,17 +384,25 @@ export default function Trades() {
           <div>
             <h1 className="text-3xl font-bold text-text-primary">Positions</h1>
             <p className="text-text-secondary">Monitor your active positions on LN Markets</p>
-            <RealtimeStatus className="mt-2" />
+            <div className="flex items-center gap-4 mt-2">
+              <RealtimeStatus />
+              {isUpdating && (
+                <div className="flex items-center gap-2 text-sm text-text-secondary">
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Updating data...</span>
+                </div>
+              )}
+            </div>
           </div>
-          <Button onClick={fetchPositions} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+          <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isUpdating}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
+            {isUpdating ? 'Updating...' : 'Refresh'}
           </Button>
         </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Margin</CardTitle>
             </CardHeader>
@@ -348,7 +414,7 @@ export default function Trades() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total P&L</CardTitle>
             </CardHeader>
@@ -362,7 +428,7 @@ export default function Trades() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Margin</CardTitle>
             </CardHeader>
@@ -376,7 +442,7 @@ export default function Trades() {
         </div>
 
         {/* Positions Table */}
-        <Card>
+        <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
           <CardHeader>
             <CardTitle>Active Positions</CardTitle>
             <CardDescription>
@@ -401,7 +467,7 @@ export default function Trades() {
                   <TableHeader>
                     <TableRow>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('side')}
                       >
                         <div className="flex items-center gap-2">
@@ -410,7 +476,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('quantity')}
                       >
                         <div className="flex items-center gap-2">
@@ -419,7 +485,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('price')}
                       >
                         <div className="flex items-center gap-2">
@@ -428,7 +494,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('liquidation')}
                       >
                         <div className="flex items-center gap-2">
@@ -437,7 +503,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('leverage')}
                       >
                         <div className="flex items-center gap-2">
@@ -446,7 +512,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('margin')}
                       >
                         <div className="flex items-center gap-2">
@@ -455,7 +521,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('pnl')}
                       >
                         <div className="flex items-center gap-2">
@@ -464,7 +530,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('marginRatio')}
                       >
                         <div className="flex items-center gap-2">
@@ -473,7 +539,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('tradingFees')}
                       >
                         <div className="flex items-center gap-2">
@@ -482,7 +548,7 @@ export default function Trades() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-bg-header select-none"
                         onClick={() => sortPositions('fundingCost')}
                       >
                         <div className="flex items-center gap-2">

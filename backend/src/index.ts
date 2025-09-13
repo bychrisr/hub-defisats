@@ -259,10 +259,10 @@ async function registerRoutes() {
       route: request.url,
     });
 
-    monitoring.captureMetric('http_request_duration_ms', reply.getResponseTime(), 'millisecond', {
-      method: request.method,
-      route: request.url,
-    });
+    // monitoring.captureMetric('http_request_duration_ms', reply.getResponseTime(), 'millisecond', {
+    //   method: request.method,
+    //   route: request.url,
+    // });
 
     // Prometheus metrics
     metrics.httpRequestsTotal.inc({

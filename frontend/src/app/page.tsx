@@ -10,28 +10,28 @@ export default function Home() {
       </div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100">
+        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-border hover:bg-bg-card">
           <h3 className="mb-3 text-2xl font-semibold">Automation</h3>
           <p className="m-0 max-w-[30ch] text-sm opacity-50">
             Automate your trading strategies with advanced algorithms.
           </p>
         </div>
 
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100">
+        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-border hover:bg-bg-card">
           <h3 className="mb-3 text-2xl font-semibold">Real-time</h3>
           <p className="m-0 max-w-[30ch] text-sm opacity-50">
             Monitor your positions in real-time with live updates.
           </p>
         </div>
 
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100">
+        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-border hover:bg-bg-card">
           <h3 className="mb-3 text-2xl font-semibold">Secure</h3>
           <p className="m-0 max-w-[30ch] text-sm opacity-50">
             Built with security in mind using the latest technologies.
           </p>
         </div>
 
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100">
+        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-border hover:bg-bg-card">
           <h3 className="mb-3 text-2xl font-semibold">Lightning</h3>
           <p className="m-0 max-w-[30ch] text-sm opacity-50">
             Integrated with Lightning Network for fast payments.

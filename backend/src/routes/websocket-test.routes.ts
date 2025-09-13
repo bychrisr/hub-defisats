@@ -15,11 +15,11 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       timestamp: new Date().toISOString()
     });
     
-    if (!userId) {
-      console.log('❌ WEBSOCKET TEST - User ID não fornecido, fechando conexão');
-      connection.socket.close(1008, 'User ID is required');
-      return;
-    }
+           if (!userId) {
+             console.log('❌ WEBSOCKET TEST - User ID não fornecido, fechando conexão');
+             connection.close(1008, 'User ID is required');
+             return;
+           }
 
     console.log('🔌 WEBSOCKET TEST - Processando conexão para usuário:', userId);
     
@@ -52,7 +52,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       };
       
       console.log('📤 WEBSOCKET TEST - Enviando mensagem de confirmação:', connectionMessage);
-      connection.socket.send(JSON.stringify(connectionMessage));
+      connection.send(JSON.stringify(connectionMessage));
       console.log('✅ WEBSOCKET TEST - Mensagem de confirmação enviada com sucesso');
 
       // Enviar dados de teste a cada 5 segundos
@@ -83,18 +83,18 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
           }
         };
 
-        try {
-          connection.socket.send(JSON.stringify(testMarketData));
-          connection.socket.send(JSON.stringify(testPositionData));
-          console.log('📊 WEBSOCKET TEST - Dados de teste enviados');
-        } catch (error) {
-          console.error('❌ WEBSOCKET TEST - Erro ao enviar dados de teste:', error);
-          clearInterval(testDataInterval);
-        }
+               try {
+                 connection.send(JSON.stringify(testMarketData));
+                 connection.send(JSON.stringify(testPositionData));
+                 console.log('📊 WEBSOCKET TEST - Dados de teste enviados');
+               } catch (error) {
+                 console.error('❌ WEBSOCKET TEST - Erro ao enviar dados de teste:', error);
+                 clearInterval(testDataInterval);
+               }
       }, 5000);
 
       // Handle client messages
-      connection.socket.on('message', (message) => {
+      connection.on('message', (message) => {
         console.log('📨 WEBSOCKET TEST - Mensagem recebida do cliente:', {
           userId,
           message: message.toString(),
@@ -116,7 +116,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection close
-      connection.socket.on('close', (code, reason) => {
+      connection.on('close', (code, reason) => {
         console.log('🔌 WEBSOCKET TEST - Conexão fechada:', {
           userId,
           code,
@@ -127,7 +127,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection error
-      connection.socket.on('error', (error) => {
+      connection.on('error', (error) => {
         console.error('❌ WEBSOCKET TEST - Erro na conexão:', {
           userId,
           error,
@@ -142,7 +142,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
         userId,
         timestamp: new Date().toISOString()
       });
-      connection.socket.close(1011, 'Internal server error');
+             connection.close(1011, 'Internal server error');
     }
   });
 }
