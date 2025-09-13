@@ -96,7 +96,8 @@ alias prod-db='docker exec -it hub-defisats-postgres-prod psql -U hubdefisats -d
 
 ```bash
 # Comandos completos:
-alias dev-prisma='docker exec -it hub-defisats-backend-dev npx prisma'
+alias dev-prisma='docker exec -it hub-defisats-backend npx prisma'
+alias dev-create-user='./scripts/create-dev-user.sh'
 alias staging-prisma='docker exec -it hub-defisats-backend-staging npx prisma'
 alias prod-prisma='docker exec -it hub-defisats-backend-prod npx prisma'
 ```
