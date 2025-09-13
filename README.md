@@ -30,6 +30,48 @@
 - ✅ **Docker Compose** para desenvolvimento
 - ✅ **Sistema de logs** detalhado
 
+## 🎨 Identidade Visual (CoinGecko Inspired)
+
+A aplicação utiliza uma paleta de cores inspirada no CoinGecko, mantendo a tipografia Inter conforme especificado.
+
+### 🌈 Paleta de Cores
+
+#### Modo Claro (Light Mode)
+- **Primária (botões, links, interações)**: `#3773f5` (CoinGecko Blue)
+- **Secundária (destaques, badges)**: `#f5ac37` (CoinGecko Orange)
+- **Fundo principal**: `#ffffff`
+- **Texto principal**: `#13161c`
+- **Texto secundário**: `#62666f`
+- **Alta (positivo, verde)**: `#0ecb81`
+- **Baixa (negativo, vermelho)**: `#f6465d`
+- **Linhas/divisores**: `#e6e8ec`
+- **Fundo cabeçalho tabela**: `#f6f7f8`
+- **Fundo cards (alternativo)**: `#f9fafb`
+
+#### Modo Escuro (Dark Mode)
+- **Primária (mantenha consistência)**: `#3773f5`
+- **Secundária (mantenha consistência)**: `#f5ac37`
+- **Fundo principal**: `#0d0f13`
+- **Fundo cards/containers**: `#16191d`
+- **Texto principal**: `#f1f3f4` (melhor contraste)
+- **Texto secundário**: `#a8b0b8` (melhor contraste)
+- **Alta (positivo, verde)**: `#0ecb81`
+- **Baixa (negativo, vermelho)**: `#f6465d`
+- **Linhas/divisores**: `#21262d`
+- **Fundo cabeçalho tabela**: `#16191d`
+- **Fundo cards (alternativo)**: `#1a1d22`
+
+### 📝 Tipografia
+- **Fonte principal**: Inter (mantida conforme especificação)
+- **Fonte monospace**: JetBrains Mono
+- **Pesos**: 400 (normal), 500 (medium), 600 (semibold), 700 (bold)
+
+### 🎯 Uso Semântico das Cores
+- `#0ecb81` para todos os valores positivos (ex: +3.2%)
+- `#f6465d` para todos os valores negativos
+- `#3773f5` para botões primários, links e CTAs
+- `#f5ac37` para badges, alertas secundários ou destaques de atenção
+
 ## 🚀 Como Executar
 
 ### Desenvolvimento

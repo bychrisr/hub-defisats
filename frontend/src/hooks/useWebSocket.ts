@@ -36,10 +36,18 @@ export const useWebSocket = ({
   const shouldReconnectRef = useRef(true);
 
   const connect = useCallback(() => {
+    console.log('🔌 WEBSOCKET - Tentando conectar:', {
+      url,
+      currentState: wsRef.current?.readyState,
+      timestamp: new Date().toISOString()
+    });
+
     if (wsRef.current?.readyState === WebSocket.OPEN) {
+      console.log('🔌 WEBSOCKET - Já está conectado, ignorando nova conexão');
       return;
     }
 
+    console.log('🔌 WEBSOCKET - Criando nova conexão WebSocket');
     setIsConnecting(true);
     setError(null);
 
@@ -48,7 +56,11 @@ export const useWebSocket = ({
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('🔌 WEBSOCKET - Conectado:', url);
+        console.log('🔌 WEBSOCKET - Conectado com sucesso:', {
+          url,
+          timestamp: new Date().toISOString(),
+          readyState: ws.readyState
+        });
         setIsConnected(true);
         setIsConnecting(false);
         setError(null);
@@ -57,12 +69,21 @@ export const useWebSocket = ({
       };
 
       ws.onmessage = (event) => {
+        console.log('📨 WEBSOCKET - Mensagem recebida:', {
+          data: event.data,
+          timestamp: new Date().toISOString()
+        });
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
+          console.log('📨 WEBSOCKET - Mensagem parseada:', message);
           setLastMessage(message);
           onMessage?.(message);
         } catch (err) {
-          console.error('❌ WEBSOCKET - Erro ao processar mensagem:', err);
+          console.error('❌ WEBSOCKET - Erro ao processar mensagem:', {
+            error: err,
+            data: event.data,
+            timestamp: new Date().toISOString()
+          });
         }
       };
 

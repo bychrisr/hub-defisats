@@ -17,6 +17,7 @@ import { cacheRoutes } from '@/routes/cache.routes';
 import { validationRoutes } from '@/routes/validation.routes';
 import { adminRoutes } from '@/routes/admin.routes';
 import { websocketRoutes } from '@/routes/websocket.routes';
+import { websocketTestRoutes } from '@/routes/websocket-test.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/services/metrics.service';
@@ -30,6 +31,7 @@ import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import websocket from '@fastify/websocket';
 
 // Initialize monitoring
 monitoring.initialize();
@@ -121,6 +123,11 @@ async function registerPlugins() {
     secret: config.jwt.secret,
   });
   console.log('✅ JWT plugin registered');
+
+  console.log('🔌 Registering WebSocket plugin...');
+  // WebSocket
+  await fastify.register(websocket);
+  console.log('✅ WebSocket plugin registered');
 
   console.log('🔌 Registering Swagger plugin...');
   // Swagger documentation
@@ -332,6 +339,10 @@ async function registerRoutes() {
   // WebSocket routes
   await fastify.register(websocketRoutes, { prefix: '/api' });
   console.log('✅ WebSocket routes registered');
+
+  // WebSocket test routes (without authentication)
+  await fastify.register(websocketTestRoutes, { prefix: '/test' });
+  console.log('✅ WebSocket test routes registered');
 
   // Validation routes (without /api prefix to avoid authentication)
   await fastify.register(validationRoutes);

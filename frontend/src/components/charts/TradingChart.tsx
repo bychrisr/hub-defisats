@@ -25,7 +25,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
   // WebSocket para dados em tempo real
   const { isConnected, isConnecting, error, connect, disconnect, sendMessage } = useWebSocket({
-    url: `ws://localhost:3001/ws/market?symbol=${symbol}`,
+    url: `ws://localhost:13010/ws/market?symbol=${symbol}`,
     onMessage: (message) => {
       const newCandle = marketDataService.processWebSocketMessage(message);
       if (newCandle && seriesRef.current) {
@@ -241,7 +241,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
                   })}
                 </div>
                 <div className={`text-sm flex items-center gap-1 ${
-                  marketData.changePercent24h >= 0 ? 'text-green-600' : 'text-red-600'
+                  marketData.changePercent24h >= 0 ? 'text-success' : 'text-destructive'
                 }`}>
                   {marketData.changePercent24h >= 0 ? (
                     <TrendingUp className="h-3 w-3" />
@@ -292,7 +292,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
           {/* Erro */}
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-2 rounded">
+            <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">
               Erro: {error}
             </div>
           )}

@@ -19,6 +19,30 @@ export default {
     },
     extend: {
       colors: {
+        // Core CoinGecko Colors
+        'coingecko-blue': '#3773f5',
+        'coingecko-orange': '#f5ac37',
+        'coingecko-green': '#0ecb81',
+        'coingecko-red': '#f6465d',
+        
+        // Light Mode Colors
+        'coingecko-bg': '#ffffff',
+        'coingecko-text-primary': '#13161c',
+        'coingecko-text-secondary': '#62666f',
+        'coingecko-border': '#e6e8ec',
+        'coingecko-header': '#f6f7f8',
+        'coingecko-card': '#f9fafb',
+        
+        // Dark Mode Colors
+        'coingecko-dark-bg': '#0d0f13',
+        'coingecko-dark-card': '#16191d',
+        'coingecko-dark-card-alt': '#1a1d22',
+        'coingecko-dark-text-primary': '#eaecef',
+        'coingecko-dark-text-secondary': '#848e9c',
+        'coingecko-dark-border': '#21262d',
+        'coingecko-dark-header': '#16191d',
+
+        // CSS Variables (existing system)
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -80,6 +104,16 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        // Text colors
+        'text-primary': 'hsl(var(--text-primary))',
+        'text-secondary': 'hsl(var(--text-secondary))',
+        // Background colors
+        'bg-primary': 'hsl(var(--bg-primary))',
+        'bg-card': 'hsl(var(--bg-card))',
+        'bg-card-alt': 'hsl(var(--bg-card-alt))',
+        'bg-header': 'hsl(var(--bg-header))',
+        // Border colors
+        'border-light': 'hsl(var(--border-light))',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -103,13 +137,42 @@ export default {
             height: '0',
           },
         },
+        'fade-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(10px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        'slide-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateX(-10px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateX(0)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-in': 'fade-in 0.3s ease-out',
+        'slide-in': 'slide-in 0.3s ease-out',
       },
       boxShadow: {
         glow: 'var(--shadow-glow)',
+        'coingecko-sm': '0 1px 2px 0 rgba(55, 115, 245, 0.05)',
+        'coingecko-md': '0 4px 6px -1px rgba(55, 115, 245, 0.1)',
+        'coingecko-lg': '0 10px 15px -3px rgba(55, 115, 245, 0.1)',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'Monaco', 'monospace'],
       },
     },
   },

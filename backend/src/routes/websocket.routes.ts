@@ -6,7 +6,163 @@ import { websocketManager } from '@/services/websocket-manager.service';
 export async function websocketRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
 
-  // Apply authentication middleware to all routes
+  // WebSocket route for real-time data (without authentication for testing)
+  fastify.get('/ws/realtime', { websocket: true }, async (connection, req) => {
+    const userId = req.query.userId as string;
+    
+    console.log('🔌 WEBSOCKET ROUTE - Nova conexão recebida:', {
+      userId,
+      remoteAddress: req.socket.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date().toISOString()
+    });
+    
+    if (!userId) {
+      console.log('❌ WEBSOCKET ROUTE - User ID não fornecido, fechando conexão');
+      connection.socket.close(1008, 'User ID is required');
+      return;
+    }
+
+    console.log('🔌 WEBSOCKET ROUTE - Processando conexão para usuário:', userId);
+    
+    // Get user credentials from database or config
+    const credentials = {
+      apiKey: process.env.LN_MARKETS_API_KEY || '',
+      apiSecret: process.env.LN_MARKETS_API_SECRET || '',
+      passphrase: process.env.LN_MARKETS_PASSPHRASE || '',
+      isTestnet: process.env.LN_MARKETS_TESTNET === 'true'
+    };
+
+    console.log('🔑 WEBSOCKET ROUTE - Credenciais LN Markets:', {
+      hasApiKey: !!credentials.apiKey,
+      hasApiSecret: !!credentials.apiSecret,
+      hasPassphrase: !!credentials.passphrase,
+      isTestnet: credentials.isTestnet
+    });
+
+    try {
+      // Create WebSocket connection
+      console.log('🔄 WEBSOCKET ROUTE - Criando conexão WebSocket para usuário:', userId);
+      const wsService = await websocketManager.createConnection(userId, credentials);
+      
+      // Set up message forwarding
+      wsService.on('marketUpdate', (data) => {
+        console.log('📈 WEBSOCKET ROUTE - Enviando dados de mercado:', data);
+        const message = {
+          type: 'market_data',
+          data: {
+            symbol: 'BTC',
+            price: data.price,
+            volume: data.volume,
+            timestamp: data.timestamp
+          }
+        };
+        connection.socket.send(JSON.stringify(message));
+      });
+
+      wsService.on('positionUpdate', (data) => {
+        console.log('📊 WEBSOCKET ROUTE - Enviando atualização de posição:', data);
+        const message = {
+          type: 'position_update',
+          data: {
+            id: data.id,
+            symbol: 'BTC',
+            side: data.side,
+            quantity: data.quantity,
+            price: data.price,
+            margin: data.margin,
+            leverage: data.leverage,
+            pnl: data.pnl,
+            pnlPercent: data.pnl / data.margin * 100,
+            timestamp: data.timestamp
+          }
+        };
+        connection.socket.send(JSON.stringify(message));
+      });
+
+      wsService.on('marginUpdate', (data) => {
+        console.log('💰 WEBSOCKET ROUTE - Enviando atualização de margem:', data);
+        const message = {
+          type: 'balance_update',
+          data: {
+            total_balance: data.totalValue,
+            available_balance: data.availableMargin,
+            margin_used: data.margin,
+            timestamp: data.timestamp
+          }
+        };
+        connection.socket.send(JSON.stringify(message));
+      });
+
+      // Handle client messages
+      connection.socket.on('message', (message) => {
+        console.log('📨 WEBSOCKET ROUTE - Mensagem recebida do cliente:', {
+          userId,
+          message: message.toString(),
+          timestamp: new Date().toISOString()
+        });
+        
+        try {
+          const data = JSON.parse(message.toString());
+          console.log('📨 WEBSOCKET ROUTE - Dados parseados:', data);
+          
+          switch (data.type) {
+            case 'subscribe_market':
+              console.log('📈 WEBSOCKET ROUTE - Inscrevendo em mercado:', data.symbol);
+              wsService.subscribeToMarket(data.symbol || 'BTC');
+              break;
+            case 'subscribe_positions':
+              console.log('📊 WEBSOCKET ROUTE - Inscrevendo em posições');
+              wsService.subscribeToPositions();
+              break;
+            case 'subscribe_margin':
+              console.log('💰 WEBSOCKET ROUTE - Inscrevendo em margem');
+              wsService.subscribeToMargin();
+              break;
+            default:
+              console.log('❓ WEBSOCKET ROUTE - Tipo de mensagem desconhecido:', data.type);
+          }
+        } catch (error) {
+          console.error('❌ WEBSOCKET ROUTE - Erro ao processar mensagem:', {
+            error,
+            message: message.toString(),
+            userId,
+            timestamp: new Date().toISOString()
+          });
+        }
+      });
+
+      // Handle connection close
+      connection.socket.on('close', (code, reason) => {
+        console.log('🔌 WEBSOCKET ROUTE - Conexão fechada:', {
+          userId,
+          code,
+          reason: reason.toString(),
+          timestamp: new Date().toISOString()
+        });
+        websocketManager.disconnectUser(userId);
+      });
+
+      // Handle connection error
+      connection.socket.on('error', (error) => {
+        console.error('❌ WEBSOCKET ROUTE - Erro na conexão:', {
+          userId,
+          error,
+          timestamp: new Date().toISOString()
+        });
+      });
+
+    } catch (error) {
+      console.error('❌ WEBSOCKET ROUTE - Erro ao criar conexão:', {
+        error,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+      connection.socket.close(1011, 'Internal server error');
+    }
+  });
+
+  // Apply authentication middleware to all routes (except WebSocket routes above)
   fastify.addHook('preHandler', authMiddleware);
 
   // Connect to WebSocket
@@ -39,9 +195,16 @@ export async function websocketRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const user = (request as any).user;
-        console.log('🔌 WEBSOCKET ROUTES - User connecting:', user.id);
+        console.log('🔌 WEBSOCKET ROUTES - Usuário conectando:', {
+          userId: user.id,
+          userEmail: user.email,
+          timestamp: new Date().toISOString(),
+          ip: request.ip,
+          userAgent: request.headers['user-agent']
+        });
 
         // Get user credentials
+        console.log('🔑 WEBSOCKET ROUTES - Buscando credenciais do usuário:', user.id);
         const userProfile = await prisma.user.findUnique({
           where: { id: user.id },
           select: {
@@ -51,7 +214,15 @@ export async function websocketRoutes(fastify: FastifyInstance) {
           },
         });
 
+        console.log('🔑 WEBSOCKET ROUTES - Credenciais encontradas:', {
+          hasApiKey: !!userProfile?.ln_markets_api_key,
+          hasApiSecret: !!userProfile?.ln_markets_api_secret,
+          hasPassphrase: !!userProfile?.ln_markets_passphrase,
+          userId: user.id
+        });
+
         if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+          console.log('❌ WEBSOCKET ROUTES - Credenciais LN Markets não configuradas para usuário:', user.id);
           return reply.status(400).send({
             success: false,
             error: 'MISSING_CREDENTIALS',

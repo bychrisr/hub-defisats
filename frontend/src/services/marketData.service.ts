@@ -29,8 +29,8 @@ class MarketDataService {
   private wsUrl: string;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    this.wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
+    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:13010';
+    this.wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:13010/ws';
   }
 
   // Obter dados históricos via REST API

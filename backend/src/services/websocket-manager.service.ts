@@ -25,16 +25,23 @@ export class WebSocketManagerService extends EventEmitter {
     userId: string, 
     credentials: LNMarketsWebSocketCredentials
   ): Promise<LNMarketsWebSocketService> {
+    console.log('🔌 WEBSOCKET MANAGER - Criando/conectando usuário:', {
+      userId,
+      hasCredentials: !!(credentials.apiKey && credentials.apiSecret),
+      isTestnet: credentials.isTestnet,
+      timestamp: new Date().toISOString()
+    });
+
     // Check if connection already exists
     const existingConnection = this.connections.get(userId);
     if (existingConnection && existingConnection.wsService.getConnectionStatus()) {
-      console.log('🔄 WEBSOCKET MANAGER - Reusing existing connection for user:', userId);
+      console.log('🔄 WEBSOCKET MANAGER - Reutilizando conexão existente para usuário:', userId);
       existingConnection.lastActivity = Date.now();
       return existingConnection.wsService;
     }
 
     // Create new connection
-    console.log('🆕 WEBSOCKET MANAGER - Creating new connection for user:', userId);
+    console.log('🆕 WEBSOCKET MANAGER - Criando nova conexão para usuário:', userId);
     const wsService = new LNMarketsWebSocketService(credentials);
     
     // Set up event listeners

@@ -4,165 +4,182 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LN Markets Trading Platform Design System */
+/* CoinGecko Inspired Design System */
 
 @layer base {
   :root {
+    /* ===== LIGHT MODE - CoinGecko Inspired ===== */
+    
     /* Core Brand Colors */
-    --background: 0 0% 100%;
-    --foreground: 210 24% 16%;
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 210 24% 8%; /* #13161c */
 
-    /* Primary - Deep Blue (Technology & Trust) */
-    --primary: 216 83% 20%;
-    --primary-foreground: 0 0% 98%;
-    --primary-hover: 216 83% 15%;
-    --primary-light: 216 83% 25%;
+    /* Primary - CoinGecko Blue */
+    --primary: 220 100% 60%; /* #3773f5 */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 220 100% 55%;
+    --primary-light: 220 100% 65%;
 
-    /* Secondary - Energy Orange */
-    --secondary: 24 95% 53%;
-    --secondary-foreground: 0 0% 98%;
-    --secondary-hover: 24 95% 48%;
-    --secondary-light: 24 95% 58%;
+    /* Secondary - CoinGecko Orange */
+    --secondary: 38 100% 60%; /* #f5ac37 */
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 38 100% 55%;
+    --secondary-light: 38 100% 65%;
 
-    /* Success - Profit Green */
-    --success: 158 64% 52%;
-    --success-foreground: 0 0% 98%;
-    --success-hover: 158 64% 47%;
-    --success-light: 158 64% 57%;
+    /* Success - CoinGecko Green */
+    --success: 158 100% 40%; /* #0ecb81 */
+    --success-foreground: 0 0% 100%;
+    --success-hover: 158 100% 35%;
+    --success-light: 158 100% 45%;
 
-    /* Destructive - Risk Red */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --destructive-hover: 0 84% 55%;
-    --destructive-light: 0 84% 65%;
+    /* Destructive - CoinGecko Red */
+    --destructive: 350 100% 60%; /* #f6465d */
+    --destructive-foreground: 0 0% 100%;
+    --destructive-hover: 350 100% 55%;
+    --destructive-light: 350 100% 65%;
 
-    /* Warning - Attention Yellow */
-    --warning: 43 96% 56%;
-    --warning-foreground: 216 83% 20%;
-    --warning-hover: 43 96% 51%;
-    --warning-light: 43 96% 61%;
+    /* Warning - CoinGecko Orange (same as secondary) */
+    --warning: 38 100% 60%; /* #f5ac37 */
+    --warning-foreground: 0 0% 100%;
+    --warning-hover: 38 100% 55%;
+    --warning-light: 38 100% 65%;
+
+    /* Text Colors */
+    --text-primary: 210 24% 8%; /* #13161c */
+    --text-secondary: 210 8% 40%; /* #62666f */
+
+    /* Background Colors */
+    --bg-primary: 0 0% 100%; /* #ffffff */
+    --bg-card: 210 20% 98%; /* #f9fafb */
+    --bg-card-alt: 210 20% 97%; /* #f6f7f8 */
+    --bg-header: 210 20% 97%; /* #f6f7f8 */
+
+    /* Border Colors */
+    --border: 210 20% 90%; /* #e6e8ec */
+    --border-light: 210 20% 95%;
 
     /* Neutral Grays */
-    --muted: 215 20% 65%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 216 83% 20%;
+    --muted: 210 8% 40%; /* #62666f */
+    --muted-foreground: 210 8% 60%;
+    --accent: 210 20% 96%;
+    --accent-foreground: 210 24% 8%;
 
     /* UI Elements */
     --card: 0 0% 100%;
-    --card-foreground: 210 24% 16%;
+    --card-foreground: 210 24% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 24% 16%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 216 83% 20%;
+    --popover-foreground: 210 24% 8%;
+    --input: 210 20% 90%;
+    --ring: 220 100% 60%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 24% 8%;
+    --sidebar-primary: 220 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 210 24% 8%;
+    --sidebar-border: 210 20% 90%;
+    --sidebar-ring: 220 100% 60%;
+
+    /* SatsIcon colors - preto no light theme para contraste */
+    --sats-icon-color: 0 0% 0%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(
-      135deg,
-      hsl(216 83% 20%),
-      hsl(216 83% 15%)
-    );
-    --gradient-success: linear-gradient(
-      135deg,
-      hsl(158 64% 52%),
-      hsl(158 64% 47%)
-    );
-    --gradient-hero: linear-gradient(135deg, hsl(216 83% 20%), hsl(24 95% 53%));
+    --gradient-primary: linear-gradient(135deg, #3773f5, #2c5ce6);
+    --gradient-success: linear-gradient(135deg, #0ecb81, #0bb870);
+    --gradient-warning: linear-gradient(135deg, #f5ac37, #e69a2e);
+    --gradient-hero: linear-gradient(135deg, #3773f5, #f5ac37);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(216 83% 20% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(216 83% 20% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(216 83% 20% / 0.1);
-    --shadow-glow: 0 0 20px hsl(216 83% 20% / 0.3);
+    --shadow-sm: 0 1px 2px 0 rgba(55, 115, 245, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(55, 115, 245, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(55, 115, 245, 0.1);
+    --shadow-glow: 0 0 20px rgba(55, 115, 245, 0.3);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.75rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-
-    /* SatsIcon colors - sempre preto no light theme */
-    --sats-icon-color: 0 0% 0%;
   }
 
   .dark {
-    /* Core Brand Colors - Dark Mode */
-    --background: 216 83% 8%;
-    --foreground: 0 0% 98%;
+    /* ===== DARK MODE - CoinGecko Inspired ===== */
+    
+    /* Core Brand Colors */
+    --background: 210 24% 5%; /* #0d0f13 */
+    --foreground: 210 20% 92%; /* #eaecef */
 
-    /* Primary - Deep Blue (adjusted for dark) */
-    --primary: 216 83% 25%;
-    --primary-foreground: 0 0% 98%;
-    --primary-hover: 216 83% 30%;
-    --primary-light: 216 83% 35%;
+    /* Primary - CoinGecko Blue (same as light) */
+    --primary: 220 100% 60%; /* #3773f5 */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 220 100% 65%;
+    --primary-light: 220 100% 55%;
 
-    /* Secondary - Energy Orange (slightly dimmed) */
-    --secondary: 24 95% 48%;
-    --secondary-foreground: 0 0% 98%;
-    --secondary-hover: 24 95% 53%;
-    --secondary-light: 24 95% 43%;
+    /* Secondary - CoinGecko Orange (same as light) */
+    --secondary: 38 100% 60%; /* #f5ac37 */
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 38 100% 65%;
+    --secondary-light: 38 100% 55%;
 
-    /* Success - Profit Green (adjusted) */
-    --success: 158 64% 47%;
-    --success-foreground: 0 0% 98%;
-    --success-hover: 158 64% 52%;
-    --success-light: 158 64% 42%;
+    /* Success - CoinGecko Green (same as light) */
+    --success: 158 100% 40%; /* #0ecb81 */
+    --success-foreground: 0 0% 100%;
+    --success-hover: 158 100% 45%;
+    --success-light: 158 100% 35%;
 
-    /* Destructive - Risk Red (adjusted) */
-    --destructive: 0 84% 55%;
-    --destructive-foreground: 0 0% 98%;
-    --destructive-hover: 0 84% 60%;
-    --destructive-light: 0 84% 50%;
+    /* Destructive - CoinGecko Red (same as light) */
+    --destructive: 350 100% 60%; /* #f6465d */
+    --destructive-foreground: 0 0% 100%;
+    --destructive-hover: 350 100% 65%;
+    --destructive-light: 350 100% 55%;
 
-    /* Warning - Attention Yellow (adjusted) */
-    --warning: 43 96% 51%;
-    --warning-foreground: 216 83% 8%;
-    --warning-hover: 43 96% 56%;
-    --warning-light: 43 96% 46%;
+    /* Warning - CoinGecko Orange (same as light) */
+    --warning: 38 100% 60%; /* #f5ac37 */
+    --warning-foreground: 0 0% 100%;
+    --warning-hover: 38 100% 65%;
+    --warning-light: 38 100% 55%;
 
-    /* Neutral Grays - Dark Mode */
-    --muted: 215 20% 35%;
-    --muted-foreground: 215 16% 65%;
-    --accent: 216 83% 12%;
-    --accent-foreground: 0 0% 98%;
+    /* Text Colors */
+    --text-primary: 210 20% 95%; /* Mais claro para melhor contraste */
+    --text-secondary: 210 8% 70%; /* Mais claro para melhor contraste */
 
-    /* UI Elements - Dark Mode */
-    --card: 216 83% 10%;
-    --card-foreground: 0 0% 98%;
-    --popover: 216 83% 10%;
-    --popover-foreground: 0 0% 98%;
-    --border: 216 83% 15%;
-    --input: 216 83% 15%;
-    --ring: 216 83% 30%;
+    /* Background Colors */
+    --bg-primary: 210 24% 5%; /* #0d0f13 */
+    --bg-card: 210 24% 8%; /* #16191d */
+    --bg-card-alt: 210 24% 10%; /* #1a1d22 */
+    --bg-header: 210 24% 8%; /* #16191d */
 
-    /* Sidebar - Dark Mode */
-    --sidebar-background: 216 83% 8%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 216 83% 25%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 216 83% 12%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 216 83% 15%;
-    --sidebar-ring: 216 83% 30%;
+    /* Border Colors */
+    --border: 210 24% 12%; /* #21262d */
+    --border-light: 210 24% 15%;
 
-    /* SatsIcon colors - sempre branco no dark theme */
+    /* Neutral Grays */
+    --muted: 210 8% 60%; /* #848e9c */
+    --muted-foreground: 210 8% 40%;
+    --accent: 210 24% 8%;
+    --accent-foreground: 210 20% 92%;
+
+    /* UI Elements */
+    --card: 210 24% 8%;
+    --card-foreground: 210 20% 92%;
+    --popover: 210 24% 8%;
+    --popover-foreground: 210 20% 92%;
+    --input: 210 24% 12%;
+    --ring: 220 100% 60%;
+
+    /* Sidebar */
+    --sidebar-background: 210 24% 5%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 220 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 24% 8%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 210 24% 12%;
+    --sidebar-ring: 220 100% 60%;
+
+    /* SatsIcon colors - branco no dark theme para contraste */
     --sats-icon-color: 0 0% 100%;
   }
 }
@@ -181,6 +198,41 @@
       'Segoe UI',
       Roboto,
       sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Garantir que todos os textos usem as variáveis corretas */
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--text-primary));
+  }
+
+  p, span, div {
+    color: inherit;
+  }
+
+  /* Override para classes hardcoded que não respeitam o tema */
+  .text-gray-900 {
+    color: hsl(var(--text-primary)) !important;
+  }
+
+  .text-gray-800 {
+    color: hsl(var(--text-primary)) !important;
+  }
+
+  .text-gray-700 {
+    color: hsl(var(--text-primary)) !important;
+  }
+
+  .text-gray-600 {
+    color: hsl(var(--text-secondary)) !important;
+  }
+
+  .text-gray-500 {
+    color: hsl(var(--text-secondary)) !important;
+  }
+
+  .text-gray-400 {
+    color: hsl(var(--text-secondary)) !important;
   }
 
   /* Aplicar tema baseado no data-theme */
@@ -192,15 +244,31 @@
     color-scheme: light;
   }
 
+  /* Garantir que o tema seja aplicado globalmente */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Forçar aplicação do tema em elementos específicos */
+  .min-h-screen {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
   code,
   pre {
     font-family:
       'JetBrains Mono', 'Fira Code', Monaco, 'Cascadia Code', monospace;
   }
+
+  /* Smooth transitions for theme switching */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
 }
 
 @layer components {
-  /* Custom button variants */
+  /* Custom button variants - CoinGecko inspired */
   .btn-hero {
     @apply bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:shadow-glow transition-all duration-300;
   }
@@ -213,7 +281,7 @@
     @apply bg-warning text-warning-foreground hover:bg-warning/90 border-warning;
   }
 
-  /* Card variants */
+  /* Card variants - CoinGecko inspired */
   .card-gradient {
     @apply bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20;
   }
@@ -226,6 +294,31 @@
     @apply bg-destructive/5 border border-destructive/20;
   }
 
+  /* CoinGecko specific components */
+  .coingecko-card {
+    @apply bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow;
+  }
+
+  .coingecko-header {
+    @apply bg-bg-header border-b border-border;
+  }
+
+  .coingecko-positive {
+    @apply text-success font-medium;
+  }
+
+  .coingecko-negative {
+    @apply text-destructive font-medium;
+  }
+
+  .coingecko-primary {
+    @apply text-primary font-medium;
+  }
+
+  .coingecko-secondary {
+    @apply text-secondary font-medium;
+  }
+
   /* Custom animations */
   .animate-fade-in {
     @apply opacity-0 animate-in fade-in duration-500;
@@ -235,7 +328,7 @@
     @apply translate-y-4 opacity-0 animate-in slide-in-from-bottom-4 fade-in duration-500;
   }
 
-  /* Status indicators */
+  /* Status indicators - CoinGecko inspired */
   .status-active {
     @apply bg-success/20 text-success border-success/30;
   }
@@ -246,5 +339,36 @@
 
   .status-error {
     @apply bg-destructive/20 text-destructive border-destructive/30;
+  }
+
+  /* Table styles - CoinGecko inspired */
+  .coingecko-table {
+    @apply w-full border-collapse;
+  }
+
+  .coingecko-table th {
+    @apply bg-bg-header text-text-secondary font-medium text-sm px-4 py-3 text-left border-b border-border;
+  }
+
+  .coingecko-table td {
+    @apply px-4 py-3 border-b border-border text-text-primary;
+  }
+
+  .coingecko-table tbody tr:hover {
+    @apply bg-bg-card-alt;
+  }
+
+  /* Input styles - CoinGecko inspired */
+  .coingecko-input {
+    @apply w-full px-3 py-2 border border-border rounded-md bg-background text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+  }
+
+  /* Button styles - CoinGecko inspired */
+  .coingecko-btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary-hover px-4 py-2 rounded-md font-medium transition-all;
+  }
+
+  .coingecko-btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary-hover px-4 py-2 rounded-md font-medium transition-all;
   }
 }

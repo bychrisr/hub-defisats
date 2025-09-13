@@ -20,6 +20,11 @@ import {
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
+import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
+import RealtimeStatus from '@/components/RealtimeStatus';
+import { useThemeClasses } from '@/contexts/ThemeContext';
+import CoinGeckoCard from '@/components/CoinGeckoCard';
+import PriceChange from '@/components/PriceChange';
 
 export default function Dashboard() {
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
@@ -30,6 +35,11 @@ export default function Dashboard() {
     stats,
     isLoading: automationLoading,
   } = useAutomationStore();
+  
+  // Dados em tempo real
+  const realtimePositions = useUserPositions();
+  const userBalance = useUserBalance();
+  const { isConnected } = useConnectionStatus();
 
   useEffect(() => {
     if (!user) {
@@ -60,8 +70,8 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Welcome back, {user?.email}</p>
+            <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
+            <p className="text-text-secondary">Welcome back, {user?.email}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant="outline" className="text-sm">
@@ -162,7 +172,7 @@ export default function Dashboard() {
                 </Button>
 
                 <Button asChild variant="outline" className="h-auto p-4">
-                  <Link to="/automations">
+                  <Link to="/automation">
                     <div className="flex items-center space-x-3">
                       <Settings className="h-5 w-5" />
                       <div className="text-left">
@@ -229,7 +239,7 @@ export default function Dashboard() {
                           <div className="text-sm font-medium capitalize">
                             {activity.type.replace('_', ' ')}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-text-secondary">
                             {new Date(activity.updated_at).toLocaleDateString()}
                           </div>
                         </div>
@@ -245,9 +255,9 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">No recent activity</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <BarChart3 className="h-12 w-12 text-text-secondary mx-auto mb-2" />
+                  <p className="text-sm text-text-secondary">No recent activity</p>
+                  <p className="text-xs text-text-secondary mt-1">
                     Create your first automation to get started
                   </p>
                 </div>
@@ -269,10 +279,10 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <Shield className="h-5 w-5 text-blue-500" />
+                    <Shield className="h-5 w-5 text-primary" />
                     <div>
                       <div className="font-medium">Margin Guard</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-text-secondary">
                         Position protection
                       </div>
                     </div>
@@ -284,10 +294,10 @@ export default function Dashboard() {
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <TrendingUp className="h-5 w-5 text-green-500" />
+                    <TrendingUp className="h-5 w-5 text-success" />
                     <div>
                       <div className="font-medium">TP/SL</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-text-secondary">
                         Take profit / Stop loss
                       </div>
                     </div>
@@ -297,10 +307,10 @@ export default function Dashboard() {
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <Settings className="h-5 w-5 text-purple-500" />
+                    <Settings className="h-5 w-5 text-secondary" />
                     <div>
                       <div className="font-medium">Auto Entry</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-text-secondary">
                         Automatic entries
                       </div>
                     </div>

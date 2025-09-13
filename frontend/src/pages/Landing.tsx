@@ -38,7 +38,7 @@ export const Landing = () => {
             <Link to="/login">
               <Button variant="ghost">Entrar</Button>
             </Link>
-            <Link to="/signup">
+            <Link to="/register">
               <Button className="btn-hero">Começar Gratuitamente</Button>
             </Link>
           </div>
@@ -59,7 +59,7 @@ export const Landing = () => {
             Guard monitora suas posições 24/7 e age quando você não pode.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link to="/signup">
+            <Link to="/register">
               <Button size="lg" className="btn-hero text-lg px-8 py-4">
                 Começar Gratuitamente
                 <ArrowRight className="ml-2 h-5 w-5" />

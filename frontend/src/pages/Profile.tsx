@@ -164,18 +164,18 @@ export default function Profile() {
 
       {/* Success/Error Messages */}
       {success && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
+        <Alert className="border-success/20 bg-success/10">
+          <CheckCircle className="h-4 w-4 text-success" />
+          <AlertDescription className="text-success">
             {success}
           </AlertDescription>
         </Alert>
       )}
 
       {error && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
+        <Alert className="border-destructive/20 bg-destructive/10">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-destructive">
             {error}
           </AlertDescription>
         </Alert>
@@ -271,11 +271,11 @@ export default function Profile() {
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center space-x-3">
                   {credentialsStatus.status === 'complete' ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-success" />
                   ) : credentialsStatus.status === 'partial' ? (
-                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                    <AlertTriangle className="h-5 w-5 text-warning" />
                   ) : (
-                    <XCircle className="h-5 w-5 text-red-600" />
+                    <XCircle className="h-5 w-5 text-destructive" />
                   )}
                   <div>
                     <p className="font-medium">Credentials Status</p>
@@ -329,7 +329,7 @@ export default function Profile() {
                       </Button>
                     </div>
                     {errors.ln_markets_api_key && (
-                      <p className="text-sm text-red-500">
+                      <p className="text-sm text-destructive">
                         {errors.ln_markets_api_key.message}
                       </p>
                     )}
@@ -367,7 +367,7 @@ export default function Profile() {
                       </Button>
                     </div>
                     {errors.ln_markets_api_secret && (
-                      <p className="text-sm text-red-500">
+                      <p className="text-sm text-destructive">
                         {errors.ln_markets_api_secret.message}
                       </p>
                     )}
@@ -405,7 +405,7 @@ export default function Profile() {
                       </Button>
                     </div>
                     {errors.ln_markets_passphrase && (
-                      <p className="text-sm text-red-500">
+                      <p className="text-sm text-destructive">
                         {errors.ln_markets_passphrase.message}
                       </p>
                     )}

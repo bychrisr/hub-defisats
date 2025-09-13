@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/stores/auth';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggle from '@/components/ThemeToggle';
+import RealtimeStatus from '@/components/RealtimeStatus';
+import { useThemeClasses } from '@/contexts/ThemeContext';
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -21,6 +23,7 @@ interface HeaderProps {
 export const Header = ({ onToggleSidebar }: HeaderProps) => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const themeClasses = useThemeClasses();
 
   const handleLogout = async () => {
     try {
@@ -44,18 +47,19 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className={`sticky top-0 z-50 w-full border-b ${themeClasses.border} ${themeClasses.bgHeader} backdrop-blur supports-[backdrop-filter]:bg-bg-header/60 ${themeClasses.transition}`}>
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">HD</span>
             </div>
-            <span className="font-bold text-lg">Hub-defisats</span>
+            <span className={`font-bold text-lg ${themeClasses.textPrimary}`}>Hub-defisats</span>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
+          <RealtimeStatus className="hidden sm:flex" />
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -125,3 +129,5 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
     </header>
   );
 };
+
+export default Header;

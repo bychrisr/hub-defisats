@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { LNMarketsError } from '@/components/LNMarketsError';
 import { LNMarketsGuard } from '@/components/LNMarketsGuard';
 import SatsIcon from '@/components/SatsIcon';
+import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
+import RealtimeStatus from '@/components/RealtimeStatus';
 import {
   Table,
   TableBody,
@@ -64,6 +66,11 @@ interface LNPositionsResponse {
 }
 
 export default function Trades() {
+  // Dados em tempo real
+  const realtimePositions = useUserPositions();
+  const userBalance = useUserBalance();
+  const { isConnected } = useConnectionStatus();
+  
   const [positions, setPositions] = useState<LNPosition[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,11 +93,11 @@ export default function Trades() {
   // Função para obter ícone de ordenação
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+      return <ArrowUpDown className="h-4 w-4 text-text-secondary" />;
     }
     return sortDirection === 'asc' 
-      ? <ArrowUp className="h-4 w-4 text-blue-600" />
-      : <ArrowDown className="h-4 w-4 text-blue-600" />;
+      ? <ArrowUp className="h-4 w-4 text-primary" />
+      : <ArrowDown className="h-4 w-4 text-primary" />;
   };
 
   // Função para formatar valores USD de forma mais amigável
@@ -109,10 +116,47 @@ export default function Trades() {
     return (
       <span className="flex items-center gap-1">
         {value.toLocaleString()}
-        <SatsIcon size={18} className="text-orange-500" />
+        <SatsIcon size={18} className="text-secondary" />
       </span>
     );
   };
+
+  // Sincronizar dados em tempo real
+  useEffect(() => {
+    if (realtimePositions.length > 0) {
+      console.log('📊 TRADES - Atualizando posições em tempo real:', realtimePositions.length);
+      
+      // Converter dados de tempo real para formato da página
+      const convertedPositions: LNPosition[] = realtimePositions.map(pos => ({
+        id: pos.id,
+        quantity: pos.quantity,
+        price: pos.price,
+        liquidation: pos.price * 0.1, // Calcular liquidação baseada no preço
+        leverage: pos.leverage,
+        margin: pos.margin,
+        pnl: pos.pnl,
+        pnlPercentage: pos.pnlPercent,
+        marginRatio: pos.margin / (pos.quantity * pos.price),
+        tradingFees: 0, // Será calculado pelo backend
+        fundingCost: 0, // Será calculado pelo backend
+        status: 'open' as const,
+        side: pos.side,
+        asset: pos.symbol,
+        createdAt: new Date(pos.timestamp).toISOString(),
+        updatedAt: new Date(pos.timestamp).toISOString()
+      }));
+      
+      setPositions(convertedPositions);
+      
+      // Calcular totais
+      const totalPnlValue = convertedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
+      const totalMarginValue = convertedPositions.reduce((sum, pos) => sum + pos.margin, 0);
+      
+      setTotalPnl(totalPnlValue);
+      setTotalMargin(totalMarginValue);
+      setTotalValue(totalMarginValue); // Total Value agora é Total Margin
+    }
+  }, [realtimePositions]);
 
   // Função para obter posições ordenadas
   const getSortedPositions = () => {
@@ -229,14 +273,14 @@ export default function Trades() {
   }, []);
 
   const getPnlColor = (pnl: number) => {
-    if (pnl > 0) return 'text-green-600';
-    if (pnl < 0) return 'text-red-600';
-    return 'text-gray-600';
+    if (pnl > 0) return 'text-success';
+    if (pnl < 0) return 'text-destructive';
+    return 'text-text-secondary';
   };
 
   const getPnlIcon = (pnl: number) => {
-    if (pnl > 0) return <TrendingUp className="h-4 w-4 text-green-600" />;
-    if (pnl < 0) return <TrendingDown className="h-4 w-4 text-red-600" />;
+    if (pnl > 0) return <TrendingUp className="h-4 w-4 text-success" />;
+    if (pnl < 0) return <TrendingDown className="h-4 w-4 text-destructive" />;
     return null;
   };
 
@@ -280,8 +324,9 @@ export default function Trades() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Positions</h1>
-            <p className="text-gray-600">Monitor your active positions on LN Markets</p>
+            <h1 className="text-3xl font-bold text-text-primary">Positions</h1>
+            <p className="text-text-secondary">Monitor your active positions on LN Markets</p>
+            <RealtimeStatus className="mt-2" />
           </div>
           <Button onClick={fetchPositions} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -344,7 +389,7 @@ export default function Trades() {
           <CardContent>
             {positions.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-gray-500 mb-4">
+                <div className="text-text-secondary mb-4">
                   <TrendingUp className="h-12 w-12 mx-auto mb-2" />
                   <p>No active positions</p>
                   <p className="text-sm">Your positions from LN Markets will appear here</p>
@@ -453,7 +498,7 @@ export default function Trades() {
                         <TableCell>
                           <Badge 
                             variant={position.side === 'long' ? 'default' : 'destructive'}
-                            className={position.side === 'long' ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}
+                            className={position.side === 'long' ? 'bg-success/20 text-success hover:bg-success/30' : 'bg-destructive/20 text-destructive hover:bg-destructive/30'}
                           >
                             {position.side === 'long' ? 'LONG' : 'SHORT'}
                           </Badge>

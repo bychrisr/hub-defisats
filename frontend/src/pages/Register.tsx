@@ -336,7 +336,7 @@ export default function Register() {
               <div className="space-y-2">
                 <Label
                   htmlFor="email"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   Email
                 </Label>
@@ -358,14 +358,14 @@ export default function Register() {
                   />
                 )}
                 {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label
                   htmlFor="username"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   Username
                 </Label>
@@ -387,21 +387,21 @@ export default function Register() {
                     }
                   />
                   {usernameChecking ? (
-                    <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-gray-400" />
+                    <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-text-secondary" />
                   ) : usernameAvailable === true ? (
-                    <CheckCircle className="absolute right-2 top-2 h-4 w-4 text-green-500" />
+                    <CheckCircle className="absolute right-2 top-2 h-4 w-4 text-success" />
                   ) : usernameAvailable === false ? (
-                    <XCircle className="absolute right-2 top-2 h-4 w-4 text-red-500" />
+                    <XCircle className="absolute right-2 top-2 h-4 w-4 text-destructive" />
                   ) : null}
                 </div>
                 {errors.username && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {errors.username.message}
                   </p>
                 )}
                 {!errors.username && username && username.length >= 3 && (
                   <p
-                    className={`text-sm ${usernameAvailable === true ? 'text-green-600' : usernameAvailable === false ? 'text-red-600' : 'text-gray-600'}`}
+                    className={`text-sm ${usernameAvailable === true ? 'text-success' : usernameAvailable === false ? 'text-destructive' : 'text-text-secondary'}`}
                   >
                     {usernameAvailable === true
                       ? '✓ Username disponível'
@@ -415,7 +415,7 @@ export default function Register() {
               <div className="space-y-2">
                 <Label
                   htmlFor="password"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   Password
                 </Label>
@@ -453,7 +453,7 @@ export default function Register() {
                   <SimplePasswordValidator password={password} />
                 )}
                 {errors.password && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {errors.password.message}
                   </p>
                 )}
@@ -462,7 +462,7 @@ export default function Register() {
               <div className="space-y-2">
                 <Label
                   htmlFor="confirmPassword"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   Confirm Password
                 </Label>
@@ -499,13 +499,13 @@ export default function Register() {
                   </Button>
                 </div>
                 {showPasswordMismatch && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
+                  <p className="text-sm text-destructive flex items-center gap-1">
                     <XCircle className="h-4 w-4" />
                     As senhas não coincidem
                   </p>
                 )}
                 {errors.confirmPassword && !showPasswordMismatch && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {errors.confirmPassword.message}
                   </p>
                 )}
@@ -514,7 +514,7 @@ export default function Register() {
               <div className="space-y-2">
                 <Label
                   htmlFor="ln_markets_api_key"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   LN Markets API Key
                 </Label>
@@ -527,7 +527,7 @@ export default function Register() {
                   className={errors.ln_markets_api_key ? 'border-red-500' : ''}
                 />
                 {errors.ln_markets_api_key && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {errors.ln_markets_api_key.message}
                   </p>
                 )}
@@ -536,7 +536,7 @@ export default function Register() {
               <div className="space-y-2">
                 <Label
                   htmlFor="ln_markets_api_secret"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   LN Markets API Secret
                 </Label>
@@ -551,7 +551,7 @@ export default function Register() {
                   }
                 />
                 {errors.ln_markets_api_secret && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {errors.ln_markets_api_secret.message}
                   </p>
                 )}
@@ -560,7 +560,7 @@ export default function Register() {
               <div className="space-y-2">
                 <Label
                   htmlFor="ln_markets_passphrase"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   LN Markets Passphrase
                 </Label>
@@ -575,7 +575,7 @@ export default function Register() {
                   }
                 />
                 {errors.ln_markets_passphrase && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {errors.ln_markets_passphrase.message}
                   </p>
                 )}
@@ -584,7 +584,7 @@ export default function Register() {
               <div className="space-y-2">
                 <Label
                   htmlFor="coupon_code"
-                  className="text-gray-900 dark:text-gray-100 font-medium"
+                  className="text-text-primary font-medium"
                 >
                   Coupon Code (Optional)
                 </Label>
@@ -595,8 +595,8 @@ export default function Register() {
                   {...register('coupon_code')}
                 />
                 <div className="flex items-start space-x-2">
-                  <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                  <p className="text-xs text-gray-600">
+                  <Info className="h-4 w-4 text-primary mt-0.5" />
+                  <p className="text-xs text-text-secondary">
                     Coupon codes can unlock premium features or extend your
                     trial period.
                   </p>
@@ -638,11 +638,11 @@ export default function Register() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-text-secondary">
                 Already have an account?{' '}
                 <Link
                   to="/login"
-                  className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  className="font-medium text-primary hover:text-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                   onKeyDown={e => handleKeyDown(e, 'login-link')}
                   onFocus={() => setFocusedField('login-link')}
                   onBlur={() => setFocusedField(null)}
