@@ -81,7 +81,7 @@ services:
       dockerfile: Dockerfile.prod
     container_name: hub-defisats-frontend-staging
     environment:
-      VITE_API_URL: http://localhost:23010  # ← API staging
+      VITE_API_URL: https://staging.hubdefisats.com/api  # ← API staging
     ports:
       - "23010:80"  # ← porta staging (alterada para evitar conflito)
     depends_on:
