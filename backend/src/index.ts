@@ -10,6 +10,8 @@ import { lnmarketsFuturesRoutes } from '@/routes/lnmarkets-futures.routes';
 import { lnmarketsOptionsRoutes } from '@/routes/lnmarkets-options.routes';
 import { lnmarketsUserRoutes } from '@/routes/lnmarkets-user.routes';
 import { lnmarketsMarketRoutes } from '@/routes/lnmarkets-market.routes';
+import { marketDataRoutes } from '@/routes/market-data.routes';
+import { couponAdminRoutes } from '@/routes/coupon-admin.routes';
 import { metricsRoutes } from '@/routes/metrics.routes';
 import { alertsRoutes } from '@/routes/alerts.routes';
 import { dashboardRoutes } from '@/routes/dashboard.routes';
@@ -331,6 +333,14 @@ async function registerRoutes() {
   // LN Markets Market Data routes
   await fastify.register(lnmarketsMarketRoutes, { prefix: '/api' });
   console.log('✅ LN Markets Market Data routes registered');
+
+  // Market Data routes
+  await fastify.register(marketDataRoutes, { prefix: '/api' });
+  console.log('✅ Market Data routes registered');
+
+  // Coupon Admin routes
+  await fastify.register(couponAdminRoutes, { prefix: '/api/admin/coupons' });
+  console.log('✅ Coupon Admin routes registered');
 
   // Admin routes
   await fastify.register(adminRoutes, { prefix: '/api/admin' });

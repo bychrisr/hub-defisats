@@ -22,8 +22,15 @@ import {
   CheckCircle,
   Settings,
   Info,
+  Smartphone,
+  Monitor,
+  Tablet,
+  RefreshCw,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useBtcPrice } from '@/hooks/useBtcPrice';
 
 interface MarginGuardSettings {
   enabled: boolean;
@@ -57,6 +64,9 @@ export const Automation = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Hook para buscar preço do BTC
+  const { data: btcPrice, loading: btcLoading, error: btcError, refetch: refetchBtc } = useBtcPrice();
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -66,184 +76,342 @@ export const Automation = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Configuração de Automações</h1>
-          <p className="text-muted-foreground">
-            Configure suas proteções automáticas e estratégias de trading
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Info className="mr-2 h-4 w-4" />
-            Ajuda
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={isLoading}>
-            <CheckCircle className="mr-2 h-4 w-4" />
-            {isLoading ? 'Salvando...' : 'Salvar Configurações'}
-          </Button>
-        </div>
-      </div>
-
-      <Tabs defaultValue="margin-guard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="margin-guard">Margin Guard</TabsTrigger>
-          <TabsTrigger value="tp-sl">Take Profit / Stop Loss</TabsTrigger>
-          <TabsTrigger value="entry">Entradas Automáticas</TabsTrigger>
-        </TabsList>
-
-        {/* Margin Guard Tab */}
-        <TabsContent value="margin-guard" className="space-y-6">
-          <Card className="card-gradient">
-            <CardHeader>
-              <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        {/* Page Header */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 sm:p-8">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          <div className="relative">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+              <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <Shield className="h-6 w-6 text-primary" />
-                  <div>
-                    <CardTitle>Margin Guard</CardTitle>
-                    <CardDescription>
-                      Proteção automática contra liquidação de posições
-                    </CardDescription>
+                  <div className="p-2 rounded-xl bg-primary/20">
+                    <Settings className="h-6 w-6 text-primary" />
                   </div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                    Configuração de Automações
+                  </h1>
                 </div>
-                <Switch
-                  checked={marginGuard.enabled}
-                  onCheckedChange={enabled =>
-                    setMarginGuard({ ...marginGuard, enabled })
-                  }
-                />
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
-                  <div>
-                    <p className="font-medium text-warning">Atenção</p>
-                    <p className="text-sm text-muted-foreground">
-                      O Margin Guard irá executar ações automáticas quando o
-                      limite for atingido. Certifique-se de configurar os
-                      parâmetros adequadamente.
-                    </p>
-                  </div>
+                <p className="text-muted-foreground text-sm sm:text-base max-w-2xl">
+                  Configure suas proteções automáticas e estratégias de trading inteligentes
+                </p>
+                <div className="flex items-center gap-4 mt-4">
+                  <Badge variant="secondary" className="gap-2">
+                    <Monitor className="h-3 w-3" />
+                    Desktop
+                  </Badge>
+                  <Badge variant="secondary" className="gap-2">
+                    <Tablet className="h-3 w-3" />
+                    Tablet
+                  </Badge>
+                  <Badge variant="secondary" className="gap-2">
+                    <Smartphone className="h-3 w-3" />
+                    Mobile
+                  </Badge>
                 </div>
               </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                  <Info className="mr-2 h-4 w-4" />
+                  Ajuda
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={handleSave} 
+                  disabled={isLoading}
+                  className="flex-1 sm:flex-none bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  {isLoading ? 'Salvando...' : 'Salvar Configurações'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-              {marginGuard.enabled && (
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <Label className="text-base font-medium">
-                      Limite de Margem ({marginGuard.threshold}%)
-                    </Label>
-                    <Slider
-                      value={[marginGuard.threshold]}
-                      onValueChange={([value]) =>
-                        setMarginGuard({ ...marginGuard, threshold: value })
+        <Tabs defaultValue="margin-guard" className="space-y-6">
+          {/* Mobile-First Tab Navigation */}
+          <div className="relative">
+            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-2 p-1 h-auto bg-muted/30 rounded-xl">
+              <TabsTrigger 
+                value="margin-guard" 
+                className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+              >
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Margin Guard</span>
+                <span className="sm:hidden">Margin</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="tp-sl" 
+                className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+              >
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden sm:inline">Take Profit / Stop Loss</span>
+                <span className="sm:hidden">TP/SL</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="entry" 
+                className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+              >
+                <Zap className="h-4 w-4" />
+                <span className="hidden sm:inline">Entradas Automáticas</span>
+                <span className="sm:hidden">Entradas</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          {/* Margin Guard Tab */}
+          <TabsContent value="margin-guard" className="space-y-6">
+            <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-background via-background to-muted/20">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-warning/5"></div>
+              <CardHeader className="relative">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
+                      <Shield className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl sm:text-2xl">Margin Guard</CardTitle>
+                      <CardDescription className="text-sm sm:text-base">
+                        Proteção automática contra liquidação de posições
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge 
+                      variant={marginGuard.enabled ? "default" : "secondary"}
+                      className="px-3 py-1"
+                    >
+                      {marginGuard.enabled ? "Ativo" : "Inativo"}
+                    </Badge>
+                    <Switch
+                      checked={marginGuard.enabled}
+                      onCheckedChange={enabled =>
+                        setMarginGuard({ ...marginGuard, enabled })
                       }
-                      max={95}
-                      min={70}
-                      step={5}
-                      className="w-full"
+                      className="data-[state=checked]:bg-primary"
                     />
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Conservador (70%)</span>
-                      <span>Moderado (85%)</span>
-                      <span>Agressivo (95%)</span>
-                    </div>
                   </div>
-
-                  <Separator />
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <Label className="text-base font-medium">
-                        Ação ao Atingir Limite
-                      </Label>
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            id="reduce"
-                            name="action"
-                            checked={marginGuard.action === 'reduce'}
-                            onChange={() =>
-                              setMarginGuard({
-                                ...marginGuard,
-                                action: 'reduce',
-                              })
-                            }
-                            className="w-4 h-4"
-                          />
-                          <Label htmlFor="reduce" className="cursor-pointer">
-                            Reduzir Posição
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            id="close"
-                            name="action"
-                            checked={marginGuard.action === 'close'}
-                            onChange={() =>
-                              setMarginGuard({
-                                ...marginGuard,
-                                action: 'close',
-                              })
-                            }
-                            className="w-4 h-4"
-                          />
-                          <Label htmlFor="close" className="cursor-pointer">
-                            Fechar Posição Completamente
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {marginGuard.action === 'reduce' && (
-                      <div className="space-y-4">
-                        <Label className="text-base font-medium">
-                          Percentual de Redução ({marginGuard.reduction}%)
-                        </Label>
-                        <Slider
-                          value={[marginGuard.reduction]}
-                          onValueChange={([value]) =>
-                            setMarginGuard({ ...marginGuard, reduction: value })
-                          }
-                          max={100}
-                          min={10}
-                          step={10}
-                          className="w-full"
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          Reduzir a posição em {marginGuard.reduction}% quando o
-                          limite for atingido
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
-                    <h4 className="font-medium text-success mb-2">Simulação</h4>
-                    <div className="text-sm space-y-1">
-                      <p>Posição atual: Long BTC/USD $15,000</p>
-                      <p>Margem atual: 85% ($2,845)</p>
-                      <p>
-                        <strong>Se atingir {marginGuard.threshold}%:</strong>{' '}
-                        {marginGuard.action === 'reduce'
-                          ? `Reduzir posição em ${marginGuard.reduction}% (${
-                              (15000 * marginGuard.reduction) / 100
-                            })`
-                          : 'Fechar posição completamente'}
+                </div>
+              </CardHeader>
+              <CardContent className="relative space-y-6">
+                <div className="p-4 bg-warning/10 border border-warning/20 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-warning">Atenção</p>
+                      <p className="text-sm text-muted-foreground">
+                        O Margin Guard irá executar ações automáticas quando o
+                        limite for atingido. Certifique-se de configurar os
+                        parâmetros adequadamente.
                       </p>
                     </div>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
+                {marginGuard.enabled && (
+                  <div className="space-y-6">
+                    {/* Margin Threshold Slider */}
+                    <div className="space-y-4 p-4 bg-muted/30 rounded-xl">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-base font-medium">
+                          Limite de Margem
+                        </Label>
+                        <Badge variant="outline" className="text-lg font-bold">
+                          {marginGuard.threshold}%
+                        </Badge>
+                      </div>
+                      <Slider
+                        value={[marginGuard.threshold]}
+                        onValueChange={([value]) =>
+                          setMarginGuard({ ...marginGuard, threshold: value })
+                        }
+                        max={95}
+                        min={70}
+                        step={5}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
+                        <span>Conservador (70%)</span>
+                        <span>Moderado (85%)</span>
+                        <span>Agressivo (95%)</span>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Action Selection */}
+                    <div className="grid lg:grid-cols-2 gap-6">
+                      <div className="space-y-4 p-4 bg-muted/20 rounded-xl">
+                        <Label className="text-base font-medium">
+                          Ação ao Atingir Limite
+                        </Label>
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3 p-3 rounded-lg border border-muted/50 hover:border-primary/50 transition-colors">
+                            <input
+                              type="radio"
+                              id="reduce"
+                              name="action"
+                              checked={marginGuard.action === 'reduce'}
+                              onChange={() =>
+                                setMarginGuard({
+                                  ...marginGuard,
+                                  action: 'reduce',
+                                })
+                              }
+                              className="w-4 h-4 text-primary"
+                            />
+                            <Label htmlFor="reduce" className="cursor-pointer flex-1">
+                              <div className="font-medium">Reduzir Posição</div>
+                              <div className="text-sm text-muted-foreground">
+                                Diminuir tamanho da posição
+                              </div>
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-3 p-3 rounded-lg border border-muted/50 hover:border-primary/50 transition-colors">
+                            <input
+                              type="radio"
+                              id="close"
+                              name="action"
+                              checked={marginGuard.action === 'close'}
+                              onChange={() =>
+                                setMarginGuard({
+                                  ...marginGuard,
+                                  action: 'close',
+                                })
+                              }
+                              className="w-4 h-4 text-primary"
+                            />
+                            <Label htmlFor="close" className="cursor-pointer flex-1">
+                              <div className="font-medium">Fechar Posição</div>
+                              <div className="text-sm text-muted-foreground">
+                                Fechar posição completamente
+                              </div>
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {marginGuard.action === 'reduce' && (
+                        <div className="space-y-4 p-4 bg-muted/20 rounded-xl">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-base font-medium">
+                              Percentual de Redução
+                            </Label>
+                            <Badge variant="outline" className="text-lg font-bold">
+                              {marginGuard.reduction}%
+                            </Badge>
+                          </div>
+                          <Slider
+                            value={[marginGuard.reduction]}
+                            onValueChange={([value]) =>
+                              setMarginGuard({ ...marginGuard, reduction: value })
+                            }
+                            max={100}
+                            min={10}
+                            step={10}
+                            className="w-full"
+                          />
+                          <p className="text-sm text-muted-foreground">
+                            Reduzir a posição em {marginGuard.reduction}% quando o
+                            limite for atingido
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Simulation Card */}
+                    <div className="p-4 bg-success/10 border border-success/20 rounded-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-5 w-5 text-success" />
+                          <h4 className="font-medium text-success">Simulação</h4>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={refetchBtc}
+                          disabled={btcLoading}
+                          className="h-8 w-8 p-0"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${btcLoading ? 'animate-spin' : ''}`} />
+                        </Button>
+                      </div>
+                      
+                      <div className="space-y-3 text-sm">
+                        {/* Preço atual do BTC */}
+                        <div className="p-3 bg-background/50 rounded-lg border border-success/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-muted-foreground">Preço atual BTC:</span>
+                            {btcLoading ? (
+                              <div className="flex items-center gap-2">
+                                <RefreshCw className="h-3 w-3 animate-spin" />
+                                <span className="text-muted-foreground">Carregando...</span>
+                              </div>
+                            ) : btcError ? (
+                              <span className="text-destructive text-xs">Erro ao carregar</span>
+                            ) : btcPrice ? (
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-lg">
+                                  ${btcPrice.price.toLocaleString('pt-BR')}
+                                </span>
+                                {btcPrice.changePercent24h !== 0 && (
+                                  <Badge 
+                                    variant={btcPrice.changePercent24h > 0 ? "default" : "destructive"}
+                                    className="text-xs"
+                                  >
+                                    {btcPrice.changePercent24h > 0 ? (
+                                      <TrendingUpIcon className="h-3 w-3 mr-1" />
+                                    ) : (
+                                      <TrendingDown className="h-3 w-3 mr-1" />
+                                    )}
+                                    {Math.abs(btcPrice.changePercent24h).toFixed(2)}%
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : null}
+                          </div>
+                          {btcPrice && (
+                            <div className="text-xs text-muted-foreground">
+                              Atualizado: {btcPrice.lastUpdated}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Simulação da posição */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Posição simulada:</span>
+                            <span className="font-medium">
+                              Long BTC/USD {btcPrice ? `$${btcPrice.price.toLocaleString('pt-BR')}` : '$50,000'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Margem atual:</span>
+                            <span className="font-medium">85% ($2,845)</span>
+                          </div>
+                          <div className="pt-2 border-t border-success/20">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Se atingir {marginGuard.threshold}%:</span>
+                            </div>
+                            <div className="mt-1 font-medium text-success">
+                              {marginGuard.action === 'reduce'
+                                ? `Reduzir posição em ${marginGuard.reduction}% ($${
+                                    btcPrice 
+                                      ? ((btcPrice.price * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
+                                      : ((50000 * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
+                                  })`
+                                : 'Fechar posição completamente'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
         {/* Take Profit / Stop Loss Tab */}
         <TabsContent value="tp-sl" className="space-y-6">
@@ -412,6 +580,7 @@ export const Automation = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };

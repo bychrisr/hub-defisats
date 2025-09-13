@@ -136,10 +136,30 @@ model Coupon {
   used_count   Int?         @default(0)
   plan_type    String
   expires_at   DateTime?    @db.Timestamp(6)
+  
+  // Novos campos para o sistema de cupons
+  value_type   String       // 'fixed' ou 'percentage'
+  value_amount Int          // Valor fixo em sats ou percentual (1-100)
+  time_type    String       // 'fixed' ou 'lifetime'
+  time_days    Int?         // Número de dias (apenas se time_type = 'fixed')
+  
+  // Campos para administração
+  is_active    Boolean      @default(true)  // Ativo/Inativo
+  description  String?      // Descrição do cupom
+  created_by   String?      // ID do admin que criou
+  
+  // Métricas
+  total_revenue_saved Int   @default(0)    // Total de receita economizada (em sats)
+  new_users_count    Int    @default(0)    // Número de novos usuários atraídos
+  conversion_rate    Float  @default(0)    // Taxa de conversão
+  
   created_at   DateTime     @default(now()) @db.Timestamp(6)
+  updated_at   DateTime     @default(now()) @db.Timestamp(6)
   user_coupons UserCoupon[] @relation("CouponUserRelation")
 
   @@index([code], map: "idx_coupon_code")
+  @@index([is_active], map: "idx_coupon_active")
+  @@index([created_at], map: "idx_coupon_created")
 }
 
 model SystemAlert {
@@ -162,9 +182,34 @@ model UserCoupon {
   @@id([user_id, coupon_id])
 }
 
+/// Modelo para rastrear métricas de cupons
+model CouponAnalytics {
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  coupon_id         String
+  date              DateTime @db.Timestamp(6)
+  
+  // Métricas do dia
+  views_count       Int      @default(0)    // Quantas vezes o cupom foi visualizado
+  clicks_count      Int      @default(0)    // Quantas vezes foi clicado
+  uses_count        Int      @default(0)    // Quantas vezes foi usado
+  new_users_count   Int      @default(0)    // Novos usuários atraídos
+  revenue_saved     Int      @default(0)    // Receita economizada (sats)
+  
+  // Métricas de conversão
+  conversion_rate   Float    @default(0)    // Taxa de conversão (uses/views)
+  click_through_rate Float   @default(0)    // Taxa de cliques (clicks/views)
+  
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  
+  @@index([coupon_id], map: "idx_coupon_analytics_coupon")
+  @@index([date], map: "idx_coupon_analytics_date")
+  @@unique([coupon_id, date], map: "idx_coupon_analytics_unique")
+}
+
 enum PlanType {
   free
   basic
   advanced
   pro
+  lifetime
 }

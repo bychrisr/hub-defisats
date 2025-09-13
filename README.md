@@ -46,6 +46,268 @@
 
 A aplicação utiliza uma paleta de cores inspirada no CoinGecko, mantendo a tipografia Inter conforme especificado.
 
+## 🧭 UI/UX: Menu Responsivo
+
+### 📱 Estrutura de Navegação
+
+A aplicação implementa um sistema de navegação responsivo que replica exatamente o design do CoinGecko:
+
+#### 🖥️ **Desktop (≥ 768px)**
+- **Menu Superior Fixo**: `position: sticky` com suporte a tema claro/escuro
+- **Layout Perfeitamente Centralizado**: Menu de navegação centralizado horizontalmente e verticalmente usando `absolute left-1/2 transform -translate-x-1/2` e `h-16 items-center justify-center`
+- **Itens de Navegação**: Dashboard, Automations, Positions, Backtests, Reports
+- **Área do Usuário**: 
+  - **Notificações**: Ícone de sino para alertas (estilo simplificado)
+  - **Perfil do Usuário**: Avatar com dropdown contendo:
+    - **Profile**: Acesso ao perfil do usuário (configurações centralizadas)
+    - **Idioma**: Seleção entre Português (BR) e English (US)
+    - **Moeda**: Seleção entre SATS e USD
+    - **Tema**: Alternância entre Claro, Escuro e Sistema
+    - **Logout**: Sair da aplicação
+  - **Informações**: Email e tipo de plano do usuário
+- **Tipografia**: Inter, 14px, maiúsculas, espaçamento uniforme
+- **Tema Adaptativo**: 
+  - **Claro**: Fundo branco (#ffffff), texto escuro (#13161c)
+  - **Escuro**: Fundo cinza escuro (#111827), texto claro (#f9fafb)
+- **Borda**: Sutil na parte inferior com cor adaptativa ao tema
+- **Comportamento**: Permanece visível ao rolar a página
+
+#### 📱 **Mobile (< 768px)**
+- **Menu Inferior Fixo**: `position: fixed, bottom: 0` com fundo branco
+- **6 Ícones com Rótulos**:
+  - 🏠 **Home** → `/dashboard`
+  - ⚡ **Automations** → `/automation`
+  - 📊 **Positions** → `/trades`
+  - 📈 **Backtests** → `/backtests`
+  - 📋 **Reports** → `/reports`
+  - ⚙️ **Menu** → Dropdown com todas as opções
+- **Design**: Ícones pretos (#13161c), 24px, rótulos cinza (#62666f), Inter 12px
+- **Item Ativo**: Azul (#3773f5) com sublinha fina
+- **Dimensões**: 60px altura, largura total da tela
+- **Bordas**: Apenas superior (`border-top: 1px solid #e6e8ec`)
+
+#### ⚙️ **Menu Mobile Avançado (Drawer)**
+O item "Menu" no mobile abre um drawer lateral que replica exatamente o design do CoinGecko:
+
+**🎨 Design do Drawer:**
+- **Header**: Logo defiSATS + botão X para fechar
+- **Navegação Principal**: Seções expansíveis com ícones + (chevron)
+  - Criptomoedas, Câmbios, NFT, Informação, Produtos, API
+- **Seção do Usuário**: Links pessoais com ícones coloridos
+  - Os meus Candies (ícone roxo), A minha carteira (ícone amarelo), A minha conta (ícone cinza)
+- **Configurações Inferiores**: 3 botões horizontais
+  - 🌐 **Idioma**: PT-BR/EN-US
+  - 💰 **Moeda**: USD/SATS
+  - 🌓 **Tema**: Claro/Escuro
+
+**📱 Comportamento:**
+- **Abertura**: Desliza da esquerda para direita
+- **Backdrop**: Fundo escuro semi-transparente
+- **Fechamento**: Toque no backdrop ou botão X
+- **Seções Expansíveis**: Animações suaves com rotação do chevron
+
+### 🎯 **Componentes Implementados**
+
+```typescript
+// Estrutura de Componentes
+components/layout/
+├── DesktopNavigation.tsx    // Menu superior para desktop
+├── MobileNavigation.tsx     // Menu inferior para mobile
+└── ResponsiveLayout.tsx     // Layout responsivo principal
+```
+
+### 📐 **Padronização de Larguras da Dashboard**
+
+#### 🎯 **Largura Consistente**
+- **Container Principal**: `max-w-4xl mx-auto` para largura fixa e centralizada
+- **Cards de Estatísticas**: Grid responsivo `grid-cols-1 md:grid-cols-2 lg:grid-cols-4` com `gap-4`
+- **Quick Actions**: Grid `grid-cols-1 lg:grid-cols-2` com `gap-4`
+- **Botões Internos**: Grid `grid-cols-1 sm:grid-cols-2` com `gap-3`
+- **Automation Overview**: Grid `grid-cols-1 md:grid-cols-3` com `gap-3`
+- **Gráfico de Preços BTC**: Mesma largura que todos os outros cards
+
+#### 📊 **Gráfico LN Markets Style**
+- **Componente**: `LNMarketsChart` com design inspirado na LN Markets
+- **Funcionalidades**:
+  - **Timeframe Selector**: 1m, 5m, 15m, 1h, 4h, 1d
+  - **Chart Tools**: Crosshair, Magnet, Ruler, Text, Shapes, Lock, Eye, Trash
+  - **Indicators**: fx Indicators button
+  - **Undo/Redo**: Controles de desfazer/refazer
+  - **Fullscreen**: Modo tela cheia
+  - **Live Data**: Conexão WebSocket em tempo real
+  - **Volume**: Gráfico de volume integrado
+  - **OHLC Display**: Open, High, Low, Close com badges
+  - **Price Change**: Indicador de mudança de preço com cores
+- **Estilo**:
+  - **Cores**: Verde (#00d4aa) e Vermelho (#ff6b6b) da LN Markets
+  - **Grid**: Linhas pontilhadas para melhor visualização
+  - **Crosshair**: Modo normal com linhas tracejadas
+  - **Font**: Inter para consistência visual
+- **Responsividade**: Adapta-se perfeitamente ao container
+
+### 📈 **Sistema de Gráficos Avançado**
+
+#### 🎯 **Componente Principal: LNMarketsChart**
+- **Arquivo**: `frontend/src/components/charts/LNMarketsChart.tsx`
+- **Base**: `lightweight-charts` com customizações avançadas
+- **Inspiração**: Interface da LN Markets para máxima familiaridade
+
+#### 🛠️ **Ferramentas de Gráfico**
+```typescript
+// Timeframe Selector
+['1m', '5m', '15m', '1h', '4h', '1d']
+
+// Chart Tools
+Crosshair, Magnet, Ruler, Text, Shapes, Lock, Eye, Trash
+
+// Controles
+Undo/Redo, Play/Pause, Refresh, Fullscreen, Indicators
+```
+
+#### 🎨 **Design System**
+- **Cores**: Verde (#00d4aa) e Vermelho (#ff6b6b) da LN Markets
+- **Grid**: Linhas pontilhadas para melhor visualização
+- **Crosshair**: Modo normal com linhas tracejadas
+- **Font**: Inter para consistência visual
+- **Layout**: Header com controles, área de gráfico, footer com volume
+
+#### 📊 **Funcionalidades Avançadas**
+- **WebSocket**: Dados em tempo real via WebSocket
+- **Volume**: Gráfico de volume integrado com cores
+- **OHLC**: Display de Open, High, Low, Close com badges
+- **Price Change**: Indicador de mudança de preço com cores
+- **Responsive**: Adapta-se perfeitamente ao container
+- **Theme**: Suporte completo a tema claro/escuro
+- **Real Data**: Dados reais da LN Markets via API
+- **Historical Data**: Dados históricos para análise técnica
+
+#### 🔧 **Configuração**
+```typescript
+<LNMarketsChart 
+  symbol="BTCUSD: LNM Futures"
+  height={400}
+  showControls={true}
+/>
+```
+
+#### 📊 **Exibição na Dashboard**
+- **Localização**: Dashboard principal (`/dashboard`)
+- **Layout**: Gráfico sem Card wrapper, igual ao da LN Markets
+- **Integração**: Usa `SimpleChart` que renderiza `LNMarketsChart`
+- **Largura**: Segue o padrão `max-w-4xl mx-auto` da dashboard
+- **Responsividade**: Adapta-se perfeitamente ao container
+- **Altura**: 500px para melhor visualização
+
+#### 🔧 **Correções Implementadas**
+- **API Routes**: Criadas rotas `/api/market/historical` e `/api/market/data`
+- **Backend Integration**: Integração com LN Markets API para dados reais
+- **Authentication**: Headers de autenticação para requisições
+- **Error Handling**: Tratamento de erros e fallback para dados simulados
+- **Real-time Updates**: Dados atualizados em tempo real via WebSocket
+- **Price Accuracy**: Preços reais refletidos no gráfico
+- **Route Update**: Alterada rota de `/trades` para `/positions`
+- **Dashboard Card**: Terceiro card atualizado para "Margem Disponível"
+- **Auth Redirect**: Usuários autenticados redirecionados de `/login` e `/register` para `/dashboard`
+
+### 🔄 **Mudanças de Rota e Interface**
+
+#### 📍 **Atualização de Rotas**
+- **Antes**: `/trades` → **Agora**: `/positions`
+- **Arquivo**: `Trades.tsx` renomeado para `Positions.tsx`
+- **Navegação**: Atualizada em desktop e mobile
+- **Consistência**: Mantida em toda a aplicação
+
+#### 💰 **Card de Margem Disponível**
+- **Posição**: Terceiro card na dashboard
+- **Dados**: Mostra saldo disponível em BTC e sats
+- **Fonte**: `userBalance.available_balance` da LN Markets
+- **Formato**: BTC (8 decimais) e sats (2 decimais)
+- **Ícone**: `DollarSign` para representar valor monetário
+
+#### 🔐 **Redirecionamento de Autenticação**
+- **Comportamento**: Usuários autenticados são redirecionados automaticamente
+- **Rotas afetadas**: `/login` e `/register`
+- **Destino**: `/dashboard` (com `replace` para limpar histórico)
+- **Lógica**: Verifica `isAuthenticated` e `isInitialized` antes de permitir acesso
+- **Logs**: Console logs para debug do redirecionamento
+
+### 🔧 **Funcionalidades do Dropdown do Usuário**
+
+#### 🌐 **Seleção de Idioma**
+- **Português (BR)**: 🇧🇷 Interface em português brasileiro
+- **English (US)**: 🇺🇸 Interface em inglês americano
+- **Estado**: Gerenciado via `useState` com persistência futura
+
+#### 💰 **Seleção de Moeda**
+- **SATS**: ₿ Exibição em satoshis (Bitcoin)
+- **USD**: $ Exibição em dólares americanos
+- **Estado**: Gerenciado via `useState` com persistência futura
+
+#### 🎨 **Alternância de Tema**
+- **Claro**: ☀️ Tema claro com fundo branco
+- **Escuro**: 🌙 Tema escuro com fundo cinza escuro
+- **Sistema**: 🖥️ Segue as preferências do sistema operacional
+- **Ícones**: Dinâmicos baseados no tema atual
+- **Integração**: Usa `useTheme` context existente
+
+#### 🔔 **Ícone de Notificações**
+- **Estilo**: Simplificado com `size="icon"` e `h-9 w-9`
+- **Hover**: Efeito suave com mudança de cor e fundo
+- **Tema**: Adaptativo (claro/escuro)
+- **Tamanho**: Ícone `h-4 w-4` para melhor proporção
+
+### 🎨 **Classes Tailwind Utilizadas**
+
+```css
+/* Desktop - Layout Perfeitamente Centralizado */
+sticky top-0 z-50 w-full border-b transition-colors duration-200
+absolute left-1/2 transform -translate-x-1/2  /* Centralização horizontal */
+flex items-center justify-center space-x-8 h-16  /* Centralização vertical */
+text-sm uppercase tracking-wide
+text-[#3773f5] hover:text-[#2c5aa0]
+
+/* Desktop - Tema Adaptativo */
+bg-white border-[#e6e8ec]  /* Modo claro */
+bg-gray-900 border-gray-700  /* Modo escuro */
+text-[#13161c] hover:text-[#3773f5]  /* Modo claro */
+text-gray-300 hover:text-[#3773f5]  /* Modo escuro */
+
+/* Desktop - Dropdown do Usuário */
+h-9 w-9  /* Botão de notificações */
+h-4 w-4  /* Ícones internos */
+hover:bg-gray-100  /* Hover modo claro */
+hover:bg-gray-800  /* Hover modo escuro */
+
+/* Desktop - Submenu Dropdown */
+DropdownMenuSub  /* Submenu para Idioma/Moeda/Tema */
+DropdownMenuSubTrigger  /* Trigger do submenu */
+DropdownMenuSubContent  /* Conteúdo do submenu */
+
+/* Desktop - Área do Usuário */
+ml-auto flex items-center space-x-4  /* Alinha à direita */
+h-8 w-8 rounded-full  /* Avatar circular */
+w-56 bg-white border-gray-200  /* Dropdown menu */
+
+/* Mobile */
+fixed bottom-0 left-0 right-0 bg-white border-t border-[#e6e8ec]
+flex justify-around items-center h-15
+text-xs text-[#62666f] hover:text-[#3773f5]
+```
+
+### 🔄 **Integração com React Router**
+
+- **Navegação Suave**: Todos os links funcionam com React Router
+- **Estados Ativos**: Detecção automática da rota atual
+- **Transições**: Animações suaves entre páginas
+- **Responsividade**: Menu se adapta automaticamente ao tamanho da tela
+
+### 📱 **Experiência do Usuário**
+
+- **Desktop**: Navegação horizontal intuitiva com acesso rápido a todas as funcionalidades
+- **Mobile**: Menu inferior acessível com polegar, sem obstruir conteúdo
+- **Consistência**: Design idêntico ao CoinGecko em ambos os modos
+- **Acessibilidade**: Contraste adequado e tamanhos de toque otimizados
+
 ### 🌈 Paleta de Cores
 
 #### Modo Claro (Light Mode)

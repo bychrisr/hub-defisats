@@ -36,14 +36,20 @@ class MarketDataService {
   // Obter dados históricos via REST API
   async getHistoricalData(symbol: string, timeframe: string = '1m', limit: number = 100): Promise<CandleData[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/market/historical?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`);
+      const response = await fetch(`${this.baseUrl}/api/market/historical?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      return data.candles || [];
+      console.log('✅ MARKET DATA - Historical data received:', data);
+      return data.data?.candles || [];
     } catch (error) {
       console.error('❌ MARKET DATA - Erro ao obter dados históricos:', error);
       return this.generateSampleData();
@@ -53,14 +59,20 @@ class MarketDataService {
   // Obter dados de mercado atuais
   async getMarketData(symbol: string): Promise<MarketData> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/market/data?symbol=${symbol}`);
+      const response = await fetch(`${this.baseUrl}/api/market/data?symbol=${symbol}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      return data;
+      console.log('✅ MARKET DATA - Current market data received:', data);
+      return data.data || this.generateSampleMarketData(symbol);
     } catch (error) {
       console.error('❌ MARKET DATA - Erro ao obter dados de mercado:', error);
       return this.generateSampleMarketData(symbol);

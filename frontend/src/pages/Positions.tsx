@@ -65,7 +65,7 @@ interface LNPositionsResponse {
   };
 }
 
-export default function Trades() {
+export default function Positions() {
   // Dados em tempo real
   const realtimePositions = useUserPositions();
   const userBalance = useUserBalance();

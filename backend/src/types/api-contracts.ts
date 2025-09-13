@@ -16,6 +16,7 @@ export enum PlanType {
   BASIC = 'basic',
   ADVANCED = 'advanced',
   PRO = 'pro',
+  LIFETIME = 'lifetime',
 }
 
 // Define enums that are not in Prisma schema
@@ -45,6 +46,17 @@ export enum PaymentStatus {
   PAID = 'paid',
   FAILED = 'failed',
   EXPIRED = 'expired',
+}
+
+// Coupon-related enums
+export enum CouponValueType {
+  FIXED = 'fixed',        // Valor fixo (ex: 1000 sats)
+  PERCENTAGE = 'percentage', // Percentual (ex: 10% desconto)
+}
+
+export enum CouponTimeType {
+  FIXED = 'fixed',        // Tempo fixo (ex: 5 dias)
+  LIFETIME = 'lifetime',  // Vitalício
 }
 
 // ============================================================================
@@ -346,6 +358,60 @@ export const CreateCouponRequestSchema = z.object({
   plan_type: z.nativeEnum(PlanType),
   usage_limit: z.number().min(1).max(1000).default(1),
   expires_at: z.string().datetime().optional(),
+  
+  // Novos campos para o sistema de cupons
+  value_type: z.nativeEnum(CouponValueType),
+  value_amount: z.number().min(1).max(1000000), // 1 sats até 1M sats ou 1-100%
+  time_type: z.nativeEnum(CouponTimeType),
+  time_days: z.number().min(1).max(3650).optional(), // 1 dia até 10 anos (apenas se time_type = 'fixed')
+  
+  // Campos para administração
+  description: z.string().optional(),
+  is_active: z.boolean().default(true),
+}).refine((data) => {
+  // Se time_type é 'fixed', time_days deve ser obrigatório
+  if (data.time_type === CouponTimeType.FIXED && !data.time_days) {
+    return false;
+  }
+  // Se time_type é 'lifetime', time_days deve ser undefined
+  if (data.time_type === CouponTimeType.LIFETIME && data.time_days) {
+    return false;
+  }
+  // Se value_type é 'percentage', value_amount deve ser entre 1 e 100
+  if (data.value_type === CouponValueType.PERCENTAGE && (data.value_amount < 1 || data.value_amount > 100)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Invalid coupon configuration: time_days required for fixed time type, value_amount must be 1-100 for percentage type"
+});
+
+export const UpdateCouponRequestSchema = z.object({
+  code: z
+    .string()
+    .min(3)
+    .max(50)
+    .regex(
+      /^[A-Z0-9_-]+$/,
+      'Code must contain only uppercase letters, numbers, hyphens, and underscores'
+    ).optional(),
+  plan_type: z.nativeEnum(PlanType).optional(),
+  usage_limit: z.number().min(1).max(1000).optional(),
+  expires_at: z.string().datetime().optional(),
+  
+  // Novos campos para o sistema de cupons
+  value_type: z.nativeEnum(CouponValueType).optional(),
+  value_amount: z.number().min(1).max(1000000).optional(),
+  time_type: z.nativeEnum(CouponTimeType).optional(),
+  time_days: z.number().min(1).max(3650).optional(),
+  
+  // Campos para administração
+  description: z.string().optional(),
+  is_active: z.boolean().optional(),
+});
+
+export const CouponToggleActiveRequestSchema = z.object({
+  is_active: z.boolean(),
 });
 
 export const CouponResponseSchema = z.object({
@@ -356,6 +422,68 @@ export const CouponResponseSchema = z.object({
   used_count: z.number(),
   expires_at: z.string().datetime().optional(),
   created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+  
+  // Novos campos para o sistema de cupons
+  value_type: z.nativeEnum(CouponValueType),
+  value_amount: z.number(),
+  time_type: z.nativeEnum(CouponTimeType),
+  time_days: z.number().optional(),
+  
+  // Campos para administração
+  is_active: z.boolean(),
+  description: z.string().optional(),
+  created_by: z.string().optional(),
+  
+  // Métricas
+  total_revenue_saved: z.number(),
+  new_users_count: z.number(),
+  conversion_rate: z.number(),
+});
+
+export const CouponAnalyticsSchema = z.object({
+  id: z.string().uuid(),
+  coupon_id: z.string().uuid(),
+  date: z.string().datetime(),
+  views_count: z.number(),
+  clicks_count: z.number(),
+  uses_count: z.number(),
+  new_users_count: z.number(),
+  revenue_saved: z.number(),
+  conversion_rate: z.number(),
+  click_through_rate: z.number(),
+  created_at: z.string().datetime(),
+});
+
+export const CouponDashboardSchema = z.object({
+  total_coupons: z.number(),
+  active_coupons: z.number(),
+  inactive_coupons: z.number(),
+  total_uses: z.number(),
+  total_revenue_saved: z.number(),
+  total_new_users: z.number(),
+  average_conversion_rate: z.number(),
+  top_coupons: z.array(z.object({
+    id: z.string(),
+    code: z.string(),
+    uses_count: z.number(),
+    revenue_saved: z.number(),
+    conversion_rate: z.number(),
+  })),
+  recent_activity: z.array(z.object({
+    id: z.string(),
+    code: z.string(),
+    action: z.string(),
+    timestamp: z.string().datetime(),
+  })),
+  daily_metrics: z.array(z.object({
+    date: z.string().datetime(),
+    views: z.number(),
+    clicks: z.number(),
+    uses: z.number(),
+    new_users: z.number(),
+    revenue_saved: z.number(),
+  })),
 });
 
 export const CouponListResponseSchema = z.array(CouponResponseSchema);
@@ -475,8 +603,12 @@ export type AdminDashboardResponse = z.infer<
 export type AdminUsersQuery = z.infer<typeof AdminUsersQuerySchema>;
 export type AdminUsersResponse = z.infer<typeof AdminUsersResponseSchema>;
 export type CreateCouponRequest = z.infer<typeof CreateCouponRequestSchema>;
+export type UpdateCouponRequest = z.infer<typeof UpdateCouponRequestSchema>;
+export type CouponToggleActiveRequest = z.infer<typeof CouponToggleActiveRequestSchema>;
 export type CouponResponse = z.infer<typeof CouponResponseSchema>;
 export type CouponListResponse = z.infer<typeof CouponListResponseSchema>;
+export type CouponAnalytics = z.infer<typeof CouponAnalyticsSchema>;
+export type CouponDashboard = z.infer<typeof CouponDashboardSchema>;
 
 export type WebSocketAuth = z.infer<typeof WebSocketAuthSchema>;
 export type MarginUpdateEvent = z.infer<typeof MarginUpdateEventSchema>;

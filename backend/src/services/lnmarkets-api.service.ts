@@ -455,7 +455,7 @@ export class LNMarketsAPIService {
   async getMarketData() {
     return this.makeRequest({
       method: 'GET',
-      path: '/market'
+      path: '/futures/info'
     });
   }
 
@@ -485,6 +485,64 @@ export class LNMarketsAPIService {
         error: error.response?.data || error.message 
       };
     }
+  }
+
+  /**
+   * Get historical data (candlesticks)
+   */
+  async getHistoricalData(symbol: string, timeframe: string = '1h', limit: number = 100): Promise<any[]> {
+    try {
+      console.log('🔍 LN MARKETS HISTORICAL - Getting historical data for:', { symbol, timeframe, limit });
+      
+      // For now, we'll generate sample data since LN Markets doesn't have a direct historical data endpoint
+      // In a real implementation, you would integrate with a data provider like CoinGecko, Binance, etc.
+      const now = Date.now();
+      const candles = [];
+      let price = 50000; // Starting price
+      
+      // Generate sample candlestick data
+      for (let i = limit; i >= 0; i--) {
+        const time = (now - i * this.getTimeframeMs(timeframe)) / 1000;
+        const change = (Math.random() - 0.5) * 1000;
+        price += change;
+        
+        const open = price;
+        const close = price + (Math.random() - 0.5) * 200;
+        const high = Math.max(open, close) + Math.random() * 100;
+        const low = Math.min(open, close) - Math.random() * 100;
+        const volume = Math.random() * 1000000;
+        
+        candles.push({
+          time,
+          open: Math.max(0, open),
+          high: Math.max(0, high),
+          low: Math.max(0, low),
+          close: Math.max(0, close),
+          volume
+        });
+      }
+      
+      console.log('✅ LN MARKETS HISTORICAL - Generated', candles.length, 'candles');
+      return candles;
+    } catch (error) {
+      console.error('Error fetching historical data:', error);
+      throw new Error('Failed to fetch historical data');
+    }
+  }
+
+  /**
+   * Get timeframe in milliseconds
+   */
+  private getTimeframeMs(timeframe: string): number {
+    const timeframes: { [key: string]: number } = {
+      '1m': 60 * 1000,
+      '5m': 5 * 60 * 1000,
+      '15m': 15 * 60 * 1000,
+      '1h': 60 * 60 * 1000,
+      '4h': 4 * 60 * 60 * 1000,
+      '1d': 24 * 60 * 60 * 1000
+    };
+    return timeframes[timeframe] || 60 * 60 * 1000; // Default to 1 hour
   }
 
   // Get credentials (for debugging)

@@ -16,6 +16,7 @@ import {
   Settings,
   User,
   BarChart3,
+  DollarSign,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
@@ -66,7 +67,7 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -81,7 +82,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -113,18 +114,16 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Margin Guard
+                Margem Disponível
               </CardTitle>
-              <Shield className="h-4 w-4 text-muted-foreground" />
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {marginGuardAutomation ? 'Active' : 'Inactive'}
+                {userBalance?.available_balance ? `${(userBalance.available_balance / 100000000).toFixed(8)} BTC` : '0.00000000 BTC'}
               </div>
               <p className="text-xs text-muted-foreground">
-                {marginGuardAutomation
-                  ? 'Protecting positions'
-                  : 'Not configured'}
+                {userBalance?.available_balance ? `${(userBalance.available_balance / 100).toFixed(2)} sats` : '0 sats'}
               </p>
             </CardContent>
           </Card>
@@ -148,14 +147,14 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription>Common tasks and automations</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button asChild className="h-auto p-4">
                   <Link to="/margin-guard">
                     <div className="flex items-center space-x-3">
@@ -276,7 +275,7 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Shield className="h-5 w-5 text-primary" />
@@ -325,18 +324,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Teste do Gráfico */}
-      <div className="mt-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Teste do Gráfico</CardTitle>
-            <CardDescription>Verificação se lightweight-charts está funcionando</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SimpleChart />
-          </CardContent>
-        </Card>
-      </div>
+        {/* Gráfico de Preços */}
+        <SimpleChart />
     </div>
   );
 }

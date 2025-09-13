@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { RealtimeDataProvider } from '@/contexts/RealtimeDataContext';
 import { Layout } from '@/components/layout/Layout';
+import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -15,7 +16,8 @@ import MarginGuard from '@/pages/MarginGuard';
 import { Automation } from '@/pages/Automation';
 import { Logs } from '@/pages/Logs';
 import Reports from '@/pages/Reports';
-import Trades from '@/pages/Trades';
+import Positions from '@/pages/Positions';
+import Backtests from '@/pages/Backtests';
 import Trading from '@/pages/Trading';
 import NotFound from './pages/NotFound';
 import { useAuthStore } from '@/stores/auth';
@@ -60,10 +62,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Public Route Component (allow access even if authenticated)
+// Public Route Component (redirect authenticated users to dashboard)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
+  // Se está carregando, mostrar loading
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -72,6 +75,13 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // Se está autenticado, redirecionar para dashboard
+  if (isAuthenticated) {
+    console.log('🔄 PUBLIC ROUTE - User is authenticated, redirecting to dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  console.log('✅ PUBLIC ROUTE - User not authenticated, allowing access');
   return <>{children}</>;
 };
 
@@ -168,9 +178,9 @@ const App = () => {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Layout>
+                  <ResponsiveLayout>
                     <Dashboard />
-                  </Layout>
+                  </ResponsiveLayout>
                 </ProtectedRoute>
               }
             />
@@ -178,9 +188,9 @@ const App = () => {
               path="/profile"
               element={
                 <ProtectedRoute>
-                  <Layout>
+                  <ResponsiveLayout>
                     <Profile />
-                  </Layout>
+                  </ResponsiveLayout>
                 </ProtectedRoute>
               }
             />
@@ -198,9 +208,9 @@ const App = () => {
               path="/automation"
               element={
                 <ProtectedRoute>
-                  <Layout>
+                  <ResponsiveLayout>
                     <Automation />
-                  </Layout>
+                  </ResponsiveLayout>
                 </ProtectedRoute>
               }
             />
@@ -208,9 +218,29 @@ const App = () => {
               path="/reports"
               element={
                 <ProtectedRoute>
-                  <Layout>
+                  <ResponsiveLayout>
                     <Reports />
-                  </Layout>
+                  </ResponsiveLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/positions"
+              element={
+                <ProtectedRoute>
+                  <ResponsiveLayout>
+                    <Positions />
+                  </ResponsiveLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/backtests"
+              element={
+                <ProtectedRoute>
+                  <ResponsiveLayout>
+                    <Backtests />
+                  </ResponsiveLayout>
                 </ProtectedRoute>
               }
             />
@@ -224,36 +254,16 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-          <Route
-            path="/trades"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Trades />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/trading"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Trading />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Reports />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/trading"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Trading />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
             {/* Admin Routes */}
             <Route
               path="/admin"
