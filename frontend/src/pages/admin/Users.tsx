@@ -222,7 +222,8 @@ export default function Users() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
@@ -295,7 +296,8 @@ export default function Users() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
 
           {/* Pagination */}
           {pagination.pages > 1 && (

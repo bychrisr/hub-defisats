@@ -50,6 +50,7 @@
     "@fastify/swagger-ui": "^2.0.0",
     "@prisma/client": "^5.7.1",
     "@sentry/node": "^10.10.0",
+    "@types/ws": "^8.18.1",
     "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
     "bullmq": "^4.15.4",
@@ -68,9 +69,10 @@
     "qrcode": "^1.5.3",
     "socket.io": "^4.7.4",
     "speakeasy": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "validator": "^13.11.0",
-    "zod": "^3.22.4",
-    "tsconfig-paths": "^4.2.0"
+    "ws": "^8.18.3",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

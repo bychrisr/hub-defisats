@@ -3,6 +3,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Layout } from '@/components/layout/Layout';
 import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';
@@ -14,6 +15,7 @@ import { Automation } from '@/pages/Automation';
 import { Logs } from '@/pages/Logs';
 import Reports from '@/pages/Reports';
 import Trades from '@/pages/Trades';
+import Trading from '@/pages/Trading';
 import NotFound from './pages/NotFound';
 import { useAuthStore } from '@/stores/auth';
 import { useEffect } from 'react';
@@ -131,11 +133,12 @@ const App = () => {
   }, [getProfile, setLoading]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter
           future={{
             v7_startTransition: true,
             v7_relativeSplatPath: true,
@@ -230,6 +233,16 @@ const App = () => {
             }
           />
           <Route
+            path="/trading"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Trading />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/reports"
             element={
               <ProtectedRoute>
@@ -260,6 +273,7 @@ const App = () => {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+  </ThemeProvider>
   );
 };
 

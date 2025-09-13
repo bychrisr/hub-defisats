@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RefreshCw, Users, TrendingUp, AlertTriangle, DollarSign, Gift, Activity, Server } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { apiGet } from '@/lib/fetch';
+import SatsIcon from '@/components/SatsIcon';
 
 interface DashboardKPIs {
   total_users: number;
@@ -60,9 +61,18 @@ export default function AdminDashboard() {
 
   const formatSats = (sats: number) => {
     if (sats >= 100000000) {
-      return `${(sats / 100000000).toFixed(2)} BTC`;
+      return (
+        <span className="flex items-center gap-1">
+          {(sats / 100000000).toFixed(2)} BTC
+        </span>
+      );
     }
-    return `${sats.toLocaleString()} sats`;
+    return (
+      <span className="flex items-center gap-1">
+        {sats.toLocaleString()}
+        <SatsIcon size={18} className="text-orange-500" />
+      </span>
+    );
   };
 
   const getSuccessRateColor = (rate: number) => {

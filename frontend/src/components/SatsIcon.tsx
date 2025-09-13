@@ -5,7 +5,7 @@ interface SatsIconProps {
   className?: string;
 }
 
-const SatsIcon: React.FC<SatsIconProps> = ({ size = 16, className = '' }) => {
+const SatsIcon: React.FC<SatsIconProps> = ({ size = 20, className = '' }) => {
   return (
     <svg
       width={size}
@@ -13,32 +13,24 @@ const SatsIcon: React.FC<SatsIconProps> = ({ size = 16, className = '' }) => {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
+      className={`${className}`}
+      style={{ color: 'hsl(var(--sats-icon-color))' }}
     >
-      {/* Bitcoin "B" symbol with sats styling */}
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M8 8h8v2H8V8zm0 4h8v2H8v-2zm0 4h6v2H8v-2z"
-        fill="currentColor"
-      />
-      {/* Small "s" for sats */}
-      <text
-        x="12"
-        y="20"
-        textAnchor="middle"
-        fontSize="6"
-        fill="currentColor"
-        fontWeight="bold"
-      >
-        s
-      </text>
+      {/* Símbolo oficial de satoshi - baseado no código SVG oficial */}
+      {/* Barra superior - quadrada */}
+      <path fillRule="evenodd" clipRule="evenodd" d="M12.75 3V5.5H11.25V3H12.75Z" fill="currentColor" />
+      
+      {/* Linha longa superior */}
+      <path fillRule="evenodd" clipRule="evenodd" d="M17 8.75H7V7.25H17V8.75Z" fill="currentColor" />
+      
+      {/* Linha longa central */}
+      <path fillRule="evenodd" clipRule="evenodd" d="M17 12.7499H7V11.2499H17V12.7499Z" fill="currentColor" />
+      
+      {/* Linha longa inferior */}
+      <path fillRule="evenodd" clipRule="evenodd" d="M17 16.75H7V15.25H17V16.75Z" fill="currentColor" />
+      
+      {/* Barra inferior - quadrada */}
+      <path fillRule="evenodd" clipRule="evenodd" d="M12.75 18.5V21H11.25V18.5H12.75Z" fill="currentColor" />
     </svg>
   );
 };

@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
+  Activity,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,11 @@ const navigation = [
     name: 'Positions',
     href: '/trades',
     icon: TrendingUp,
+  },
+  {
+    name: 'Trading',
+    href: '/trading',
+    icon: Activity,
   },
   {
     name: 'Reports',

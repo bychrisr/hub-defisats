@@ -1,19 +1,25 @@
 #!/bin/bash
 
 # Script para criar usuário de teste no ambiente de desenvolvimento
-# Uso: ./scripts/create-dev-user.sh [email] [username] [password]
+# Uso: ./scripts/create-dev-user.sh [email] [username] [password] [--admin]
 
 set -e
 
 # Valores padrão
 EMAIL=${1:-"test@dev.com"}
 USERNAME=${2:-"testuser"}
-PASSWORD=${3:-"password"}
+PASSWORD=${3:-"Password123!"}
+IS_ADMIN=${4:-""}
 
 echo "🚀 Criando usuário de teste para desenvolvimento..."
 echo "📧 Email: $EMAIL"
 echo "👤 Username: $USERNAME"
 echo "🔑 Password: $PASSWORD"
+if [ "$IS_ADMIN" = "--admin" ]; then
+    echo "👑 Tipo: SUPER ADMIN"
+else
+    echo "👤 Tipo: Usuário normal"
+fi
 
 # Verificar se o container está rodando
 if ! docker ps | grep -q "hub-defisats-postgres"; then
@@ -59,6 +65,28 @@ INSERT INTO \"User\" (
 "
 
 echo "✅ Usuário criado/atualizado com sucesso!"
+
+# Se for admin, criar registro na tabela AdminUser
+if [ "$IS_ADMIN" = "--admin" ]; then
+    echo "👑 Criando permissões de super admin..."
+    USER_ID=$(docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -t -c "SELECT id FROM \"User\" WHERE email = '$EMAIL';" | tr -d ' \n')
+    
+    docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "
+    INSERT INTO \"AdminUser\" (
+      id,
+      user_id,
+      role,
+      created_at
+    ) VALUES (
+      gen_random_uuid()::text,
+      '$USER_ID',
+      'superadmin',
+      NOW()
+    ) ON CONFLICT (user_id) DO UPDATE SET
+      role = EXCLUDED.role;
+    "
+    echo "✅ Permissões de super admin criadas!"
+fi
 
 # Testar login
 echo "🧪 Testando login..."

@@ -13,14 +13,14 @@ export const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Header onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} />
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex min-h-[calc(100vh-4rem)]">
         <Sidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
         <main
           className={cn(
-            'flex-1 overflow-auto transition-all duration-300',
+            'flex-1 transition-all duration-300',
             sidebarCollapsed ? 'ml-16' : 'ml-64'
           )}
         >

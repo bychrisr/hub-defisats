@@ -361,7 +361,8 @@ export default function Reports() {
               </div>
             ) : (
               <>
-                <Table>
+                <div className="overflow-x-auto">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Status</TableHead>
@@ -412,7 +413,8 @@ export default function Reports() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
 
                 {/* Pagination */}
                 {pagination.totalPages > 1 && (

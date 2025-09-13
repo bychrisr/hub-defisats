@@ -231,7 +231,8 @@ export default function Coupons() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Code</TableHead>
@@ -301,7 +302,8 @@ export default function Coupons() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
 
           {coupons.length === 0 && (
             <div className="text-center py-8">

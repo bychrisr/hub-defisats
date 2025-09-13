@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Edit, Trash2, CreditCard } from 'lucide-react';
 import axios from 'axios';
+import SatsIcon from '@/components/SatsIcon';
 
 interface Payment {
   id: string;
@@ -186,7 +187,12 @@ export const Payments = () => {
                   <TableCell>
                     <Badge variant="outline">{payment.plan_type}</Badge>
                   </TableCell>
-                  <TableCell>{payment.amount_sats.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <span className="flex items-center gap-1">
+                      {payment.amount_sats.toLocaleString()}
+                      <SatsIcon size={16} className="text-orange-500" />
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={

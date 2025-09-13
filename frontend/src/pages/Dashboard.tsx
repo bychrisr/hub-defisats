@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
+import SimpleChart from '@/components/charts/SimpleChart';
 
 export default function Dashboard() {
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
@@ -312,6 +313,19 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+      </div>
+
+      {/* Teste do Gráfico */}
+      <div className="mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Teste do Gráfico</CardTitle>
+            <CardDescription>Verificação se lightweight-charts está funcionando</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SimpleChart />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

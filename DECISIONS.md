@@ -2,6 +2,33 @@
 
 Este documento registra decisões técnicas importantes tomadas durante o desenvolvimento do projeto.
 
+## 2025-01-19 - Implementação de Gráficos de Trading
+
+### Problema
+O usuário solicitou integração de TradingView com dados da LN Markets para exibir gráficos de preços em tempo real na aplicação.
+
+### Decisão
+Implementar solução customizada usando bibliotecas de gráficos leves ao invés do widget oficial do TradingView:
+
+1. **Biblioteca escolhida**: `lightweight-charts` - mais leve e customizável que TradingView
+2. **Arquitetura**: Separar em componentes reutilizáveis (TradingChart, useWebSocket, marketDataService)
+3. **WebSocket**: Implementar conexão em tempo real para dados de mercado
+4. **Dados**: Usar API REST para dados históricos e WebSocket para atualizações em tempo real
+5. **Tema**: Adaptar cores automaticamente ao tema claro/escuro da aplicação
+
+### Justificativa
+- **Performance**: `lightweight-charts` é mais leve que TradingView widget
+- **Customização**: Maior controle sobre aparência e funcionalidades
+- **Integração**: Melhor integração com o design system existente
+- **Flexibilidade**: Fácil adaptação para diferentes tipos de dados de mercado
+
+### Implementação
+- Criado componente `TradingChart` com controles de conexão
+- Implementado hook `useWebSocket` para gerenciar conexões
+- Desenvolvido `marketDataService` para processar dados de mercado
+- Adicionada página `/trading` com interface completa
+- Configurado backend WebSocket para dados em tempo real
+
 ## 2025-09-12 - Resolução de Problemas de Produção
 
 ### Problema
@@ -200,6 +227,131 @@ backend/src/
 - ✅ Fácil manutenção e expansão
 - ✅ Reutilização de componentes
 - ⚠️ Mais arquivos para gerenciar
+
+## 2025-01-19 - Correção de Dupla Barra de Rolagem
+
+### Problema
+A interface apresentava dupla barra de rolagem devido a:
+1. Layout principal com `height: calc(100vh - 4rem)` forçando altura fixa
+2. Layout principal (`main`) com `overflow-auto` criando scroll interno
+3. Componente Table com `overflow-auto` redundante
+
+### Decisão
+Remover altura fixa do layout principal e `overflow-auto` redundante para usar apenas scroll global.
+
+### Justificativa
+1. **UX**: Dupla barra de rolagem confunde o usuário e prejudica a experiência
+2. **Performance**: Múltiplas camadas de scroll podem causar problemas de performance
+3. **Simplicidade**: Scroll único é mais intuitivo e limpo
+4. **Padrão**: Seguir convenções de design para interfaces web
+
+### Implementação
+```typescript
+// Antes - Layout principal (CAUSA DO PROBLEMA)
+<div className="flex h-[calc(100vh-4rem)]">
+  <Sidebar />
+  <main className="flex-1 overflow-auto">
+    <div className="container mx-auto p-6">{children}</div>
+  </main>
+</div>
+
+// Depois - Layout principal (SOLUÇÃO)
+<div className="flex min-h-[calc(100vh-4rem)]">
+  <Sidebar />
+  <main className="flex-1">
+    <div className="container mx-auto p-6">{children}</div>
+  </main>
+</div>
+
+// Componente Table - Sem overflow redundante
+<div className="relative w-full">
+  <table className="w-full caption-bottom text-sm">
+    ...
+  </table>
+</div>
+```
+
+### Implementação Final
+Aplicada a correção em **7 páginas** do projeto:
+- `pages/Automations.tsx`
+- `pages/Notifications.tsx` 
+- `pages/Users.tsx`
+- `pages/Reports.tsx`
+- `pages/admin/Users.tsx`
+- `pages/admin/Coupons.tsx`
+- `pages/Payments.tsx`
+
+### Solução Implementada
+```tsx
+// Antes - Dupla barra de rolagem
+<CardContent>
+  <div className="overflow-x-auto max-h-[calc(100vh-24rem)]">
+    <Table>...</Table>
+  </div>
+</CardContent>
+
+// Depois - Scroll global único
+<CardContent>
+  <div className="overflow-x-auto">
+    <Table>...</Table>
+  </div>
+</CardContent>
+```
+
+### Consequências
+- ✅ **Scroll global único** (amarelo) - apenas uma barra de rolagem
+- ✅ **Sidebar fixa** (verde) - sem scroll, sempre visível
+- ✅ **Conteúdo principal** (vermelho) - usa scroll global quando necessário
+- ✅ **Experiência do usuário otimizada** - scroll intuitivo e limpo
+- ✅ **Interface profissional** - comportamento consistente em todas as páginas
+
+## 2025-01-19 - Redesign do Ícone de Sats
+
+### Problema
+O ícone de sats estava ilegível devido a:
+1. **Tamanho muito pequeno** (14px em uso, 16px padrão)
+2. **Círculo desnecessário** que poluía o visual
+3. **Design complexo** com "B" e "s" pequeno
+4. **Falta de referência visual** com a LN Markets
+
+### Decisão
+Redesenhar o SatsIcon baseado na referência da LN Markets para melhor legibilidade e consistência visual.
+
+### Justificativa
+1. **Legibilidade**: Ícone muito pequeno dificultava leitura dos valores
+2. **Consistência**: Alinhar com padrões visuais da LN Markets
+3. **Simplicidade**: Remover elementos desnecessários (círculo)
+4. **UX**: Melhor experiência visual para valores monetários
+
+### Implementação
+```tsx
+// Antes - Ícone pequeno e complexo
+<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+<path d="M8 8h8v2H8V8zm0 4h8v2H8v-2zm0 4h6v2H8v-2z" fill="currentColor" />
+<text x="12" y="20" fontSize="6">s</text>
+
+// Depois - Ícone maior e limpo
+<path d="M6 4h8c2.2 0 4 1.8 4 4s-1.8 4-4 4H8v4H6V4zm2 6h6c1.1 0 2-.9 2-2s-.9-2-2-2H8v4z" fill="currentColor" />
+<text x="18" y="18" fontSize="8" fontFamily="monospace">s</text>
+```
+
+### Implementação Global
+Aplicada a correção em **3 páginas** que exibem valores em sats:
+- `pages/Trades.tsx` - Valores de P&L, margin, fees, funding
+- `pages/admin/Dashboard.tsx` - Revenue em sats
+- `pages/Payments.tsx` - Amount em sats na tabela
+
+### Tamanhos Padronizados
+- **Valores principais**: 18px (P&L, margin, revenue)
+- **Tabelas secundárias**: 16px (payments, fees)
+- **Padrão do componente**: 20px (quando não especificado)
+
+### Consequências
+- ✅ **Legibilidade melhorada** - ícone maior e mais visível
+- ✅ **Design limpo** - sem círculo desnecessário
+- ✅ **Consistência visual** - alinhado com LN Markets
+- ✅ **Melhor UX** - valores monetários mais claros
+- ✅ **Padronização global** - mesmo visual em toda aplicação
 
 ## 2025-01-19 - ADR-017: Staging Environment Obrigatório
 

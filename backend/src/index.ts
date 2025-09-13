@@ -16,6 +16,7 @@ import { dashboardRoutes } from '@/routes/dashboard.routes';
 import { cacheRoutes } from '@/routes/cache.routes';
 import { validationRoutes } from '@/routes/validation.routes';
 import { adminRoutes } from '@/routes/admin.routes';
+import { websocketRoutes } from '@/routes/websocket.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/services/metrics.service';
@@ -327,6 +328,10 @@ async function registerRoutes() {
   // Admin routes
   await fastify.register(adminRoutes, { prefix: '/api/admin' });
   console.log('✅ Admin routes registered');
+
+  // WebSocket routes
+  await fastify.register(websocketRoutes, { prefix: '/api' });
+  console.log('✅ WebSocket routes registered');
 
   // Validation routes (without /api prefix to avoid authentication)
   await fastify.register(validationRoutes);

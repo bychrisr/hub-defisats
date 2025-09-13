@@ -97,6 +97,9 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* SatsIcon colors - sempre preto no light theme */
+    --sats-icon-color: 0 0% 0%;
   }
 
   .dark {
@@ -158,6 +161,9 @@
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 216 83% 15%;
     --sidebar-ring: 216 83% 30%;
+
+    /* SatsIcon colors - sempre branco no dark theme */
+    --sats-icon-color: 0 0% 100%;
   }
 }
 
@@ -175,6 +181,15 @@
       'Segoe UI',
       Roboto,
       sans-serif;
+  }
+
+  /* Aplicar tema baseado no data-theme */
+  [data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
   }
 
   code,

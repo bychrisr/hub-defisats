@@ -8,6 +8,44 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased] - 2025-01-19
 
 ### Adicionado
+- **Página de Trading**: Nova página `/trading` com gráficos de preços em tempo real
+- **Gráfico customizado**: Implementado usando `lightweight-charts` para visualização de candlesticks
+- **WebSocket integration**: Hook `useWebSocket` para conexão em tempo real com dados de mercado
+- **Serviço de dados de mercado**: `marketDataService` para gerenciar dados históricos e em tempo real
+- **Componente TradingChart**: Gráfico interativo com controles de conexão e atualização
+- **Dados de mercado**: Exibição de preço atual, variação 24h, high/low, volume
+- **Navegação**: Adicionado link "Trading" no menu lateral com ícone Activity
+- **Backend WebSocket**: Serviços para conexão WebSocket com LN Markets
+- **Dependências**: Instalado `lightweight-charts` e `recharts` para visualização de dados
+- **Tema**: Gráficos adaptam cores automaticamente ao tema claro/escuro
+
+### Corrigido
+- **Dupla barra de rolagem**: Removido `overflow-auto` redundante do componente Table
+- **Layout de tabelas**: Ajustado controle de scroll para evitar múltiplas camadas de rolagem
+- **Experiência do usuário**: Interface agora tem scroll único e mais limpo
+- **Todas as páginas com tabelas**: Aplicada correção em 7 páginas (Automations, Notifications, Users, Reports, admin/Users, admin/Coupons, Payments)
+- **Scroll global único**: Removido scroll interno das tabelas, mantendo apenas scroll global da página
+- **Sidebar fixa**: Sidebar permanece fixa sem scroll, conteúdo principal usa scroll global
+- **Layout principal**: Removido `height: calc(100vh - 4rem)` que causava dupla barra de rolagem
+- **Altura flexível**: Alterado para `min-h-[calc(100vh-4rem)]` permitindo conteúdo expandir naturalmente
+- **Ícone de sats**: Redesenhado baseado na referência da LN Markets - maior, mais grosso, sem círculo
+- **Legibilidade**: Aumentado tamanho padrão de 16px para 20px e tamanho de uso de 14px para 18px
+- **Consistência global**: Aplicado SatsIcon em todas as páginas que exibem valores em sats
+- **Páginas atualizadas**: Trades, admin/Dashboard, Payments com ícones padronizados
+- **Tamanhos otimizados**: 18px para valores principais, 16px para tabelas secundárias
+- **Símbolo correto**: Implementado símbolo oficial de satoshi com 5 retângulos horizontais
+- **Design oficial**: Baseado na proposta do Bitcoin Design Initiative
+- **Estrutura**: 2 quadrados nas extremidades + 3 linhas longas no centro
+- **Sistema de temas**: Implementado toggle light/dark mode com Context API
+- **Cores do SatsIcon**: Sempre preto (light) ou branco (dark) independente do contexto
+- **Toggle no menu**: Adicionado no dropdown do usuário no header
+- **Persistência**: Tema salvo no localStorage e detecta preferência do sistema
+- **Formatação do Leverage**: Corrigido para mostrar apenas 1 casa decimal (7.8x em vez de 7.8882x)
+- **Correção do Total Value**: Alterado cálculo para usar margin total em vez de quantity * price
+- **Exibição em Sats**: Total Value agora mostra margin total em sats com ícone correto
+- **Título atualizado**: "Total Value" alterado para "Total Margin" para maior clareza
+
+### Adicionado
 - **Ambiente de Staging Obrigatório**: Implementado `docker-compose.staging.yml` com portas separadas (23000, 23010)
 - **Banco de dados staging**: `defisats_staging` independente da produção
 - **Script de setup automatizado**: `scripts/setup-staging.sh` para configuração completa do ambiente

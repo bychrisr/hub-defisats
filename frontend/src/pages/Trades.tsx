@@ -109,7 +109,7 @@ export default function Trades() {
     return (
       <span className="flex items-center gap-1">
         {value.toLocaleString()}
-        <SatsIcon size={14} className="text-orange-500" />
+        <SatsIcon size={18} className="text-orange-500" />
       </span>
     );
   };
@@ -186,20 +186,14 @@ export default function Trades() {
         setPositions(transformedPositions);
         
         // Calculate totals from actual positions data
-        const totalValue = transformedPositions.reduce((sum, pos) => sum + (pos.quantity * pos.price), 0);
+        // Total value should be the sum of all margins (total capital at risk)
+        const totalValue = transformedPositions.reduce((sum, pos) => sum + pos.margin, 0);
         const totalPnl = transformedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
         const totalMargin = transformedPositions.reduce((sum, pos) => sum + pos.margin, 0);
         
         setTotalValue(totalValue);
         setTotalPnl(totalPnl);
         setTotalMargin(totalMargin);
-        
-        console.log('📊 TRADES - Calculated totals:', {
-          totalValue,
-          totalPnl,
-          totalMargin,
-          positionsCount: transformedPositions.length
-        });
       } else {
         console.error('❌ TRADES - Invalid data structure:', data);
         setError('Invalid response format from LN Markets');
@@ -299,12 +293,12 @@ export default function Trades() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Value</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Margin</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
+              <div className="text-2xl font-bold">{formatSats(totalValue)}</div>
               <p className="text-xs text-muted-foreground">
-                Total portfolio value
+                Total margin at risk
               </p>
             </CardContent>
           </Card>
@@ -467,7 +461,7 @@ export default function Trades() {
                         <TableCell>{formatCurrency(position.quantity)}</TableCell>
                         <TableCell>{formatCurrency(position.price)}</TableCell>
                         <TableCell>{formatCurrency(position.liquidation)}</TableCell>
-                        <TableCell>{position.leverage}x</TableCell>
+                        <TableCell>{position.leverage.toFixed(1)}x</TableCell>
                         <TableCell>{formatSats(position.margin)}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-1">
