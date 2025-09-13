@@ -1,5 +1,27 @@
 # Roadmap do Projeto Hub DeFiSats
 
+## ✅ CONCLUÍDO - v0.2.24 (13/01/2025)
+
+### Sistema de Gráficos de Trading e Temas
+- [x] **Página de Trading** - Implementada página completa com gráficos interativos
+- [x] **Gráficos lightweight-charts** - Integração com biblioteca moderna para visualização
+- [x] **Sistema de temas** - Implementado toggle claro/escuro com persistência
+- [x] **WebSocket backend** - Serviços para dados em tempo real da LN Markets
+- [x] **Hook useWebSocket** - Gerenciamento de conexões WebSocket no frontend
+- [x] **Serviço marketDataService** - Processamento de dados de mercado
+- [x] **Correção dupla scrollbar** - Resolvido problema de scroll em todas as páginas
+- [x] **Redesign ícone Sats** - Implementado símbolo oficial baseado na referência
+- [x] **Formatação de dados** - Corrigido leverage (1 decimal) e Total Margin
+- [x] **Atualização dependências** - Vite 7.x, lightweight-charts 5.x, Node.js 20+
+- [x] **Adaptação de cores** - Gráficos se adaptam automaticamente ao tema
+- [x] **Navegação** - Adicionado link "Trading" no menu lateral
+
+### Melhorias de UX/UI
+- [x] **Tema automático** - Detecção de preferência do sistema
+- [x] **Cores consistentes** - Paleta de cores adaptável ao tema
+- [x] **Responsividade** - Gráficos se adaptam ao tamanho da tela
+- [x] **Controles interativos** - Botões de conectar/desconectar e atualizar
+
 ## ✅ CONCLUÍDO - v0.2.23 (20/01/2025)
 
 ### Arquitetura de Proxy Reverso Global
