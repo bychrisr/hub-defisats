@@ -85,10 +85,17 @@ export default function UserUpgradeModal({ user, isOpen, onClose, onSuccess }: U
     try {
       // Converter data do formato datetime-local para ISO string
       let formattedEffectiveDate = effectiveDate;
-      if (effectiveDate && !effectiveDate.includes('.')) {
-        // Se não tem milissegundos, adicionar .000Z
-        formattedEffectiveDate = effectiveDate + '.000Z';
-      } else if (!effectiveDate) {
+      if (effectiveDate) {
+        // Se tem data, converter para ISO string completa
+        if (effectiveDate.includes('T') && !effectiveDate.includes('Z')) {
+          // Formato datetime-local: YYYY-MM-DDTHH:MM
+          formattedEffectiveDate = effectiveDate + ':00.000Z';
+        } else if (!effectiveDate.includes('.')) {
+          // Se não tem milissegundos, adicionar .000Z
+          formattedEffectiveDate = effectiveDate + '.000Z';
+        }
+      } else {
+        // Se não tem data, usar data atual
         formattedEffectiveDate = new Date().toISOString();
       }
 
