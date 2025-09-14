@@ -19,7 +19,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
         // Escutar atualizações de preço
         lnMarketsWS.on('price_update', (data) => {
           console.log('📊 WEBSOCKET MARKET - Broadcasting price update:', data);
-          connection.send(JSON.stringify({
+          connection.socket.send(JSON.stringify({
             type: 'market_data',
             data: data.data,
             timestamp: Date.now()
@@ -29,7 +29,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
         // Escutar erros
         lnMarketsWS.on('error', (error) => {
           console.error('❌ WEBSOCKET MARKET - LN Markets error:', error);
-          connection.send(JSON.stringify({
+          connection.socket.send(JSON.stringify({
             type: 'error',
             message: 'LN Markets connection error',
             timestamp: Date.now()
@@ -39,7 +39,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
         // Escutar desconexão
         lnMarketsWS.on('disconnected', () => {
           console.log('🔌 WEBSOCKET MARKET - LN Markets disconnected');
-          connection.send(JSON.stringify({
+          connection.socket.send(JSON.stringify({
             type: 'disconnected',
             message: 'LN Markets connection lost',
             timestamp: Date.now()
@@ -48,7 +48,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
 
       }).catch((error) => {
         console.error('❌ WEBSOCKET MARKET - Failed to connect to LN Markets:', error);
-        connection.send(JSON.stringify({
+        connection.socket.send(JSON.stringify({
           type: 'error',
           message: 'Failed to connect to LN Markets',
           timestamp: Date.now()
@@ -69,7 +69,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
               lnMarketsWS.unsubscribe(data.symbol || 'BTCUSD');
               break;
             case 'ping':
-              connection.send(JSON.stringify({ type: 'pong' }));
+              connection.socket.send(JSON.stringify({ type: 'pong' }));
               break;
           }
         } catch (error) {

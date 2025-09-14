@@ -52,7 +52,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       };
       
       console.log('📤 WEBSOCKET TEST - Enviando mensagem de confirmação:', connectionMessage);
-      connection.send(JSON.stringify(connectionMessage));
+      connection.socket.send(JSON.stringify(connectionMessage));
       console.log('✅ WEBSOCKET TEST - Mensagem de confirmação enviada com sucesso');
 
       // DISABLED: Simulação de dados de teste desabilitada para usar dados reais da LN Markets

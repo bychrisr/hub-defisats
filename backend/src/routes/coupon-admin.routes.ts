@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { adminAuthMiddleware } from '@/middleware/auth.middleware';
 import { CouponService } from '@/services/coupon.service';
 import { CreateCouponRequestSchema } from '@/types/api-contracts';
 
@@ -8,8 +8,8 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
   const couponService = new CouponService(prisma);
 
-  // Apply authentication middleware to all routes
-  fastify.addHook('preHandler', authMiddleware);
+  // Apply admin authentication middleware to all routes
+  fastify.addHook('preHandler', adminAuthMiddleware);
 
   // Get coupon dashboard
   fastify.get('/dashboard', {

@@ -57,7 +57,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.send(JSON.stringify(message));
+        connection.socket.send(JSON.stringify(message));
       });
 
       wsService.on('positionUpdate', (data) => {
@@ -77,7 +77,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.send(JSON.stringify(message));
+        connection.socket.send(JSON.stringify(message));
       });
 
       wsService.on('marginUpdate', (data) => {
@@ -91,7 +91,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.send(JSON.stringify(message));
+        connection.socket.send(JSON.stringify(message));
       });
 
       // Handle client messages
