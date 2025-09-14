@@ -2,7 +2,7 @@
 
 ## 🎯 Status Atual
 
-**Versão**: v1.2.1  
+**Versão**: v1.2.3  
 **Status**: Plataforma Completa de Trading com Sistema de Administração Avançado  
 **Última Atualização**: 2025-09-14
 
@@ -55,14 +55,16 @@
 - ✅ **Controle de Acesso** baseado em permissões
 - ✅ **Auditoria Completa** de alterações de plano
 
-### 📊 Sistema de Posições em Tempo Real (v1.2.0)
+### 📊 Sistema de Posições em Tempo Real (v1.2.3)
 - ✅ **Tracking de P&L** em tempo real via LN Markets
 - ✅ **Favicon Dinâmico** baseado no status de lucro/prejuízo
 - ✅ **Títulos de Página** com informações de P&L
 - ✅ **Context de Posições** centralizado
-- ✅ **Atualizações Automáticas** a cada 30 segundos
+- ✅ **Atualizações Automáticas** a cada 5 segundos
 - ✅ **Tratamento de Erros** robusto
 - ✅ **Integração LN Markets** completa
+- ✅ **Sincronização de Dados** entre contextos corrigida
+- ✅ **Header Dinâmico** com índice, trading fees, next funding e rate atualizados
 
 ### 🎛️ Sistema de Menus Dinâmicos (v1.2.0)
 - ✅ **Configuração Dinâmica** de menus via admin
@@ -73,12 +75,15 @@
 - ✅ **Sistema de Roles** integrado
 - ✅ **Seed Scripts** para dados iniciais
 
-### 🔧 Melhorias na API (v1.2.1)
+### 🔧 Melhorias na API (v1.2.3)
 - ✅ **Correção de Serialização** JSON dupla
 - ✅ **Headers Corretos** em requisições
 - ✅ **Resolução de Erros 400** em upgrades
 - ✅ **Integração Axios** melhorada
 - ✅ **Logging Detalhado** de requisições
+- ✅ **Rate Corrigido** de 0.002% para 0.001%
+- ✅ **Sincronização de Contextos** corrigida
+- ✅ **Dados em Tempo Real** funcionando perfeitamente
 
 ### 🧭 Navegação Responsiva (v0.3.0)
 - ✅ **Menu Desktop** centralizado com perfil de usuário
@@ -434,6 +439,15 @@ docker compose -f docker-compose.dev.yml up -d
 - [ ] Adicionar testes automatizados
 
 ## 📋 Changelog
+
+### v1.2.3 (2025-09-14) - Correção de Sincronização
+- 🔧 **Correção**: Resolvido problema do header não atualizar o índice
+- 🔧 **Correção**: Adicionado campo `userPositions` no RealtimeDataContext
+- 🔧 **Correção**: Sincronização entre PositionsContext e RealtimeDataContext
+- 🔧 **Correção**: Rate corrigido de 0.002% para 0.001% no backend
+- 🔧 **Melhoria**: Header dinâmico com dados atualizados em tempo real
+- 🔧 **Melhoria**: Logs de debug para identificar problemas de sincronização
+- ✅ **Funcionalidade**: Índice, trading fees, next funding e rate atualizam junto com posições
 
 ### v1.2.1 (2025-09-14) - Hotfix
 - 🔧 **Correção**: Resolvido erro 400 em upgrades de usuário
