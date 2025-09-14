@@ -111,6 +111,14 @@ export class LNMarketsWebSocketService extends EventEmitter {
           change24h: `${change24h.toFixed(2)}%`,
           volume: `${(volume/1000000).toFixed(2)}M` 
         });
+
+        // Emitir dados de saldo simulados para teste
+        this.emit('marginUpdate', {
+          totalValue: 1000000 + Math.random() * 100000, // Saldo total entre 1M e 1.1M sats
+          availableMargin: 800000 + Math.random() * 50000, // Margem disponível entre 800K e 850K sats
+          margin: 200000 + Math.random() * 50000, // Margem usada entre 200K e 250K sats
+          timestamp: now
+        });
       }
     } catch (error) {
       console.error('❌ LN MARKETS WS - Failed to fetch real data:', error);

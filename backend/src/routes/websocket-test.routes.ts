@@ -55,43 +55,9 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       connection.send(JSON.stringify(connectionMessage));
       console.log('✅ WEBSOCKET TEST - Mensagem de confirmação enviada com sucesso');
 
-      // Enviar dados de teste a cada 5 segundos
-      const testDataInterval = setInterval(() => {
-        const testMarketData = {
-          type: 'market_data',
-          data: {
-            symbol: 'BTC',
-            price: 50000 + Math.random() * 1000,
-            volume: 1000000 + Math.random() * 100000,
-            timestamp: Date.now()
-          }
-        };
-        
-        const testPositionData = {
-          type: 'position_update',
-          data: {
-            id: 'test-position-' + Date.now(),
-            symbol: 'BTC',
-            side: 'long',
-            quantity: 100,
-            price: 50000 + Math.random() * 1000,
-            margin: 1000,
-            leverage: 10,
-            pnl: -100 + Math.random() * 200,
-            pnlPercent: -5 + Math.random() * 10,
-            timestamp: Date.now()
-          }
-        };
-
-               try {
-                 connection.send(JSON.stringify(testMarketData));
-                 connection.send(JSON.stringify(testPositionData));
-                 console.log('📊 WEBSOCKET TEST - Dados de teste enviados');
-               } catch (error) {
-                 console.error('❌ WEBSOCKET TEST - Erro ao enviar dados de teste:', error);
-                 clearInterval(testDataInterval);
-               }
-      }, 5000);
+      // DISABLED: Simulação de dados de teste desabilitada para usar dados reais da LN Markets
+      // Os dados agora vêm diretamente da API da LN Markets via PositionsContext
+      console.log('📊 WEBSOCKET TEST - Simulação desabilitada, usando dados reais da LN Markets');
 
       // Handle client messages
       connection.on('message', (message) => {
@@ -123,7 +89,6 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
           reason: reason.toString(),
           timestamp: new Date().toISOString()
         });
-        clearInterval(testDataInterval);
       });
 
       // Handle connection error
@@ -133,7 +98,6 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
           error,
           timestamp: new Date().toISOString()
         });
-        clearInterval(testDataInterval);
       });
 
     } catch (error) {

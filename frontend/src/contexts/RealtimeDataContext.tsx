@@ -166,39 +166,35 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         case 'position_update':
           console.log('📊 REALTIME - Atualizando posição:', message.data);
-          // DISABLED: Esta simulação estava corrompendo os dados reais
-          // O problema era que os dados de mercado tinham escala de preço diferente
-          // e isso causava cálculos de P&L absurdos
-          // setData(prev => {
-          //   const marketData = prev.marketData[message.data.symbol];
-          //   if (marketData) {
-          //     // Calcular novo P&L baseado na mudança de preço
-          //     const priceChange = (marketData.price - message.data.price) / message.data.price;
-          //     const newPnl = message.data.pnl + (priceChange * message.data.quantity * message.data.price);
-          //     const newPnlPercent = message.data.margin > 0 ? (newPnl / message.data.margin) * 100 : 0;
-          //     
-          //     const updatedPosition = {
-          //       ...message.data,
-          //       price: marketData.price,
-          //       pnl: newPnl,
-          //       pnlPercent: newPnlPercent,
-          //       timestamp: Date.now()
-          //     };
-          //     
-          //     console.log('📊 REALTIME - Posição atualizada com dados de mercado:', updatedPosition);
-          //     
-          //     const newData = {
-          //       ...prev,
-          //       positions: prev.positions.map(pos => 
-          //         pos.id === message.data.id ? updatedPosition : pos
-          //       ),
-          //       lastUpdate: Date.now()
-          //     };
-          //     console.log('📊 REALTIME - Posições atualizadas:', newData.positions.length);
-          //     return newData;
-          //   }
-          //   return prev;
-          // });
+          setData(prev => {
+            // Atualizar posição diretamente com os dados recebidos
+            const updatedPosition = {
+              ...message.data,
+              timestamp: Date.now()
+            };
+            
+            console.log('📊 REALTIME - Posição atualizada:', updatedPosition);
+            
+            const existingPositions = prev.userPositions || [];
+            const existingIndex = existingPositions.findIndex(pos => pos.id === message.data.id);
+            
+            let newPositions;
+            if (existingIndex >= 0) {
+              // Atualizar posição existente
+              newPositions = existingPositions.map(pos => 
+                pos.id === message.data.id ? updatedPosition : pos
+              );
+            } else {
+              // Adicionar nova posição
+              newPositions = [...existingPositions, updatedPosition];
+            }
+            
+            return {
+              ...prev,
+              userPositions: newPositions,
+              lastUpdate: Date.now()
+            };
+          });
           break;
 
         case 'position_added':
@@ -562,7 +558,7 @@ export const useMarketData = (symbol: string) => {
 // Hook para posições do usuário
 export const useUserPositions = () => {
   const { data } = useRealtimeData();
-  return data.positions;
+  return data.userPositions || [];
 };
 
 // Hook para saldo do usuário
