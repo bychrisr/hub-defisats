@@ -322,6 +322,7 @@ export class LNMarketsUserController {
       limit?: string;
       offset?: string;
       status?: string;
+      type?: string;
     } }>,
     reply: FastifyReply
   ) {
@@ -335,13 +336,19 @@ export class LNMarketsUserController {
         });
       }
 
-      const { limit, offset, status } = request.query;
+      const { limit, offset, status, type } = request.query;
       const lnmarkets = await this.getLNMarketsService(userId);
       
       const params: any = {};
       if (limit) params.limit = parseInt(limit);
       if (offset) params.offset = parseInt(offset);
       if (status) params.status = status;
+      if (type) params.type = type;
+      
+      // Se não foi especificado um tipo, usar 'closed' como padrão para trades
+      if (!params.type) {
+        params.type = 'closed';
+      }
 
       const result = await lnmarkets.getUserTrades(params);
       
