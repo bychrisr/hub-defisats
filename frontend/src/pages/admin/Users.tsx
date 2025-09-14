@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RefreshCw, Search, Filter, MoreHorizontal, UserCheck, UserX, Eye, Crown } from 'lucide-react';
+import { RefreshCw, Search, Filter, MoreHorizontal, UserCheck, UserX, Eye, Crown, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { apiGet } from '@/lib/fetch';
 import UserUpgradeModal from '@/components/admin/UserUpgradeModal';
@@ -94,8 +94,7 @@ export default function Users() {
       const response = await fetch(`/api/admin/users/${userId}/toggle`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
       });
 
@@ -114,6 +113,39 @@ export default function Users() {
       fetchUsers(pagination.page);
     } catch (error) {
       console.error('❌ USERS COMPONENT - Error toggling user status:', error);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (!confirm(`Tem certeza que deseja excluir permanentemente o usuário ${userEmail}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ USERS COMPONENT - Deleting user:', userId);
+      
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+
+      console.log('🗑️ USERS COMPONENT - Delete response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ USERS COMPONENT - Delete error:', errorData);
+        throw new Error(`Failed to delete user: ${errorData.message || response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ USERS COMPONENT - User deleted successfully:', result);
+
+      // Refresh the users list
+      fetchUsers(pagination.page);
+    } catch (error) {
+      console.error('❌ USERS COMPONENT - Error deleting user:', error);
     }
   };
 
@@ -293,35 +325,51 @@ export default function Users() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="hover:bg-gray-100 cursor-pointer transition-colors"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem 
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => {/* TODO: Implement view details */}}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
-                          View Details
+                          Ver Detalhes
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          className="cursor-pointer hover:bg-gray-50"
                           onClick={() => handleOpenUpgradeModal(user)}
                         >
                           <Crown className="h-4 w-4 mr-2" />
                           Mudar Plano
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          className="cursor-pointer hover:bg-gray-50"
                           onClick={() => handleToggleUserStatus(user.id, user.is_active)}
                         >
                           {user.is_active ? (
                             <>
                               <UserX className="h-4 w-4 mr-2" />
-                              Deactivate
+                              Desativar
                             </>
                           ) : (
                             <>
                               <UserCheck className="h-4 w-4 mr-2" />
-                              Activate
+                              Ativar
                             </>
                           )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer hover:bg-red-50 text-red-600 focus:text-red-600 focus:bg-red-50"
+                          onClick={() => handleDeleteUser(user.id, user.email)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

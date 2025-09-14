@@ -506,6 +506,92 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // Delete user
+  fastify.delete('/users/:id', {
+    schema: {
+      description: 'Delete user permanently',
+      tags: ['Admin'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' }
+        },
+        required: ['id']
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' }
+          }
+        },
+        404: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+    console.log('🗑️ ADMIN DELETE ROUTE - Starting delete for user:', id);
+
+    try {
+      console.log('🗑️ ADMIN DELETE ROUTE - Finding user in database...');
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: { 
+          id: true, 
+          email: true, 
+          username: true,
+          is_active: true 
+        }
+      });
+
+      console.log('🗑️ ADMIN DELETE ROUTE - User found:', user);
+
+      if (!user) {
+        console.log('❌ ADMIN DELETE ROUTE - User not found');
+        return reply.status(404).send({
+          error: 'NOT_FOUND',
+          message: 'User not found'
+        });
+      }
+
+      console.log('🗑️ ADMIN DELETE ROUTE - Deleting user:', user.email);
+
+      // Delete user permanently
+      await prisma.user.delete({
+        where: { id }
+      });
+
+      console.log('✅ ADMIN DELETE ROUTE - User deleted successfully:', user.email);
+
+      return reply.status(200).send({
+        success: true,
+        message: `User ${user.email} deleted successfully`
+      });
+    } catch (error) {
+      console.log('❌ ADMIN DELETE ROUTE - Error:', error);
+      console.log('❌ ADMIN DELETE ROUTE - Error stack:', (error as Error).stack);
+      fastify.log.error('Error deleting user:', error as any);
+      return reply.status(500).send({
+        error: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to delete user',
+        details: (error as Error).message
+      });
+    }
+  });
 
   // Configurações globais
   fastify.get('/settings', {
