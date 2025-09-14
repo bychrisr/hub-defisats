@@ -15,6 +15,25 @@
     - is_active (boolean, default: true)
     - session_expires_at (datetime, nullable)
     - [ASSUMPTION] Users can have only one active LN Markets key pair at a time.
+
+## 1.1. Design System Architecture
+
+### CoinGecko Inspired Design System
+- **Design Tokens**: Centralizados em `frontend/src/lib/design-tokens.ts`
+- **Paleta de Cores**: 
+  - Primária: `#3773f5` (CoinGecko Blue)
+  - Secundária: `#f5ac37` (CoinGecko Orange) 
+  - Sucesso: `#0ecb81` (CoinGecko Green)
+  - Destrutiva: `#f6465d` (CoinGecko Red)
+- **Tipografia**: Inter (principal) + JetBrains Mono (dados técnicos)
+- **Temas**: Light/Dark mode com CSS variables
+- **Componentes**: CoinGeckoCard, PriceChange, ThemeContext
+
+### UI Components
+- **CoinGeckoCard**: Card component com estilo CoinGecko
+- **PriceChange**: Componente para exibir mudanças de preço com cores semânticas
+- **ThemeContext**: Context para gerenciamento de temas
+- **Design System Page**: Página de demonstração dos componentes
 - **Automation**
     - id (UUID, pk, required)
     - user_id (UUID, fk to [User.id](http://user.id/), required)

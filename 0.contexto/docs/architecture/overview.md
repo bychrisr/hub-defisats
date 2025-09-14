@@ -70,8 +70,11 @@ O hub-defisats é uma plataforma de automação de trades para LN Markets, const
 ### 2. Frontend (Next.js 14)
 - **Responsabilidade**: Interface do usuário, autenticação, visualização de dados
 - **Tecnologias**: Next.js 14, TypeScript, Tailwind CSS, Radix UI
+- **Design System**: CoinGecko Inspired com design tokens centralizados
 - **Estado**: Zustand para client state, TanStack Query para server state
 - **Comunicação**: REST API + WebSocket para tempo real
+- **Componentes UI**: CoinGeckoCard, PriceChange, ThemeContext
+- **Temas**: Light/Dark mode com transições suaves
 
 ### 2. API Gateway (Fastify)
 - **Responsabilidade**: Roteamento, autenticação, rate limiting, validação
@@ -148,6 +151,31 @@ LN Markets API → Margin Monitor Worker → Redis Pub/Sub → WebSocket → Fro
 ```
 User → Frontend → Payment Service → Lightning Node → Webhook → Payment Validator
 ```
+
+## Design System Architecture
+
+### 1. CoinGecko Inspired Design System
+- **Design Tokens**: Centralizados em `frontend/src/lib/design-tokens.ts`
+- **Paleta de Cores**: 
+  - Primária: `#3773f5` (CoinGecko Blue)
+  - Secundária: `#f5ac37` (CoinGecko Orange)
+  - Sucesso: `#0ecb81` (CoinGecko Green)
+  - Destrutiva: `#f6465d` (CoinGecko Red)
+- **Tipografia**: Inter (principal) + JetBrains Mono (dados técnicos)
+- **Temas**: Light/Dark mode com CSS variables
+- **Componentes**: CoinGeckoCard, PriceChange, ThemeContext
+
+### 2. Componentes UI Específicos
+- **CoinGeckoCard**: Card component com estilo CoinGecko
+- **PriceChange**: Componente para exibir mudanças de preço com cores semânticas
+- **ThemeContext**: Context para gerenciamento de temas
+- **Design System Page**: Página de demonstração dos componentes
+
+### 3. Configuração Tailwind
+- Cores específicas do CoinGecko mapeadas para classes Tailwind
+- CSS variables para temas light/dark
+- Animações e transições otimizadas
+- Breakpoints responsivos
 
 ## Padrões Arquiteturais
 

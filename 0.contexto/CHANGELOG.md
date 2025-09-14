@@ -7,6 +7,34 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+## [0.8.3] - 2025-01-10
+
+### Added
+- **Sistema de Design CoinGecko Inspired**: Implementação completa do design system
+  - **Paleta de Cores**: Cores inspiradas no CoinGecko para transmitir confiança
+    - Primária: `#3773f5` (CoinGecko Blue) para botões e CTAs
+    - Secundária: `#f5ac37` (CoinGecko Orange) para badges e alertas
+    - Sucesso: `#0ecb81` (CoinGecko Green) para valores positivos
+    - Destrutiva: `#f6465d` (CoinGecko Red) para valores negativos
+  - **Design Tokens**: Arquivo centralizado `frontend/src/lib/design-tokens.ts`
+  - **Tema Light/Dark**: Sistema completo com transições suaves
+  - **Tipografia**: Inter (principal) + JetBrains Mono (dados técnicos)
+  - **Componentes Específicos**: CoinGeckoCard, PriceChange, ThemeContext
+  - **Configuração Tailwind**: Cores e classes personalizadas do CoinGecko
+  - **Guia de Estilos**: Documentação completa em `frontend/src/docs/STYLE_GUIDE.md`
+  - **Página Design System**: Demonstração de componentes em `/design-system`
+
+### Changed
+- **Configuração Tailwind**: Adicionadas cores específicas do CoinGecko
+- **CSS Variables**: Implementadas variáveis para temas light/dark
+- **Componentes UI**: Atualizados para usar o novo design system
+- **Documentação**: PDR e ANALYSIS atualizados com delimitações de identidade visual
+
+### Technical Details
+- **Arquivos Criados**: `design-tokens.ts`, `STYLE_GUIDE.md`, `DesignSystem.tsx`
+- **Arquivos Modificados**: `tailwind.config.ts`, `index.css`, `ThemeContext.tsx`
+- **Status**: Design system 100% implementado e documentado
+
 ## [0.8.2] - 2025-01-10
 
 ### Fixed

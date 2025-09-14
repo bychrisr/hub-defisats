@@ -22,6 +22,25 @@ O produto atua como uma **ponte inteligente** entre o usuário e a LN Markets, u
 - **Pagamentos Lightning**: via transferência interna LN Markets ou invoice Lightning externa.
 - **Cadastro & Onboarding**: login social + cadastro de keys LN Markets (criptografadas).
 
+## 2.1. Identidade Visual e Design System
+
+### Sistema de Design CoinGecko Inspired
+- **Paleta de Cores**: Inspirada no CoinGecko para transmitir confiança e profissionalismo
+  - **Primária**: `#3773f5` (CoinGecko Blue) - Botões principais, CTAs
+  - **Secundária**: `#f5ac37` (CoinGecko Orange) - Badges, alertas secundários
+  - **Sucesso**: `#0ecb81` (CoinGecko Green) - Valores positivos, confirmações
+  - **Destrutiva**: `#f6465d` (CoinGecko Red) - Valores negativos, erros
+- **Tipografia**: Inter (principal) + JetBrains Mono (dados técnicos)
+- **Temas**: Light/Dark mode com transições suaves
+- **Componentes**: Design system completo com tokens centralizados
+
+### Delimitações de Identidade Visual
+- **Consistência**: Uso obrigatório das cores semânticas para valores financeiros
+- **Acessibilidade**: Contraste adequado em ambos os temas
+- **Responsividade**: Design adaptável para desktop e mobile
+- **Performance**: Transições otimizadas (200-500ms)
+- **Branding**: Visual que transmite confiança e profissionalismo financeiro
+
 ---
 
 ## 3. Requisitos Funcionais

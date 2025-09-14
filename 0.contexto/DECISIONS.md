@@ -2,6 +2,58 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats.
 
+## ADR-021: CoinGecko Inspired Design System Implementation
+
+**Data**: 2025-01-10
+**Status**: Aceito
+**Contexto**: Implementação de um sistema de design completo inspirado no CoinGecko para transmitir confiança e profissionalismo na plataforma financeira
+
+### Decisão
+- **Paleta de Cores CoinGecko**: Adotar cores específicas do CoinGecko para identidade visual
+  - Primária: `#3773f5` (CoinGecko Blue) para ações principais
+  - Secundária: `#f5ac37` (CoinGecko Orange) para badges e alertas
+  - Sucesso: `#0ecb81` (CoinGecko Green) para valores positivos
+  - Destrutiva: `#f6465d` (CoinGecko Red) para valores negativos
+- **Design Tokens Centralizados**: Arquivo `design-tokens.ts` com todos os tokens
+- **Sistema de Temas**: Light/Dark mode com CSS variables
+- **Tipografia**: Inter (principal) + JetBrains Mono (dados técnicos)
+- **Componentes Específicos**: CoinGeckoCard, PriceChange, ThemeContext
+- **Documentação Completa**: Guia de estilos e página de demonstração
+
+### Justificativa
+- **Confiança**: CoinGecko é referência em plataformas financeiras
+- **Consistência**: Paleta de cores semântica para valores financeiros
+- **Profissionalismo**: Visual que transmite credibilidade
+- **Acessibilidade**: Contraste adequado em ambos os temas
+- **Manutenibilidade**: Design tokens centralizados facilitam mudanças
+- **Escalabilidade**: Sistema preparado para novos componentes
+
+### Implementação
+```typescript
+// design-tokens.ts
+export const designTokens = {
+  colors: {
+    primary: '#3773f5',      // CoinGecko Blue
+    secondary: '#f5ac37',    // CoinGecko Orange
+    success: '#0ecb81',      // CoinGecko Green
+    destructive: '#f6465d',  // CoinGecko Red
+  },
+  // ... outros tokens
+};
+
+// Uso em componentes
+<PriceChange value={3.2} /> // Verde para positivo
+<Button className="bg-primary">Ação Principal</Button>
+```
+
+### Consequências
+- ✅ **Positivas**: Identidade visual consistente, confiança do usuário, manutenibilidade
+- ⚠️ **Negativas**: Dependência de cores específicas, necessidade de documentação
+- 🔄 **Reversível**: Sim, mas requer refatoração de todos os componentes
+- 📊 **Métricas**: Consistência visual, tempo de desenvolvimento de componentes
+
+---
+
 ## ADR-020: Admin Dashboard Authentication and Routing System
 
 **Data**: 2025-01-10
