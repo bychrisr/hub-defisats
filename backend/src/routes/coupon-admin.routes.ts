@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { CouponService } from '@/services/coupon.service';
+import { CreateCouponRequestSchema } from '@/types/api-contracts';
 
 export async function couponAdminRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
@@ -313,7 +314,12 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       const user = (request as any).user;
       const couponData = request.body as any;
       
-      const coupon = await couponService.createCoupon(couponData, user.id);
+      console.log('🔍 COUPON ADMIN - Received data:', JSON.stringify(couponData, null, 2));
+      
+      // Validate with Zod schema
+      const validatedData = CreateCouponRequestSchema.parse(couponData);
+      
+      const coupon = await couponService.createCoupon(validatedData, user.id);
       
       console.log('✅ COUPON ADMIN - Coupon created:', coupon.code);
       return reply.status(201).send({
@@ -322,6 +328,16 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
       });
     } catch (error: any) {
       console.error('❌ COUPON ADMIN - Error creating coupon:', error);
+      
+      // Handle Zod validation errors
+      if (error.name === 'ZodError') {
+        return reply.status(400).send({
+          success: false,
+          error: 'VALIDATION_ERROR',
+          message: error.errors.map((e: any) => e.message).join(', ')
+        });
+      }
+      
       return reply.status(400).send({
         success: false,
         error: 'VALIDATION_ERROR',
