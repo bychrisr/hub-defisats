@@ -203,46 +203,46 @@ const App = () => {
   }, [getProfile, setLoading]);
 
   return (
-    <ThemeProvider>
-      <RealtimeDataProvider>
-        <PositionsProvider>
-          <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <GlobalPageTitle />
-          <GlobalDynamicFavicon />
-          <Routes>
-            <Route path="/" element={
-              <PublicRoute>
-                <Landing />
-              </PublicRoute>
-            } />
-            <Route
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <RealtimeDataProvider>
+          <PositionsProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter
+                future={{
+                  v7_startTransition: true,
+                  v7_relativeSplatPath: true,
+                }}
+              >
+                <GlobalPageTitle />
+                <GlobalDynamicFavicon />
+                <Routes>
+                  <Route path="/" element={
+                    <PublicRoute>
+                      <Landing />
+                    </PublicRoute>
+                  } />
+                  <Route
               path="/login"
-              element={
-                <PublicRoute>
+                element={
+                  <PublicRoute>
                   <Login />
                 </PublicRoute>
               }
             />
-            <Route
+                  <Route
               path="/register"
-              element={
-                <PublicRoute>
+                element={
+                  <PublicRoute>
                   <Register />
                 </PublicRoute>
               }
             />
-            <Route
+                  <Route
               path="/dashboard"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard>
                     <ResponsiveLayout>
@@ -252,9 +252,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/profile"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard>
                     <ResponsiveLayout>
@@ -264,9 +264,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/margin-guard"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="advanced">
                     <Layout>
@@ -276,9 +276,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/automation"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
@@ -288,9 +288,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/reports"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
@@ -300,9 +300,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/positions"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
@@ -312,9 +312,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/backtests"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
@@ -324,9 +324,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/logs"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="advanced">
                     <Layout>
@@ -336,9 +336,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/trading"
-              element={
+                element={
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="advanced">
                     <Layout>
@@ -348,18 +348,18 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+                  <Route
               path="/test-permissions"
-              element={
+                element={
                 <ProtectedRoute>
                   <TestPermissions />
                 </ProtectedRoute>
               }
             />
             {/* Admin Routes */}
-            <Route
+                  <Route
               path="/admin"
-              element={
+                element={
                 <AdminRoute>
                   <RouteGuard requireAdmin>
                     <AdminLayout />
@@ -376,14 +376,14 @@ const App = () => {
               <Route path="alerts" element={<AdminAlerts />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
-            <Route path="*" element={<NotFound />} />
+                  <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </TooltipProvider>
+            </TooltipProvider>
+          </PositionsProvider>
+        </RealtimeDataProvider>
+      </ThemeProvider>
     </QueryClientProvider>
-        </PositionsProvider>
-      </RealtimeDataProvider>
-  </ThemeProvider>
   );
 };
 

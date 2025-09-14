@@ -25,6 +25,8 @@ const LNMarketsHeader: React.FC = () => {
   const lnMarketsData = data.marketIndex;
   const lnMarketsError = data.marketIndexError;
   
+  console.log('🔍 LN MARKETS HEADER - Data received:', { lnMarketsData, lnMarketsError, fullData: data });
+  
   const [marketData, setMarketData] = useState<LNMarketsData>({
     index: 115820.50,
     index24hChange: -0.5,

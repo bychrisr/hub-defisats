@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useUserPositions, useRealtimeData } from './RealtimeDataContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
 // Tipos para as posições (baseado na página Positions.tsx)
@@ -85,6 +86,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   const { isAuthenticated, user } = useAuthStore();
   const userPositions = useUserPositions();
   const { updatePositions } = useRealtimeData();
+  const queryClient = useQueryClient();
   
   console.log('📊 POSITIONS - Provider render:', { userPositions, length: userPositions?.length });
   
@@ -262,9 +264,12 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         totalPL: 0,
         totalMargin: 0,
         totalQuantity: 0,
+        totalValue: 0,
         lastUpdate: 0,
         isLoading: false,
         error: null,
+        marketIndex: null,
+        marketIndexError: null,
       });
     }
   }, [isAuthenticated]);
@@ -279,23 +284,32 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     }, 10000); // Atualizar a cada 10 segundos
 
     return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchRealPositions]);
 
   // Função para buscar posições reais da LN Markets
   const fetchRealPositions = async () => {
     try {
-      console.log('🔍 POSITIONS CONTEXT - Fetching real positions and market index from LN Markets...');
+      console.log('🔍 POSITIONS CONTEXT - Fetching real positions, market index and menu from LN Markets...');
       
-      // Atualizar posições e índice simultaneamente
-      const [positionsResponse, indexResponse] = await Promise.all([
+      // Atualizar posições, índice e menu simultaneamente
+      const [positionsResponse, indexResponse, menuResponse] = await Promise.all([
         api.get('/api/lnmarkets/user/positions'),
-        api.get('/api/market/index')
+        api.get('/api/market/index'),
+        api.get('/api/menu')
       ]);
       
       const positionsData = positionsResponse.data;
       const indexData = indexResponse.data;
+      const menuData = menuResponse.data;
       console.log('✅ POSITIONS CONTEXT - Received real positions:', positionsData);
       console.log('✅ POSITIONS CONTEXT - Received market index:', indexData);
+      console.log('✅ POSITIONS CONTEXT - Received menu data:', menuData);
+
+      // Invalidar cache do menu para forçar atualização
+      if (menuData.success) {
+        console.log('🔄 POSITIONS CONTEXT - Invalidating menu cache...');
+        queryClient.invalidateQueries({ queryKey: ['menus'] });
+      }
 
       if (positionsData.success && positionsData.data && Array.isArray(positionsData.data)) {
         // Transformar dados da LN Markets para o formato do contexto
@@ -348,8 +362,10 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
             rateChange: indexData.data.rateChange,
             timestamp: indexData.data.timestamp
           };
+          console.log('✅ POSITIONS CONTEXT - Market index processed:', marketIndex);
         } else {
           marketIndexError = indexData.message || 'Failed to fetch market index';
+          console.log('❌ POSITIONS CONTEXT - Market index error:', marketIndexError);
         }
 
         setData({
@@ -373,6 +389,12 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         });
       } else {
         console.log('📝 POSITIONS CONTEXT - No positions data, using empty array');
+        
+        // Invalidar cache do menu mesmo sem posições
+        if (menuData.success) {
+          console.log('🔄 POSITIONS CONTEXT - Invalidating menu cache (no positions)...');
+          queryClient.invalidateQueries({ queryKey: ['menus'] });
+        }
         
         // Processar dados do índice de mercado mesmo sem posições
         let marketIndex: MarketIndexData | null = null;
@@ -407,6 +429,14 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       }
     } catch (error) {
       console.error('❌ POSITIONS CONTEXT - Error fetching real positions:', error);
+      
+      // Tentar invalidar cache do menu mesmo em caso de erro
+      try {
+        queryClient.invalidateQueries({ queryKey: ['menus'] });
+      } catch (menuError) {
+        console.warn('⚠️ POSITIONS CONTEXT - Could not invalidate menu cache:', menuError);
+      }
+      
       setData(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to fetch positions',
