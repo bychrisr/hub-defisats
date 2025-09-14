@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import LNMarketsHeader from '@/components/layout/LNMarketsHeader';
 import { 
   BarChart3, 
   Camera, 
@@ -159,11 +158,7 @@ const LNMarketsStyleChart: React.FC<LNMarketsStyleChartProps> = ({
   }
 
   return (
-    <div className={className}>
-      {/* LN Markets Header */}
-      <LNMarketsHeader />
-      
-      <Card className="p-0 overflow-hidden">
+    <Card className={`p-0 overflow-hidden ${className}`}>
         {/* Header da LN Markets */}
         <div className="bg-[#1e1e1e] border-b border-[#2a2e39] p-4">
         <div className="flex items-center justify-between">
@@ -290,8 +285,7 @@ const LNMarketsStyleChart: React.FC<LNMarketsStyleChartProps> = ({
           </div>
         </div>
       </div>
-      </Card>
-    </div>
+    </Card>
   );
 };
 

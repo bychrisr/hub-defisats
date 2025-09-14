@@ -1,5 +1,6 @@
 import { DesktopHeader } from './DesktopNavigation';
 import { MobileNavigation } from './MobileNavigation';
+import LNMarketsHeader from './LNMarketsHeader';
 import { cn } from '@/lib/utils';
 
 interface ResponsiveLayoutProps {
@@ -9,6 +10,11 @@ interface ResponsiveLayoutProps {
 export const ResponsiveLayout = ({ children }: ResponsiveLayoutProps) => {
   return (
     <div className="min-h-screen bg-white">
+      {/* Market Header - Above navigation */}
+      <div className="hidden md:block">
+        <LNMarketsHeader />
+      </div>
+
       {/* Desktop Header - Hidden on mobile */}
       <div className="hidden md:block">
         <DesktopHeader />
