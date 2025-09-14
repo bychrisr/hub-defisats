@@ -96,6 +96,16 @@ export const AuthResponseSchema = z.object({
   token: z.string(),
   refresh_token: z.string().optional(),
   plan_type: z.nativeEnum(PlanType),
+  user_balance: z.object({
+    balance: z.number(),
+    synthetic_usd_balance: z.number(),
+    uid: z.string(),
+    role: z.string(),
+    username: z.string(),
+    linking_public_key: z.string().nullable(),
+    show_leaderboard: z.boolean(),
+    email: z.string().nullable()
+  }).optional(),
 });
 
 export const RefreshTokenResponseSchema = z.object({

@@ -43,13 +43,64 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              data: { type: 'object' }
+              data: { 
+                type: 'object',
+                properties: {
+                  balance: { type: 'number' },
+                  synthetic_usd_balance: { type: 'number' },
+                  uid: { type: 'string' },
+                  role: { type: 'string' },
+                  username: { type: 'string' },
+                  login: { type: 'string' },
+                  linking_public_key: { type: ['string', 'null'] },
+                  show_leaderboard: { type: 'boolean' },
+                  email: { type: ['string', 'null'] },
+                  email_confirmed: { type: 'boolean' },
+                  account_type: { type: 'string' },
+                  fee_tier: { type: 'number' }
+                },
+                additionalProperties: true
+              }
             }
           }
         }
       }
     },
     userController.getUserBalance.bind(userController)
+  );
+
+  // Get estimated balance (wallet + margin + PnL - fees)
+  fastify.get(
+    '/lnmarkets/user/estimated-balance',
+    {
+      schema: {
+        description: 'Get estimated balance calculation',
+        tags: ['LN Markets - User'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: { 
+                type: 'object',
+                properties: {
+                  wallet_balance: { type: 'number' },
+                  total_margin: { type: 'number' },
+                  total_pnl: { type: 'number' },
+                  total_fees: { type: 'number' },
+                  estimated_balance: { type: 'number' },
+                  total_invested: { type: 'number' },
+                  positions_count: { type: 'number' },
+                  trades_count: { type: 'number' }
+                },
+                additionalProperties: true
+              }
+            }
+          }
+        }
+      }
+    },
+    userController.getEstimatedBalance.bind(userController)
   );
 
   // Get user history
@@ -93,7 +144,8 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
           properties: {
             limit: { type: 'string', description: 'Number of trades to return' },
             offset: { type: 'string', description: 'Number of trades to skip' },
-            status: { type: 'string', description: 'Filter by trade status' }
+            status: { type: 'string', description: 'Filter by trade status' },
+            type: { type: 'string', description: 'Filter by trade type (running, closed)' }
           }
         },
         response: {
