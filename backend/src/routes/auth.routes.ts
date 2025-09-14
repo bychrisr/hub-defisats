@@ -550,7 +550,7 @@ export async function authRoutes(fastify: FastifyInstance) {
               email: { type: 'string', format: 'email' },
               plan_type: {
                 type: 'string',
-                enum: ['free', 'basic', 'advanced', 'pro'],
+                enum: ['free', 'basic', 'advanced', 'pro', 'lifetime'],
               },
               created_at: { type: 'string', format: 'date-time' },
               last_activity_at: { type: 'string', format: 'date-time' },

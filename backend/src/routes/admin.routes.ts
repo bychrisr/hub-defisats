@@ -337,7 +337,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
           limit: { type: 'string', default: '20' },
           plan_type: { 
             type: 'string',
-            enum: ['free', 'basic', 'advanced', 'pro']
+            enum: ['free', 'basic', 'advanced', 'pro', 'lifetime']
           },
           is_active: { type: 'string' },
           search: { type: 'string' }

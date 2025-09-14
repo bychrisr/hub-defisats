@@ -48,7 +48,7 @@ const LoginRequestZodSchema = z.object({
 const AuthResponseZodSchema = z.object({
   user_id: z.string().uuid(),
   token: z.string(),
-  plan_type: z.enum(['free', 'basic', 'advanced', 'pro']),
+  plan_type: z.enum(['free', 'basic', 'advanced', 'pro', 'lifetime']),
 });
 
 // const RefreshTokenResponseZodSchema = z.object({

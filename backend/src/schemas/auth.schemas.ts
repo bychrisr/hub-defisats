@@ -85,7 +85,7 @@ export const AuthResponseSchema = {
     },
     plan_type: {
       type: 'string',
-      enum: ['free', 'basic', 'advanced', 'pro'],
+      enum: ['free', 'basic', 'advanced', 'pro', 'lifetime'],
     },
   },
   additionalProperties: false,

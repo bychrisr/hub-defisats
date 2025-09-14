@@ -17,7 +17,7 @@ model User {
   social_id                  String?
   ln_markets_api_key         String?
   ln_markets_api_secret      String?
-  plan_type                  String           @default("free")
+  plan_type                  PlanType         @default(free)
   last_activity_at           DateTime?        @db.Timestamp(6)
   created_at                 DateTime         @default(now()) @db.Timestamp(6)
   updated_at                 DateTime         @default(now()) @db.Timestamp(6)
@@ -98,7 +98,7 @@ model Notification {
 model Payment {
   id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id           String
-  plan_type         String
+  plan_type         PlanType
   amount_sats       Int
   lightning_invoice String
   status            String
@@ -136,7 +136,7 @@ model Coupon {
   code         String       @unique
   usage_limit  Int?         @default(1)
   used_count   Int?         @default(0)
-  plan_type    String
+  plan_type    PlanType
   expires_at   DateTime?    @db.Timestamp(6)
   
   // Novos campos para o sistema de cupons
