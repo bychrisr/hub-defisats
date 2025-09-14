@@ -89,12 +89,19 @@ export async function adminAuthMiddleware(
   reply: FastifyReply
 ): Promise<void> {
   try {
+    console.log('🔍 ADMIN AUTH MIDDLEWARE - Starting authentication check');
+    console.log('🔍 Request URL:', request.url);
+    console.log('🔍 Headers:', request.headers.authorization);
+    
     // First, authenticate the user
     await authMiddleware(request, reply);
 
     // Check if user is admin
     const user = (request as any).user;
+    console.log('🔍 ADMIN AUTH MIDDLEWARE - User from authMiddleware:', user?.email, 'ID:', user?.id);
+    
     if (!user) {
+      console.log('❌ ADMIN AUTH MIDDLEWARE - No user found from authMiddleware');
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
         message: 'User not authenticated',
@@ -109,12 +116,17 @@ export async function adminAuthMiddleware(
 
     await prisma.$disconnect();
 
+    console.log('🔍 ADMIN AUTH MIDDLEWARE - Admin user found:', adminUser);
+
     if (!adminUser) {
+      console.log('❌ ADMIN AUTH MIDDLEWARE - User is not admin');
       return reply.status(403).send({
         error: 'FORBIDDEN',
         message: 'Admin access required',
       });
     }
+
+    console.log('✅ ADMIN AUTH MIDDLEWARE - Admin access granted');
 
     // Attach admin info to request
     (request as any).user = { 
@@ -124,6 +136,7 @@ export async function adminAuthMiddleware(
       plan_type: user.plan_type
     };
   } catch (error) {
+    console.log('❌ ADMIN AUTH MIDDLEWARE - Error:', error);
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
       message: error instanceof Error ? error.message : 'Authentication failed',
