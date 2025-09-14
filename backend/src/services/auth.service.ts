@@ -378,17 +378,21 @@ export class AuthService {
       console.log('🔍 VALIDATE SESSION - User found:', user?.email);
 
       if (!user || !user.is_active) {
+        console.log('❌ VALIDATE SESSION - User not found or inactive');
         throw new Error('Invalid session');
       }
 
       // Check if session is expired
       if (user.session_expires_at && user.session_expires_at < new Date()) {
+        console.log('❌ VALIDATE SESSION - Session expired');
         throw new Error('Session expired');
       }
 
+      console.log('✅ VALIDATE SESSION - Session valid');
       return user as any;
     } catch (error) {
       console.log('❌ VALIDATE SESSION - Error:', (error as Error).message);
+      console.log('❌ VALIDATE SESSION - Error stack:', (error as Error).stack);
       throw new Error('Invalid session');
     }
   }
