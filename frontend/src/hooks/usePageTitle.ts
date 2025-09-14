@@ -36,7 +36,7 @@ export const usePageTitle = ({
           totalPL: finalPL
         });
         
-        const plFormatted = finalPL >= 0 ? `+${finalPL.toFixed(2)}` : finalPL.toFixed(2);
+        const plFormatted = finalPL >= 0 ? `+${finalPL.toLocaleString()}` : finalPL.toLocaleString();
         const plColor = finalPL >= 0 ? '🟢' : '🔴';
 
         title = `${plColor} ${plFormatted} sats | ${baseTitle}`;
