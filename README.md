@@ -2,9 +2,9 @@
 
 ## 🎯 Status Atual
 
-**Versão**: v0.3.0  
-**Status**: Sistema Completo de Administração de Cupons com Analytics  
-**Última Atualização**: 2025-01-13
+**Versão**: v1.2.1  
+**Status**: Plataforma Completa de Trading com Sistema de Administração Avançado  
+**Última Atualização**: 2025-09-14
 
 ## ✅ Funcionalidades Implementadas
 
@@ -45,6 +45,40 @@
 - ✅ **Interface Responsiva** para desktop e mobile
 - ✅ **Validação Completa** no backend e frontend
 - ✅ **Documentação Detalhada** do sistema
+
+### 🚀 Sistema de Upgrade de Usuários (v1.2.0)
+- ✅ **Administração de Planos** com upgrade/downgrade de usuários
+- ✅ **5 Tipos de Plano**: free, basic, advanced, pro, lifetime
+- ✅ **Histórico de Upgrades** com rastreamento completo
+- ✅ **Validação Robusta** com motivos obrigatórios
+- ✅ **Interface Admin** para gerenciamento de usuários
+- ✅ **Controle de Acesso** baseado em permissões
+- ✅ **Auditoria Completa** de alterações de plano
+
+### 📊 Sistema de Posições em Tempo Real (v1.2.0)
+- ✅ **Tracking de P&L** em tempo real via LN Markets
+- ✅ **Favicon Dinâmico** baseado no status de lucro/prejuízo
+- ✅ **Títulos de Página** com informações de P&L
+- ✅ **Context de Posições** centralizado
+- ✅ **Atualizações Automáticas** a cada 30 segundos
+- ✅ **Tratamento de Erros** robusto
+- ✅ **Integração LN Markets** completa
+
+### 🎛️ Sistema de Menus Dinâmicos (v1.2.0)
+- ✅ **Configuração Dinâmica** de menus via admin
+- ✅ **Estrutura Hierárquica** de navegação
+- ✅ **Controle de Visibilidade** baseado em permissões
+- ✅ **Interface de Administração** para gerenciar menus
+- ✅ **Configuração de Páginas** dinâmica
+- ✅ **Sistema de Roles** integrado
+- ✅ **Seed Scripts** para dados iniciais
+
+### 🔧 Melhorias na API (v1.2.1)
+- ✅ **Correção de Serialização** JSON dupla
+- ✅ **Headers Corretos** em requisições
+- ✅ **Resolução de Erros 400** em upgrades
+- ✅ **Integração Axios** melhorada
+- ✅ **Logging Detalhado** de requisições
 
 ### 🧭 Navegação Responsiva (v0.3.0)
 - ✅ **Menu Desktop** centralizado com perfil de usuário
@@ -398,6 +432,31 @@ docker compose -f docker-compose.dev.yml up -d
 - [ ] Atualizar outros componentes admin para usar função utilitária
 - [ ] Implementar sistema de permissões baseado em roles
 - [ ] Adicionar testes automatizados
+
+## 📋 Changelog
+
+### v1.2.1 (2025-09-14) - Hotfix
+- 🔧 **Correção**: Resolvido erro 400 em upgrades de usuário
+- 🔧 **Correção**: Corrigida serialização JSON dupla na API
+- 🔧 **Correção**: Headers de requisição agora são mesclados corretamente
+- 🔧 **Melhoria**: Logging detalhado de requisições para debugging
+
+### v1.2.0 (2025-09-14) - Major Release
+- 🚀 **Novo**: Sistema completo de upgrade de usuários
+- 📊 **Novo**: Tracking de posições em tempo real com P&L
+- 🎛️ **Novo**: Sistema de menus dinâmicos configuráveis
+- 🔧 **Novo**: Melhorias no WebSocket para dados em tempo real
+- 🎨 **Novo**: Favicon dinâmico baseado no status de P&L
+- 🎨 **Novo**: Títulos de página dinâmicos com informações de P&L
+- 🛡️ **Novo**: Sistema de permissões e guards de rota
+- 📱 **Novo**: Interface admin responsiva para gerenciamento
+- 🔧 **Novo**: Scripts de teste e seeding de dados
+- 📚 **Novo**: Documentação abrangente e exemplos de uso
+
+### v0.3.0 (2025-01-13) - Sistema de Cupons
+- 🎫 **Novo**: Sistema completo de administração de cupons
+- 📊 **Novo**: Analytics detalhados de cupons
+- 🧭 **Novo**: Navegação responsiva
 
 ### 🎯 Próximas Funcionalidades
 - [ ] Dashboard de usuário comum
