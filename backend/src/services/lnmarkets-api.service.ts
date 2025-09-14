@@ -503,13 +503,13 @@ export class LNMarketsAPIService {
       // Generate sample candlestick data
       for (let i = limit; i >= 0; i--) {
         const time = (now - i * this.getTimeframeMs(timeframe)) / 1000;
-        const change = (Math.random() - 0.5) * 1000;
+        const change = (Math.random() - 0.5) * 100; // Mudança menor e mais realista
         price += change;
         
         const open = price;
-        const close = price + (Math.random() - 0.5) * 200;
-        const high = Math.max(open, close) + Math.random() * 100;
-        const low = Math.min(open, close) - Math.random() * 100;
+        const close = price + (Math.random() - 0.5) * 50; // Variação menor
+        const high = Math.max(open, close) + Math.random() * 25;
+        const low = Math.min(open, close) - Math.random() * 25;
         const volume = Math.random() * 1000000;
         
         candles.push({

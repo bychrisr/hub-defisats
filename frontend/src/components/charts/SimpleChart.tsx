@@ -1,13 +1,9 @@
 import React from 'react';
-import LNMarketsChart from './LNMarketsChart';
+import CircularChart from './CircularChart';
 
 const SimpleChart: React.FC = () => {
   return (
-    <LNMarketsChart 
-      symbol="BTCUSD: LNM Futures"
-      height={500}
-      showControls={true}
-    />
+    <CircularChart className="w-full" />
   );
 };
 

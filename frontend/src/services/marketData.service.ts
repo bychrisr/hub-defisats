@@ -87,13 +87,13 @@ class MarketDataService {
 
     for (let i = 100; i >= 0; i--) {
       const time = (now - i * 60000) / 1000; // 1 minuto atrás
-      const change = (Math.random() - 0.5) * 1000; // Mudança aleatória
+      const change = (Math.random() - 0.5) * 100; // Mudança menor e mais realista
       price += change;
       
       const open = price;
-      const close = price + (Math.random() - 0.5) * 200;
-      const high = Math.max(open, close) + Math.random() * 100;
-      const low = Math.min(open, close) - Math.random() * 100;
+      const close = price + (Math.random() - 0.5) * 50; // Variação menor
+      const high = Math.max(open, close) + Math.random() * 25;
+      const low = Math.min(open, close) - Math.random() * 25;
       const volume = Math.random() * 1000000;
 
       data.push({
