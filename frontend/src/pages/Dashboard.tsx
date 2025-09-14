@@ -17,16 +17,31 @@ import {
   User,
   BarChart3,
   DollarSign,
+  Wallet,
+  Target,
+  Activity,
+  TrendingDown,
+  CheckCircle,
+  XCircle,
+  Percent,
 } from 'lucide-react';
 import { PositionsSummary } from '@/components/PositionsSummary';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
+import { usePositionsMetrics } from '@/contexts/PositionsContext';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
+import { useDashboardMetrics, useFormatSats } from '@/hooks/useDashboardMetrics';
+import { useFormatPercentage } from '@/hooks/useFormatPercentage';
+import { useHistoricalData } from '@/hooks/useHistoricalData';
+import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
+import { MetricCard } from '@/components/dashboard/MetricCard';
+import { PnLCard } from '@/components/dashboard/PnLCard';
+import SatsIcon from '@/components/SatsIcon';
 
 export default function Dashboard() {
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
@@ -42,6 +57,15 @@ export default function Dashboard() {
   const realtimePositions = useUserPositions();
   const userBalance = useUserBalance();
   const { isConnected } = useConnectionStatus();
+  
+  // Novos hooks para métricas da dashboard
+  const positionsData = usePositionsMetrics();
+  const metrics = useDashboardMetrics();
+  const historicalData = useHistoricalData();
+  const estimatedBalance = useEstimatedBalance();
+  const { formatSats } = useFormatSats();
+  const formatPercentage = useFormatPercentage();
+  
 
   useEffect(() => {
     if (!user) {
@@ -68,7 +92,7 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -82,69 +106,125 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Automations
-              </CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.total || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.active || 0} active, {stats?.inactive || 0} inactive
-              </p>
-            </CardContent>
-          </Card>
+        {/* Linha 1 - Posições Ativas */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-text-primary">Posições Ativas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <PnLCard
+              title="PnL Total"
+              pnl={metrics.totalPnL}
+              percentage={metrics.totalPnLPercentage}
+              subtitle="Lucro/prejuízo total"
+            />
+            
+            <PnLCard
+              title="Profit Estimado"
+              pnl={metrics.estimatedProfit}
+              subtitle="Se fechadas com take profit"
+              icon={Target}
+            />
+            
+            <MetricCard
+              title="Trades Abertos"
+              value={metrics.openTrades.toString()}
+              subtitle="Posições em execução"
+              icon={Activity}
+              variant={metrics.openTrades > 0 ? 'default' : 'warning'}
+            />
+            
+            <MetricCard
+              title="Margem Total"
+              value={formatSats(metrics.totalMargin)}
+              subtitle="Margem utilizada"
+              icon={Wallet}
+            />
+            
+            <MetricCard
+              title="Taxas Estimadas"
+              value={formatSats(metrics.estimatedFees)}
+              subtitle="Taxas das posições ativas"
+              icon={DollarSign}
+            />
+          </div>
+        </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Automations
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.active || 0}</div>
-              <p className="text-xs text-muted-foreground">Currently running</p>
-            </CardContent>
-          </Card>
+        {/* Linha 2 - Histórico */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-text-primary">Histórico</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <PnLCard
+              title="Saldo Estimado"
+              pnl={estimatedBalance.data?.estimated_balance || 0}
+              subtitle={estimatedBalance.isLoading ? "Carregando..." : `${estimatedBalance.data?.positions_count || 0} posições`}
+              icon={Wallet}
+            />
+            
+            <MetricCard
+              title="Total Investido"
+              value={formatSats(estimatedBalance.data?.total_invested || 0)}
+              subtitle={estimatedBalance.isLoading ? "Carregando..." : `${estimatedBalance.data?.trades_count || 0} trades`}
+              icon={Target}
+            />
+            
+            <PnLCard
+              title="Lucro Total"
+              pnl={metrics.totalProfit}
+              subtitle="Soma de todos os lucros"
+              icon={TrendingUp}
+            />
+            
+            <MetricCard
+              title="Taxas Pagas"
+              value={formatSats(metrics.totalFeesPaid)}
+              subtitle="Taxas pagas em operações"
+              icon={DollarSign}
+            />
+            
+            <MetricCard
+              title="Taxa de Sucesso"
+              value={`${metrics.successRate.toFixed(1)}%`}
+              subtitle={`${metrics.winningPositions} de ${metrics.totalPositions} posições`}
+              icon={CheckCircle}
+              variant={metrics.successRate >= 50 ? 'success' : 'warning'}
+            />
+          </div>
+        </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Margem Disponível
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {userBalance?.available_balance ? `${(userBalance.available_balance / 100000000).toFixed(8)} BTC` : '0.00000000 BTC'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {userBalance?.available_balance ? `${(userBalance.available_balance / 100).toFixed(2)} sats` : '0 sats'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Account Status
-              </CardTitle>
-              <User className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {user?.email_verified ? 'Verified' : 'Pending'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Email verification
-              </p>
-            </CardContent>
-          </Card>
+        {/* Linha 3 - Estatísticas Adicionais */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-text-primary">Estatísticas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <MetricCard
+              title="ROI"
+              value={formatPercentage(metrics.roi)}
+              subtitle="Retorno sobre investimento"
+              icon={Percent}
+              variant={metrics.roi >= 0 ? 'success' : 'danger'}
+            />
+            
+            <MetricCard
+              title="Total de Posições"
+              value={metrics.totalPositions.toString()}
+              subtitle="Posições totais"
+              icon={BarChart3}
+            />
+            
+            <MetricCard
+              title="Posições Ganhas"
+              value={metrics.winningPositions.toString()}
+              subtitle="Encerradas com lucro"
+              icon={CheckCircle}
+              variant="success"
+            />
+            
+            <MetricCard
+              title="Posições Perdidas"
+              value={metrics.losingPositions.toString()}
+              subtitle="Encerradas com prejuízo"
+              icon={XCircle}
+              variant="danger"
+            />
+          </div>
         </div>
 
         {/* Resumo das Posições */}
@@ -333,6 +413,7 @@ export default function Dashboard() {
 
         {/* Gráfico de Preços */}
         <SimpleChart />
+
     </div>
   );
 }
