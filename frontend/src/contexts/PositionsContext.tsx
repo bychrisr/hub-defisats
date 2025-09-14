@@ -252,40 +252,6 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     updateLocalPositions(convertedPositions);
   }, [userPositions]);
 
-  // Buscar posições reais quando usuário estiver autenticado
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log('🔍 POSITIONS CONTEXT - User authenticated, fetching real positions...');
-      fetchRealPositions();
-    } else {
-      console.log('🔍 POSITIONS CONTEXT - User not authenticated, clearing positions...');
-      setData({
-        positions: [],
-        totalPL: 0,
-        totalMargin: 0,
-        totalQuantity: 0,
-        totalValue: 0,
-        lastUpdate: 0,
-        isLoading: false,
-        error: null,
-        marketIndex: null,
-        marketIndexError: null,
-      });
-    }
-  }, [isAuthenticated]);
-
-  // Atualizar posições periodicamente quando autenticado
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const interval = setInterval(() => {
-      console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and index...');
-      fetchRealPositions();
-    }, 10000); // Atualizar a cada 10 segundos
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated, fetchRealPositions]);
-
   // Função para buscar posições reais da LN Markets
   const fetchRealPositions = async () => {
     try {
@@ -446,6 +412,40 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       }));
     }
   };
+
+  // Buscar posições reais quando usuário estiver autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('🔍 POSITIONS CONTEXT - User authenticated, fetching real positions...');
+      fetchRealPositions();
+    } else {
+      console.log('🔍 POSITIONS CONTEXT - User not authenticated, clearing positions...');
+      setData({
+        positions: [],
+        totalPL: 0,
+        totalMargin: 0,
+        totalQuantity: 0,
+        totalValue: 0,
+        lastUpdate: 0,
+        isLoading: false,
+        error: null,
+        marketIndex: null,
+        marketIndexError: null,
+      });
+    }
+  }, [isAuthenticated]);
+
+  // Atualizar posições periodicamente quando autenticado
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const interval = setInterval(() => {
+      console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and index...');
+      fetchRealPositions();
+    }, 5000); // Atualizar a cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, fetchRealPositions]);
 
   // Função para refresh manual
   const refreshPositions = () => {
