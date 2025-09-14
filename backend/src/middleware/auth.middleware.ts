@@ -226,3 +226,75 @@ export async function planAuthMiddleware(requiredPlan: string) {
     }
   };
 }
+
+// Middleware específico para autenticação de administradores
+export async function authenticateAdmin(
+  request: FastifyRequest,
+  reply: FastifyReply
+): Promise<void> {
+  try {
+    // Get token from Authorization header
+    const authHeader = request.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return reply.status(401).send({
+        error: 'UNAUTHORIZED',
+        message: 'Authorization header with Bearer token is required',
+      });
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    // Verify JWT token using fastify jwt
+    const decoded = request.server.jwt.verify(token) as any;
+
+    if (!decoded) {
+      return reply.status(401).send({
+        error: 'UNAUTHORIZED',
+        message: 'Invalid or expired token',
+      });
+    }
+
+    // Get user from database
+    const prisma = new PrismaClient();
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        plan_type: true,
+      },
+    });
+
+    if (!user) {
+      return reply.status(401).send({
+        error: 'UNAUTHORIZED',
+        message: 'User not found',
+      });
+    }
+
+    // Check if user is admin
+    const adminUser = await prisma.adminUser.findUnique({
+      where: { user_id: user.id },
+    });
+
+    if (!adminUser) {
+      return reply.status(403).send({
+        error: 'FORBIDDEN',
+        message: 'Admin access required',
+      });
+    }
+
+    // Add user to request object
+    (request as any).user = user;
+
+    await prisma.$disconnect();
+  } catch (error) {
+    return reply.status(401).send({
+      error: 'UNAUTHORIZED',
+      message:
+        error instanceof Error ? error.message : 'Authentication failed',
+    });
+  }
+}

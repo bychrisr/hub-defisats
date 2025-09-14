@@ -18,6 +18,10 @@ import { dashboardRoutes } from '@/routes/dashboard.routes';
 import { cacheRoutes } from '@/routes/cache.routes';
 import { validationRoutes } from '@/routes/validation.routes';
 import { adminRoutes } from '@/routes/admin.routes';
+import { menuAdminRoutes } from '@/routes/menu-admin.routes';
+import { menuPublicRoutes } from '@/routes/menu-public.routes';
+import { dynamicPagesConfigRoutes } from '@/routes/dynamic-pages-config.routes';
+import { adminUpgradeRoutes } from '@/routes/admin-upgrade.routes';
 import { websocketRoutes } from '@/routes/websocket.routes';
 import { websocketTestRoutes } from '@/routes/websocket-test.routes';
 import { websocketMarketRoutes } from '@/routes/websocket-market.routes';
@@ -278,7 +282,7 @@ async function registerRoutes() {
       method: request.method,
       route: request.url,
       status_code: reply.statusCode.toString(),
-    }, reply.getResponseTime() / 1000);
+    }, reply.getResponseTime ? reply.getResponseTime() / 1000 : 0);
 
     done();
   });
@@ -346,6 +350,22 @@ async function registerRoutes() {
   // Admin routes
   await fastify.register(adminRoutes, { prefix: '/api/admin' });
   console.log('✅ Admin routes registered');
+
+  // Menu admin routes
+  await fastify.register(menuAdminRoutes, { prefix: '/api/admin/menu' });
+  console.log('✅ Menu admin routes registered');
+
+  // Admin upgrade routes
+  await fastify.register(adminUpgradeRoutes, { prefix: '/api' });
+  console.log('✅ Admin upgrade routes registered');
+
+  // Menu public routes
+  await fastify.register(menuPublicRoutes, { prefix: '/api/menu' });
+  console.log('✅ Menu public routes registered');
+
+  // Dynamic pages config routes
+  await fastify.register(dynamicPagesConfigRoutes);
+  console.log('✅ Dynamic pages config routes registered');
 
   // WebSocket routes
   await fastify.register(websocketRoutes, { prefix: '/api' });
