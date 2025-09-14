@@ -127,8 +127,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     };
   };
 
-  // Função para atualizar posições
-  const updatePositions = (newPositions: LNPosition[]) => {
+  // Função para atualizar posições locais
+  const updateLocalPositions = (newPositions: LNPosition[]) => {
     const metrics = calculateMetrics(newPositions);
     
     setData(prev => {
@@ -233,7 +233,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     // Converter posições em tempo real para LNPosition
     const convertedPositions = userPositions.map(convertRealtimeToLNPosition);
     console.log('📊 POSITIONS - Posições convertidas:', convertedPositions);
-    updatePositions(convertedPositions);
+    updateLocalPositions(convertedPositions);
   }, [userPositions]);
 
   // Buscar posições reais quando usuário estiver autenticado
