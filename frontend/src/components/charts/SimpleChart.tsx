@@ -1,10 +1,9 @@
 import React from 'react';
-import TradingViewChart from './TradingViewChart';
+import BitstampTradingView from './BitstampTradingView';
 
 const SimpleChart: React.FC = () => {
   return (
-    <TradingViewChart 
-      symbol="BTCUSD: LNM Futures"
+    <BitstampTradingView 
       height={500}
       className="w-full"
     />
