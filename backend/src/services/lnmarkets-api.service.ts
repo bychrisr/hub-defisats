@@ -459,6 +459,14 @@ export class LNMarketsAPIService {
     });
   }
 
+  // Get current market index data
+  async getMarketIndex() {
+    return this.makeRequest({
+      method: 'GET',
+      path: '/v2/market'
+    });
+  }
+
   async getFuturesData() {
     return this.makeRequest({
       method: 'GET',

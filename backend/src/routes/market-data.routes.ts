@@ -126,6 +126,147 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // Get LN Markets index data
+  fastify.get('/market/index', {
+    schema: {
+      description: 'Get current LN Markets index data',
+      tags: ['Market Data'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                index: { type: 'number' },
+                index24hChange: { type: 'number' },
+                tradingFees: { type: 'number' },
+                nextFunding: { type: 'string' },
+                rate: { type: 'number' },
+                rateChange: { type: 'number' },
+                timestamp: { type: 'number' }
+              }
+            }
+          }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const user = (request as any).user;
+      
+      console.log('🔍 MARKET INDEX - Getting LN Markets index data for user:', user.id);
+
+      // Get user credentials
+      const userProfile = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          ln_markets_api_key: true,
+          ln_markets_api_secret: true,
+          ln_markets_passphrase: true,
+        },
+      });
+
+      if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+        return reply.status(400).send({
+          success: false,
+          error: 'MISSING_CREDENTIALS',
+          message: 'LN Markets credentials not configured',
+        });
+      }
+
+      // Initialize LN Markets service
+      const lnMarketsService = new LNMarketsAPIService({
+        apiKey: userProfile.ln_markets_api_key,
+        apiSecret: userProfile.ln_markets_api_secret,
+        passphrase: userProfile.ln_markets_passphrase,
+        isTestnet: false,
+      });
+
+      // Get market index data from LN Markets
+      let marketIndexData;
+      try {
+        marketIndexData = await lnMarketsService.getMarketIndex();
+        console.log('✅ MARKET INDEX - LN Markets index data retrieved:', marketIndexData);
+      } catch (lnMarketsError) {
+        console.log('⚠️ MARKET INDEX - LN Markets API failed, using CoinGecko as fallback:', lnMarketsError.message);
+        
+        // Fallback to CoinGecko for real BTC price
+        const coingeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+        const coingeckoData = await coingeckoResponse.json();
+        
+        marketIndexData = {
+          price: coingeckoData.bitcoin.usd,
+          change24h: coingeckoData.bitcoin.usd_24h_change,
+          changePercent24h: coingeckoData.bitcoin.usd_24h_change
+        };
+        
+        console.log('✅ MARKET INDEX - Using CoinGecko fallback data:', marketIndexData);
+      }
+
+      // Calculate Next Funding (LN Markets funding every 8h: 00:00, 08:00, 16:00 UTC)
+      const now = new Date();
+      const currentHour = now.getUTCHours();
+      const currentMinute = now.getUTCMinutes();
+      const currentSecond = now.getUTCSeconds();
+      
+      let nextFundingHour;
+      if (currentHour < 8) {
+        nextFundingHour = 8;
+      } else if (currentHour < 16) {
+        nextFundingHour = 16;
+      } else {
+        nextFundingHour = 24; // Next day 00:00
+      }
+      
+      const hoursToNext = nextFundingHour - currentHour;
+      const minutesToNext = 60 - currentMinute;
+      const secondsToNext = 60 - currentSecond;
+      
+      const nextFunding = hoursToNext === 0 
+        ? `${minutesToNext - 1}m ${secondsToNext}s`
+        : `${hoursToNext - 1}h ${minutesToNext - 1}m ${secondsToNext}s`;
+
+      return reply.status(200).send({
+        success: true,
+        data: {
+          index: marketIndexData.price || marketIndexData.index || 0,
+          index24hChange: marketIndexData.change24h || marketIndexData.changePercent24h || 0,
+          tradingFees: 0.1, // LN Markets standard fee
+          nextFunding: nextFunding,
+          rate: 0.00002, // 0.0020% in decimal
+          rateChange: 0.00001,
+          timestamp: Date.now()
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ MARKET INDEX - Error getting LN Markets index data:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to get LN Markets index data',
+        details: error.message
+      });
+    }
+  });
+
   // Get current market data
   fastify.get('/market/data', {
     schema: {

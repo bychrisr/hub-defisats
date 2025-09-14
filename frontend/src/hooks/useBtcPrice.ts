@@ -60,6 +60,13 @@ export const useBtcPrice = (): UseBtcPriceReturn => {
 
   useEffect(() => {
     fetchBtcPrice();
+    
+    // Atualizar preço a cada 30 segundos
+    const interval = setInterval(() => {
+      fetchBtcPrice();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   return {

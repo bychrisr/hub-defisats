@@ -8,6 +8,7 @@ import {
   Percent,
   Activity
 } from 'lucide-react';
+import { useLNMarketsIndex } from '@/hooks/useLNMarketsIndex';
 
 interface LNMarketsData {
   index: number;
@@ -20,6 +21,8 @@ interface LNMarketsData {
 }
 
 const LNMarketsHeader: React.FC = () => {
+  const { data: lnMarketsData, loading: lnMarketsLoading, error: lnMarketsError } = useLNMarketsIndex();
+  
   const [marketData, setMarketData] = useState<LNMarketsData>({
     index: 115820.50,
     index24hChange: -0.5,
@@ -31,6 +34,22 @@ const LNMarketsHeader: React.FC = () => {
   });
 
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Atualizar dados quando os dados da LN Markets mudarem
+  useEffect(() => {
+    if (lnMarketsData) {
+      setMarketData(prev => ({
+        ...prev,
+        index: lnMarketsData.index,
+        index24hChange: lnMarketsData.index24hChange,
+        tradingFees: lnMarketsData.tradingFees,
+        nextFunding: lnMarketsData.nextFunding,
+        rate: lnMarketsData.rate,
+        rateChange: lnMarketsData.rateChange,
+        lastUpdate: new Date(lnMarketsData.timestamp)
+      }));
+    }
+  }, [lnMarketsData]);
 
   // Detectar scroll para reduzir header
   useEffect(() => {
@@ -72,10 +91,7 @@ const LNMarketsHeader: React.FC = () => {
       
       setMarketData(prev => ({
         ...prev,
-        index: prev.index + (Math.random() - 0.5) * 50,
-        index24hChange: prev.index24hChange + (Math.random() - 0.5) * 0.1,
-        rate: 0.00002 + (Math.random() - 0.5) * 0.00001, // Manter próximo a 0.0020%
-        rateChange: (Math.random() - 0.5) * 0.00001,
+        // Manter dados reais do BTC, não simular variações
         nextFunding: nextFunding,
         lastUpdate: now
       }));
@@ -127,11 +143,22 @@ const LNMarketsHeader: React.FC = () => {
                 <span className={`text-gray-300 font-medium transition-all duration-300 ${
                   isScrolled ? 'text-xs' : 'text-sm'
                 }`}>Index:</span>
-                <span className={`text-white font-bold transition-all duration-300 ${
-                  isScrolled ? 'text-base' : 'text-lg'
-                }`}>
-                  ${formatIndex(marketData.index)}
-                </span>
+                {lnMarketsLoading ? (
+                  <div className="flex items-center space-x-1">
+                    <Activity className="h-3 w-3 animate-spin text-gray-400" />
+                    <span className="text-gray-400 text-sm">Loading...</span>
+                  </div>
+                ) : lnMarketsError ? (
+                  <div className="flex items-center space-x-1">
+                    <span className="text-red-400 text-sm">Error</span>
+                  </div>
+                ) : (
+                  <span className={`text-white font-bold transition-all duration-300 ${
+                    isScrolled ? 'text-base' : 'text-lg'
+                  }`}>
+                    ${formatIndex(marketData.index)}
+                  </span>
+                )}
               </div>
               {!isScrolled && (
                 <div className="flex items-center space-x-1">
