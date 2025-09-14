@@ -21,7 +21,7 @@ interface LNMarketsData {
 }
 
 const LNMarketsHeader: React.FC = () => {
-  const { data: lnMarketsData, loading: lnMarketsLoading, error: lnMarketsError } = useLNMarketsIndex();
+  const { data: lnMarketsData, error: lnMarketsError, refetch: refetchIndex } = useLNMarketsIndex();
   
   const [marketData, setMarketData] = useState<LNMarketsData>({
     index: 115820.50,
@@ -143,12 +143,7 @@ const LNMarketsHeader: React.FC = () => {
                 <span className={`text-gray-300 font-medium transition-all duration-300 ${
                   isScrolled ? 'text-xs' : 'text-sm'
                 }`}>Index:</span>
-                {lnMarketsLoading ? (
-                  <div className="flex items-center space-x-1">
-                    <Activity className="h-3 w-3 animate-spin text-gray-400" />
-                    <span className="text-gray-400 text-sm">Loading...</span>
-                  </div>
-                ) : lnMarketsError ? (
+                {lnMarketsError ? (
                   <div className="flex items-center space-x-1">
                     <span className="text-red-400 text-sm">Error</span>
                   </div>

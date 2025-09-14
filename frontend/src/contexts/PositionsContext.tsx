@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useAuthStore } from '@/stores/auth';
 import { useUserPositions } from './RealtimeDataContext';
 import { api } from '@/lib/api';
+import { useLNMarketsIndex } from '@/hooks/useLNMarketsIndex';
 
 // Tipos para as posições (baseado na página Positions.tsx)
 export interface LNPosition {
@@ -70,6 +71,7 @@ interface PositionsProviderProps {
 export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   const { isAuthenticated, user } = useAuthStore();
   const userPositions = useUserPositions();
+  const { refetch: refetchIndex } = useLNMarketsIndex();
   
   console.log('📊 POSITIONS - Provider render:', { userPositions, length: userPositions?.length });
   
@@ -257,9 +259,9 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     if (!isAuthenticated) return;
 
     const interval = setInterval(() => {
-      console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions...');
+      console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and index...');
       fetchRealPositions();
-    }, 30000); // Atualizar a cada 30 segundos
+    }, 10000); // Atualizar a cada 10 segundos
 
     return () => clearInterval(interval);
   }, [isAuthenticated]);
@@ -269,8 +271,13 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     try {
       console.log('🔍 POSITIONS CONTEXT - Fetching real positions from LN Markets...');
       
-      const response = await api.get('/api/lnmarkets/user/positions');
-      const data = response.data;
+      // Atualizar posições e índice simultaneamente
+      const [positionsResponse] = await Promise.all([
+        api.get('/api/lnmarkets/user/positions'),
+        refetchIndex() // Atualizar índice junto com as posições
+      ]);
+      
+      const data = positionsResponse.data;
       console.log('✅ POSITIONS CONTEXT - Received real positions:', data);
 
       if (data.success && data.data && Array.isArray(data.data)) {

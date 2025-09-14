@@ -212,11 +212,20 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
         const coingeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
         const coingeckoData = await coingeckoResponse.json();
         
-        marketIndexData = {
-          price: coingeckoData.bitcoin.usd,
-          change24h: coingeckoData.bitcoin.usd_24h_change,
-          changePercent24h: coingeckoData.bitcoin.usd_24h_change
-        };
+        if (coingeckoData && coingeckoData.bitcoin && coingeckoData.bitcoin.usd) {
+          marketIndexData = {
+            price: coingeckoData.bitcoin.usd,
+            change24h: coingeckoData.bitcoin.usd_24h_change || 0,
+            changePercent24h: coingeckoData.bitcoin.usd_24h_change || 0
+          };
+        } else {
+          // Fallback final com dados simulados
+          marketIndexData = {
+            price: 115000,
+            change24h: 0,
+            changePercent24h: 0
+          };
+        }
         
         console.log('✅ MARKET INDEX - Using CoinGecko fallback data:', marketIndexData);
       }

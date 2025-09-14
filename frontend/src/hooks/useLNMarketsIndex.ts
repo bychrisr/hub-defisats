@@ -13,19 +13,16 @@ interface LNMarketsIndexData {
 
 interface UseLNMarketsIndexReturn {
   data: LNMarketsIndexData | null;
-  loading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
 export const useLNMarketsIndex = (): UseLNMarketsIndexReturn => {
   const [data, setData] = useState<LNMarketsIndexData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchIndexData = async () => {
     try {
-      setLoading(true);
       setError(null);
 
       console.log('🔍 LN MARKETS INDEX - Fetching real index data from LN Markets API...');
@@ -52,25 +49,15 @@ export const useLNMarketsIndex = (): UseLNMarketsIndexReturn => {
         rateChange: 0.00001,
         timestamp: Date.now()
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchIndexData();
-    
-    // Atualizar dados a cada 30 segundos
-    const interval = setInterval(() => {
-      fetchIndexData();
-    }, 30000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   return {
     data,
-    loading,
     error,
     refetch: fetchIndexData,
   };
