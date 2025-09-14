@@ -1,10 +1,10 @@
 import React from 'react';
-import BitstampTradingView from './BitstampTradingView';
+import LNMarketsStyleChart from './LNMarketsStyleChart';
 
 const SimpleChart: React.FC = () => {
   return (
-    <BitstampTradingView 
-      height={500}
+    <LNMarketsStyleChart 
+      height={600}
       className="w-full"
     />
   );

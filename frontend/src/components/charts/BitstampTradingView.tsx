@@ -23,59 +23,66 @@ const BitstampTradingView: React.FC<BitstampTradingViewProps> = ({
     // Limpar conteúdo anterior
     containerRef.current.innerHTML = '';
 
-    // Configuração específica para Bitcoin da Bitstamp
+    // Configuração específica para replicar a interface da LN Markets
     const widgetConfig = {
       autosize: true,
       symbol: 'BITSTAMP:BTCUSD',
-      interval: '1',
+      interval: '60', // 1h como padrão (igual à LN Markets)
       timezone: 'UTC',
       theme: 'dark',
-      style: '1',
+      style: '1', // Candlestick
       locale: 'en',
-      toolbar_bg: '#1e1e1e',
+      toolbar_bg: '#1e1e1e', // Background escuro igual à LN Markets
       enable_publishing: false,
-      allow_symbol_change: true,
+      allow_symbol_change: false, // Desabilitar mudança de símbolo
       container_id: 'bitstamp_tradingview_widget',
-      hide_side_toolbar: false,
-      hide_top_toolbar: false,
+      hide_side_toolbar: true, // Ocultar barra lateral (não tem na LN Markets)
+      hide_top_toolbar: false, // Manter barra superior
       hide_legend: false,
-      save_image: false,
-      // Indicadores técnicos específicos para Bitcoin
+      save_image: true, // Permitir salvar imagem
+      // Apenas indicador de Volume (como na LN Markets)
       studies: [
-        'Volume@tv-basicstudies',
-        'RSI@tv-basicstudies',
-        'MACD@tv-basicstudies',
-        'MA@tv-basicstudies',
-        'BB@tv-basicstudies'
+        'Volume@tv-basicstudies'
       ],
-      // Configurações de cores para tema escuro
+      // Configurações de cores idênticas à LN Markets
       colorTheme: 'dark',
-      gridColor: '#2a2e39',
-      upColor: '#00d4aa',
-      downColor: '#ff6b6b',
+      gridColor: '#2a2e39', // Grid pontilhado escuro
+      upColor: '#00d4aa', // Verde brilhante para alta
+      downColor: '#ff6b6b', // Vermelho brilhante para baixa
       borderUpColor: '#00d4aa',
       borderDownColor: '#ff6b6b',
       wickUpColor: '#00d4aa',
       wickDownColor: '#ff6b6b',
-      // Configurações de volume
+      // Configurações de volume (idênticas à LN Markets)
       volume_up_color: '#00d4aa',
       volume_down_color: '#ff6b6b',
       // Configurações de crosshair
       crosshair: '1',
       // Configurações de popup
       show_popup_button: true,
-      popup_width: '1200',
-      popup_height: '800',
+      popup_width: '1400',
+      popup_height: '900',
       support_host: 'https://www.tradingview.com',
-      // Configurações específicas para Bitcoin
+      // Configurações específicas para replicar LN Markets
       symbol_info: {
         name: 'Bitcoin',
-        description: 'Bitcoin/USD - Bitstamp',
+        description: 'BTCUSD: LNM Futures',
         type: 'crypto',
         session: '24x7',
         timezone: 'UTC',
         ticker: 'BTCUSD',
         exchange: 'BITSTAMP'
+      },
+      // Configurações adicionais para replicar LN Markets
+      hide_volume: false, // Mostrar volume
+      volume_ma: 'SMA', // Média móvel do volume
+      volume_ma_length: 20,
+      // Configurações de timeframe (igual à LN Markets)
+      timeframe: '1h',
+      // Configurações de layout
+      layout: {
+        background: '#1e1e1e',
+        textColor: '#ffffff'
       }
     };
 
