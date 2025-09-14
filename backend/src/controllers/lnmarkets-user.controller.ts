@@ -194,6 +194,20 @@ export class LNMarketsUserController {
         });
       }
 
+      // Check if user has LN Markets credentials
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { ln_markets_api_key: true, ln_markets_api_secret: true, ln_markets_passphrase: true }
+      });
+
+      if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
+        console.log(`[UserController] User ${userId} has no LN Markets credentials, returning empty positions`);
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
+
       const lnmarkets = await this.getLNMarketsService(userId);
       const result = await lnmarkets.getUserPositions();
       
@@ -205,6 +219,19 @@ export class LNMarketsUserController {
       });
     } catch (error: any) {
       console.error('[UserController] Error getting user positions:', error);
+      
+      // If it's a credentials error, return empty array instead of 500
+      if (error.message?.includes('credentials') || 
+          error.message?.includes('LN Markets') || 
+          error.message?.includes('Api key does not exist') ||
+          error.status === 401) {
+        console.log(`[UserController] Credentials error for user ${(request as any).user?.id}, returning empty positions:`, error.message);
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
+      
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_SERVER_ERROR',
