@@ -202,13 +202,24 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
     for (let i = 200; i >= 0; i--) {
       const time = (now - i * 60 * 60 * 1000) / 1000; // 1 hora atrás
-      const change = (Math.random() - 0.5) * 200; // Variação realista
-      price += change;
       
+      // Variação mais realista para evitar candles muito finos
+      const trend = Math.sin(i / 50) * 0.01; // Tendência suave
+      const volatility = 0.005; // 0.5% volatilidade
+      const randomChange = (Math.random() - 0.5) * volatility;
+      
+      price *= (1 + trend + randomChange);
+      
+      // Garantir que os candles tenham corpo substancial
+      const bodySize = price * 0.002; // 0.2% do preço como tamanho mínimo do corpo
       const open = price;
-      const close = price + (Math.random() - 0.5) * 100;
-      const high = Math.max(open, close) + Math.random() * 50;
-      const low = Math.min(open, close) - Math.random() * 50;
+      const close = price + (Math.random() - 0.5) * bodySize * 2; // Variação do corpo
+      
+      // Wicks mais realistas
+      const wickSize = bodySize * 0.5; // Wicks menores que o corpo
+      const high = Math.max(open, close) + Math.random() * wickSize;
+      const low = Math.min(open, close) - Math.random() * wickSize;
+      
       const vol = Math.random() * 2 + 0.5; // Volume entre 0.5M e 2.5M
 
       data.push({
@@ -299,7 +310,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
         timeVisible: true,
         secondsVisible: false,
         rightOffset: 12,
-        barSpacing: 3,
+        barSpacing: 6, // Aumentar espaçamento entre candles
         fixLeftEdge: false,
         fixRightEdge: false,
         lockVisibleTimeRangeOnResize: true,
@@ -320,9 +331,15 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
       borderDownColor: '#ff6b6b',
       wickUpColor: '#00d4aa',
       wickDownColor: '#ff6b6b',
+      // Melhorar exibição dos candles
+      priceFormat: {
+        type: 'price',
+        precision: 2,
+        minMove: 0.01,
+      },
     });
 
-    // Adicionar série de volume
+    // Adicionar série de volume (reduzir tamanho)
     const volumeSeries = chart.addHistogramSeries({
       color: '#26a69a',
       priceFormat: {
@@ -330,7 +347,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
       },
       priceScaleId: '',
       scaleMargins: {
-        top: 0.8,
+        top: 0.9, // Reduzir espaço do volume
         bottom: 0,
       },
     });
@@ -343,10 +360,10 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
     const candlestickData = generateCandlestickData();
     candlestickSeries.setData(candlestickData);
 
-    // Dados de volume
+    // Dados de volume (reduzir tamanho)
     const volumeData = candlestickData.map((candle, index) => ({
       time: candle.time,
-      value: Math.random() * 2 + 0.5,
+      value: (Math.random() * 0.5 + 0.2) * 0.1, // Volume menor
       color: candle.close >= candle.open ? '#00d4aa' : '#ff6b6b',
     }));
     volumeSeries.setData(volumeData);
