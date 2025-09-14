@@ -1,9 +1,13 @@
 import React from 'react';
-import CircularChart from './CircularChart';
+import TradingViewChart from './TradingViewChart';
 
 const SimpleChart: React.FC = () => {
   return (
-    <CircularChart className="w-full" />
+    <TradingViewChart 
+      symbol="BTCUSD: LNM Futures"
+      height={500}
+      className="w-full"
+    />
   );
 };
 

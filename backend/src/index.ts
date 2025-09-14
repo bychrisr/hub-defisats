@@ -20,6 +20,7 @@ import { validationRoutes } from '@/routes/validation.routes';
 import { adminRoutes } from '@/routes/admin.routes';
 import { websocketRoutes } from '@/routes/websocket.routes';
 import { websocketTestRoutes } from '@/routes/websocket-test.routes';
+import { websocketMarketRoutes } from '@/routes/websocket-market.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/services/metrics.service';
@@ -353,6 +354,10 @@ async function registerRoutes() {
   // WebSocket test routes (without authentication)
   await fastify.register(websocketTestRoutes, { prefix: '/test' });
   console.log('✅ WebSocket test routes registered');
+
+  // WebSocket market routes (without authentication)
+  await fastify.register(websocketMarketRoutes, { prefix: '/api' });
+  console.log('✅ WebSocket market routes registered');
 
   // Validation routes (without /api prefix to avoid authentication)
   await fastify.register(validationRoutes);
