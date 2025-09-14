@@ -25,6 +25,9 @@ export interface LNPosition {
   asset: string;
   createdAt: string;
   updatedAt: string;
+  takeProfit?: number;
+  stopLoss?: number;
+  timestamp?: number; // Timestamp da criação da posição para cálculo de funding fees
 }
 
 // Interface simplificada para dados em tempo real
@@ -58,12 +61,18 @@ export interface PositionsData {
   totalMargin: number;
   totalQuantity: number;
   totalValue: number;
+  estimatedProfit: number;
+  estimatedBalance: number;
   lastUpdate: number;
   isLoading: boolean;
   error: string | null;
   // Dados do índice de mercado integrados
   marketIndex: MarketIndexData | null;
   marketIndexError: string | null;
+  // Taxas totais
+  totalFees: number;
+  totalTradingFees: number;
+  totalFundingCost: number;
 }
 
 interface PositionsContextType {
@@ -85,7 +94,7 @@ interface PositionsProviderProps {
 export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   const { isAuthenticated, user } = useAuthStore();
   const userPositions = useUserPositions();
-  const { updatePositions } = useRealtimeData();
+  const { updatePositions, data: realtimeData } = useRealtimeData();
   const queryClient = useQueryClient();
   
   console.log('📊 POSITIONS - Provider render:', { userPositions, length: userPositions?.length });
@@ -96,11 +105,16 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     totalMargin: 0,
     totalQuantity: 0,
     totalValue: 0,
+    estimatedProfit: 0,
+    estimatedBalance: 0,
     lastUpdate: 0,
     isLoading: false,
     error: null,
     marketIndex: null,
     marketIndexError: null,
+    totalFees: 0,
+    totalTradingFees: 0,
+    totalFundingCost: 0,
   });
 
   // Função para converter posição em tempo real para LNPosition
@@ -109,8 +123,10 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       id: pos.id,
       quantity: pos.quantity,
       price: pos.price,
-      entryPrice: pos.price, // Usar o preço atual como preço de entrada por enquanto
-      currentPrice: pos.price, // Usar o preço atual
+      // NOTA: Para posições em tempo real, precisamos do entry_price real da API
+      // Por enquanto usando o preço atual, mas isso pode afetar o cálculo do profit estimado
+      entryPrice: (pos as any).entryPrice || pos.price, // Tentar pegar entryPrice se disponível
+      currentPrice: pos.price,
       liquidation: pos.price * 0.1, // Calcular liquidação baseada no preço
       leverage: pos.leverage,
       margin: pos.margin,
@@ -124,28 +140,171 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       symbol: pos.symbol,
       asset: pos.symbol,
       createdAt: new Date(pos.timestamp).toISOString(),
-      updatedAt: new Date(pos.timestamp).toISOString()
+      updatedAt: new Date(pos.timestamp).toISOString(),
+      timestamp: pos.timestamp
     };
   };
 
   // Função para calcular métricas das posições
-  const calculateMetrics = (positions: LNPosition[]) => {
+  const calculateMetrics = (positions: LNPosition[], marketIndex?: any, userBalance?: any) => {
     const totalPL = positions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
     const totalMargin = positions.reduce((sum, pos) => sum + (pos.margin || 0), 0);
     const totalQuantity = positions.reduce((sum, pos) => sum + (pos.quantity || 0), 0);
     const totalValue = totalMargin; // Total Value é igual ao Total Margin
+    
+    // Calcular taxas totais (trading fees + funding costs)
+    const totalTradingFees = positions.reduce((sum, pos) => sum + (pos.tradingFees || 0), 0);
+    const totalFundingCost = positions.reduce((sum, pos) => sum + (pos.fundingCost || 0), 0);
+    const totalFees = totalTradingFees + totalFundingCost;
+    
+    console.log('💰 TAXAS CALCULADAS:', {
+      totalTradingFees,
+      totalFundingCost,
+      totalFees,
+      positionsCount: positions.length,
+      samplePosition: positions[0] ? {
+        id: positions[0].id,
+        tradingFees: positions[0].tradingFees,
+        fundingCost: positions[0].fundingCost
+      } : null
+    });
+    
+    // Calcular profit estimado baseado no take profit
+    console.log('🔍 ALL POSITIONS DATA:', positions.map(pos => ({
+      id: pos.id,
+      status: pos.status,
+      side: pos.side,
+      entryPrice: pos.entryPrice,
+      takeProfit: pos.takeProfit,
+      margin: pos.margin,
+      leverage: pos.leverage,
+      pnl: pos.pnl
+    })));
+    
+    const estimatedProfit = positions.reduce((sum, pos) => {
+      if (pos.takeProfit && pos.takeProfit > 0 && pos.status === 'open') {
+        // Fórmula correta da LN Markets para contratos futuros
+        // P&L = Quantity × Leverage × (Price_Change) / Entry Price
+        // Resultado já em satoshis (conforme especificação da LN Markets)
+        
+        const isLong = pos.side === 'long';
+        
+        // Calcular mudança de preço baseada na direção da posição
+        const priceChange = isLong 
+          ? (pos.takeProfit - pos.entryPrice) 
+          : (pos.entryPrice - pos.takeProfit);
+        
+        // Fórmula correta da LN Markets para contratos futuros
+        // Na LN Markets: Margem já está em sats, P&L é calculado diretamente em sats
+        // P&L = Margem × Leverage × (Price_Change / Entry_Price)
+        const grossPnLSats = pos.margin * pos.leverage * (priceChange / pos.entryPrice);
+        
+        // Calcular taxas conforme documentação da LN Markets
+        // Taxa de abertura e fechamento: 0.1% cada
+        const entryFeeSats = (pos.margin * 0.001); // 0.1% da margem em sats
+        const exitFeeSats = (pos.margin * 0.001); // 0.1% da margem em sats
+        
+        // Calcular funding fees baseado nos dias desde abertura
+        const positionOpenDate = new Date(pos.timestamp || pos.createdAt || Date.now());
+        const currentDate = new Date();
+        const isValidDate = !isNaN(positionOpenDate.getTime());
+        const daysPassed = isValidDate 
+          ? Math.max(1, Math.ceil((currentDate.getTime() - positionOpenDate.getTime()) / (1000 * 60 * 60 * 24)))
+          : 1;
+        
+        // Taxa de funding: aproximadamente 0.03% ao dia
+        const dailyFundingRate = 0.0003;
+        const fundingFeesSats = (pos.margin * dailyFundingRate * daysPassed);
+        
+        // Total de taxas em satoshis
+        const totalFeesSats = entryFeeSats + exitFeeSats + fundingFeesSats;
+        
+        // P&L sem descontar taxas (LN Markets já calcula internamente)
+        // Apenas arredondar para remover casas decimais
+        const netPnLSats = Math.round(grossPnLSats);
+        
+        console.log('🔍 ESTIMATED PROFIT CALCULATION (CORRECTED LN MARKETS FORMULA):', {
+          positionId: pos.id,
+          side: pos.side,
+          isLong: isLong,
+          entryPrice: pos.entryPrice,
+          takeProfit: pos.takeProfit,
+          currentPrice: pos.price,
+          margin: pos.margin,
+          leverage: pos.leverage,
+          quantity: pos.quantity,
+          daysPassed: daysPassed,
+          
+          // Fórmula step-by-step FINAL (LN Markets nativa em sats)
+          step1_priceChange: priceChange,
+          step2_priceChangePercent: (priceChange / pos.entryPrice),
+          step3_marginInSats: pos.margin,
+          step4_leverageMultiplier: pos.leverage,
+          step5_formula: `${pos.margin} × ${pos.leverage} × (${priceChange} / ${pos.entryPrice})`,
+          step6_grossPnLSats: grossPnLSats,
+          
+          // Comparação com valor esperado da LN Markets  
+          expectedLNMarketsValue: 2758, // Baseado na imagem mostrada
+          calculatedVsExpected: Math.abs(grossPnLSats - 2758),
+          isCloseToExpected: Math.abs(grossPnLSats - 2758) < 500,
+          
+          // Taxas detalhadas
+          fees: {
+            entryFeeSats: entryFeeSats,
+            exitFeeSats: exitFeeSats,
+            fundingFeesSats: fundingFeesSats,
+            totalFeesSats: totalFeesSats
+          },
+          
+          // Resultado final
+          netPnLSats: netPnLSats,
+          netPnLSatsRounded: Math.round(netPnLSats),
+          
+          // Para debug - comparação com valor esperado
+          expectedValue: 8135, // Valor mencionado pelo usuário
+          difference: Math.abs(netPnLSats - 8135),
+          currentSum: sum,
+          newSum: sum + netPnLSats
+        });
+        
+        return sum + netPnLSats;
+      }
+      return sum;
+    }, 0);
+    
+    // Arredondar o total final para remover casas decimais
+    const finalEstimatedProfit = Math.round(estimatedProfit);
+    
+    console.log('💰 TOTAL ESTIMATED PROFIT:', finalEstimatedProfit);
+
+    // Calcular saldo estimado (saldo da wallet + P&L atual + profit estimado)
+    const walletBalance = userBalance?.total_balance || 0;
+    const estimatedBalance = walletBalance + totalPL + finalEstimatedProfit;
+    
+    console.log('💰 SALDO ESTIMADO CALCULADO:', {
+      walletBalance,
+      totalPL,
+      finalEstimatedProfit,
+      estimatedBalance,
+      userBalance: userBalance
+    });
     
     return {
       totalPL,
       totalMargin,
       totalQuantity,
       totalValue,
+      estimatedProfit: finalEstimatedProfit,
+      estimatedBalance,
+      totalFees,
+      totalTradingFees,
+      totalFundingCost,
     };
   };
 
   // Função para atualizar posições locais
   const updateLocalPositions = (newPositions: LNPosition[]) => {
-    const metrics = calculateMetrics(newPositions);
+    const metrics = calculateMetrics(newPositions, data.marketIndex, realtimeData.userBalance);
     
     setData(prev => {
       // Deep comparison to prevent unnecessary state updates and infinite loops
@@ -201,7 +360,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         newPositions = [...prev.positions, position];
       }
       
-      const metrics = calculateMetrics(newPositions);
+      const metrics = calculateMetrics(newPositions, data.marketIndex, realtimeData.userBalance);
       
       return {
         ...prev,
@@ -216,7 +375,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   const removePosition = (positionId: string) => {
     setData(prev => {
       const newPositions = prev.positions.filter(p => p.id !== positionId);
-      const metrics = calculateMetrics(newPositions);
+      const metrics = calculateMetrics(newPositions, data.marketIndex, realtimeData.userBalance);
       
       return {
         ...prev,
@@ -283,7 +442,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           id: pos.id,
           quantity: pos.quantity || 0,
           price: pos.price || 0,
-          entryPrice: pos.price || 0,
+          // Usar o preço de entrada correto da API da LN Markets
+          entryPrice: pos.entry_price || pos.price || 0,
           currentPrice: pos.price || 0,
           liquidation: pos.liquidation || 0,
           leverage: pos.leverage || 1,
@@ -301,6 +461,10 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           asset: 'BTC',
           createdAt: new Date(pos.creation_ts || Date.now()).toISOString(),
           updatedAt: new Date(pos.market_filled_ts || Date.now()).toISOString(),
+          takeProfit: pos.takeprofit || undefined,
+          stopLoss: pos.stoploss || undefined,
+          // Adicionar timestamp para cálculo de funding fees
+          timestamp: pos.creation_ts || Date.now(),
         }));
 
         console.log('🔄 POSITIONS CONTEXT - Updating with real positions:', transformedPositions.length);
@@ -322,16 +486,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         
         console.log('🔄 POSITIONS CONTEXT - Transformed for RealtimeDataContext:', realtimePositions.length);
         
-        // Atualizar o RealtimeDataContext com as posições reais
-        updatePositions(realtimePositions);
-        
-        // Calcular totais
-        const totalPL = transformedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
-        const totalMargin = transformedPositions.reduce((sum, pos) => sum + pos.margin, 0);
-        const totalQuantity = transformedPositions.reduce((sum, pos) => sum + pos.quantity, 0);
-        const totalValue = totalMargin; // Total value = total margin
-
-        // Processar dados do índice de mercado
+        // Processar dados do índice de mercado primeiro
         let marketIndex: MarketIndexData | null = null;
         let marketIndexError: string | null = null;
 
@@ -351,12 +506,15 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           console.log('❌ POSITIONS CONTEXT - Market index error:', marketIndexError);
         }
 
+        // Atualizar o RealtimeDataContext com as posições reais
+        updatePositions(realtimePositions);
+        
+        // Calcular métricas incluindo profit estimado
+        const metrics = calculateMetrics(transformedPositions, marketIndex, realtimeData.userBalance);
+
         setData({
           positions: transformedPositions,
-          totalPL,
-          totalMargin,
-          totalQuantity,
-          totalValue,
+          ...metrics,
           lastUpdate: Date.now(),
           isLoading: false,
           error: null,
@@ -366,9 +524,11 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
 
         console.log('✅ POSITIONS CONTEXT - Real positions updated:', {
           count: transformedPositions.length,
-          totalPL,
-          totalMargin,
-          totalQuantity
+          totalPL: metrics.totalPL,
+          totalMargin: metrics.totalMargin,
+          totalQuantity: metrics.totalQuantity,
+          estimatedProfit: metrics.estimatedProfit,
+          estimatedBalance: metrics.estimatedBalance
         });
       } else {
         console.log('📝 POSITIONS CONTEXT - No positions data, using empty array');
@@ -403,6 +563,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           totalMargin: 0,
           totalQuantity: 0,
           totalValue: 0,
+          estimatedProfit: 0,
+          estimatedBalance: 0,
           lastUpdate: Date.now(),
           isLoading: false,
           error: null,
@@ -443,6 +605,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         totalMargin: 0,
         totalQuantity: 0,
         totalValue: 0,
+        estimatedProfit: 0,
+        estimatedBalance: 0,
         lastUpdate: 0,
         isLoading: false,
         error: null,
@@ -535,7 +699,12 @@ export const usePositionsMetrics = () => {
     totalPL: data.totalPL,
     totalMargin: data.totalMargin,
     totalQuantity: data.totalQuantity,
+    estimatedProfit: data.estimatedProfit,
+    estimatedBalance: data.estimatedBalance,
     positionCount: data.positions.length,
     lastUpdate: data.lastUpdate,
+    totalFees: data.totalFees || 0,
+    totalTradingFees: data.totalTradingFees || 0,
+    totalFundingCost: data.totalFundingCost || 0,
   };
 };

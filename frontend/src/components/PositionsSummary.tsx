@@ -4,8 +4,10 @@ import { useTotalPL, useTotalMargin, usePositionCount, useLongPositions, useShor
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
+import { useFormatSats } from '@/hooks/useFormatSats';
 
 export const PositionsSummary = () => {
+  const { formatSats } = useFormatSats();
   const totalPL = useTotalPL();
   const totalMargin = useTotalMargin();
   const positionCount = usePositionCount();
@@ -27,11 +29,8 @@ export const PositionsSummary = () => {
             ) : (
               <TrendingDown className="h-4 w-4 text-red-500" />
             )}
-            <span className={totalPL >= 0 ? 'text-green-500' : 'text-red-500'}>
-              {totalPL >= 0 ? '+' : ''}{totalPL.toFixed(2)}
-            </span>
+            {formatSats(totalPL, { size: 20, variant: 'auto' })}
           </div>
-          <p className="text-xs text-muted-foreground">sats</p>
         </CardContent>
       </Card>
 
@@ -43,9 +42,8 @@ export const PositionsSummary = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {totalMargin.toFixed(2)}
+            {formatSats(totalMargin, { size: 24, variant: 'default' })}
           </div>
-          <p className="text-xs text-muted-foreground">sats</p>
         </CardContent>
       </Card>
 

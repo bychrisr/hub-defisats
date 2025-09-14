@@ -119,14 +119,14 @@ export default function Positions() {
       return (
         <span className="flex items-center gap-1">
           -
-          <SatsIcon size={18} className="text-secondary" />
+          <SatsIcon size={20} variant="neutral" />
         </span>
       );
     }
     return (
       <span className="flex items-center gap-1">
         {value.toLocaleString()}
-        <SatsIcon size={18} className="text-secondary" />
+        <SatsIcon size={20} variant="default" />
       </span>
     );
   };

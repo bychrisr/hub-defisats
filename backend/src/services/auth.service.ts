@@ -189,6 +189,8 @@ export class AuthService {
    * Login user with email and password
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
+    console.log('🔍 AUTH SERVICE - Login called with:', { email: data.email });
+    console.log('🔍 AUTH SERVICE - This is the login method');
     const { email, password } = data;
 
     // Find user
@@ -229,12 +231,60 @@ export class AuthService {
     // Store refresh token in database
     await this.storeRefreshToken(user.id, refreshToken);
 
-    return {
+    // Fetch real balance from LN Markets
+    let userBalance: any = {
+      balance: 0,
+      synthetic_usd_balance: 0,
+      uid: user.id,
+      role: 'user',
+      username: user.username,
+      linking_public_key: null,
+      show_leaderboard: false,
+      email: user.email
+    };
+
+    try {
+      console.log('🔍 AUTH SERVICE - Fetching LN Markets balance for user:', user.id);
+      
+      if (user.ln_markets_api_key && user.ln_markets_api_secret && user.ln_markets_passphrase) {
+        const { LNMarketsAPIService } = await import('./lnmarkets-api.service');
+        const lnMarketsService = new LNMarketsAPIService({
+          apiKey: user.ln_markets_api_key,
+          apiSecret: user.ln_markets_api_secret,
+          passphrase: user.ln_markets_passphrase,
+          isTestnet: false
+        });
+
+        const lnMarketsBalance = await lnMarketsService.getUserBalance();
+        console.log('✅ AUTH SERVICE - LN Markets balance fetched:', lnMarketsBalance);
+        
+        userBalance = {
+          balance: lnMarketsBalance.balance || 0,
+          synthetic_usd_balance: lnMarketsBalance.synthetic_usd_balance || 0,
+          uid: lnMarketsBalance.uid || user.id,
+          role: lnMarketsBalance.role || 'user',
+          username: lnMarketsBalance.username || user.username,
+          linking_public_key: lnMarketsBalance.linking_public_key || null,
+          show_leaderboard: lnMarketsBalance.show_leaderboard || false,
+          email: lnMarketsBalance.email || user.email
+        };
+      } else {
+        console.log('⚠️ AUTH SERVICE - LN Markets credentials not configured, using default balance');
+      }
+    } catch (error: any) {
+      console.log('❌ AUTH SERVICE - Error fetching LN Markets balance:', error.message);
+      // Continue with default balance on error
+    }
+
+    const response: any = {
       user_id: user.id,
       token,
       refresh_token: refreshToken,
       plan_type: user.plan_type as PlanType,
+      user_balance: userBalance,
     };
+
+    return response;
   }
 
   /**

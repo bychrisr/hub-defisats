@@ -70,7 +70,7 @@ export default function AdminDashboard() {
     return (
       <span className="flex items-center gap-1">
         {sats.toLocaleString()}
-        <SatsIcon size={18} className="text-secondary" />
+        <SatsIcon size={20} variant="default" />
       </span>
     );
   };

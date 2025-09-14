@@ -3,9 +3,27 @@ import React from 'react';
 interface SatsIconProps {
   size?: number;
   className?: string;
+  variant?: 'default' | 'positive' | 'negative' | 'neutral';
 }
 
-const SatsIcon: React.FC<SatsIconProps> = ({ size = 20, className = '' }) => {
+const SatsIcon: React.FC<SatsIconProps> = ({ 
+  size = 20, 
+  className = '', 
+  variant = 'default' 
+}) => {
+  const getVariantClass = () => {
+    switch (variant) {
+      case 'positive':
+        return 'text-green-600 dark:text-green-400';
+      case 'negative':
+        return 'text-red-600 dark:text-red-400';
+      case 'neutral':
+        return 'text-muted-foreground';
+      default:
+        return 'text-current';
+    }
+  };
+
   return (
     <svg
       width={size}
@@ -13,8 +31,7 @@ const SatsIcon: React.FC<SatsIconProps> = ({ size = 20, className = '' }) => {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`${className}`}
-      style={{ color: 'hsl(var(--sats-icon-color))' }}
+      className={`${getVariantClass()} ${className}`}
     >
       {/* Símbolo oficial de satoshi - baseado no código SVG oficial */}
       {/* Barra superior - quadrada */}

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/stores/auth';
+import api from '@/lib/api';
 
 // Tipos de dados em tempo real
 interface MarketData {
@@ -52,6 +53,7 @@ interface RealtimeDataContextType {
   reconnect: () => void;
   loadRealPositions: (positions: any[]) => void;
   updatePositions: (positions: any[]) => void;
+  loadUserBalance: () => Promise<void>;
 }
 
 const RealtimeDataContext = createContext<RealtimeDataContextType | undefined>(undefined);
@@ -69,6 +71,45 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   });
 
   const [subscribedSymbols, setSubscribedSymbols] = useState<Set<string>>(new Set());
+
+  // Função para carregar saldo do usuário via API
+  const loadUserBalance = useCallback(async () => {
+    if (!isAuthenticated || !user?.id) return;
+    
+    try {
+      console.log('💰 REALTIME - Carregando saldo do usuário via API...', { 
+        userId: user?.id,
+        isAuthenticated
+      });
+      
+      // Usar axios para aproveitar os interceptors de autenticação
+      const response = await api.get('/api/lnmarkets/user/balance');
+      const data = response.data;
+      
+      console.log('💰 REALTIME - Response status:', response.status);
+      console.log('💰 REALTIME - Response data:', data);
+      
+      if (data.success) {
+        console.log('💰 REALTIME - Saldo carregado via API:', data.data);
+        setData(prev => ({
+          ...prev,
+          userBalance: { ...data.data, timestamp: Date.now() },
+          lastUpdate: Date.now()
+        }));
+      } else {
+        console.error('💰 REALTIME - Erro ao carregar saldo:', data);
+      }
+    } catch (error) {
+      console.error('💰 REALTIME - Erro ao carregar saldo:', error);
+    }
+  }, [isAuthenticated, user?.id]);
+
+  // Carregar saldo do usuário quando autenticado
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      loadUserBalance();
+    }
+  }, [isAuthenticated, user?.id, loadUserBalance]);
 
   // DISABLED: Simulação que estava corrompendo os dados reais do LN Markets
   // O problema era que os dados de mercado tinham escala de preço diferente (50k vs 117k)
@@ -388,16 +429,18 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   const loadRealPositions = useCallback((positions: any[]) => {
     console.log('📊 REALTIME - Carregando posições reais da LN Markets:', positions.length);
     setData(prev => {
-      const transformedPositions = positions.map(pos => {
-        // Usar dados reais da LN Markets
-        const pnl = typeof pos.pl === 'number' ? pos.pl : 0;
-        const margin = typeof pos.margin === 'number' ? pos.margin : 0;
-        const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
-        const price = typeof pos.price === 'number' ? pos.price : 0;
-        const leverage = typeof pos.leverage === 'number' ? pos.leverage : 1;
-        
-        // Calcular P&L percentual de forma segura
-        const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
+      const transformedPositions = positions
+        .filter(pos => typeof pos.pl === 'number') // Só processar posições com PnL válido
+        .map(pos => {
+          // Usar dados reais da LN Markets
+          const pnl = pos.pl; // Já validado que é number
+          const margin = typeof pos.margin === 'number' ? pos.margin : 0;
+          const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
+          const price = typeof pos.price === 'number' ? pos.price : 0;
+          const leverage = typeof pos.leverage === 'number' ? pos.leverage : 1;
+          
+          // Calcular P&L percentual de forma segura
+          const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
         
         // Calcular margin ratio (maintenance_margin / (margin + pl))
         const marginRatio = pos.maintenance_margin > 0 
@@ -456,58 +499,60 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   const updatePositions = useCallback((positions: any[]) => {
     console.log('🔄 REALTIME - Atualizando posições com dados reais da LN Markets:', positions.length);
     setData(prev => {
-      const transformedPositions = positions.map(pos => {
-        // Usar dados reais da LN Markets
-        const pnl = typeof pos.pl === 'number' ? pos.pl : 0;
-        const margin = typeof pos.margin === 'number' ? pos.margin : 0;
-        const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
-        const price = typeof pos.price === 'number' ? pos.price : 0;
-        const leverage = typeof pos.leverage === 'number' ? pos.leverage : 1;
-        
-        // Calcular P&L percentual de forma segura
-        const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
-        
-        // Calcular margin ratio (maintenance_margin / (margin + pl))
-        const marginRatio = pos.maintenance_margin > 0 
-          ? (pos.maintenance_margin / (margin + pnl)) * 100 
-          : leverage > 0 
-            ? (100 / leverage)
-            : 0;
-        
-        // Calcular fees
-        const tradingFees = (pos.opening_fee || 0) + (pos.closing_fee || 0);
-        const fundingCost = pos.sum_carry_fees || 0;
-        
-        console.log('🔄 REALTIME - Atualizando posição LN Markets:', {
-          id: pos.id,
-          side: pos.side,
-          pl: pos.pl,
-          pnl: pnl,
-          margin: margin,
-          pnlPercent: pnlPercent,
-          quantity: quantity,
-          price: price,
-          marginRatio: marginRatio,
-          tradingFees: tradingFees,
-          fundingCost: fundingCost
+      const transformedPositions = positions
+        .filter(pos => typeof pos.pl === 'number') // Só processar posições com PnL válido
+        .map(pos => {
+          // Usar dados reais da LN Markets
+          const pnl = pos.pl; // Já validado que é number
+          const margin = typeof pos.margin === 'number' ? pos.margin : 0;
+          const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
+          const price = typeof pos.price === 'number' ? pos.price : 0;
+          const leverage = typeof pos.leverage === 'number' ? pos.leverage : 1;
+          
+          // Calcular P&L percentual de forma segura
+          const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
+          
+          // Calcular margin ratio (maintenance_margin / (margin + pl))
+          const marginRatio = pos.maintenance_margin > 0 
+            ? (pos.maintenance_margin / (margin + pnl)) * 100 
+            : leverage > 0 
+              ? (100 / leverage)
+              : 0;
+          
+          // Calcular fees
+          const tradingFees = (pos.opening_fee || 0) + (pos.closing_fee || 0);
+          const fundingCost = pos.sum_carry_fees || 0;
+          
+          console.log('🔄 REALTIME - Atualizando posição LN Markets:', {
+            id: pos.id,
+            side: pos.side,
+            pl: pos.pl,
+            pnl: pnl,
+            margin: margin,
+            pnlPercent: pnlPercent,
+            quantity: quantity,
+            price: price,
+            marginRatio: marginRatio,
+            tradingFees: tradingFees,
+            fundingCost: fundingCost
+          });
+          
+          return {
+            id: pos.id,
+            symbol: 'BTC', // LN Markets only trades BTC futures
+            side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
+            quantity: quantity,
+            price: price,
+            margin: margin,
+            leverage: leverage,
+            pnl: pnl, // Usar o P&L real da LN Markets
+            pnlPercent: pnlPercent,
+            marginRatio: marginRatio,
+            tradingFees: tradingFees,
+            fundingCost: fundingCost,
+            timestamp: Date.now()
+          };
         });
-        
-        return {
-          id: pos.id,
-          symbol: 'BTC', // LN Markets only trades BTC futures
-          side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
-          quantity: quantity,
-          price: price,
-          margin: margin,
-          leverage: leverage,
-          pnl: pnl, // Usar o P&L real da LN Markets
-          pnlPercent: pnlPercent,
-          marginRatio: marginRatio,
-          tradingFees: tradingFees,
-          fundingCost: fundingCost,
-          timestamp: Date.now()
-        };
-      });
       
       console.log('🔄 REALTIME - Posições atualizadas:', transformedPositions);
       
@@ -527,7 +572,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     refreshData,
     reconnect,
     loadRealPositions,
-    updatePositions
+    updatePositions,
+    loadUserBalance
   };
 
   return (
