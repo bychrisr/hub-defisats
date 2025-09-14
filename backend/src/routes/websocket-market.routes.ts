@@ -56,7 +56,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
       });
 
       // Escutar mensagens do cliente
-      connection.on('message', (message) => {
+      connection.on('message', (message: any) => {
         try {
           const data = JSON.parse(message.toString());
           console.log('📨 WEBSOCKET MARKET - Message from client:', data);
@@ -84,7 +84,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
       });
 
       // Escutar erros do cliente
-      connection.on('error', (error) => {
+      connection.on('error', (error: any) => {
         console.error('❌ WEBSOCKET MARKET - Client error:', error);
       });
     });

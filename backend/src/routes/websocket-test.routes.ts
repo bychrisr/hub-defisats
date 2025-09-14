@@ -60,7 +60,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       console.log('📊 WEBSOCKET TEST - Simulação desabilitada, usando dados reais da LN Markets');
 
       // Handle client messages
-      connection.on('message', (message) => {
+      connection.on('message', (message: any) => {
         console.log('📨 WEBSOCKET TEST - Mensagem recebida do cliente:', {
           userId,
           message: message.toString(),
@@ -82,7 +82,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection close
-      connection.on('close', (code, reason) => {
+      connection.on('close', (code: any, reason: any) => {
         console.log('🔌 WEBSOCKET TEST - Conexão fechada:', {
           userId,
           code,
@@ -92,7 +92,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection error
-      connection.on('error', (error) => {
+      connection.on('error', (error: any) => {
         console.error('❌ WEBSOCKET TEST - Erro na conexão:', {
           userId,
           error,

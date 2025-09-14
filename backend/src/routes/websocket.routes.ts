@@ -95,7 +95,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
       });
 
       // Handle client messages
-      connection.on('message', (message) => {
+      connection.on('message', (message: any) => {
         console.log('📨 WEBSOCKET ROUTE - Mensagem recebida do cliente:', {
           userId,
           message: message.toString(),
@@ -133,7 +133,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection close
-      connection.on('close', (code, reason) => {
+      connection.on('close', (code: any, reason: any) => {
         console.log('🔌 WEBSOCKET ROUTE - Conexão fechada:', {
           userId,
           code,
@@ -144,7 +144,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection error
-      connection.on('error', (error) => {
+      connection.on('error', (error: any) => {
         console.error('❌ WEBSOCKET ROUTE - Erro na conexão:', {
           userId,
           error,
