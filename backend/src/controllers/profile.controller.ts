@@ -1,11 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
+import { AuthService } from '@/services/auth.service';
 
 export class ProfileController {
   private prisma: PrismaClient;
+  private authService: AuthService;
 
   constructor(prisma?: PrismaClient) {
     this.prisma = prisma || new PrismaClient();
+    this.authService = new AuthService();
   }
 
   async getProfile(request: FastifyRequest, reply: FastifyReply) {
@@ -40,9 +43,43 @@ export class ProfileController {
 
       console.log('✅ PROFILE - Profile fetched successfully');
 
+      // Decrypt LN Markets credentials for display
+      let decryptedProfile = { ...profile };
+      
+      try {
+        if (profile.ln_markets_api_key) {
+          console.log('🔓 PROFILE - Decrypting API key...');
+          decryptedProfile.ln_markets_api_key = this.authService.decryptData(profile.ln_markets_api_key);
+          console.log('✅ PROFILE - API key decrypted successfully');
+        }
+        
+        if (profile.ln_markets_api_secret) {
+          console.log('🔓 PROFILE - Decrypting API secret...');
+          decryptedProfile.ln_markets_api_secret = this.authService.decryptData(profile.ln_markets_api_secret);
+          console.log('✅ PROFILE - API secret decrypted successfully');
+        }
+        
+        if (profile.ln_markets_passphrase) {
+          console.log('🔓 PROFILE - Decrypting passphrase...');
+          decryptedProfile.ln_markets_passphrase = this.authService.decryptData(profile.ln_markets_passphrase);
+          console.log('✅ PROFILE - Passphrase decrypted successfully');
+        }
+        
+        console.log('🔓 PROFILE - All credentials decrypted for display');
+      } catch (error) {
+        console.error('❌ PROFILE - Error decrypting credentials:', error);
+        // Return encrypted data with indication if decryption fails
+        decryptedProfile = {
+          ...profile,
+          ln_markets_api_key: profile.ln_markets_api_key ? '[ENCRYPTED]' : null,
+          ln_markets_api_secret: profile.ln_markets_api_secret ? '[ENCRYPTED]' : null,
+          ln_markets_passphrase: profile.ln_markets_passphrase ? '[ENCRYPTED]' : null,
+        };
+      }
+
       return reply.status(200).send({
         success: true,
-        data: profile,
+        data: decryptedProfile,
       });
     } catch (error) {
       console.error('❌ PROFILE - Error fetching profile:', error);

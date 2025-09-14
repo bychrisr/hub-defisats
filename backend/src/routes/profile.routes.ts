@@ -52,47 +52,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
         },
       },
     },
-  }, async (request, reply) => {
-    try {
-      const user = (request as any).user;
-      console.log('🔍 PROFILE ROUTE - Fetching profile for user:', user?.id);
-      
-      const profile = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          plan_type: true,
-          created_at: true,
-          last_activity_at: true,
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true,
-        },
-      });
-
-      if (!profile) {
-        return reply.status(404).send({
-          success: false,
-          error: 'USER_NOT_FOUND',
-          message: 'User not found',
-        });
-      }
-
-      return reply.status(200).send({
-        success: true,
-        data: profile,
-      });
-    } catch (error) {
-      console.error('❌ PROFILE ROUTE - Error:', error);
-      return reply.status(500).send({
-        success: false,
-        error: 'INTERNAL_ERROR',
-        message: 'Failed to fetch profile',
-      });
-    }
-  });
+  }, profileController.getProfile.bind(profileController));
 
   // PUT /api/profile - Atualizar perfil do usuário
   fastify.put('/profile', {
