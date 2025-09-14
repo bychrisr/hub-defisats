@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// ✅ Usar caminho relativo para funcionar com proxy do Vite
-const API_BASE_URL = '';
+// ✅ Usar variável de ambiente ou caminho relativo para funcionar com proxy do Vite
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
