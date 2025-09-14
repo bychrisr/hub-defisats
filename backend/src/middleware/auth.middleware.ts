@@ -18,10 +18,15 @@ export async function authMiddleware(
   reply: FastifyReply
 ): Promise<void> {
   try {
+    console.log('🔍 AUTH MIDDLEWARE - Starting authentication check');
+    console.log('🔍 Request URL:', request.url);
+    console.log('🔍 Headers:', request.headers.authorization);
+    
     // Get token from Authorization header
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ AUTH MIDDLEWARE - No valid authorization header');
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
         message: 'Authorization header with Bearer token is required',
@@ -29,20 +34,26 @@ export async function authMiddleware(
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log('🔍 AUTH MIDDLEWARE - Token extracted:', token.substring(0, 20) + '...');
 
     // Initialize auth service
     const prisma = new PrismaClient();
     const authService = new AuthService(prisma, request.server);
 
     // Validate token and get user
+    console.log('🔍 AUTH MIDDLEWARE - Validating session...');
     const user = await authService.validateSession(token);
+    console.log('🔍 AUTH MIDDLEWARE - User from validateSession:', user?.email, 'ID:', user?.id);
 
     // Attach user to request
     (request as any).user = user;
 
     // Close Prisma connection
     await prisma.$disconnect();
+    
+    console.log('✅ AUTH MIDDLEWARE - Authentication successful');
   } catch (error) {
+    console.log('❌ AUTH MIDDLEWARE - Error:', error);
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
       message: error instanceof Error ? error.message : 'Invalid token',
