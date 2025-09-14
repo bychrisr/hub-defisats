@@ -42,13 +42,9 @@ export default function Login() {
       clearError();
       await login(data.email, data.password);
       
-      // Redirecionar baseado no tipo de usuário
-      const isAdmin = data.email === 'admin@hub-defisats.com';
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      // O redirecionamento será feito automaticamente pelo PublicRoute
+      // baseado no campo is_admin que vem do backend
+      console.log('✅ LOGIN - Login successful, redirecting will be handled by PublicRoute');
     } catch (error) {
       // Error is handled by the store
     }

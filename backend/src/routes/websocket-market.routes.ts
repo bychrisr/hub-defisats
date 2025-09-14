@@ -6,7 +6,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
 
   // WebSocket para dados de mercado em tempo real
   fastify.register(async function (fastify) {
-    fastify.get('/ws/market', { websocket: true }, (connection, req) => {
+    fastify.get('/ws/market', { websocket: true }, (connection, _req) => {
       console.log('🔌 WEBSOCKET MARKET - New connection established');
 
       // Conectar ao WebSocket da LN Markets
@@ -19,7 +19,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
         // Escutar atualizações de preço
         lnMarketsWS.on('price_update', (data) => {
           console.log('📊 WEBSOCKET MARKET - Broadcasting price update:', data);
-          connection.socket.send(JSON.stringify({
+          connection.send(JSON.stringify({
             type: 'market_data',
             data: data.data,
             timestamp: Date.now()
@@ -29,7 +29,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
         // Escutar erros
         lnMarketsWS.on('error', (error) => {
           console.error('❌ WEBSOCKET MARKET - LN Markets error:', error);
-          connection.socket.send(JSON.stringify({
+          connection.send(JSON.stringify({
             type: 'error',
             message: 'LN Markets connection error',
             timestamp: Date.now()
@@ -39,7 +39,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
         // Escutar desconexão
         lnMarketsWS.on('disconnected', () => {
           console.log('🔌 WEBSOCKET MARKET - LN Markets disconnected');
-          connection.socket.send(JSON.stringify({
+          connection.send(JSON.stringify({
             type: 'disconnected',
             message: 'LN Markets connection lost',
             timestamp: Date.now()
@@ -48,7 +48,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
 
       }).catch((error) => {
         console.error('❌ WEBSOCKET MARKET - Failed to connect to LN Markets:', error);
-        connection.socket.send(JSON.stringify({
+        connection.send(JSON.stringify({
           type: 'error',
           message: 'Failed to connect to LN Markets',
           timestamp: Date.now()
@@ -56,7 +56,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
       });
 
       // Escutar mensagens do cliente
-      connection.socket.on('message', (message) => {
+      connection.on('message', (message) => {
         try {
           const data = JSON.parse(message.toString());
           console.log('📨 WEBSOCKET MARKET - Message from client:', data);
@@ -69,7 +69,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
               lnMarketsWS.unsubscribe(data.symbol || 'BTCUSD');
               break;
             case 'ping':
-              connection.socket.send(JSON.stringify({ type: 'pong' }));
+              connection.send(JSON.stringify({ type: 'pong' }));
               break;
           }
         } catch (error) {
@@ -78,13 +78,13 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
       });
 
       // Escutar desconexão do cliente
-      connection.socket.on('close', () => {
+      connection.on('close', () => {
         console.log('🔌 WEBSOCKET MARKET - Client disconnected');
         lnMarketsWS.unsubscribe('BTCUSD');
       });
 
       // Escutar erros do cliente
-      connection.socket.on('error', (error) => {
+      connection.on('error', (error) => {
         console.error('❌ WEBSOCKET MARKET - Client error:', error);
       });
     });

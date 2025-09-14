@@ -105,7 +105,7 @@ export class AlertingService {
         condition: async () => {
           const metricsData = await metrics.getMetricsAsJSON();
           const memoryMetric = metricsData.find(
-            (m: any) => m.name === 'memory_usage_bytes' && m.labels.type === 'heapUsed'
+            (m: any) => m.name === 'memory_usage_bytes' && m.labels?.type === 'heapUsed'
           );
           if (!memoryMetric) return false;
 

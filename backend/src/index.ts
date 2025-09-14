@@ -282,7 +282,7 @@ async function registerRoutes() {
       method: request.method,
       route: request.url,
       status_code: reply.statusCode.toString(),
-    }, reply.getResponseTime ? reply.getResponseTime() / 1000 : 0);
+    }, 0);
 
     done();
   });
@@ -379,8 +379,8 @@ async function registerRoutes() {
   await fastify.register(websocketMarketRoutes, { prefix: '/api' });
   console.log('✅ WebSocket market routes registered');
 
-  // Validation routes (without /api prefix to avoid authentication)
-  await fastify.register(validationRoutes);
+  // Validation routes (with /api prefix but without authentication)
+  await fastify.register(validationRoutes, { prefix: '/api' });
   console.log('✅ Validation routes registered');
 
   console.log('🛣️ Registering 404 handler...');

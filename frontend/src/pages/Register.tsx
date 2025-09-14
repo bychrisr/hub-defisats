@@ -104,6 +104,34 @@ export default function Register() {
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
+  // Disable browser autofill for username only
+  useEffect(() => {
+    const disableUsernameAutofill = () => {
+      const usernameInput = document.querySelector('input[name="username"]');
+      if (usernameInput) {
+        usernameInput.setAttribute('autocomplete', 'off');
+        usernameInput.setAttribute('data-lpignore', 'true');
+        usernameInput.setAttribute('data-form-type', 'other');
+      }
+    };
+
+    disableUsernameAutofill();
+    
+    // Re-disable username autofill on focus
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.getAttribute('name') === 'username') {
+        disableUsernameAutofill();
+      }
+    };
+    
+    document.addEventListener('focusin', handleFocus);
+    
+    return () => {
+      document.removeEventListener('focusin', handleFocus);
+    };
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -326,12 +354,20 @@ export default function Register() {
               className="space-y-4"
               role="form"
               aria-label="User registration form"
+              autoComplete="off"
+              data-lpignore="true"
+              style={{ position: 'relative', zIndex: 1 }}
             >
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+
+              {/* Hidden field to prevent username autofill confusion */}
+              <div style={{ display: 'none' }}>
+                <input type="text" name="fake-username" autoComplete="off" />
+              </div>
 
               <div className="space-y-2">
                 <Label
@@ -342,9 +378,11 @@ export default function Register() {
                 </Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
                   autoComplete="email"
+                  data-testid="email-field"
                   {...register('email')}
                   className={errors.email ? 'border-red-500' : ''}
                   onKeyDown={e => handleKeyDown(e, 'email')}
@@ -369,23 +407,30 @@ export default function Register() {
                 >
                   Username
                 </Label>
-                <div className="relative">
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="Choose a username"
-                    autoComplete="off"
-                    {...register('username')}
-                    className={
-                      errors.username
+                <div className="relative" style={{ zIndex: 10 }}>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  placeholder="Choose a username"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  data-testid="username-field"
+                  {...register('username')}
+                  className={
+                    errors.username
+                      ? 'border-red-500 pr-8'
+                      : usernameAvailable === false
                         ? 'border-red-500 pr-8'
-                        : usernameAvailable === false
-                          ? 'border-red-500 pr-8'
-                          : usernameAvailable === true
-                            ? 'border-green-500 pr-8'
-                            : 'pr-8'
-                    }
-                  />
+                        : usernameAvailable === true
+                          ? 'border-green-500 pr-8'
+                          : 'pr-8'
+                  }
+                  onKeyDown={e => handleKeyDown(e, 'username')}
+                  onFocus={() => setFocusedField('username')}
+                  onBlur={() => setFocusedField(null)}
+                />
                   {usernameChecking ? (
                     <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-text-secondary" />
                   ) : usernameAvailable === true ? (

@@ -69,9 +69,33 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
             },
           },
         },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
         401: {
           type: 'object',
           properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+        429: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
             error: { type: 'string' },
             message: { type: 'string' },
           },
@@ -252,9 +276,25 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
             data: { type: 'object' },
           },
         },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
         401: {
           type: 'object',
           properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
             error: { type: 'string' },
             message: { type: 'string' },
           },
@@ -330,3 +370,4 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
     }
   });
 }
+

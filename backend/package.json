@@ -58,6 +58,7 @@
     "dompurify": "^3.0.8",
     "dotenv": "^17.2.2",
     "fastify": "^5.0.0",
+    "glob": "^11.0.3",
     "ioredis": "^5.4.1",
     "isomorphic-dompurify": "^2.5.0",
     "libsodium-wrappers": "^0.7.13",

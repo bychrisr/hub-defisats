@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuthStore } from '@/stores/auth';
 import { 
   LayoutDashboard, 
   Monitor, 
@@ -36,6 +37,7 @@ export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuthStore();
 
   // Configurar título e favicon estáticos para o admin
   useEffect(() => {
@@ -59,9 +61,17 @@ export default function AdminLayout() {
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback: clear localStorage manually
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      navigate('/login');
+    }
   };
 
   return (

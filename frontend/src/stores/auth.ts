@@ -142,6 +142,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             user: null,
             isAuthenticated: false,
             isLoading: false,
+            isInitialized: true,
             error: null,
           });
           
@@ -159,10 +160,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const user = response.data;
           console.log('✅ AUTH STORE - Profile received:', user);
 
-          // Verificar se é admin baseado no email
-          const adminEmails = ['admin@dev.com', 'superadmin@test.com', 'superadmin2@test.com'];
-          const isAdmin = adminEmails.includes(user.email);
-          console.log('🔍 AUTH STORE - Is admin:', isAdmin, 'for email:', user.email);
+          // Usar o campo is_admin que vem do backend
+          const isAdmin = user.is_admin === true;
+          console.log('🔍 AUTH STORE - Is admin:', isAdmin, 'for email:', user.email, 'from backend:', user.is_admin);
 
           set({
             user: {
@@ -216,11 +216,37 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           if (!token) {
             // No token means not authenticated
             console.log('❌ onRehydrateStorage: No token, setting isAuthenticated: false');
-            state.set({ isAuthenticated: false, user: null, isLoading: false, isInitialized: true });
+            state.set({ 
+              isAuthenticated: false, 
+              user: null, 
+              isLoading: false, 
+              isInitialized: true,
+              error: null
+            });
           } else {
-            // Token exists, but don't set isAuthenticated yet - wait for getProfile
-            console.log('✅ onRehydrateStorage: Token exists, will wait for getProfile to complete');
-            state.set({ isLoading: true, isInitialized: false }); // Set loading to true so AdminRoute waits
+            // Token exists, validate it by calling getProfile
+            console.log('✅ onRehydrateStorage: Token exists, validating...');
+            state.set({ 
+              isLoading: true, 
+              isInitialized: false,
+              error: null 
+            });
+            
+            // Validate token with a timeout to prevent infinite loading
+            Promise.race([
+              state.get().getProfile(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+            ]).catch((error) => {
+              console.log('❌ onRehydrateStorage: Token validation failed:', error.message);
+              localStorage.removeItem('access_token');
+              state.set({ 
+                isAuthenticated: false, 
+                user: null, 
+                isLoading: false, 
+                isInitialized: true,
+                error: null
+              });
+            });
           }
         }
       },

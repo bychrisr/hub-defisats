@@ -26,87 +26,94 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
     schema: {
       description: 'Get main dashboard data',
       tags: ['Dashboard'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                system: {
-                  type: 'object',
-                  properties: {
-                    uptime: { type: 'number' },
-                    memory: { type: 'object' },
-                    cpu: { type: 'number' },
-                    version: { type: 'string' },
-                    environment: { type: 'string' },
-                  },
-                },
-                metrics: {
-                  type: 'object',
-                  properties: {
-                    http: {
-                      type: 'object',
-                      properties: {
-                        totalRequests: { type: 'number' },
-                        avgResponseTime: { type: 'number' },
-                        errorRate: { type: 'number' },
-                        requestsPerMinute: { type: 'number' },
-                      },
-                    },
-                    auth: {
-                      type: 'object',
-                      properties: {
-                        totalAttempts: { type: 'number' },
-                        successRate: { type: 'number' },
-                        failures: { type: 'number' },
-                      },
-                    },
-                    rateLimit: {
-                      type: 'object',
-                      properties: {
-                        totalHits: { type: 'number' },
-                        totalBlocks: { type: 'number' },
-                        blockRate: { type: 'number' },
-                      },
-                    },
-                  },
-                },
-                alerts: {
-                  type: 'object',
-                  properties: {
-                    active: { type: 'number' },
-                    total: { type: 'number' },
-                    bySeverity: {
-                      type: 'object',
-                      properties: {
-                        low: { type: 'number' },
-                        medium: { type: 'number' },
-                        high: { type: 'number' },
-                        critical: { type: 'number' },
-                      },
-                    },
-                  },
-                },
-                recentAlerts: {
-                  type: 'array',
-                  items: {
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  system: {
                     type: 'object',
                     properties: {
-                      id: { type: 'string' },
-                      severity: { type: 'string' },
-                      message: { type: 'string' },
-                      timestamp: { type: 'string' },
+                      uptime: { type: 'number' },
+                      memory: { type: 'object' },
+                      cpu: { type: 'number' },
+                      version: { type: 'string' },
+                      environment: { type: 'string' },
+                    },
+                  },
+                  metrics: {
+                    type: 'object',
+                    properties: {
+                      http: {
+                        type: 'object',
+                        properties: {
+                          totalRequests: { type: 'number' },
+                          avgResponseTime: { type: 'number' },
+                          errorRate: { type: 'number' },
+                          requestsPerMinute: { type: 'number' },
+                        },
+                      },
+                      auth: {
+                        type: 'object',
+                        properties: {
+                          totalAttempts: { type: 'number' },
+                          successRate: { type: 'number' },
+                          failures: { type: 'number' },
+                        },
+                      },
+                      rateLimit: {
+                        type: 'object',
+                        properties: {
+                          totalHits: { type: 'number' },
+                          totalBlocks: { type: 'number' },
+                          blockRate: { type: 'number' },
+                        },
+                      },
+                    },
+                  },
+                  alerts: {
+                    type: 'object',
+                    properties: {
+                      active: { type: 'number' },
+                      total: { type: 'number' },
+                      bySeverity: {
+                        type: 'object',
+                        properties: {
+                          low: { type: 'number' },
+                          medium: { type: 'number' },
+                          high: { type: 'number' },
+                          critical: { type: 'number' },
+                        },
+                      },
+                    },
+                  },
+                  recentAlerts: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        severity: { type: 'string' },
+                        message: { type: 'string' },
+                        timestamp: { type: 'string' },
+                      },
                     },
                   },
                 },
               },
             },
           },
+          500: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+            },
+          },
         },
-      },
     },
     handler: async (_request, reply) => {
       try {
@@ -363,6 +370,13 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
             },
           },
         },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
       },
     },
     handler: async (_request, reply) => {
@@ -484,6 +498,13 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
                 },
               },
             },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
           },
         },
       },

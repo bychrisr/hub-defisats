@@ -83,21 +83,33 @@ export default function UserUpgradeModal({ user, isOpen, onClose, onSuccess }: U
     setError(null);
 
     try {
+      // Converter data do formato datetime-local para ISO string
+      let formattedEffectiveDate = effectiveDate;
+      if (effectiveDate && !effectiveDate.includes('.')) {
+        // Se não tem milissegundos, adicionar .000Z
+        formattedEffectiveDate = effectiveDate + '.000Z';
+      } else if (!effectiveDate) {
+        formattedEffectiveDate = new Date().toISOString();
+      }
+
+      const payload = {
+        newPlan,
+        reason: reason.trim(),
+        effectiveDate: formattedEffectiveDate
+      };
+
       console.log('🔄 USER UPGRADE - Iniciando upgrade:', {
         userId: user.id,
         newPlan,
         reason,
-        effectiveDate
+        effectiveDate,
+        payload
       });
 
       const token = localStorage.getItem('access_token');
       console.log('🔑 USER UPGRADE - Token:', token ? `${token.substring(0, 20)}...` : 'MISSING');
 
-      const response = await apiPut(`/api/admin/users/${user.id}/upgrade`, {
-        newPlan,
-        reason: reason.trim(),
-        effectiveDate: effectiveDate || new Date().toISOString()
-      });
+      const response = await apiPut(`/api/admin/users/${user.id}/upgrade`, payload);
 
       if (!response.ok) {
         const errorData = await response.json();

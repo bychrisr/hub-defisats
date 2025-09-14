@@ -12,6 +12,13 @@ export async function metricsRoutes(fastify: FastifyInstance) {
           type: 'string',
           description: 'Prometheus metrics in text format',
         },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
       },
     },
     handler: async (_request, reply) => {
@@ -38,6 +45,13 @@ export async function metricsRoutes(fastify: FastifyInstance) {
         200: {
           type: 'object',
           description: 'Metrics in JSON format',
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
         },
       },
     },
@@ -71,6 +85,13 @@ export async function metricsRoutes(fastify: FastifyInstance) {
             status: { type: 'string' },
             timestamp: { type: 'string' },
             metrics_count: { type: 'number' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
           },
         },
       },

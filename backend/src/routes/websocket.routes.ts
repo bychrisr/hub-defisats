@@ -8,7 +8,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
 
   // WebSocket route for real-time data (without authentication for testing)
   fastify.get('/ws/realtime', { websocket: true }, async (connection, req) => {
-    const userId = req.query.userId as string;
+    const userId = (req.query as any).userId as string;
     
     console.log('🔌 WEBSOCKET ROUTE - Nova conexão recebida:', {
       userId,
@@ -19,7 +19,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
     
     if (!userId) {
       console.log('❌ WEBSOCKET ROUTE - User ID não fornecido, fechando conexão');
-      connection.socket.close(1008, 'User ID is required');
+      connection.close(1008, 'User ID is required');
       return;
     }
 
@@ -27,10 +27,10 @@ export async function websocketRoutes(fastify: FastifyInstance) {
     
     // Get user credentials from database or config
     const credentials = {
-      apiKey: process.env.LN_MARKETS_API_KEY || '',
-      apiSecret: process.env.LN_MARKETS_API_SECRET || '',
-      passphrase: process.env.LN_MARKETS_PASSPHRASE || '',
-      isTestnet: process.env.LN_MARKETS_TESTNET === 'true'
+      apiKey: process.env['LN_MARKETS_API_KEY'] || '',
+      apiSecret: process.env['LN_MARKETS_API_SECRET'] || '',
+      passphrase: process.env['LN_MARKETS_PASSPHRASE'] || '',
+      isTestnet: process.env['LN_MARKETS_TESTNET'] === 'true'
     };
 
     console.log('🔑 WEBSOCKET ROUTE - Credenciais LN Markets:', {
@@ -57,7 +57,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.socket.send(JSON.stringify(message));
+        connection.send(JSON.stringify(message));
       });
 
       wsService.on('positionUpdate', (data) => {
@@ -77,7 +77,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.socket.send(JSON.stringify(message));
+        connection.send(JSON.stringify(message));
       });
 
       wsService.on('marginUpdate', (data) => {
@@ -91,11 +91,11 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.socket.send(JSON.stringify(message));
+        connection.send(JSON.stringify(message));
       });
 
       // Handle client messages
-      connection.socket.on('message', (message) => {
+      connection.on('message', (message) => {
         console.log('📨 WEBSOCKET ROUTE - Mensagem recebida do cliente:', {
           userId,
           message: message.toString(),
@@ -133,7 +133,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection close
-      connection.socket.on('close', (code, reason) => {
+      connection.on('close', (code, reason) => {
         console.log('🔌 WEBSOCKET ROUTE - Conexão fechada:', {
           userId,
           code,
@@ -144,7 +144,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
       });
 
       // Handle connection error
-      connection.socket.on('error', (error) => {
+      connection.on('error', (error) => {
         console.error('❌ WEBSOCKET ROUTE - Erro na conexão:', {
           userId,
           error,
@@ -158,7 +158,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
         userId,
         timestamp: new Date().toISOString()
       });
-      connection.socket.close(1011, 'Internal server error');
+      connection.close(1011, 'Internal server error');
     }
   });
 
@@ -187,6 +187,15 @@ export async function websocketRoutes(fastify: FastifyInstance) {
               success: { type: 'boolean' },
               error: { type: 'string' },
               message: { type: 'string' }
+            }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
             }
           }
         }
@@ -231,7 +240,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
         }
 
         // Create WebSocket connection
-        const wsService = await websocketManager.createConnection(user.id, {
+        await websocketManager.createConnection(user.id, {
           apiKey: userProfile.ln_markets_api_key,
           apiSecret: userProfile.ln_markets_api_secret,
           passphrase: userProfile.ln_markets_passphrase,
@@ -278,6 +287,15 @@ export async function websocketRoutes(fastify: FastifyInstance) {
               success: { type: 'boolean' },
               message: { type: 'string' }
             }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
           }
         }
       }
@@ -320,6 +338,15 @@ export async function websocketRoutes(fastify: FastifyInstance) {
               success: { type: 'boolean' },
               message: { type: 'string' }
             }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
           }
         }
       }
@@ -360,6 +387,15 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             properties: {
               success: { type: 'boolean' },
               message: { type: 'string' }
+            }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
             }
           }
         }
@@ -403,6 +439,15 @@ export async function websocketRoutes(fastify: FastifyInstance) {
               connected: { type: 'boolean' },
               subscriptions: { type: 'array', items: { type: 'string' } }
             }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
           }
         }
       }
@@ -444,6 +489,15 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             properties: {
               success: { type: 'boolean' },
               message: { type: 'string' }
+            }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
             }
           }
         }
@@ -487,11 +541,20 @@ export async function websocketRoutes(fastify: FastifyInstance) {
               activeConnections: { type: 'number' },
               connectionCount: { type: 'number' }
             }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
           }
         }
       }
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       try {
         const activeConnections = websocketManager.getActiveConnections();
         const connectionCount = websocketManager.getConnectionCount();

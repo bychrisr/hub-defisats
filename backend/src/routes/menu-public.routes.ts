@@ -5,7 +5,7 @@ const menuService = new MenuService();
 
 export async function menuPublicRoutes(fastify: FastifyInstance) {
   // GET /api/menu - Buscar menu para frontend (público)
-  fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/', async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const menu = await menuService.getMenuForFrontend();
       return reply.send({
@@ -23,7 +23,7 @@ export async function menuPublicRoutes(fastify: FastifyInstance) {
   });
 
   // GET /api/menu/types - Buscar tipos de menu (público)
-  fastify.get('/types', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/types', async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const menuTypes = await menuService.getMenuTypes();
       return reply.send({

@@ -50,7 +50,7 @@ export class CouponService {
       value_type,
       value_amount,
       time_type,
-      time_days
+      ...(time_days !== undefined && { time_days })
     });
 
     // Create coupon
@@ -63,10 +63,10 @@ export class CouponService {
         value_type,
         value_amount,
         time_type,
-        time_days: time_type === 'fixed' ? time_days : null,
-        description,
+        time_days: time_type === 'fixed' ? (time_days ?? null) : null,
+        description: description ?? null,
         is_active,
-        created_by: createdBy,
+        created_by: createdBy ?? null,
       },
     });
 
@@ -158,7 +158,7 @@ export class CouponService {
   /**
    * Update coupon
    */
-  async updateCoupon(id: string, data: UpdateCouponRequest): Promise<CouponResponse> {
+  async updateCoupon(id: string, data: Partial<CreateCouponRequest>): Promise<CouponResponse> {
     const existingCoupon = await this.prisma.coupon.findUnique({
       where: { id },
     });
@@ -184,7 +184,8 @@ export class CouponService {
         value_type: data.value_type || existingCoupon.value_type,
         value_amount: data.value_amount || existingCoupon.value_amount,
         time_type: data.time_type || existingCoupon.time_type,
-        time_days: data.time_days || existingCoupon.time_days,
+        ...(data.time_days !== undefined && { time_days: data.time_days }),
+        ...(data.time_days === undefined && existingCoupon.time_days !== null && { time_days: existingCoupon.time_days }),
       });
     }
 
@@ -192,6 +193,9 @@ export class CouponService {
       where: { id },
       data: {
         ...data,
+        time_days: data.time_days ?? null,
+        description: data.description ?? null,
+        expires_at: data.expires_at ? new Date(data.expires_at) : data.expires_at ?? null,
         updated_at: new Date(),
       },
     });
@@ -449,7 +453,7 @@ export class CouponService {
       where: { id: couponId },
       data: {
         total_revenue_saved: { increment: revenueSaved },
-        new_users_count: newUser ? { increment: 1 } : undefined,
+        ...(newUser && { new_users_count: { increment: 1 } }),
         conversion_rate: await this.calculateCouponConversionRate(couponId),
       }
     });
@@ -559,15 +563,7 @@ export class CouponService {
       }),
     ]);
 
-    return {
-      id: updatedCoupon.id,
-      code: updatedCoupon.code,
-      plan_type: updatedCoupon.plan_type as PlanType,
-      usage_limit: updatedCoupon.usage_limit ?? 0,
-      used_count: updatedCoupon.used_count ?? 0,
-      expires_at: updatedCoupon.expires_at?.toISOString(),
-      created_at: updatedCoupon.created_at.toISOString(),
-    };
+    return this.mapCouponToResponse(updatedCoupon);
   }
 
   /**
@@ -615,80 +611,6 @@ export class CouponService {
     };
   }
 
-  /**
-   * Delete coupon
-   */
-  async deleteCoupon(couponId: string): Promise<void> {
-    const coupon = await this.prisma.coupon.findUnique({
-      where: { id: couponId },
-    });
-
-    if (!coupon) {
-      throw new Error('Coupon not found');
-    }
-
-      // Check if coupon has been used
-      if ((coupon.used_count ?? 0) > 0) {
-        throw new Error('Cannot delete coupon that has been used');
-      }
-
-    await this.prisma.coupon.delete({
-      where: { id: couponId },
-    });
-  }
-
-  /**
-   * Update coupon
-   */
-  async updateCoupon(
-    couponId: string,
-    data: Partial<{
-      code: string;
-      plan_type: PlanType;
-      usage_limit: number;
-      expires_at: string | null;
-    }>
-  ): Promise<CouponResponse> {
-    const coupon = await this.prisma.coupon.findUnique({
-      where: { id: couponId },
-    });
-
-    if (!coupon) {
-      throw new Error('Coupon not found');
-    }
-
-    // Check if new code already exists (if code is being updated)
-    if (data.code && data.code !== coupon.code) {
-      const existingCoupon = await this.prisma.coupon.findUnique({
-        where: { code: data.code },
-      });
-
-      if (existingCoupon) {
-        throw new Error('Coupon code already exists');
-      }
-    }
-
-    // Update coupon
-    const updatedCoupon = await this.prisma.coupon.update({
-      where: { id: couponId },
-      data: {
-        ...data,
-        expires_at: data.expires_at
-          ? new Date(data.expires_at)
-          : data.expires_at || null,
-      },
-    });
-
-    return {
-      id: updatedCoupon.id,
-      code: updatedCoupon.code,
-      plan_type: updatedCoupon.plan_type as PlanType,
-      usage_limit: updatedCoupon.usage_limit ?? 0,
-      used_count: updatedCoupon.used_count ?? 0,
-      expires_at: updatedCoupon.expires_at?.toISOString(),
-      created_at: updatedCoupon.created_at.toISOString(),
-    };
-  }
 
   /**
    * Generate random coupon code
@@ -718,6 +640,10 @@ export class CouponService {
       plan_type: planType,
       usage_limit: usageLimit,
       expires_at: undefined, // No expiration for testers
+      value_type: 'PERCENTAGE' as any,
+      value_amount: 100,
+      time_type: 'LIFETIME' as any,
+      is_active: true,
     });
   }
 

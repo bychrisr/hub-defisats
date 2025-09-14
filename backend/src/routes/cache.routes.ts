@@ -28,6 +28,13 @@ export async function cacheRoutes(fastify: FastifyInstance) {
             },
           },
         },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
       },
     },
     handler: async (_request, reply) => {
@@ -57,6 +64,13 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
+            message: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
             message: { type: 'string' },
           },
         },
@@ -96,6 +110,13 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
+            message: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
             message: { type: 'string' },
           },
         },
@@ -143,6 +164,13 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
+            message: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
             message: { type: 'string' },
           },
         },
@@ -196,6 +224,13 @@ export async function cacheRoutes(fastify: FastifyInstance) {
             message: { type: 'string' },
           },
         },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
       },
     },
     handler: async (_request, reply) => {
@@ -237,6 +272,13 @@ export async function cacheRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
+            message: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
             message: { type: 'string' },
           },
         },

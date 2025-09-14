@@ -50,6 +50,22 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
               }
             }
           }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
         }
       }
     }
@@ -139,6 +155,22 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
                 timestamp: { type: 'number' }
               }
             }
+          }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
           }
         }
       }

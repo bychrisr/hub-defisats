@@ -107,7 +107,7 @@ export class MenuService {
   }
 
   // Reordenar itens de menu
-  async reorderMenuItems(menuTypeId: string, itemOrders: { id: string; order: number }[]) {
+  async reorderMenuItems(_menuTypeId: string, itemOrders: { id: string; order: number }[]) {
     const transaction = await prisma.$transaction(
       itemOrders.map(({ id, order }) =>
         prisma.menuItem.update({

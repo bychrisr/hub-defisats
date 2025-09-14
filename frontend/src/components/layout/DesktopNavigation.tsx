@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -97,6 +97,7 @@ export const DesktopNavigation = ({ isScrolled = false }: { isScrolled?: boolean
 export const DesktopHeader = () => {
   const { theme, setTheme } = useTheme();
   const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState('pt-BR');
   const [currency, setCurrency] = useState('SATS');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -119,6 +120,7 @@ export const DesktopHeader = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
     }

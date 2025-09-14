@@ -1,6 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { PrismaClient } from '@prisma/client';
 import { authenticateAdmin } from '../middleware/auth.middleware';
+
+const prisma = new PrismaClient();
 
 // Schema de validação para configuração de páginas dinâmicas
 const DynamicPageConfigSchema = z.object({
@@ -50,11 +53,19 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
             },
           },
         },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
       },
     },
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
-      const result = await fastify.pg.query(`
+      const result = await (fastify as any).pg.query(`
         SELECT * FROM dynamic_pages_config 
         ORDER BY page_path ASC
       `);
@@ -64,7 +75,7 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
         data: result.rows,
       };
     } catch (error) {
-      fastify.log.error('Error fetching dynamic pages config:', error);
+      fastify.log.error('Error fetching dynamic pages config:', error as any);
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_SERVER_ERROR',
@@ -86,17 +97,56 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
         },
         required: ['id'],
       },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                page_path: { type: 'string' },
+                page_name: { type: 'string' },
+                use_dynamic_title: { type: 'boolean' },
+                use_dynamic_favicon: { type: 'boolean' },
+                custom_title: { type: 'string' },
+                custom_favicon_url: { type: 'string' },
+                description: { type: 'string' },
+                is_active: { type: 'boolean' },
+                created_at: { type: 'string' },
+                updated_at: { type: 'string' },
+              },
+            },
+          },
+        },
+        404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+      },
     },
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
       
-      const result = await fastify.pg.query(
-        'SELECT * FROM dynamic_pages_config WHERE id = $1',
-        [id]
-      );
+      const result = await prisma.$queryRaw`
+        SELECT * FROM dynamic_pages_config WHERE id = ${id}
+      ` as any[];
 
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         return reply.status(404).send({
           success: false,
           error: 'NOT_FOUND',
@@ -106,10 +156,10 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
 
       return {
         success: true,
-        data: result.rows[0],
+        data: result[0],
       };
     } catch (error) {
-      fastify.log.error('Error fetching dynamic page config:', error);
+      fastify.log.error('Error fetching dynamic page config:', error as any);
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_SERVER_ERROR',
@@ -143,7 +193,7 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
     try {
       const configData = DynamicPageConfigSchema.omit({ id: true }).parse(request.body);
 
-      const result = await fastify.pg.query(`
+      const result = await (fastify as any).pg.query(`
         INSERT INTO dynamic_pages_config (
           page_path, page_name, use_dynamic_title, use_dynamic_favicon,
           custom_title, custom_favicon_url, description, is_active
@@ -162,7 +212,7 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
 
       return {
         success: true,
-        data: result.rows[0],
+        data: result[0],
       };
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -174,7 +224,7 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
         });
       }
 
-      if (error.code === '23505') { // Unique constraint violation
+      if ((error as any).code === '23505') { // Unique constraint violation
         return reply.status(409).send({
           success: false,
           error: 'CONFLICT',
@@ -182,7 +232,7 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
         });
       }
 
-      fastify.log.error('Error creating dynamic page config:', error);
+      fastify.log.error('Error creating dynamic page config:', error as any);
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_SERVER_ERROR',
@@ -236,14 +286,14 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
       const setClause = fields.map((field, index) => `${field} = $${index + 2}`).join(', ');
       const values = [id, ...fields.map(field => updateData[field as keyof typeof updateData])];
 
-      const result = await fastify.pg.query(`
+      const result = await (fastify as any).pg.query(`
         UPDATE dynamic_pages_config 
         SET ${setClause}, updated_at = NOW()
         WHERE id = $1
         RETURNING *
       `, values);
 
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         return reply.status(404).send({
           success: false,
           error: 'NOT_FOUND',
@@ -253,7 +303,7 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
 
       return {
         success: true,
-        data: result.rows[0],
+        data: result[0],
       };
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -265,7 +315,7 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
         });
       }
 
-      fastify.log.error('Error updating dynamic page config:', error);
+      fastify.log.error('Error updating dynamic page config:', error as any);
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_SERVER_ERROR',
@@ -292,12 +342,11 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
     try {
       const { id } = request.params as { id: string };
 
-      const result = await fastify.pg.query(
-        'DELETE FROM dynamic_pages_config WHERE id = $1 RETURNING *',
-        [id]
-      );
+      const result = await prisma.$queryRaw`
+        DELETE FROM dynamic_pages_config WHERE id = ${id} RETURNING *
+      ` as any[];
 
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         return reply.status(404).send({
           success: false,
           error: 'NOT_FOUND',
@@ -307,10 +356,10 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
 
       return {
         success: true,
-        data: result.rows[0],
+        data: result[0],
       };
     } catch (error) {
-      fastify.log.error('Error deleting dynamic page config:', error);
+      fastify.log.error('Error deleting dynamic page config:', error as any);
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_SERVER_ERROR',
@@ -337,12 +386,11 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
       const { path } = request.params as { path: string };
       
       // Usar conexão direta do PostgreSQL
-      const result = await fastify.pg.query(
-        'SELECT * FROM dynamic_pages_config WHERE page_path = $1 AND is_active = true',
-        [path]
-      );
+      const result = await prisma.$queryRaw`
+        SELECT * FROM dynamic_pages_config WHERE page_path = ${path} AND is_active = true
+      ` as any[];
 
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         // Retornar configuração padrão se não encontrar
         return {
           success: true,
@@ -358,10 +406,10 @@ export async function dynamicPagesConfigRoutes(fastify: FastifyInstance) {
 
       return {
         success: true,
-        data: result.rows[0],
+        data: result[0],
       };
     } catch (error) {
-      fastify.log.error('Error checking dynamic page config:', error);
+      fastify.log.error('Error checking dynamic page config:', error as any);
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_SERVER_ERROR',

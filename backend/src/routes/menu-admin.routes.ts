@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { MenuService } from '@/services/menu.service';
+import { MenuService, CreateMenuItemData } from '@/services/menu.service';
 import { superAdminAuthMiddleware } from '@/middleware/auth.middleware';
 
 const menuService = new MenuService();
@@ -9,7 +9,7 @@ export async function menuAdminRoutes(fastify: FastifyInstance) {
   fastify.addHook('preHandler', superAdminAuthMiddleware);
 
   // GET /api/admin/menu/types - Buscar tipos de menu
-  fastify.get('/types', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/types', async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const menuTypes = await menuService.getMenuTypes();
       return reply.send({
@@ -27,7 +27,7 @@ export async function menuAdminRoutes(fastify: FastifyInstance) {
   });
 
   // GET /api/admin/menu/items - Buscar todos os itens de menu
-  fastify.get('/items', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/items', async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const menuItems = await menuService.getAllMenuItems();
       return reply.send({
@@ -92,7 +92,7 @@ export async function menuAdminRoutes(fastify: FastifyInstance) {
   });
 
   // POST /api/admin/menu/item - Criar novo item
-  fastify.post('/item', async (request: FastifyRequest<{ Body: any }>, reply: FastifyReply) => {
+  fastify.post('/item', async (request: FastifyRequest<{ Body: CreateMenuItemData }>, reply: FastifyReply) => {
     try {
       const menuItem = await menuService.createMenuItem(request.body);
       return reply.status(201).send({
@@ -111,7 +111,7 @@ export async function menuAdminRoutes(fastify: FastifyInstance) {
   });
 
   // PUT /api/admin/menu/item/:id - Atualizar item
-  fastify.put('/item/:id', async (request: FastifyRequest<{ Params: { id: string }; Body: any }>, reply: FastifyReply) => {
+  fastify.put('/item/:id', async (request: FastifyRequest<{ Params: { id: string }; Body: Partial<CreateMenuItemData> }>, reply: FastifyReply) => {
     try {
       const { id } = request.params;
       const menuItem = await menuService.updateMenuItem({
@@ -196,7 +196,7 @@ export async function menuAdminRoutes(fastify: FastifyInstance) {
   });
 
   // GET /api/admin/menu/frontend - Buscar menu para frontend
-  fastify.get('/frontend', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/frontend', async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const menu = await menuService.getMenuForFrontend();
       return reply.send({
@@ -214,7 +214,7 @@ export async function menuAdminRoutes(fastify: FastifyInstance) {
   });
 
   // GET /api/admin/config - Buscar configurações do sistema
-  fastify.get('/config', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/config', async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const configs = await menuService.getSystemConfigs();
       return reply.send({

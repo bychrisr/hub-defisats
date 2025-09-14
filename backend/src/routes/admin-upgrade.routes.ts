@@ -75,7 +75,8 @@ export async function adminUpgradeRoutes(fastify: FastifyInstance) {
             properties: {
               success: { type: 'boolean' },
               error: { type: 'string' },
-              message: { type: 'string' }
+              message: { type: 'string' },
+              details: { type: 'string' }
             }
           },
           404: {
@@ -84,6 +85,15 @@ export async function adminUpgradeRoutes(fastify: FastifyInstance) {
               success: { type: 'boolean' },
               error: { type: 'string' },
               message: { type: 'string' }
+            }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
             }
           }
         }
@@ -265,6 +275,24 @@ export async function adminUpgradeRoutes(fastify: FastifyInstance) {
                 }
               }
             }
+          },
+          400: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
           }
         }
       }
@@ -392,11 +420,29 @@ export async function adminUpgradeRoutes(fastify: FastifyInstance) {
                 }
               }
             }
+          },
+          400: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
           }
         }
       }
     },
-    async (request, reply) => {
+    async (_, reply) => {
       try {
         console.log('📊 ADMIN UPGRADE - Buscando estatísticas');
 

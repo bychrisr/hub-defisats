@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useUserPositions } from './RealtimeDataContext';
+import { api } from '@/lib/api';
 
 // Tipos para as posições (baseado na página Positions.tsx)
 export interface LNPosition {
@@ -268,18 +269,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     try {
       console.log('🔍 POSITIONS CONTEXT - Fetching real positions from LN Markets...');
       
-      const response = await fetch('/api/lnmarkets/user/positions', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await api.get('/api/lnmarkets/user/positions');
+      const data = response.data;
       console.log('✅ POSITIONS CONTEXT - Received real positions:', data);
 
       if (data.success && data.data && Array.isArray(data.data)) {

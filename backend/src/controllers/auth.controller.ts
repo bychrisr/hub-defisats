@@ -76,8 +76,10 @@ const ValidationErrorResponseZodSchema = z.object({
 
 export class AuthController {
   private authService: AuthService;
+  private prisma: PrismaClient;
 
   constructor(prisma: PrismaClient, fastify: FastifyInstance) {
+    this.prisma = prisma;
     this.authService = new AuthService(prisma, fastify);
   }
 
@@ -320,6 +322,14 @@ export class AuthController {
         return reply.status(401).send(errorResponse);
       }
 
+      // Check if user is admin
+      const adminUser = await this.prisma.adminUser.findUnique({
+        where: { user_id: user.id },
+        select: { role: true }
+      });
+      
+      const isAdmin = adminUser?.role === 'superadmin';
+
       // Return user info
       return reply.status(200).send({
         id: user.id,
@@ -330,6 +340,7 @@ export class AuthController {
         ln_markets_api_key: (user as any).ln_markets_api_key,
         ln_markets_api_secret: (user as any).ln_markets_api_secret,
         ln_markets_passphrase: (user as any).ln_markets_passphrase,
+        is_admin: isAdmin,
       });
     } catch (error) {
       const errorResponse = ErrorResponseZodSchema.parse({

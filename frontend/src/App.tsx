@@ -72,9 +72,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Public Route Component (redirect authenticated users to dashboard)
+// Public Route Component (redirect authenticated users to appropriate page)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
 
   // Se está carregando, mostrar loading
   if (isLoading) {
@@ -85,10 +85,11 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // Se está autenticado, redirecionar para dashboard
-  if (isAuthenticated) {
-    console.log('🔄 PUBLIC ROUTE - User is authenticated, redirecting to dashboard');
-    return <Navigate to="/dashboard" replace />;
+  // Se está autenticado E tem dados do usuário, redirecionar para página apropriada
+  if (isAuthenticated && user) {
+    const redirectTo = user.is_admin ? '/admin' : '/dashboard';
+    console.log('🔄 PUBLIC ROUTE - User is authenticated, redirecting to:', redirectTo, { is_admin: user.is_admin });
+    return <Navigate to={redirectTo} replace />;
   }
 
   console.log('✅ PUBLIC ROUTE - User not authenticated, allowing access');
@@ -219,9 +220,9 @@ const App = () => {
           <GlobalDynamicFavicon />
           <Routes>
             <Route path="/" element={
-              <SmartRedirect>
+              <PublicRoute>
                 <Landing />
-              </SmartRedirect>
+              </PublicRoute>
             } />
             <Route
               path="/login"

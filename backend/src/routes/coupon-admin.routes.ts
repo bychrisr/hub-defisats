@@ -66,10 +66,19 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
               }
             }
           }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+            details: { type: 'string' }
+          }
         }
       }
     }
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
       const dashboard = await couponService.getCouponDashboard();
       return reply.status(200).send(dashboard);
@@ -121,10 +130,19 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
               }
             }
           }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+            details: { type: 'string' }
+          }
         }
       }
     }
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
       const coupons = await couponService.getCoupons();
       return reply.status(200).send(coupons);
@@ -187,6 +205,15 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
             success: { type: 'boolean' },
             error: { type: 'string' },
             message: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+            details: { type: 'string' }
           }
         }
       }
@@ -367,6 +394,22 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
             error: { type: 'string' },
             message: { type: 'string' }
           }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
         }
       }
     }
@@ -413,6 +456,14 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
           }
         },
         404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
@@ -478,6 +529,14 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
           }
         },
         404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
           type: 'object',
           properties: {
             success: { type: 'boolean' },

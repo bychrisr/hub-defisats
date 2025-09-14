@@ -239,7 +239,7 @@ export class WebSocketManagerService extends EventEmitter {
     console.log('🔄 WEBSOCKET MANAGER - Shutting down all connections');
     this.stopCleanupInterval();
     
-    for (const [userId, connection] of this.connections) {
+    for (const [_userId, connection] of this.connections) {
       connection.wsService.disconnect();
     }
     

@@ -32,6 +32,13 @@ export async function alertsRoutes(fastify: FastifyInstance) {
             },
           },
         },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
       },
     },
     handler: async (_request, reply) => {
@@ -84,6 +91,13 @@ export async function alertsRoutes(fastify: FastifyInstance) {
                 },
               },
             },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
           },
         },
       },
@@ -142,6 +156,14 @@ export async function alertsRoutes(fastify: FastifyInstance) {
           properties: {
             success: { type: 'boolean' },
             error: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
           },
         },
       },
@@ -203,6 +225,14 @@ export async function alertsRoutes(fastify: FastifyInstance) {
             },
           },
         },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
       },
     },
     handler: async (_request, reply) => {
@@ -254,6 +284,13 @@ export async function alertsRoutes(fastify: FastifyInstance) {
             success: { type: 'boolean' },
             message: { type: 'string' },
             cleaned: { type: 'number' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' },
           },
         },
       },

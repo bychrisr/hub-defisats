@@ -15,19 +15,24 @@ export interface LNMarketsWebSocketMessage {
   };
 }
 
+export interface LNMarketsWebSocketCredentials {
+  apiKey: string;
+  apiSecret: string;
+  passphrase: string;
+  isTestnet: boolean;
+}
+
 export class LNMarketsWebSocketService extends EventEmitter {
   private ws: WebSocket | null = null;
   private reconnectInterval: NodeJS.Timeout | null = null;
   private isConnected = false;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private baseUrl: string;
+  // private reconnectAttempts = 0;
+  // private maxReconnectAttempts = 5;
+  // private _baseUrl: string;
 
-  constructor(isTestnet: boolean = false) {
+  constructor(_credentials: LNMarketsWebSocketCredentials | boolean = false) {
     super();
-    this.baseUrl = isTestnet 
-      ? 'wss://api.testnet4.lnmarkets.com/v2/ws'
-      : 'wss://api.lnmarkets.com/v2/ws';
+    // URL configuration removed as it's not used
   }
 
   connect(): Promise<void> {
@@ -37,7 +42,6 @@ export class LNMarketsWebSocketService extends EventEmitter {
         
         // Conectar usando polling da API REST da LN Markets
         this.isConnected = true;
-        this.reconnectAttempts = 0;
         this.emit('connected');
         resolve();
         
@@ -74,7 +78,7 @@ export class LNMarketsWebSocketService extends EventEmitter {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = await response.json() as any;
       
       // Processar dados reais do Bitcoin
       if (data && data.bitcoin && data.bitcoin.usd) {
@@ -158,20 +162,20 @@ export class LNMarketsWebSocketService extends EventEmitter {
     this.emit('price_update', priceUpdate);
   }
 
-  private scheduleReconnect() {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('❌ LN MARKETS WS - Max reconnection attempts reached');
-      return;
-    }
+  // private scheduleReconnect() {
+  //   if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+  //     console.error('❌ LN MARKETS WS - Max reconnection attempts reached');
+  //     return;
+  //   }
 
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-    console.log(`🔄 LN MARKETS WS - Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
+  //   const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+  //   console.log(`🔄 LN MARKETS WS - Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
     
-    this.reconnectInterval = setTimeout(() => {
-      this.reconnectAttempts++;
-      this.connect().catch(console.error);
-    }, delay);
-  }
+  //   this.reconnectInterval = setTimeout(() => {
+  //     this.reconnectAttempts++;
+  //     this.connect().catch(console.error);
+  //   }, delay);
+  // }
 
   send(data: any) {
     if (this.ws && this.isConnected) {
@@ -192,6 +196,27 @@ export class LNMarketsWebSocketService extends EventEmitter {
     this.send({
       type: 'unsubscribe',
       symbol: symbol
+    });
+  }
+
+  subscribeToMarket(symbol: string) {
+    console.log('📊 LN MARKETS WS - Subscribing to market:', symbol);
+    this.subscribe(symbol);
+  }
+
+  subscribeToPositions() {
+    console.log('📊 LN MARKETS WS - Subscribing to positions');
+    this.send({
+      type: 'subscribe',
+      channel: 'positions'
+    });
+  }
+
+  subscribeToMargin() {
+    console.log('📊 LN MARKETS WS - Subscribing to margin');
+    this.send({
+      type: 'subscribe',
+      channel: 'margin'
     });
   }
 

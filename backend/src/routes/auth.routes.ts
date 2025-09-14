@@ -52,6 +52,14 @@ export async function authRoutes(fastify: FastifyInstance) {
               details: { type: 'object' },
             },
           },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              details: { type: 'object' },
+            },
+          },
         },
       },
     },
@@ -142,6 +150,14 @@ export async function authRoutes(fastify: FastifyInstance) {
                   },
                 },
               },
+            },
+          },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              details: { type: 'object' },
             },
           },
         },
@@ -541,6 +557,7 @@ export async function authRoutes(fastify: FastifyInstance) {
               ln_markets_api_key: { type: 'string' },
               ln_markets_api_secret: { type: 'string' },
               ln_markets_passphrase: { type: 'string' },
+              is_admin: { type: 'boolean' },
             },
           },
           401: {

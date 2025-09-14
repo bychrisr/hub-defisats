@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { websocketManager } from '@/services/websocket-manager.service';
+// import { websocketManager } from '@/services/websocket-manager.service';
 
 export async function websocketTestRoutes(fastify: FastifyInstance) {
   console.log('🔌 WEBSOCKET TEST - Registrando rota WebSocket');
@@ -25,10 +25,10 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
     
     // Get user credentials from database or config
     const credentials = {
-      apiKey: process.env.LN_MARKETS_API_KEY || '',
-      apiSecret: process.env.LN_MARKETS_API_SECRET || '',
-      passphrase: process.env.LN_MARKETS_PASSPHRASE || '',
-      isTestnet: process.env.LN_MARKETS_TESTNET === 'true'
+      apiKey: process.env['LN_MARKETS_API_KEY'] || '',
+      apiSecret: process.env['LN_MARKETS_API_SECRET'] || '',
+      passphrase: process.env['LN_MARKETS_PASSPHRASE'] || '',
+      isTestnet: process.env['LN_MARKETS_TESTNET'] === 'true'
     };
 
     console.log('🔑 WEBSOCKET TEST - Credenciais LN Markets:', {
