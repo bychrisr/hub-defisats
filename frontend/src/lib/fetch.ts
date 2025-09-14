@@ -38,6 +38,10 @@ export const apiPost = (endpoint: string, data?: any, options: RequestInit = {})
   apiFetch(endpoint, {
     ...options,
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
     body: data ? JSON.stringify(data) : undefined,
   });
 
@@ -45,7 +49,11 @@ export const apiPut = (endpoint: string, data?: any, options: RequestInit = {}) 
   apiFetch(endpoint, {
     ...options,
     method: 'PUT',
-    body: data,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    body: data ? JSON.stringify(data) : undefined,
   });
 
 export const apiDelete = (endpoint: string, options: RequestInit = {}) => 
