@@ -308,8 +308,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
 
         console.log('🔄 POSITIONS CONTEXT - Updating with real positions:', transformedPositions.length);
         
-        // Atualizar estado com posições reais
-        setPositions(transformedPositions);
+        // Atualizar estado com posições reais (removido setPositions que não existe)
         
         // Calcular totais
         const totalPL = transformedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
@@ -336,7 +335,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         });
       } else {
         console.log('📝 POSITIONS CONTEXT - No positions data, using empty array');
-        setPositions([]);
+        // setPositions([]); // Removido - não existe
         setData({
           positions: [],
           totalPL: 0,

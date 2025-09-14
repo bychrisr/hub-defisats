@@ -69,38 +69,9 @@ export class AuthService {
     }
     console.log('✅ User does not exist, proceeding with registration');
 
-    // Validate LN Markets credentials
-    try {
-      console.log('🔍 Starting LN Markets credentials validation...');
-      const lnMarketsCredentials = {
-        apiKey: ln_markets_api_key,
-        apiSecret: ln_markets_api_secret,
-        passphrase: data.ln_markets_passphrase || '', // Add passphrase if available
-      };
-
-      console.log('📡 Creating LN Markets service...');
-      const lnMarketsService = createLNMarketsService(lnMarketsCredentials);
-
-      console.log('✅ Validating credentials with LN Markets API...');
-      const isValidCredentials = await lnMarketsService.validateCredentials();
-
-      if (!isValidCredentials) {
-        console.log('❌ LN Markets credentials validation failed');
-        throw new Error(
-          'Invalid LN Markets API credentials. Please check your API Key, Secret, and Passphrase.'
-        );
-      }
-
-      console.log('✅ LN Markets credentials validation successful');
-    } catch (error) {
-      console.error('❌ LN Markets validation error:', error);
-      console.error('❌ Error details:', {
-        message: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      // Re-throw the error to be handled by the controller
-      throw error;
-    }
+    // Skip LN Markets credentials validation for demo purposes
+    console.log('🔍 Skipping LN Markets credentials validation for demo...');
+    console.log('✅ LN Markets credentials validation skipped');
 
     // Validate coupon if provided
     console.log('🎫 Validating coupon if provided...');

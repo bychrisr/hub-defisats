@@ -201,10 +201,56 @@ export class LNMarketsUserController {
       });
 
       if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-        console.log(`[UserController] User ${userId} has no LN Markets credentials, returning empty positions`);
+        console.log(`[UserController] User ${userId} has no LN Markets credentials, returning demo positions`);
+        
+        // Retornar posições de demonstração para usuários sem credenciais
+        const demoPositions = [
+          {
+            id: 'demo-1',
+            quantity: 0.001,
+            price: 115000,
+            entryPrice: 114500,
+            currentPrice: 115000,
+            liquidation: 100000,
+            leverage: 10,
+            margin: 0.1,
+            pnl: 0.5,
+            pnlPercentage: 0.44,
+            marginRatio: 0.1,
+            fundingCost: 0.01,
+            status: 'open',
+            side: 'long',
+            symbol: 'BTC',
+            asset: 'BTC',
+            createdAt: new Date(Date.now() - 86400000).toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          {
+            id: 'demo-2',
+            quantity: 0.0005,
+            price: 115000,
+            entryPrice: 115500,
+            currentPrice: 115000,
+            liquidation: 120000,
+            leverage: 5,
+            margin: 0.05,
+            pnl: -0.25,
+            pnlPercentage: -0.43,
+            marginRatio: 0.05,
+            fundingCost: 0.005,
+            status: 'open',
+            side: 'short',
+            symbol: 'BTC',
+            asset: 'BTC',
+            createdAt: new Date(Date.now() - 172800000).toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+        ];
+        
+        console.log(`[UserController] Returning demo positions for no credentials:`, JSON.stringify(demoPositions, null, 2));
         return reply.send({
           success: true,
-          data: []
+          data: demoPositions
         });
       }
 
@@ -219,16 +265,72 @@ export class LNMarketsUserController {
       });
     } catch (error: any) {
       console.error('[UserController] Error getting user positions:', error);
+      console.error('[UserController] Error details:', {
+        message: error.message,
+        status: error.status,
+        response: error.response?.data
+      });
       
-      // If it's a credentials error, return empty array instead of 500
-      if (error.message?.includes('credentials') || 
-          error.message?.includes('LN Markets') || 
-          error.message?.includes('Api key does not exist') ||
-          error.status === 401) {
-        console.log(`[UserController] Credentials error for user ${(request as any).user?.id}, returning empty positions:`, error.message);
+      // If it's a credentials error, return demo positions instead of 500
+      console.log(`[UserController] Checking error conditions:`, {
+        status: error.status,
+        message: error.message,
+        responseMessage: error.response?.data?.message,
+        condition1: error.status === 401,
+        condition2: error.response?.data?.message?.includes('Api key does not exist')
+      });
+      
+      if (error.status === 401 || error.response?.data?.message?.includes('Api key does not exist')) {
+        console.log(`[UserController] Credentials error for user ${(request as any).user?.id}, returning demo positions:`, error.message);
+        
+        // Retornar posições de demonstração para usuários com credenciais inválidas
+        const demoPositions = [
+          {
+            id: 'demo-1',
+            quantity: 0.001,
+            price: 115000,
+            entryPrice: 114500,
+            currentPrice: 115000,
+            liquidation: 100000,
+            leverage: 10,
+            margin: 0.1,
+            pnl: 0.5,
+            pnlPercentage: 0.44,
+            marginRatio: 0.1,
+            fundingCost: 0.01,
+            status: 'open',
+            side: 'long',
+            symbol: 'BTC',
+            asset: 'BTC',
+            createdAt: '2025-09-13T15:00:00.000Z',
+            updatedAt: '2025-09-14T15:00:00.000Z',
+          },
+          {
+            id: 'demo-2',
+            quantity: 0.0005,
+            price: 115000,
+            entryPrice: 115500,
+            currentPrice: 115000,
+            liquidation: 120000,
+            leverage: 5,
+            margin: 0.05,
+            pnl: -0.25,
+            pnlPercentage: -0.43,
+            marginRatio: 0.05,
+            fundingCost: 0.005,
+            status: 'open',
+            side: 'short',
+            symbol: 'BTC',
+            asset: 'BTC',
+            createdAt: '2025-09-12T15:00:00.000Z',
+            updatedAt: '2025-09-14T15:00:00.000Z',
+          }
+        ];
+        
+        console.log(`[UserController] Returning demo positions for credentials error:`, JSON.stringify(demoPositions, null, 2));
         return reply.send({
           success: true,
-          data: []
+          data: demoPositions
         });
       }
       

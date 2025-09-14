@@ -113,21 +113,6 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   // Get user positions
   fastify.get(
     '/lnmarkets/user/positions',
-    {
-      schema: {
-        description: 'Get LN Markets user positions',
-        tags: ['LN Markets - User'],
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              data: { type: 'array', items: { type: 'object' } }
-            }
-          }
-        }
-      }
-    },
     userController.getUserPositions.bind(userController)
   );
 
