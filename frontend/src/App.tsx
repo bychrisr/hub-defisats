@@ -2,11 +2,18 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { RealtimeDataProvider } from '@/contexts/RealtimeDataContext';
+import { PositionsProvider } from '@/contexts/PositionsContext';
 import { Layout } from '@/components/layout/Layout';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { useDynamicFavicon } from '@/hooks/useDynamicFavicon';
+import { useDynamicPageConfig } from '@/hooks/useDynamicPageConfig';
+import { RouteGuard } from '@/components/guards/RouteGuard';
+import { SmartRedirect } from '@/components/guards/SmartRedirect';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -24,11 +31,14 @@ import { useAuthStore } from '@/stores/auth';
 import { useEffect } from 'react';
 import AdminLayout from '@/pages/admin/Layout';
 import AdminDashboard from '@/pages/admin/Dashboard';
+import AdminMenuManagement from '@/pages/admin/MenuManagement';
+import DynamicPagesConfig from '@/pages/admin/DynamicPagesConfig';
 import AdminMonitoring from '@/pages/admin/Monitoring';
 import AdminUsers from '@/pages/admin/Users';
 import AdminCoupons from '@/pages/admin/Coupons';
 import AdminAlerts from '@/pages/admin/Alerts';
 import AdminSettings from '@/pages/admin/Settings';
+import TestPermissions from '@/pages/TestPermissions';
 
 const queryClient = new QueryClient();
 
@@ -123,6 +133,54 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Componente interno para gerenciar título global (deve estar dentro do Router)
+const GlobalPageTitle = () => {
+  const pageConfig = useDynamicPageConfig();
+  
+  // Sempre chamar o hook, mas controlar a lógica internamente
+  const { updateTitle } = usePageTitle({ baseTitle: 'defiSATS', showPL: true });
+  
+  useEffect(() => {
+    if (!pageConfig.use_dynamic_title) {
+      // Se não deve usar título dinâmico, definir título customizado
+      if (pageConfig.custom_title) {
+        document.title = pageConfig.custom_title;
+      }
+    }
+    // Se deve usar título dinâmico, o hook usePageTitle já gerencia isso
+  }, [pageConfig.use_dynamic_title, pageConfig.custom_title, updateTitle]);
+  
+  return null; // Este componente não renderiza nada, apenas gerencia o título
+};
+
+// Componente interno para gerenciar favicon dinâmico (deve estar dentro do Router)
+const GlobalDynamicFavicon = () => {
+  const pageConfig = useDynamicPageConfig();
+  
+  // Sempre chamar o hook, mas controlar a lógica internamente
+  const { updateFavicon } = useDynamicFavicon();
+  
+  useEffect(() => {
+    if (!pageConfig.use_dynamic_favicon) {
+      // Se não deve usar favicon dinâmico, definir favicon customizado
+      if (pageConfig.custom_favicon_url) {
+        const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+        if (favicon) {
+          favicon.href = pageConfig.custom_favicon_url;
+        } else {
+          const link = document.createElement('link');
+          link.rel = 'icon';
+          link.href = pageConfig.custom_favicon_url;
+          document.head.appendChild(link);
+        }
+      }
+    }
+    // Se deve usar favicon dinâmico, o hook useDynamicFavicon já gerencia isso
+  }, [pageConfig.use_dynamic_favicon, pageConfig.custom_favicon_url, updateFavicon]);
+  
+  return null; // Este componente não renderiza nada, apenas gerencia o favicon
+};
+
 const App = () => {
   const { getProfile, setLoading } = useAuthStore();
 
@@ -146,7 +204,8 @@ const App = () => {
   return (
     <ThemeProvider>
       <RealtimeDataProvider>
-        <QueryClientProvider client={queryClient}>
+        <PositionsProvider>
+          <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -156,8 +215,14 @@ const App = () => {
             v7_relativeSplatPath: true,
           }}
         >
+          <GlobalPageTitle />
+          <GlobalDynamicFavicon />
           <Routes>
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={
+              <SmartRedirect>
+                <Landing />
+              </SmartRedirect>
+            } />
             <Route
               path="/login"
               element={
@@ -178,9 +243,11 @@ const App = () => {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <ResponsiveLayout>
-                    <Dashboard />
-                  </ResponsiveLayout>
+                  <RouteGuard>
+                    <ResponsiveLayout>
+                      <Dashboard />
+                    </ResponsiveLayout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -188,9 +255,11 @@ const App = () => {
               path="/profile"
               element={
                 <ProtectedRoute>
-                  <ResponsiveLayout>
-                    <Profile />
-                  </ResponsiveLayout>
+                  <RouteGuard>
+                    <ResponsiveLayout>
+                      <Profile />
+                    </ResponsiveLayout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -198,9 +267,11 @@ const App = () => {
               path="/margin-guard"
               element={
                 <ProtectedRoute>
-                  <Layout>
-                    <MarginGuard />
-                  </Layout>
+                  <RouteGuard requiredPlan="advanced">
+                    <Layout>
+                      <MarginGuard />
+                    </Layout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -208,9 +279,11 @@ const App = () => {
               path="/automation"
               element={
                 <ProtectedRoute>
-                  <ResponsiveLayout>
-                    <Automation />
-                  </ResponsiveLayout>
+                  <RouteGuard requiredPlan="basic">
+                    <ResponsiveLayout>
+                      <Automation />
+                    </ResponsiveLayout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -218,9 +291,11 @@ const App = () => {
               path="/reports"
               element={
                 <ProtectedRoute>
-                  <ResponsiveLayout>
-                    <Reports />
-                  </ResponsiveLayout>
+                  <RouteGuard requiredPlan="basic">
+                    <ResponsiveLayout>
+                      <Reports />
+                    </ResponsiveLayout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -228,9 +303,11 @@ const App = () => {
               path="/positions"
               element={
                 <ProtectedRoute>
-                  <ResponsiveLayout>
-                    <Positions />
-                  </ResponsiveLayout>
+                  <RouteGuard requiredPlan="basic">
+                    <ResponsiveLayout>
+                      <Positions />
+                    </ResponsiveLayout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -238,9 +315,11 @@ const App = () => {
               path="/backtests"
               element={
                 <ProtectedRoute>
-                  <ResponsiveLayout>
-                    <Backtests />
-                  </ResponsiveLayout>
+                  <RouteGuard requiredPlan="basic">
+                    <ResponsiveLayout>
+                      <Backtests />
+                    </ResponsiveLayout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -248,9 +327,11 @@ const App = () => {
               path="/logs"
               element={
                 <ProtectedRoute>
-                  <Layout>
-                    <Logs />
-                  </Layout>
+                  <RouteGuard requiredPlan="advanced">
+                    <Layout>
+                      <Logs />
+                    </Layout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />
@@ -258,9 +339,19 @@ const App = () => {
               path="/trading"
               element={
                 <ProtectedRoute>
-                  <Layout>
-                    <Trading />
-                  </Layout>
+                  <RouteGuard requiredPlan="advanced">
+                    <Layout>
+                      <Trading />
+                    </Layout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/test-permissions"
+              element={
+                <ProtectedRoute>
+                  <TestPermissions />
                 </ProtectedRoute>
               }
             />
@@ -269,11 +360,15 @@ const App = () => {
               path="/admin"
               element={
                 <AdminRoute>
-                  <AdminLayout />
+                  <RouteGuard requireAdmin>
+                    <AdminLayout />
+                  </RouteGuard>
                 </AdminRoute>
               }
             >
               <Route index element={<AdminDashboard />} />
+              <Route path="menus" element={<AdminMenuManagement />} />
+              <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="monitoring" element={<AdminMonitoring />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="coupons" element={<AdminCoupons />} />
@@ -285,6 +380,7 @@ const App = () => {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+        </PositionsProvider>
       </RealtimeDataProvider>
   </ThemeProvider>
   );

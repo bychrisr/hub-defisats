@@ -4,16 +4,6 @@ import { cn } from '@/lib/utils';
 import { 
   X,
   ChevronRight,
-  Coins,
-  TrendingUp,
-  Image,
-  Info,
-  Package,
-  Code,
-  Candy,
-  Star,
-  User,
-  Settings,
   Globe,
   DollarSign,
   Sun,
@@ -25,33 +15,35 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useSecondaryMenu, useUserMenu } from '@/hooks/useDynamicMenus';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { 
+  SECONDARY_NAVIGATION, 
+  USER_NAVIGATION, 
+  MOBILE_TEXT_CLASSES 
+} from '@/constants/navigation';
 
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const mainNavigation = [
-  { name: 'Criptomoedas', href: '/cryptocurrencies', icon: Coins },
-  { name: 'Câmbios', href: '/exchanges', icon: TrendingUp },
-  { name: 'NFT', href: '/nft', icon: Image },
-  { name: 'Informação', href: '/information', icon: Info },
-  { name: 'Produtos', href: '/products', icon: Package },
-  { name: 'API', href: '/api', icon: Code },
-];
-
-const userNavigation = [
-  { name: 'Os meus Candies', href: '/candies', icon: Candy, color: 'text-purple-600' },
-  { name: 'A minha carteira', href: '/wallet', icon: Star, color: 'text-yellow-600' },
-  { name: 'A minha conta', href: '/account', icon: User, color: 'text-gray-600' },
-];
+// Fallback para quando a API não estiver disponível
+const fallbackSecondaryNavigation = SECONDARY_NAVIGATION;
+const fallbackUserNavigation = USER_NAVIGATION;
 
 export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
   const location = useLocation();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [language, setLanguage] = useState('PT-BR');
   const [currency, setCurrency] = useState('USD');
-  const [theme, setTheme] = useState('light');
+  const { theme, toggleTheme } = useTheme();
+  
+  // Hooks para dados dinâmicos
+  const { menuItems: secondaryMenuItems, isLoading: secondaryLoading, error: secondaryError } = useSecondaryMenu();
+  const { menuItems: userMenuItems, isLoading: userLoading, error: userError } = useUserMenu();
+  const { canAccessRoute } = useUserPermissions();
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
@@ -68,6 +60,14 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
     return location.pathname.startsWith(href);
   };
 
+  // Usar dados dinâmicos ou fallback
+  const rawMainNavigation = secondaryLoading || secondaryError ? fallbackSecondaryNavigation : secondaryMenuItems;
+  const rawUserNavigation = userLoading || userError ? fallbackUserNavigation : userMenuItems;
+  
+  // Filtrar navegação baseada em permissões
+  const mainNavigation = rawMainNavigation.filter(item => canAccessRoute(item.href));
+  const userNavigation = rawUserNavigation.filter(item => canAccessRoute(item.href));
+
   if (!isOpen) return null;
 
   return (
@@ -79,15 +79,26 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
       />
       
       {/* Drawer */}
-      <div className="fixed inset-y-0 left-0 w-80 bg-white z-50 md:hidden transform transition-transform duration-300 ease-in-out">
+      <div 
+        className="fixed inset-y-0 left-0 w-80 z-50 md:hidden transform transition-transform duration-300 ease-in-out"
+        style={{ backgroundColor: 'hsl(var(--bg-card))' }}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div 
+            className="flex items-center justify-between p-4"
+            style={{ borderBottom: '1px solid hsl(var(--border))' }}
+          >
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">HD</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">defiSATS</span>
+              <span 
+                className={MOBILE_TEXT_CLASSES.drawerTitle}
+                style={{ color: 'hsl(var(--text-primary))' }}
+              >
+                defiSATS
+              </span>
             </div>
             <Button
               variant="ghost"
@@ -112,14 +123,28 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full justify-between p-3 h-auto text-left font-medium text-gray-900 hover:bg-gray-50',
-                          isActive(item.href) && 'bg-blue-50 text-blue-600'
+                          'w-full justify-between p-3 h-auto text-left font-medium transition-colors',
+                          isActive(item.href) && 'bg-primary/10 text-primary'
                         )}
+                        style={{
+                          color: isActive(item.href) ? 'hsl(var(--primary))' : 'hsl(var(--text-primary))',
+                          backgroundColor: isActive(item.href) ? 'hsl(var(--primary) / 0.1)' : 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive(item.href)) {
+                            e.currentTarget.style.backgroundColor = 'hsl(var(--accent))';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive(item.href)) {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }
+                        }}
                         onClick={() => toggleSection(item.name)}
                       >
                         <div className="flex items-center space-x-3">
-                          <Icon className="h-5 w-5" />
-                          <span>{item.name}</span>
+                          <Icon className={MOBILE_TEXT_CLASSES.drawerIcon} />
+                          <span className={MOBILE_TEXT_CLASSES.drawerItem}>{item.name}</span>
                         </div>
                         <ChevronRight 
                           className={cn(
@@ -130,7 +155,10 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
                       </Button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-1 ml-8">
-                      <div className="text-sm text-gray-600 py-2">
+                      <div 
+                        className={cn(MOBILE_TEXT_CLASSES.drawerSubItem, 'py-2')}
+                        style={{ color: 'hsl(var(--text-secondary))' }}
+                      >
                         Submenu para {item.name}
                       </div>
                     </CollapsibleContent>
@@ -140,7 +168,10 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
             </nav>
 
             {/* Separator */}
-            <div className="border-t border-gray-200 mx-4" />
+            <div 
+              className="mx-4"
+              style={{ borderTop: '1px solid hsl(var(--border))' }}
+            />
 
             {/* User Navigation */}
             <nav className="p-4 space-y-1">
@@ -153,14 +184,28 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full justify-between p-3 h-auto text-left font-medium text-gray-900 hover:bg-gray-50',
-                          isActive(item.href) && 'bg-blue-50 text-blue-600'
+                          'w-full justify-between p-3 h-auto text-left font-medium transition-colors',
+                          isActive(item.href) && 'bg-primary/10 text-primary'
                         )}
+                        style={{
+                          color: isActive(item.href) ? 'hsl(var(--primary))' : 'hsl(var(--text-primary))',
+                          backgroundColor: isActive(item.href) ? 'hsl(var(--primary) / 0.1)' : 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive(item.href)) {
+                            e.currentTarget.style.backgroundColor = 'hsl(var(--accent))';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive(item.href)) {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }
+                        }}
                         onClick={() => toggleSection(item.name)}
                       >
                         <div className="flex items-center space-x-3">
-                          <Icon className={cn('h-5 w-5', item.color)} />
-                          <span>{item.name}</span>
+                          <Icon className={cn(MOBILE_TEXT_CLASSES.drawerIcon, item.color)} />
+                          <span className={MOBILE_TEXT_CLASSES.drawerItem}>{item.name}</span>
                         </div>
                         <ChevronRight 
                           className={cn(
@@ -171,7 +216,10 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
                       </Button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-1 ml-8">
-                      <div className="text-sm text-gray-600 py-2">
+                      <div 
+                        className={cn(MOBILE_TEXT_CLASSES.drawerSubItem, 'py-2')}
+                        style={{ color: 'hsl(var(--text-secondary))' }}
+                      >
                         Submenu para {item.name}
                       </div>
                     </CollapsibleContent>
@@ -182,13 +230,26 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
           </div>
 
           {/* Settings Footer */}
-          <div className="border-t border-gray-200 p-4">
+          <div 
+            className="p-4"
+            style={{ borderTop: '1px solid hsl(var(--border))' }}
+          >
             <div className="flex space-x-2">
               {/* Language Button */}
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 h-10 text-sm font-medium text-gray-700 border-gray-300 hover:bg-gray-50"
+                className={cn('flex-1 h-10 transition-colors', MOBILE_TEXT_CLASSES.buttonText)}
+                style={{
+                  color: 'hsl(var(--text-primary))',
+                  borderColor: 'hsl(var(--border))'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'hsl(var(--accent))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
                 onClick={() => setLanguage(language === 'PT-BR' ? 'EN-US' : 'PT-BR')}
               >
                 <Globe className="h-4 w-4 mr-2" />
@@ -199,7 +260,17 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 h-10 text-sm font-medium text-gray-700 border-gray-300 hover:bg-gray-50"
+                className={cn('flex-1 h-10 transition-colors', MOBILE_TEXT_CLASSES.buttonText)}
+                style={{
+                  color: 'hsl(var(--text-primary))',
+                  borderColor: 'hsl(var(--border))'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'hsl(var(--accent))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
                 onClick={() => setCurrency(currency === 'USD' ? 'SATS' : 'USD')}
               >
                 <DollarSign className="h-4 w-4 mr-2" />
@@ -210,11 +281,18 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 h-10 text-sm font-medium text-gray-700 border-gray-300 hover:bg-gray-50"
-                onClick={() => {
-                  setTheme(theme === 'light' ? 'dark' : 'light');
-                  // Aqui você pode integrar com o sistema de tema existente
+                className={cn('flex-1 h-10 transition-colors', MOBILE_TEXT_CLASSES.buttonText)}
+                style={{
+                  color: 'hsl(var(--text-primary))',
+                  borderColor: 'hsl(var(--border))'
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'hsl(var(--accent))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+                onClick={toggleTheme}
               >
                 {theme === 'light' ? (
                   <Sun className="h-4 w-4" />

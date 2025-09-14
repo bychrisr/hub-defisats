@@ -160,8 +160,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           console.log('✅ AUTH STORE - Profile received:', user);
 
           // Verificar se é admin baseado no email
-          const isAdmin = user.email === 'admin@hub-defisats.com';
-          console.log('🔍 AUTH STORE - Is admin:', isAdmin);
+          const adminEmails = ['admin@dev.com', 'superadmin@test.com', 'superadmin2@test.com'];
+          const isAdmin = adminEmails.includes(user.email);
+          console.log('🔍 AUTH STORE - Is admin:', isAdmin, 'for email:', user.email);
 
           set({
             user: {

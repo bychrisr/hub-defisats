@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useTheme } from '@/contexts/ThemeContext';
 import { 
   LayoutDashboard, 
   Monitor, 
@@ -10,13 +11,19 @@ import {
   Gift, 
   AlertTriangle, 
   Settings,
+  Menu as MenuIcon,
   LogOut,
   Menu,
-  X
+  X,
+  Sun,
+  Moon,
+  Palette
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Menus', href: '/admin/menus', icon: MenuIcon },
+  { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Coupons', href: '/admin/coupons', icon: Gift },
@@ -28,6 +35,29 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+
+  // Configurar título e favicon estáticos para o admin
+  useEffect(() => {
+    // Definir título estático para admin
+    document.title = 'Admin Panel - defiSATS';
+    
+    // Definir favicon estático para admin
+    const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+    if (favicon) {
+      favicon.href = '/favicon-admin.svg';
+    } else {
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = '/favicon-admin.svg';
+      document.head.appendChild(link);
+    }
+
+    // Cleanup function para restaurar quando sair do admin
+    return () => {
+      // Não restaurar automaticamente, deixar para o sistema principal gerenciar
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -35,13 +65,27 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div 
+      className="min-h-screen"
+      style={{ backgroundColor: 'hsl(var(--bg-primary))' }}
+    >
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50" 
+          onClick={() => setSidebarOpen(false)} 
+        />
+        <div 
+          className="fixed inset-y-0 left-0 flex w-64 flex-col"
+          style={{ backgroundColor: 'hsl(var(--bg-card))' }}
+        >
           <div className="flex h-16 items-center justify-between px-4">
-            <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+            <h1 
+              className="text-xl font-bold"
+              style={{ color: 'hsl(var(--text-primary))' }}
+            >
+              Admin Panel
+            </h1>
             <Button
               variant="ghost"
               size="sm"
@@ -69,24 +113,52 @@ export default function AdminLayout() {
               );
             })}
           </nav>
-          <div className="border-t p-4">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-600 hover:text-red-700"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              Logout
-            </Button>
+          <div 
+            className="p-4"
+            style={{ borderTop: '1px solid hsl(var(--border))' }}
+          >
+            <div className="space-y-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={toggleTheme}
+              >
+                {theme === 'light' ? (
+                  <Moon className="mr-3 h-5 w-5" />
+                ) : (
+                  <Sun className="mr-3 h-5 w-5" />
+                )}
+                {theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-600 hover:text-red-700"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
+        <div 
+          className="flex flex-col flex-grow"
+          style={{ 
+            backgroundColor: 'hsl(var(--bg-card))',
+            borderRight: '1px solid hsl(var(--border))'
+          }}
+        >
           <div className="flex h-16 items-center px-4">
-            <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+            <h1 
+              className="text-xl font-bold"
+              style={{ color: 'hsl(var(--text-primary))' }}
+            >
+              Admin Panel
+            </h1>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
@@ -104,15 +176,32 @@ export default function AdminLayout() {
               );
             })}
           </nav>
-          <div className="border-t p-4">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-600 hover:text-red-700"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              Logout
-            </Button>
+          <div 
+            className="p-4"
+            style={{ borderTop: '1px solid hsl(var(--border))' }}
+          >
+            <div className="space-y-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={toggleTheme}
+              >
+                {theme === 'light' ? (
+                  <Moon className="mr-3 h-5 w-5" />
+                ) : (
+                  <Sun className="mr-3 h-5 w-5" />
+                )}
+                {theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-600 hover:text-red-700"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -120,7 +209,13 @@ export default function AdminLayout() {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div 
+          className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8"
+          style={{ 
+            borderBottom: '1px solid hsl(var(--border))',
+            backgroundColor: 'hsl(var(--bg-card))'
+          }}
+        >
           <Button
             variant="ghost"
             size="sm"
@@ -133,10 +228,29 @@ export default function AdminLayout() {
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1" />
             <div className="flex items-center gap-x-4 lg:gap-x-6">
+              {/* Theme toggle */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={toggleTheme}
+                title={theme === 'light' ? 'Alternar para modo escuro' : 'Alternar para modo claro'}
+              >
+                {theme === 'light' ? (
+                  <Moon className="h-5 w-5" />
+                ) : (
+                  <Sun className="h-5 w-5" />
+                )}
+              </Button>
+              
               {/* Status indicator */}
               <div className="flex items-center space-x-2">
                 <div className="h-2 w-2 bg-green-500 rounded-full" />
-                <span className="text-sm text-gray-500">System Online</span>
+                <span 
+                  className="text-sm"
+                  style={{ color: 'hsl(var(--text-secondary))' }}
+                >
+                  System Online
+                </span>
               </div>
               
               {/* Admin badge */}

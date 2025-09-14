@@ -6,15 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RefreshCw, Search, Filter, MoreHorizontal, UserCheck, UserX, Eye } from 'lucide-react';
+import { RefreshCw, Search, Filter, MoreHorizontal, UserCheck, UserX, Eye, Crown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { apiGet } from '@/lib/fetch';
+import UserUpgradeModal from '@/components/admin/UserUpgradeModal';
 
 interface User {
   id: string;
   email: string;
   username: string;
-  plan_type: 'free' | 'basic' | 'advanced' | 'pro';
+  plan_type: 'free' | 'basic' | 'advanced' | 'pro' | 'lifetime';
   is_active: boolean;
   created_at: string;
   last_activity_at: string | null;
@@ -44,6 +45,13 @@ export default function Users() {
     search: '',
     plan_type: 'all',
     is_active: 'all'
+  });
+  const [upgradeModal, setUpgradeModal] = useState<{
+    isOpen: boolean;
+    user: User | null;
+  }>({
+    isOpen: false,
+    user: null
   });
 
   const fetchUsers = async (page = 1) => {
@@ -107,6 +115,25 @@ export default function Users() {
     } catch (error) {
       console.error('❌ USERS COMPONENT - Error toggling user status:', error);
     }
+  };
+
+  const handleOpenUpgradeModal = (user: User) => {
+    setUpgradeModal({
+      isOpen: true,
+      user
+    });
+  };
+
+  const handleCloseUpgradeModal = () => {
+    setUpgradeModal({
+      isOpen: false,
+      user: null
+    });
+  };
+
+  const handleUpgradeSuccess = async () => {
+    console.log('✅ USERS COMPONENT - Upgrade successful, refreshing users list');
+    await fetchUsers(pagination.page);
   };
 
   const getPlanBadgeVariant = (plan: string) => {
@@ -276,6 +303,12 @@ export default function Users() {
                           View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          onClick={() => handleOpenUpgradeModal(user)}
+                        >
+                          <Crown className="h-4 w-4 mr-2" />
+                          Mudar Plano
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => handleToggleUserStatus(user.id, user.is_active)}
                         >
                           {user.is_active ? (
@@ -327,6 +360,14 @@ export default function Users() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Upgrade */}
+      <UserUpgradeModal
+        user={upgradeModal.user}
+        isOpen={upgradeModal.isOpen}
+        onClose={handleCloseUpgradeModal}
+        onSuccess={handleUpgradeSuccess}
+      />
     </div>
   );
 }

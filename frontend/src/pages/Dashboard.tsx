@@ -18,6 +18,7 @@ import {
   BarChart3,
   DollarSign,
 } from 'lucide-react';
+import { PositionsSummary } from '@/components/PositionsSummary';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
@@ -144,6 +145,12 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Resumo das Posições */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Resumo das Posições</h2>
+          <PositionsSummary />
         </div>
 
         {/* Quick Actions */}
