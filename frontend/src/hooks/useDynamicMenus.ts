@@ -59,7 +59,7 @@ const iconMap: Record<string, any> = {
 
 // Função para buscar dados dos menus
 const fetchMenus = async (): Promise<MenuData> => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://defisats.site/api'}/menu`);
+  const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://defisats.site'}/api/menu`);
   if (!response.ok) {
     throw new Error('Failed to fetch menus');
   }
