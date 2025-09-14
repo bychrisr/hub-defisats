@@ -57,7 +57,7 @@ export class CouponService {
     const coupon = await this.prisma.coupon.create({
       data: {
         code,
-        plan_type,
+        plan_type: plan_type as PlanType,
         usage_limit: usage_limit ?? null,
         expires_at: expires_at ? new Date(expires_at) : null,
         value_type,

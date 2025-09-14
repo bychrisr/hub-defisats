@@ -205,12 +205,12 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
       try {
         marketIndexData = await lnMarketsService.getMarketIndex();
         console.log('✅ MARKET INDEX - LN Markets index data retrieved:', marketIndexData);
-      } catch (lnMarketsError) {
-        console.log('⚠️ MARKET INDEX - LN Markets API failed, using CoinGecko as fallback:', lnMarketsError.message);
+      } catch (lnMarketsError: any) {
+        console.log('⚠️ MARKET INDEX - LN Markets API failed, using CoinGecko as fallback:', lnMarketsError?.message || lnMarketsError);
         
         // Fallback to CoinGecko for real BTC price
         const coingeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
-        const coingeckoData = await coingeckoResponse.json();
+        const coingeckoData = await coingeckoResponse.json() as any;
         
         if (coingeckoData && coingeckoData.bitcoin && coingeckoData.bitcoin.usd) {
           marketIndexData = {

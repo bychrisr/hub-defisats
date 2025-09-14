@@ -6,9 +6,9 @@ export class ProfileController {
   private prisma: PrismaClient;
   private authService: AuthService;
 
-  constructor(prisma?: PrismaClient) {
+  constructor(prisma?: PrismaClient, authService?: AuthService) {
     this.prisma = prisma || new PrismaClient();
-    this.authService = new AuthService();
+    this.authService = authService || new AuthService(this.prisma, null as any);
   }
 
   async getProfile(request: FastifyRequest, reply: FastifyReply) {

@@ -22,11 +22,15 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "worker:margin-monitor": "tsx src/workers/margin-monitor.ts",
+    "worker:margin-monitor:prod": "node -r tsconfig-paths/register dist/workers/margin-monitor.js",
     "kill-zombies": "pkill -f 'node.*fastify' || true && pkill -f 'npm.*dev' || true && pkill -f 'tsx.*index' || true && pkill -f 'postgres' || true && pkill -f 'redis-server' || true",
     "reset-db": "npm run kill-zombies && docker-compose down && docker-compose up -d && npx prisma migrate reset --force && npx prisma db push",
     "worker:automation-executor": "tsx src/workers/automation-executor.ts",
+    "worker:automation-executor:prod": "node -r tsconfig-paths/register dist/workers/automation-executor.js",
     "worker:notification": "tsx src/workers/notification.ts",
+    "worker:notification:prod": "node -r tsconfig-paths/register dist/workers/notification.js",
     "worker:payment-validator": "tsx src/workers/payment-validator.ts",
+    "worker:payment-validator:prod": "node -r tsconfig-paths/register dist/workers/payment-validator.js",
     "worker:all": "concurrently \"npm run worker:*\""
   },
   "keywords": [

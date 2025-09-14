@@ -483,7 +483,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         data: { 
           is_active: !user.is_active,
           // Invalidate all sessions when deactivating user
-          session_expires_at: !user.is_active ? null : undefined
+          ...(user.is_active && { session_expires_at: null })
         },
         select: {
           id: true,

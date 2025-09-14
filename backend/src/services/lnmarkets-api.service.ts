@@ -354,8 +354,8 @@ export class LNMarketsAPIService {
     console.log('🔍 LN MARKETS USER BALANCE - Starting getUserBalance');
     console.log('🔍 LN MARKETS USER BALANCE - Config:', {
       baseURL: this.client.defaults.baseURL,
-      apiKey: this.apiKey ? `${this.apiKey.substring(0, 8)}...` : 'MISSING',
-      passphrase: this.passphrase ? `${this.passphrase.substring(0, 4)}...` : 'MISSING'
+      apiKey: this.credentials.apiKey ? `${this.credentials.apiKey.substring(0, 8)}...` : 'MISSING',
+      passphrase: this.credentials.passphrase ? `${this.credentials.passphrase.substring(0, 4)}...` : 'MISSING'
     });
     
     try {
