@@ -325,10 +325,10 @@ export default function Users() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="hover:bg-gray-100 cursor-pointer transition-colors"
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
