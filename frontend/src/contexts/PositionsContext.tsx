@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuthStore } from '@/stores/auth';
-import { useUserPositions } from './RealtimeDataContext';
+import { useUserPositions, useRealtimeData } from './RealtimeDataContext';
 import { api } from '@/lib/api';
 import { useLNMarketsIndex } from '@/hooks/useLNMarketsIndex';
 
@@ -72,6 +72,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   const { isAuthenticated, user } = useAuthStore();
   const userPositions = useUserPositions();
   const { refetch: refetchIndex } = useLNMarketsIndex();
+  const { updatePositions } = useRealtimeData();
   
   console.log('📊 POSITIONS - Provider render:', { userPositions, length: userPositions?.length });
   
@@ -308,7 +309,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
 
         console.log('🔄 POSITIONS CONTEXT - Updating with real positions:', transformedPositions.length);
         
-        // Atualizar estado com posições reais (removido setPositions que não existe)
+        // Atualizar o RealtimeDataContext com as posições reais
+        updatePositions(transformedPositions);
         
         // Calcular totais
         const totalPL = transformedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
