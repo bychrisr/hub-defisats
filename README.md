@@ -2,8 +2,8 @@
 
 ## 🎯 Status Atual
 
-**Versão**: v1.2.3  
-**Status**: Plataforma Completa de Trading com Sistema de Administração Avançado  
+**Versão**: v0.4.0  
+**Status**: Plataforma Completa com Dashboard Financeiro Avançado  
 **Última Atualização**: 2025-09-14
 
 ## ✅ Funcionalidades Implementadas
@@ -21,6 +21,14 @@
 - ✅ **Filtros por período** (1h, 24h, 7d, 30d)
 - ✅ **Atualização automática** de dados
 - ✅ **Interface responsiva** e moderna
+
+### 💰 Dashboard Financeiro (v0.4.0)
+- ✅ **Saldo Estimado** - Cálculo em tempo real (wallet + margem + PnL - taxas)
+- ✅ **Total Investido** - Margem inicial de TODAS as posições (abertas + fechadas)
+- ✅ **Análise Histórica** - 51 trades únicos analisados automaticamente
+- ✅ **Deduplicação Inteligente** - Sistema robusto contra contagem dupla
+- ✅ **Atualização Automática** - Dados atualizados a cada 30 segundos
+- ✅ **Validação Matemática** - Cálculos precisos validados: 116.489 sats
 
 ### 🔄 Sistema de Dados em Tempo Real (v0.2.1)
 - ✅ **WebSocket Integration** para dados de mercado ao vivo

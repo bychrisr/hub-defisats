@@ -5,6 +5,38 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [v0.4.0] - 2025-09-14
+
+### Adicionado
+- **Saldo Estimado**: Cálculo em tempo real (wallet + margem + PnL - taxas)
+- **Total Investido**: Margem inicial de TODAS as posições (abertas + fechadas)
+- **Endpoint /api/lnmarkets/user/estimated-balance**: API completa para cálculos financeiros
+- **Deduplicação de Trades**: Sistema robusto para evitar contagem dupla
+- **Hooks Dashboard**: useEstimatedBalance, useDashboardMetrics, useFormatSats
+- **Cards Dashboard**: Exibição em tempo real dos dados financeiros
+- **Análise Histórica**: 51 trades únicos analisados (11 abertas + 40 fechadas)
+- **Sistema de Formatação SATS**: Formatação consistente com ícones
+
+### Melhorado
+- **Integração LN Markets**: Endpoint correto `/futures` para trades históricos
+- **Cálculos Financeiros**: Validação matemática completa dos valores
+- **Performance Dashboard**: Atualização automática a cada 30 segundos
+- **Error Handling**: Tratamento robusto de erros da API LN Markets
+- **Autenticação**: Melhorias no fluxo de login e sessão
+- **UX/UI**: Estados de loading e feedback visual aprimorados
+
+### Corrigido
+- **Duplicação de Trades**: Implementada deduplicação por ID único
+- **Endpoint API**: Corrigido de `/futures/trades` para `/futures`
+- **Schema Validation**: Adicionado suporte ao parâmetro `type`
+- **Cálculo Matemático**: Validação 116.489 sats = 33.440 (abertas) + 83.049 (fechadas)
+
+### Dados Validados
+- **Saldo Estimado**: 25.337 sats (fórmula validada)
+- **Total Investido**: 116.489 sats (51 trades únicos)
+- **Wallet Balance**: 220 sats (LN Markets API)
+- **Posições Ativas**: 11 posições com 33.440 sats de margem
+
 ## [v0.3.0] - 2025-01-13
 
 ### Adicionado
