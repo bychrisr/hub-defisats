@@ -335,21 +335,21 @@ export default function Users() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem 
-                          className="cursor-pointer hover:bg-gray-50"
+                          className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
                           onClick={() => {/* TODO: Implement view details */}}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Ver Detalhes
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer hover:bg-gray-50"
+                          className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
                           onClick={() => handleOpenUpgradeModal(user)}
                         >
                           <Crown className="h-4 w-4 mr-2" />
                           Mudar Plano
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer hover:bg-gray-50"
+                          className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
                           onClick={() => handleToggleUserStatus(user.id, user.is_active)}
                         >
                           {user.is_active ? (
@@ -365,7 +365,7 @@ export default function Users() {
                           )}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer hover:bg-red-50 text-red-600 focus:text-red-600 focus:bg-red-50"
+                          className="cursor-pointer hover:bg-red-50 focus:bg-red-50 text-red-600 focus:text-red-600"
                           onClick={() => handleDeleteUser(user.id, user.email)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
