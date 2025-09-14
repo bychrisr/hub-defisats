@@ -8,7 +8,7 @@ import {
   Percent,
   Activity
 } from 'lucide-react';
-import { useLNMarketsIndex } from '@/hooks/useLNMarketsIndex';
+import { usePositions } from '@/contexts/PositionsContext';
 
 interface LNMarketsData {
   index: number;
@@ -21,7 +21,9 @@ interface LNMarketsData {
 }
 
 const LNMarketsHeader: React.FC = () => {
-  const { data: lnMarketsData, error: lnMarketsError, refetch: refetchIndex } = useLNMarketsIndex();
+  const { data } = usePositions();
+  const lnMarketsData = data.marketIndex;
+  const lnMarketsError = data.marketIndexError;
   
   const [marketData, setMarketData] = useState<LNMarketsData>({
     index: 115820.50,

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useAuthStore } from '@/stores/auth';
 import { useUserPositions, useRealtimeData } from './RealtimeDataContext';
 import { api } from '@/lib/api';
-import { useLNMarketsIndex } from '@/hooks/useLNMarketsIndex';
 
 // Tipos para as posições (baseado na página Positions.tsx)
 export interface LNPosition {
@@ -41,6 +40,17 @@ export interface RealtimePosition {
   timestamp: number;
 }
 
+// Interface para dados do índice de mercado
+export interface MarketIndexData {
+  index: number;
+  index24hChange: number;
+  tradingFees: number;
+  nextFunding: string;
+  rate: number;
+  rateChange: number;
+  timestamp: number;
+}
+
 export interface PositionsData {
   positions: LNPosition[];
   totalPL: number;
@@ -50,6 +60,9 @@ export interface PositionsData {
   lastUpdate: number;
   isLoading: boolean;
   error: string | null;
+  // Dados do índice de mercado integrados
+  marketIndex: MarketIndexData | null;
+  marketIndexError: string | null;
 }
 
 interface PositionsContextType {
@@ -71,7 +84,6 @@ interface PositionsProviderProps {
 export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   const { isAuthenticated, user } = useAuthStore();
   const userPositions = useUserPositions();
-  const { refetch: refetchIndex } = useLNMarketsIndex();
   const { updatePositions } = useRealtimeData();
   
   console.log('📊 POSITIONS - Provider render:', { userPositions, length: userPositions?.length });
@@ -85,6 +97,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     lastUpdate: 0,
     isLoading: false,
     error: null,
+    marketIndex: null,
+    marketIndexError: null,
   });
 
   // Função para converter posição em tempo real para LNPosition
@@ -270,20 +284,22 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   // Função para buscar posições reais da LN Markets
   const fetchRealPositions = async () => {
     try {
-      console.log('🔍 POSITIONS CONTEXT - Fetching real positions from LN Markets...');
+      console.log('🔍 POSITIONS CONTEXT - Fetching real positions and market index from LN Markets...');
       
       // Atualizar posições e índice simultaneamente
-      const [positionsResponse] = await Promise.all([
+      const [positionsResponse, indexResponse] = await Promise.all([
         api.get('/api/lnmarkets/user/positions'),
-        refetchIndex() // Atualizar índice junto com as posições
+        api.get('/api/market/index')
       ]);
       
-      const data = positionsResponse.data;
-      console.log('✅ POSITIONS CONTEXT - Received real positions:', data);
+      const positionsData = positionsResponse.data;
+      const indexData = indexResponse.data;
+      console.log('✅ POSITIONS CONTEXT - Received real positions:', positionsData);
+      console.log('✅ POSITIONS CONTEXT - Received market index:', indexData);
 
-      if (data.success && data.data && Array.isArray(data.data)) {
+      if (positionsData.success && positionsData.data && Array.isArray(positionsData.data)) {
         // Transformar dados da LN Markets para o formato do contexto
-        const transformedPositions: LNPosition[] = data.data.map((pos: any) => ({
+        const transformedPositions: LNPosition[] = positionsData.data.map((pos: any) => ({
           id: pos.id,
           quantity: pos.quantity || 0,
           price: pos.price || 0,
@@ -318,6 +334,24 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         const totalQuantity = transformedPositions.reduce((sum, pos) => sum + pos.quantity, 0);
         const totalValue = totalMargin; // Total value = total margin
 
+        // Processar dados do índice de mercado
+        let marketIndex: MarketIndexData | null = null;
+        let marketIndexError: string | null = null;
+
+        if (indexData.success && indexData.data) {
+          marketIndex = {
+            index: indexData.data.index,
+            index24hChange: indexData.data.index24hChange,
+            tradingFees: indexData.data.tradingFees,
+            nextFunding: indexData.data.nextFunding,
+            rate: indexData.data.rate,
+            rateChange: indexData.data.rateChange,
+            timestamp: indexData.data.timestamp
+          };
+        } else {
+          marketIndexError = indexData.message || 'Failed to fetch market index';
+        }
+
         setData({
           positions: transformedPositions,
           totalPL,
@@ -326,7 +360,9 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           totalValue,
           lastUpdate: Date.now(),
           isLoading: false,
-          error: null
+          error: null,
+          marketIndex,
+          marketIndexError
         });
 
         console.log('✅ POSITIONS CONTEXT - Real positions updated:', {
@@ -337,7 +373,25 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         });
       } else {
         console.log('📝 POSITIONS CONTEXT - No positions data, using empty array');
-        // setPositions([]); // Removido - não existe
+        
+        // Processar dados do índice de mercado mesmo sem posições
+        let marketIndex: MarketIndexData | null = null;
+        let marketIndexError: string | null = null;
+
+        if (indexData.success && indexData.data) {
+          marketIndex = {
+            index: indexData.data.index,
+            index24hChange: indexData.data.index24hChange,
+            tradingFees: indexData.data.tradingFees,
+            nextFunding: indexData.data.nextFunding,
+            rate: indexData.data.rate,
+            rateChange: indexData.data.rateChange,
+            timestamp: indexData.data.timestamp
+          };
+        } else {
+          marketIndexError = indexData.message || 'Failed to fetch market index';
+        }
+
         setData({
           positions: [],
           totalPL: 0,
@@ -346,7 +400,9 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           totalValue: 0,
           lastUpdate: Date.now(),
           isLoading: false,
-          error: null
+          error: null,
+          marketIndex,
+          marketIndexError
         });
       }
     } catch (error) {
@@ -354,7 +410,9 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       setData(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to fetch positions',
-        isLoading: false
+        isLoading: false,
+        marketIndex: null,
+        marketIndexError: 'Failed to fetch market data'
       }));
     }
   };
