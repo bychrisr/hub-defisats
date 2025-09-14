@@ -71,8 +71,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-frontend
-    environment:
-      VITE_API_URL: http://localhost:13010
     ports:
       - "13000:3001"
     volumes:
