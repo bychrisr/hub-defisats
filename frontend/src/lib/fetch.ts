@@ -1,35 +1,34 @@
+import { api } from './api';
+
 /**
  * Utility function for making API requests with proper URL handling
+ * Using Axios to ensure proxy compatibility
  */
 
-const getApiUrl = () => {
-  return import.meta.env.VITE_API_URL || 'http://localhost:13010';
-};
-
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-  const apiUrl = getApiUrl();
-  const url = endpoint.startsWith('/') ? `${apiUrl}${endpoint}` : `${apiUrl}/${endpoint}`;
+  const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-  };
-
-  const config: RequestInit = {
-    ...options,
+  // Convert RequestInit to Axios config
+  const axiosConfig = {
+    method: options.method || 'GET',
+    url,
+    data: options.body,
     headers: {
-      ...defaultHeaders,
+      // Merge default headers with custom headers
       ...options.headers,
     },
   };
 
-  const response = await fetch(url, config);
+  const response = await api(axiosConfig);
   
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  
-  return response;
+  // Return a Response-like object for compatibility
+  return {
+    ok: response.status >= 200 && response.status < 300,
+    status: response.status,
+    statusText: response.statusText,
+    json: async () => response.data,
+    text: async () => JSON.stringify(response.data),
+  };
 };
 
 export const apiGet = (endpoint: string, options: RequestInit = {}) => 
@@ -46,7 +45,7 @@ export const apiPut = (endpoint: string, data?: any, options: RequestInit = {}) 
   apiFetch(endpoint, {
     ...options,
     method: 'PUT',
-    body: data ? JSON.stringify(data) : undefined,
+    body: data,
   });
 
 export const apiDelete = (endpoint: string, options: RequestInit = {}) => 
