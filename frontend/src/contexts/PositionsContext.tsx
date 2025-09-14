@@ -304,9 +304,26 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         }));
 
         console.log('🔄 POSITIONS CONTEXT - Updating with real positions:', transformedPositions.length);
+        console.log('🔄 POSITIONS CONTEXT - Sample transformed position:', transformedPositions[0]);
+        
+        // Transformar para o formato esperado pelo RealtimeDataContext
+        const realtimePositions = transformedPositions.map(pos => ({
+          id: pos.id,
+          symbol: pos.symbol,
+          side: pos.side,
+          quantity: pos.quantity,
+          price: pos.price,
+          margin: pos.margin,
+          leverage: pos.leverage,
+          pnl: pos.pnl,
+          pnlPercent: pos.pnlPercentage,
+          timestamp: Date.now()
+        }));
+        
+        console.log('🔄 POSITIONS CONTEXT - Transformed for RealtimeDataContext:', realtimePositions.length);
         
         // Atualizar o RealtimeDataContext com as posições reais
-        updatePositions(transformedPositions);
+        updatePositions(realtimePositions);
         
         // Calcular totais
         const totalPL = transformedPositions.reduce((sum, pos) => sum + pos.pnl, 0);

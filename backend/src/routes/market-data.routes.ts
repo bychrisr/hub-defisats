@@ -260,7 +260,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           index24hChange: marketIndexData.change24h || marketIndexData.changePercent24h || 0,
           tradingFees: 0.1, // LN Markets standard fee
           nextFunding: nextFunding,
-          rate: 0.00002, // 0.0020% in decimal
+          rate: 0.00001, // 0.001% in decimal
           rateChange: 0.00001,
           timestamp: Date.now()
         }

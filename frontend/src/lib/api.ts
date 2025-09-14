@@ -78,11 +78,11 @@ api.interceptors.response.use(
             }
           );
 
-          const { access_token } = response.data;
-          localStorage.setItem('access_token', access_token);
+          const { token } = response.data;
+          localStorage.setItem('access_token', token);
 
           // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         }
       } catch (refreshError) {

@@ -58,12 +58,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
         try {
           const response = await authAPI.login({ email, password });
-          const { user_id, token, plan_type } = response.data;
+          const { user_id, token, refresh_token, plan_type } = response.data;
 
-          // Store token
+          // Store tokens
           console.log('💾 Storing token in localStorage:', token.substring(0, 20) + '...');
           localStorage.setItem('access_token', token);
-          console.log('✅ Token stored successfully');
+          if (refresh_token) {
+            console.log('💾 Storing refresh token in localStorage:', refresh_token.substring(0, 20) + '...');
+            localStorage.setItem('refresh_token', refresh_token);
+          }
+          console.log('✅ Tokens stored successfully');
 
           // Call getProfile to get full user data and set isInitialized
           console.log('🔄 LOGIN - Calling getProfile after login...');

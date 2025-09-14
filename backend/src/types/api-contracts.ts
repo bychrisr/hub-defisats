@@ -94,6 +94,7 @@ export const RefreshTokenRequestSchema = z.object({
 export const AuthResponseSchema = z.object({
   user_id: z.string().uuid(),
   token: z.string(),
+  refresh_token: z.string().optional(),
   plan_type: z.nativeEnum(PlanType),
 });
 

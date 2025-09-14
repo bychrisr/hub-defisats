@@ -37,6 +37,7 @@ interface UserBalance {
 interface RealtimeData {
   marketData: Record<string, MarketData>;
   positions: PositionData[];
+  userPositions: PositionData[];
   userBalance: UserBalance | null;
   lastUpdate: number;
   isConnected: boolean;
@@ -60,6 +61,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [data, setData] = useState<RealtimeData>({
     marketData: {},
     positions: [],
+    userPositions: [],
     userBalance: null,
     lastUpdate: 0,
     isConnected: false,
@@ -444,6 +446,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       return {
         ...prev,
         positions: transformedPositions,
+        userPositions: transformedPositions,
         lastUpdate: Date.now()
       };
     });
@@ -511,6 +514,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       return {
         ...prev,
         positions: transformedPositions,
+        userPositions: transformedPositions,
         lastUpdate: Date.now()
       };
     });

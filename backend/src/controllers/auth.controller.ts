@@ -238,8 +238,9 @@ export class AuthController {
    */
   async refreshToken(request: FastifyRequest, reply: FastifyReply) {
     try {
-      // Get refresh token from cookie
-      const refreshToken = (request as any).cookies?.refresh_token;
+      // Get refresh token from body or cookie
+      const body = request.body as any;
+      const refreshToken = body?.refresh_token || (request as any).cookies?.refresh_token;
 
       if (!refreshToken) {
         const errorResponse = ErrorResponseZodSchema.parse({
