@@ -7,7 +7,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
 
   // WebSocket route for real-time data (without authentication for testing)
-  fastify.get('/ws/realtime', { websocket: true }, async (connection, req) => {
+  fastify.get('/ws/realtime', { websocket: true }, async (connection: any, req) => {
     const userId = (req.query as any).userId as string;
     
     console.log('🔌 WEBSOCKET ROUTE - Nova conexão recebida:', {

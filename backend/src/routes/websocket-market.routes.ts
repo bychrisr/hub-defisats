@@ -6,7 +6,7 @@ export async function websocketMarketRoutes(fastify: FastifyInstance) {
 
   // WebSocket para dados de mercado em tempo real
   fastify.register(async function (fastify) {
-    fastify.get('/ws/market', { websocket: true }, (connection, _req) => {
+    fastify.get('/ws/market', { websocket: true }, (connection: any, _req) => {
       console.log('🔌 WEBSOCKET MARKET - New connection established');
 
       // Conectar ao WebSocket da LN Markets
