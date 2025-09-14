@@ -480,7 +480,11 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
       const updatedUser = await prisma.user.update({
         where: { id },
-        data: { is_active: !user.is_active },
+        data: { 
+          is_active: !user.is_active,
+          // Invalidate all sessions when deactivating user
+          session_expires_at: !user.is_active ? null : undefined
+        },
         select: {
           id: true,
           email: true,
