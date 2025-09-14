@@ -169,7 +169,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // WebSocket para dados em tempo real
   const { isConnected, isConnecting, error, connect, disconnect, sendMessage } = useWebSocket({
-    url: `ws://localhost:13010/test/ws/realtime?userId=${user?.id || 'anonymous'}`,
+    url: `${import.meta.env.VITE_WS_URL || 'wss://defisats.site/ws'}/test/ws/realtime?userId=${user?.id || 'anonymous'}`,
     onMessage: useCallback((message) => {
       console.log('📊 REALTIME - Mensagem recebida:', {
         type: message.type,
@@ -347,7 +347,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     if (isAuthenticated && user?.id) {
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
-      console.log('🔗 REALTIME - URL do WebSocket:', `ws://localhost:13010/test/ws/realtime?userId=${user.id}`);
+      console.log('🔗 REALTIME - URL do WebSocket:', `${import.meta.env.VITE_WS_URL || 'wss://defisats.site/ws'}/test/ws/realtime?userId=${user.id}`);
       connect();
     } else {
       console.log('🔄 REALTIME - Desconectando - usuário não autenticado');

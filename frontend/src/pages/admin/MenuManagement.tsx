@@ -95,13 +95,13 @@ export default function MenuManagement() {
       }
 
       const [itemsResponse, typesResponse] = await Promise.all([
-        fetch('http://localhost:13010/api/admin/menu/items', {
+        fetch(`${import.meta.env.VITE_API_URL || 'https://defisats.site/api'}/admin/menu/items`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }),
-        fetch('http://localhost:13010/api/admin/menu/types', {
+        fetch(`${import.meta.env.VITE_API_URL || 'https://defisats.site/api'}/admin/menu/types`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

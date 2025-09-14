@@ -61,7 +61,7 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
 
   // WebSocket para dados em tempo real
   const { connect, disconnect, sendMessage } = useWebSocket({
-    url: `ws://localhost:13010/ws/market?symbol=${symbol}`,
+    url: `${import.meta.env.VITE_WS_URL || 'wss://defisats.site/ws'}/ws/market?symbol=${symbol}`,
     onMessage: (message) => {
       const newCandle = marketDataService.processWebSocketMessage(message);
       if (newCandle && seriesRef.current) {
