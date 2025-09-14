@@ -333,23 +333,23 @@ export default function Users() {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuContent align="end" className="w-48 bg-background border border-border shadow-lg">
                         <DropdownMenuItem 
-                          className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                          className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                           onClick={() => {/* TODO: Implement view details */}}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Ver Detalhes
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                          className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                           onClick={() => handleOpenUpgradeModal(user)}
                         >
                           <Crown className="h-4 w-4 mr-2" />
                           Mudar Plano
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                          className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                           onClick={() => handleToggleUserStatus(user.id, user.is_active)}
                         >
                           {user.is_active ? (
@@ -365,7 +365,7 @@ export default function Users() {
                           )}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer hover:bg-red-50 focus:bg-red-50 text-red-600 focus:text-red-600"
+                          className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground text-destructive"
                           onClick={() => handleDeleteUser(user.id, user.email)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
