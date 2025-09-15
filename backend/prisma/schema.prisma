@@ -45,6 +45,7 @@ model User {
   user_coupons               UserCoupon[]     @relation("UserCouponRelation")
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
+  simulations                Simulation[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -296,4 +297,76 @@ model UserUpgradeHistory {
   @@index([upgraded_by])
   @@index([created_at])
   @@index([new_plan])
+}
+
+// Sistema de Simulação
+model Simulation {
+  id                String          @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id           String
+  name              String
+  automation_type   SimulationType
+  price_scenario    PriceScenario
+  initial_price     Float
+  duration          Int             // em segundos
+  status            SimulationStatus @default(created)
+  account_id        String?         // ID da conta de teste
+  environment       String          @default("testnet")
+  created_at        DateTime        @default(now()) @db.Timestamp(6)
+  updated_at        DateTime        @default(now()) @db.Timestamp(6)
+  started_at        DateTime?       @db.Timestamp(6)
+  completed_at      DateTime?       @db.Timestamp(6)
+
+  // Relations
+  user              User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  results           SimulationResult[]
+
+  @@index([user_id])
+  @@index([status])
+  @@index([automation_type])
+  @@index([created_at])
+}
+
+model SimulationResult {
+  id                String          @id @default(dbgenerated("(gen_random_uuid())::text"))
+  simulation_id     String
+  timestamp         DateTime        @db.Timestamp(6)
+  price             Float
+  action_type       String?
+  action_details    Json?
+  account_balance   Float?
+  position_size     Float?
+  pnl               Float?
+  margin_level      Float?
+  success_rate      Float?
+  total_actions     Int             @default(0)
+  executed_at       DateTime        @db.Timestamp(6)
+
+  // Relations
+  simulation        Simulation      @relation(fields: [simulation_id], references: [id], onDelete: Cascade)
+
+  @@index([simulation_id])
+  @@index([timestamp])
+}
+
+// Enums para Simulação
+enum SimulationType {
+  margin_guard
+  take_profit
+  trailing_stop
+  auto_entry
+}
+
+enum PriceScenario {
+  bull
+  bear
+  sideways
+  volatile
+}
+
+enum SimulationStatus {
+  created
+  running
+  completed
+  failed
+  cancelled
 }

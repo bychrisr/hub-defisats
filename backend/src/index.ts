@@ -25,6 +25,7 @@ import { adminUpgradeRoutes } from '@/routes/admin-upgrade.routes';
 import { websocketRoutes } from '@/routes/websocket.routes';
 import { websocketTestRoutes } from '@/routes/websocket-test.routes';
 import { websocketMarketRoutes } from '@/routes/websocket-market.routes';
+import { simulationRoutes } from '@/routes/simulation.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/services/metrics.service';
@@ -378,6 +379,10 @@ async function registerRoutes() {
   // WebSocket market routes (without authentication)
   await fastify.register(websocketMarketRoutes, { prefix: '/api' });
   console.log('✅ WebSocket market routes registered');
+
+  // Simulation routes
+  await fastify.register(simulationRoutes, { prefix: '/api' });
+  console.log('✅ Simulation routes registered');
 
   // Validation routes (with /api prefix but without authentication)
   await fastify.register(validationRoutes, { prefix: '/api' });

@@ -2,11 +2,62 @@
 
 ## 🎯 Status Atual
 
-**Versão**: v0.4.0  
-**Status**: Plataforma Completa com Dashboard Financeiro Avançado  
-**Última Atualização**: 2025-09-14
+**Versão**: v1.3.0
+**Status**: Plataforma Completa com Margin Guard e Simulações em Tempo Real
+**Última Atualização**: 2025-09-15
+
+## 🏆 **Novidades - v1.3.0**
+
+### 🎮 **Sistema de Simulações em Tempo Real** ⭐ **NOVO**
+- ✅ **Cenários Realistas**: Bull, Bear, Sideways, Volatile Markets
+- ✅ **Automações Completas**: Margin Guard, Take Profit, Trailing Stop, Auto Entry
+- ✅ **Interface Visual**: Gráficos interativos com Recharts
+- ✅ **Análise Detalhada**: Métricas de performance e histórico completo
+- ✅ **API REST Completa**: Criar, executar, monitorar simulações
+- ✅ **Workers Avançados**: Processamento assíncrono com Redis Queue
+
+### 🛡️ **Margin Guard 100% Funcional** ⭐ **NOVO**
+- ✅ **Proteção Automática**: Fecha posições quando margem crítica
+- ✅ **Ações Configuráveis**: Close, Reduce, Add Margin
+- ✅ **Monitoramento 24/7**: Worker dedicado com alertas
+- ✅ **Notificações**: Email, Telegram, Webhook
+- ✅ **Integração LN Markets**: Credenciais seguras via DB
+
+### 🚀 **Melhorias nos Workers**
+- ✅ **Automation Executor**: Execução real das automações
+- ✅ **Margin Monitor**: Monitoramento contínuo de margem
+- ✅ **Simulation Executor**: Simulações em tempo real
+- ✅ **Notification Worker**: Sistema de alertas integrado
 
 ## ✅ Funcionalidades Implementadas
+
+### 🎮 Sistema de Simulações em Tempo Real (v1.3.0) ⭐ **NOVO**
+- ✅ **Cenários de Mercado**: Bull, Bear, Sideways, Volatile com algoritmos realistas
+- ✅ **Automações Suportadas**: Margin Guard, Take Profit, Trailing Stop, Auto Entry
+- ✅ **Interface Visual Completa**: Gráficos interativos com Recharts (preço, P&L, ações)
+- ✅ **Análise de Performance**: Taxa de sucesso, tempo de resposta, drawdown máximo
+- ✅ **API REST Completa**: CRUD de simulações + endpoints de progresso e métricas
+- ✅ **Workers Avançados**: Simulation Executor com processamento assíncrono
+- ✅ **Tempo Real**: Progresso ao vivo e métricas atualizadas
+- ✅ **Histórico Detalhado**: Logs completos de todas as ações executadas
+
+### 🛡️ Sistema de Margin Guard (v1.3.0) ⭐ **NOVO**
+- ✅ **Proteção Automática**: Monitora margem e executa ações quando crítica
+- ✅ **Ações Configuráveis**: Close Position, Reduce Position, Add Margin
+- ✅ **Monitoramento 24/7**: Worker dedicado com verificação a cada 30 segundos
+- ✅ **Notificações Integradas**: Email, Telegram, Webhook via sistema de notificações
+- ✅ **Configuração por Usuário**: Thresholds personalizados salvos no banco
+- ✅ **Integração LN Markets**: Credenciais seguras e execução real
+- ✅ **Logs de Auditoria**: Histórico completo de todas as ações
+- ✅ **Alertas em Tempo Real**: Notificações para níveis de aviso e crítico
+
+### 🤖 Sistema de Automações Avançado (v1.3.0)
+- ✅ **Automation Executor**: Worker para execução real das automações
+- ✅ **Margin Monitor**: Monitoramento contínuo com alertas inteligentes
+- ✅ **Notification System**: Sistema integrado de notificações
+- ✅ **Queue Management**: Gerenciamento de filas com Redis/BullMQ
+- ✅ **Error Handling**: Tratamento robusto de erros e recovery
+- ✅ **Real-time Updates**: Atualizações em tempo real via WebSocket
 
 ### 🔐 Sistema de Autenticação
 - ✅ **Registro de usuários** com validação robusta
@@ -29,6 +80,56 @@
 - ✅ **Deduplicação Inteligente** - Sistema robusto contra contagem dupla
 - ✅ **Atualização Automática** - Dados atualizados a cada 30 segundos
 - ✅ **Validação Matemática** - Cálculos precisos validados: 116.489 sats
+
+### 📊 Cenários de Simulação Detalhados
+
+#### 🐂 **Bull Market** (Mercado em Alta)
+- **Tendência**: +0.1% por passo (consistente positiva)
+- **Volatilidade**: 0.2% (baixa oscilação)
+- **Ideal para**: Take Profit e Trailing Stop
+- **Características**: Movimentos suaves para cima, correções mínimas
+- **Aplicação**: Testar estratégias de captura de lucros
+
+#### 🐻 **Bear Market** (Mercado em Queda)
+- **Tendência**: -0.2% por passo (consistente negativa)
+- **Volatilidade**: 0.3% (média oscilação)
+- **Ideal para**: Margin Guard e Stop Loss
+- **Características**: Quedas controladas com momentos de recuperação
+- **Aplicação**: Testar proteção contra perdas
+
+#### ➡️ **Sideways** (Mercado Lateral)
+- **Tendência**: 0% (neutra)
+- **Volatilidade**: 0.5% (média-alta)
+- **Ideal para**: Auto Entry e Range Trading
+- **Características**: Movimentos aleatórios sem direção definida
+- **Aplicação**: Testar estratégias de range
+
+#### ⚡ **Volatile** (Mercado Volátil)
+- **Tendência**: Aleatória com eventos extremos
+- **Volatilidade**: 1% + eventos de 5%
+- **Ideal para**: Trailing Stop e Risk Management
+- **Características**: Alta imprevisibilidade com gaps
+- **Aplicação**: Testar resistência a condições extremas
+
+### 🎯 Algoritmos de Simulação
+
+```typescript
+// Bull Market: tendência positiva + baixa volatilidade
+currentPrice += initialPrice * (0.001 + random * 0.002);
+
+// Bear Market: tendência negativa + média volatilidade
+currentPrice += initialPrice * (-0.002 + random * 0.003);
+
+// Sideways: sem tendência + volatilidade média
+currentPrice += initialPrice * random * 0.005;
+
+// Volatile: alta volatilidade + eventos extremos
+if (extremeEvent) {
+  currentPrice += initialPrice * random * 0.05; // Até 5%
+} else {
+  currentPrice += initialPrice * random * 0.01;  // 1%
+}
+```
 
 ### 🔄 Sistema de Dados em Tempo Real (v0.2.1)
 - ✅ **WebSocket Integration** para dados de mercado ao vivo
@@ -149,10 +250,11 @@ A aplicação implementa um sistema de navegação responsivo que replica exatam
 
 #### 📱 **Mobile (< 768px)**
 - **Menu Inferior Fixo**: `position: fixed, bottom: 0` com fundo branco
-- **6 Ícones com Rótulos**:
+- **7 Ícones com Rótulos**:
   - 🏠 **Home** → `/dashboard`
   - ⚡ **Automations** → `/automation`
-  - 📊 **Positions** → `/trades`
+  - 🎮 **Simulations** → `/simulation`
+  - 📊 **Positions** → `/positions`
   - 📈 **Backtests** → `/backtests`
   - 📋 **Reports** → `/reports`
   - ⚙️ **Menu** → Dropdown com todas as opções
@@ -440,13 +542,77 @@ docker compose -f docker-compose.dev.yml up -d
 
 ## 📋 Próximos Passos
 
-### 🔄 Em Desenvolvimento
-- [ ] Implementar campo `role` no banco de dados
-- [ ] Atualizar outros componentes admin para usar função utilitária
-- [ ] Implementar sistema de permissões baseado em roles
-- [ ] Adicionar testes automatizados
+### 🎯 **Funcionalidades Planejadas**
+
+#### 🚀 **Sistema de Trading Real** (Próxima Fase)
+- [ ] **Execução Real**: Integração completa com LN Markets API
+- [ ] **Risk Management**: Controle automático de exposição
+- [ ] **Portfolio Tracking**: Acompanhamento de múltiplas posições
+- [ ] **Performance Analytics**: Métricas avançadas de trading
+
+#### 📊 **Análises Avançadas**
+- [ ] **Backtesting Histórico**: Teste com dados reais do passado
+- [ ] **Machine Learning**: Algoritmos de predição de mercado
+- [ ] **Risk Metrics**: VaR, Sharpe Ratio, Maximum Drawdown
+- [ ] **Correlation Analysis**: Análise de correlação entre ativos
+
+#### 🔧 **Melhorias Técnicas**
+- [ ] **API Rate Limiting**: Controle avançado de limites
+- [ ] **Caching Estratégico**: Redis para dados frequentes
+- [ ] **Monitoring Avançado**: Dashboards de performance
+- [ ] **Load Balancing**: Distribuição de carga entre workers
+
+#### 🎨 **UX/UI Enhancements**
+- [ ] **Dark Mode Completo**: Tema escuro em todos os componentes
+- [ ] **Mobile Optimization**: Interface otimizada para dispositivos móveis
+- [ ] **Accessibility**: Conformidade com WCAG 2.1
+- [ ] **Progressive Web App**: Funcionalidades offline
 
 ## 📋 Changelog
+
+### v1.3.0 (2025-09-15) - Margin Guard & Simulações ⭐ **MAJOR RELEASE**
+
+#### 🎮 **Sistema de Simulações em Tempo Real** ⭐ **NOVO**
+- 🚀 **Cenários Realistas**: Bull, Bear, Sideways, Volatile com algoritmos avançados
+- 🤖 **Automações Completas**: Margin Guard, Take Profit, Trailing Stop, Auto Entry
+- 📊 **Interface Visual**: Gráficos interativos com Recharts (preço, P&L, ações)
+- 📈 **Análise Detalhada**: Taxa de sucesso, tempo de resposta, drawdown máximo
+- 🔧 **API REST Completa**: CRUD + progresso + métricas + dados históricos
+- ⚡ **Workers Avançados**: Simulation Executor com processamento assíncrono
+- 📱 **Tempo Real**: Progresso ao vivo e métricas atualizadas
+- 📝 **Logs Completos**: Histórico detalhado de todas as ações executadas
+
+#### 🛡️ **Margin Guard 100% Funcional** ⭐ **NOVO**
+- 🔒 **Proteção Automática**: Monitora margem e executa ações críticas
+- ⚙️ **Ações Configuráveis**: Close Position, Reduce Position, Add Margin
+- 👁️ **Monitoramento 24/7**: Worker dedicado verificando a cada 30 segundos
+- 📢 **Notificações Integradas**: Email, Telegram, Webhook via sistema unificado
+- 👤 **Configuração Personalizada**: Thresholds individuais salvos no banco
+- 🔗 **Integração LN Markets**: Credenciais seguras e execução real de trades
+- 📋 **Logs de Auditoria**: Histórico completo de todas as intervenções
+- 🚨 **Alertas em Tempo Real**: Notificações para níveis de aviso e crítico
+
+#### 🤖 **Sistema de Automações Avançado**
+- ⚙️ **Automation Executor**: Worker para execução real das automações
+- 📊 **Margin Monitor**: Monitoramento contínuo com alertas inteligentes
+- 📧 **Notification System**: Sistema integrado de notificações multi-canal
+- 🔄 **Queue Management**: Gerenciamento de filas com Redis/BullMQ
+- 🛠️ **Error Handling**: Tratamento robusto de erros e recuperação automática
+- 🔴 **Real-time Updates**: Atualizações em tempo real via WebSocket
+
+#### 🏗️ **Melhorias Arquiteturais**
+- 🗄️ **Modelos Prisma**: Simulation e SimulationResult para persistência
+- 🚀 **Workers Independentes**: Margin Monitor, Automation Executor, Simulation Executor
+- 🔐 **Segurança Aprimorada**: Credenciais criptografadas e validações robustas
+- 📊 **Monitoramento**: Métricas em tempo real e logs detalhados
+- 🔧 **API RESTful**: Endpoints padronizados com documentação OpenAPI
+
+#### 🎨 **Interface do Usuário**
+- 🎮 **Página de Simulações**: Interface completa para configuração e execução
+- 📊 **Gráficos Interativos**: Visualização de dados com Recharts
+- 🔔 **Notificações**: Sistema de alertas integrado na UI
+- 📱 **Responsividade**: Interface otimizada para desktop e mobile
+- 🎯 **UX Aprimorada**: Navegação intuitiva e feedback visual
 
 ### v1.2.3 (2025-09-14) - Correção de Sincronização
 - 🔧 **Correção**: Resolvido problema do header não atualizar o índice
@@ -494,33 +660,66 @@ docker compose -f docker-compose.dev.yml up -d
 - **ORM**: Prisma
 - **Banco**: PostgreSQL
 - **Cache**: Redis
+- **Queue**: BullMQ (Redis-based)
 - **Autenticação**: JWT
 - **Validação**: Zod
+- **Workers**:
+  - `margin-monitor`: Monitoramento contínuo de margem
+  - `automation-executor`: Execução de automações
+  - `simulation-executor`: Simulações em tempo real
+  - `notification`: Sistema de notificações
 
 ### Frontend
 - **Framework**: React 18
 - **Build Tool**: Vite
 - **UI**: Tailwind CSS + shadcn/ui
+- **Charts**: Recharts
 - **Estado**: Zustand
 - **Roteamento**: React Router
 - **HTTP**: Axios + Fetch utilitário
+- **Real-time**: WebSocket + Server-Sent Events
 
 ## 📊 Métricas de Qualidade
 
-- **Cobertura de Testes**: Em desenvolvimento
-- **Performance**: Otimizada com cache Redis
-- **Segurança**: Validação robusta e sanitização
-- **Logs**: Sistema centralizado de logging
-- **Monitoramento**: Métricas em tempo real
+- **Cobertura de Testes**: Estruturado com testes unitários e de integração
+- **Performance**: Otimizada com cache Redis e workers assíncronos
+- **Segurança**: Validação robusta, criptografia de credenciais, sanitização
+- **Arquitetura**: Microserviços com workers independentes
+- **Monitoramento**: Métricas em tempo real, logs detalhados, health checks
+- **Escalabilidade**: Suporte a múltiplas simulações e usuários simultâneos
+- **Confiabilidade**: Tratamento de erros, circuit breakers, recovery automático
 
 ## 🔧 Desenvolvimento
 
 ### Estrutura do Projeto
 ```
-├── backend/          # API Node.js
-├── frontend/         # Interface React
-├── infra/           # Configurações de infraestrutura
-└── 0.contexto/      # Documentação técnica
+├── backend/                      # API Node.js
+│   ├── src/
+│   │   ├── controllers/          # Controladores da API
+│   │   │   ├── simulation.controller.ts    # ⭐ NOVO - Simulações
+│   │   │   └── automation.controller.ts    # ⭐ MELHORADO - Automações
+│   │   ├── services/             # Serviços de negócio
+│   │   │   ├── simulation.service.ts      # ⭐ NOVO - Lógica de simulação
+│   │   │   └── automation.service.ts      # ⭐ MELHORADO - Automações
+│   │   ├── workers/              # Workers assíncronos
+│   │   │   ├── margin-monitor.ts         # ⭐ MELHORADO - Monitor de margem
+│   │   │   ├── automation-executor.ts    # ⭐ NOVO - Executor de automações
+│   │   │   └── simulation-executor.ts    # ⭐ NOVO - Executor de simulações
+│   │   ├── routes/               # Rotas da API
+│   │   │   └── simulation.routes.ts      # ⭐ NOVO - Rotas de simulação
+│   │   └── prisma/schema.prisma           # ⭐ ATUALIZADO - Novos modelos
+├── frontend/                     # Interface React
+│   ├── src/
+│   │   ├── pages/
+│   │   │   └── Simulation.tsx            # ⭐ NOVO - Página de simulações
+│   │   ├── components/
+│   │   │   └── SimulationChart.tsx       # ⭐ NOVO - Gráficos de simulação
+│   │   └── contexts/                     # ⭐ MELHORADO - Contextos atualizados
+├── infra/                       # Configurações de infraestrutura
+├── docs/                        # Documentação técnica
+│   ├── README_MARGIN_GUARD.md           # ⭐ NOVO - Documentação Margin Guard
+│   └── README_SIMULATIONS.md            # ⭐ NOVO - Documentação Simulações
+└── docker-compose.dev.yml       # ⭐ ATUALIZADO - Novos workers
 ```
 
 ### Convenções
@@ -529,13 +728,108 @@ docker compose -f docker-compose.dev.yml up -d
 - **Branches**: Git Flow
 - **Documentação**: Markdown + ADRs
 
+### API Endpoints Principais
+
+#### 🎮 **Simulações** `/api/simulations`
+```bash
+POST   /api/simulations           # Criar simulação
+GET    /api/simulations           # Listar simulações
+GET    /api/simulations/:id       # Detalhes da simulação
+POST   /api/simulations/:id/start # Executar simulação
+GET    /api/simulations/:id/progress # Progresso em tempo real
+GET    /api/simulations/:id/metrics  # Métricas finais
+GET    /api/simulations/:id/chart    # Dados para gráficos
+DELETE /api/simulations/:id       # Deletar simulação
+```
+
+#### 🛡️ **Margin Guard** `/api/automations`
+```bash
+POST   /api/automations           # Criar automação
+GET    /api/automations           # Listar automações
+PUT    /api/automations/:id       # Atualizar configuração
+POST   /api/automations/:id/toggle # Ativar/desativar
+DELETE /api/automations/:id       # Deletar automação
+```
+
+#### 📊 **Dashboard** `/api/dashboard`
+```bash
+GET    /api/dashboard/summary     # Resumo financeiro
+GET    /api/dashboard/positions   # Posições atuais
+GET    /api/dashboard/history     # Histórico de trades
+```
+
+#### 📈 **Market Data** `/api/market`
+```bash
+GET    /api/market/data           # Dados de mercado em tempo real
+GET    /api/market/historical     # Dados históricos
+GET    /api/market/index          # Índice de preço
+```
+
+## 🚀 Execução dos Workers
+
+### Desenvolvimento
+```bash
+# Todos os workers simultaneamente
+npm run workers:start-all
+
+# Workers individuais
+npm run worker:margin-monitor      # Monitoramento de margem
+npm run worker:automation-executor # Execução de automações
+npm run worker:simulation-executor # Simulações em tempo real
+npm run worker:notification        # Sistema de notificações
+```
+
+### Docker Compose
+```bash
+# Iniciar apenas os workers
+docker-compose --profile workers up -d
+
+# Iniciar tudo (backend + frontend + workers)
+docker-compose --profile workers up -d postgres redis backend frontend
+```
+
+### Produção
+```bash
+# Workers em background
+npm run worker:margin-monitor:prod &
+npm run worker:automation-executor:prod &
+npm run worker:simulation-executor:prod &
+npm run worker:notification:prod &
+```
+
 ## 📞 Suporte
 
 Para dúvidas ou problemas:
-1. Verificar logs do sistema
-2. Consultar documentação em `0.contexto/`
+1. Verificar logs dos workers: `docker-compose logs [worker-name]`
+2. Consultar documentação específica:
+   - `README_MARGIN_GUARD.md` - Documentação completa do Margin Guard
+   - `README_SIMULATIONS.md` - Guia detalhado das simulações
 3. Verificar issues conhecidas no CHANGELOG
+4. API Documentation: `http://localhost:13010/docs`
+
+## 🎯 Estado Atual - v1.3.0
+
+### ✅ **Funcionalidades Completas**
+- 🎮 **Sistema de Simulações**: 4 cenários realistas, 4 tipos de automação, interface completa
+- 🛡️ **Margin Guard**: Monitoramento 24/7, ações automáticas, notificações integradas
+- 🤖 **Workers Avançados**: Processamento assíncrono, filas Redis, tratamento de erros
+- 📊 **Dashboard Financeiro**: Métricas em tempo real, histórico detalhado
+- 🔐 **Sistema Seguro**: Autenticação JWT, criptografia de credenciais
+
+### 🎨 **Interface Moderna**
+- 📱 **Design Responsivo**: Desktop e mobile otimizados
+- 🌙 **Tema Adaptativo**: Claro/escuro com persistência
+- 📈 **Gráficos Interativos**: Recharts para visualização de dados
+- 🎯 **UX Intuitiva**: Navegação CoinGecko-inspired
+
+### 🏗️ **Arquitetura Robusta**
+- ⚡ **Performance**: Workers assíncronos, cache Redis, otimização
+- 🛡️ **Confiabilidade**: Tratamento de erros, recovery automático, logs
+- 📊 **Monitoramento**: Métricas em tempo real, health checks
+- 🔧 **Escalabilidade**: Suporte a múltiplos usuários e simulações
 
 ---
 
-**Desenvolvido com ❤️ para automatização de trading no LN Markets**
+**🚀 Hub-defisats v1.3.0 - Plataforma completa de automação de trading no LN Markets**
+
+*Desenvolvido com ❤️ para traders que buscam eficiência e segurança máxima*

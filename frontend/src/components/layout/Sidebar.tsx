@@ -12,6 +12,7 @@ import {
   ChevronRight,
   TrendingUp,
   Activity,
+  PlayCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -46,6 +47,11 @@ const navigation = [
     name: 'Margin Guard',
     href: '/margin-guard',
     icon: Shield,
+  },
+  {
+    name: 'Simulations',
+    href: '/simulation',
+    icon: PlayCircle,
   },
   {
     name: 'Automations',

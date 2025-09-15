@@ -402,9 +402,27 @@ export class LNMarketsService {
   }
 
   /**
+   * Add margin to position
+   */
+  async addMargin(positionId: string, amount: number): Promise<any> {
+    try {
+      const response = await this.client.post(
+        `/futures/position/${positionId}/add-margin`,
+        {
+          amount: amount,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error adding margin:', error);
+      throw new Error('Failed to add margin');
+    }
+  }
+
+  /**
    * Get market data
    */
-  async getMarketData(market: string = 'btc'): Promise<any> {
+  async getMarketData(_market: string = 'btc'): Promise<any> {
     try {
       // Use the working ticker endpoint instead of the failing market endpoint
       const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {

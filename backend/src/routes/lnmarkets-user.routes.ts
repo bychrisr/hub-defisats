@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { LNMarketsUserController } from '@/controllers/lnmarkets-user.controller';
 import { authMiddleware } from '@/middleware/auth.middleware';
@@ -217,7 +217,7 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
         }
       }
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (_request: FastifyRequest, reply: FastifyReply) => {
       try {
         const axios = require('axios');
         const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {

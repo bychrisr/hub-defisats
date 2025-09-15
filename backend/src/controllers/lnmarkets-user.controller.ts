@@ -167,9 +167,9 @@ export class LNMarketsUserController {
       } catch (error) {
         console.log('⚠️ USER CONTROLLER - Could not fetch trades, using positions only for Total Investido');
         console.log('⚠️ USER CONTROLLER - Error details:', {
-          message: error.message,
-          status: error.response?.status,
-          statusText: error.response?.statusText
+          message: (error as Error).message,
+          status: (error as any).response?.status,
+          statusText: (error as any).response?.statusText
         });
         allTrades = [];
       }

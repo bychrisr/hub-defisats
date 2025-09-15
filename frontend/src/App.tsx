@@ -27,6 +27,7 @@ import Reports from '@/pages/Reports';
 import Positions from '@/pages/Positions';
 import Backtests from '@/pages/Backtests';
 import Trading from '@/pages/Trading';
+import Simulation from '@/pages/Simulation';
 import NotFound from './pages/NotFound';
 import { useAuthStore } from '@/stores/auth';
 import { useEffect } from 'react';
@@ -272,6 +273,18 @@ const App = () => {
                   <RouteGuard requiredPlan="advanced">
                     <Layout>
                       <MarginGuard />
+                    </Layout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/simulation"
+              element={
+                <ProtectedRoute>
+                  <RouteGuard requiredPlan="advanced">
+                    <Layout>
+                      <Simulation />
                     </Layout>
                   </RouteGuard>
                 </ProtectedRoute>
