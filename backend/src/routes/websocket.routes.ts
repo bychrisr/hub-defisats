@@ -25,25 +25,53 @@ export async function websocketRoutes(fastify: FastifyInstance) {
 
     console.log('🔌 WEBSOCKET ROUTE - Processando conexão para usuário:', userId);
     
-    // Get user credentials from database or config
+    // Get user credentials from database
+    const prisma = new PrismaClient();
+    const userProfile = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        ln_markets_api_key: true,
+        ln_markets_api_secret: true,
+        ln_markets_passphrase: true,
+      },
+    });
+
+    if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+      console.log('❌ WEBSOCKET ROUTE - User has no LN Markets credentials configured');
+      connection.close(1008, 'LN Markets credentials not configured');
+      return;
+    }
+
+    // Decrypt credentials
+    const { AuthService } = await import('../services/auth.service');
+    const authService = new AuthService(prisma, {} as any);
     const credentials = {
-      apiKey: process.env['LN_MARKETS_API_KEY'] || '',
-      apiSecret: process.env['LN_MARKETS_API_SECRET'] || '',
-      passphrase: process.env['LN_MARKETS_PASSPHRASE'] || '',
-      isTestnet: process.env['LN_MARKETS_TESTNET'] === 'true'
+      apiKey: authService.decryptData(userProfile.ln_markets_api_key),
+      apiSecret: authService.decryptData(userProfile.ln_markets_api_secret),
+      passphrase: authService.decryptData(userProfile.ln_markets_passphrase),
+      isTestnet: false // Force mainnet for production
     };
 
-    console.log('🔑 WEBSOCKET ROUTE - Credenciais LN Markets:', {
+    console.log('🔑 WEBSOCKET ROUTE - Credenciais LN Markets descriptografadas:', {
       hasApiKey: !!credentials.apiKey,
       hasApiSecret: !!credentials.apiSecret,
       hasPassphrase: !!credentials.passphrase,
-      isTestnet: credentials.isTestnet
+      isTestnet: credentials.isTestnet,
+      apiKeyLength: credentials.apiKey?.length,
+      apiSecretLength: credentials.apiSecret?.length,
+      passphraseLength: credentials.passphrase?.length
     });
 
     try {
       // Create WebSocket connection
       console.log('🔄 WEBSOCKET ROUTE - Criando conexão WebSocket para usuário:', userId);
       const wsService = await websocketManager.createConnection(userId, credentials);
+
+      // Add error handling for WebSocket service
+      wsService.on('error', (error) => {
+        console.error('❌ WEBSOCKET ROUTE - WebSocket service error:', error);
+        connection.close(1011, 'Internal server error');
+      });
       
       // Set up message forwarding
       wsService.on('marketUpdate', (data) => {
@@ -152,13 +180,23 @@ export async function websocketRoutes(fastify: FastifyInstance) {
         });
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ WEBSOCKET ROUTE - Erro ao criar conexão:', {
-        error,
+        error: error.message,
+        stack: error.stack,
+        name: error.name,
         userId,
         timestamp: new Date().toISOString()
       });
-      connection.close(1011, 'Internal server error');
+
+      // Provide more specific error messages based on error type
+      if (error.message?.includes('credentials') || error.message?.includes('authentication')) {
+        connection.close(1008, 'Authentication failed');
+      } else if (error.message?.includes('network') || error.message?.includes('connection')) {
+        connection.close(1006, 'Network error');
+      } else {
+        connection.close(1011, 'Internal server error');
+      }
     }
   });
 

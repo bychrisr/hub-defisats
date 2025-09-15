@@ -123,11 +123,31 @@ async function registerPlugins() {
   console.log('✅ Helmet plugin registered');
 
   console.log('🔌 Registering Rate Limit plugin...');
-  // Rate limiting
+  // Rate limiting - exclude public endpoints
   await fastify.register(rateLimit, {
     max: config.rateLimit.max,
     timeWindow: config.rateLimit.timeWindow,
     skipOnError: config.rateLimit.skipOnError,
+    // Skip rate limiting for public endpoints
+    skip: (request) => {
+      const url = request.url;
+      // Public endpoints that don't require authentication
+      const publicEndpoints = [
+        '/health',
+        '/health/detailed',
+        '/api/market/prices/latest',
+        '/api/menu',
+        '/api/auth/login',
+        '/api/auth/register',
+        '/api/auth/forgot-password',
+        '/api/auth/reset-password',
+        '/favicon.ico',
+        '/robots.txt',
+        '/sitemap.xml'
+      ];
+
+      return publicEndpoints.some(endpoint => url.startsWith(endpoint));
+    },
   });
   console.log('✅ Rate Limit plugin registered');
 
