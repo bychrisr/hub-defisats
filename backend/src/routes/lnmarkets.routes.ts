@@ -325,11 +325,17 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         });
       }
 
+      // Decrypt credentials (assuming we have access to decryption)
+      const authService = new (await import('../services/auth.service')).AuthService(prisma, {} as any);
+      const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
+      const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
+      const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
+
       // Initialize LN Markets service
       const lnMarketsService = new LNMarketsAPIService({
-        apiKey: userProfile.ln_markets_api_key,
-        apiSecret: userProfile.ln_markets_api_secret,
-        passphrase: userProfile.ln_markets_passphrase,
+        apiKey,
+        apiSecret,
+        passphrase,
         isTestnet: false, // Force mainnet for now
       });
 

@@ -15,10 +15,17 @@ export class LNMarketsMarketController {
       throw new Error('LN Markets credentials not configured');
     }
 
+    // Decrypt credentials
+    const { AuthService } = await import('../services/auth.service');
+    const authService = new AuthService(this.prisma, {} as any);
+    const apiKey = authService.decryptData(user.ln_markets_api_key);
+    const apiSecret = authService.decryptData(user.ln_markets_api_secret);
+    const passphrase = authService.decryptData(user.ln_markets_passphrase);
+
     return new LNMarketsAPIService({
-      apiKey: user.ln_markets_api_key,
-      apiSecret: user.ln_markets_api_secret,
-      passphrase: user.ln_markets_passphrase,
+      apiKey,
+      apiSecret,
+      passphrase,
       isTestnet: false // Force mainnet for now
     });
   }

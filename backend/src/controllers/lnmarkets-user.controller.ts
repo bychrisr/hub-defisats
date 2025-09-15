@@ -15,10 +15,17 @@ export class LNMarketsUserController {
       throw new Error('LN Markets credentials not configured');
     }
 
+    // Decrypt credentials
+    const { AuthService } = await import('../services/auth.service');
+    const authService = new AuthService(this.prisma, {} as any);
+    const apiKey = authService.decryptData(user.ln_markets_api_key);
+    const apiSecret = authService.decryptData(user.ln_markets_api_secret);
+    const passphrase = authService.decryptData(user.ln_markets_passphrase);
+
     return new LNMarketsAPIService({
-      apiKey: user.ln_markets_api_key,
-      apiSecret: user.ln_markets_api_secret,
-      passphrase: user.ln_markets_passphrase,
+      apiKey,
+      apiSecret,
+      passphrase,
       isTestnet: false // Force mainnet for now
     });
   }
@@ -264,11 +271,25 @@ export class LNMarketsUserController {
         statusText: error.response?.statusText,
         data: error.response?.data
       });
-      
-      return reply.status(500).send({
-        success: false,
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to calculate estimated balance'
+
+      // Return empty/default data instead of 500 error to avoid breaking the UI
+      const userId = (request as any).user?.id;
+      console.log(`⚠️ [UserController] Returning default estimated balance for user ${userId} due to error`);
+
+      return reply.send({
+        success: true,
+        data: {
+          wallet_balance: 0,
+          total_margin: 0,
+          total_pnl: 0,
+          total_fees: 0,
+          estimated_balance: 0,
+          total_invested: 0,
+          positions_count: 0,
+          trades_count: 0
+        },
+        message: 'Unable to calculate estimated balance. Please check your API credentials.',
+        error: 'CALCULATION_FAILED'
       });
     }
   }
@@ -371,51 +392,14 @@ export class LNMarketsUserController {
     } catch (error: any) {
       console.error('[UserController] Error getting user trades:', error);
 
-      // Se o endpoint falhar, retornar dados simulados baseados no ticker público
-      console.log('[UserController] Returning simulated trades data based on market conditions');
-
-      // Dados simulados realistas baseados no ticker público
-      const simulatedTrades = [
-        {
-          id: 'sim-trade-1',
-          side: 'b',
-          quantity: 100,
-          leverage: 10,
-          price: 115000,
-          liquidation: 103500,
-          pl: 150,
-          creation_ts: new Date(Date.now() - 86400000).toISOString(), // 1 dia atrás
-          market_filled_ts: new Date(Date.now() - 86400000).toISOString(),
-          closed_ts: new Date(Date.now() - 43200000).toISOString(), // 12 horas atrás
-          entry_price: 114500,
-          pnl: 150,
-          opening_fee: 10,
-          closing_fee: 10,
-          sum_carry_fees: 5,
-          status: 'closed'
-        },
-        {
-          id: 'sim-trade-2',
-          side: 's',
-          quantity: 50,
-          leverage: 5,
-          price: 116000,
-          liquidation: 128000,
-          pl: -75,
-          creation_ts: new Date(Date.now() - 43200000).toISOString(), // 12 horas atrás
-          market_filled_ts: new Date(Date.now() - 43200000).toISOString(),
-          entry_price: 116500,
-          pnl: -75,
-          opening_fee: 5,
-          closing_fee: 5,
-          sum_carry_fees: 2,
-          status: 'closed'
-        }
-      ];
+      // Return empty data instead of simulated data to avoid misleading users
+      console.log('[UserController] API call failed, returning empty trades data');
 
       return reply.send({
         success: true,
-        data: simulatedTrades
+        data: [], // Empty array instead of simulated data
+        message: 'Unable to retrieve trades data. Please check your connection and credentials.',
+        error: 'API_UNAVAILABLE'
       });
     }
   }
@@ -438,56 +422,13 @@ export class LNMarketsUserController {
       });
 
       if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-        console.log(`[UserController] User ${userId} has no LN Markets credentials, returning demo positions`);
-        
-        // Retornar posições de demonstração realistas no formato da LN Markets API
-        const demoPositions = [
-          {
-            id: 'demo-pos-1',
-            quantity: 100,
-            price: 115000,
-            entry_price: 114500,
-            liquidation: 103500,
-            leverage: 10,
-            margin: 1000,
-            pl: 500,
-            maintenance_margin: 100,
-            opening_fee: 10,
-            closing_fee: 0,
-            sum_carry_fees: 5,
-            running: true,
-            side: 'b',
-            creation_ts: new Date(Date.now() - 3600000).toISOString(), // 1 hora atrás
-            market_filled_ts: new Date(Date.now() - 3600000).toISOString(),
-            takeprofit: 116000,
-            stoploss: 113000
-          },
-          {
-            id: 'demo-pos-2',
-            quantity: 50,
-            price: 115500,
-            entry_price: 116000,
-            liquidation: 124000,
-            leverage: 5,
-            margin: 500,
-            pl: -250,
-            maintenance_margin: 50,
-            opening_fee: 5,
-            closing_fee: 0,
-            sum_carry_fees: 2,
-            running: true,
-            side: 's',
-            creation_ts: new Date(Date.now() - 7200000).toISOString(), // 2 horas atrás
-            market_filled_ts: new Date(Date.now() - 7200000).toISOString(),
-            takeprofit: 114000,
-            stoploss: 117000
-          }
-        ];
-        
-        console.log(`[UserController] Returning demo positions for no credentials:`, JSON.stringify(demoPositions, null, 2));
+        console.log(`[UserController] User ${userId} has no LN Markets credentials configured`);
+
+        // Return null/empty data instead of demo data to avoid misleading users
         return reply.send({
           success: true,
-          data: demoPositions
+          data: [], // Empty array instead of demo data
+          message: 'LN Markets credentials not configured. Please configure your API credentials in settings.'
         });
       }
 
@@ -518,56 +459,14 @@ export class LNMarketsUserController {
       });
       
       if (error.status === 401 || error.response?.data?.message?.includes('Api key does not exist')) {
-        console.log(`[UserController] Credentials error for user ${(request as any).user?.id}, returning demo positions:`, error.message);
-        
-        // Retornar posições de demonstração para usuários com credenciais inválidas
-        const demoPositions = [
-          {
-            id: 'demo-1',
-            quantity: 0.001,
-            price: 115000,
-            entryPrice: 114500,
-            currentPrice: 115000,
-            liquidation: 100000,
-            leverage: 10,
-            margin: 0.1,
-            pnl: 0.5,
-            pnlPercentage: 0.44,
-            marginRatio: 0.1,
-            fundingCost: 0.01,
-            status: 'open',
-            side: 'long',
-            symbol: 'BTC',
-            asset: 'BTC',
-            createdAt: '2025-09-13T15:00:00.000Z',
-            updatedAt: '2025-09-14T15:00:00.000Z',
-          },
-          {
-            id: 'demo-2',
-            quantity: 0.0005,
-            price: 115000,
-            entryPrice: 115500,
-            currentPrice: 115000,
-            liquidation: 120000,
-            leverage: 5,
-            margin: 0.05,
-            pnl: -0.25,
-            pnlPercentage: -0.43,
-            marginRatio: 0.05,
-            fundingCost: 0.005,
-            status: 'open',
-            side: 'short',
-            symbol: 'BTC',
-            asset: 'BTC',
-            createdAt: '2025-09-12T15:00:00.000Z',
-            updatedAt: '2025-09-14T15:00:00.000Z',
-          }
-        ];
-        
-        console.log(`[UserController] Returning demo positions for credentials error:`, JSON.stringify(demoPositions, null, 2));
+        console.log(`[UserController] Invalid LN Markets credentials for user ${(request as any).user?.id}:`, error.message);
+
+        // Return empty data instead of demo data to avoid misleading users
         return reply.send({
           success: true,
-          data: demoPositions
+          data: [], // Empty array instead of demo data
+          message: 'LN Markets credentials are invalid. Please check your API credentials in settings.',
+          error: 'INVALID_CREDENTIALS'
         });
       }
       
