@@ -19,9 +19,7 @@ export const ResponsiveLayout = ({ children }: ResponsiveLayoutProps) => {
       {/* Fixed Headers Container */}
       <div className="fixed top-0 left-0 right-0 z-50">
         {/* Market Header - Above navigation */}
-        <div className="hidden md:block">
-          <LNMarketsHeader />
-        </div>
+        <LNMarketsHeader />
 
         {/* Desktop Header - Hidden on mobile */}
         <div className="hidden md:block">

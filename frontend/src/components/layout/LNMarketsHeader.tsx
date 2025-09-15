@@ -124,9 +124,45 @@ const LNMarketsHeader: React.FC = () => {
   };
 
   return (
-    <Card className={'bg-[#1a1a1a] border-[#2a2e39] rounded-none border-b-0 transition-all duration-300 ' + (isScrolled ? 'py-1' : 'py-3')}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={'flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+    <Card className={'bg-[#1a1a1a] border-[#2a2e39] rounded-none border-b-0 transition-all duration-300 ' + (isScrolled ? 'py-1' : 'py-2 md:py-3')}>
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+        {/* Mobile Layout - Simplified */}
+        <div className="md:hidden flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'text-lg' : 'text-xl')}>₿</span>
+            <div className="flex flex-col">
+              <span className="text-gray-300 font-medium text-xs">Index:</span>
+              {lnMarketsError ? (
+                <span className="text-red-400 text-xs">Error</span>
+              ) : marketData ? (
+                <span className="text-white font-bold text-sm">
+                  ${formatIndex(marketData.index)}
+                </span>
+              ) : (
+                <div className="flex items-center space-x-1">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                  <span className="text-gray-400 text-xs">Loading...</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {marketData && !isScrolled && (
+            <div className="flex items-center space-x-1">
+              {marketData.index24hChange >= 0 ? (
+                <TrendingUp className="w-3 h-3 text-[#00d4aa]" />
+              ) : (
+                <TrendingDown className="w-3 h-3 text-[#ff6b6b]" />
+              )}
+              <span className={'text-xs font-medium ' + (marketData.index24hChange >= 0 ? 'text-[#00d4aa]' : 'text-[#ff6b6b]')}>
+                {format24hChange(marketData.index24hChange)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Layout - Full */}
+        <div className={'hidden md:flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
           {/* Index - Largura fixa */}
           <div className="flex items-center space-x-2 w-1/4">
             <span className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'text-lg' : 'text-2xl')}>₿</span>
