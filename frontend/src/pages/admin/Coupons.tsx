@@ -99,7 +99,7 @@ export default function Coupons() {
         },
         body: JSON.stringify({
           ...newCoupon,
-          expires_at: newCoupon.expires_at || null
+          expires_at: newCoupon.expires_at ? new Date(newCoupon.expires_at).toISOString() : null
         })
       });
 
@@ -143,7 +143,7 @@ export default function Coupons() {
         },
         body: JSON.stringify({
           ...selectedCoupon,
-          expires_at: selectedCoupon.expires_at || null
+          expires_at: selectedCoupon.expires_at ? new Date(selectedCoupon.expires_at).toISOString() : null
         })
       });
 
