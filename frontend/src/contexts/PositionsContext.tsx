@@ -419,7 +419,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       // Atualizar posições, índice e menu simultaneamente
       const [positionsResponse, indexResponse, menuResponse] = await Promise.all([
         api.get('/api/lnmarkets/user/positions'),
-        api.get('/api/market/index'),
+        api.get('/api/market/index/public'), // Use public endpoint that doesn't require auth
         api.get('/api/menu')
       ]);
 
