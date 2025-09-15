@@ -146,7 +146,10 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
   }, async (_request, reply) => {
     try {
       const coupons = await couponService.getCoupons();
-      return reply.status(200).send(coupons);
+      return reply.status(200).send({
+        success: true,
+        data: coupons
+      });
     } catch (error: any) {
       console.error('❌ COUPON ADMIN - Error getting coupons:', error);
       return reply.status(500).send({
