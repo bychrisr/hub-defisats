@@ -54,6 +54,7 @@ export async function authMiddleware(
     console.log('✅ AUTH MIDDLEWARE - Authentication successful');
   } catch (error) {
     console.log('❌ AUTH MIDDLEWARE - Error:', error);
+    console.log('❌ AUTH MIDDLEWARE - Error stack:', (error as Error).stack);
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
       message: error instanceof Error ? error.message : 'Invalid token',
