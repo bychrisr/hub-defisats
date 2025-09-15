@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { securityController } from '../controllers/security.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function securityRoutes(fastify: FastifyInstance) {
   // Apply authentication to protected routes
-  fastify.addHook('preHandler', authenticate);
+  fastify.addHook('preHandler', authMiddleware);
 
   // 2FA endpoints
   fastify.post('/api/security/2fa/setup', securityController.setup2FA.bind(securityController));

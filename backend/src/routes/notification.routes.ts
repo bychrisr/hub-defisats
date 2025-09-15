@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { notificationController } from '../controllers/notification.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function notificationRoutes(fastify: FastifyInstance) {
   // Apply authentication to all routes
-  fastify.addHook('preHandler', authenticate);
+  fastify.addHook('preHandler', authMiddleware);
 
   // Get user's notifications
   fastify.get('/api/notifications', notificationController.getUserNotifications.bind(notificationController));

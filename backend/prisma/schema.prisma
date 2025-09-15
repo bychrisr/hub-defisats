@@ -48,6 +48,7 @@ model User {
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
   simulations                Simulation[]
+  notification_logs          NotificationLog[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")

@@ -18,61 +18,7 @@ export async function adminAdvancedRoutes(fastify: FastifyInstance) {
     },
   }, adminController.getAdvancedDashboard.bind(adminController));
 
-  // Coupon management
-  fastify.post('/api/admin/coupons', {
-    schema: {
-      body: {
-        type: 'object',
-        required: ['code', 'plan_type'],
-        properties: {
-          code: { type: 'string', minLength: 3, maxLength: 20 },
-          plan_type: { type: 'string', enum: ['free', 'basic', 'advanced', 'pro', 'lifetime'] },
-          usage_limit: { type: 'number', minimum: 1 },
-          expires_at: { type: 'string', format: 'date-time' },
-          value_type: { type: 'string', enum: ['fixed', 'percentage'], default: 'fixed' },
-          value_amount: { type: 'number', minimum: 0 },
-          time_type: { type: 'string', enum: ['fixed', 'lifetime'], default: 'fixed' },
-          time_days: { type: 'number', minimum: 1 },
-          description: { type: 'string', maxLength: 500 },
-          is_active: { type: 'boolean', default: true },
-        },
-      },
-    },
-  }, adminController.createCoupon.bind(adminController));
-
-  fastify.put('/api/admin/coupons/:id', {
-    schema: {
-      params: {
-        type: 'object',
-        required: ['id'],
-        properties: {
-          id: { type: 'string' },
-        },
-      },
-      body: {
-        type: 'object',
-        properties: {
-          usage_limit: { type: 'number', minimum: 1 },
-          expires_at: { type: 'string', format: 'date-time' },
-          is_active: { type: 'boolean' },
-          description: { type: 'string', maxLength: 500 },
-        },
-      },
-    },
-  }, adminController.updateCoupon.bind(adminController));
-
-  // Coupon analytics
-  fastify.get('/api/admin/coupons/:id/analytics', {
-    schema: {
-      params: {
-        type: 'object',
-        required: ['id'],
-        properties: {
-          id: { type: 'string' },
-        },
-      },
-    },
-  }, adminController.getCouponAnalytics.bind(adminController));
+  // Coupon management routes are handled by coupon-admin.routes.ts
 
   // Bulk user operations
   fastify.post('/api/admin/users/bulk', {

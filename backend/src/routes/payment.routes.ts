@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { paymentController } from '../controllers/payment.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function paymentRoutes(fastify: FastifyInstance) {
   // Apply authentication to protected routes
-  fastify.addHook('preHandler', authenticate);
+  fastify.addHook('preHandler', authMiddleware);
 
   // Create Lightning invoice
   fastify.post('/api/payments/lightning', {

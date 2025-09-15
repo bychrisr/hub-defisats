@@ -1,7 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { RateLimitMiddleware } from './rate-limit.middleware';
-
-const rateLimitMiddleware = new RateLimitMiddleware();
+import { rateLimiters } from './rate-limit.middleware';
 
 /**
  * Middleware para rate limiting de API calls por usuário
@@ -10,7 +8,7 @@ export async function apiRateLimitMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  await rateLimitMiddleware.apiRateLimit(request, reply);
+  await rateLimiters.api(request, reply);
 }
 
 /**
@@ -20,7 +18,7 @@ export async function automationRateLimitMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  await rateLimitMiddleware.automationRateLimit(request, reply);
+  await rateLimiters.api(request, reply);
 }
 
 /**
@@ -30,7 +28,7 @@ export async function tradeRateLimitMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  await rateLimitMiddleware.tradeRateLimit(request, reply);
+  await rateLimiters.trading(request, reply);
 }
 
 /**
@@ -40,13 +38,7 @@ export async function loginRateLimitMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  await rateLimitMiddleware.userRateLimit(
-    request,
-    reply,
-    'login_attempts',
-    5,
-    900000
-  ); // 5 tentativas em 15 min
+  await rateLimiters.auth(request, reply);
 }
 
 /**
@@ -56,13 +48,7 @@ export async function registrationRateLimitMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  await rateLimitMiddleware.userRateLimit(
-    request,
-    reply,
-    'registration_attempts',
-    3,
-    3600000
-  ); // 3 tentativas em 1 hora
+  await rateLimiters.auth(request, reply);
 }
 
 /**
@@ -72,11 +58,5 @@ export async function passwordResetRateLimitMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  await rateLimitMiddleware.userRateLimit(
-    request,
-    reply,
-    'password_reset_attempts',
-    3,
-    3600000
-  ); // 3 tentativas em 1 hora
+  await rateLimiters.auth(request, reply);
 }
