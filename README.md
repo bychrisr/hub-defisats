@@ -29,6 +29,23 @@
 - ✅ **Simulation Executor**: Simulações em tempo real
 - ✅ **Notification Worker**: Sistema de alertas integrado
 
+### 🎯 **Sistema de Monitoramento Avançado** ⭐ **NOVO**
+- ✅ **System Health Dashboard**: Monitoramento em tempo real da saúde do sistema
+- ✅ **Performance Metrics**: Web Vitals e métricas de Core Web Vitals
+- ✅ **Cache Busting Inteligente**: Resolução automática de problemas de cache
+- ✅ **Retry Automático**: Recuperação inteligente de falhas com backoff
+- ✅ **Offline Mode**: Funcionamento completo sem conexão à internet
+- ✅ **Error Notifications**: Alertas inteligentes para problemas da API
+- ✅ **Debug System**: Logs estruturados e troubleshooting avançado
+
+### 💰 **Sistema de Planos e Preços** ⭐ **NOVO**
+- ✅ **Gerenciamento de Planos**: Interface completa no admin para criar/editar planos
+- ✅ **Configuração Flexível**: Limites personalizados por plano (automações, backtests, notificações)
+- ✅ **Preços Dinâmicos**: Mensal, anual e vitalício por plano
+- ✅ **Funcionalidades por Plano**: Controle granular de recursos
+- ✅ **Relatórios de Receita**: Analytics de uso e receita por plano
+- ✅ **Seed de Planos**: Script automático para popular planos padrão
+
 ## ✅ Funcionalidades Implementadas
 
 ### 🎮 Sistema de Simulações em Tempo Real (v1.3.0) ⭐ **NOVO**

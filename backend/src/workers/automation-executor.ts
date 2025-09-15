@@ -164,6 +164,208 @@ async function executeMarginGuardAction(
   }
 }
 
+// Function to execute Auto Entry automation
+async function executeAutoEntryAction(
+  lnMarkets: LNMarketsService,
+  automationConfig: any,
+  userId: string
+) {
+  try {
+    console.log(`🎯 Executing Auto Entry action for user ${userId}`);
+
+    const {
+      market = 'btcusd',
+      side, // 'b' for buy, 's' for sell
+      leverage = 10,
+      quantity,
+      stoploss,
+      takeprofit,
+      trigger_price, // Optional price trigger
+      trigger_type = 'market', // 'market' or 'limit'
+    } = automationConfig;
+
+    // Validate required parameters
+    if (!side || !quantity) {
+      throw new Error('Side and quantity are required for auto entry');
+    }
+
+    // Check if we should trigger based on price (if trigger_price is set)
+    if (trigger_price) {
+      const currentPrice = await lnMarkets.getMarketPrice(market);
+      const shouldTrigger = side === 'b'
+        ? currentPrice <= trigger_price
+        : currentPrice >= trigger_price;
+
+      if (!shouldTrigger) {
+        console.log(`⏳ Auto entry not triggered. Current price: ${currentPrice}, Trigger: ${trigger_price}`);
+        return {
+          status: 'pending',
+          reason: 'price_not_triggered',
+          currentPrice,
+          triggerPrice: trigger_price,
+        };
+      }
+    }
+
+    console.log(`📈 Creating ${side === 'b' ? 'LONG' : 'SHORT'} position: ${quantity} contracts at ${leverage}x leverage`);
+
+    // Create the trade
+    const tradeResult = await lnMarkets.createTrade({
+      type: 'm', // market order
+      side,
+      market,
+      leverage,
+      quantity,
+      stoploss,
+      takeprofit,
+    });
+
+    console.log(`✅ Auto entry executed successfully. Trade ID: ${tradeResult.id}`);
+
+    // Log the action
+    await prisma.tradeLog.create({
+      data: {
+        user_id: userId,
+        automation_id: automationConfig.id,
+        trade_id: tradeResult.id,
+        status: 'completed',
+        executed_at: new Date(),
+      },
+    });
+
+    return {
+      status: 'completed',
+      tradeId: tradeResult.id,
+      side,
+      quantity,
+      leverage,
+      market,
+    };
+
+  } catch (error) {
+    console.error(`❌ Failed to execute Auto Entry action:`, error);
+
+    // Log the error
+    await prisma.tradeLog.create({
+      data: {
+        user_id: userId,
+        automation_id: automationConfig.id,
+        trade_id: 'auto_entry_failed',
+        status: 'failed',
+        error_message: (error as Error).message,
+        executed_at: new Date(),
+      },
+    });
+
+    throw error;
+  }
+}
+
+// Function to execute Take Profit/Stop Loss automation
+async function executeTpSlAction(
+  lnMarkets: LNMarketsService,
+  automationConfig: any,
+  userId: string,
+  tradeId?: string
+) {
+  try {
+    console.log(`💰 Executing TP/SL action for user ${userId}`);
+
+    const {
+      action, // 'update_tp', 'update_sl', 'close_tp', 'close_sl'
+      new_takeprofit,
+      new_stoploss,
+      trigger_pnl_percentage, // Optional: trigger when P&L reaches X%
+      trigger_price, // Optional: trigger at specific price
+    } = automationConfig;
+
+    // If tradeId is not provided, we need to find the relevant trade
+    let targetTradeId = tradeId;
+    if (!targetTradeId) {
+      // Get all running trades and find the most suitable one
+      const runningTrades = await lnMarkets.getRunningTrades();
+      if (runningTrades.length === 0) {
+        throw new Error('No running trades found for TP/SL action');
+      }
+
+      // For now, use the first running trade (could be enhanced with more logic)
+      targetTradeId = runningTrades[0].id;
+    }
+
+    console.log(`🎯 ${action} for trade ${targetTradeId}`);
+
+    let result;
+
+    switch (action) {
+      case 'update_tp':
+        if (!new_takeprofit) {
+          throw new Error('New take profit price required');
+        }
+        console.log(`📈 Updating TP to ${new_takeprofit} for trade ${targetTradeId}`);
+        result = await lnMarkets.updateTakeProfit(targetTradeId, new_takeprofit);
+        break;
+
+      case 'update_sl':
+        if (!new_stoploss) {
+          throw new Error('New stop loss price required');
+        }
+        console.log(`📉 Updating SL to ${new_stoploss} for trade ${targetTradeId}`);
+        result = await lnMarkets.updateStopLoss(targetTradeId, new_stoploss);
+        break;
+
+      case 'close_tp':
+        console.log(`🎯 Closing position at take profit for trade ${targetTradeId}`);
+        result = await lnMarkets.closePosition(targetTradeId);
+        break;
+
+      case 'close_sl':
+        console.log(`🛑 Closing position at stop loss for trade ${targetTradeId}`);
+        result = await lnMarkets.closePosition(targetTradeId);
+        break;
+
+      default:
+        throw new Error(`Unknown TP/SL action: ${action}`);
+    }
+
+    console.log(`✅ TP/SL action executed successfully for trade ${targetTradeId}`);
+
+    // Log the action
+    await prisma.tradeLog.create({
+      data: {
+        user_id: userId,
+        automation_id: automationConfig.id,
+        trade_id: targetTradeId,
+        status: 'completed',
+        executed_at: new Date(),
+      },
+    });
+
+    return {
+      status: 'completed',
+      action,
+      tradeId: targetTradeId,
+      result,
+    };
+
+  } catch (error) {
+    console.error(`❌ Failed to execute TP/SL action:`, error);
+
+    // Log the error
+    await prisma.tradeLog.create({
+      data: {
+        user_id: userId,
+        automation_id: automationConfig.id,
+        trade_id: tradeId || 'tpsl_failed',
+        status: 'failed',
+        error_message: (error as Error).message,
+        executed_at: new Date(),
+      },
+    });
+
+    throw error;
+  }
+}
+
 // Create worker with real automation logic
 const worker = new Worker(
   'automation-executor',
@@ -204,25 +406,26 @@ const worker = new Worker(
           };
 
         case 'tp_sl':
-          console.log('💰 Executing TP/SL automation');
-          // TODO: Implement TP/SL logic
+          await executeTpSlAction(lnMarkets, automation.config, userId, tradeId);
           return {
             status: 'completed',
             action: 'tp_sl_executed',
             timestamp: new Date().toISOString(),
             automationId,
-            userId
+            userId,
+            tradeId
           };
 
         case 'auto_entry':
-          console.log('🎯 Executing auto entry automation');
-          // TODO: Implement auto entry logic
+          const entryResult = await executeAutoEntryAction(lnMarkets, automation.config, userId);
           return {
-            status: 'completed',
+            status: entryResult.status,
             action: 'auto_entry_executed',
             timestamp: new Date().toISOString(),
             automationId,
-            userId
+            userId,
+            tradeId: entryResult.tradeId,
+            result: entryResult
           };
 
         default:

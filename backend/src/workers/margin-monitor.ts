@@ -4,24 +4,14 @@ import {
   createLNMarketsService,
   LNMarketsService,
 } from '../services/lnmarkets.service';
-import {
-  secureStorage,
-  SecureCredentials,
-} from '../services/secure-storage.service';
+// Import notification queue
+import { notificationQueue } from '../queues/notification.queue';
 import { PrismaClient } from '@prisma/client';
 
 // Create Redis connection
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 
-// Create notification queue
-const notificationQueue = new Queue('notification', {
-  connection: redis,
-  defaultJobOptions: {
-    priority: 5, // Lower priority than trading
-    removeOnComplete: 50,
-    removeOnFail: 50,
-  },
-});
+// Notification queue is imported from shared module
 
 // Create Prisma client for database access
 const prisma = new PrismaClient();
@@ -158,19 +148,19 @@ async function sendMarginAlert(
       const channelConfig = notification.channel_config as any;
 
       await notificationQueue.add(
-        'send-notification',
+        'notification',
         {
           userId,
           type: 'margin_alert',
           channel: notification.type,
           message: alert.message,
-          data: {
-            tradeId: alert.tradeId,
+          metadata: {
             marginRatio: alert.marginRatio,
             level: alert.level,
-            timestamp: new Date().toISOString(),
+            pnl: 0, // Will be calculated later
+            price: 0, // Will be fetched from market data
+            tradeId: alert.tradeId,
           },
-          config: channelConfig,
         },
         {
           priority: 5,

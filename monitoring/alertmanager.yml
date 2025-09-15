@@ -1,0 +1,87 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@hubdefisats.com'
+  smtp_auth_username: '${SMTP_USER}'
+  smtp_auth_password: '${SMTP_PASS}'
+
+route:
+  group_by: ['alertname', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'hub-defisats-alerts'
+  routes:
+  - match:
+      severity: critical
+    receiver: 'hub-defisats-critical'
+  - match:
+      service: database
+    receiver: 'hub-defisats-database'
+  - match:
+      service: payments
+    receiver: 'hub-defisats-payments'
+
+receivers:
+- name: 'hub-defisats-alerts'
+  slack_configs:
+  - api_url: '${SLACK_WEBHOOK_URL}'
+    channel: '#alerts'
+    title: '{{ .GroupLabels.alertname }}'
+    text: |
+      {{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Severity:* {{ .Labels.severity }}
+      *Service:* {{ .Labels.service }}
+      {{ end }}
+
+- name: 'hub-defisats-critical'
+  slack_configs:
+  - api_url: '${SLACK_WEBHOOK_URL}'
+    channel: '#critical-alerts'
+    title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+    text: |
+      {{ range .Alerts }}
+      *🚨 CRITICAL ALERT*
+      *Service:* {{ .Labels.service }}
+      *Summary:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ end }}
+
+- name: 'hub-defisats-database'
+  email_configs:
+  - to: 'dba@hubdefisats.com'
+    subject: 'Database Alert: {{ .GroupLabels.alertname }}'
+    body: |
+      Database alert triggered:
+
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Severity: {{ .Labels.severity }}
+      {{ end }}
+
+- name: 'hub-defisats-payments'
+  email_configs:
+  - to: 'payments@hubdefisats.com'
+    subject: 'Payment Alert: {{ .GroupLabels.alertname }}'
+    body: |
+      Payment system alert:
+
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Severity: {{ .Labels.severity }}
+      {{ end }}
+
+  telegram_configs:
+  - bot_token: '${TELEGRAM_BOT_TOKEN}'
+    chat_id: '${TELEGRAM_PAYMENT_CHAT_ID}'
+    message: |
+      💰 *Payment Alert*
+      {{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      {{ end }}
+

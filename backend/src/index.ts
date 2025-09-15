@@ -26,6 +26,12 @@ import { websocketRoutes } from '@/routes/websocket.routes';
 import { websocketTestRoutes } from '@/routes/websocket-test.routes';
 import { websocketMarketRoutes } from '@/routes/websocket-market.routes';
 import { simulationRoutes } from '@/routes/simulation.routes';
+import { notificationRoutes } from '@/routes/notification.routes';
+import { backtestRoutes } from '@/routes/backtest.routes';
+import { paymentRoutes } from '@/routes/payment.routes';
+import { securityRoutes } from '@/routes/security.routes';
+import { adminAdvancedRoutes } from '@/routes/admin-advanced.routes';
+import { planRoutes } from '@/routes/plan.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/services/metrics.service';
@@ -383,6 +389,27 @@ async function registerRoutes() {
   // Simulation routes
   await fastify.register(simulationRoutes, { prefix: '/api' });
   console.log('✅ Simulation routes registered');
+
+  // Notification routes
+  await fastify.register(notificationRoutes);
+  console.log('✅ Notification routes registered');
+
+  // Backtest routes
+  await fastify.register(backtestRoutes);
+  console.log('✅ Backtest routes registered');
+
+  // Payment routes
+  await fastify.register(paymentRoutes);
+  console.log('✅ Payment routes registered');
+
+  // Security routes
+  await fastify.register(securityRoutes);
+  console.log('✅ Security routes registered');
+
+  // Advanced admin routes
+  await fastify.register(adminAdvancedRoutes);
+  await fastify.register(planRoutes);
+  console.log('✅ Advanced admin routes registered');
 
   // Validation routes (with /api prefix but without authentication)
   await fastify.register(validationRoutes, { prefix: '/api' });

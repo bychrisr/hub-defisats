@@ -1,233 +1,176 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Redis } from 'ioredis';
-import { config } from '@/config/env';
 
-export class RateLimitMiddleware {
-  private redis: Redis;
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-  constructor() {
-    this.redis = new Redis(config.redis.url);
+export interface RateLimitConfig {
+  windowMs: number; // Time window in milliseconds
+  max: number;      // Maximum requests per window
+  message?: string; // Custom message
+  skipFailedRequests?: boolean; // Skip counting failed requests
+  skipSuccessfulRequests?: boolean; // Skip counting successful requests
+}
+
+export class RateLimiter {
+  /**
+   * Create rate limiter middleware
+   */
+  static create(config: RateLimitConfig) {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
+      const key = this.getKey(request);
+      const now = Date.now();
+      const windowStart = now - config.windowMs;
+
+      try {
+        // Clean old entries and count current requests
+        const multi = redis.multi();
+        multi.zremrangebyscore(key, '-inf', windowStart);
+        multi.zcard(key);
+        const results = await multi.exec();
+
+        const requestCount = results?.[1]?.[1] as number || 0;
+
+        // Check if limit exceeded
+        if (requestCount >= config.max) {
+          const resetTime = await this.getResetTime(key);
+          const remaining = Math.max(0, config.max - requestCount);
+
+          reply.header('X-RateLimit-Limit', config.max.toString());
+          reply.header('X-RateLimit-Remaining', remaining.toString());
+          reply.header('X-RateLimit-Reset', resetTime.toString());
+          reply.header('Retry-After', Math.ceil((resetTime - now) / 1000).toString());
+
+          return reply.code(429).send({
+            error: 'TOO_MANY_REQUESTS',
+            message: config.message || 'Too many requests, please try again later',
+            retry_after: Math.ceil((resetTime - now) / 1000),
+          });
+        }
+
+        // Add current request to the set
+        await redis.zadd(key, now, `${now}:${Math.random()}`);
+
+        // Set expiry on the key
+        await redis.expire(key, Math.ceil(config.windowMs / 1000));
+
+        // Add headers
+        const remaining = Math.max(0, config.max - requestCount - 1);
+        const resetTime = await this.getResetTime(key);
+
+        reply.header('X-RateLimit-Limit', config.max.toString());
+        reply.header('X-RateLimit-Remaining', remaining.toString());
+        reply.header('X-RateLimit-Reset', resetTime.toString());
+
+      } catch (error) {
+        console.error('Rate limiting error:', error);
+        // Continue without rate limiting if Redis fails
+      }
+    };
   }
 
   /**
-   * Rate limiting for login attempts
+   * Get rate limit key for request
    */
-  async loginRateLimit(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<void> {
+  private static getKey(request: FastifyRequest): string {
     const ip = this.getClientIP(request);
-    const key = `login_attempts:${ip}`;
+    const userId = (request as any).user?.id;
+    const endpoint = request.routerPath || request.url;
 
-    try {
-      const attempts = await this.redis.get(key);
-      const count = attempts ? parseInt(attempts, 10) : 0;
+    // Use user ID if authenticated, otherwise IP
+    const identifier = userId ? `user:${userId}` : `ip:${ip}`;
 
-      if (count >= 5) {
-        return reply.status(429).send({
-          error: 'RATE_LIMIT_EXCEEDED',
-          message: 'Too many login attempts. Please try again in 15 minutes.',
-          retryAfter: 900, // 15 minutes
-        });
-      }
-
-      // Increment counter
-      await this.redis.incr(key);
-      await this.redis.expire(key, 900); // 15 minutes
-
-      // Set CAPTCHA required after 3 attempts
-      if (count >= 2) {
-        reply.header('X-Captcha-Required', 'true');
-      }
-    } catch (error) {
-      console.error('Rate limit error:', error);
-      // Continue if Redis is down
-    }
-  }
-
-  /**
-   * Rate limiting for registration
-   */
-  async registrationRateLimit(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<void> {
-    const ip = this.getClientIP(request);
-    const key = `registration_attempts:${ip}`;
-
-    try {
-      const attempts = await this.redis.get(key);
-      const count = attempts ? parseInt(attempts, 10) : 0;
-
-      if (count >= 3) {
-        return reply.status(429).send({
-          error: 'RATE_LIMIT_EXCEEDED',
-          message:
-            'Too many registration attempts. Please try again in 1 hour.',
-          retryAfter: 3600, // 1 hour
-        });
-      }
-
-      // Increment counter
-      await this.redis.incr(key);
-      await this.redis.expire(key, 3600); // 1 hour
-    } catch (error) {
-      console.error('Rate limit error:', error);
-      // Continue if Redis is down
-    }
-  }
-
-  /**
-   * Rate limiting for password reset
-   */
-  async passwordResetRateLimit(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<void> {
-    const ip = this.getClientIP(request);
-    const key = `password_reset_attempts:${ip}`;
-
-    try {
-      const attempts = await this.redis.get(key);
-      const count = attempts ? parseInt(attempts, 10) : 0;
-
-      if (count >= 3) {
-        return reply.status(429).send({
-          error: 'RATE_LIMIT_EXCEEDED',
-          message:
-            'Too many password reset attempts. Please try again in 1 hour.',
-          retryAfter: 3600, // 1 hour
-        });
-      }
-
-      // Increment counter
-      await this.redis.incr(key);
-      await this.redis.expire(key, 3600); // 1 hour
-    } catch (error) {
-      console.error('Rate limit error:', error);
-      // Continue if Redis is down
-    }
-  }
-
-  /**
-   * Rate limiting por usuário
-   */
-  async userRateLimit(
-    request: FastifyRequest,
-    reply: FastifyReply,
-    action: string,
-    maxAttempts: number = 10,
-    windowMs: number = 3600000
-  ): Promise<boolean> {
-    const user = (request as any).user;
-    if (!user) {
-      return true; // Se não há usuário, não aplicar rate limit por usuário
-    }
-
-    const key = `user_${action}:${user.id}`;
-
-    try {
-      const attempts = await this.redis.get(key);
-      const count = attempts ? parseInt(attempts, 10) : 0;
-
-      if (count >= maxAttempts) {
-        return reply.status(429).send({
-          error: 'RATE_LIMIT_EXCEEDED',
-          message: `Too many ${action} attempts. Please try again later.`,
-          retryAfter: Math.ceil(windowMs / 1000),
-        });
-      }
-
-      // Increment counter
-      await this.redis.incr(key);
-      await this.redis.expire(key, Math.ceil(windowMs / 1000));
-
-      return true;
-    } catch (error) {
-      console.error('User rate limit error:', error);
-      // Continue if Redis is down
-      return true;
-    }
-  }
-
-  /**
-   * Rate limiting para API calls por usuário
-   */
-  async apiRateLimit(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<boolean> {
-    return this.userRateLimit(request, reply, 'api_calls', 100, 60000); // 100 calls per minute
-  }
-
-  /**
-   * Rate limiting para automações por usuário
-   */
-  async automationRateLimit(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<boolean> {
-    return this.userRateLimit(
-      request,
-      reply,
-      'automation_actions',
-      20,
-      3600000
-    ); // 20 actions per hour
-  }
-
-  /**
-   * Rate limiting para trade operations por usuário
-   */
-  async tradeRateLimit(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<boolean> {
-    return this.userRateLimit(request, reply, 'trade_operations', 50, 3600000); // 50 trades per hour
-  }
-
-  /**
-   * Clear rate limit on successful login
-   */
-  async clearLoginRateLimit(request: FastifyRequest): Promise<void> {
-    const ip = this.getClientIP(request);
-    const key = `login_attempts:${ip}`;
-
-    try {
-      await this.redis.del(key);
-    } catch (error) {
-      console.error('Clear rate limit error:', error);
-    }
-  }
-
-  /**
-   * Clear user rate limit
-   */
-  async clearUserRateLimit(userId: string, action: string): Promise<void> {
-    const key = `user_${action}:${userId}`;
-
-    try {
-      await this.redis.del(key);
-    } catch (error) {
-      console.error('Clear user rate limit error:', error);
-    }
+    return `ratelimit:${identifier}:${endpoint}`;
   }
 
   /**
    * Get client IP address
    */
-  private getClientIP(request: FastifyRequest): string {
+  private static getClientIP(request: FastifyRequest): string {
+    // Try different headers for IP detection
     const forwarded = request.headers['x-forwarded-for'];
-    const realIP = request.headers['x-real-ip'];
-
     if (forwarded) {
-      return Array.isArray(forwarded) ? (forwarded[0] as string) : ((forwarded as string) || '').split(',')[0]?.trim() || '';
+      return Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0].trim();
     }
 
+    const realIP = request.headers['x-real-ip'];
     if (realIP) {
-      return Array.isArray(realIP) ? (realIP[0] as string) : (realIP as string);
+      return Array.isArray(realIP) ? realIP[0] : realIP;
     }
 
+    const cfIP = request.headers['cf-connecting-ip'];
+    if (cfIP) {
+      return Array.isArray(cfIP) ? cfIP[0] : cfIP;
+    }
+
+    // Fallback to connection remote address
     return request.ip || 'unknown';
   }
+
+  /**
+   * Get reset time for rate limit
+   */
+  private static async getResetTime(key: string): Promise<number> {
+    try {
+      const scores = await redis.zrange(key, 0, 0, 'WITHSCORES');
+      if (scores && scores.length >= 2) {
+        const oldestTimestamp = parseInt(scores[1]);
+        return oldestTimestamp + 60000; // 1 minute window
+      }
+    } catch (error) {
+      console.error('Error getting reset time:', error);
+    }
+    return Date.now() + 60000;
+  }
 }
+
+// Pre-configured rate limiters
+export const rateLimiters = {
+  // Strict limits for auth endpoints
+  auth: RateLimiter.create({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 attempts per 15 minutes
+    message: 'Too many authentication attempts. Please wait 15 minutes before trying again.',
+  }),
+
+  // General API limits
+  api: RateLimiter.create({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100, // 100 requests per minute
+    message: 'Too many requests. Please slow down.',
+  }),
+
+  // Trading endpoints (higher limits for active traders)
+  trading: RateLimiter.create({
+    windowMs: 60 * 1000, // 1 minute
+    max: 200, // 200 requests per minute
+    message: 'Too many trading requests. Please slow down.',
+  }),
+
+  // Notification endpoints
+  notifications: RateLimiter.create({
+    windowMs: 60 * 1000, // 1 minute
+    max: 30, // 30 notifications per minute
+    message: 'Too many notification requests. Please slow down.',
+  }),
+
+  // Payment endpoints
+  payments: RateLimiter.create({
+    windowMs: 60 * 1000, // 1 minute
+    max: 10, // 10 payment requests per minute
+    message: 'Too many payment requests. Please slow down.',
+  }),
+
+  // Admin endpoints (strict limits)
+  admin: RateLimiter.create({
+    windowMs: 60 * 1000, // 1 minute
+    max: 50, // 50 admin requests per minute
+    message: 'Too many admin requests. Please slow down.',
+  }),
+};
+
+// Global rate limiter (catch-all)
+export const globalRateLimiter = RateLimiter.create({
+  windowMs: 60 * 1000, // 1 minute
+  max: 1000, // 1000 requests per minute globally
+  message: 'Service temporarily unavailable due to high traffic.',
+});

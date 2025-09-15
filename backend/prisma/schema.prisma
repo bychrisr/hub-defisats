@@ -17,7 +17,9 @@ model User {
   social_id                  String?
   ln_markets_api_key         String?
   ln_markets_api_secret      String?
-  plan_type                  PlanType         @default(free)
+  plan_id                    String?
+  plan                       Plan?           @relation("PlanUsers", fields: [plan_id], references: [id])
+  plan_type                  PlanType        @default(free) // Mantido para compatibilidade
   last_activity_at           DateTime?        @db.Timestamp(6)
   created_at                 DateTime         @default(now()) @db.Timestamp(6)
   updated_at                 DateTime         @default(now()) @db.Timestamp(6)
@@ -92,8 +94,31 @@ model Notification {
   created_at     DateTime @default(now()) @db.Timestamp(6)
   updated_at     DateTime @default(now()) @db.Timestamp(6)
   user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  logs           NotificationLog[]
 
   @@index([user_id], map: "idx_notification_user_id")
+}
+
+model NotificationLog {
+  id              String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id         String
+  notification_id String
+  channel         String      // telegram, whatsapp, email
+  message         String
+  status          String      // sent, failed, pending
+  sent_at         DateTime?   @db.Timestamp(6)
+  error_message   String?
+  metadata        Json?       // Additional data like message_id, etc.
+  created_at      DateTime    @default(now()) @db.Timestamp(6)
+
+  // Relations
+  user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([notification_id])
+  @@index([status])
+  @@index([created_at])
 }
 
 model Payment {
@@ -102,13 +127,21 @@ model Payment {
   plan_type         PlanType
   amount_sats       Int
   lightning_invoice String
-  status            String
+  payment_hash      String?   // Lightning payment hash
+  preimage          String?   // Payment preimage for verification
+  description       String?   // Payment description
+  expiry_seconds    Int?      @default(3600) // Invoice expiry in seconds
+  status            String    @default("pending") // pending, paid, expired, failed
   paid_at           DateTime? @db.Timestamp(6)
+  expires_at        DateTime? @db.Timestamp(6)
   created_at        DateTime  @default(now()) @db.Timestamp(6)
   updated_at        DateTime  @default(now()) @db.Timestamp(6)
   user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_payment_user_id")
+  @@index([status], map: "idx_payment_status")
+  @@index([expires_at], map: "idx_payment_expires")
+  @@index([payment_hash], map: "idx_payment_hash")
 }
 
 model BacktestReport {
@@ -207,6 +240,36 @@ model CouponAnalytics {
   @@index([coupon_id], map: "idx_coupon_analytics_coupon")
   @@index([date], map: "idx_coupon_analytics_date")
   @@unique([coupon_id, date], map: "idx_coupon_analytics_unique")
+}
+
+model Plan {
+  id                 String       @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name               String       @unique // Nome do plano (Free, Basic, etc.)
+  slug               PlanType     @unique // Slug correspondente ao enum
+  description        String?      // Descrição do plano
+  price_monthly      Float?       // Preço mensal (opcional para free)
+  price_yearly       Float?       // Preço anual (opcional)
+  price_lifetime     Float?       // Preço vitalício (opcional)
+  currency           String       @default("BRL") // Moeda
+  is_active          Boolean      @default(true) // Se o plano está disponível
+  max_automations    Int          @default(0) // Máximo de automações ativas (-1 = ilimitado)
+  max_backtests      Int          @default(0) // Máximo de backtests por mês
+  max_notifications  Int          @default(0) // Máximo de notificações por mês
+  has_priority       Boolean      @default(false) // Suporte prioritário
+  has_advanced       Boolean      @default(false) // Funcionalidades avançadas
+  has_api_access     Boolean      @default(false) // Acesso à API
+  features           Json         // Lista de funcionalidades incluídas
+  stripe_price_id    String?      // ID do preço no Stripe (opcional)
+  order              Int          @default(0) // Ordem de exibição
+  created_at         DateTime     @default(now()) @db.Timestamp(6)
+  updated_at         DateTime     @default(now()) @db.Timestamp(6)
+
+  // Relacionamentos
+  users              User[]       @relation("PlanUsers")
+
+  @@index([slug])
+  @@index([is_active])
+  @@index([order])
 }
 
 enum PlanType {

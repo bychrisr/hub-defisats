@@ -503,6 +503,166 @@ export class LNMarketsService {
       message: `Low Risk: Margin level at ${marginLevel.toFixed(2)}% - Position healthy`,
     };
   }
+
+  /**
+   * Get current market price for a specific market
+   */
+  async getMarketPrice(market: string = 'btcusd'): Promise<number> {
+    try {
+      const response = await this.client.get(`/futures/ticker?market=${market}`);
+      return response.data.last || response.data.price;
+    } catch (error) {
+      console.error('Error getting market price:', error);
+      throw new Error('Failed to get market price');
+    }
+  }
+
+  /**
+   * Create a new trade/position
+   */
+  async createTrade(params: {
+    type: 'm' | 'l'; // market or limit
+    side: 'b' | 's'; // buy or sell
+    market: string;
+    leverage: number;
+    quantity: number;
+    stoploss?: number;
+    takeprofit?: number;
+    price?: number; // for limit orders
+  }) {
+    try {
+      const payload = {
+        type: params.type,
+        side: params.side,
+        market: params.market,
+        leverage: params.leverage,
+        quantity: params.quantity,
+        ...(params.stoploss && { stoploss: params.stoploss }),
+        ...(params.takeprofit && { takeprofit: params.takeprofit }),
+        ...(params.price && { price: params.price }),
+      };
+
+      const response = await this.client.post('/futures/new-trade', payload);
+
+      return {
+        id: response.data.id,
+        market: params.market,
+        side: params.side,
+        quantity: params.quantity,
+        leverage: params.leverage,
+        price: response.data.price,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error: any) {
+      console.error('Error creating trade:', error.response?.data || error.message);
+      throw new Error(`Failed to create trade: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update take profit for an existing position
+   */
+  async updateTakeProfit(tradeId: string, newTakeProfit: number) {
+    try {
+      const response = await this.client.post('/futures/update-trade', {
+        id: tradeId,
+        type: 'takeprofit',
+        value: newTakeProfit,
+      });
+
+      return {
+        success: true,
+        tradeId,
+        takeProfit: newTakeProfit,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error: any) {
+      console.error('Error updating take profit:', error.response?.data || error.message);
+      throw new Error(`Failed to update take profit: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update stop loss for an existing position
+   */
+  async updateStopLoss(tradeId: string, newStopLoss: number) {
+    try {
+      const response = await this.client.post('/futures/update-trade', {
+        id: tradeId,
+        type: 'stoploss',
+        value: newStopLoss,
+      });
+
+      return {
+        success: true,
+        tradeId,
+        stopLoss: newStopLoss,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error: any) {
+      console.error('Error updating stop loss:', error.response?.data || error.message);
+      throw new Error(`Failed to update stop loss: ${error.message}`);
+    }
+  }
+
+  /**
+   * Reduce position size (partial close)
+   */
+  async reducePosition(market: string, side: 'b' | 's', quantity: number) {
+    try {
+      const response = await this.client.post('/futures/new-trade', {
+        type: 'm',
+        side: side === 'b' ? 's' : 'b', // opposite side to reduce
+        market,
+        leverage: 1, // doesn't matter for closing
+        quantity,
+      });
+
+      return {
+        success: true,
+        tradeId: response.data.id,
+        reducedQuantity: quantity,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error: any) {
+      console.error('Error reducing position:', error.response?.data || error.message);
+      throw new Error(`Failed to reduce position: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get running trades (positions)
+   */
+  async getRunningTrades(): Promise<any[]> {
+    try {
+      const response = await this.client.get('/futures/trades?type=running');
+      return response.data || [];
+    } catch (error: any) {
+      console.error('Error getting running trades:', error.response?.data || error.message);
+      // Return empty array instead of throwing to prevent dashboard breakage
+      console.warn('Returning empty array for running trades due to API error');
+      return [];
+    }
+  }
+
+  /**
+   * Get closed trades history
+   */
+  async getClosedTrades(from?: Date, to?: Date): Promise<any[]> {
+    try {
+      const params = new URLSearchParams({
+        type: 'closed',
+        ...(from && { from: from.toISOString() }),
+        ...(to && { to: to.toISOString() }),
+      });
+
+      const response = await this.client.get(`/futures/trades?${params}`);
+      return response.data || [];
+    } catch (error: any) {
+      console.error('Error getting closed trades:', error.response?.data || error.message);
+      return [];
+    }
+  }
 }
 
 // Factory function to create LN Markets service instance

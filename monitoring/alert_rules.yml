@@ -1,0 +1,192 @@
+groups:
+  - name: hub-defisats-alerts
+    rules:
+
+    # Application Health Alerts
+    - alert: BackendDown
+      expr: up{job="hub-defisats-backend"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        service: backend
+      annotations:
+        summary: "Backend service is down"
+        description: "Backend service has been down for more than 5 minutes"
+
+    - alert: FrontendDown
+      expr: up{job="hub-defisats-frontend"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        service: frontend
+      annotations:
+        summary: "Frontend service is down"
+        description: "Frontend service has been down for more than 5 minutes"
+
+    # Database Alerts
+    - alert: DatabaseDown
+      expr: up{job="postgres"} == 0
+      for: 2m
+      labels:
+        severity: critical
+        service: database
+      annotations:
+        summary: "PostgreSQL database is down"
+        description: "PostgreSQL database has been unreachable for more than 2 minutes"
+
+    - alert: DatabaseHighConnections
+      expr: pg_stat_activity_count > 80
+      for: 5m
+      labels:
+        severity: warning
+        service: database
+      annotations:
+        summary: "High database connections"
+        description: "Database has {{ $value }} active connections (>80)"
+
+    # Redis Alerts
+    - alert: RedisDown
+      expr: up{job="redis"} == 0
+      for: 2m
+      labels:
+        severity: critical
+        service: cache
+      annotations:
+        summary: "Redis cache is down"
+        description: "Redis has been unreachable for more than 2 minutes"
+
+    - alert: RedisHighMemoryUsage
+      expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+      for: 5m
+      labels:
+        severity: warning
+        service: cache
+      annotations:
+        summary: "High Redis memory usage"
+        description: "Redis memory usage is {{ $value | humanizePercentage }}"
+
+    # Performance Alerts
+    - alert: HighResponseTime
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="hub-defisats-backend"}[5m])) > 2
+      for: 5m
+      labels:
+        severity: warning
+        service: backend
+      annotations:
+        summary: "High response time"
+        description: "95th percentile response time is {{ $value }}s (>2s)"
+
+    - alert: HighErrorRate
+      expr: rate(http_requests_total{status_code=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+      for: 5m
+      labels:
+        severity: critical
+        service: backend
+      annotations:
+        summary: "High error rate"
+        description: "Error rate is {{ $value | humanizePercentage }} (>5%)"
+
+    # Business Logic Alerts
+    - alert: LowSuccessfulTrades
+      expr: rate(hub_defisats_trades_success_total[1h]) < 0.8
+      for: 1h
+      labels:
+        severity: warning
+        service: trading
+      annotations:
+        summary: "Low trade success rate"
+        description: "Trade success rate is {{ $value | humanizePercentage }} (<80%)"
+
+    - alert: PaymentProcessingFailed
+      expr: increase(hub_defisats_payments_failed_total[5m]) > 0
+      labels:
+        severity: warning
+        service: payments
+      annotations:
+        summary: "Payment processing failed"
+        description: "{{ $value }} payment(s) failed in the last 5 minutes"
+
+    # Worker Alerts
+    - alert: WorkerDown
+      expr: up{job=~"margin-monitor|automation-executor|notification-worker|payment-validator"} == 0
+      for: 10m
+      labels:
+        severity: critical
+        service: workers
+      annotations:
+        summary: "Worker service is down"
+        description: "{{ $labels.job }} worker has been down for more than 10 minutes"
+
+    - alert: WorkerQueueBacklog
+      expr: hub_defisats_worker_queue_size > 1000
+      for: 5m
+      labels:
+        severity: warning
+        service: workers
+      annotations:
+        summary: "Worker queue backlog"
+        description: "{{ $labels.worker }} has {{ $value }} queued jobs (>1000)"
+
+    # System Resource Alerts
+    - alert: HighCPUUsage
+      expr: rate(cpu_usage_seconds_total[5m]) > 0.8
+      for: 5m
+      labels:
+        severity: warning
+        service: system
+      annotations:
+        summary: "High CPU usage"
+        description: "CPU usage is {{ $value | humanizePercentage }} (>80%)"
+
+    - alert: HighMemoryUsage
+      expr: process_resident_memory_bytes / 1024 / 1024 / 1024 > 2
+      for: 5m
+      labels:
+        severity: warning
+        service: system
+      annotations:
+        summary: "High memory usage"
+        description: "Memory usage is {{ $value }}GB (>2GB)"
+
+    - alert: DiskSpaceLow
+      expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+      for: 5m
+      labels:
+        severity: critical
+        service: system
+      annotations:
+        summary: "Low disk space"
+        description: "Disk space available is {{ $value | humanizePercentage }} (<10%)"
+
+    # LN Markets API Alerts
+    - alert: LNMarketsAPIDown
+      expr: hub_defisats_lnmarkets_api_errors_total > 10
+      for: 5m
+      labels:
+        severity: critical
+        service: external
+      annotations:
+        summary: "LN Markets API issues"
+        description: "{{ $value }} LN Markets API errors in the last 5 minutes"
+
+    # User Experience Alerts
+    - alert: HighUserLoginFailures
+      expr: rate(hub_defisats_login_failures_total[5m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+        service: auth
+      annotations:
+        summary: "High login failure rate"
+        description: "Login failure rate is {{ $value | humanizePercentage }} (>10%)"
+
+    - alert: SlowPageLoad
+      expr: histogram_quantile(0.95, rate(page_load_duration_seconds[5m])) > 3
+      for: 5m
+      labels:
+        severity: warning
+        service: frontend
+      annotations:
+        summary: "Slow page load times"
+        description: "95th percentile page load time is {{ $value }}s (>3s)"
+

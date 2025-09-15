@@ -5,12 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuthStore } from '@/stores/auth';
-import { 
-  LayoutDashboard, 
-  Monitor, 
-  Users, 
-  Gift, 
-  AlertTriangle, 
+import {
+  LayoutDashboard,
+  Monitor,
+  Users,
+  Gift,
+  AlertTriangle,
   Settings,
   Menu as MenuIcon,
   LogOut,
@@ -18,16 +18,18 @@ import {
   X,
   Sun,
   Moon,
-  Palette
+  Palette,
+  CreditCard
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Plans', href: '/admin/plans', icon: CreditCard },
+  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Coupons', href: '/admin/coupons', icon: Gift },
   { name: 'Menus', href: '/admin/menus', icon: MenuIcon },
   { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor },
-  { name: 'Users', href: '/admin/users', icon: Users },
-  { name: 'Coupons', href: '/admin/coupons', icon: Gift },
   { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];

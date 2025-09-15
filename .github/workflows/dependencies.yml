@@ -1,47 +1,196 @@
-name: Dependencies Check
+name: Dependency Audit
 
 on:
   schedule:
-    - cron: '0 0 * * 1' # Run every Monday
-  workflow_dispatch: # Allow manual trigger
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - 'backend/prisma/schema.prisma'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - 'backend/prisma/schema.prisma'
 
 jobs:
-  check-dependencies:
+  audit-backend:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run npm audit
+        run: |
+          cd backend
+          npm audit --audit-level=moderate
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=backend/package.json
+
+  audit-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run npm audit
+        run: |
+          cd frontend
+          npm audit --audit-level=moderate
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=frontend/package.json
+
+  database-security:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Check backend dependencies
-      working-directory: ./backend
-      run: |
-        npm ci
-        npm audit --audit-level=moderate
-        npm outdated
+      - name: Install Prisma
+        run: |
+          cd backend
+          npm install -g prisma
 
-    - name: Check frontend dependencies
-      working-directory: ./frontend
-      run: |
-        npm ci
-        npm audit --audit-level=moderate
-        npm outdated
+      - name: Check database schema
+        run: |
+          cd backend
+          npx prisma validate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/hub_defisats_audit
 
-    - name: Check for security vulnerabilities
-      run: |
-        cd backend && npm audit --json > backend-audit.json
-        cd ../frontend && npm audit --json > frontend-audit.json
+  container-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Upload audit results
-      uses: actions/upload-artifact@v4
-      with:
-        name: audit-results
-        path: |
-          backend-audit.json
-          frontend-audit.json
+      - name: Build backend image
+        run: docker build -t hub-defisats-backend:audit ./backend
+
+      - name: Build frontend image
+        run: docker build -t hub-defisats-frontend:audit ./frontend
+
+      - name: Scan backend image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          scan-ref: 'hub-defisats-backend:audit'
+          format: 'sarif'
+          output: 'backend-trivy-results.sarif'
+
+      - name: Scan frontend image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          scan-ref: 'hub-defisats-frontend:audit'
+          format: 'sarif'
+          output: 'frontend-trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: |
+            backend-trivy-results.sarif
+            frontend-trivy-results.sarif
+
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install license-checker
+        run: npm install -g license-checker
+
+      - name: Check backend licenses
+        run: |
+          cd backend
+          npx license-checker --json > licenses.json
+          # Check for GPL licenses (example)
+          if grep -q "GPL" licenses.json; then
+            echo "⚠️ GPL licenses found in backend dependencies"
+            exit 1
+          fi
+
+      - name: Check frontend licenses
+        run: |
+          cd frontend
+          npx license-checker --json > licenses.json
+          # Check for GPL licenses (example)
+          if grep -q "GPL" licenses.json; then
+            echo "⚠️ GPL licenses found in frontend dependencies"
+            exit 1
+          fi
+
+  notify-security:
+    runs-on: ubuntu-latest
+    needs: [audit-backend, audit-frontend, database-security, container-security, license-check]
+    if: failure()
+    steps:
+      - name: Send security alert
+        run: |
+          echo "🚨 Security audit failed! Please review the security issues above."
+          # Add notification logic here (Slack, email, etc.)
+          # Example: curl -X POST -H 'Content-type: application/json' --data '{"text":"Security audit failed"}' ${{ secrets.SLACK_WEBHOOK }}
