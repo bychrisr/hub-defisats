@@ -22,10 +22,7 @@ import {
   Activity,
   TrendingDown,
   CheckCircle,
-  XCircle,
-  Percent,
 } from 'lucide-react';
-import { PositionsSummary } from '@/components/PositionsSummary';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
@@ -35,8 +32,7 @@ import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
-import { useDashboardMetrics, useFormatSats } from '@/hooks/useDashboardMetrics';
-import { useFormatPercentage } from '@/hooks/useFormatPercentage';
+import { useFormatSats } from '@/hooks/useDashboardMetrics';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -60,11 +56,12 @@ export default function Dashboard() {
   
   // Novos hooks para métricas da dashboard
   const positionsData = usePositionsMetrics();
-  const metrics = useDashboardMetrics();
   const historicalData = useHistoricalData();
   const estimatedBalance = useEstimatedBalance();
   const { formatSats } = useFormatSats();
-  const formatPercentage = useFormatPercentage();
+  
+  // Dados históricos para cálculos
+  const historicalMetrics = historicalData.data;
   
 
   useEffect(() => {
@@ -112,36 +109,36 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <PnLCard
               title="PnL Total"
-              pnl={metrics.totalPnL}
-              percentage={metrics.totalPnLPercentage}
+              pnl={positionsData.totalPL || 0}
+              percentage={positionsData.totalMargin > 0 ? ((positionsData.totalPL || 0) / positionsData.totalMargin) * 100 : 0}
               subtitle="Lucro/prejuízo total"
             />
             
             <PnLCard
               title="Profit Estimado"
-              pnl={metrics.estimatedProfit}
+              pnl={positionsData.estimatedProfit || 0}
               subtitle="Se fechadas com take profit"
               icon={Target}
             />
             
             <MetricCard
-              title="Trades Abertos"
-              value={metrics.openTrades.toString()}
+              title="Posições em Execução"
+              value={(positionsData.positionCount || 0).toString()}
               subtitle="Posições em execução"
               icon={Activity}
-              variant={metrics.openTrades > 0 ? 'default' : 'warning'}
+              variant={(positionsData.positionCount || 0) > 0 ? 'default' : 'warning'}
             />
             
             <MetricCard
               title="Margem Total"
-              value={formatSats(metrics.totalMargin)}
+              value={formatSats(positionsData.totalMargin || 0)}
               subtitle="Margem utilizada"
               icon={Wallet}
             />
             
             <MetricCard
               title="Taxas Estimadas"
-              value={formatSats(metrics.estimatedFees)}
+              value={formatSats(positionsData.totalFees || 0)}
               subtitle="Taxas das posições ativas"
               icon={DollarSign}
             />
@@ -168,70 +165,28 @@ export default function Dashboard() {
             
             <PnLCard
               title="Lucro Total"
-              pnl={metrics.totalProfit}
+              pnl={historicalMetrics?.totalProfit || 0}
               subtitle="Soma de todos os lucros"
               icon={TrendingUp}
             />
             
             <MetricCard
               title="Taxas Pagas"
-              value={formatSats(metrics.totalFeesPaid)}
+              value={formatSats(historicalMetrics?.totalFees || 0)}
               subtitle="Taxas pagas em operações"
               icon={DollarSign}
             />
             
             <MetricCard
               title="Taxa de Sucesso"
-              value={`${metrics.successRate.toFixed(1)}%`}
-              subtitle={`${metrics.winningPositions} de ${metrics.totalPositions} posições`}
+              value={`${(historicalMetrics?.successRate || 0).toFixed(1)}%`}
+              subtitle={`${historicalMetrics?.winningPositions || 0} de ${historicalMetrics?.totalPositions || 0} posições`}
               icon={CheckCircle}
-              variant={metrics.successRate >= 50 ? 'success' : 'warning'}
+              variant={(historicalMetrics?.successRate || 0) >= 50 ? 'success' : 'warning'}
             />
           </div>
         </div>
 
-        {/* Linha 3 - Estatísticas Adicionais */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-text-primary">Estatísticas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              title="ROI"
-              value={formatPercentage(metrics.roi)}
-              subtitle="Retorno sobre investimento"
-              icon={Percent}
-              variant={metrics.roi >= 0 ? 'success' : 'danger'}
-            />
-            
-            <MetricCard
-              title="Total de Posições"
-              value={metrics.totalPositions.toString()}
-              subtitle="Posições totais"
-              icon={BarChart3}
-            />
-            
-            <MetricCard
-              title="Posições Ganhas"
-              value={metrics.winningPositions.toString()}
-              subtitle="Encerradas com lucro"
-              icon={CheckCircle}
-              variant="success"
-            />
-            
-            <MetricCard
-              title="Posições Perdidas"
-              value={metrics.losingPositions.toString()}
-              subtitle="Encerradas com prejuízo"
-              icon={XCircle}
-              variant="danger"
-            />
-          </div>
-        </div>
-
-        {/* Resumo das Posições */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Resumo das Posições</h2>
-          <PositionsSummary />
-        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -411,8 +366,8 @@ export default function Dashboard() {
         )}
       </div>
 
-        {/* Gráfico de Preços */}
-        <SimpleChart />
+        {/* Gráfico de Preços - Temporariamente comentado */}
+        {/* <SimpleChart /> */}
 
     </div>
   );
