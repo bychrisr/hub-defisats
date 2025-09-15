@@ -6,16 +6,16 @@ import path from 'path';
 export default defineConfig(({ mode }) => ({
   server: {
     host: '0.0.0.0',
-    port: 3001,
+    port: 3000,
     proxy: {
       '/api': {
-        target: 'http://backend:3010', // ✅ CORRETO: usar nome do serviço Docker e porta interna
-        changeOrigin: true,             // ✅ Necessário para evitar problemas de Host header
-        secure: false,                  // ✅ Útil em dev (desabilita verificação SSL)
+        target: 'http://localhost:13010', // ✅ Backend está rodando na porta 13010
+        changeOrigin: true,
+        secure: false,
         // rewrite: (path) => path.replace(/^\/api/, ''), // ❌ REMOVIDO: backend espera prefixo /api
       },
       '/test': {
-        target: 'http://backend:3010', // ✅ WebSocket proxy para endpoints de teste
+        target: 'http://localhost:13010', // ✅ WebSocket proxy para endpoints de teste
         changeOrigin: true,
         secure: false,
         ws: true,                      // ✅ Habilitar WebSocket proxy
