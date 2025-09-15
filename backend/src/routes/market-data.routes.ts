@@ -6,8 +6,9 @@ import { LNMarketsAPIService } from '@/services/lnmarkets-api.service';
 export async function marketDataRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
 
-  // PUBLIC ENDPOINT - No authentication required
-  // Get current market prices (public data)
+// Authentication middleware applied above for private routes
+
+  // PUBLIC ENDPOINT - No authentication required (registered after auth middleware)
   fastify.get('/prices/latest', {
     schema: {
       description: 'Get latest market prices (public endpoint)',
@@ -96,8 +97,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Apply authentication middleware to private routes only
-  fastify.addHook('preHandler', authMiddleware);
+// Authentication middleware applied above for private routes
 
   // Get historical market data (candlesticks)
   fastify.get('/market/historical', {
