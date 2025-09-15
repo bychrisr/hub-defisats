@@ -28,6 +28,7 @@ import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
 import { usePositionsMetrics, usePositions } from '@/contexts/PositionsContext';
+import LatestPricesWidget from '@/components/market/LatestPricesWidget';
 import FaviconTest from '@/components/FaviconTest';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
@@ -372,6 +373,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+      </div>
+
+      {/* Latest Prices Widget - Dados públicos sem autenticação */}
+      <div className="mt-6">
+        <LatestPricesWidget showRefreshButton={true} compact={false} />
       </div>
 
       {/* Favicon Test Component */}

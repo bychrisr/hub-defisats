@@ -591,10 +591,15 @@ export const useRealtimeData = () => {
   return context;
 };
 
+// Hook para dados de mercado públicos (não requer autenticação)
+// Hook for public market data (no authentication required)
+export { useLatestPrices, useBitcoinPrice, useCryptoPrices } from '@/hooks/useLatestPrices';
+
 // Hook para dados de mercado específicos
+// Hook for LN Markets authenticated market data (requires credentials)
 export const useMarketData = (symbol: string) => {
   const { data, subscribeToSymbol, unsubscribeFromSymbol } = useRealtimeData();
-  
+
   useEffect(() => {
     if (symbol) {
       subscribeToSymbol(symbol);
