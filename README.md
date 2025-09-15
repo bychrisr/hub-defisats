@@ -46,6 +46,20 @@
 - ✅ **Relatórios de Receita**: Analytics de uso e receita por plano
 - ✅ **Seed de Planos**: Script automático para popular planos padrão
 
+### 🌐 **Sistema de Internacionalização** ⭐ **NOVO**
+- ✅ **Suporte Multi-idioma**: PT-BR e EN-US completos
+- ✅ **Detecção Automática**: Idioma baseado no navegador
+- ✅ **Persistência**: Preferências salvas localmente
+- ✅ **Dicionários Completos**: 200+ chaves traduzidas
+- ✅ **Interface Dinâmica**: Mudança instantânea de idioma
+
+### 💱 **Conversão Inteligente de Moedas** ⭐ **NOVO**
+- ✅ **Conversão em Tempo Real**: BTC, USD, BRL, EUR, sats
+- ✅ **APIs Externas**: CoinGecko + ExchangeRate-API
+- ✅ **Cache Inteligente**: Atualização automática a cada 5min
+- ✅ **Formatação Inteligente**: Símbolos e casas decimais adequadas
+- ✅ **Fallback Offline**: Valores padrão para quando APIs falham
+
 ## ✅ Funcionalidades Implementadas
 
 ### 🎮 Sistema de Simulações em Tempo Real (v1.3.0) ⭐ **NOVO**

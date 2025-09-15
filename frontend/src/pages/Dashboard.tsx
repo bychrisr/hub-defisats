@@ -41,8 +41,10 @@ import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
   const {
     automations,
@@ -151,40 +153,40 @@ export default function Dashboard() {
 
         {/* Linha 2 - Histórico */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-text-primary">Histórico</h2>
+          <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.history')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <PnLCard
-              title="Saldo Estimado"
+              title={t('dashboard.estimated_balance')}
               pnl={estimatedBalance.data?.estimated_balance || 0}
-              subtitle={estimatedBalance.isLoading ? "Carregando..." : (estimatedBalance.data?.positions_count || 0) + ' posições'}
+              subtitle={estimatedBalance.isLoading ? t('common.loading') : (estimatedBalance.data?.positions_count || 0) + ' ' + t('dashboard.positions')}
               icon={Wallet}
             />
-            
+
             <MetricCard
-              title="Total Investido"
+              title={t('dashboard.total_invested')}
               value={formatSats(estimatedBalance.data?.total_invested || 0)}
-              subtitle={estimatedBalance.isLoading ? "Carregando..." : (estimatedBalance.data?.trades_count || 0) + ' trades'}
+              subtitle={estimatedBalance.isLoading ? t('common.loading') : (estimatedBalance.data?.trades_count || 0) + ' ' + t('dashboard.trades')}
               icon={Target}
             />
-            
+
             <PnLCard
-              title="Lucro Total"
+              title={t('dashboard.total_profit')}
               pnl={historicalMetrics?.totalProfit || 0}
-              subtitle="Soma de todos os lucros"
+              subtitle={t('dashboard.sum_of_all_profits')}
               icon={TrendingUp}
             />
-            
+
             <MetricCard
-              title="Taxas Pagas"
+              title={t('dashboard.fees_paid')}
               value={formatSats(historicalMetrics?.totalFees || 0)}
-              subtitle="Taxas pagas em operações"
+              subtitle={t('dashboard.fees_in_operations')}
               icon={DollarSign}
             />
-            
+
             <MetricCard
-              title="Taxa de Sucesso"
+              title={t('dashboard.success_rate')}
               value={(historicalMetrics?.successRate || 0).toFixed(1) + '%'}
-              subtitle={(historicalMetrics?.winningPositions || 0) + '/' + (historicalMetrics?.totalPositions || 0) + ' trades | BTC volátil'}
+              subtitle={(historicalMetrics?.winningPositions || 0) + '/' + (historicalMetrics?.totalPositions || 0) + ' ' + t('dashboard.trades') + ' | ' + t('dashboard.volatile_btc')}
               icon={CheckCircle}
               variant={(historicalMetrics?.successRate || 0) >= 50 ? 'success' : 'warning'}
             />
@@ -193,13 +195,13 @@ export default function Dashboard() {
 
         {/* System Health */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-text-primary">Saúde do Sistema</h2>
+          <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.system_health')}</h2>
           <SystemHealth />
         </div>
 
         {/* Quick Actions */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-text-primary">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.quick_actions')}</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card>
             <CardHeader>

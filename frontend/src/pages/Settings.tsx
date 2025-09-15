@@ -27,8 +27,12 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { LanguageCurrencySelector } from '@/components/common/LanguageCurrencySelector';
+import { CurrencyConverter } from '@/components/common/CurrencyConverter';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export const Settings = () => {
+  const { t } = useTranslation();
   const [showApiKey, setShowApiKey] = useState(false);
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
@@ -53,11 +57,12 @@ export const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="profile">Perfil</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="profile">{t('settings.general')}</TabsTrigger>
           <TabsTrigger value="api-keys">API Keys</TabsTrigger>
-          <TabsTrigger value="notifications">Notificações</TabsTrigger>
-          <TabsTrigger value="security">Segurança</TabsTrigger>
+          <TabsTrigger value="notifications">{t('settings.notifications')}</TabsTrigger>
+          <TabsTrigger value="security">{t('settings.security')}</TabsTrigger>
+          <TabsTrigger value="preferences">Preferências</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -487,6 +492,28 @@ export const Settings = () => {
                   </Button>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Preferences Tab */}
+        <TabsContent value="preferences" className="space-y-6">
+          {/* Language & Currency Settings */}
+          <LanguageCurrencySelector variant="settings" />
+
+          {/* Currency Converter */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Conversor de Moeda
+              </CardTitle>
+              <CardDescription>
+                Converta valores entre diferentes moedas em tempo real
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CurrencyConverter />
             </CardContent>
           </Card>
         </TabsContent>

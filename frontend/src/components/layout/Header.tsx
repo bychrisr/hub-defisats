@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import ThemeToggle from '@/components/ThemeToggle';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
+import { LanguageCurrencySelector } from '@/components/common/LanguageCurrencySelector';
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -60,6 +61,10 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
 
         <div className="flex items-center gap-4">
           <RealtimeStatus className="hidden sm:flex" />
+
+          {/* Language & Currency Selector */}
+          <LanguageCurrencySelector variant="header" compact />
+
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
