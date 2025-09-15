@@ -9,10 +9,16 @@ export default defineConfig(({ mode }) => ({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://backend:3010', // ✅ CORRETO: usar nome do serviço Docker
+        target: 'http://backend:3010', // ✅ CORRETO: usar nome do serviço Docker e porta interna
         changeOrigin: true,             // ✅ Necessário para evitar problemas de Host header
         secure: false,                  // ✅ Útil em dev (desabilita verificação SSL)
         // rewrite: (path) => path.replace(/^\/api/, ''), // ❌ REMOVIDO: backend espera prefixo /api
+      },
+      '/test': {
+        target: 'http://backend:3010', // ✅ WebSocket proxy para endpoints de teste
+        changeOrigin: true,
+        secure: false,
+        ws: true,                      // ✅ Habilitar WebSocket proxy
       },
     },
   },

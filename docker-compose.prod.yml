@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile.prod
     container_name: hub-defisats-backend-prod
     env_file:
-      - .env.production
+      - env.production
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}

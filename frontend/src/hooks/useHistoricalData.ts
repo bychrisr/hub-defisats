@@ -35,7 +35,7 @@ export const useHistoricalData = () => {
       setError(null);
 
       // Buscar trades históricos
-      const tradesResponse = await api.get('/api/lnmarkets/user/trades?limit=100');
+      const tradesResponse = await api.get('/api/lnmarkets/user/trades?limit=100&type=closed');
       const tradesData = tradesResponse.data;
 
       if (tradesData.success && Array.isArray(tradesData.data)) {
@@ -43,13 +43,13 @@ export const useHistoricalData = () => {
           id: trade.id,
           side: trade.side === 'b' ? 'long' : 'short',
           quantity: trade.quantity || 0,
-          entryPrice: trade.entry_price || 0,
-          exitPrice: trade.exit_price || undefined,
-          pnl: trade.pnl || 0,
+          entryPrice: trade.entry_price || trade.price || 0,
+          exitPrice: trade.price || undefined,
+          pnl: trade.pnl || trade.pl || 0,
           fees: (trade.opening_fee || 0) + (trade.closing_fee || 0) + (trade.sum_carry_fees || 0),
-          status: trade.status === 'closed' ? 'closed' : 'open',
+          status: trade.status === 'closed' || trade.closed ? 'closed' : 'open',
           createdAt: trade.creation_ts || new Date().toISOString(),
-          closedAt: trade.closing_ts || undefined,
+          closedAt: trade.closed_ts || undefined,
         }));
 
         // Calcular métricas históricas

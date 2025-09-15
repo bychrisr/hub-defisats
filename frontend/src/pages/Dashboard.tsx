@@ -27,12 +27,13 @@ import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
-import { usePositionsMetrics } from '@/contexts/PositionsContext';
+import { usePositionsMetrics, usePositions } from '@/contexts/PositionsContext';
+import FaviconTest from '@/components/FaviconTest';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
-import { useFormatSats } from '@/hooks/useDashboardMetrics';
+import { useFormatSatsText } from '@/hooks/useDashboardMetrics';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -51,14 +52,15 @@ export default function Dashboard() {
   
   // Dados em tempo real
   const realtimePositions = useUserPositions();
-  const userBalance = useUserBalance();
+  const balanceData = useUserBalance();
   const { isConnected } = useConnectionStatus();
   
   // Novos hooks para métricas da dashboard
   const positionsData = usePositionsMetrics();
   const historicalData = useHistoricalData();
   const estimatedBalance = useEstimatedBalance();
-  const { formatSats } = useFormatSats();
+  const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente
+  const formatSats = useFormatSatsText();
   
   // Dados históricos para cálculos
   const historicalMetrics = historicalData.data;
@@ -124,7 +126,7 @@ export default function Dashboard() {
             <MetricCard
               title="Posições em Execução"
               value={(positionsData.positionCount || 0).toString()}
-              subtitle="Posições em execução"
+              subtitle={'BTC @ ' + (positionsContextData?.marketIndex?.index ? '$' + positionsContextData.marketIndex.index.toLocaleString() : 'Carregando...')}
               icon={Activity}
               variant={(positionsData.positionCount || 0) > 0 ? 'default' : 'warning'}
             />
@@ -152,14 +154,14 @@ export default function Dashboard() {
             <PnLCard
               title="Saldo Estimado"
               pnl={estimatedBalance.data?.estimated_balance || 0}
-              subtitle={estimatedBalance.isLoading ? "Carregando..." : `${estimatedBalance.data?.positions_count || 0} posições`}
+              subtitle={estimatedBalance.isLoading ? "Carregando..." : (estimatedBalance.data?.positions_count || 0) + ' posições'}
               icon={Wallet}
             />
             
             <MetricCard
               title="Total Investido"
               value={formatSats(estimatedBalance.data?.total_invested || 0)}
-              subtitle={estimatedBalance.isLoading ? "Carregando..." : `${estimatedBalance.data?.trades_count || 0} trades`}
+              subtitle={estimatedBalance.isLoading ? "Carregando..." : (estimatedBalance.data?.trades_count || 0) + ' trades'}
               icon={Target}
             />
             
@@ -179,8 +181,8 @@ export default function Dashboard() {
             
             <MetricCard
               title="Taxa de Sucesso"
-              value={`${(historicalMetrics?.successRate || 0).toFixed(1)}%`}
-              subtitle={`${historicalMetrics?.winningPositions || 0} de ${historicalMetrics?.totalPositions || 0} posições`}
+              value={(historicalMetrics?.successRate || 0).toFixed(1) + '%'}
+              subtitle={(historicalMetrics?.winningPositions || 0) + '/' + (historicalMetrics?.totalPositions || 0) + ' trades | BTC volátil'}
               icon={CheckCircle}
               variant={(historicalMetrics?.successRate || 0) >= 50 ? 'success' : 'warning'}
             />
@@ -189,7 +191,9 @@ export default function Dashboard() {
 
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-text-primary">Quick Actions</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
@@ -257,10 +261,16 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-text-primary">Recent Activity</h2>
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest automation activity</CardDescription>
+              <CardTitle>Latest Automation Activity</CardTitle>
+              <CardDescription>Recent automation events and updates</CardDescription>
             </CardHeader>
             <CardContent>
               {stats?.recentActivity && stats.recentActivity.length > 0 ? (
@@ -268,13 +278,11 @@ export default function Dashboard() {
                   {stats.recentActivity.slice(0, 5).map(activity => (
                     <div
                       key={activity.id}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between p-3 rounded-lg border border-border"
                     >
                       <div className="flex items-center space-x-3">
                         <div
-                          className={`w-2 h-2 rounded-full ${
-                            activity.is_active ? 'bg-green-500' : 'bg-gray-400'
-                          }`}
+                          className={'w-2 h-2 rounded-full ' + (activity.is_active ? 'bg-green-500' : 'bg-gray-400')}
                         />
                         <div>
                           <div className="text-sm font-medium capitalize">
@@ -366,8 +374,8 @@ export default function Dashboard() {
         )}
       </div>
 
-        {/* Gráfico de Preços - Temporariamente comentado */}
-        {/* <SimpleChart /> */}
+      {/* Favicon Test Component */}
+      <FaviconTest />
 
     </div>
   );

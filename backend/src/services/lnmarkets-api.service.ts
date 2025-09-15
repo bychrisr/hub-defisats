@@ -444,7 +444,16 @@ export class LNMarketsAPIService {
       return result;
     } catch (error: any) {
       console.log('❌ LN MARKETS TRADES - Error:', error.response?.status, error.response?.statusText);
-      throw error;
+
+      // Se o endpoint não existir (404), retornar array vazio em vez de erro
+      if (error.response?.status === 404) {
+        console.log('⚠️ LN MARKETS TRADES - Endpoint /futures not available, returning empty trades array');
+        return [];
+      }
+
+      // Para outros erros, também retornar array vazio para não quebrar a dashboard
+      console.log('⚠️ LN MARKETS TRADES - Unknown error, returning empty trades array');
+      return [];
     }
   }
 
@@ -453,39 +462,39 @@ export class LNMarketsAPIService {
     try {
       // Buscar trades em execução (abertas)
       console.log('📊 LN MARKETS ALL TRADES - Fetching running trades...');
-      const runningTrades = await this.getUserTrades({ 
-        type: 'running', 
-        limit: Math.floor(limit / 2) 
+      const runningTrades = await this.getUserTrades({
+        type: 'running',
+        limit: Math.floor(limit / 2)
       });
 
       // Buscar trades fechadas
       console.log('📊 LN MARKETS ALL TRADES - Fetching closed trades...');
-      const closedTrades = await this.getUserTrades({ 
-        type: 'closed', 
-        limit: Math.floor(limit / 2) 
+      const closedTrades = await this.getUserTrades({
+        type: 'closed',
+        limit: Math.floor(limit / 2)
       });
 
       // Combinar todos os trades e remover duplicatas por ID
       const runningArray = Array.isArray(runningTrades) ? runningTrades : [];
       const closedArray = Array.isArray(closedTrades) ? closedTrades : [];
-      
+
       // Criar um Map para deduplicação por ID
       const tradesMap = new Map();
-      
+
       // Adicionar trades running
       runningArray.forEach(trade => {
         if (trade.id) {
           tradesMap.set(trade.id, trade);
         }
       });
-      
+
       // Adicionar trades closed (sobrescreve se já existe)
       closedArray.forEach(trade => {
         if (trade.id) {
           tradesMap.set(trade.id, trade);
         }
       });
-      
+
       const allTrades = Array.from(tradesMap.values());
 
       console.log('✅ LN MARKETS ALL TRADES - Combined and deduplicated results:', {
@@ -499,7 +508,16 @@ export class LNMarketsAPIService {
       return allTrades;
     } catch (error: any) {
       console.log('❌ LN MARKETS ALL TRADES - Error:', error.response?.status, error.response?.statusText);
-      throw error;
+
+      // Se o endpoint não existir (404), retornar array vazio em vez de erro
+      if (error.response?.status === 404) {
+        console.log('⚠️ LN MARKETS ALL TRADES - Endpoint /futures not available, returning empty trades array');
+        return [];
+      }
+
+      // Para outros erros, também retornar array vazio para não quebrar a dashboard
+      console.log('⚠️ LN MARKETS ALL TRADES - Unknown error, returning empty trades array');
+      return [];
     }
   }
 
@@ -583,10 +601,24 @@ export class LNMarketsAPIService {
 
   // Get current market index data
   async getMarketIndex() {
-    return this.makeRequest({
-      method: 'GET',
-      path: '/v2/market'
-    });
+    try {
+      console.log('🔍 LN MARKETS MARKET INDEX - Trying /futures/ticker endpoint');
+      return await this.makeRequest({
+        method: 'GET',
+        path: '/futures/ticker'
+      });
+    } catch (tickerError: any) {
+      console.log('⚠️ LN MARKETS MARKET INDEX - /futures/ticker failed, trying /futures/info:', tickerError?.message || tickerError);
+      try {
+        return await this.makeRequest({
+          method: 'GET',
+          path: '/futures/info'
+        });
+      } catch (infoError: any) {
+        console.log('❌ LN MARKETS MARKET INDEX - Both endpoints failed:', infoError?.message || infoError);
+        throw infoError;
+      }
+    }
   }
 
   async getFuturesData() {

@@ -13,6 +13,7 @@ import { useDynamicFavicon } from '@/hooks/useDynamicFavicon';
 import { useDynamicPageConfig } from '@/hooks/useDynamicPageConfig';
 import { RouteGuard } from '@/components/guards/RouteGuard';
 import { SmartRedirect } from '@/components/guards/SmartRedirect';
+import FaviconTest from '@/components/FaviconTest';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';

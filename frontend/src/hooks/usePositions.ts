@@ -12,7 +12,8 @@ import { usePositionsMetrics, usePositionsList, usePositionsData } from '@/conte
 // Hook específico para P&L total
 export const useTotalPL = () => {
   const { totalPL } = usePositionsMetrics();
-  return totalPL;
+  console.log('📊 useTotalPL - Current totalPL:', totalPL);
+  return totalPL || 0;
 };
 
 // Hook específico para margem total

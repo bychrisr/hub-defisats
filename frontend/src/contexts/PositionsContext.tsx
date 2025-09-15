@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useUserPositions, useRealtimeData } from './RealtimeDataContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -240,7 +240,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           step2_priceChangePercent: (priceChange / pos.entryPrice),
           step3_marginInSats: pos.margin,
           step4_leverageMultiplier: pos.leverage,
-          step5_formula: `${pos.margin} × ${pos.leverage} × (${priceChange} / ${pos.entryPrice})`,
+          step5_formula: pos.margin + ' × ' + pos.leverage + ' × (' + priceChange + ' / ' + pos.entryPrice + ')',
           step6_grossPnLSats: grossPnLSats,
           
           // Comparação com valor esperado da LN Markets  
@@ -412,17 +412,17 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   }, [userPositions]);
 
   // Função para buscar posições reais da LN Markets
-  const fetchRealPositions = async () => {
+  const fetchRealPositions = useCallback(async () => {
     try {
       console.log('🔍 POSITIONS CONTEXT - Fetching real positions, market index and menu from LN Markets...');
-      
+
       // Atualizar posições, índice e menu simultaneamente
       const [positionsResponse, indexResponse, menuResponse] = await Promise.all([
         api.get('/api/lnmarkets/user/positions'),
         api.get('/api/market/index'),
         api.get('/api/menu')
       ]);
-      
+
       const positionsData = positionsResponse.data;
       const indexData = indexResponse.data;
       const menuData = menuResponse.data;
@@ -501,9 +501,12 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
             timestamp: indexData.data.timestamp
           };
           console.log('✅ POSITIONS CONTEXT - Market index processed:', marketIndex);
+          console.log('📊 MARKET INDEX - Index value:', marketIndex.index);
+          console.log('📊 MARKET INDEX - 24h change:', marketIndex.index24hChange);
         } else {
           marketIndexError = indexData.message || 'Failed to fetch market index';
           console.log('❌ POSITIONS CONTEXT - Market index error:', marketIndexError);
+          console.log('❌ MARKET INDEX - Response data:', indexData);
         }
 
         // Atualizar o RealtimeDataContext com as posições reais
@@ -590,7 +593,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         marketIndexError: 'Failed to fetch market data'
       }));
     }
-  };
+  }, [queryClient, updatePositions]);
 
   // Buscar posições reais quando usuário estiver autenticado
   useEffect(() => {
@@ -616,12 +619,12 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     }
   }, [isAuthenticated]);
 
-  // Atualizar posições periodicamente quando autenticado
+  // Atualizar posições e market index periodicamente quando autenticado
   useEffect(() => {
     if (!isAuthenticated) return;
 
     const interval = setInterval(() => {
-      console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and index...');
+      console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and market index...');
       fetchRealPositions();
     }, 5000); // Atualizar a cada 5 segundos
 

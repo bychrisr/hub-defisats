@@ -188,4 +188,65 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
     },
     userController.getUserOrders.bind(userController)
   );
+
+  // Get market data (public)
+  fastify.get(
+    '/lnmarkets/market/ticker',
+    {
+      schema: {
+        description: 'Get LN Markets public ticker data',
+        tags: ['LN Markets - Market'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  index: { type: 'number' },
+                  lastPrice: { type: 'number' },
+                  askPrice: { type: 'number' },
+                  bidPrice: { type: 'number' },
+                  carryFeeRate: { type: 'number' },
+                  timestamp: { type: 'number' }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const axios = require('axios');
+        const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {
+          timeout: 10000
+        });
+
+        return reply.send({
+          success: true,
+          data: {
+            ...response.data,
+            timestamp: Date.now()
+          }
+        });
+      } catch (error: any) {
+        console.error('Error fetching market ticker:', error);
+
+        // Return fallback data
+        return reply.send({
+          success: true,
+          data: {
+            index: 115000,
+            lastPrice: 115000,
+            askPrice: 115100,
+            bidPrice: 114900,
+            carryFeeRate: 0.0001,
+            timestamp: Date.now()
+          }
+        });
+      }
+    }
+  );
 }

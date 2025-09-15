@@ -29,23 +29,14 @@ const LNMarketsHeader: React.FC = () => {
   console.log('🔍 LN MARKETS HEADER - Market index details:', lnMarketsData);
   console.log('🔍 LN MARKETS HEADER - Market index error:', lnMarketsError);
   
-  const [marketData, setMarketData] = useState<LNMarketsData>({
-    index: 115820.50,
-    index24hChange: -0.5,
-    tradingFees: 0.1,
-    nextFunding: '2h 15m 30s',
-    rate: 0.00002, // 0.0020% em decimal
-    rateChange: 0.00001,
-    lastUpdate: new Date()
-  });
+  const [marketData, setMarketData] = useState<LNMarketsData | null>(null);
 
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Atualizar dados quando os dados da LN Markets mudarem
   useEffect(() => {
     if (lnMarketsData) {
-      setMarketData(prev => ({
-        ...prev,
+      setMarketData({
         index: lnMarketsData.index,
         index24hChange: lnMarketsData.index24hChange,
         tradingFees: lnMarketsData.tradingFees,
@@ -53,7 +44,7 @@ const LNMarketsHeader: React.FC = () => {
         rate: lnMarketsData.rate,
         rateChange: lnMarketsData.rateChange,
         lastUpdate: new Date(lnMarketsData.timestamp)
-      }));
+      });
     }
   }, [lnMarketsData]);
 
@@ -68,8 +59,10 @@ const LNMarketsHeader: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Simular atualizações em tempo real baseadas em dados reais
+  // Atualizar Next Funding em tempo real apenas quando há dados reais
   useEffect(() => {
+    if (!marketData) return;
+    
     const interval = setInterval(() => {
       const now = new Date();
       
@@ -91,20 +84,19 @@ const LNMarketsHeader: React.FC = () => {
       const minutesToNext = 60 - currentMinute;
       const secondsToNext = 60 - currentSecond;
       
-      const nextFunding = hoursToNext === 0 
-        ? `${minutesToNext}m ${secondsToNext}s`
-        : `${hoursToNext}h ${minutesToNext}m ${secondsToNext}s`;
+      const nextFunding = hoursToNext === 0
+        ? minutesToNext + 'm ' + secondsToNext + 's'
+        : hoursToNext + 'h ' + minutesToNext + 'm ' + secondsToNext + 's';
       
-      setMarketData(prev => ({
+      setMarketData(prev => prev ? ({
         ...prev,
-        // Manter dados reais do BTC, não simular variações
         nextFunding: nextFunding,
         lastUpdate: now
-      }));
-    }, 3000);
+      }) : null);
+    }, 1000); // Atualizar a cada segundo para contagem regressiva precisa
 
     return () => clearInterval(interval);
-  }, []);
+  }, [marketData]);
 
   const formatIndex = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -115,62 +107,55 @@ const LNMarketsHeader: React.FC = () => {
 
   const format24hChange = (value: number) => {
     const sign = value >= 0 ? '+' : '';
-    return `${sign}${value.toFixed(1)}%`;
+    return sign + value.toFixed(1) + '%';
   };
 
   const formatRate = (value: number) => {
-    return `${(value * 100).toFixed(4)}%`;
+    return (value * 100).toFixed(4) + '%';
   };
 
   const formatRateChange = (value: number) => {
     const sign = value >= 0 ? '+' : '';
-    return `${sign}${(value * 100).toFixed(4)}%`;
+    return sign + (value * 100).toFixed(4) + '%';
   };
 
   const formatTradingFees = (value: number) => {
-    return `${value.toFixed(3)}%`;
+    return value.toFixed(3) + '%';
   };
 
   return (
-    <Card className={`bg-[#1a1a1a] border-[#2a2e39] rounded-none border-b-0 transition-all duration-300 ${
-      isScrolled ? 'py-1' : 'py-3'
-    }`}>
+    <Card className={'bg-[#1a1a1a] border-[#2a2e39] rounded-none border-b-0 transition-all duration-300 ' + (isScrolled ? 'py-1' : 'py-3')}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`flex items-center justify-between w-full transition-all duration-300 ${
-          isScrolled ? 'text-sm' : 'text-base'
-        }`}>
+        <div className={'flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
           {/* Index - Largura fixa */}
           <div className="flex items-center space-x-2 w-1/4">
-            <span className={`text-gray-400 transition-all duration-300 ${
-              isScrolled ? 'text-lg' : 'text-2xl'
-            }`}>₿</span>
+            <span className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'text-lg' : 'text-2xl')}>₿</span>
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <span className={`text-gray-300 font-medium transition-all duration-300 ${
-                  isScrolled ? 'text-xs' : 'text-sm'
-                }`}>Index:</span>
+                <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
                 {lnMarketsError ? (
                   <div className="flex items-center space-x-1">
                     <span className="text-red-400 text-sm">Error</span>
                   </div>
-                ) : (
-                  <span className={`text-white font-bold transition-all duration-300 ${
-                    isScrolled ? 'text-base' : 'text-lg'
-                  }`}>
+                ) : marketData ? (
+                  <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-base' : 'text-lg')}>
                     ${formatIndex(marketData.index)}
                   </span>
+                ) : (
+                  <div className="flex items-center space-x-1">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span className="text-gray-400 text-sm">Loading...</span>
+                  </div>
                 )}
               </div>
-              {!isScrolled && (
+              {!isScrolled && marketData && (
                 <div className="flex items-center space-x-1">
                   {marketData.index24hChange >= 0 ? (
                     <TrendingUp className="w-3 h-3 text-[#00d4aa]" />
                   ) : (
                     <TrendingDown className="w-3 h-3 text-[#ff6b6b]" />
                   )}
-                  <span className={`text-xs font-medium ${
-                    marketData.index24hChange >= 0 ? 'text-[#00d4aa]' : 'text-[#ff6b6b]'
-                  }`}>
+                  <span className={'text-xs font-medium ' + (marketData.index24hChange >= 0 ? 'text-[#00d4aa]' : 'text-[#ff6b6b]')}>
                     {format24hChange(marketData.index24hChange)} (24h)
                   </span>
                 </div>
@@ -180,46 +165,28 @@ const LNMarketsHeader: React.FC = () => {
 
           {/* Trading Fees - Largura fixa */}
           <div className="flex items-center space-x-2 w-1/4">
-            <Percent className={`text-gray-400 transition-all duration-300 ${
-              isScrolled ? 'w-3 h-3' : 'w-4 h-4'
-            }`} />
-            <span className={`text-gray-300 font-medium transition-all duration-300 ${
-              isScrolled ? 'text-xs' : 'text-sm'
-            }`}>Trading Fees:</span>
-            <span className={`text-white font-bold transition-all duration-300 ${
-              isScrolled ? 'text-sm' : 'text-base'
-            }`}>
-              {formatTradingFees(marketData.tradingFees)}
+            <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+            <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Trading Fees:</span>
+            <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+              {marketData ? formatTradingFees(marketData.tradingFees) : '--'}
             </span>
           </div>
 
           {/* Next Funding - Largura fixa */}
           <div className="flex items-center space-x-2 w-1/4">
-            <Clock className={`text-gray-400 transition-all duration-300 ${
-              isScrolled ? 'w-3 h-3' : 'w-4 h-4'
-            }`} />
-            <span className={`text-gray-300 font-medium transition-all duration-300 ${
-              isScrolled ? 'text-xs' : 'text-sm'
-            }`}>Next Funding:</span>
-            <span className={`text-white font-bold transition-all duration-300 ${
-              isScrolled ? 'text-sm' : 'text-base'
-            }`}>
-              {marketData.nextFunding}
+            <Clock className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+            <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Next Funding:</span>
+            <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+              {marketData ? marketData.nextFunding : '--'}
             </span>
           </div>
 
           {/* Rate - Largura fixa */}
           <div className="flex items-center space-x-2 w-1/4">
-            <Activity className={`text-gray-400 transition-all duration-300 ${
-              isScrolled ? 'w-3 h-3' : 'w-4 h-4'
-            }`} />
-            <span className={`text-gray-300 font-medium transition-all duration-300 ${
-              isScrolled ? 'text-xs' : 'text-sm'
-            }`}>Rate:</span>
-            <span className={`text-white font-bold transition-all duration-300 ${
-              isScrolled ? 'text-sm' : 'text-base'
-            }`}>
-              {formatRate(marketData.rate)}
+            <Activity className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+            <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Rate:</span>
+            <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+              {marketData ? formatRate(marketData.rate) : '--'}
             </span>
             {!isScrolled && (
               <span className="text-xs text-gray-400">Funding Rate</span>

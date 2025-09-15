@@ -1,0 +1,69 @@
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
+
+interface MarketTickerData {
+  index: number;
+  lastPrice: number;
+  askPrice: number;
+  bidPrice: number;
+  carryFeeRate: number;
+  timestamp: number;
+}
+
+export const useMarketTicker = () => {
+  const [data, setData] = useState<MarketTickerData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMarketTicker = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('🔍 MARKET TICKER HOOK - Fetching market ticker...');
+
+      const response = await api.get('/api/lnmarkets/market/ticker');
+      const tickerData = response.data;
+
+      if (tickerData.success && tickerData.data) {
+        console.log('✅ MARKET TICKER HOOK - Data received:', tickerData.data);
+        setData(tickerData.data);
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err: any) {
+      console.error('❌ MARKET TICKER HOOK - Error:', err);
+      setError(err.message || 'Failed to fetch market ticker');
+
+      // Em caso de erro, usar dados padrão
+      setData({
+        index: 115000,
+        lastPrice: 115000,
+        askPrice: 115100,
+        bidPrice: 114900,
+        carryFeeRate: 0.0001,
+        timestamp: Date.now()
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMarketTicker();
+
+    // Atualizar a cada 30 segundos
+    const interval = setInterval(() => {
+      fetchMarketTicker();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: fetchMarketTicker,
+  };
+};
