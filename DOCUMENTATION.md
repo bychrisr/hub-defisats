@@ -77,9 +77,172 @@ Analisamos o projeto anterior e implementamos melhorias significativas:
 - Integração com sistema de pagamentos
 - Relatórios de receita e uso
 
+### **9. Sistema de Internacionalização (i18n)**
+- ✅ Suporte completo a PT-BR e EN-US
+- ✅ Detecção automática de idioma
+- ✅ Persistência de preferências no localStorage
+- ✅ Dicionários completos com 200+ traduções
+- ✅ Interface totalmente traduzida
+- ✅ Hook personalizado `useTranslation`
+
+### **10. Sistema de Conversão de Moedas**
+- ✅ Conversão em tempo real (BTC, USD, BRL, EUR, sats)
+- ✅ Integração com APIs externas (CoinGecko, ExchangeRate)
+- ✅ Cache inteligente com atualização automática
+- ✅ Fallback offline robusto
+- ✅ Formatação inteligente por moeda
+- ✅ Suporte a satoshis e criptomoedas
+
+### **11. Interface Multilíngue**
+- ✅ Seletor de idioma/moeda no header
+- ✅ Página completa de configurações
+- ✅ Conversor de moeda integrado
+- ✅ Feedback visual em tempo real
+- ✅ Interface responsiva
+- ✅ Demonstração interativa do sistema
+
 ---
 
 ## 🔧 **Instalação e Configuração**
+
+### **Sistema de Internacionalização**
+
+#### **Configuração Inicial**
+O sistema de i18n está configurado automaticamente no arquivo `frontend/src/main.tsx`:
+
+```typescript
+import './i18n'; // Sistema carregado automaticamente
+```
+
+#### **Estrutura de Arquivos**
+```
+frontend/src/
+├── i18n/
+│   ├── index.ts              # Configuração principal
+│   └── locales/
+│       ├── pt-BR.json       # Traduções em português
+│       └── en-US.json       # Traduções em inglês
+├── hooks/
+│   ├── useTranslation.ts    # Hook para traduções
+│   ├── useCurrency.ts       # Hook para conversões
+│   └── useSmartFormat.ts    # Hook para formatação
+├── services/
+│   └── currency.service.ts   # Serviço de câmbio
+└── components/
+    ├── common/
+    │   ├── LanguageCurrencySelector.tsx
+    │   ├── CurrencyConverter.tsx
+    │   └── InternationalizationDemo.tsx
+    └── layout/
+        └── Header.tsx        # Seletor integrado
+```
+
+#### **Uso Básico das Traduções**
+
+```typescript
+import { useTranslation } from '@/hooks/useTranslation';
+
+const MyComponent = () => {
+  const { t, changeLanguage, getCurrentLanguage } = useTranslation();
+
+  return (
+    <div>
+      <h1>{t('dashboard.title')}</h1>
+      <p>{t('common.loading')}</p>
+
+      <button onClick={() => changeLanguage('en-US')}>
+        {t('settings.language')}
+      </button>
+    </div>
+  );
+};
+```
+
+#### **Uso do Sistema de Moedas**
+
+```typescript
+import { useCurrency } from '@/hooks/useCurrency';
+
+const PriceComponent = () => {
+  const { convert, format, supportedCurrencies } = useCurrency();
+
+  const price = convert(1000, 'BRL', 'USD');
+
+  return (
+    <div>
+      <span>{price.formatted}</span>
+      <small>Taxa: {price.rate}</small>
+    </div>
+  );
+};
+```
+
+#### **Formatação Inteligente**
+
+```typescript
+import { useSmartFormat } from '@/hooks/useSmartFormat';
+
+const TradingData = ({ pnl, volume, timestamp }) => {
+  const {
+    formatValue,
+    formatPercentage,
+    formatDate,
+    formatSats,
+    formatPnL
+  } = useSmartFormat();
+
+  return (
+    <div>
+      <div>P&L: {formatPnL(pnl)}</div>
+      <div>Volume: {formatValue(volume)}</div>
+      <div>Data: {formatDate(timestamp)}</div>
+      <div>Sats: {formatSats(5000000)}</div>
+    </div>
+  );
+};
+```
+
+#### **Chaves de Tradução Disponíveis**
+
+**Interface Geral:**
+- `common.*` - Elementos comuns (loading, error, success, etc.)
+- `navigation.*` - Menu de navegação
+- `dashboard.*` - Página do dashboard
+
+**Funcionalidades:**
+- `automations.*` - Sistema de automações
+- `backtests.*` - Sistema de backtests
+- `settings.*` - Página de configurações
+- `currency.*` - Sistema de moedas
+- `market.*` - Dados de mercado
+
+**Validação e Erros:**
+- `validation.*` - Mensagens de validação
+- `errors.*` - Mensagens de erro
+- `success.*` - Mensagens de sucesso
+
+### **Sistema de Conversão de Moedas**
+
+#### **Moedas Suportadas**
+- **BTC** - Bitcoin
+- **USD** - Dólar americano
+- **BRL** - Real brasileiro
+- **EUR** - Euro
+- **sats** - Satoshis
+
+#### **APIs Utilizadas**
+- **CoinGecko API**: Preços de BTC em tempo real
+- **ExchangeRate API**: Taxas de câmbio fiat
+- **Cache**: Atualização automática a cada 5 minutos
+- **Fallback**: Valores padrão para funcionamento offline
+
+#### **Funcionalidades Avançadas**
+- ✅ Conversão bidirecional
+- ✅ Cache inteligente
+- ✅ Formatação automática
+- ✅ Suporte a satoshis
+- ✅ Interface responsiva
+- ✅ Atualização em tempo real
 
 ### **Pré-requisitos**
 
