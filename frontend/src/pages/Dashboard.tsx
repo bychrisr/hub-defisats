@@ -38,6 +38,7 @@ import PriceChange from '@/components/PriceChange';
 import { useFormatSatsText } from '@/hooks/useDashboardMetrics';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
+import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
@@ -59,6 +60,14 @@ export default function Dashboard() {
   const balanceData = useUserBalance();
   const { isConnected } = useConnectionStatus();
   
+  // Hook de tempo real para todos os dados do dashboard
+  const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
+    positionsInterval: 5000, // 5 segundos
+    balanceInterval: 10000, // 10 segundos
+    marketInterval: 30000, // 30 segundos
+    historicalInterval: 60000, // 1 minuto
+    enabled: true
+  });
   
   // Novos hooks para métricas da dashboard
   const positionsData = usePositionsMetrics();
@@ -100,13 +109,32 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
+            <div className="flex items-center space-x-3">
+              <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
+              {isRealtimeEnabled && (
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-green-600 font-medium">Live</span>
+                </div>
+              )}
+            </div>
             <p className="text-text-secondary">Welcome back, {user?.email}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant="outline" className="text-sm">
               {user?.plan_type.toUpperCase()} Plan
             </Badge>
+            {isRealtimeEnabled && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshAll}
+                className="text-xs"
+              >
+                <Activity className="w-3 h-3 mr-1" />
+                Refresh
+              </Button>
+            )}
           </div>
         </div>
 
