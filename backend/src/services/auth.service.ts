@@ -69,49 +69,44 @@ export class AuthService {
     }
     console.log('✅ User does not exist, proceeding with registration');
 
-    // Validate LN Markets credentials (accept test credentials)
-    // const isTestCredentials = ln_markets_api_key === 'q4dbbRpWE2ZpfPV3GBqAFNLfQhXrcab2quz8FsxGZ7U=' &&
-    //                          ln_markets_api_secret === 'bq9WimSkASMQo0eJ4IzVv6P7hC+OEY4GLzB+ztVrcfkA3XbL7826/fkUgHe8+2TZL6+J8NM2/RnTn3D/6gyE4A==' &&
-    //                          data.ln_markets_passphrase === '#PassCursor';
-    
-    // Temporarily skip LN Markets validation for testing
-    console.log('⚠️ Skipping LN Markets credentials validation for testing');
-    
-    // if (!isTestCredentials) {
-    //   try {
-    //     console.log('🔍 Starting LN Markets credentials validation...');
-    //     const lnMarketsCredentials = {
-    //       apiKey: ln_markets_api_key,
-    //       apiSecret: ln_markets_api_secret,
-    //       passphrase: data.ln_markets_passphrase || '', // Add passphrase if available
-    //     };
+    // Validate LN Markets credentials
+    if (ln_markets_api_key) {
+      try {
+        console.log('🔍 Starting LN Markets credentials validation...');
+        const { LNMarketsAPIService } = await import('./lnmarkets-api.service');
+        const lnMarketsService = new LNMarketsAPIService({
+          apiKey: ln_markets_api_key,
+          apiSecret: ln_markets_api_secret,
+          passphrase: ln_markets_passphrase || '',
+          isTestnet: false
+        }, {
+          info: () => {},
+          error: () => {},
+          warn: () => {},
+          debug: () => {},
+        } as any);
 
-    //     console.log('📡 Creating LN Markets service...');
-    //     const lnMarketsService = createLNMarketsService(lnMarketsCredentials);
+        console.log('✅ Validating credentials with LN Markets API...');
+        const isValidCredentials = await lnMarketsService.validateCredentials();
 
-    //     console.log('✅ Validating credentials with LN Markets API...');
-    //     const isValidCredentials = await lnMarketsService.validateCredentials();
+        if (!isValidCredentials) {
+          console.log('❌ LN Markets credentials validation failed');
+          throw new Error(
+            'Invalid LN Markets API credentials. Please check your API Key, Secret, and Passphrase.'
+          );
+        }
 
-    //     if (!isValidCredentials) {
-    //       console.log('❌ LN Markets credentials validation failed');
-    //       throw new Error(
-    //         'Invalid LN Markets API credentials. Please check your API Key, Secret, and Passphrase.'
-    //       );
-    //     }
-
-    //     console.log('✅ LN Markets credentials validation successful');
-    //   } catch (error) {
-    //     console.error('❌ LN Markets validation error:', error);
-    //     console.error('❌ Error details:', {
-    //       message: (error as Error).message,
-    //       stack: (error as Error).stack,
-    //     });
-    //     // Re-throw the error to be handled by the controller
-    //     throw error;
-    //   }
-    // } else {
-    //   console.log('⚠️ Using test LN Markets credentials - skipping validation');
-    // }
+        console.log('✅ LN Markets credentials validation successful');
+      } catch (error) {
+        console.error('❌ LN Markets validation error:', error);
+        console.error('❌ Error details:', {
+          message: (error as Error).message,
+          stack: (error as Error).stack,
+        });
+        // Re-throw the error to be handled by the controller
+        throw error;
+      }
+    }
 
     // Validate coupon if provided
     console.log('🎫 Validating coupon if provided...');
@@ -264,7 +259,12 @@ export class AuthService {
           apiSecret: user.ln_markets_api_secret,
           passphrase: user.ln_markets_passphrase,
           isTestnet: false
-        });
+        }, {
+          info: () => {},
+          error: () => {},
+          warn: () => {},
+          debug: () => {},
+        } as any);
 
         const lnMarketsBalance = await lnMarketsService.getUserBalance();
         console.log('✅ AUTH SERVICE - LN Markets balance fetched:', lnMarketsBalance);

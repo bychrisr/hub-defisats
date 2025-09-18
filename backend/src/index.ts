@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
-import { PrismaClient } from '@prisma/client';
 import { config } from '@/config/env';
+import { prisma } from '@/lib/prisma';
 import { authRoutes } from '@/routes/auth.routes';
 import { automationRoutes } from '@/routes/automation.routes';
 import { tradeLogRoutes } from '@/routes/trade-log.routes';
@@ -34,8 +34,11 @@ import { adminAdvancedRoutes } from '@/routes/admin-advanced.routes';
 import { planRoutes } from '@/routes/plan.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
-import { metrics } from '@/services/metrics.service';
+import { metrics } from '@/utils/metrics';
 import { alerting } from '@/services/alerting.service';
+import { AdvancedHealthService } from '@/services/advanced-health.service';
+import { AdvancedAlertingService } from '@/services/advanced-alerting.service';
+import { Redis } from 'ioredis';
 // import { cacheService } from '@/services/cache.service';
 
 // Import plugins statically
@@ -48,18 +51,33 @@ import swaggerUi from '@fastify/swagger-ui';
 import websocket from '@fastify/websocket';
 
 // Initialize monitoring
-monitoring.initialize();
+// monitoring.initialize();
 
 // Initialize metrics
-metrics.initialize();
+// metrics.initialize();
 
 // Initialize alerting
-alerting.initialize();
+// alerting.initialize();
 
-// Initialize Prisma
-const prisma = new PrismaClient({
-  log: config.isDevelopment ? ['query', 'info', 'warn', 'error'] : ['error'],
-});
+// Prisma client is now imported as singleton from lib/prisma.ts
+
+// Create Redis connection
+const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
+
+// Initialize advanced services
+const advancedHealth = new AdvancedHealthService(prisma, redis, {
+  info: () => {},
+  error: () => {},
+  warn: () => {},
+  debug: () => {},
+} as any);
+
+const advancedAlerting = new AdvancedAlertingService({
+  info: () => {},
+  error: () => {},
+  warn: () => {},
+  debug: () => {},
+} as any);
 
 // Create Fastify instance
 const fastify = Fastify({
@@ -122,9 +140,19 @@ async function registerPlugins() {
   });
   console.log('✅ Helmet plugin registered');
 
-  // Disable rate limiting for now to test public endpoints
-  // console.log('🔌 Rate limiting disabled for testing public endpoints');
-  console.log('✅ Rate limiting skipped for public endpoints testing');
+  console.log('🔌 Registering rate limiting plugin...');
+  // Rate limiting - more permissive in development
+  await fastify.register(rateLimit, {
+    max: config.isDevelopment ? 1000 : 100, // 1000 requests per minute in dev, 100 in prod
+    timeWindow: '1 minute',
+    errorResponseBuilder: (request, context) => ({
+      code: 429,
+      error: 'Too Many Requests',
+      message: 'Rate limit exceeded',
+      retryAfter: Math.round(context.after / 1000)
+    })
+  });
+  console.log('✅ Rate limiting plugin registered');
 
   console.log('🔌 Registering JWT plugin...');
   // JWT
@@ -243,6 +271,112 @@ async function registerRoutes() {
     };
   });
   console.log('✅ Health check route registered');
+
+  // Advanced health check endpoint
+  fastify.get('/api/health/advanced', {
+    schema: {
+      description: 'Advanced health check endpoint with detailed metrics',
+      tags: ['System'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            overall: { type: 'string' },
+            timestamp: { type: 'string' },
+            uptime: { type: 'number' },
+            version: { type: 'string' },
+            environment: { type: 'string' },
+            checks: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  status: { type: 'string' },
+                  responseTime: { type: 'number' },
+                  details: { type: 'object' },
+                  error: { type: 'string' }
+                }
+              }
+            },
+            summary: {
+              type: 'object',
+              properties: {
+                total: { type: 'number' },
+                healthy: { type: 'number' },
+                unhealthy: { type: 'number' },
+                degraded: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, async (_request, _reply) => {
+    try {
+      const healthStatus = await advancedHealth.getHealthStatus();
+      return healthStatus;
+    } catch (error) {
+      return {
+        overall: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: '0.0.2',
+        environment: config.env.NODE_ENV,
+        checks: [],
+        summary: { total: 0, healthy: 0, unhealthy: 1, degraded: 0 },
+        error: (error as Error).message
+      };
+    }
+  });
+  console.log('✅ Advanced health check route registered');
+
+  // Prometheus metrics endpoint
+  fastify.get('/metrics', {
+    schema: {
+      description: 'Prometheus metrics endpoint',
+      tags: ['System'],
+      response: {
+        200: {
+          type: 'string',
+          description: 'Prometheus metrics in text format'
+        }
+      }
+    }
+  }, async (_request, _reply) => {
+    try {
+      const metricsData = metrics.getMetricsAsPrometheus();
+      _reply.type('text/plain; version=0.0.4; charset=utf-8');
+      return metricsData;
+    } catch (error) {
+      _reply.code(500);
+      return `# Error generating metrics: ${(error as Error).message}`;
+    }
+  });
+  console.log('✅ Prometheus metrics route registered');
+
+  // Test endpoint to check if authentication is required
+  fastify.get('/test', {
+    schema: {
+      description: 'Test endpoint',
+      tags: ['System'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            message: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (_request, _reply) => {
+    return { message: 'Test endpoint working' };
+  });
+  console.log('✅ Test endpoint registered');
+
+  // Alerts endpoint (moved to alerts routes plugin)
+  // fastify.get('/api/alerts', { ... });
+  // console.log('✅ Alerts route registered');
 
   // Register health detailed endpoint explicitly as public
   fastify.get('/api/health/detailed', {
@@ -464,45 +598,53 @@ async function registerRoutes() {
 
   // Add monitoring hooks
   fastify.addHook('onRequest', (_request, _reply, done) => {
+    // Set start time for response time calculation
+    (_request as any).startTime = Date.now();
+    
     // Add breadcrumb for request
-    monitoring.addBreadcrumb(
-      `${_request.method} ${_request.url}`,
-      'http',
-      'info',
-      {
-        method: _request.method,
-        url: _request.url,
-        userAgent: _request.headers['user-agent'],
-      }
-    );
+    try {
+      monitoring.addBreadcrumb(
+        `${_request.method} ${_request.url}`,
+        'http',
+        'info',
+        {
+          method: _request.method,
+          url: _request.url,
+          userAgent: _request.headers['user-agent'],
+        }
+      );
+    } catch (error) {
+      // Ignore monitoring errors
+      console.warn('Monitoring breadcrumb failed:', error);
+    }
     done();
   });
 
   fastify.addHook('onResponse', (request, reply, done) => {
     // Capture metrics
-    monitoring.captureMetric('http_requests_total', 1, 'count', {
-      method: request.method,
-      status_code: reply.statusCode.toString(),
-      route: request.url,
-    });
-
-    // monitoring.captureMetric('http_request_duration_ms', reply.getResponseTime(), 'millisecond', {
-    //   method: request.method,
-    //   route: request.url,
-    // });
+    try {
+      monitoring.captureMetric('http_requests_total', 1, 'count', {
+        method: request.method,
+        status_code: reply.statusCode.toString(),
+        route: request.url,
+      });
+    } catch (error) {
+      // Ignore monitoring errors
+      console.warn('Monitoring capture failed:', error);
+    }
 
     // Prometheus metrics
-    metrics.httpRequestsTotal.inc({
-      method: request.method,
-      route: request.url,
-      status_code: reply.statusCode.toString(),
-    });
-
-    metrics.httpRequestDuration.observe({
-      method: request.method,
-      route: request.url,
-      status_code: reply.statusCode.toString(),
-    }, 0);
+    try {
+      metrics.recordHttpRequest(
+        request.method,
+        request.url,
+        reply.statusCode,
+        Date.now() - (request as any).startTime
+      );
+    } catch (error) {
+      // Ignore metrics errors
+      console.warn('Metrics recording failed:', error);
+    }
 
     done();
   });
@@ -512,9 +654,9 @@ async function registerRoutes() {
   await fastify.register(authRoutes, { prefix: '/api/auth' });
   console.log('✅ Auth routes registered');
 
-  // Metrics routes
-  await fastify.register(metricsRoutes, { prefix: '/api/metrics' });
-  console.log('✅ Metrics routes registered');
+  // Metrics routes (commented out - using public /metrics endpoint instead)
+  // await fastify.register(metricsRoutes, { prefix: '/api/metrics' });
+  // console.log('✅ Metrics routes registered');
 
   // Alerts routes
   await fastify.register(alertsRoutes, { prefix: '/api' });
@@ -630,9 +772,7 @@ async function registerRoutes() {
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler
-  fastify.setNotFoundHandler({
-    preHandler: (fastify as any).authenticate,
-  }, function (request, reply) {
+  fastify.setNotFoundHandler(function (request, reply) {
     reply.status(404).send({
       error: 'NOT_FOUND',
       message: 'Route not found',
@@ -648,18 +788,23 @@ fastify.setErrorHandler((error, request, reply) => {
   // Continue with error handling
 
   // Capture error in Sentry
-  monitoring.captureError(error, {
-    request: {
-      method: request.method,
-      url: request.url,
-      headers: request.headers,
-      body: request.body,
-    },
-    user: (request as any).user ? {
-      id: (request as any).user.id,
-      email: (request as any).user.email,
-    } : undefined,
-  });
+  try {
+    monitoring.captureError(error, {
+      request: {
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: request.body,
+      },
+      user: (request as any).user ? {
+        id: (request as any).user.id,
+        email: (request as any).user.email,
+      } : undefined,
+    });
+  } catch (monitoringError) {
+    // Ignore monitoring errors
+    console.warn('Monitoring error capture failed:', monitoringError);
+  }
 
   // Prisma errors
   if ((error as any).code === 'P2002') {
@@ -743,16 +888,16 @@ async function start() {
     await registerPlugins();
     console.log('✅ Plugins registered successfully');
 
-    console.log('🔧 Step 2: Registering routes...');
-    // Register routes
-    await registerRoutes();
-    console.log('✅ Routes registered successfully');
-
-    console.log('🔧 Step 3: Testing database connection...');
+    console.log('🔧 Step 2: Testing database connection...');
     // Test database connection
     await prisma.$connect();
     fastify.log.info('Database connected successfully');
     console.log('✅ Database connected successfully');
+
+    console.log('🔧 Step 3: Registering routes...');
+    // Register routes
+    await registerRoutes();
+    console.log('✅ Routes registered successfully');
 
     console.log('🔧 Step 4: Starting server on port', config.env.PORT);
     // Start server
@@ -769,6 +914,15 @@ async function start() {
     console.log(`📍 Server listening at ${address}`);
     console.log(`📚 API documentation available at ${address}/docs`);
     console.log(`🌍 Environment: ${config.env.NODE_ENV}`);
+
+    // Start advanced monitoring services
+    console.log('🔧 Step 5: Starting advanced monitoring services...');
+    
+    // Start alert evaluation loop
+    advancedAlerting.startEvaluationLoop(30000); // Every 30 seconds
+    console.log('✅ Alert evaluation loop started');
+    
+    console.log('✅ Advanced monitoring services started');
   } catch (error) {
     fastify.log.error('Error starting server:', error as any);
     console.error('❌ Full error details:', error);

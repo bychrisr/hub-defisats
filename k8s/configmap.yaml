@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hub-defisats-config
+  namespace: hub-defisats
+data:
+  NODE_ENV: "production"
+  PORT: "13016"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_TIME_WINDOW: "60000"
+  CORS_ORIGIN: "https://hubdefisats.com"
+  PROMETHEUS_PORT: "9090"
+  JWT_EXPIRES_IN: "2h"
+  REFRESH_TOKEN_EXPIRES_IN: "7d"
+  LN_MARKETS_API_URL: "https://api.lnmarkets.com"
+  LN_MARKETS_SANDBOX_URL: "https://api.lnmarkets.com/sandbox"

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Frontend - Hub DefiSats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste Frontend - Hub DefiSats</h1>
+        <p>Este teste verifica se o frontend consegue se comunicar com o backend corretamente.</p>
+    </div>
+
+    <div class="container">
+        <h2>1️⃣ Teste de Conectividade</h2>
+        <div class="test-section info">
+            <p>Testando se o frontend consegue acessar o backend...</p>
+            <button onclick="testConnectivity()">Testar Conectividade</button>
+            <div id="connectivity-result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>2️⃣ Teste de Login</h2>
+        <div class="test-section info">
+            <p>Testando login com as credenciais fornecidas...</p>
+            <input type="email" id="email" placeholder="Email" value="brainoschris@gmail.com">
+            <input type="password" id="password" placeholder="Senha" value="#Lobinho123">
+            <button onclick="testLogin()">Testar Login</button>
+            <div id="login-result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>3️⃣ Teste de Perfil</h2>
+        <div class="test-section info">
+            <p>Testando obtenção do perfil do usuário...</p>
+            <button onclick="testProfile()" id="profile-btn" disabled>Testar Perfil</button>
+            <div id="profile-result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>4️⃣ Teste de Dashboard</h2>
+        <div class="test-section info">
+            <p>Testando acesso ao dashboard...</p>
+            <button onclick="testDashboard()" id="dashboard-btn" disabled>Testar Dashboard</button>
+            <div id="dashboard-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                const data = await response.json();
+                return { status: response.status, data, ok: response.ok };
+            } catch (error) {
+                return { status: 0, data: { error: error.message }, ok: false };
+            }
+        }
+
+        async function testConnectivity() {
+            const resultDiv = document.getElementById('connectivity-result');
+            resultDiv.textContent = 'Testando...';
+            
+            try {
+                const response = await makeRequest('/api/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'Password123!',
+                        username: 'testuser',
+                        confirmPassword: 'Password123!',
+                        ln_markets_api_key: 'test_api_key_16_chars',
+                        ln_markets_api_secret: 'test_api_secret_16_chars',
+                        ln_markets_passphrase: 'testpassphrase'
+                    })
+                });
+
+                if (response.status === 400 && response.data.error === 'REGISTRATION_FAILED') {
+                    resultDiv.textContent = '✅ Conectividade OK - Proxy funcionando corretamente';
+                    resultDiv.parentElement.className = 'test-section success';
+                } else {
+                    resultDiv.textContent = `❌ Erro inesperado: ${JSON.stringify(response.data)}`;
+                    resultDiv.parentElement.className = 'test-section error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro de conectividade: ${error.message}`;
+                resultDiv.parentElement.className = 'test-section error';
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('login-result');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            resultDiv.textContent = 'Fazendo login...';
+            
+            try {
+                const response = await makeRequest('/api/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok && response.data.token) {
+                    authToken = response.data.token;
+                    resultDiv.textContent = `✅ Login realizado com sucesso!\nUser ID: ${response.data.user_id}\nPlan: ${response.data.plan_type}\nToken: ${response.data.token.substring(0, 20)}...`;
+                    resultDiv.parentElement.className = 'test-section success';
+                    
+                    // Habilitar botões que dependem do login
+                    document.getElementById('profile-btn').disabled = false;
+                    document.getElementById('dashboard-btn').disabled = false;
+                } else {
+                    resultDiv.textContent = `❌ Falha no login: ${JSON.stringify(response.data)}`;
+                    resultDiv.parentElement.className = 'test-section error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro no login: ${error.message}`;
+                resultDiv.parentElement.className = 'test-section error';
+            }
+        }
+
+        async function testProfile() {
+            const resultDiv = document.getElementById('profile-result');
+            resultDiv.textContent = 'Obtendo perfil...';
+            
+            try {
+                const response = await makeRequest('/api/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    resultDiv.textContent = `✅ Perfil obtido com sucesso!\nEmail: ${response.data.email}\nPlan: ${response.data.plan_type}\nAdmin: ${response.data.is_admin}\nCreated: ${response.data.created_at}`;
+                    resultDiv.parentElement.className = 'test-section success';
+                } else {
+                    resultDiv.textContent = `❌ Falha ao obter perfil: ${JSON.stringify(response.data)}`;
+                    resultDiv.parentElement.className = 'test-section error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro ao obter perfil: ${error.message}`;
+                resultDiv.parentElement.className = 'test-section error';
+            }
+        }
+
+        async function testDashboard() {
+            const resultDiv = document.getElementById('dashboard-result');
+            resultDiv.textContent = 'Testando dashboard...';
+            
+            try {
+                const response = await makeRequest('/api/automations', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    resultDiv.textContent = `✅ Dashboard acessível!\nStatus: ${response.status}\nData: ${JSON.stringify(response.data, null, 2)}`;
+                    resultDiv.parentElement.className = 'test-section success';
+                } else {
+                    resultDiv.textContent = `❌ Falha ao acessar dashboard: ${JSON.stringify(response.data)}`;
+                    resultDiv.parentElement.className = 'test-section error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro ao acessar dashboard: ${error.message}`;
+                resultDiv.parentElement.className = 'test-section error';
+            }
+        }
+
+        // Testar conectividade automaticamente ao carregar a página
+        window.onload = function() {
+            testConnectivity();
+        };
+    </script>
+</body>
+</html>

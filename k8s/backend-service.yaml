@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-defisats-backend-service
+  namespace: hub-defisats
+  labels:
+    app: hub-defisats-backend
+spec:
+  selector:
+    app: hub-defisats-backend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 13016
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-defisats-backend-headless
+  namespace: hub-defisats
+  labels:
+    app: hub-defisats-backend
+spec:
+  selector:
+    app: hub-defisats-backend
+  ports:
+  - name: http
+    port: 13016
+    targetPort: 13016
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  clusterIP: None

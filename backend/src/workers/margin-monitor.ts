@@ -6,15 +6,16 @@ import {
 } from '../services/lnmarkets.service';
 // Import notification queue
 import { notificationQueue } from '../queues/notification.queue';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
+import { CredentialCacheService } from '../services/credential-cache.service';
 
 // Create Redis connection
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 
-// Notification queue is imported from shared module
+// Create credential cache service
+const credentialCache = new CredentialCacheService(redis);
 
-// Create Prisma client for database access
-const prisma = new PrismaClient();
+// Notification queue is imported from shared module
 
 // Create queue for margin monitoring jobs
 const marginCheckQueue = new Queue('margin-check', {
@@ -26,8 +27,7 @@ const marginCheckQueue = new Queue('margin-check', {
   },
 });
 
-// Secure storage for user credentials (encrypted)
-const userCredentials: { [userId: string]: string } = {};
+// Note: Credentials are now fetched from database and decrypted on-demand
 
 // Store LN Markets service instances
 const lnMarketsServices: { [userId: string]: LNMarketsService } = {};
@@ -232,24 +232,45 @@ const worker = new Worker(
         return { status: 'skipped', reason: 'disabled' };
       }
 
-      // Get encrypted user credentials
-      const encryptedCredentials = userCredentials[userId];
-      if (!encryptedCredentials) {
-        console.warn(`No credentials found for user ${userId}`);
-        return { status: 'skipped', reason: 'no_credentials' };
-      }
+      // Try to get credentials from cache first
+      let credentials = await credentialCache.get(userId);
+      if (!credentials) {
+        console.log(`🔍 Credentials not in cache, fetching from database for user ${userId}`);
+        
+        // Get user credentials from database
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            ln_markets_api_key: true,
+            ln_markets_api_secret: true,
+            ln_markets_passphrase: true,
+          },
+        });
 
-      // Decrypt credentials
-      let credentials: SecureCredentials;
-      try {
-        credentials =
-          await secureStorage.decryptCredentials(encryptedCredentials);
-      } catch (error) {
-        console.error(
-          `Failed to decrypt credentials for user ${userId}:`,
-          error
-        );
-        return { status: 'error', reason: 'decryption_failed' };
+        if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret) {
+          console.warn(`No LN Markets credentials found for user ${userId}`);
+          return { status: 'skipped', reason: 'no_credentials' };
+        }
+
+        // Import secure storage service
+        const { secureStorage } = await import('../services/secure-storage.service');
+        
+        // Decrypt credentials using SecureStorageService
+        try {
+          credentials = await secureStorage.decryptCredentials(user.ln_markets_api_key);
+          
+          // Cache the credentials for future use
+          await credentialCache.set(userId, credentials);
+          console.log(`✅ Credentials cached for user ${userId}`);
+        } catch (error) {
+          console.error(
+            `Failed to decrypt credentials for user ${userId}:`,
+            error
+          );
+          return { status: 'error', reason: 'decryption_failed' };
+        }
+      } else {
+        console.log(`✅ Credentials found in cache for user ${userId}`);
       }
 
       // Get or create LN Markets service
@@ -367,28 +388,8 @@ worker.on('failed', (job, err) => {
   );
 });
 
-// Helper function to add user credentials (called when user registers/logs in)
-export async function addUserCredentials(
-  userId: string,
-  apiKey: string,
-  apiSecret: string,
-  passphrase: string
-) {
-  try {
-    const credentials: SecureCredentials = { apiKey, apiSecret, passphrase };
-    const encryptedCredentials =
-      await secureStorage.encryptCredentials(credentials);
-    userCredentials[userId] = encryptedCredentials;
-    console.log(`🔑 Added encrypted credentials for user ${userId}`);
-  } catch (error) {
-    console.error(`Failed to encrypt credentials for user ${userId}:`, error);
-    throw new Error('Failed to store credentials securely');
-  }
-}
-
 // Helper function to remove user credentials (called when user logs out or deletes account)
 export function removeUserCredentials(userId: string) {
-  delete userCredentials[userId];
   delete lnMarketsServices[userId];
   console.log(`🗑️  Removed credentials for user ${userId}`);
 }
@@ -401,21 +402,42 @@ export async function simulateMarginMonitoring(
   console.log(`🎯 Simulating margin monitoring for user ${userId}`);
 
   try {
-    // Get encrypted user credentials
-    const encryptedCredentials = userCredentials[userId];
-    if (!encryptedCredentials) {
-      console.warn(`No credentials found for user ${userId}`);
-      return;
-    }
+    // Try to get credentials from cache first
+    let credentials = await credentialCache.get(userId);
+    if (!credentials) {
+      console.log(`🔍 Credentials not in cache, fetching from database for user ${userId}`);
+      
+      // Get user credentials from database
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          ln_markets_api_key: true,
+          ln_markets_api_secret: true,
+          ln_markets_passphrase: true,
+        },
+      });
 
-    // Decrypt credentials
-    let credentials: SecureCredentials;
-    try {
-      credentials =
-        await secureStorage.decryptCredentials(encryptedCredentials);
-    } catch (error) {
-      console.error(`Failed to decrypt credentials for user ${userId}:`, error);
-      return;
+      if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret) {
+        console.warn(`No LN Markets credentials found for user ${userId}`);
+        return;
+      }
+
+      // Import secure storage service
+      const { secureStorage } = await import('../services/secure-storage.service');
+      
+      // Decrypt credentials using SecureStorageService
+      try {
+        credentials = await secureStorage.decryptCredentials(user.ln_markets_api_key);
+        
+        // Cache the credentials for future use
+        await credentialCache.set(userId, credentials);
+        console.log(`✅ Credentials cached for user ${userId}`);
+      } catch (error) {
+        console.error(`Failed to decrypt credentials for user ${userId}:`, error);
+        return;
+      }
+    } else {
+      console.log(`✅ Credentials found in cache for user ${userId}`);
     }
 
     // Create LN Markets service
@@ -454,34 +476,43 @@ export function startPeriodicMonitoring() {
 
   monitoringInterval = setInterval(async () => {
     try {
-      // Get all user IDs with credentials
-      const userIds = Object.keys(userCredentials);
+      // Get all users with active Margin Guard configurations
+      const usersWithMarginGuard = await prisma.automation.findMany({
+        where: {
+          type: 'margin_guard',
+          is_active: true,
+        },
+        select: {
+          user_id: true,
+        },
+        distinct: ['user_id'],
+      });
 
-      if (userIds.length === 0) {
-        console.log('ℹ️  No users to monitor');
+      if (usersWithMarginGuard.length === 0) {
+        console.log('ℹ️  No users with active Margin Guard to monitor');
         return;
       }
 
-      console.log(`🔄 Monitoring ${userIds.length} users with Margin Guard`);
+      console.log(`🔄 Monitoring ${usersWithMarginGuard.length} users with Margin Guard`);
 
-      // Add monitoring jobs for each user (only if they have Margin Guard configured)
-      for (const userId of userIds) {
+      // Add monitoring jobs for each user
+      for (const { user_id: userId } of usersWithMarginGuard) {
         try {
           // Check if user has Margin Guard configured and enabled
           const config = await getMarginGuardConfig(userId);
           if (config && config.enabled) {
-        await marginCheckQueue.add(
-          'monitor-margin',
-          {
-            userId,
-          },
-          {
-            priority: 10,
-            delay: 0,
-            removeOnComplete: 50,
-            removeOnFail: 50,
-          }
-        );
+            await marginCheckQueue.add(
+              'monitor-margin',
+              {
+                userId,
+              },
+              {
+                priority: 10,
+                delay: 0,
+                removeOnComplete: 50,
+                removeOnFail: 50,
+              }
+            );
             console.log(`✅ Scheduled margin monitoring for user ${userId}`);
           } else {
             console.log(`⏭️  Skipping user ${userId} - no active Margin Guard`);

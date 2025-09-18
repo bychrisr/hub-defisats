@@ -6,28 +6,88 @@ export class LNMarketsUserController {
   constructor(private prisma: PrismaClient) {}
 
   private async getLNMarketsService(userId: string): Promise<LNMarketsAPIService> {
+    console.log(`🔍 GET LN MARKETS SERVICE - Starting for user: ${userId}`);
+    
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { ln_markets_api_key: true, ln_markets_api_secret: true, ln_markets_passphrase: true }
+    });
+
+    console.log(`🔍 GET LN MARKETS SERVICE - User found:`, {
+      hasApiKey: !!user?.ln_markets_api_key,
+      hasApiSecret: !!user?.ln_markets_api_secret,
+      hasPassphrase: !!user?.ln_markets_passphrase
     });
 
     if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
       throw new Error('LN Markets credentials not configured');
     }
 
-    // Decrypt credentials
-    const { AuthService } = await import('../services/auth.service');
-    const authService = new AuthService(this.prisma, {} as any);
-    const apiKey = authService.decryptData(user.ln_markets_api_key);
-    const apiSecret = authService.decryptData(user.ln_markets_api_secret);
-    const passphrase = authService.decryptData(user.ln_markets_passphrase);
+    try {
+      // Decrypt credentials
+      const { AuthService } = await import('../services/auth.service');
+      const authService = new AuthService(this.prisma, {} as any);
+      
+      console.log(`🔍 GET LN MARKETS SERVICE - Decrypting credentials...`);
+      console.log(`🔍 GET LN MARKETS SERVICE - Encrypted data lengths:`, {
+        apiKeyLength: user.ln_markets_api_key?.length || 0,
+        apiSecretLength: user.ln_markets_api_secret?.length || 0,
+        passphraseLength: user.ln_markets_passphrase?.length || 0
+      });
+      
+      let apiKey, apiSecret, passphrase;
+      
+      try {
+        apiKey = authService.decryptData(user.ln_markets_api_key);
+        console.log(`✅ GET LN MARKETS SERVICE - API Key decrypted successfully`);
+      } catch (error: any) {
+        console.error(`❌ GET LN MARKETS SERVICE - Error decrypting API Key:`, error?.message);
+        throw error;
+      }
+      
+      try {
+        apiSecret = authService.decryptData(user.ln_markets_api_secret);
+        console.log(`✅ GET LN MARKETS SERVICE - API Secret decrypted successfully`);
+      } catch (error: any) {
+        console.error(`❌ GET LN MARKETS SERVICE - Error decrypting API Secret:`, error?.message);
+        throw error;
+      }
+      
+      try {
+        passphrase = authService.decryptData(user.ln_markets_passphrase);
+        console.log(`✅ GET LN MARKETS SERVICE - Passphrase decrypted successfully`);
+      } catch (error: any) {
+        console.error(`❌ GET LN MARKETS SERVICE - Error decrypting Passphrase:`, error?.message);
+        throw error;
+      }
 
-    return new LNMarketsAPIService({
-      apiKey,
-      apiSecret,
-      passphrase,
-      isTestnet: false // Force mainnet for now
-    });
+      console.log(`🔍 GET LN MARKETS SERVICE - Credentials decrypted successfully:`, {
+        apiKeyLength: apiKey?.length || 0,
+        apiSecretLength: apiSecret?.length || 0,
+        passphraseLength: passphrase?.length || 0
+      });
+
+      // Create a logger for the LNMarketsAPIService
+      const logger = {
+        info: (message: string, meta?: any) => console.log(`[LNMarketsAPI] ${message}`, meta || ''),
+        error: (message: string, meta?: any) => console.error(`[LNMarketsAPI] ${message}`, meta || ''),
+        warn: (message: string, meta?: any) => console.warn(`[LNMarketsAPI] ${message}`, meta || ''),
+        debug: (message: string, meta?: any) => console.debug(`[LNMarketsAPI] ${message}`, meta || '')
+      };
+
+      return new LNMarketsAPIService({
+        apiKey,
+        apiSecret,
+        passphrase,
+        isTestnet: false // Force mainnet for now
+      }, logger);
+    } catch (error: any) {
+      console.error(`❌ GET LN MARKETS SERVICE - Error decrypting credentials:`, {
+        message: error?.message,
+        stack: error?.stack
+      });
+      throw error;
+    }
   }
 
   async getUser(request: FastifyRequest, reply: FastifyReply) {
@@ -453,9 +513,9 @@ export class LNMarketsUserController {
       console.log(`[UserController] Checking error conditions:`, {
         status: error.status,
         message: error.message,
-        responseMessage: error.response?.data?.message,
+        responseMessage: error.response?.data?.message || 'No response message',
         condition1: error.status === 401,
-        condition2: error.response?.data?.message?.includes('Api key does not exist')
+        condition2: error.response?.data?.message?.includes('Api key does not exist') || false
       });
       
       if (error.status === 401 || error.response?.data?.message?.includes('Api key does not exist')) {

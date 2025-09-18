@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { metrics } from '@/services/metrics.service';
+import { metrics } from '@/utils/metrics';
 
 export async function metricsRoutes(fastify: FastifyInstance) {
   // Endpoint para métricas Prometheus
@@ -23,7 +23,7 @@ export async function metricsRoutes(fastify: FastifyInstance) {
     },
     handler: async (_request, reply) => {
       try {
-        const metricsData = await metrics.getMetrics();
+        const metricsData = metrics.getMetricsAsPrometheus();
         reply.type('text/plain; version=0.0.4; charset=utf-8');
         return metricsData;
       } catch (error) {
@@ -57,7 +57,7 @@ export async function metricsRoutes(fastify: FastifyInstance) {
     },
     handler: async (_request, reply) => {
       try {
-        const metricsData = await metrics.getMetricsAsJSON();
+        const metricsData = metrics.getMetricsAsJSON();
         return {
           success: true,
           data: metricsData,
@@ -98,7 +98,7 @@ export async function metricsRoutes(fastify: FastifyInstance) {
     },
     handler: async (_request, reply) => {
       try {
-        const metricsData = await metrics.getMetricsAsJSON();
+        const metricsData = metrics.getMetricsAsJSON();
         return {
           status: 'healthy',
           timestamp: new Date().toISOString(),

@@ -1,5 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import crypto from 'crypto';
+import { CircuitBreaker } from './circuit-breaker.service';
+import { RetryService } from './retry.service';
+import { Logger } from 'winston';
 
 export interface LNMarketsCredentials {
   apiKey: string;
@@ -19,8 +22,11 @@ export class LNMarketsAPIService {
   private client: AxiosInstance;
   private credentials: LNMarketsCredentials;
   private baseURL: string;
+  private circuitBreaker: CircuitBreaker;
+  private retryService: RetryService;
+  private logger: Logger;
 
-  constructor(credentials: LNMarketsCredentials) {
+  constructor(credentials: LNMarketsCredentials, logger: Logger) {
     console.log('🚨 TESTE SIMPLES - CONSTRUTOR LNMarketsAPIService CHAMADO!');
     console.log('🚨 TESTE SIMPLES - Credentials:', {
       hasApiKey: !!credentials.apiKey,
@@ -40,6 +46,11 @@ export class LNMarketsAPIService {
       baseURL: this.baseURL,
       timeout: 30000,
     });
+
+    // Initialize circuit breaker with 5 failures threshold and 60s timeout
+    this.circuitBreaker = new CircuitBreaker(5, 60000);
+    this.retryService = new RetryService(logger);
+    this.logger = logger;
 
     // Add request interceptor for authentication
     console.log('🚨 TESTE SIMPLES - REGISTRANDO INTERCEPTOR!');
@@ -163,43 +174,65 @@ export class LNMarketsAPIService {
     });
     
     try {
-      console.log(`[LNMarketsAPI] Making ${request.method} request to ${request.path}`, {
-        data: request.data,
-        params: request.params,
-        fullURL: `${this.baseURL}${request.path}`
+      // Use circuit breaker to protect against API failures
+      const result = await this.circuitBreaker.execute(async () => {
+        return await this.retryService.executeApiOperation(async () => {
+          console.log(`[LNMarketsAPI] Making ${request.method} request to ${request.path}`, {
+            data: request.data,
+            params: request.params,
+            fullURL: `${this.baseURL}${request.path}`
+          });
+
+          const response = await this.client.request({
+            method: request.method,
+            url: request.path,
+            data: request.data,
+            params: request.params,
+          });
+
+          console.log(`[LNMarketsAPI] Request successful:`, {
+            status: response.status,
+            statusText: response.statusText,
+            data: response.data,
+            headers: response.headers
+          });
+
+          // LN Markets API returns data directly, not wrapped in an object
+          return response.data;
+        }, `LNMarkets-${request.method}-${request.path}`, {
+          maxAttempts: 3,
+          baseDelay: 1000,
+          maxDelay: 5000,
+          backoffMultiplier: 2,
+          jitter: true
+        });
       });
 
-      const response = await this.client.request({
-        method: request.method,
-        url: request.path,
-        data: request.data,
-        params: request.params,
-      });
-
-      console.log(`[LNMarketsAPI] Request successful:`, {
-        status: response.status,
-        statusText: response.statusText,
-        data: response.data,
-        headers: response.headers
-      });
-
-      // LN Markets API returns data directly, not wrapped in an object
-      return response.data;
+      return result;
     } catch (error: any) {
-      console.error(`[LNMarketsAPI] Request failed:`, {
+      console.log('🚨 LN MARKETS ERROR - Error caught:', {
+        error,
+        errorType: typeof error,
+        errorConstructor: error?.constructor?.name,
+        hasResponse: !!error?.response,
+        hasMessage: !!error?.message,
+        errorKeys: error ? Object.keys(error) : 'undefined'
+      });
+      
+      this.logger.error(`[LNMarketsAPI] Request failed:`, {
         method: request.method,
         path: request.path,
         fullURL: `${this.baseURL}${request.path}`,
-        error: error.response?.data || error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        headers: error.response?.headers,
+        error: error?.response?.data || error?.message || 'Unknown error',
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        headers: error?.response?.headers,
         config: {
-          method: error.config?.method,
-          url: error.config?.url,
-          params: error.config?.params,
-          data: error.config?.data,
-          headers: error.config?.headers
+          method: error?.config?.method,
+          url: error?.config?.url,
+          params: error?.config?.params,
+          data: error?.config?.data,
+          headers: error?.config?.headers
         }
       });
       throw error;
@@ -377,16 +410,16 @@ export class LNMarketsAPIService {
       return result;
     } catch (error: any) {
       console.log('❌ LN MARKETS USER BALANCE - Error caught:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        message: error.message,
-        data: error.response?.data,
-        url: error.config?.url,
-        headers: error.config?.headers
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        message: error?.message,
+        data: error?.response?.data,
+        url: error?.config?.url,
+        headers: error?.config?.headers
       });
       
       // Se for erro de API keys inválidas, retornar saldo padrão
-      if (error.response?.status === 404 || error.response?.status === 401) {
+      if (error?.response?.status === 404 || error?.response?.status === 401) {
         console.log('⚠️ LN MARKETS USER BALANCE - API keys invalid, returning default balance');
         return {
           balance: 0,
@@ -443,10 +476,10 @@ export class LNMarketsAPIService {
       console.log('✅ LN MARKETS TRADES - Success:', Array.isArray(result) ? result.length : 'unknown', 'trades');
       return result;
     } catch (error: any) {
-      console.log('❌ LN MARKETS TRADES - Error:', error.response?.status, error.response?.statusText);
+      console.log('❌ LN MARKETS TRADES - Error:', error?.response?.status, error?.response?.statusText);
 
       // Se o endpoint não existir (404), retornar array vazio em vez de erro
-      if (error.response?.status === 404) {
+      if (error?.response?.status === 404) {
         console.log('⚠️ LN MARKETS TRADES - Endpoint /futures not available, returning empty trades array');
         return [];
       }
@@ -507,10 +540,10 @@ export class LNMarketsAPIService {
 
       return allTrades;
     } catch (error: any) {
-      console.log('❌ LN MARKETS ALL TRADES - Error:', error.response?.status, error.response?.statusText);
+      console.log('❌ LN MARKETS ALL TRADES - Error:', error?.response?.status, error?.response?.statusText);
 
       // Se o endpoint não existir (404), retornar array vazio em vez de erro
-      if (error.response?.status === 404) {
+      if (error?.response?.status === 404) {
         console.log('⚠️ LN MARKETS ALL TRADES - Endpoint /futures not available, returning empty trades array');
         return [];
       }
@@ -560,14 +593,14 @@ export class LNMarketsAPIService {
     } catch (error: any) {
       console.log('⚠️ LN MARKETS POSITIONS - Error getting user positions:', {
         message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
         fullError: error
       });
       
       // If endpoint doesn't exist (404) or returns empty, return empty array
-      if (error.response?.status === 404 || error.message?.includes('404')) {
+      if (error?.response?.status === 404 || error?.message?.includes('404')) {
         console.log('📝 LN MARKETS POSITIONS - Endpoint /futures not found, returning empty positions');
         return [];
       }
@@ -644,8 +677,27 @@ export class LNMarketsAPIService {
       return { 
         success: false, 
         message: 'Connection failed', 
-        error: error.response?.data || error.message 
+        error: error?.response?.data || error?.message 
       };
+    }
+  }
+
+  /**
+   * Validate credentials by making a simple API call
+   */
+  async validateCredentials(): Promise<boolean> {
+    try {
+      console.log('🔍 LN MARKETS VALIDATE - Starting credentials validation');
+      await this.getUser();
+      console.log('✅ LN MARKETS VALIDATE - Credentials are valid');
+      return true;
+    } catch (error: any) {
+      console.log('❌ LN MARKETS VALIDATE - Credentials validation failed:', {
+        status: error?.response?.status,
+        message: error?.message,
+        data: error?.response?.data
+      });
+      return false;
     }
   }
 

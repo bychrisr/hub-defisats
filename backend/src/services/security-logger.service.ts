@@ -1,311 +1,427 @@
-import { Redis } from 'ioredis';
-import { config } from '@/config/env';
+import { Logger } from 'winston';
+import { Request, Reply } from 'fastify';
 
 export interface SecurityEvent {
-  type:
-    | 'LOGIN_SUCCESS'
-    | 'LOGIN_FAILED'
-    | 'LOGOUT'
-    | 'PASSWORD_CHANGE'
-    | 'PASSWORD_RESET'
-    | 'ACCOUNT_LOCKED'
-    | 'SUSPICIOUS_ACTIVITY'
-    | 'ADMIN_ACTION'
-    | 'RATE_LIMIT_EXCEEDED'
-    | 'CSRF_VIOLATION';
+  eventType: 'login' | 'logout' | 'register' | 'api_access' | 'suspicious_activity' | 'data_access' | 'admin_action';
   userId?: string;
-  email?: string;
-  ipAddress?: string;
+  ipAddress: string;
   userAgent?: string;
-  details?: any;
+  endpoint?: string;
+  method?: string;
+  statusCode?: number;
+  riskScore: number;
+  details: Record<string, any>;
   timestamp: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+}
+
+export interface SecurityAlert {
+  id: string;
+  eventType: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  userId?: string;
+  ipAddress: string;
+  timestamp: string;
+  resolved: boolean;
+  resolvedAt?: string;
+  resolvedBy?: string;
 }
 
 export class SecurityLoggerService {
-  private redis: Redis;
+  private logger: Logger;
+  private alerts: Map<string, SecurityAlert> = new Map();
+  private riskThresholds = {
+    low: 0.3,
+    medium: 0.6,
+    high: 0.8,
+    critical: 0.9
+  };
 
-  constructor() {
-    this.redis = new Redis(config.redis.url);
+  constructor(logger: Logger) {
+    this.logger = logger;
   }
 
   /**
-   * Log security event
+   * Log a security event
    */
-  async logSecurityEvent(event: SecurityEvent): Promise<void> {
-    try {
-      const logEntry = {
+  logSecurityEvent(event: Omit<SecurityEvent, 'timestamp'>): void {
+    const securityEvent: SecurityEvent = {
         ...event,
-        id: this.generateLogId(),
-        timestamp: new Date().toISOString(),
-      };
+      timestamp: new Date().toISOString()
+    };
 
-      // Store in Redis
-      await this.redis.lpush('security_logs', JSON.stringify(logEntry));
-      await this.redis.ltrim('security_logs', 0, 9999); // Keep last 10000 logs
+    // Log to security logger
+    this.logger.security('Security event detected', securityEvent);
 
-      // Also log to console for development
-      if (config.isDevelopment) {
-        console.log('Security Event:', logEntry);
-      }
-
-      // Send alerts for critical events
-      if (event.severity === 'CRITICAL' || event.severity === 'HIGH') {
-        await this.sendSecurityAlert(logEntry);
-      }
-    } catch (error) {
-      console.error('Security logging error:', error);
+    // Check if event requires alert
+    if (securityEvent.riskScore >= this.riskThresholds.medium) {
+      this.createSecurityAlert(securityEvent);
     }
+  }
+
+  /**
+   * Log API access
+   */
+  logApiAccess(request: Request, reply: Reply, userId?: string): void {
+    const event: Omit<SecurityEvent, 'timestamp'> = {
+      eventType: 'api_access',
+      userId,
+      ipAddress: this.getClientIP(request),
+      userAgent: request.headers['user-agent'],
+      endpoint: request.url,
+      method: request.method,
+      statusCode: reply.statusCode,
+      riskScore: this.calculateApiAccessRiskScore(request, reply),
+      details: {
+        headers: this.sanitizeHeaders(request.headers),
+        query: request.query,
+        body: this.sanitizeBody(request.body)
+      }
+    };
+
+    this.logSecurityEvent(event);
   }
 
   /**
    * Log login attempt
    */
-  async logLoginAttempt(
-    email: string,
-    success: boolean,
-    ipAddress?: string,
-    userAgent?: string,
-    details?: any
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILED',
-      email,
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      details,
-      timestamp: new Date().toISOString(),
-      severity: success ? 'LOW' : 'MEDIUM',
-    });
+  logLoginAttempt(email: string, success: boolean, ipAddress: string, userAgent?: string): void {
+    const event: Omit<SecurityEvent, 'timestamp'> = {
+      eventType: 'login',
+      ipAddress,
+      userAgent,
+      riskScore: success ? 0.1 : 0.7,
+      details: {
+        email: this.maskEmail(email),
+        success,
+        attemptTime: new Date().toISOString()
+      }
+    };
+
+    this.logSecurityEvent(event);
   }
 
   /**
-   * Log logout
+   * Log registration attempt
    */
-  async logLogout(
-    userId: string,
-    email: string,
-    ipAddress?: string,
-    userAgent?: string
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: 'LOGOUT',
-      userId,
-      email,
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      timestamp: new Date().toISOString(),
-      severity: 'LOW',
-    });
-  }
+  logRegistrationAttempt(email: string, success: boolean, ipAddress: string, userAgent?: string): void {
+    const event: Omit<SecurityEvent, 'timestamp'> = {
+      eventType: 'register',
+      ipAddress,
+      userAgent,
+      riskScore: success ? 0.2 : 0.6,
+      details: {
+        email: this.maskEmail(email),
+        success,
+        attemptTime: new Date().toISOString()
+      }
+    };
 
-  /**
-   * Log password change
-   */
-  async logPasswordChange(
-    userId: string,
-    email: string,
-    ipAddress?: string,
-    userAgent?: string
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: 'PASSWORD_CHANGE',
-      userId,
-      email,
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      timestamp: new Date().toISOString(),
-      severity: 'HIGH',
-    });
-  }
-
-  /**
-   * Log password reset
-   */
-  async logPasswordReset(
-    email: string,
-    success: boolean,
-    ipAddress?: string,
-    userAgent?: string
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: 'PASSWORD_RESET',
-      email,
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      details: { success },
-      timestamp: new Date().toISOString(),
-      severity: 'HIGH',
-    });
+    this.logSecurityEvent(event);
   }
 
   /**
    * Log suspicious activity
    */
-  async logSuspiciousActivity(
-    type: string,
-    userId?: string,
-    email?: string,
-    ipAddress?: string,
-    userAgent?: string,
-    details?: any
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: 'SUSPICIOUS_ACTIVITY',
-      userId: userId || '',
-      email: email || '',
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      details: { activityType: type, ...details },
-      timestamp: new Date().toISOString(),
-      severity: 'HIGH',
-    });
+  logSuspiciousActivity(
+    userId: string,
+    activity: string,
+    ipAddress: string,
+    details: Record<string, any> = {}
+  ): void {
+    const event: Omit<SecurityEvent, 'timestamp'> = {
+      eventType: 'suspicious_activity',
+      userId,
+      ipAddress,
+      riskScore: 0.8,
+      details: {
+        activity,
+        ...details,
+        detectedAt: new Date().toISOString()
+      }
+    };
+
+    this.logSecurityEvent(event);
+  }
+
+  /**
+   * Log data access
+   */
+  logDataAccess(
+    userId: string,
+    dataType: string,
+    action: 'read' | 'write' | 'delete',
+    ipAddress: string,
+    details: Record<string, any> = {}
+  ): void {
+    const event: Omit<SecurityEvent, 'timestamp'> = {
+      eventType: 'data_access',
+      userId,
+      ipAddress,
+      riskScore: action === 'delete' ? 0.7 : 0.3,
+      details: {
+        dataType,
+        action,
+        ...details,
+        accessedAt: new Date().toISOString()
+      }
+    };
+
+    this.logSecurityEvent(event);
   }
 
   /**
    * Log admin action
    */
-  async logAdminAction(
+  logAdminAction(
     adminUserId: string,
     action: string,
     targetUserId?: string,
-    details?: any,
     ipAddress?: string,
-    userAgent?: string
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: 'ADMIN_ACTION',
+    details: Record<string, any> = {}
+  ): void {
+    const event: Omit<SecurityEvent, 'timestamp'> = {
+      eventType: 'admin_action',
       userId: adminUserId,
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      details: { action, targetUserId, ...details },
-      timestamp: new Date().toISOString(),
-      severity: 'MEDIUM',
-    });
-  }
-
-  /**
-   * Log rate limit exceeded
-   */
-  async logRateLimitExceeded(
-    ipAddress: string,
-    endpoint: string,
-    userAgent?: string
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: 'RATE_LIMIT_EXCEEDED',
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      details: { endpoint },
-      timestamp: new Date().toISOString(),
-      severity: 'MEDIUM',
-    });
-  }
-
-  /**
-   * Log CSRF violation
-   */
-  async logCSRFViolation(
-    userId?: string,
-    ipAddress?: string,
-    userAgent?: string,
-    details?: any
-  ): Promise<void> {
-    await this.logSecurityEvent({
-      type: 'CSRF_VIOLATION',
-      userId: userId || '',
-      ipAddress: ipAddress || '',
-      userAgent: userAgent || '',
-      details,
-      timestamp: new Date().toISOString(),
-      severity: 'HIGH',
-    });
-  }
-
-  /**
-   * Get security logs
-   */
-  async getSecurityLogs(
-    limit: number = 100,
-    type?: string,
-    severity?: string
-  ): Promise<SecurityEvent[]> {
-    try {
-      const logs = await this.redis.lrange('security_logs', 0, limit - 1);
-      let parsedLogs = logs.map(log => JSON.parse(log));
-
-      // Filter by type if specified
-      if (type) {
-        parsedLogs = parsedLogs.filter(log => log.type === type);
+      ipAddress: ipAddress || 'unknown',
+      riskScore: 0.5,
+      details: {
+        action,
+        targetUserId,
+        ...details,
+        performedAt: new Date().toISOString()
       }
+    };
 
-      // Filter by severity if specified
-      if (severity) {
-        parsedLogs = parsedLogs.filter(log => log.severity === severity);
-      }
+    this.logSecurityEvent(event);
+  }
 
-      return parsedLogs;
-    } catch (error) {
-      console.error('Get security logs error:', error);
-      return [];
+  /**
+   * Create security alert
+   */
+  private createSecurityAlert(event: SecurityEvent): void {
+    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const severity = this.getSeverityFromRiskScore(event.riskScore);
+
+    const alert: SecurityAlert = {
+      id: alertId,
+      eventType: event.eventType,
+      severity,
+      message: this.generateAlertMessage(event),
+      userId: event.userId,
+      ipAddress: event.ipAddress,
+      timestamp: event.timestamp,
+      resolved: false
+    };
+
+    this.alerts.set(alertId, alert);
+
+    // Log alert
+    this.logger.warn('Security alert created', alert);
+
+    // TODO: Send alert to monitoring system
+    this.sendAlertNotification(alert);
+  }
+
+  /**
+   * Get all active alerts
+   */
+  getActiveAlerts(): SecurityAlert[] {
+    return Array.from(this.alerts.values()).filter(alert => !alert.resolved);
+  }
+
+  /**
+   * Resolve alert
+   */
+  resolveAlert(alertId: string, resolvedBy: string): boolean {
+    const alert = this.alerts.get(alertId);
+    if (!alert) return false;
+
+    alert.resolved = true;
+    alert.resolvedAt = new Date().toISOString();
+    alert.resolvedBy = resolvedBy;
+
+    this.logger.info('Security alert resolved', { alertId, resolvedBy });
+    return true;
+  }
+
+  /**
+   * Calculate risk score for API access
+   */
+  private calculateApiAccessRiskScore(request: Request, reply: Reply): number {
+    let riskScore = 0.1; // Base risk
+
+    // High risk endpoints
+    const highRiskEndpoints = ['/api/auth', '/api/admin', '/api/payments'];
+    if (highRiskEndpoints.some(endpoint => request.url?.includes(endpoint))) {
+      riskScore += 0.3;
     }
+
+    // Failed requests
+    if (reply.statusCode >= 400) {
+      riskScore += 0.2;
+    }
+
+    // Suspicious user agent
+    const userAgent = request.headers['user-agent'];
+    if (userAgent && this.isSuspiciousUserAgent(userAgent)) {
+      riskScore += 0.4;
+    }
+
+    // Rate limiting
+    const rateLimitRemaining = reply.getHeader('x-ratelimit-remaining');
+    if (rateLimitRemaining && parseInt(rateLimitRemaining as string) < 10) {
+      riskScore += 0.3;
+    }
+
+    return Math.min(riskScore, 1.0);
+  }
+
+  /**
+   * Check if user agent is suspicious
+   */
+  private isSuspiciousUserAgent(userAgent: string): boolean {
+    const suspiciousPatterns = [
+      /bot/i,
+      /crawler/i,
+      /spider/i,
+      /scraper/i,
+      /curl/i,
+      /wget/i,
+      /python/i,
+      /java/i,
+      /go-http/i
+    ];
+
+    return suspiciousPatterns.some(pattern => pattern.test(userAgent));
+  }
+
+  /**
+   * Get client IP address
+   */
+  private getClientIP(request: Request): string {
+    return (
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      (request.headers['x-real-ip'] as string) ||
+      request.ip ||
+      'unknown'
+    );
+  }
+
+  /**
+   * Sanitize headers for logging
+   */
+  private sanitizeHeaders(headers: any): Record<string, any> {
+    const sanitized: Record<string, any> = {};
+    const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'x-auth-token'];
+
+    for (const [key, value] of Object.entries(headers)) {
+      if (sensitiveHeaders.includes(key.toLowerCase())) {
+        sanitized[key] = '[REDACTED]';
+      } else {
+        sanitized[key] = value;
+      }
+    }
+
+    return sanitized;
+  }
+
+  /**
+   * Sanitize request body for logging
+   */
+  private sanitizeBody(body: any): any {
+    if (!body) return body;
+
+    const sensitiveFields = ['password', 'apiKey', 'secret', 'token', 'passphrase'];
+    const sanitized = { ...body };
+
+    for (const field of sensitiveFields) {
+      if (sanitized[field]) {
+        sanitized[field] = '[REDACTED]';
+      }
+    }
+
+    return sanitized;
+  }
+
+  /**
+   * Mask email for privacy
+   */
+  private maskEmail(email: string): string {
+    const [local, domain] = email.split('@');
+    if (!local || !domain) return email;
+
+    const maskedLocal = local.length > 2 
+      ? local[0] + '*'.repeat(local.length - 2) + local[local.length - 1]
+      : local;
+
+    return `${maskedLocal}@${domain}`;
+  }
+
+  /**
+   * Get severity from risk score
+   */
+  private getSeverityFromRiskScore(riskScore: number): 'low' | 'medium' | 'high' | 'critical' {
+    if (riskScore >= this.riskThresholds.critical) return 'critical';
+    if (riskScore >= this.riskThresholds.high) return 'high';
+    if (riskScore >= this.riskThresholds.medium) return 'medium';
+    return 'low';
+  }
+
+  /**
+   * Generate alert message
+   */
+  private generateAlertMessage(event: SecurityEvent): string {
+    const baseMessage = `Security event detected: ${event.eventType}`;
+    
+    if (event.userId) {
+      return `${baseMessage} for user ${event.userId}`;
+    }
+    
+    return `${baseMessage} from IP ${event.ipAddress}`;
+  }
+
+  /**
+   * Send alert notification
+   */
+  private sendAlertNotification(alert: SecurityAlert): void {
+    // TODO: Implement notification sending (email, Slack, etc.)
+    this.logger.warn('Security alert notification', {
+      alertId: alert.id,
+      severity: alert.severity,
+      message: alert.message,
+      userId: alert.userId,
+      ipAddress: alert.ipAddress
+    });
   }
 
   /**
    * Get security statistics
    */
-  async getSecurityStats(): Promise<{
+  getSecurityStats(): {
     totalEvents: number;
+    activeAlerts: number;
+    resolvedAlerts: number;
     eventsByType: Record<string, number>;
-    eventsBySeverity: Record<string, number>;
-    recentEvents: SecurityEvent[];
-  }> {
-    try {
-      const logs = await this.redis.lrange('security_logs', 0, 999);
-      const parsedLogs = logs.map(log => JSON.parse(log));
-
+    alertsBySeverity: Record<string, number>;
+  } {
+    const alerts = Array.from(this.alerts.values());
       const eventsByType: Record<string, number> = {};
-      const eventsBySeverity: Record<string, number> = {};
+    const alertsBySeverity: Record<string, number> = {};
 
-      parsedLogs.forEach(log => {
-        eventsByType[log.type] = (eventsByType[log.type] || 0) + 1;
-        eventsBySeverity[log.severity] =
-          (eventsBySeverity[log.severity] || 0) + 1;
+    // Count events by type (this would need to be tracked separately in production)
+    // For now, we'll use alerts as a proxy
+    alerts.forEach(alert => {
+      eventsByType[alert.eventType] = (eventsByType[alert.eventType] || 0) + 1;
+      alertsBySeverity[alert.severity] = (alertsBySeverity[alert.severity] || 0) + 1;
       });
 
       return {
-        totalEvents: parsedLogs.length,
+      totalEvents: alerts.length,
+      activeAlerts: alerts.filter(alert => !alert.resolved).length,
+      resolvedAlerts: alerts.filter(alert => alert.resolved).length,
         eventsByType,
-        eventsBySeverity,
-        recentEvents: parsedLogs.slice(0, 10),
-      };
-    } catch (error) {
-      console.error('Get security stats error:', error);
-      return {
-        totalEvents: 0,
-        eventsByType: {},
-        eventsBySeverity: {},
-        recentEvents: [],
-      };
-    }
-  }
-
-  /**
-   * Generate unique log ID
-   */
-  private generateLogId(): string {
-    return `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
-   * Send security alert
-   */
-  private async sendSecurityAlert(logEntry: any): Promise<void> {
-    // This would integrate with your notification system
-    // For now, just log to console
-    console.error('SECURITY ALERT:', logEntry);
-
-    // TODO: Send email/SMS/Slack notification
-    // await this.notificationService.sendSecurityAlert(logEntry);
+      alertsBySeverity
+    };
   }
 }

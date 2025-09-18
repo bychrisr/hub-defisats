@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useCentralizedData } from './useCentralizedData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
-import { usePositionsMetrics } from '@/contexts/PositionsContext';
+import { usePositions } from '@/contexts/PositionsContext';
 
 interface RealtimeDashboardConfig {
   positionsInterval?: number; // Intervalo para atualizar posições (ms)
@@ -26,7 +26,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   const { refreshData: refreshCentralizedData, isLoading: centralizedLoading } = useCentralizedData();
   const { refetch: refetchEstimatedBalance } = useEstimatedBalance();
   const { refetch: refetchHistoricalData } = useHistoricalData();
-  const { refetch: refetchPositionsMetrics } = usePositionsMetrics();
+  const { refreshPositions } = usePositions();
 
   // Refs para controlar os intervalos
   const positionsIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -55,12 +55,12 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
       await Promise.all([
         refetchHistoricalData(),
         refetchEstimatedBalance(),
-        refetchPositionsMetrics()
+        refreshPositions()
       ]);
     } catch (error) {
       console.error('❌ REALTIME DASHBOARD - Error updating historical data:', error);
     }
-  }, [isAuthenticated, user?.id, refetchHistoricalData, refetchEstimatedBalance, refetchPositionsMetrics]);
+  }, [isAuthenticated, user?.id, refetchHistoricalData, refetchEstimatedBalance, refreshPositions]);
 
   // Função para limpar todos os intervalos
   const clearAllIntervals = useCallback(() => {

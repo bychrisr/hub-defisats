@@ -5,4 +5,4 @@ metadata:
   labels:
     name: hub-defisats
     app: hub-defisats
-
+    environment: production

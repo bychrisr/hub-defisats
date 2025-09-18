@@ -1,21 +1,31 @@
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
-import { PrismaClient } from '@prisma/client';
 import {
   createLNMarketsService,
   LNMarketsService,
 } from '../services/lnmarkets.service';
 import { SecureCredentials } from '../services/secure-storage.service';
+import { prisma } from '../lib/prisma';
+import { CredentialCacheService } from '../services/credential-cache.service';
 
 // Create Redis connection
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 
-// Create Prisma client
-const prisma = new PrismaClient();
+// Create credential cache service
+const credentialCache = new CredentialCacheService(redis);
 
 // Function to get user's LN Markets credentials
 async function getUserCredentials(userId: string): Promise<SecureCredentials | null> {
   try {
+    // Try to get from cache first
+    let credentials = await credentialCache.get(userId);
+    if (credentials) {
+      console.log(`✅ Credentials found in cache for user ${userId}`);
+      return credentials;
+    }
+
+    console.log(`🔍 Credentials not in cache, fetching from database for user ${userId}`);
+    
     // Get the credentials from the User table
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -31,13 +41,16 @@ async function getUserCredentials(userId: string): Promise<SecureCredentials | n
       return null;
     }
 
-    // Encrypt and then decrypt to ensure proper format (this is a workaround)
-    const credentials: SecureCredentials = {
-      apiKey: user.ln_markets_api_key,
-      apiSecret: user.ln_markets_api_secret,
-      passphrase: user.ln_markets_passphrase || '',
-    };
-
+    // Import secure storage service
+    const { secureStorage } = await import('../services/secure-storage.service');
+    
+    // Decrypt credentials using SecureStorageService
+    credentials = await secureStorage.decryptCredentials(user.ln_markets_api_key);
+    
+    // Cache the credentials for future use
+    await credentialCache.set(userId, credentials);
+    console.log(`✅ Credentials cached for user ${userId}`);
+    
     return credentials;
   } catch (error) {
     console.error(`Failed to get credentials for user ${userId}:`, error);

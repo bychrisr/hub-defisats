@@ -1,374 +1,650 @@
-import {
-  register,
-  Counter,
-  Histogram,
-  Gauge,
-  collectDefaultMetrics,
-} from 'prom-client';
-import { monitoring } from './monitoring.service';
-
-// Coletar métricas padrão do Node.js
-collectDefaultMetrics({ register });
+import { register, collectDefaultMetrics, Counter, Histogram, Gauge } from 'prom-client';
+import type { Logger } from 'winston';
 
 export class MetricsService {
-  private static instance: MetricsService;
+  private logger: Logger;
   private isInitialized = false;
 
-  // Métricas de HTTP
-  public readonly httpRequestsTotal: Counter<string>;
-  public readonly httpRequestDuration: Histogram<string>;
-  public readonly httpRequestSize: Histogram<string>;
-  public readonly httpResponseSize: Histogram<string>;
+  // HTTP Metrics
+  private httpRequestDuration: Histogram<string>;
+  private httpRequestTotal: Counter<string>;
+  private httpRequestErrors: Counter<string>;
 
-  // Métricas de autenticação
-  public readonly authAttemptsTotal: Counter<string>;
-  public readonly authSuccessTotal: Counter<string>;
-  public readonly authFailuresTotal: Counter<string>;
+  // Database Metrics
+  private dbQueryDuration: Histogram<string>;
+  private dbQueryTotal: Counter<string>;
+  private dbConnectionPool: Gauge<string>;
 
-  // Métricas de rate limiting
-  public readonly rateLimitHitsTotal: Counter<string>;
-  public readonly rateLimitBlocksTotal: Counter<string>;
+  // Redis Metrics
+  private redisOperationDuration: Histogram<string>;
+  private redisOperationTotal: Counter<string>;
+  private redisConnectionPool: Gauge<string>;
 
-  // Métricas de banco de dados
-  public readonly dbConnectionsActive: Gauge<string>;
-  public readonly dbQueriesTotal: Counter<string>;
-  public readonly dbQueryDuration: Histogram<string>;
+  // Business Metrics
+  private userRegistrations: Counter<string>;
+  private userLogins: Counter<string>;
+  private tradeExecutions: Counter<string>;
+  private automationExecutions: Counter<string>;
+  private alertTriggers: Counter<string>;
 
-  // Métricas de LN Markets API
-  public readonly lnMarketsApiCallsTotal: Counter<string>;
-  public readonly lnMarketsApiDuration: Histogram<string>;
-  public readonly lnMarketsApiErrorsTotal: Counter<string>;
+  // System Metrics
+  private memoryUsage: Gauge<string>;
+  private cpuUsage: Gauge<string>;
+  private activeConnections: Gauge<string>;
+  private queueSize: Gauge<string>;
 
-  // Métricas de workers
-  public readonly workerJobsTotal: Counter<string>;
-  public readonly workerJobDuration: Histogram<string>;
-  public readonly workerJobFailuresTotal: Counter<string>;
+  // Custom Metrics
+  private customMetrics: Map<string, any> = new Map();
 
-  // Métricas de sistema
-  public readonly memoryUsage: Gauge<string>;
-  public readonly cpuUsage: Gauge<string>;
-  public readonly activeUsers: Gauge<string>;
-
-  private constructor() {
-    // Métricas de HTTP
-    this.httpRequestsTotal = new Counter({
-      name: 'http_requests_total',
-      help: 'Total number of HTTP requests',
-      labelNames: ['method', 'route', 'status_code'],
-    });
-
+  constructor(logger: Logger) {
+    this.logger = logger;
+    
+    // Initialize all metrics
     this.httpRequestDuration = new Histogram({
       name: 'http_request_duration_seconds',
       help: 'Duration of HTTP requests in seconds',
       labelNames: ['method', 'route', 'status_code'],
-      buckets: [0.1, 0.5, 1, 2, 5, 10],
+      buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
     });
 
-    this.httpRequestSize = new Histogram({
-      name: 'http_request_size_bytes',
-      help: 'Size of HTTP requests in bytes',
-      labelNames: ['method', 'route'],
-      buckets: [100, 1000, 10000, 100000, 1000000],
+    this.httpRequestTotal = new Counter({
+      name: 'http_requests_total',
+      help: 'Total number of HTTP requests',
+      labelNames: ['method', 'route', 'status_code']
     });
 
-    this.httpResponseSize = new Histogram({
-      name: 'http_response_size_bytes',
-      help: 'Size of HTTP responses in bytes',
-      labelNames: ['method', 'route', 'status_code'],
-      buckets: [100, 1000, 10000, 100000, 1000000],
-    });
-
-    // Métricas de autenticação
-    this.authAttemptsTotal = new Counter({
-      name: 'auth_attempts_total',
-      help: 'Total number of authentication attempts',
-      labelNames: ['type', 'result'],
-    });
-
-    this.authSuccessTotal = new Counter({
-      name: 'auth_success_total',
-      help: 'Total number of successful authentications',
-      labelNames: ['type'],
-    });
-
-    this.authFailuresTotal = new Counter({
-      name: 'auth_failures_total',
-      help: 'Total number of failed authentications',
-      labelNames: ['type', 'reason'],
-    });
-
-    // Métricas de rate limiting
-    this.rateLimitHitsTotal = new Counter({
-      name: 'rate_limit_hits_total',
-      help: 'Total number of rate limit hits',
-      labelNames: ['type', 'identifier'],
-    });
-
-    this.rateLimitBlocksTotal = new Counter({
-      name: 'rate_limit_blocks_total',
-      help: 'Total number of rate limit blocks',
-      labelNames: ['type', 'identifier'],
-    });
-
-    // Métricas de banco de dados
-    this.dbConnectionsActive = new Gauge({
-      name: 'db_connections_active',
-      help: 'Number of active database connections',
-    });
-
-    this.dbQueriesTotal = new Counter({
-      name: 'db_queries_total',
-      help: 'Total number of database queries',
-      labelNames: ['operation', 'table'],
+    this.httpRequestErrors = new Counter({
+      name: 'http_request_errors_total',
+      help: 'Total number of HTTP request errors',
+      labelNames: ['method', 'route', 'status_code']
     });
 
     this.dbQueryDuration = new Histogram({
       name: 'db_query_duration_seconds',
       help: 'Duration of database queries in seconds',
       labelNames: ['operation', 'table'],
-      buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+      buckets: [0.01, 0.05, 0.1, 0.2, 0.5, 1, 2, 5]
     });
 
-    // Métricas de LN Markets API
-    this.lnMarketsApiCallsTotal = new Counter({
-      name: 'lnmarkets_api_calls_total',
-      help: 'Total number of LN Markets API calls',
-      labelNames: ['endpoint', 'status'],
+    this.dbQueryTotal = new Counter({
+      name: 'db_queries_total',
+      help: 'Total number of database queries',
+      labelNames: ['operation', 'table']
     });
 
-    this.lnMarketsApiDuration = new Histogram({
-      name: 'lnmarkets_api_duration_seconds',
-      help: 'Duration of LN Markets API calls in seconds',
-      labelNames: ['endpoint'],
-      buckets: [0.1, 0.5, 1, 2, 5, 10, 30],
+    this.dbConnectionPool = new Gauge({
+      name: 'db_connection_pool_size',
+      help: 'Number of connections in the database pool',
+      labelNames: ['state']
     });
 
-    this.lnMarketsApiErrorsTotal = new Counter({
-      name: 'lnmarkets_api_errors_total',
-      help: 'Total number of LN Markets API errors',
-      labelNames: ['endpoint', 'error_type'],
+    this.redisOperationDuration = new Histogram({
+      name: 'redis_operation_duration_seconds',
+      help: 'Duration of Redis operations in seconds',
+      labelNames: ['operation'],
+      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.5]
     });
 
-    // Métricas de workers
-    this.workerJobsTotal = new Counter({
-      name: 'worker_jobs_total',
-      help: 'Total number of worker jobs processed',
-      labelNames: ['worker_type', 'status'],
+    this.redisOperationTotal = new Counter({
+      name: 'redis_operations_total',
+      help: 'Total number of Redis operations',
+      labelNames: ['operation']
     });
 
-    this.workerJobDuration = new Histogram({
-      name: 'worker_job_duration_seconds',
-      help: 'Duration of worker jobs in seconds',
-      labelNames: ['worker_type'],
-      buckets: [1, 5, 10, 30, 60, 300, 600],
+    this.redisConnectionPool = new Gauge({
+      name: 'redis_connection_pool_size',
+      help: 'Number of connections in the Redis pool',
+      labelNames: ['state']
     });
 
-    this.workerJobFailuresTotal = new Counter({
-      name: 'worker_job_failures_total',
-      help: 'Total number of worker job failures',
-      labelNames: ['worker_type', 'error_type'],
+    this.userRegistrations = new Counter({
+      name: 'user_registrations_total',
+      help: 'Total number of user registrations',
+      labelNames: ['method']
     });
 
-    // Métricas de sistema
+    this.userLogins = new Counter({
+      name: 'user_logins_total',
+      help: 'Total number of user logins',
+      labelNames: ['method']
+    });
+
+    this.tradeExecutions = new Counter({
+      name: 'trade_executions_total',
+      help: 'Total number of trade executions',
+      labelNames: ['symbol', 'side']
+    });
+
+    this.automationExecutions = new Counter({
+      name: 'automation_executions_total',
+      help: 'Total number of automation executions',
+      labelNames: ['type', 'status']
+    });
+
+    this.alertTriggers = new Counter({
+      name: 'alert_triggers_total',
+      help: 'Total number of alert triggers',
+      labelNames: ['type', 'severity']
+    });
+
     this.memoryUsage = new Gauge({
       name: 'memory_usage_bytes',
       help: 'Memory usage in bytes',
-      labelNames: ['type'],
+      labelNames: ['type']
     });
 
     this.cpuUsage = new Gauge({
       name: 'cpu_usage_percent',
-      help: 'CPU usage percentage',
+      help: 'CPU usage percentage'
     });
 
-    this.activeUsers = new Gauge({
-      name: 'active_users_total',
-      help: 'Number of active users',
+    this.activeConnections = new Gauge({
+      name: 'active_connections',
+      help: 'Number of active connections',
+      labelNames: ['type']
     });
-  }
 
-  static getInstance(): MetricsService {
-    if (!MetricsService.instance) {
-      MetricsService.instance = new MetricsService();
-    }
-    return MetricsService.instance;
+    this.queueSize = new Gauge({
+      name: 'queue_size',
+      help: 'Number of items in queue',
+      labelNames: ['queue_name']
+    });
+
+    this.initializeMetrics();
   }
 
   /**
-   * Inicializar métricas
+   * Initialize all metrics
    */
-  initialize(): void {
-    if (this.isInitialized) {
-      return;
+  private initializeMetrics(): void {
+    if (this.isInitialized) return;
+
+    try {
+      // Collect default system metrics
+      collectDefaultMetrics({
+        register,
+        prefix: 'hub_defisats_',
+        gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
+      });
+
+      // HTTP Metrics
+      this.httpRequestDuration = new Histogram({
+        name: 'hub_defisats_http_request_duration_seconds',
+        help: 'Duration of HTTP requests in seconds',
+        labelNames: ['method', 'route', 'status_code'],
+        buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+        registers: [register],
+      });
+
+      this.httpRequestTotal = new Counter({
+        name: 'hub_defisats_http_requests_total',
+        help: 'Total number of HTTP requests',
+        labelNames: ['method', 'route', 'status_code'],
+        registers: [register],
+      });
+
+      this.httpRequestErrors = new Counter({
+        name: 'hub_defisats_http_request_errors_total',
+        help: 'Total number of HTTP request errors',
+        labelNames: ['method', 'route', 'error_type'],
+        registers: [register],
+      });
+
+      // Database Metrics
+      this.dbQueryDuration = new Histogram({
+        name: 'hub_defisats_db_query_duration_seconds',
+        help: 'Duration of database queries in seconds',
+        labelNames: ['operation', 'table', 'status'],
+        buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
+        registers: [register],
+      });
+
+      this.dbQueryTotal = new Counter({
+        name: 'hub_defisats_db_queries_total',
+        help: 'Total number of database queries',
+        labelNames: ['operation', 'table', 'status'],
+        registers: [register],
+      });
+
+      this.dbConnectionPool = new Gauge({
+        name: 'hub_defisats_db_connection_pool_size',
+        help: 'Number of connections in the database pool',
+        labelNames: ['state'],
+        registers: [register],
+      });
+
+      // Redis Metrics
+      this.redisOperationDuration = new Histogram({
+        name: 'hub_defisats_redis_operation_duration_seconds',
+        help: 'Duration of Redis operations in seconds',
+        labelNames: ['operation', 'status'],
+        buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1],
+        registers: [register],
+      });
+
+      this.redisOperationTotal = new Counter({
+        name: 'hub_defisats_redis_operations_total',
+        help: 'Total number of Redis operations',
+        labelNames: ['operation', 'status'],
+        registers: [register],
+      });
+
+      this.redisConnectionPool = new Gauge({
+        name: 'hub_defisats_redis_connection_pool_size',
+        help: 'Number of connections in the Redis pool',
+        labelNames: ['state'],
+        registers: [register],
+      });
+
+      // Business Metrics
+      this.userRegistrations = new Counter({
+        name: 'hub_defisats_user_registrations_total',
+        help: 'Total number of user registrations',
+        labelNames: ['source'],
+        registers: [register],
+      });
+
+      this.userLogins = new Counter({
+        name: 'hub_defisats_user_logins_total',
+        help: 'Total number of user logins',
+        labelNames: ['method'],
+        registers: [register],
+      });
+
+      this.tradeExecutions = new Counter({
+        name: 'hub_defisats_trade_executions_total',
+        help: 'Total number of trade executions',
+        labelNames: ['symbol', 'side', 'status'],
+        registers: [register],
+      });
+
+      this.automationExecutions = new Counter({
+        name: 'hub_defisats_automation_executions_total',
+        help: 'Total number of automation executions',
+        labelNames: ['type', 'status'],
+        registers: [register],
+      });
+
+      this.alertTriggers = new Counter({
+        name: 'hub_defisats_alert_triggers_total',
+        help: 'Total number of alert triggers',
+        labelNames: ['type', 'severity'],
+        registers: [register],
+      });
+
+      // System Metrics
+      this.memoryUsage = new Gauge({
+        name: 'hub_defisats_memory_usage_bytes',
+        help: 'Memory usage in bytes',
+        labelNames: ['type'],
+        registers: [register],
+      });
+
+      this.cpuUsage = new Gauge({
+        name: 'hub_defisats_cpu_usage_percent',
+        help: 'CPU usage percentage',
+        registers: [register],
+      });
+
+      this.activeConnections = new Gauge({
+        name: 'hub_defisats_active_connections',
+        help: 'Number of active connections',
+        labelNames: ['type'],
+        registers: [register],
+      });
+
+      this.queueSize = new Gauge({
+        name: 'hub_defisats_queue_size',
+        help: 'Number of items in queue',
+        labelNames: ['queue_name'],
+        registers: [register],
+      });
+
+      this.isInitialized = true;
+      this.logger.info('Metrics service initialized successfully');
+    } catch (error) {
+      this.logger.error('Failed to initialize metrics service', { error });
+      throw error;
     }
-
-    // Registrar métricas
-    register.registerMetric(this.httpRequestsTotal);
-    register.registerMetric(this.httpRequestDuration);
-    register.registerMetric(this.httpRequestSize);
-    register.registerMetric(this.httpResponseSize);
-    register.registerMetric(this.authAttemptsTotal);
-    register.registerMetric(this.authSuccessTotal);
-    register.registerMetric(this.authFailuresTotal);
-    register.registerMetric(this.rateLimitHitsTotal);
-    register.registerMetric(this.rateLimitBlocksTotal);
-    register.registerMetric(this.dbConnectionsActive);
-    register.registerMetric(this.dbQueriesTotal);
-    register.registerMetric(this.dbQueryDuration);
-    register.registerMetric(this.lnMarketsApiCallsTotal);
-    register.registerMetric(this.lnMarketsApiDuration);
-    register.registerMetric(this.lnMarketsApiErrorsTotal);
-    register.registerMetric(this.workerJobsTotal);
-    register.registerMetric(this.workerJobDuration);
-    register.registerMetric(this.workerJobFailuresTotal);
-    register.registerMetric(this.memoryUsage);
-    register.registerMetric(this.cpuUsage);
-    register.registerMetric(this.activeUsers);
-
-    // Iniciar coleta de métricas do sistema
-    this.startSystemMetricsCollection();
-
-    this.isInitialized = true;
-    console.log('✅ Metrics service initialized');
   }
 
   /**
-   * Iniciar coleta de métricas do sistema
+   * Record HTTP request metrics
    */
-  private startSystemMetricsCollection(): void {
-    setInterval(() => {
-      // Métricas de memória
+  recordHttpRequest(
+    method: string,
+    route: string,
+    statusCode: number,
+    duration: number
+  ): void {
+    try {
+      this.httpRequestDuration
+        .labels(method, route, statusCode.toString())
+        .observe(duration);
+
+      this.httpRequestTotal
+        .labels(method, route, statusCode.toString())
+        .inc();
+
+      if (statusCode >= 400) {
+        this.httpRequestErrors
+          .labels(method, route, this.getErrorType(statusCode))
+          .inc();
+      }
+    } catch (error) {
+      this.logger.error('Failed to record HTTP request metrics', { error });
+    }
+  }
+
+  /**
+   * Record database query metrics
+   */
+  recordDbQuery(
+    operation: string,
+    table: string,
+    duration: number,
+    success: boolean = true
+  ): void {
+    try {
+      const status = success ? 'success' : 'error';
+      
+      this.dbQueryDuration
+        .labels(operation, table, status)
+        .observe(duration);
+
+      this.dbQueryTotal
+        .labels(operation, table, status)
+        .inc();
+    } catch (error) {
+      this.logger.error('Failed to record database query metrics', { error });
+    }
+  }
+
+  /**
+   * Record Redis operation metrics
+   */
+  recordRedisOperation(
+    operation: string,
+    duration: number,
+    success: boolean = true
+  ): void {
+    try {
+      const status = success ? 'success' : 'error';
+      
+      this.redisOperationDuration
+        .labels(operation, status)
+        .observe(duration);
+
+      this.redisOperationTotal
+        .labels(operation, status)
+        .inc();
+    } catch (error) {
+      this.logger.error('Failed to record Redis operation metrics', { error });
+    }
+  }
+
+  /**
+   * Record user registration
+   */
+  recordUserRegistration(source: string = 'direct'): void {
+    try {
+      this.userRegistrations.labels(source).inc();
+    } catch (error) {
+      this.logger.error('Failed to record user registration metrics', { error });
+    }
+  }
+
+  /**
+   * Record user login
+   */
+  recordUserLogin(method: string = 'password'): void {
+    try {
+      this.userLogins.labels(method).inc();
+    } catch (error) {
+      this.logger.error('Failed to record user login metrics', { error });
+    }
+  }
+
+  /**
+   * Record authentication attempt
+   */
+  recordAuthAttempt(type: string, status: string, error?: string): void {
+    try {
+      if (type === 'login') {
+        this.userLogins.labels(status).inc();
+      } else if (type === 'register') {
+        this.userRegistrations.labels(status).inc();
+      }
+      
+      // Log error details if provided
+      if (error) {
+        this.logger.warn('Auth attempt failed', { type, status, error });
+      }
+    } catch (err) {
+      this.logger.error('Failed to record auth attempt metrics', { error: err });
+    }
+  }
+
+  /**
+   * Record trade execution
+   */
+  recordTradeExecution(symbol: string, side: string, status: string): void {
+    try {
+      this.tradeExecutions.labels(symbol, side, status).inc();
+    } catch (error) {
+      this.logger.error('Failed to record trade execution metrics', { error });
+    }
+  }
+
+  /**
+   * Record automation execution
+   */
+  recordAutomationExecution(type: string, status: string): void {
+    try {
+      this.automationExecutions.labels(type, status).inc();
+    } catch (error) {
+      this.logger.error('Failed to record automation execution metrics', { error });
+    }
+  }
+
+  /**
+   * Record alert trigger
+   */
+  recordAlertTrigger(type: string, severity: string): void {
+    try {
+      this.alertTriggers.labels(type, severity).inc();
+    } catch (error) {
+      this.logger.error('Failed to record alert trigger metrics', { error });
+    }
+  }
+
+  /**
+   * Update system metrics
+   */
+  updateSystemMetrics(): void {
+    try {
       const memUsage = process.memoryUsage();
-      this.memoryUsage.set({ type: 'rss' }, memUsage.rss);
-      this.memoryUsage.set({ type: 'heapTotal' }, memUsage.heapTotal);
-      this.memoryUsage.set({ type: 'heapUsed' }, memUsage.heapUsed);
-      this.memoryUsage.set({ type: 'external' }, memUsage.external);
+      
+      this.memoryUsage.labels('rss').set(memUsage.rss);
+      this.memoryUsage.labels('heapTotal').set(memUsage.heapTotal);
+      this.memoryUsage.labels('heapUsed').set(memUsage.heapUsed);
+      this.memoryUsage.labels('external').set(memUsage.external);
 
-      // Métricas de CPU (simplificado)
+      // CPU usage monitoring (simplified)
       const cpuUsage = process.cpuUsage();
       this.cpuUsage.set(cpuUsage.user + cpuUsage.system);
-
-      // Capturar métricas no Sentry também
-      monitoring.captureMetric(
-        'memory_usage_mb',
-        memUsage.heapUsed / 1024 / 1024,
-        'megabyte'
-      );
-      monitoring.captureMetric(
-        'cpu_usage_microseconds',
-        cpuUsage.user + cpuUsage.system,
-        'microsecond'
-      );
-    }, 30000); // A cada 30 segundos
-  }
-
-  /**
-   * Registrar tentativa de autenticação
-   */
-  recordAuthAttempt(
-    type: string,
-    result: 'success' | 'failure',
-    reason?: string
-  ): void {
-    this.authAttemptsTotal.inc({ type, result });
-
-    if (result === 'success') {
-      this.authSuccessTotal.inc({ type });
-    } else {
-      this.authFailuresTotal.inc({ type, reason: reason || 'unknown' });
+    } catch (error) {
+      this.logger.error('Failed to update system metrics', { error });
     }
   }
 
   /**
-   * Registrar hit de rate limit
+   * Update connection pool metrics
    */
-  recordRateLimitHit(type: string, identifier: string): void {
-    this.rateLimitHitsTotal.inc({ type, identifier });
+  updateConnectionPoolMetrics(dbPoolSize: number, redisPoolSize: number): void {
+    try {
+      this.dbConnectionPool.labels('active').set(dbPoolSize);
+      this.redisConnectionPool.labels('active').set(redisPoolSize);
+      
+      // Update active connections
+      this.activeConnections.labels('database').set(dbPoolSize);
+      this.activeConnections.labels('redis').set(redisPoolSize);
+    } catch (error) {
+      this.logger.error('Failed to update connection pool metrics', { error });
+    }
   }
 
   /**
-   * Registrar bloqueio de rate limit
+   * Update queue size metrics
    */
-  recordRateLimitBlock(type: string, identifier: string): void {
-    this.rateLimitBlocksTotal.inc({ type, identifier });
+  updateQueueSize(queueName: string, size: number): void {
+    try {
+      this.queueSize.labels(queueName).set(size);
+    } catch (error) {
+      this.logger.error('Failed to update queue size metrics', { error });
+    }
   }
 
   /**
-   * Registrar query do banco
+   * Create custom counter
    */
-  recordDbQuery(operation: string, table: string, duration: number): void {
-    this.dbQueriesTotal.inc({ operation, table });
-    this.dbQueryDuration.observe({ operation, table }, duration);
-  }
-
-  /**
-   * Registrar chamada da API LN Markets
-   */
-  recordLnMarketsApiCall(
-    endpoint: string,
-    status: 'success' | 'error',
-    duration: number,
-    errorType?: string
-  ): void {
-    this.lnMarketsApiCallsTotal.inc({ endpoint, status });
-    this.lnMarketsApiDuration.observe({ endpoint }, duration);
-
-    if (status === 'error') {
-      this.lnMarketsApiErrorsTotal.inc({
-        endpoint,
-        error_type: errorType || 'unknown',
+  createCounter(name: string, help: string, labelNames: string[] = []): Counter<string> {
+    try {
+      const counter = new Counter({
+        name: `hub_defisats_${name}`,
+        help,
+        labelNames,
+        registers: [register],
       });
+
+      this.customMetrics.set(name, counter);
+      return counter;
+    } catch (error) {
+      this.logger.error('Failed to create custom counter', { error, name });
+      throw error;
     }
   }
 
   /**
-   * Registrar job de worker
+   * Create custom gauge
    */
-  recordWorkerJob(
-    workerType: string,
-    status: 'success' | 'failure',
-    duration: number,
-    errorType?: string
-  ): void {
-    this.workerJobsTotal.inc({ workerType, status });
-    this.workerJobDuration.observe({ workerType }, duration);
-
-    if (status === 'failure') {
-      this.workerJobFailuresTotal.inc({
-        workerType,
-        error_type: errorType || 'unknown',
+  createGauge(name: string, help: string, labelNames: string[] = []): Gauge<string> {
+    try {
+      const gauge = new Gauge({
+        name: `hub_defisats_${name}`,
+        help,
+        labelNames,
+        registers: [register],
       });
+
+      this.customMetrics.set(name, gauge);
+      return gauge;
+    } catch (error) {
+      this.logger.error('Failed to create custom gauge', { error, name });
+      throw error;
     }
   }
 
   /**
-   * Atualizar número de usuários ativos
+   * Create custom histogram
    */
-  updateActiveUsers(count: number): void {
-    this.activeUsers.set(count);
+  createHistogram(name: string, help: string, labelNames: string[] = [], buckets: number[] = []): Histogram<string> {
+    try {
+      const histogram = new Histogram({
+        name: `hub_defisats_${name}`,
+        help,
+        labelNames,
+        buckets: buckets.length > 0 ? buckets : [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
+        registers: [register],
+      });
+
+      this.customMetrics.set(name, histogram);
+      return histogram;
+    } catch (error) {
+      this.logger.error('Failed to create custom histogram', { error, name });
+      throw error;
+    }
   }
 
   /**
-   * Obter métricas em formato Prometheus
+   * Get metrics in Prometheus format
    */
   async getMetrics(): Promise<string> {
-    return register.metrics();
+    try {
+      return await register.metrics();
+    } catch (error) {
+      this.logger.error('Failed to get metrics', { error });
+      throw error;
+    }
   }
 
   /**
-   * Obter métricas em formato JSON
+   * Get metrics as JSON
    */
-  async getMetricsAsJSON(): Promise<any> {
-    return register.getMetricsAsJSON();
+  async getMetricsAsJson(): Promise<any> {
+    try {
+      return await register.getMetricsAsJSON();
+    } catch (error) {
+      this.logger.error('Failed to get metrics as JSON', { error });
+      throw error;
+    }
   }
 
   /**
-   * Limpar métricas
+   * Clear all metrics
    */
   clearMetrics(): void {
-    register.clear();
+    try {
+      register.clear();
+      this.customMetrics.clear();
+      this.logger.info('All metrics cleared');
+    } catch (error) {
+      this.logger.error('Failed to clear metrics', { error });
+    }
+  }
+
+  /**
+   * Get error type from status code
+   */
+  private getErrorType(statusCode: number): string {
+    if (statusCode >= 500) return 'server_error';
+    if (statusCode >= 400) return 'client_error';
+    return 'unknown';
+  }
+
+  /**
+   * Start metrics collection
+   */
+  startMetricsCollection(intervalMs: number = 30000): void {
+    try {
+      setInterval(() => {
+        this.updateSystemMetrics();
+      }, intervalMs);
+
+      this.logger.info('Metrics collection started', { intervalMs });
+    } catch (error) {
+      this.logger.error('Failed to start metrics collection', { error });
+    }
   }
 }
 
-// Instância singleton
-export const metrics = MetricsService.getInstance();
+// Singleton instance
+let metricsInstance: MetricsService | null = null;
+
+export const getMetricsService = (logger: Logger): MetricsService => {
+  if (!metricsInstance) {
+    metricsInstance = new MetricsService(logger);
+  }
+  return metricsInstance;
+};
+
+// Export metrics instance for direct use
+export const metrics = new MetricsService({
+  info: () => {},
+  error: () => {},
+  warn: () => {},
+  debug: () => {},
+} as any);
+
+// Export Prometheus metrics for direct use
+export { Counter, Histogram, Gauge, Summary } from 'prom-client';
