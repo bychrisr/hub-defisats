@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 // Load environment variables from .env file (only in development)
 if (process.env['NODE_ENV'] !== 'production') {
-  dotenv.config({ path: '../../.env' });
+  dotenv.config();
 }
 
 // Environment validation schema

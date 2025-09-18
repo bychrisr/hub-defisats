@@ -38,7 +38,7 @@ services:
   # Backend API
   backend:
     build:
-      context: ../../backend
+      context: ./backend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-backend
     environment:
@@ -50,6 +50,7 @@ services:
       - "13010:3010"
     volumes:
       - ./backend:/app
+      - ./.env:/app/.env
       - /app/node_modules
     depends_on:
       postgres:
@@ -100,6 +101,7 @@ services:
       REDIS_URL: redis://redis:6379
     volumes:
       - ./backend:/app
+      - ./.env:/app/.env
       - /app/node_modules
     depends_on:
       postgres:
@@ -123,6 +125,7 @@ services:
       REDIS_URL: redis://redis:6379
     volumes:
       - ./backend:/app
+      - ./.env:/app/.env
       - /app/node_modules
     depends_on:
       postgres:
@@ -146,6 +149,7 @@ services:
       REDIS_URL: redis://redis:6379
     volumes:
       - ./backend:/app
+      - ./.env:/app/.env
       - /app/node_modules
     depends_on:
       postgres:
@@ -169,6 +173,7 @@ services:
       REDIS_URL: redis://redis:6379
     volumes:
       - ./backend:/app
+      - ./.env:/app/.env
       - /app/node_modules
     depends_on:
       postgres:
