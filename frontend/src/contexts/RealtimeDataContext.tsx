@@ -60,6 +60,9 @@ const RealtimeDataContext = createContext<RealtimeDataContextType | undefined>(u
 
 export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isAuthenticated } = useAuthStore();
+  
+  // Verificar se é admin
+  const isAdmin = user?.is_admin || false;
   const [data, setData] = useState<RealtimeData>({
     marketData: {},
     positions: [],
@@ -328,15 +331,20 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     }, [])
   });
 
-  // Conectar quando usuário estiver autenticado
+  // Conectar quando usuário estiver autenticado (apenas para usuários comuns)
   useEffect(() => {
     console.log('🔄 REALTIME - Verificando conexão:', {
       isAuthenticated,
       userId: user?.id,
+      isAdmin,
       timestamp: new Date().toISOString()
     });
 
     if (isAuthenticated && user?.id) {
+      if (isAdmin) {
+        console.log('🔄 REALTIME - Admin user, skipping WebSocket connection...');
+        return;
+      }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
       console.log('🔗 REALTIME - URL do WebSocket:', (import.meta.env.VITE_WS_URL || 'ws://localhost:13010') + '/test/ws/realtime?userId=' + user.id);
       connect();
@@ -344,7 +352,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       console.log('🔄 REALTIME - Desconectando - usuário não autenticado');
       disconnect();
     }
-  }, [isAuthenticated, user?.id, connect, disconnect]);
+  }, [isAuthenticated, user?.id, isAdmin, connect, disconnect]);
 
   // Atualizar status de conexão
   useEffect(() => {

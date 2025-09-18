@@ -100,7 +100,15 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   const { updatePositions, data: realtimeData } = useRealtimeData();
   const queryClient = useQueryClient();
   
-  console.log('📊 POSITIONS - Provider render:', { userPositions, length: userPositions?.length });
+  // Verificar se é admin
+  const isAdmin = user?.is_admin || false;
+  
+  console.log('📊 POSITIONS - Provider render:', { 
+    userPositions, 
+    length: userPositions?.length, 
+    isAdmin,
+    userEmail: user?.email 
+  });
   
   const [data, setData] = useState<PositionsData>({
     positions: [],
@@ -422,6 +430,12 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
 
   // Função para buscar posições reais da LN Markets
   const fetchRealPositions = useCallback(async () => {
+    // Pular para admins - eles não têm credenciais LN Markets
+    if (isAdmin) {
+      console.log('🔍 POSITIONS CONTEXT - Skipping LN Markets queries for admin user');
+      return;
+    }
+
     try {
       console.log('🔍 POSITIONS CONTEXT - Fetching real positions, market index and menu from LN Markets...');
 
@@ -614,11 +628,29 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     }
   }, [queryClient, updatePositions]);
 
-  // Buscar posições reais quando usuário estiver autenticado
+  // Buscar posições reais quando usuário estiver autenticado (apenas para usuários comuns)
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('🔍 POSITIONS CONTEXT - User authenticated, fetching real positions...');
-      fetchRealPositions();
+      if (isAdmin) {
+        console.log('🔍 POSITIONS CONTEXT - Admin user authenticated, skipping LN Markets queries...');
+        // Para admins, apenas limpar dados de posições
+        setData(prev => ({
+          ...prev,
+          positions: [],
+          totalPL: 0,
+          totalMargin: 0,
+          totalQuantity: 0,
+          totalValue: 0,
+          estimatedProfit: 0,
+          estimatedBalance: 0,
+          lastUpdate: Date.now(),
+          isLoading: false,
+          error: null,
+        }));
+      } else {
+        console.log('🔍 POSITIONS CONTEXT - User authenticated, fetching real positions...');
+        fetchRealPositions();
+      }
     } else {
       console.log('🔍 POSITIONS CONTEXT - User not authenticated, clearing positions...');
       setData({
@@ -636,11 +668,11 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         marketIndexError: null,
       });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isAdmin]);
 
-  // Atualizar posições e market index periodicamente quando autenticado
+  // Atualizar posições e market index periodicamente quando autenticado (apenas para usuários comuns)
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || isAdmin) return;
 
     const interval = setInterval(() => {
       console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and market index...');
@@ -648,10 +680,14 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     }, 5000); // Atualizar a cada 5 segundos
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, fetchRealPositions]);
+  }, [isAuthenticated, isAdmin, fetchRealPositions]);
 
   // Função para refresh manual
   const refreshPositions = () => {
+    if (isAdmin) {
+      console.log('🔄 POSITIONS CONTEXT - Admin user, skipping refresh...');
+      return;
+    }
     setData(prev => ({ ...prev, isLoading: true }));
     fetchRealPositions();
   };
