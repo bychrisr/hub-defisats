@@ -37,10 +37,11 @@ export const useCurrency = (options: UseCurrencyOptions = {}) => {
     // Initial update
     updateRates();
 
-    if (autoUpdate) {
-      const interval = setInterval(updateRates, updateInterval);
-      return () => clearInterval(interval);
-    }
+    // Desabilitar polling automático para evitar esgotamento de recursos
+    // if (autoUpdate) {
+    //   const interval = setInterval(updateRates, updateInterval);
+    //   return () => clearInterval(interval);
+    // }
   }, [autoUpdate, updateInterval, updateRates]);
 
   const convert = useCallback((value: number, from: string, to: string): ConversionResult => {

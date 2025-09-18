@@ -124,11 +124,8 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   }, [
     enabled,
     isAuthenticated,
-    user?.id,
-    startAllIntervals,
-    clearAllIntervals,
-    updateMainData,
-    updateHistoricalData
+    user?.id
+    // Removidas dependências que causam re-execução constante
   ]);
 
   // Função para forçar atualização manual de todos os dados

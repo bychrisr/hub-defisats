@@ -74,12 +74,12 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
   useEffect(() => {
     fetchEstimatedBalance();
     
-    // Atualizar a cada 30 segundos
-    const interval = setInterval(() => {
-      fetchEstimatedBalance();
-    }, 30000);
+    // Desabilitar polling automático - será controlado pelo useRealtimeDashboard
+    // const interval = setInterval(() => {
+    //   fetchEstimatedBalance();
+    // }, 30000);
     
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [fetchEstimatedBalance]);
 
   return {

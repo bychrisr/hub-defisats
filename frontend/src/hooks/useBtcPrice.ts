@@ -61,12 +61,12 @@ export const useBtcPrice = (): UseBtcPriceReturn => {
   useEffect(() => {
     fetchBtcPrice();
     
-    // Atualizar preço a cada 10 segundos
-    const interval = setInterval(() => {
-      fetchBtcPrice();
-    }, 10000);
+    // Desabilitar polling automático para evitar esgotamento de recursos
+    // const interval = setInterval(() => {
+    //   fetchBtcPrice();
+    // }, 10000);
     
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   return {
