@@ -25,11 +25,11 @@ export const useDynamicFavicon = (config?: Partial<FaviconConfig>) => {
   const { isAuthenticated } = useAuthStore();
   const totalPL = useTotalPL();
 
-  // Configuração padrão do favicon com cores mais vibrantes
+  // Configuração padrão do favicon - apenas círculos sólidos
   const defaultConfig: FaviconConfig = {
-    positive: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#00ff00"/><text x="16" y="20" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">+</text></svg>'),
-    negative: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#ff0000"/><text x="16" y="20" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">-</text></svg>'),
-    neutral: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#666"/><text x="16" y="20" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">=</text></svg>')
+    positive: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#00ff00"/></svg>'),
+    negative: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#ff0000"/></svg>'),
+    neutral: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#666"/></svg>')
   };
 
   const faviconConfig = { ...defaultConfig, ...config };
@@ -88,7 +88,7 @@ export const useDynamicFavicon = (config?: Partial<FaviconConfig>) => {
     }
   };
 
-  // Função para gerar favicon com valor específico
+  // Função para gerar favicon com valor específico - apenas círculo sólido
   const generateFaviconWithValue = (pl: number) => {
     console.log('🎨 FAVICON - generateFaviconWithValue called with:', pl);
 
@@ -103,28 +103,19 @@ export const useDynamicFavicon = (config?: Partial<FaviconConfig>) => {
     const isZero = pl === 0;
 
     // Cores mais vibrantes e distintas
-    let color, symbol, displayValue;
+    let color;
 
     if (isZero) {
-      color = '#666';
-      symbol = '=';
-      displayValue = '0';
+      color = '#666'; // Cinza para neutro
     } else {
       color = isPositive ? '#00ff00' : '#ff0000'; // Verde brilhante para positivo, vermelho brilhante para negativo
-      symbol = isPositive ? '+' : '-';
-      const absValue = Math.abs(pl);
-      // Mostrar valor em sats (dividir por 1000 para mostrar em milhares)
-      const valueInKSats = Math.floor(absValue / 1000);
-      displayValue = valueInKSats > 999 ? '999+' : valueInKSats.toString();
     }
 
-    console.log('🎨 FAVICON - Generated values:', { color, symbol, displayValue, originalPL: pl });
+    console.log('🎨 FAVICON - Generated values:', { color, originalPL: pl });
 
-    // Favicon mais simples mas mais visível - usando concatenação para evitar problemas de template strings
+    // Favicon simplificado - apenas círculo sólido
     const svgContent = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
-      '<circle cx="16" cy="16" r="15" fill="' + color + '" stroke="white" stroke-width="1"/>' +
-      '<text x="16" y="12" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">' + symbol + '</text>' +
-      '<text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">' + displayValue + 'k</text>' +
+      '<circle cx="16" cy="16" r="15" fill="' + color + '"/>' +
       '</svg>';
 
     const faviconSvg = 'data:image/svg+xml,' + encodeURIComponent(svgContent);
