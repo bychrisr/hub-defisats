@@ -15,6 +15,11 @@ const badgeVariants = cva(
         destructive:
           'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
         outline: 'text-foreground',
+        // Custom variants for market data
+        success:
+          'border-transparent bg-[#00d4aa] text-black hover:bg-[#00b894]',
+        danger:
+          'border-transparent bg-[#ff6b6b] text-white hover:bg-[#ff5252]',
       },
     },
     defaultVariants: {

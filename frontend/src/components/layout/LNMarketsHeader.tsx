@@ -159,8 +159,8 @@ const LNMarketsHeader: React.FC = () => {
                     ${formatIndex(marketData.index)}
                   </span>
                   <Badge 
-                    variant={marketData.index24hChange >= 0 ? "default" : "destructive"}
-                    className={'text-xs font-mono ' + (marketData.index24hChange >= 0 ? 'bg-[#00d4aa] text-black' : 'bg-[#ff6b6b] text-white')}
+                    variant={marketData.index24hChange >= 0 ? "success" : "danger"}
+                    className="text-xs font-mono"
                   >
                     {marketData.index24hChange >= 0 ? (
                       <TrendingUp className="w-3 h-3 mr-1" />
@@ -230,8 +230,8 @@ const LNMarketsHeader: React.FC = () => {
                         ${formatIndex(marketData.index)}
                       </span>
                       <Badge 
-                        variant={marketData.index24hChange >= 0 ? "default" : "destructive"}
-                        className={'text-xs font-mono ' + (marketData.index24hChange >= 0 ? 'bg-[#00d4aa] text-black' : 'bg-[#ff6b6b] text-white')}
+                        variant={marketData.index24hChange >= 0 ? "success" : "danger"}
+                        className="text-xs font-mono"
                       >
                         {marketData.index24hChange >= 0 ? (
                           <TrendingUp className="w-3 h-3 mr-1" />
@@ -299,8 +299,8 @@ const LNMarketsHeader: React.FC = () => {
                       ${formatIndex(marketData.index)}
                     </span>
                     <Badge 
-                      variant={marketData.index24hChange >= 0 ? "default" : "destructive"}
-                      className={'text-xs font-mono ' + (marketData.index24hChange >= 0 ? 'bg-[#00d4aa] text-black' : 'bg-[#ff6b6b] text-white')}
+                      variant={marketData.index24hChange >= 0 ? "success" : "danger"}
+                      className="text-xs font-mono"
                     >
                       {marketData.index24hChange >= 0 ? (
                         <TrendingUp className="w-3 h-3 mr-1" />

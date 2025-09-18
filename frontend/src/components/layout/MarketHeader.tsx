@@ -99,12 +99,8 @@ const MarketHeader: React.FC = () => {
                 {formatRate(marketData.rate)}
               </span>
               <Badge 
-                variant={marketData.rateChange >= 0 ? "default" : "destructive"}
-                className={`text-xs ${
-                  marketData.rateChange >= 0 
-                    ? 'bg-[#00d4aa] text-black hover:bg-[#00d4aa]' 
-                    : 'bg-[#ff6b6b] text-white hover:bg-[#ff6b6b]'
-                }`}
+                variant={marketData.rateChange >= 0 ? "success" : "danger"}
+                className="text-xs"
               >
                 {marketData.rateChange >= 0 ? (
                   <TrendingUp className="w-3 h-3 mr-1" />
