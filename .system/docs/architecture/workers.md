@@ -1,7 +1,5 @@
 # Workers e Processamento Assíncrono
 
-Este documento descreve a arquitetura de workers do hub-defisats, responsáveis pelo processamento assíncrono e monitoramento em tempo real.
-
 ## Visão Geral
 
 Os workers são serviços independentes que processam tarefas em background, garantindo que operações críticas como monitoramento de margem e execução de automações sejam executadas de forma confiável e escalável.
@@ -84,7 +82,44 @@ interface AutomationExecutorConfig {
 
 ---
 
-### 3. Notification Worker
+### 3. Simulation Executor Worker
+
+**Responsabilidade**: Execução de simulações em tempo real
+
+**Processo**:
+1. Processa simulações na fila Redis
+2. Executa lógica de automação passo a passo (100ms por passo)
+3. Aplica cenários de preço (Bull, Bear, Sideways, Volatile)
+4. Salva resultados em tempo real
+5. Suporta até 2 simulações simultâneas por usuário
+
+**Cenários de Preço**:
+```typescript
+// Bull Market: tendência positiva + baixa volatilidade
+currentPrice += initialPrice * (0.001 + random * 0.002);
+
+// Bear Market: tendência negativa + média volatilidade
+currentPrice += initialPrice * (-0.002 + random * 0.003);
+
+// Sideways: sem tendência + volatilidade baixa
+currentPrice += initialPrice * random * 0.005;
+
+// Volatile: alta volatilidade + eventos extremos
+if (extremeEvent) {
+  currentPrice += initialPrice * random * 0.05;
+} else {
+  currentPrice += initialPrice * random * 0.01;
+}
+```
+
+**Filas**:
+- `simulation-execute`: Execução de simulações
+- `simulation-data`: Salvamento de dados em tempo real
+- `simulation-complete`: Finalização de simulações
+
+---
+
+### 4. Notification Worker
 
 **Responsabilidade**: Envio de notificações multi-canal
 
@@ -114,7 +149,7 @@ interface NotificationConfig {
 
 ---
 
-### 4. Payment Validator Worker
+### 5. Payment Validator Worker
 
 **Responsabilidade**: Validação de pagamentos Lightning
 
@@ -234,6 +269,7 @@ services:
   "scripts": {
     "worker:margin-monitor": "tsx src/workers/margin-monitor.ts",
     "worker:automation-executor": "tsx src/workers/automation-executor.ts",
+    "worker:simulation-executor": "tsx src/workers/simulation-executor.ts",
     "worker:notification": "tsx src/workers/notification.ts",
     "worker:payment-validator": "tsx src/workers/payment-validator.ts",
     "worker:all": "concurrently \"npm run worker:*\""
@@ -350,3 +386,10 @@ spec:
 - Alertas automáticos
 - Logs estruturados
 - Tracing distribuído
+
+---
+
+**Documento**: Workers e Processamento Assíncrono  
+**Versão**: 1.3.0  
+**Última Atualização**: 2025-01-15  
+**Responsável**: Equipe de Desenvolvimento
