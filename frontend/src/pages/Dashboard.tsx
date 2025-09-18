@@ -154,7 +154,15 @@ export default function Dashboard() {
         {/* Linha 2 - Histórico */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.history')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <MetricCard
+              title="Margem disponível"
+              value={formatSats(balanceData?.total_balance || 0)}
+              subtitle="Saldo da conta LN Markets"
+              icon={Wallet}
+              variant="default"
+            />
+
             <PnLCard
               title={t('dashboard.estimated_balance')}
               pnl={estimatedBalance.data?.estimated_balance || 0}
