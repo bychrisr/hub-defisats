@@ -143,11 +143,11 @@ const LNMarketsHeader: React.FC = () => {
   return (
     <Card className={'bg-[#1a1a1a] border-[#2a2e39] rounded-none border-b-0 transition-all duration-300 ' + (isScrolled ? 'py-1' : 'py-2 md:py-3')}>
       <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
-        {/* Mobile Layout - Same as Desktop but with vertical labels */}
+        {/* Mobile Layout - Two columns */}
         <div className="md:hidden">
           <div className={'flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
-            {/* Index - Largura fixa */}
-            <div className="flex items-center space-x-2 w-1/4">
+            {/* Coluna 1: Index */}
+            <div className="flex items-center space-x-2 w-1/2">
               <div className="flex flex-col items-start space-y-1">
                 <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
                 {lnMarketsError ? (
@@ -185,47 +185,33 @@ const LNMarketsHeader: React.FC = () => {
               </div>
             </div>
 
-            {/* Trading Fees - Largura fixa */}
-            <div className="flex items-center space-x-2 w-1/4">
-              <div className="flex flex-col items-start space-y-1">
-                <div className="flex items-center space-x-1">
-                  <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
-                  <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Trading Fees:</span>
-                </div>
+            {/* Coluna 2: Fees, Funding, Rate */}
+            <div className="flex flex-col items-end space-y-2 w-1/2">
+              {/* Fees */}
+              <div className="flex items-center space-x-1">
+                <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+                <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Fees:</span>
                 <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
                   {marketData ? formatTradingFees(marketData.tradingFees) : '--'}
                 </span>
               </div>
-            </div>
 
-            {/* Next Funding - Largura fixa */}
-            <div className="flex items-center space-x-2 w-1/4">
-              <div className="flex flex-col items-start space-y-1">
-                <div className="flex items-center space-x-1">
-                  <Clock className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
-                  <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Next Funding:</span>
-                </div>
+              {/* Funding */}
+              <div className="flex items-center space-x-1">
+                <Clock className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+                <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Funding:</span>
                 <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
                   {marketData ? marketData.nextFunding : '--'}
                 </span>
               </div>
-            </div>
 
-            {/* Rate - Largura fixa */}
-            <div className="flex items-center space-x-2 w-1/4">
-              <div className="flex flex-col items-start space-y-1">
-                <div className="flex items-center space-x-1">
-                  <Activity className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
-                  <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Rate:</span>
-                </div>
-                <div className="flex flex-col items-start space-y-1">
-                  <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
-                    {marketData ? formatRate(marketData.rate) : '--'}
-                  </span>
-                  {!isScrolled && (
-                    <span className="text-xs text-gray-400">Funding Rate</span>
-                  )}
-                </div>
+              {/* Rate */}
+              <div className="flex items-center space-x-1">
+                <Activity className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+                <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Rate:</span>
+                <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
+                  {marketData ? formatRate(marketData.rate) : '--'}
+                </span>
               </div>
             </div>
           </div>
