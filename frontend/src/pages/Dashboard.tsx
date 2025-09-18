@@ -27,7 +27,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
-import { usePositionsMetrics, usePositions } from '@/contexts/PositionsContext';
+import { usePositionsMetrics, usePositions, useCredentialsError } from '@/contexts/PositionsContext';
 import LatestPricesWidget from '@/components/market/LatestPricesWidget';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
@@ -38,6 +38,7 @@ import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { MetricCard } from '@/components/dashboard/MetricCard';
+import { LNMarketsError } from '@/components/LNMarketsError';
 import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -58,6 +59,9 @@ export default function Dashboard() {
   const realtimePositions = useUserPositions();
   const balanceData = useUserBalance();
   const { isConnected } = useConnectionStatus();
+  
+  // Erro de credenciais LN Markets
+  const { credentialsError, clearCredentialsError } = useCredentialsError();
   
   // Hook de tempo real para todos os dados do dashboard
   const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
@@ -129,6 +133,19 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+
+          {/* LN Markets Credentials Error */}
+          {credentialsError && (
+            <LNMarketsError 
+              error={credentialsError}
+              onConfigure={() => {
+                clearCredentialsError();
+                // Navigate to profile page to configure credentials
+                window.location.href = '/profile';
+              }}
+              showConfigureButton={true}
+            />
+          )}
 
           {/* Linha 1 - Posições Ativas */}
           <div className="space-y-4">

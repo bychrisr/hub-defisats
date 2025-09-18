@@ -25,9 +25,9 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
     
     // Get user credentials from database or config
     const credentials = {
-      apiKey: process.env['LN_MARKETS_API_KEY'] || '',
-      apiSecret: process.env['LN_MARKETS_API_SECRET'] || '',
-      passphrase: process.env['LN_MARKETS_PASSPHRASE'] || '',
+      apiKey: process.env['LN_MARKETS_API_KEY'] || 'dummy-api-key',
+      apiSecret: process.env['LN_MARKETS_API_SECRET'] || 'dummy-api-secret',
+      passphrase: process.env['LN_MARKETS_PASSPHRASE'] || 'dummy-passphrase',
       isTestnet: process.env['LN_MARKETS_TESTNET'] === 'true'
     };
 
@@ -102,11 +102,12 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
 
     } catch (error) {
       console.error('❌ WEBSOCKET TEST - Erro ao criar conexão:', {
-        error,
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
         userId,
         timestamp: new Date().toISOString()
       });
-             connection.close(1011, 'Internal server error');
+      connection.close(1011, 'Internal server error');
     }
   });
 }

@@ -84,6 +84,8 @@ interface PositionsContextType {
   getPositionsBySymbol: (symbol: string) => LNPosition[];
   getPositionsBySide: (side: 'long' | 'short') => LNPosition[];
   convertRealtimeToLNPosition: (pos: RealtimePosition) => LNPosition;
+  credentialsError: string | null;
+  clearCredentialsError: () => void;
 }
 
 const PositionsContext = createContext<PositionsContextType | undefined>(undefined);
@@ -117,6 +119,12 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     totalTradingFees: 0,
     totalFundingCost: 0,
   });
+  
+  const [credentialsError, setCredentialsError] = useState<string | null>(null);
+  
+  const clearCredentialsError = useCallback(() => {
+    setCredentialsError(null);
+  }, []);
 
   // Função para converter posição em tempo real para LNPosition
   const convertRealtimeToLNPosition = (pos: RealtimePosition): LNPosition => {
@@ -430,6 +438,14 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       console.log('✅ POSITIONS CONTEXT - Received real positions:', positionsData);
       console.log('✅ POSITIONS CONTEXT - Received market index:', indexData);
       console.log('✅ POSITIONS CONTEXT - Received menu data:', menuData);
+      
+      // Verificar se há erro de credenciais
+      if (positionsData.message && positionsData.message.includes('credentials not configured')) {
+        console.log('⚠️ POSITIONS CONTEXT - LN Markets credentials not configured');
+        setCredentialsError(positionsData.message);
+      } else {
+        setCredentialsError(null);
+      }
 
       // Invalidar cache do menu para forçar atualização
       if (menuData.success) {
@@ -663,6 +679,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     getPositionsBySymbol,
     getPositionsBySide,
     convertRealtimeToLNPosition,
+    credentialsError,
+    clearCredentialsError,
   };
 
   return (
@@ -713,4 +731,10 @@ export const usePositionsMetrics = () => {
     totalTradingFees: data.totalTradingFees || 0,
     totalFundingCost: data.totalFundingCost || 0,
   };
+};
+
+// Hook para erro de credenciais
+export const useCredentialsError = () => {
+  const { credentialsError, clearCredentialsError } = usePositions();
+  return { credentialsError, clearCredentialsError };
 };
