@@ -257,6 +257,32 @@ sequenceDiagram
 - Recuperação automática
 - Monitoramento de saúde
 
+## Otimizações de Performance
+
+### 1. Requisições Centralizadas
+- **useCentralizedData**: Hook que centraliza requisições em uma única chamada paralela
+- **Requisições Paralelas**: Balance, positions, market e menu em uma única requisição
+- **Redução de Overhead**: De 4+ requisições simultâneas para 1 requisição paralela
+- **Cache Inteligente**: Dados compartilhados entre componentes
+
+### 2. Proteção de Rotas Inteligente
+- **LoadingGuard**: Componente elegante com loading animado e feedback visual
+- **RouteGuard otimizado**: Verificação de autenticação com estados visuais
+- **Estados de Loading**: Diferentes estados visuais para cada situação
+- **UX Melhorada**: Feedback visual durante verificações de autenticação
+
+### 3. Otimizações de Frontend
+- **Hooks Reutilizáveis**: useCentralizedData e useRealtimeDashboard
+- **Componentes Modulares**: LoadingGuard e RouteGuard reutilizáveis
+- **Imports Limpos**: Remoção de código de teste e imports desnecessários
+- **Código Centralizado**: Melhor organização e manutenibilidade
+
+### 4. Benefícios Alcançados
+- **Performance**: Menos requisições simultâneas e carregamento mais rápido
+- **UX/UI**: Loading inteligente e proteção de rotas com feedback visual
+- **Manutenibilidade**: Código centralizado e hooks reutilizáveis
+- **Eficiência**: Menor uso de banda e recursos do servidor
+
 ## Segurança
 
 ### 1. Autenticação e Autorização

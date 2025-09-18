@@ -23,6 +23,28 @@ Todos os endpoints (exceto os públicos) requerem autenticação via JWT token n
 - `404` - Não encontrado
 - `500` - Erro interno do servidor
 
+## ⚡ Otimizações de Performance
+
+### Requisições Centralizadas
+O frontend agora utiliza requisições centralizadas para melhor performance:
+
+- **useCentralizedData**: Hook que faz uma única requisição paralela para múltiplos endpoints
+- **Requisições Paralelas**: Balance, positions, market e menu em uma única chamada
+- **Redução de Overhead**: De 4+ requisições simultâneas para 1 requisição paralela
+- **Cache Inteligente**: Dados compartilhados entre componentes
+
+### Endpoints Otimizados
+- **GET /api/lnmarkets/user/balance**: Saldo do usuário
+- **GET /api/lnmarkets/user/positions**: Posições do usuário
+- **GET /api/market/index/public**: Dados de mercado (público)
+- **GET /api/menu**: Dados do menu
+
+### Benefícios
+- **Performance**: Carregamento mais rápido com menos requisições
+- **Eficiência**: Menor uso de banda e recursos do servidor
+- **UX**: Melhor experiência do usuário com loading inteligente
+- **Manutenibilidade**: Código centralizado e reutilizável
+
 ---
 
 ## 🔐 Autenticação

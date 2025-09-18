@@ -211,6 +211,26 @@ Esta pasta contém toda a documentação técnica e de produto do Hub-defisats, 
 - docs/deployment/kubernetes.md - Deploy em Kubernetes
 - docs/development/setup.md - Setup de desenvolvimento
 
+## 🚀 Melhorias Recentes (v1.3.2)
+
+### Proteção de Rotas Inteligente
+- **LoadingGuard**: Componente elegante com loading animado e feedback visual
+- **RouteGuard otimizado**: Verificação de autenticação com estados visuais
+- **Dashboard protegido**: Loading durante verificação de autenticação
+- **Tela de acesso negado**: Interface amigável com opções de login e navegação
+
+### Otimização de Requisições
+- **useCentralizedData**: Hook que centraliza requisições em uma única chamada paralela
+- **Requisições Paralelas**: Balance, positions, market e menu em uma única requisição
+- **Redução de Overhead**: De 4+ requisições simultâneas para 1 requisição paralela
+- **Cache Inteligente**: Dados compartilhados entre componentes
+
+### Benefícios Alcançados
+- **Performance**: Menos requisições simultâneas e carregamento mais rápido
+- **UX/UI**: Loading inteligente e proteção de rotas com feedback visual
+- **Manutenibilidade**: Código centralizado e hooks reutilizáveis
+- **Eficiência**: Menor uso de banda e recursos do servidor
+
 ## Contribuição
 
 ### Como Contribuir

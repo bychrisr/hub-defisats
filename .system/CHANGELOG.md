@@ -6,6 +6,34 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.3.2] - 2025-01-15 - Proteção de Rotas Inteligente & Otimização de Performance 🚀 **PERFORMANCE**
+
+### 🔐 Proteção de Rotas Inteligente
+- ✅ **LoadingGuard**: Componente elegante com loading animado e feedback visual
+- ✅ **RouteGuard atualizado**: Integração com LoadingGuard para melhor UX
+- ✅ **Dashboard protegido**: Loading durante verificação de autenticação
+- ✅ **Tela de acesso negado**: Interface amigável com opções de login e navegação
+- ✅ **Estados de loading**: Diferentes estados visuais para cada situação
+
+### ⚡ Otimização de Requisições
+- ✅ **useCentralizedData**: Hook para requisições centralizadas e paralelas
+- ✅ **Requisição única**: Balance, positions, market e menu em uma única chamada
+- ✅ **useRealtimeDashboard otimizado**: Uso de dados centralizados
+- ✅ **Redução de requisições**: De 4+ requisições simultâneas para 1 requisição paralela
+- ✅ **Performance melhorada**: Carregamento mais rápido e menor uso de recursos
+
+### 🧹 Limpeza e Manutenibilidade
+- ✅ **Removido FaviconTest**: Componente e botão de teste eliminados
+- ✅ **Removido useTestFavicon**: Hook de teste removido
+- ✅ **Imports limpos**: Removidos imports desnecessários
+- ✅ **Código centralizado**: Melhor organização e reutilização
+
+### 📊 Benefícios Alcançados
+- ✅ **Performance**: Menos requisições simultâneas e carregamento mais rápido
+- ✅ **UX/UI**: Loading inteligente e proteção de rotas com feedback visual
+- ✅ **Manutenibilidade**: Código centralizado e hooks reutilizáveis
+- ✅ **Eficiência**: Menor uso de banda e recursos do servidor
+
 ## [1.3.1] - 2025-01-15 - Reestruturação Completa da Documentação 📚 **DOCUMENTAÇÃO**
 
 ### 📚 Reestruturação da Documentação
