@@ -8,18 +8,6 @@ interface FaviconConfig {
   neutral: string;  // URL ou data URL para P&L neutro/zero
 }
 
-// Hook de teste para verificar o favicon (remova em produção)
-export const useTestFavicon = () => {
-  const { generateFaviconWithValue, updateFavicon } = useDynamicFavicon();
-
-  const testFavicon = (pl: number) => {
-    const faviconUrl = generateFaviconWithValue(pl);
-    updateFavicon(faviconUrl);
-    return faviconUrl;
-  };
-
-  return { testFavicon };
-};
 
 export const useDynamicFavicon = (config?: Partial<FaviconConfig>) => {
   const { isAuthenticated } = useAuthStore();

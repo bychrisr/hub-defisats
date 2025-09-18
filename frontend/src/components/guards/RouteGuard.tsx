@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { LoadingGuard } from './LoadingGuard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -19,6 +20,7 @@ interface RouteGuardProps {
   requireAdmin?: boolean;
   fallbackRoute?: string;
   showUpgradePrompt?: boolean;
+  isLoading?: boolean;
 }
 
 export const RouteGuard: React.FC<RouteGuardProps> = ({
@@ -27,6 +29,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
   requireAdmin = false,
   fallbackRoute,
   showUpgradePrompt = true,
+  isLoading = false,
 }) => {
   const location = useLocation();
   const {
@@ -40,9 +43,30 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
     hasPlanLevel,
   } = useUserPermissions();
 
-  // Se não está autenticado, redirecionar para login
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <LoadingGuard 
+        isLoading={true}
+        isAuthenticated={isAuthenticated}
+        message="Verificando permissões de acesso..."
+      >
+        {children}
+      </LoadingGuard>
+    );
+  }
+
+  // Se não está autenticado, mostrar tela de acesso negado com loading
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return (
+      <LoadingGuard 
+        isLoading={false}
+        isAuthenticated={false}
+        message="Acesso negado"
+      >
+        {children}
+      </LoadingGuard>
+    );
   }
 
   // Verificar se é admin quando necessário

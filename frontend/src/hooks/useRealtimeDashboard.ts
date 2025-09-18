@@ -1,7 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
-import { useRealtimeData } from '@/contexts/RealtimeDataContext';
-import { usePositions } from '@/contexts/PositionsContext';
+import { useCentralizedData } from './useCentralizedData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { usePositionsMetrics } from '@/contexts/PositionsContext';
@@ -24,8 +23,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   } = config;
 
   const { isAuthenticated, user } = useAuthStore();
-  const { loadUserBalance, loadUserPositions } = useRealtimeData();
-  const { fetchRealPositions } = usePositions();
+  const { refreshData: refreshCentralizedData, isLoading: centralizedLoading } = useCentralizedData();
   const { refetch: refetchEstimatedBalance } = useEstimatedBalance();
   const { refetch: refetchHistoricalData } = useHistoricalData();
   const { refetch: refetchPositionsMetrics } = usePositionsMetrics();
@@ -36,42 +34,17 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   const marketIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const historicalIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Função para atualizar posições
-  const updatePositions = useCallback(async () => {
+  // Função para atualizar dados principais (posições, saldo, mercado)
+  const updateMainData = useCallback(async () => {
     if (!isAuthenticated || !user?.id) return;
     
     try {
-      console.log('🔄 REALTIME DASHBOARD - Updating positions...');
-      await fetchRealPositions();
-      await refetchPositionsMetrics();
+      console.log('🔄 REALTIME DASHBOARD - Updating main data (positions, balance, market)...');
+      await refreshCentralizedData();
     } catch (error) {
-      console.error('❌ REALTIME DASHBOARD - Error updating positions:', error);
+      console.error('❌ REALTIME DASHBOARD - Error updating main data:', error);
     }
-  }, [isAuthenticated, user?.id, fetchRealPositions, refetchPositionsMetrics]);
-
-  // Função para atualizar saldo
-  const updateBalance = useCallback(async () => {
-    if (!isAuthenticated || !user?.id) return;
-    
-    try {
-      console.log('🔄 REALTIME DASHBOARD - Updating balance...');
-      await loadUserBalance();
-    } catch (error) {
-      console.error('❌ REALTIME DASHBOARD - Error updating balance:', error);
-    }
-  }, [isAuthenticated, user?.id, loadUserBalance]);
-
-  // Função para atualizar dados de mercado
-  const updateMarketData = useCallback(async () => {
-    if (!isAuthenticated || !user?.id) return;
-    
-    try {
-      console.log('🔄 REALTIME DASHBOARD - Updating market data...');
-      await fetchRealPositions(); // Isso também atualiza o market index
-    } catch (error) {
-      console.error('❌ REALTIME DASHBOARD - Error updating market data:', error);
-    }
-  }, [isAuthenticated, user?.id, fetchRealPositions]);
+  }, [isAuthenticated, user?.id, refreshCentralizedData]);
 
   // Função para atualizar dados históricos
   const updateHistoricalData = useCallback(async () => {
@@ -79,12 +52,15 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     
     try {
       console.log('🔄 REALTIME DASHBOARD - Updating historical data...');
-      await refetchHistoricalData();
-      await refetchEstimatedBalance();
+      await Promise.all([
+        refetchHistoricalData(),
+        refetchEstimatedBalance(),
+        refetchPositionsMetrics()
+      ]);
     } catch (error) {
       console.error('❌ REALTIME DASHBOARD - Error updating historical data:', error);
     }
-  }, [isAuthenticated, user?.id, refetchHistoricalData, refetchEstimatedBalance]);
+  }, [isAuthenticated, user?.id, refetchHistoricalData, refetchEstimatedBalance, refetchPositionsMetrics]);
 
   // Função para limpar todos os intervalos
   const clearAllIntervals = useCallback(() => {
@@ -112,14 +88,8 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
 
     console.log('🚀 REALTIME DASHBOARD - Starting all intervals...');
 
-    // Atualizar posições a cada 5 segundos
-    positionsIntervalRef.current = setInterval(updatePositions, positionsInterval);
-
-    // Atualizar saldo a cada 10 segundos
-    balanceIntervalRef.current = setInterval(updateBalance, balanceInterval);
-
-    // Atualizar dados de mercado a cada 30 segundos
-    marketIntervalRef.current = setInterval(updateMarketData, marketInterval);
+    // Atualizar dados principais a cada 5 segundos (posições, saldo, mercado)
+    positionsIntervalRef.current = setInterval(updateMainData, positionsInterval);
 
     // Atualizar dados históricos a cada 1 minuto
     historicalIntervalRef.current = setInterval(updateHistoricalData, historicalInterval);
@@ -128,12 +98,8 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     isAuthenticated,
     user?.id,
     positionsInterval,
-    balanceInterval,
-    marketInterval,
     historicalInterval,
-    updatePositions,
-    updateBalance,
-    updateMarketData,
+    updateMainData,
     updateHistoricalData
   ]);
 
@@ -141,9 +107,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   useEffect(() => {
     if (enabled && isAuthenticated && user?.id) {
       // Atualização inicial imediata
-      updatePositions();
-      updateBalance();
-      updateMarketData();
+      updateMainData();
       updateHistoricalData();
 
       // Iniciar intervalos
@@ -163,44 +127,29 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     user?.id,
     startAllIntervals,
     clearAllIntervals,
-    updatePositions,
-    updateBalance,
-    updateMarketData,
+    updateMainData,
     updateHistoricalData
   ]);
 
   // Função para forçar atualização manual de todos os dados
   const refreshAll = useCallback(async () => {
     if (!isAuthenticated || !user?.id) return;
-
-    console.log('🔄 REALTIME DASHBOARD - Manual refresh of all data...');
     
+    console.log('🔄 REALTIME DASHBOARD - Manual refresh triggered...');
     try {
       await Promise.all([
-        updatePositions(),
-        updateBalance(),
-        updateMarketData(),
+        updateMainData(),
         updateHistoricalData()
       ]);
-      console.log('✅ REALTIME DASHBOARD - All data refreshed successfully');
+      console.log('✅ REALTIME DASHBOARD - All data refreshed successfully.');
     } catch (error) {
-      console.error('❌ REALTIME DASHBOARD - Error in manual refresh:', error);
+      console.error('❌ REALTIME DASHBOARD - Error during manual refresh:', error);
     }
-  }, [
-    isAuthenticated,
-    user?.id,
-    updatePositions,
-    updateBalance,
-    updateMarketData,
-    updateHistoricalData
-  ]);
+  }, [isAuthenticated, user?.id, updateMainData, updateHistoricalData]);
 
   return {
     refreshAll,
-    updatePositions,
-    updateBalance,
-    updateMarketData,
-    updateHistoricalData,
-    isEnabled: enabled && isAuthenticated && !!user?.id
+    isEnabled: enabled,
+    isLoading: centralizedLoading
   };
 };

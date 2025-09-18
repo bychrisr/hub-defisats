@@ -29,7 +29,6 @@ import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
 import { usePositionsMetrics, usePositions } from '@/contexts/PositionsContext';
 import LatestPricesWidget from '@/components/market/LatestPricesWidget';
-import FaviconTest from '@/components/FaviconTest';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import SystemHealth from '@/components/system/SystemHealth';
 import { useThemeClasses } from '@/contexts/ThemeContext';
@@ -43,6 +42,7 @@ import { MetricCard } from '@/components/dashboard/MetricCard';
 import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
+import { RouteGuard } from '@/components/guards/RouteGuard';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -90,21 +90,14 @@ export default function Dashboard() {
 
   const isLoading = authLoading || automationLoading;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
   const marginGuardAutomation = automations.find(
     a => a.type === 'margin_guard'
   );
   const activeAutomations = automations.filter(a => a.is_active);
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <RouteGuard isLoading={isLoading}>
+      <div className="container mx-auto py-8 px-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -425,9 +418,8 @@ export default function Dashboard() {
         <LatestPricesWidget showRefreshButton={true} compact={false} />
       </div>
 
-      {/* Favicon Test Component */}
-      <FaviconTest />
 
-    </div>
+      </div>
+    </RouteGuard>
   );
 }
