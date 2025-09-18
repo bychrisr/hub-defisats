@@ -143,10 +143,79 @@ const LNMarketsHeader: React.FC = () => {
   return (
     <Card className={'bg-[#1a1a1a] border-[#2a2e39] rounded-none border-b-0 transition-all duration-300 ' + (isScrolled ? 'py-1' : 'py-2 md:py-3')}>
       <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
-        {/* Mobile Layout - Two columns */}
+        {/* Mobile Layout - Two lines horizontal */}
         <div className="md:hidden">
+          {/* Linha 1: Index */}
+          <div className={'flex items-center justify-center w-full mb-2 transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+            <div className="flex items-center space-x-2">
+              <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
+              {lnMarketsError ? (
+                <div className="flex items-center space-x-1">
+                  <span className="text-red-400 text-sm">Error</span>
+                </div>
+              ) : marketData ? (
+                <div className="flex items-center space-x-2">
+                  <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
+                    ${formatIndex(marketData.index)}
+                  </span>
+                  <Badge 
+                    variant={marketData.index24hChange >= 0 ? "default" : "destructive"}
+                    className={'text-xs font-mono ' + (marketData.index24hChange >= 0 ? 'bg-[#00d4aa] text-black' : 'bg-[#ff6b6b] text-white')}
+                  >
+                    {marketData.index24hChange >= 0 ? (
+                      <TrendingUp className="w-3 h-3 mr-1" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 mr-1" />
+                    )}
+                    {format24hChange(marketData.index24hChange)}
+                  </Badge>
+                  {marketData.source === 'coingecko' && (
+                    <span className="text-xs text-gray-400 font-mono">CoinGecko</span>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span className="text-gray-400 text-sm">Loading...</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Linha 2: Outras informações */}
           <div className={'flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
-            {/* Coluna 1: Index */}
+            {/* Fees */}
+            <div className="flex items-center space-x-1">
+              <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+              <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Fees:</span>
+              <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
+                {marketData ? formatTradingFees(marketData.tradingFees) : '--'}
+              </span>
+            </div>
+
+            {/* Funding */}
+            <div className="flex items-center space-x-1">
+              <Clock className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+              <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Funding:</span>
+              <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
+                {marketData ? marketData.nextFunding : '--'}
+              </span>
+            </div>
+
+            {/* Rate */}
+            <div className="flex items-center space-x-1">
+              <Activity className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
+              <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Rate:</span>
+              <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
+                {marketData ? formatRate(marketData.rate) : '--'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout - Two columns (COMENTADO) */}
+        {/* <div className="md:hidden">
+          <div className={'flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
             <div className="flex items-center space-x-2 w-1/2">
               <div className="flex flex-col items-start space-y-1">
                 <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
@@ -185,9 +254,7 @@ const LNMarketsHeader: React.FC = () => {
               </div>
             </div>
 
-            {/* Coluna 2: Fees, Funding, Rate */}
             <div className="flex flex-col items-end space-y-2 w-1/2">
-              {/* Fees */}
               <div className="flex items-center space-x-1">
                 <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
                 <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Fees:</span>
@@ -196,7 +263,6 @@ const LNMarketsHeader: React.FC = () => {
                 </span>
               </div>
 
-              {/* Funding */}
               <div className="flex items-center space-x-1">
                 <Clock className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
                 <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Funding:</span>
@@ -205,7 +271,6 @@ const LNMarketsHeader: React.FC = () => {
                 </span>
               </div>
 
-              {/* Rate */}
               <div className="flex items-center space-x-1">
                 <Activity className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
                 <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Rate:</span>
@@ -215,7 +280,7 @@ const LNMarketsHeader: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Desktop Layout - Full */}
         <div className={'hidden md:flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
