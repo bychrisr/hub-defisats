@@ -580,10 +580,10 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
     try {
       console.log('🔍 PUBLIC MARKET INDEX - Getting market index data');
 
-      // 1. Try LN Markets first (official data)
+      // 1. Get current index from LN Markets
       let lnMarketsData = null;
       try {
-        console.log('🔍 PUBLIC MARKET INDEX - Trying LN Markets API...');
+        console.log('🔍 PUBLIC MARKET INDEX - Getting current index from LN Markets...');
         const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {
           timeout: 10000
         });
@@ -592,10 +592,9 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           const data = await response.json();
           lnMarketsData = {
             index: data.index || data.price,
-            change24h: data.change24h || 0,
             source: 'lnmarkets'
           };
-          console.log('✅ PUBLIC MARKET INDEX - LN Markets success:', lnMarketsData);
+          console.log('✅ PUBLIC MARKET INDEX - LN Markets index success:', lnMarketsData);
         } else {
           console.log('⚠️ PUBLIC MARKET INDEX - LN Markets response not ok:', response.status, response.statusText);
         }
@@ -603,39 +602,58 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
         console.log('⚠️ PUBLIC MARKET INDEX - LN Markets failed:', lnMarketsError.message);
       }
 
-      // 2. If LN Markets failed, try CoinGecko as fallback
-      let coinGeckoData = null;
-      if (!lnMarketsData) {
+      // 2. Get 24h change from Binance (more reliable than CoinGecko)
+      let change24hData = null;
+      try {
+        console.log('🔍 PUBLIC MARKET INDEX - Getting 24h change from Binance...');
+        const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
+          timeout: 10000
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          change24hData = {
+            change24h: parseFloat(data.priceChangePercent) || 0
+          };
+          console.log('✅ PUBLIC MARKET INDEX - Binance 24h change success:', change24hData);
+        } else {
+          console.log('⚠️ PUBLIC MARKET INDEX - Binance response not ok:', response.status, response.statusText);
+        }
+      } catch (binanceError) {
+        console.log('⚠️ PUBLIC MARKET INDEX - Binance failed:', binanceError.message);
+      }
+
+      // 3. Fallback to CoinCap if Binance fails
+      if (!change24hData) {
         try {
-          console.log('🔍 PUBLIC MARKET INDEX - Trying CoinGecko API as fallback...');
-          const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            },
+          console.log('🔍 PUBLIC MARKET INDEX - Trying CoinCap as fallback for 24h change...');
+          const response = await fetch('https://api.coincap.io/v2/assets/bitcoin', {
             timeout: 10000
           });
           
           if (response.ok) {
             const data = await response.json();
-            coinGeckoData = {
-              index: data.bitcoin?.usd,
-              change24h: data.bitcoin?.usd_24h_change || 0,
-              source: 'coingecko'
+            change24hData = {
+              change24h: parseFloat(data.data.changePercent24Hr) || 0
             };
-            console.log('✅ PUBLIC MARKET INDEX - CoinGecko success:', coinGeckoData);
+            console.log('✅ PUBLIC MARKET INDEX - CoinCap 24h change success:', change24hData);
           } else {
-            console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko response not ok:', response.status, response.statusText);
+            console.log('⚠️ PUBLIC MARKET INDEX - CoinCap response not ok:', response.status, response.statusText);
           }
-        } catch (coinGeckoError) {
-          console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko failed:', coinGeckoError.message);
+        } catch (coinCapError) {
+          console.log('⚠️ PUBLIC MARKET INDEX - CoinCap failed:', coinCapError.message);
         }
       }
 
-      // 3. Use available data or return error
-      const marketData = lnMarketsData || coinGeckoData;
+      // 4. Combine data from different sources
+      const marketData = {
+        index: lnMarketsData?.index || 0,
+        change24h: change24hData?.change24h || 0,
+        source: lnMarketsData?.source || 'fallback'
+      };
       
-      if (marketData && marketData.index && marketData.index > 0) {
-        console.log('✅ PUBLIC MARKET INDEX - Using data from:', marketData.source);
+      if (marketData.index && marketData.index > 0) {
+        console.log('✅ PUBLIC MARKET INDEX - Using combined data:', marketData);
         
         // Calculate Next Funding (LN Markets funding every 8h: 00:00, 08:00, 16:00 UTC)
         const now = new Date();
