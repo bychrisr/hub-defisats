@@ -18,6 +18,7 @@ interface LNMarketsData {
   rate: number;
   rateChange: number;
   lastUpdate: Date;
+  source?: string; // Data source: 'lnmarkets' or 'coingecko'
 }
 
 const LNMarketsHeader: React.FC = () => {
@@ -41,7 +42,8 @@ const LNMarketsHeader: React.FC = () => {
         nextFunding: lnMarketsData.nextFunding,
         rate: lnMarketsData.rate,
         rateChange: lnMarketsData.rateChange,
-        lastUpdate: new Date(lnMarketsData.timestamp)
+        lastUpdate: new Date(lnMarketsData.timestamp),
+        source: lnMarketsData.source
       };
       return newMarketData;
     }
@@ -152,9 +154,14 @@ const LNMarketsHeader: React.FC = () => {
                 {lnMarketsError ? (
                   <span className="text-red-400 text-xs">Error</span>
                 ) : marketData ? (
-                  <span className="text-white font-bold text-sm">
-                    ${formatIndex(marketData.index)}
-                  </span>
+                  <div className="flex flex-col items-start space-y-1">
+                    <span className="text-white font-bold text-sm">
+                      ${formatIndex(marketData.index)}
+                    </span>
+                    {marketData.source === 'coingecko' && (
+                      <span className="text-xs text-gray-400 font-mono">CoinGecko</span>
+                    )}
+                  </div>
                 ) : (
                   <div className="flex items-center space-x-1">
                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
@@ -221,21 +228,26 @@ const LNMarketsHeader: React.FC = () => {
                   <span className="text-red-400 text-sm">Error</span>
                 </div>
               ) : marketData ? (
-                <div className="flex items-center space-x-2">
-                  <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-base' : 'text-lg')}>
-                    ${formatIndex(marketData.index)}
-                  </span>
-                  <Badge 
-                    variant={marketData.index24hChange >= 0 ? "default" : "destructive"}
-                    className={'text-xs font-mono ' + (marketData.index24hChange >= 0 ? 'bg-[#00d4aa] text-black' : 'bg-[#ff6b6b] text-white')}
-                  >
-                    {marketData.index24hChange >= 0 ? (
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3 mr-1" />
-                    )}
-                    {format24hChange(marketData.index24hChange)}
-                  </Badge>
+                <div className="flex flex-col items-start space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-base' : 'text-lg')}>
+                      ${formatIndex(marketData.index)}
+                    </span>
+                    <Badge 
+                      variant={marketData.index24hChange >= 0 ? "default" : "destructive"}
+                      className={'text-xs font-mono ' + (marketData.index24hChange >= 0 ? 'bg-[#00d4aa] text-black' : 'bg-[#ff6b6b] text-white')}
+                    >
+                      {marketData.index24hChange >= 0 ? (
+                        <TrendingUp className="w-3 h-3 mr-1" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3 mr-1" />
+                      )}
+                      {format24hChange(marketData.index24hChange)}
+                    </Badge>
+                  </div>
+                  {marketData.source === 'coingecko' && (
+                    <span className="text-xs text-gray-400 font-mono">CoinGecko</span>
+                  )}
                 </div>
               ) : (
                 <div className="flex items-center space-x-1">

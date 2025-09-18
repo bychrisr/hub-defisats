@@ -53,6 +53,7 @@ export interface MarketIndexData {
   rate: number;
   rateChange: number;
   timestamp: number;
+  source?: string; // Data source: 'lnmarkets' or 'coingecko'
 }
 
 export interface PositionsData {
@@ -498,7 +499,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
             nextFunding: indexData.data.nextFunding,
             rate: indexData.data.rate,
             rateChange: indexData.data.rateChange,
-            timestamp: indexData.data.timestamp
+            timestamp: indexData.data.timestamp,
+            source: indexData.data.source
           };
           console.log('✅ POSITIONS CONTEXT - Market index processed:', marketIndex);
           console.log('📊 MARKET INDEX - Index value:', marketIndex.index);
@@ -554,7 +556,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
             nextFunding: indexData.data.nextFunding,
             rate: indexData.data.rate,
             rateChange: indexData.data.rateChange,
-            timestamp: indexData.data.timestamp
+            timestamp: indexData.data.timestamp,
+            source: indexData.data.source
           };
         } else {
           marketIndexError = indexData.message || 'Failed to fetch market index';

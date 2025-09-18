@@ -560,101 +560,132 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
                 tradingFees: { type: 'number' },
                 nextFunding: { type: 'string' },
                 rate: { type: 'number' },
-                timestamp: { type: 'string' }
+                timestamp: { type: 'string' },
+                source: { type: 'string' }
               }
             }
+          }
+        },
+        503: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
           }
         }
       }
     }
   }, async (request, reply) => {
     try {
-      console.log('🔍 PUBLIC MARKET INDEX - Getting basic market index data');
+      console.log('🔍 PUBLIC MARKET INDEX - Getting market index data');
 
-      // Try multiple sources for BTC price
-      let btcPrice = null;
-      let btcChange = 0;
-
-      // Try CoinGecko first
+      // 1. Try LN Markets first (official data)
+      let lnMarketsData = null;
       try {
-        console.log('🔍 PUBLIC MARKET INDEX - Trying CoinGecko API...');
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
+        console.log('🔍 PUBLIC MARKET INDEX - Trying LN Markets API...');
+        const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {
+          timeout: 10000
         });
         
         if (response.ok) {
           const data = await response.json();
-          btcPrice = data.bitcoin?.usd;
-          btcChange = data.bitcoin?.usd_24h_change || 0;
-          console.log('✅ PUBLIC MARKET INDEX - CoinGecko success:', { btcPrice, btcChange });
+          lnMarketsData = {
+            index: data.index || data.price,
+            change24h: data.change24h || 0,
+            source: 'lnmarkets'
+          };
+          console.log('✅ PUBLIC MARKET INDEX - LN Markets success:', lnMarketsData);
         } else {
-          console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko response not ok:', response.status, response.statusText);
+          console.log('⚠️ PUBLIC MARKET INDEX - LN Markets response not ok:', response.status, response.statusText);
         }
-      } catch (coingeckoError) {
-        console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko failed:', coingeckoError.message);
+      } catch (lnMarketsError) {
+        console.log('⚠️ PUBLIC MARKET INDEX - LN Markets failed:', lnMarketsError.message);
       }
 
-      // Try alternative API if CoinGecko failed
-      if (!btcPrice) {
+      // 2. If LN Markets failed, try CoinGecko as fallback
+      let coinGeckoData = null;
+      if (!lnMarketsData) {
         try {
-          console.log('🔍 PUBLIC MARKET INDEX - Trying alternative API...');
-          const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+          console.log('🔍 PUBLIC MARKET INDEX - Trying CoinGecko API as fallback...');
+          const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            },
+            timeout: 10000
+          });
+          
           if (response.ok) {
             const data = await response.json();
-            btcPrice = parseFloat(data.price);
-            console.log('✅ PUBLIC MARKET INDEX - Binance success:', btcPrice);
+            coinGeckoData = {
+              index: data.bitcoin?.usd,
+              change24h: data.bitcoin?.usd_24h_change || 0,
+              source: 'coingecko'
+            };
+            console.log('✅ PUBLIC MARKET INDEX - CoinGecko success:', coinGeckoData);
+          } else {
+            console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko response not ok:', response.status, response.statusText);
           }
-        } catch (binanceError) {
-          console.log('⚠️ PUBLIC MARKET INDEX - Binance failed:', binanceError.message);
+        } catch (coinGeckoError) {
+          console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko failed:', coinGeckoError.message);
         }
       }
 
-      // Try another alternative
-      if (!btcPrice) {
-        try {
-          console.log('🔍 PUBLIC MARKET INDEX - Trying CoinCap API...');
-          const response = await fetch('https://api.coincap.io/v2/assets/bitcoin');
-          if (response.ok) {
-            const data = await response.json();
-            btcPrice = parseFloat(data.data.priceUsd);
-            console.log('✅ PUBLIC MARKET INDEX - CoinCap success:', btcPrice);
-          }
-        } catch (coincapError) {
-          console.log('⚠️ PUBLIC MARKET INDEX - CoinCap failed:', coincapError.message);
+      // 3. Use available data or return error
+      const marketData = lnMarketsData || coinGeckoData;
+      
+      if (marketData && marketData.index && marketData.index > 0) {
+        console.log('✅ PUBLIC MARKET INDEX - Using data from:', marketData.source);
+        
+        // Calculate Next Funding (LN Markets funding every 8h: 00:00, 08:00, 16:00 UTC)
+        const now = new Date();
+        const currentHour = now.getUTCHours();
+        const currentMinute = now.getUTCMinutes();
+        const currentSecond = now.getUTCSeconds();
+        
+        let nextFundingHour;
+        if (currentHour < 8) {
+          nextFundingHour = 8;
+        } else if (currentHour < 16) {
+          nextFundingHour = 16;
+        } else {
+          nextFundingHour = 24; // Next day 00:00
         }
-      }
+        
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        const nextFundingTimeInMinutes = nextFundingHour * 60;
+        const timeDiffInMinutes = nextFundingTimeInMinutes - currentTimeInMinutes;
+        
+        const hoursToNext = Math.floor(timeDiffInMinutes / 60);
+        const minutesToNext = timeDiffInMinutes % 60;
+        const secondsToNext = 60 - currentSecond;
+        
+        const nextFunding = hoursToNext === 0
+          ? `${minutesToNext}m ${secondsToNext}s`
+          : `${hoursToNext}h ${minutesToNext}m ${secondsToNext}s`;
 
-      // Use real-time data if available
-      if (btcPrice && btcPrice > 0) {
-        console.log('✅ PUBLIC MARKET INDEX - Using real-time data:', { btcPrice, btcChange });
         return reply.status(200).send({
           success: true,
           data: {
-            index: Math.round(btcPrice),
-            index24hChange: parseFloat(btcChange.toFixed(3)),
-            tradingFees: 0.1,
-            nextFunding: '1h 45m 30s',
-            rate: 0.00001,
-            timestamp: new Date().toISOString()
+            index: Math.round(marketData.index),
+            index24hChange: parseFloat(marketData.change24h.toFixed(3)),
+            tradingFees: 0.1, // LN Markets standard fee
+            nextFunding: nextFunding,
+            rate: 0.00001, // 0.001% in decimal
+            timestamp: new Date().toISOString(),
+            source: marketData.source // Include data source
           }
         });
       }
 
-      // Fallback data (only if all APIs fail)
-      console.log('⚠️ PUBLIC MARKET INDEX - All APIs failed, using fallback data');
-      return reply.status(200).send({
-        success: true,
-        data: {
-          index: 116676, // Updated to current approximate value
-          index24hChange: -0.5,
-          tradingFees: 0.1,
-          nextFunding: '1h 45m 30s',
-          rate: 0.00001,
-          timestamp: new Date().toISOString()
-        }
+      // 4. No data available - return error instead of fake data
+      console.log('❌ PUBLIC MARKET INDEX - No reliable data source available');
+      return reply.status(503).send({
+        success: false,
+        error: 'SERVICE_UNAVAILABLE',
+        message: 'Market data temporarily unavailable. Please try again later.'
       });
+
     } catch (error: any) {
       console.error('❌ PUBLIC MARKET INDEX - Error getting market index:', error);
       return reply.status(500).send({
