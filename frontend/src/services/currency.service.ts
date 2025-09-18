@@ -53,14 +53,14 @@ class CurrencyService {
     try {
       console.log('Updating currency rates...');
 
-      // Fetch BTC price from CoinGecko
-      const btcResponse = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
-      );
+      // Fetch BTC price from backend (evita CORS)
+      const btcResponse = await fetch('/api/market/index/public');
 
       if (btcResponse.ok) {
-        const btcData = await btcResponse.json();
-        this.btcPrice = btcData.bitcoin.usd;
+        const result = await btcResponse.json();
+        if (result.success && result.data) {
+          this.btcPrice = result.data.index;
+        }
       }
 
       // Fetch exchange rates
@@ -272,19 +272,20 @@ class CurrencyService {
 
   async getHistoricalRates(days: number = 7): Promise<CurrencyRate[]> {
     try {
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`
-      );
+      // Usar endpoint do backend em vez de CoinGecko diretamente
+      const response = await fetch(`/api/market/historical?days=${days}`);
 
       if (response.ok) {
-        const data = await response.json();
-        return data.prices.map(([timestamp, price]: [number, number]) => ({
-          from: 'BTC',
-          to: 'USD',
-          rate: price,
-          timestamp,
-          source: 'CoinGecko',
-        }));
+        const result = await response.json();
+        if (result.success && result.data) {
+          return result.data.map((item: any) => ({
+            from: 'BTC',
+            to: 'USD',
+            rate: item.price,
+            timestamp: item.timestamp,
+            source: 'Backend',
+          }));
+        }
       }
     } catch (error) {
       console.error('Error fetching historical rates:', error);
