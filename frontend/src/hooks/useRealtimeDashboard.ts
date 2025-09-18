@@ -23,6 +23,10 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   } = config;
 
   const { isAuthenticated, user } = useAuthStore();
+  
+  // Verificar se é admin
+  const isAdmin = user?.is_admin || false;
+  
   const { refreshData: refreshCentralizedData, isLoading: centralizedLoading } = useCentralizedData();
   const { refetch: refetchEstimatedBalance } = useEstimatedBalance();
   const { refetch: refetchHistoricalData } = useHistoricalData();
@@ -38,17 +42,29 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   const updateMainData = useCallback(async () => {
     if (!isAuthenticated || !user?.id) return;
     
+    // Pular para admins
+    if (isAdmin) {
+      console.log('🔄 REALTIME DASHBOARD - Admin user, skipping main data update...');
+      return;
+    }
+    
     try {
       console.log('🔄 REALTIME DASHBOARD - Updating main data (positions, balance, market)...');
       await refreshCentralizedData();
     } catch (error) {
       console.error('❌ REALTIME DASHBOARD - Error updating main data:', error);
     }
-  }, [isAuthenticated, user?.id, refreshCentralizedData]);
+  }, [isAuthenticated, user?.id, isAdmin, refreshCentralizedData]);
 
   // Função para atualizar dados históricos
   const updateHistoricalData = useCallback(async () => {
     if (!isAuthenticated || !user?.id) return;
+    
+    // Pular para admins
+    if (isAdmin) {
+      console.log('🔄 REALTIME DASHBOARD - Admin user, skipping historical data update...');
+      return;
+    }
     
     try {
       console.log('🔄 REALTIME DASHBOARD - Updating historical data...');
@@ -60,7 +76,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     } catch (error) {
       console.error('❌ REALTIME DASHBOARD - Error updating historical data:', error);
     }
-  }, [isAuthenticated, user?.id, refetchHistoricalData, refetchEstimatedBalance, refreshPositions]);
+  }, [isAuthenticated, user?.id, isAdmin, refetchHistoricalData, refetchEstimatedBalance, refreshPositions]);
 
   // Função para limpar todos os intervalos
   const clearAllIntervals = useCallback(() => {
@@ -86,6 +102,12 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   const startAllIntervals = useCallback(() => {
     if (!enabled || !isAuthenticated || !user?.id) return;
 
+    // Pular para admins
+    if (isAdmin) {
+      console.log('🚀 REALTIME DASHBOARD - Admin user, skipping intervals...');
+      return;
+    }
+
     console.log('🚀 REALTIME DASHBOARD - Starting all intervals...');
 
     // Atualizar dados principais a cada 5 segundos (posições, saldo, mercado)
@@ -97,6 +119,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     enabled,
     isAuthenticated,
     user?.id,
+    isAdmin,
     positionsInterval,
     historicalInterval,
     updateMainData,
@@ -106,6 +129,12 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   // Efeito para gerenciar os intervalos
   useEffect(() => {
     if (enabled && isAuthenticated && user?.id) {
+      // Pular para admins
+      if (isAdmin) {
+        console.log('🚀 REALTIME DASHBOARD - Admin user, skipping initial updates...');
+        return;
+      }
+      
       // Atualização inicial imediata
       updateMainData();
       updateHistoricalData();
@@ -124,13 +153,20 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   }, [
     enabled,
     isAuthenticated,
-    user?.id
+    user?.id,
+    isAdmin
     // Removidas dependências que causam re-execução constante
   ]);
 
   // Função para forçar atualização manual de todos os dados
   const refreshAll = useCallback(async () => {
     if (!isAuthenticated || !user?.id) return;
+    
+    // Pular para admins
+    if (isAdmin) {
+      console.log('🔄 REALTIME DASHBOARD - Admin user, skipping manual refresh...');
+      return;
+    }
     
     console.log('🔄 REALTIME DASHBOARD - Manual refresh triggered...');
     try {
@@ -142,7 +178,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     } catch (error) {
       console.error('❌ REALTIME DASHBOARD - Error during manual refresh:', error);
     }
-  }, [isAuthenticated, user?.id, updateMainData, updateHistoricalData]);
+  }, [isAuthenticated, user?.id, isAdmin, updateMainData, updateHistoricalData]);
 
   return {
     refreshAll,

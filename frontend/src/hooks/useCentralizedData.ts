@@ -35,6 +35,9 @@ interface UseCentralizedDataReturn extends CentralizedData {
 
 export const useCentralizedData = (): UseCentralizedDataReturn => {
   const { isAuthenticated, user } = useAuthStore();
+  
+  // Verificar se é admin
+  const isAdmin = user?.is_admin || false;
   const [data, setData] = useState<CentralizedData>({
     userBalance: null,
     userPositions: [],
@@ -56,6 +59,12 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
 
   const refreshData = useCallback(async () => {
     if (!isAuthenticated || !user?.id) {
+      return;
+    }
+
+    // Pular para admins - eles não têm credenciais LN Markets
+    if (isAdmin) {
+      console.log('🔄 CENTRALIZED DATA - Admin user, skipping LN Markets queries...');
       return;
     }
 
