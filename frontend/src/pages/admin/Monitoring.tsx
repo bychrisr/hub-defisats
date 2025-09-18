@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Activity, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
 import SystemHealth from '@/components/system/SystemHealth';
+import { useAuthStore } from '@/stores/auth';
 
 interface MonitoringData {
   api_latency: number;
@@ -20,6 +21,7 @@ interface MonitoringData {
 }
 
 export default function Monitoring() {
+  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   const [monitoringData, setMonitoringData] = useState<MonitoringData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,11 +50,16 @@ export default function Monitoring() {
   };
 
   useEffect(() => {
-    fetchMonitoringData();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchMonitoringData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    // Só fazer a requisição se estiver autenticado e não estiver carregando
+    if (isAuthenticated && !authLoading) {
+      fetchMonitoringData();
+      
+      // Auto-refresh every 30 seconds
+      const interval = setInterval(fetchMonitoringData, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated, authLoading]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -94,7 +101,7 @@ export default function Monitoring() {
     return 'text-red-500';
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="h-8 w-8 animate-spin" />
