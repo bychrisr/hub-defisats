@@ -25,9 +25,7 @@ const LNMarketsHeader: React.FC = () => {
   const lnMarketsData = data.marketIndex;
   const lnMarketsError = data.marketIndexError;
   
-  console.log('🔍 LN MARKETS HEADER - Data received:', { lnMarketsData, lnMarketsError, fullData: data });
-  console.log('🔍 LN MARKETS HEADER - Market index details:', lnMarketsData);
-  console.log('🔍 LN MARKETS HEADER - Market index error:', lnMarketsError);
+  // Debug logs removed for production
   
   const [marketData, setMarketData] = useState<LNMarketsData | null>(null);
 
@@ -35,7 +33,6 @@ const LNMarketsHeader: React.FC = () => {
 
   // Memoizar dados do mercado para evitar re-renders desnecessários
   const memoizedMarketData = useMemo(() => {
-    console.log('🔍 LN MARKETS HEADER - useMemo triggered with lnMarketsData:', lnMarketsData);
     if (lnMarketsData) {
       const newMarketData = {
         index: lnMarketsData.index,
@@ -46,16 +43,13 @@ const LNMarketsHeader: React.FC = () => {
         rateChange: lnMarketsData.rateChange,
         lastUpdate: new Date(lnMarketsData.timestamp)
       };
-      console.log('🔍 LN MARKETS HEADER - Memoized market data:', newMarketData);
       return newMarketData;
     }
-    console.log('🔍 LN MARKETS HEADER - No lnMarketsData, returning null');
     return null;
   }, [lnMarketsData]);
 
   // Atualizar dados quando os dados da LN Markets mudarem
   useEffect(() => {
-    console.log('🔍 LN MARKETS HEADER - useEffect triggered with memoizedMarketData:', memoizedMarketData);
     setMarketData(memoizedMarketData);
   }, [memoizedMarketData]);
 
@@ -72,13 +66,8 @@ const LNMarketsHeader: React.FC = () => {
 
   // Atualizar Next Funding em tempo real apenas quando há dados reais
   useEffect(() => {
-    console.log('🔍 LN MARKETS HEADER - Next Funding useEffect triggered, marketData:', marketData);
-    if (!marketData) {
-      console.log('🔍 LN MARKETS HEADER - No marketData, skipping Next Funding interval');
-      return;
-    }
+    if (!marketData) return;
     
-    console.log('🔍 LN MARKETS HEADER - Starting Next Funding interval');
     const interval = setInterval(() => {
       const now = new Date();
       
@@ -109,7 +98,6 @@ const LNMarketsHeader: React.FC = () => {
         ? minutesToNext + 'm ' + secondsToNext + 's'
         : hoursToNext + 'h ' + minutesToNext + 'm ' + secondsToNext + 's';
       
-      console.log('🔍 LN MARKETS HEADER - Updating Next Funding:', nextFunding);
       setMarketData(prev => {
         if (!prev) return null;
         // Só atualizar se o valor realmente mudou
@@ -122,10 +110,7 @@ const LNMarketsHeader: React.FC = () => {
       });
     }, 1000); // Atualizar a cada segundo para contagem regressiva precisa
 
-    return () => {
-      console.log('🔍 LN MARKETS HEADER - Clearing Next Funding interval');
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [marketData?.index, marketData?.index24hChange, marketData?.tradingFees, marketData?.rate, marketData?.rateChange]); // Dependências específicas em vez de marketData completo
 
   const formatIndex = (value: number) => {

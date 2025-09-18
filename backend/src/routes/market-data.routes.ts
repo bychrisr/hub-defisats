@@ -571,36 +571,84 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
     try {
       console.log('🔍 PUBLIC MARKET INDEX - Getting basic market index data');
 
-      // Try to get current BTC price from CoinGecko
+      // Try multiple sources for BTC price
+      let btcPrice = null;
+      let btcChange = 0;
+
+      // Try CoinGecko first
       try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+        console.log('🔍 PUBLIC MARKET INDEX - Trying CoinGecko API...');
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        
         if (response.ok) {
           const data = await response.json();
-          const btcPrice = data.bitcoin?.usd || 65000;
-          const btcChange = data.bitcoin?.usd_24h_change || 0;
-
-          return reply.status(200).send({
-            success: true,
-            data: {
-              index: Math.round(btcPrice),
-              index24hChange: parseFloat(btcChange.toFixed(3)),
-              tradingFees: 0.1,
-              nextFunding: '1h 45m 30s',
-              rate: 0.00001,
-              timestamp: new Date().toISOString()
-            }
-          });
+          btcPrice = data.bitcoin?.usd;
+          btcChange = data.bitcoin?.usd_24h_change || 0;
+          console.log('✅ PUBLIC MARKET INDEX - CoinGecko success:', { btcPrice, btcChange });
+        } else {
+          console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko response not ok:', response.status, response.statusText);
         }
       } catch (coingeckoError) {
-        console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko failed, using fallback data');
+        console.log('⚠️ PUBLIC MARKET INDEX - CoinGecko failed:', coingeckoError.message);
       }
 
-      // Fallback data
+      // Try alternative API if CoinGecko failed
+      if (!btcPrice) {
+        try {
+          console.log('🔍 PUBLIC MARKET INDEX - Trying alternative API...');
+          const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+          if (response.ok) {
+            const data = await response.json();
+            btcPrice = parseFloat(data.price);
+            console.log('✅ PUBLIC MARKET INDEX - Binance success:', btcPrice);
+          }
+        } catch (binanceError) {
+          console.log('⚠️ PUBLIC MARKET INDEX - Binance failed:', binanceError.message);
+        }
+      }
+
+      // Try another alternative
+      if (!btcPrice) {
+        try {
+          console.log('🔍 PUBLIC MARKET INDEX - Trying CoinCap API...');
+          const response = await fetch('https://api.coincap.io/v2/assets/bitcoin');
+          if (response.ok) {
+            const data = await response.json();
+            btcPrice = parseFloat(data.data.priceUsd);
+            console.log('✅ PUBLIC MARKET INDEX - CoinCap success:', btcPrice);
+          }
+        } catch (coincapError) {
+          console.log('⚠️ PUBLIC MARKET INDEX - CoinCap failed:', coincapError.message);
+        }
+      }
+
+      // Use real-time data if available
+      if (btcPrice && btcPrice > 0) {
+        console.log('✅ PUBLIC MARKET INDEX - Using real-time data:', { btcPrice, btcChange });
+        return reply.status(200).send({
+          success: true,
+          data: {
+            index: Math.round(btcPrice),
+            index24hChange: parseFloat(btcChange.toFixed(3)),
+            tradingFees: 0.1,
+            nextFunding: '1h 45m 30s',
+            rate: 0.00001,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+
+      // Fallback data (only if all APIs fail)
+      console.log('⚠️ PUBLIC MARKET INDEX - All APIs failed, using fallback data');
       return reply.status(200).send({
         success: true,
         data: {
-          index: 115479,
-          index24hChange: -0.423,
+          index: 116676, // Updated to current approximate value
+          index24hChange: -0.5,
           tradingFees: 0.1,
           nextFunding: '1h 45m 30s',
           rate: 0.00001,
