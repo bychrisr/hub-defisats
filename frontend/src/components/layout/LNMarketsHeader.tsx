@@ -155,7 +155,7 @@ const LNMarketsHeader: React.FC = () => {
                   <span className="text-red-400 text-xs">Error</span>
                 ) : marketData ? (
                   <div className="flex flex-col items-start space-y-1">
-                    <span className="text-white font-bold text-sm">
+                    <span className="text-white font-bold text-xs">
                       ${formatIndex(marketData.index)}
                     </span>
                     {marketData.source === 'coingecko' && (
@@ -230,7 +230,7 @@ const LNMarketsHeader: React.FC = () => {
               ) : marketData ? (
                 <div className="flex flex-col items-start space-y-1">
                   <div className="flex items-center space-x-2">
-                    <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-base' : 'text-lg')}>
+                    <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
                       ${formatIndex(marketData.index)}
                     </span>
                     <Badge 
@@ -262,7 +262,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
             <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Trading Fees:</span>
-            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
+            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
               {marketData ? formatTradingFees(marketData.tradingFees) : '--'}
             </span>
           </div>
@@ -271,7 +271,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <Clock className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
             <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Next Funding:</span>
-            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
+            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
               {marketData ? marketData.nextFunding : '--'}
             </span>
           </div>
@@ -280,7 +280,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <Activity className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
             <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Rate:</span>
-            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
+            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-xs' : 'text-sm')}>
               {marketData ? formatRate(marketData.rate) : '--'}
             </span>
             {!isScrolled && (
