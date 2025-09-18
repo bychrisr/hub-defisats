@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Activity, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
+import SystemHealth from '@/components/system/SystemHealth';
 
 interface MonitoringData {
   api_latency: number;
@@ -204,93 +205,10 @@ export default function Monitoring() {
         </Card>
       </div>
 
-      {/* System Health */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              {getStatusIcon(system_health.database)}
-              <span>Database</span>
-            </CardTitle>
-            <CardDescription>PostgreSQL connection and performance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Connection</span>
-                <Badge variant={system_health.database === 'healthy' ? 'default' : 'destructive'}>
-                  {system_health.database}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Query Performance</span>
-                <span className="text-sm text-muted-foreground">Good</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Active Connections</span>
-                <span className="text-sm text-muted-foreground">12/100</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              {getStatusIcon(system_health.redis)}
-              <span>Redis Cache</span>
-            </CardTitle>
-            <CardDescription>Cache and queue management</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Connection</span>
-                <Badge variant={system_health.redis === 'healthy' ? 'default' : 'destructive'}>
-                  {system_health.redis}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Memory Usage</span>
-                <span className="text-sm text-muted-foreground">45MB</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Hit Rate</span>
-                <span className="text-sm text-muted-foreground">94.2%</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              {getStatusIcon(system_health.workers)}
-              <span>Workers</span>
-            </CardTitle>
-            <CardDescription>Background job processors</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Margin Monitor</span>
-                <Badge variant="default">Running</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Automation Executor</span>
-                <Badge variant="default">Running</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Notification Worker</span>
-                <Badge variant="default">Running</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Payment Validator</span>
-                <Badge variant="default">Running</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* System Health - Detailed Component */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold">System Health</h2>
+        <SystemHealth />
       </div>
 
       {/* Alerts Section */}

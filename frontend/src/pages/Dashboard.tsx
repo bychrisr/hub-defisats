@@ -30,7 +30,6 @@ import { useUserPositions, useUserBalance, useConnectionStatus } from '@/context
 import { usePositionsMetrics, usePositions } from '@/contexts/PositionsContext';
 import LatestPricesWidget from '@/components/market/LatestPricesWidget';
 import RealtimeStatus from '@/components/RealtimeStatus';
-import SystemHealth from '@/components/system/SystemHealth';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
@@ -223,11 +222,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* System Health */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.system_health')}</h2>
-            <SystemHealth />
-          </div>
 
           {/* Quick Actions */}
           <div className="space-y-4">
