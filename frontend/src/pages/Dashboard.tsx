@@ -418,7 +418,6 @@ export default function Dashboard() {
         <LatestPricesWidget showRefreshButton={true} compact={false} />
       </div>
 
-
       </div>
     </RouteGuard>
   );
