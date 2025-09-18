@@ -708,7 +708,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
             index24hChange: parseFloat(marketData.change24h.toFixed(3)),
             tradingFees: 0.1, // LN Markets standard fee
             nextFunding: nextFunding,
-            rate: 0.00001, // 0.001% in decimal
+            rate: 0.0001, // 0.01% in decimal
             timestamp: new Date().toISOString(),
             source: marketData.source // Include data source
           }
