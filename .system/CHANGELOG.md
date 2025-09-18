@@ -6,6 +6,20 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.3.3] - 2025-01-15 - Correção de Erro de Sintaxe JSX 🐛 **BUGFIX**
+
+### 🐛 Correções Críticas
+- ✅ **Dashboard.tsx**: Corrigido erro de sintaxe JSX que causava crash da aplicação
+- ✅ **Estrutura JSX**: Removida div extra que causava erro de parsing
+- ✅ **Cache Vite**: Limpeza de cache para resolver problemas de compilação
+- ✅ **Container Frontend**: Reiniciado para aplicar correções
+
+### 🔧 Problema Resolvido
+- **Erro**: `Expected '</', got '<eof>'` no Dashboard.tsx
+- **Causa**: Div extra na estrutura JSX causando erro de sintaxe
+- **Solução**: Recriação completa do arquivo com estrutura JSX limpa
+- **Resultado**: Aplicação funcionando normalmente sem erros
+
 ## [1.3.2] - 2025-01-15 - Proteção de Rotas Inteligente & Otimização de Performance 🚀 **PERFORMANCE**
 
 ### 🔐 Proteção de Rotas Inteligente
