@@ -80,8 +80,13 @@ const LNMarketsHeader: React.FC = () => {
         nextFundingHour = 24; // Próximo dia 00:00
       }
       
-      const hoursToNext = nextFundingHour - currentHour;
-      const minutesToNext = 60 - currentMinute;
+      // Calcular tempo restante corretamente
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      const nextFundingTimeInMinutes = nextFundingHour * 60;
+      const timeDiffInMinutes = nextFundingTimeInMinutes - currentTimeInMinutes;
+      
+      const hoursToNext = Math.floor(timeDiffInMinutes / 60);
+      const minutesToNext = timeDiffInMinutes % 60;
       const secondsToNext = 60 - currentSecond;
       
       const nextFunding = hoursToNext === 0
@@ -199,35 +204,33 @@ const LNMarketsHeader: React.FC = () => {
         <div className={'hidden md:flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
           {/* Index - Largura fixa */}
           <div className="flex items-center space-x-2 w-1/4">
-            <span className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'text-lg' : 'text-2xl')}>₿</span>
-            <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
-                {lnMarketsError ? (
-                  <div className="flex items-center space-x-1">
-                    <span className="text-red-400 text-sm">Error</span>
-                  </div>
-                ) : marketData ? (
-                  <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-base' : 'text-lg')}>
+            <div className="flex items-center space-x-2">
+              <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
+              {lnMarketsError ? (
+                <div className="flex items-center space-x-1">
+                  <span className="text-red-400 text-sm">Error</span>
+                </div>
+              ) : marketData ? (
+                <div className="flex items-center space-x-2">
+                  <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-base' : 'text-lg')}>
                     ${formatIndex(marketData.index)}
                   </span>
-                ) : (
-                  <div className="flex items-center space-x-1">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span className="text-gray-400 text-sm">Loading...</span>
-                  </div>
-                )}
-              </div>
-              {!isScrolled && marketData && (
+                  <Badge 
+                    variant={marketData.index24hChange >= 0 ? "default" : "destructive"}
+                    className={'text-xs font-mono ' + (marketData.index24hChange >= 0 ? 'bg-[#00d4aa] text-black' : 'bg-[#ff6b6b] text-white')}
+                  >
+                    {marketData.index24hChange >= 0 ? (
+                      <TrendingUp className="w-3 h-3 mr-1" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 mr-1" />
+                    )}
+                    {format24hChange(marketData.index24hChange)}
+                  </Badge>
+                </div>
+              ) : (
                 <div className="flex items-center space-x-1">
-                  {marketData.index24hChange >= 0 ? (
-                    <TrendingUp className="w-3 h-3 text-[#00d4aa]" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3 text-[#ff6b6b]" />
-                  )}
-                  <span className={'text-xs font-medium ' + (marketData.index24hChange >= 0 ? 'text-[#00d4aa]' : 'text-[#ff6b6b]')}>
-                    {format24hChange(marketData.index24hChange)} (24h)
-                  </span>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span className="text-gray-400 text-sm">Loading...</span>
                 </div>
               )}
             </div>
@@ -237,7 +240,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
             <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Trading Fees:</span>
-            <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
               {marketData ? formatTradingFees(marketData.tradingFees) : '--'}
             </span>
           </div>
@@ -246,7 +249,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <Clock className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
             <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Next Funding:</span>
-            <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
               {marketData ? marketData.nextFunding : '--'}
             </span>
           </div>
@@ -255,7 +258,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <Activity className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />
             <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Rate:</span>
-            <span className={'text-white font-bold transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+            <span className={'text-white font-bold transition-all duration-300 font-mono ' + (isScrolled ? 'text-sm' : 'text-base')}>
               {marketData ? formatRate(marketData.rate) : '--'}
             </span>
             {!isScrolled && (
