@@ -74,7 +74,16 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // Função para carregar saldo do usuário via API
   const loadUserBalance = useCallback(async () => {
-    if (!isAuthenticated || !user?.id) return;
+    console.log('🔍 REALTIME - loadUserBalance chamada:', { 
+      isAuthenticated, 
+      userId: user?.id,
+      hasUser: !!user
+    });
+    
+    if (!isAuthenticated || !user?.id) {
+      console.log('❌ REALTIME - Não carregando saldo - usuário não autenticado');
+      return;
+    }
     
     try {
       console.log('💰 REALTIME - Carregando saldo do usuário via API...', { 
@@ -106,8 +115,21 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // Carregar saldo do usuário quando autenticado
   useEffect(() => {
+    console.log('🔍 REALTIME - useEffect saldo:', { 
+      isAuthenticated, 
+      userId: user?.id,
+      hasUser: !!user
+    });
+    
     if (isAuthenticated && user?.id) {
+      console.log('✅ REALTIME - Chamando loadUserBalance...');
       loadUserBalance();
+    } else {
+      console.log('❌ REALTIME - Não chamando loadUserBalance:', {
+        isAuthenticated,
+        hasUser: !!user,
+        userId: user?.id
+      });
     }
   }, [isAuthenticated, user?.id, loadUserBalance]);
 
