@@ -74,39 +74,21 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // Função para carregar saldo do usuário via API
   const loadUserBalance = useCallback(async () => {
-    console.log('🔍 REALTIME - loadUserBalance chamada:', { 
-      isAuthenticated, 
-      userId: user?.id,
-      hasUser: !!user
-    });
-    
     if (!isAuthenticated || !user?.id) {
-      console.log('❌ REALTIME - Não carregando saldo - usuário não autenticado');
       return;
     }
     
     try {
-      console.log('💰 REALTIME - Carregando saldo do usuário via API...', { 
-        userId: user?.id,
-        isAuthenticated
-      });
-      
       // Usar axios para aproveitar os interceptors de autenticação
       const response = await api.get('/api/lnmarkets/user/balance');
       const data = response.data;
       
-      console.log('💰 REALTIME - Response status:', response.status);
-      console.log('💰 REALTIME - Response data:', data);
-      
       if (data.success) {
-        console.log('💰 REALTIME - Saldo carregado via API:', data.data);
         setData(prev => ({
           ...prev,
           userBalance: { ...data.data, timestamp: Date.now() },
           lastUpdate: Date.now()
         }));
-      } else {
-        console.error('💰 REALTIME - Erro ao carregar saldo:', data);
       }
     } catch (error) {
       console.error('💰 REALTIME - Erro ao carregar saldo:', error);
@@ -115,21 +97,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // Carregar saldo do usuário quando autenticado
   useEffect(() => {
-    console.log('🔍 REALTIME - useEffect saldo:', { 
-      isAuthenticated, 
-      userId: user?.id,
-      hasUser: !!user
-    });
-    
     if (isAuthenticated && user?.id) {
-      console.log('✅ REALTIME - Chamando loadUserBalance...');
       loadUserBalance();
-    } else {
-      console.log('❌ REALTIME - Não chamando loadUserBalance:', {
-        isAuthenticated,
-        hasUser: !!user,
-        userId: user?.id
-      });
     }
   }, [isAuthenticated, user?.id, loadUserBalance]);
 

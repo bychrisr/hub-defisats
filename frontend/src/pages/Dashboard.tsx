@@ -26,7 +26,7 @@ import {
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
-import { useUserPositions, useUserBalance, useConnectionStatus, useRealtimeData } from '@/contexts/RealtimeDataContext';
+import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
 import { usePositionsMetrics, usePositions } from '@/contexts/PositionsContext';
 import LatestPricesWidget from '@/components/market/LatestPricesWidget';
 import FaviconTest from '@/components/FaviconTest';
@@ -58,30 +58,7 @@ export default function Dashboard() {
   const realtimePositions = useUserPositions();
   const balanceData = useUserBalance();
   const { isConnected } = useConnectionStatus();
-  const { loadUserBalance } = useRealtimeData();
   
-  // Debug: Log balance data
-  console.log('🔍 DASHBOARD - Balance data:', balanceData);
-  console.log('🔍 DASHBOARD - User:', user);
-  console.log('🔍 DASHBOARD - isAuthenticated:', !!user);
-  
-  // Force load balance for testing
-  const handleForceLoadBalance = async () => {
-    console.log('🔄 DASHBOARD - Forçando carregamento do saldo...');
-    try {
-      await loadUserBalance();
-    } catch (error) {
-      console.error('❌ DASHBOARD - Erro ao forçar carregamento:', error);
-    }
-  };
-  
-  // Force load balance on component mount
-  useEffect(() => {
-    if (user && !balanceData) {
-      console.log('🔄 DASHBOARD - Carregando saldo automaticamente...');
-      handleForceLoadBalance();
-    }
-  }, [user, balanceData]);
   
   // Novos hooks para métricas da dashboard
   const positionsData = usePositionsMetrics();
@@ -179,21 +156,13 @@ export default function Dashboard() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.history')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div className="relative">
-              <MetricCard
-                title="Margem disponível"
-                value={formatSats(balanceData?.balance || 0)}
-                subtitle={`Saldo da conta LN Markets ${balanceData ? '✅' : '❌'}`}
-                icon={Wallet}
-                variant="default"
-              />
-              <button
-                onClick={handleForceLoadBalance}
-                className="absolute top-2 right-2 text-xs bg-blue-500 text-white px-2 py-1 rounded"
-              >
-                🔄
-              </button>
-            </div>
+            <MetricCard
+              title="Margem disponível"
+              value={formatSats(balanceData?.balance || 0)}
+              subtitle="Saldo da conta LN Markets"
+              icon={Wallet}
+              variant="default"
+            />
 
             <PnLCard
               title={t('dashboard.estimated_balance')}
