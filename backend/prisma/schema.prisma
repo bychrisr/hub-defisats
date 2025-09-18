@@ -9,46 +9,42 @@ datasource db {
 }
 
 model User {
-  id                         String           @id @default(dbgenerated("(gen_random_uuid())::text"))
-  email                      String           @unique
-  username                   String           @unique
+  id                         String               @id @default(dbgenerated("(gen_random_uuid())::text"))
+  email                      String               @unique
+  username                   String               @unique
   password_hash              String?
   social_provider            String?
   social_id                  String?
   ln_markets_api_key         String?
   ln_markets_api_secret      String?
-  plan_id                    String?
-  plan                       Plan?           @relation("PlanUsers", fields: [plan_id], references: [id])
-  plan_type                  PlanType        @default(free) // Mantido para compatibilidade
-  last_activity_at           DateTime?        @db.Timestamp(6)
-  created_at                 DateTime         @default(now()) @db.Timestamp(6)
-  updated_at                 DateTime         @default(now()) @db.Timestamp(6)
-  is_active                  Boolean          @default(true)
-  session_expires_at         DateTime?        @db.Timestamp(6)
-  email_verified             Boolean?         @default(false)
+  last_activity_at           DateTime?            @db.Timestamp(6)
+  created_at                 DateTime             @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime             @default(now()) @db.Timestamp(6)
+  is_active                  Boolean              @default(true)
+  session_expires_at         DateTime?            @db.Timestamp(6)
+  email_verified             Boolean?             @default(false)
   email_verification_token   String?
-  email_verification_expires DateTime?        @db.Timestamp(6)
+  email_verification_expires DateTime?            @db.Timestamp(6)
   password_reset_token       String?
-  password_reset_expires     DateTime?        @db.Timestamp(6)
-  two_factor_enabled         Boolean?         @default(false)
+  password_reset_expires     DateTime?            @db.Timestamp(6)
+  two_factor_enabled         Boolean?             @default(false)
   two_factor_secret          String?
   two_factor_backup_codes    Json?
-  login_attempts             Int?             @default(0)
-  locked_until               DateTime?        @db.Timestamp(6)
+  login_attempts             Int?                 @default(0)
+  locked_until               DateTime?            @db.Timestamp(6)
   last_login_ip              String?
   last_login_user_agent      String?
-  ln_markets_passphrase      String?          @db.VarChar(255)
+  ln_markets_passphrase      String?              @db.VarChar(255)
+  plan_type                  PlanType             @default(free)
   admin_user                 AdminUser?
   automations                Automation[]
   backtest_reports           BacktestReport[]
   notifications              Notification[]
   payments                   Payment[]
   trade_logs                 TradeLog[]
-  user_coupons               UserCoupon[]     @relation("UserCouponRelation")
-  upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
+  user_coupons               UserCoupon[]         @relation("UserCouponRelation")
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
-  simulations                Simulation[]
-  notification_logs          NotificationLog[]
+  upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -95,54 +91,23 @@ model Notification {
   created_at     DateTime @default(now()) @db.Timestamp(6)
   updated_at     DateTime @default(now()) @db.Timestamp(6)
   user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  logs           NotificationLog[]
 
   @@index([user_id], map: "idx_notification_user_id")
-}
-
-model NotificationLog {
-  id              String      @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id         String
-  notification_id String
-  channel         String      // telegram, whatsapp, email
-  message         String
-  status          String      // sent, failed, pending
-  sent_at         DateTime?   @db.Timestamp(6)
-  error_message   String?
-  metadata        Json?       // Additional data like message_id, etc.
-  created_at      DateTime    @default(now()) @db.Timestamp(6)
-
-  // Relations
-  user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
-
-  @@index([user_id])
-  @@index([notification_id])
-  @@index([status])
-  @@index([created_at])
 }
 
 model Payment {
   id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id           String
-  plan_type         PlanType
   amount_sats       Int
   lightning_invoice String
-  payment_hash      String?   // Lightning payment hash
-  preimage          String?   // Payment preimage for verification
-  description       String?   // Payment description
-  expiry_seconds    Int?      @default(3600) // Invoice expiry in seconds
-  status            String    @default("pending") // pending, paid, expired, failed
+  status            String
   paid_at           DateTime? @db.Timestamp(6)
-  expires_at        DateTime? @db.Timestamp(6)
   created_at        DateTime  @default(now()) @db.Timestamp(6)
   updated_at        DateTime  @default(now()) @db.Timestamp(6)
+  plan_type         PlanType
   user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_payment_user_id")
-  @@index([status], map: "idx_payment_status")
-  @@index([expires_at], map: "idx_payment_expires")
-  @@index([payment_hash], map: "idx_payment_hash")
 }
 
 model BacktestReport {
@@ -167,32 +132,25 @@ model AdminUser {
 }
 
 model Coupon {
-  id           String       @id @default(dbgenerated("(gen_random_uuid())::text"))
-  code         String       @unique
-  usage_limit  Int?         @default(1)
-  used_count   Int?         @default(0)
-  plan_type    PlanType
-  expires_at   DateTime?    @db.Timestamp(6)
-  
-  // Novos campos para o sistema de cupons
-  value_type   String       // 'fixed' ou 'percentage'
-  value_amount Int          // Valor fixo em sats ou percentual (1-100)
-  time_type    String       // 'fixed' ou 'lifetime'
-  time_days    Int?         // Número de dias (apenas se time_type = 'fixed')
-  
-  // Campos para administração
-  is_active    Boolean      @default(true)  // Ativo/Inativo
-  description  String?      // Descrição do cupom
-  created_by   String?      // ID do admin que criou
-  
-  // Métricas
-  total_revenue_saved Int   @default(0)    // Total de receita economizada (em sats)
-  new_users_count    Int    @default(0)    // Número de novos usuários atraídos
-  conversion_rate    Float  @default(0)    // Taxa de conversão
-  
-  created_at   DateTime     @default(now()) @db.Timestamp(6)
-  updated_at   DateTime     @default(now()) @db.Timestamp(6)
-  user_coupons UserCoupon[] @relation("CouponUserRelation")
+  id                  String       @id @default(dbgenerated("(gen_random_uuid())::text"))
+  code                String       @unique
+  usage_limit         Int?         @default(1)
+  used_count          Int?         @default(0)
+  expires_at          DateTime?    @db.Timestamp(6)
+  value_type          String
+  value_amount        Int
+  time_type           String
+  time_days           Int?
+  is_active           Boolean      @default(true)
+  description         String?
+  created_by          String?
+  total_revenue_saved Int          @default(0)
+  new_users_count     Int          @default(0)
+  conversion_rate     Float        @default(0)
+  created_at          DateTime     @default(now()) @db.Timestamp(6)
+  updated_at          DateTime     @default(now()) @db.Timestamp(6)
+  plan_type           PlanType
+  user_coupons        UserCoupon[] @relation("CouponUserRelation")
 
   @@index([code], map: "idx_coupon_code")
   @@index([is_active], map: "idx_coupon_active")
@@ -221,56 +179,89 @@ model UserCoupon {
 
 /// Modelo para rastrear métricas de cupons
 model CouponAnalytics {
-  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  coupon_id         String
-  date              DateTime @db.Timestamp(6)
-  
-  // Métricas do dia
-  views_count       Int      @default(0)    // Quantas vezes o cupom foi visualizado
-  clicks_count      Int      @default(0)    // Quantas vezes foi clicado
-  uses_count        Int      @default(0)    // Quantas vezes foi usado
-  new_users_count   Int      @default(0)    // Novos usuários atraídos
-  revenue_saved     Int      @default(0)    // Receita economizada (sats)
-  
-  // Métricas de conversão
-  conversion_rate   Float    @default(0)    // Taxa de conversão (uses/views)
-  click_through_rate Float   @default(0)    // Taxa de cliques (clicks/views)
-  
-  created_at        DateTime @default(now()) @db.Timestamp(6)
-  
+  id                 String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  coupon_id          String
+  date               DateTime @db.Timestamp(6)
+  views_count        Int      @default(0)
+  clicks_count       Int      @default(0)
+  uses_count         Int      @default(0)
+  new_users_count    Int      @default(0)
+  revenue_saved      Int      @default(0)
+  conversion_rate    Float    @default(0)
+  click_through_rate Float    @default(0)
+  created_at         DateTime @default(now()) @db.Timestamp(6)
+
+  @@unique([coupon_id, date], map: "idx_coupon_analytics_unique")
   @@index([coupon_id], map: "idx_coupon_analytics_coupon")
   @@index([date], map: "idx_coupon_analytics_date")
-  @@unique([coupon_id, date], map: "idx_coupon_analytics_unique")
 }
 
-model Plan {
-  id                 String       @id @default(dbgenerated("(gen_random_uuid())::text"))
-  name               String       @unique // Nome do plano (Free, Basic, etc.)
-  slug               PlanType     @unique // Slug correspondente ao enum
-  description        String?      // Descrição do plano
-  price_monthly      Float?       // Preço mensal (opcional para free)
-  price_yearly       Float?       // Preço anual (opcional)
-  price_lifetime     Float?       // Preço vitalício (opcional)
-  currency           String       @default("BRL") // Moeda
-  is_active          Boolean      @default(true) // Se o plano está disponível
-  max_automations    Int          @default(0) // Máximo de automações ativas (-1 = ilimitado)
-  max_backtests      Int          @default(0) // Máximo de backtests por mês
-  max_notifications  Int          @default(0) // Máximo de notificações por mês
-  has_priority       Boolean      @default(false) // Suporte prioritário
-  has_advanced       Boolean      @default(false) // Funcionalidades avançadas
-  has_api_access     Boolean      @default(false) // Acesso à API
-  features           Json         // Lista de funcionalidades incluídas
-  stripe_price_id    String?      // ID do preço no Stripe (opcional)
-  order              Int          @default(0) // Ordem de exibição
-  created_at         DateTime     @default(now()) @db.Timestamp(6)
-  updated_at         DateTime     @default(now()) @db.Timestamp(6)
+model MenuItem {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name        String
+  mobileName  String?
+  href        String
+  icon        String
+  order       Int
+  isActive    Boolean  @default(true)
+  isVisible   Boolean  @default(true)
+  target      String   @default("_self")
+  badge       String?
+  badgeColor  String?
+  description String?
+  menuTypeId  String
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  menuType    MenuType @relation(fields: [menuTypeId], references: [id])
 
-  // Relacionamentos
-  users              User[]       @relation("PlanUsers")
-
-  @@index([slug])
-  @@index([is_active])
+  @@index([menuTypeId])
   @@index([order])
+  @@index([isActive, isVisible])
+}
+
+model MenuType {
+  id          String     @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name        String     @unique
+  displayName String
+  description String?
+  isActive    Boolean    @default(true)
+  created_at  DateTime   @default(now()) @db.Timestamp(6)
+  updated_at  DateTime   @default(now()) @db.Timestamp(6)
+  menuItems   MenuItem[]
+}
+
+model SystemConfig {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  key         String   @unique
+  value       String
+  type        String   @default("string")
+  description String?
+  isActive    Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([key])
+  @@index([isActive])
+}
+
+model UserUpgradeHistory {
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id        String
+  old_plan       String
+  new_plan       String
+  reason         String
+  effective_date DateTime @db.Timestamp(6)
+  upgraded_by    String
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
+  admin          User     @relation("AdminUpgradeHistory", fields: [upgraded_by], references: [id], onDelete: SetNull)
+  user           User     @relation("UserUpgradeHistory", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([upgraded_by])
+  @@index([created_at])
+  @@index([new_plan])
+  @@map("user_upgrade_history")
 }
 
 enum PlanType {
@@ -279,158 +270,4 @@ enum PlanType {
   advanced
   pro
   lifetime
-}
-
-// Sistema de Menu Dinâmico
-model MenuItem {
-  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  name        String   // Nome exibido no menu
-  mobileName  String?  // Nome mais curto para mobile (opcional)
-  href        String   // URL/rota
-  icon        String   // Nome do ícone (lucide-react)
-  order       Int      // Ordem de exibição
-  isActive    Boolean  @default(true) // Se está ativo/visível
-  isVisible   Boolean  @default(true) // Se deve ser exibido
-  target      String   @default("_self") // _self, _blank, etc.
-  badge       String?  // Badge/notificação (opcional)
-  badgeColor  String?  // Cor do badge (opcional)
-  description String?  // Descrição para tooltip
-  
-  // Relacionamentos
-  menuType    MenuType @relation(fields: [menuTypeId], references: [id])
-  menuTypeId  String
-  
-  // Timestamps
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-  
-  @@index([menuTypeId])
-  @@index([order])
-  @@index([isActive, isVisible])
-}
-
-model MenuType {
-  id          String     @id @default(dbgenerated("(gen_random_uuid())::text"))
-  name        String     @unique // main, secondary, user
-  displayName String     // Nome para exibição
-  description String?    // Descrição do tipo de menu
-  isActive    Boolean    @default(true)
-  
-  // Relacionamentos
-  menuItems   MenuItem[]
-  
-  // Timestamps
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-}
-
-// Configurações do Sistema
-model SystemConfig {
-  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  key         String   @unique // chave única da configuração
-  value       String   // valor da configuração (JSON string)
-  type        String   @default("string") // string, number, boolean, json
-  description String?  // descrição da configuração
-  isActive    Boolean  @default(true)
-  
-  // Timestamps
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-  
-  @@index([key])
-  @@index([isActive])
-}
-
-model UserUpgradeHistory {
-  id            String   @id @default(dbgenerated("gen_random_uuid()"))
-  user_id       String
-  old_plan      String
-  new_plan      String
-  reason        String
-  effective_date DateTime @db.Timestamp(6)
-  upgraded_by   String
-  created_at    DateTime @default(now()) @db.Timestamp(6)
-  updated_at    DateTime @default(now()) @db.Timestamp(6)
-
-  // Relations
-  user    User @relation("UserUpgradeHistory", fields: [user_id], references: [id], onDelete: Cascade)
-  admin   User @relation("AdminUpgradeHistory", fields: [upgraded_by], references: [id], onDelete: SetNull)
-
-  @@map("user_upgrade_history")
-  @@index([user_id])
-  @@index([upgraded_by])
-  @@index([created_at])
-  @@index([new_plan])
-}
-
-// Sistema de Simulação
-model Simulation {
-  id                String          @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id           String
-  name              String
-  automation_type   SimulationType
-  price_scenario    PriceScenario
-  initial_price     Float
-  duration          Int             // em segundos
-  status            SimulationStatus @default(created)
-  account_id        String?         // ID da conta de teste
-  environment       String          @default("testnet")
-  created_at        DateTime        @default(now()) @db.Timestamp(6)
-  updated_at        DateTime        @default(now()) @db.Timestamp(6)
-  started_at        DateTime?       @db.Timestamp(6)
-  completed_at      DateTime?       @db.Timestamp(6)
-
-  // Relations
-  user              User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  results           SimulationResult[]
-
-  @@index([user_id])
-  @@index([status])
-  @@index([automation_type])
-  @@index([created_at])
-}
-
-model SimulationResult {
-  id                String          @id @default(dbgenerated("(gen_random_uuid())::text"))
-  simulation_id     String
-  timestamp         DateTime        @db.Timestamp(6)
-  price             Float
-  action_type       String?
-  action_details    Json?
-  account_balance   Float?
-  position_size     Float?
-  pnl               Float?
-  margin_level      Float?
-  success_rate      Float?
-  total_actions     Int             @default(0)
-  executed_at       DateTime        @db.Timestamp(6)
-
-  // Relations
-  simulation        Simulation      @relation(fields: [simulation_id], references: [id], onDelete: Cascade)
-
-  @@index([simulation_id])
-  @@index([timestamp])
-}
-
-// Enums para Simulação
-enum SimulationType {
-  margin_guard
-  take_profit
-  trailing_stop
-  auto_entry
-}
-
-enum PriceScenario {
-  bull
-  bear
-  sideways
-  volatile
-}
-
-enum SimulationStatus {
-  created
-  running
-  completed
-  failed
-  cancelled
 }
