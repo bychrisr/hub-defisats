@@ -183,7 +183,7 @@ const LNMarketsHeader: React.FC = () => {
           </div>
 
           {/* Linha 2: Outras informações */}
-          <div className={'flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-sm' : 'text-base')}>
+          <div className={'flex items-center justify-between w-full transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>
             {/* Fees */}
             <div className="flex items-center space-x-1">
               <Percent className={'text-gray-400 transition-all duration-300 ' + (isScrolled ? 'w-3 h-3' : 'w-4 h-4')} />

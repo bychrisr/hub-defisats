@@ -602,25 +602,44 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
         console.log('⚠️ PUBLIC MARKET INDEX - LN Markets failed:', lnMarketsError.message);
       }
 
-      // 2. Get 24h change from Binance (more reliable than CoinGecko)
+      // 2. Get historical data to calculate 24h change
       let change24hData = null;
       try {
-        console.log('🔍 PUBLIC MARKET INDEX - Getting 24h change from Binance...');
-        const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
+        console.log('🔍 PUBLIC MARKET INDEX - Getting historical data for 24h change calculation...');
+        
+        // Get current price from Binance
+        const currentResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
           timeout: 10000
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          change24hData = {
-            change24h: parseFloat(data.priceChangePercent) || 0
-          };
-          console.log('✅ PUBLIC MARKET INDEX - Binance 24h change success:', change24hData);
+        // Get price from 24h ago from Binance
+        const historicalResponse = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=2', {
+          timeout: 10000
+        });
+        
+        if (currentResponse.ok && historicalResponse.ok) {
+          const currentData = await currentResponse.json();
+          const historicalData = await historicalResponse.json();
+          
+          const currentPrice = parseFloat(currentData.price);
+          const price24hAgo = parseFloat(historicalData[0][4]); // Close price from 24h ago
+          
+          if (currentPrice && price24hAgo && price24hAgo > 0) {
+            const change24h = ((currentPrice - price24hAgo) / price24hAgo) * 100;
+            change24hData = {
+              change24h: parseFloat(change24h.toFixed(3))
+            };
+            console.log('✅ PUBLIC MARKET INDEX - 24h change calculated:', {
+              currentPrice,
+              price24hAgo,
+              change24h: change24hData.change24h
+            });
+          }
         } else {
-          console.log('⚠️ PUBLIC MARKET INDEX - Binance response not ok:', response.status, response.statusText);
+          console.log('⚠️ PUBLIC MARKET INDEX - Binance historical data response not ok');
         }
       } catch (binanceError) {
-        console.log('⚠️ PUBLIC MARKET INDEX - Binance failed:', binanceError.message);
+        console.log('⚠️ PUBLIC MARKET INDEX - Binance historical data failed:', binanceError.message);
       }
 
       // 3. Fallback to CoinCap if Binance fails
