@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -33,10 +33,11 @@ const LNMarketsHeader: React.FC = () => {
 
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Atualizar dados quando os dados da LN Markets mudarem
-  useEffect(() => {
+  // Memoizar dados do mercado para evitar re-renders desnecessários
+  const memoizedMarketData = useMemo(() => {
+    console.log('🔍 LN MARKETS HEADER - useMemo triggered with lnMarketsData:', lnMarketsData);
     if (lnMarketsData) {
-      setMarketData({
+      const newMarketData = {
         index: lnMarketsData.index,
         index24hChange: lnMarketsData.index24hChange,
         tradingFees: lnMarketsData.tradingFees,
@@ -44,9 +45,19 @@ const LNMarketsHeader: React.FC = () => {
         rate: lnMarketsData.rate,
         rateChange: lnMarketsData.rateChange,
         lastUpdate: new Date(lnMarketsData.timestamp)
-      });
+      };
+      console.log('🔍 LN MARKETS HEADER - Memoized market data:', newMarketData);
+      return newMarketData;
     }
+    console.log('🔍 LN MARKETS HEADER - No lnMarketsData, returning null');
+    return null;
   }, [lnMarketsData]);
+
+  // Atualizar dados quando os dados da LN Markets mudarem
+  useEffect(() => {
+    console.log('🔍 LN MARKETS HEADER - useEffect triggered with memoizedMarketData:', memoizedMarketData);
+    setMarketData(memoizedMarketData);
+  }, [memoizedMarketData]);
 
   // Detectar scroll para reduzir header
   useEffect(() => {
@@ -61,8 +72,13 @@ const LNMarketsHeader: React.FC = () => {
 
   // Atualizar Next Funding em tempo real apenas quando há dados reais
   useEffect(() => {
-    if (!marketData) return;
+    console.log('🔍 LN MARKETS HEADER - Next Funding useEffect triggered, marketData:', marketData);
+    if (!marketData) {
+      console.log('🔍 LN MARKETS HEADER - No marketData, skipping Next Funding interval');
+      return;
+    }
     
+    console.log('🔍 LN MARKETS HEADER - Starting Next Funding interval');
     const interval = setInterval(() => {
       const now = new Date();
       
@@ -93,15 +109,24 @@ const LNMarketsHeader: React.FC = () => {
         ? minutesToNext + 'm ' + secondsToNext + 's'
         : hoursToNext + 'h ' + minutesToNext + 'm ' + secondsToNext + 's';
       
-      setMarketData(prev => prev ? ({
-        ...prev,
-        nextFunding: nextFunding,
-        lastUpdate: now
-      }) : null);
+      console.log('🔍 LN MARKETS HEADER - Updating Next Funding:', nextFunding);
+      setMarketData(prev => {
+        if (!prev) return null;
+        // Só atualizar se o valor realmente mudou
+        if (prev.nextFunding === nextFunding) return prev;
+        return {
+          ...prev,
+          nextFunding: nextFunding,
+          lastUpdate: now
+        };
+      });
     }, 1000); // Atualizar a cada segundo para contagem regressiva precisa
 
-    return () => clearInterval(interval);
-  }, [marketData]);
+    return () => {
+      console.log('🔍 LN MARKETS HEADER - Clearing Next Funding interval');
+      clearInterval(interval);
+    };
+  }, [marketData?.index, marketData?.index24hChange, marketData?.tradingFees, marketData?.rate, marketData?.rateChange]); // Dependências específicas em vez de marketData completo
 
   const formatIndex = (value: number) => {
     return new Intl.NumberFormat('en-US', {
