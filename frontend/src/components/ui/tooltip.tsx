@@ -111,17 +111,17 @@ export const Tooltip: React.FC<TooltipProps> = ({
   }, []);
 
   const getArrowClasses = () => {
-    const baseClasses = 'absolute w-2 h-2 bg-gray-900 dark:bg-gray-100 transform rotate-45';
+    const baseClasses = 'absolute w-2 h-2 transform rotate-45';
     
     switch (position) {
       case 'top':
-        return `${baseClasses} -bottom-1 left-1/2 -translate-x-1/2`;
+        return `${baseClasses} -bottom-1 left-1/2 -translate-x-1/2 bg-popover border-r border-b border-border`;
       case 'bottom':
-        return `${baseClasses} -top-1 left-1/2 -translate-x-1/2`;
+        return `${baseClasses} -top-1 left-1/2 -translate-x-1/2 bg-popover border-l border-t border-border`;
       case 'left':
-        return `${baseClasses} -right-1 top-1/2 -translate-y-1/2`;
+        return `${baseClasses} -right-1 top-1/2 -translate-y-1/2 bg-popover border-t border-r border-border`;
       case 'right':
-        return `${baseClasses} -left-1 top-1/2 -translate-y-1/2`;
+        return `${baseClasses} -left-1 top-1/2 -translate-y-1/2 bg-popover border-b border-l border-border`;
       default:
         return baseClasses;
     }
@@ -142,8 +142,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
         <div
           ref={tooltipRef}
           className={cn(
-            'fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-100 dark:text-gray-900 rounded-lg shadow-lg max-w-xs',
-            'animate-in fade-in-0 zoom-in-95 duration-200'
+            'fixed z-50 px-3 py-2 text-sm text-popover-foreground bg-popover border border-border rounded-lg shadow-lg max-w-xs',
+            'animate-in fade-in-0 zoom-in-95 duration-200',
+            'backdrop-blur-sm bg-popover/95'
           )}
           style={{
             top: tooltipPosition.top,

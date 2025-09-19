@@ -6,6 +6,33 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.4] - 2025-01-19 - Tooltips Melhorados com Ícones & CSS Otimizado 🎨 **UI/UX IMPROVEMENT**
+
+### 🎨 Tooltips Melhorados com Ícones
+- ✅ **Ícones de Ajuda**: Adicionados ícones "?" ao lado dos títulos dos cards
+- ✅ **Hover Inteligente**: Tooltips aparecem apenas no hover do ícone, não do card inteiro
+- ✅ **Visual Elegante**: Ícones com transições suaves e cursor de ajuda
+- ✅ **Posicionamento Otimizado**: Tooltips posicionados corretamente em relação aos ícones
+
+### 🎨 CSS Otimizado para Temas
+- ✅ **Compatibilidade Dark/Light**: Tooltips funcionam perfeitamente em ambos os temas
+- ✅ **Design System**: Uso das cores do design system (popover, border, etc.)
+- ✅ **Backdrop Blur**: Efeito de blur sutil para melhor legibilidade
+- ✅ **Animações Suaves**: Transições elegantes de fade-in e zoom-in
+- ✅ **Bordas Consistentes**: Bordas que seguem o tema atual
+
+### 🔧 Melhorias Técnicas
+- ✅ **Componente Tooltip**: Atualizado para usar classes do design system
+- ✅ **MetricCard**: Reestruturado para incluir ícones de ajuda
+- ✅ **Responsividade**: Tooltips se adaptam ao viewport automaticamente
+- ✅ **Acessibilidade**: Suporte a focus/blur para navegação por teclado
+
+### 📊 Resultado Final
+- ✅ **UX Melhorada**: Interface mais intuitiva e profissional
+- ✅ **Visual Consistente**: Tooltips seguem o design system da aplicação
+- ✅ **Performance**: Tooltips leves e responsivos
+- ✅ **Compatibilidade**: Funciona perfeitamente em dark e light mode
+
 ## [1.4.3] - 2025-01-19 - Correção de Rotas de Tooltips & Interface Administrativa 🔧 **CRITICAL FIX**
 
 ### 🔧 Correção de Rotas de Tooltips
