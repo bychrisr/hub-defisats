@@ -118,36 +118,76 @@ export const Automation = () => {
     const currentBtcPrice = btcPrice.price;
     console.log('🔍 AUTOMATION - Current BTC price:', currentBtcPrice);
     
-    // Encontrar a posição cujo preço de liquidação está mais próximo do preço atual do BTC
+    // Encontrar a posição mais próxima de ser liquidada considerando a direção do movimento
     const closestPosition = openPositions.reduce((closestToLiquidation, current) => {
       const currentLiquidationPrice = current.liquidation || 0;
       const closestLiquidationPrice = closestToLiquidation.liquidation || 0;
       
-      // Calcular a diferença absoluta entre preço de liquidação e preço atual do BTC
-      const currentDifference = Math.abs(currentLiquidationPrice - currentBtcPrice);
-      const closestDifference = Math.abs(closestLiquidationPrice - currentBtcPrice);
+      // Calcular a distância considerando a direção do movimento
+      let currentRisk = 0;
+      let closestRisk = 0;
       
-      console.log('🔍 AUTOMATION - Comparing positions:', {
+      if (current.side === 'long') {
+        // LONG: risco aumenta quando preço cai (liquidação abaixo do preço atual)
+        currentRisk = currentLiquidationPrice > currentBtcPrice ? 
+          currentLiquidationPrice - currentBtcPrice : // Ainda não atingiu liquidação
+          currentBtcPrice - currentLiquidationPrice; // Já passou da liquidação (muito arriscado)
+      } else {
+        // SHORT: risco aumenta quando preço sobe (liquidação acima do preço atual)
+        currentRisk = currentLiquidationPrice < currentBtcPrice ? 
+          currentBtcPrice - currentLiquidationPrice : // Ainda não atingiu liquidação
+          currentLiquidationPrice - currentBtcPrice; // Já passou da liquidação (muito arriscado)
+      }
+      
+      if (closestToLiquidation.side === 'long') {
+        closestRisk = closestLiquidationPrice > currentBtcPrice ? 
+          closestLiquidationPrice - currentBtcPrice :
+          currentBtcPrice - closestLiquidationPrice;
+      } else {
+        closestRisk = closestLiquidationPrice < currentBtcPrice ? 
+          currentBtcPrice - closestLiquidationPrice :
+          closestLiquidationPrice - currentBtcPrice;
+      }
+      
+      console.log('🔍 AUTOMATION - Comparing positions with direction:', {
         current: {
           id: current.id,
+          side: current.side,
           liquidation: currentLiquidationPrice,
-          difference: currentDifference
+          risk: currentRisk,
+          btcPrice: currentBtcPrice
         },
         closest: {
           id: closestToLiquidation.id,
+          side: closestToLiquidation.side,
           liquidation: closestLiquidationPrice,
-          difference: closestDifference
+          risk: closestRisk,
+          btcPrice: currentBtcPrice
         }
       });
       
-      // Menor diferença = mais próximo de liquidar
-      return currentDifference < closestDifference ? current : closestToLiquidation;
+      // Menor risco = mais próximo de liquidar
+      return currentRisk < closestRisk ? current : closestToLiquidation;
     });
+    
+    // Calcular o risco final da posição selecionada
+    const finalRisk = closestPosition.side === 'long' ? 
+      (closestPosition.liquidation || 0) > currentBtcPrice ? 
+        (closestPosition.liquidation || 0) - currentBtcPrice :
+        currentBtcPrice - (closestPosition.liquidation || 0) :
+      (closestPosition.liquidation || 0) < currentBtcPrice ? 
+        currentBtcPrice - (closestPosition.liquidation || 0) :
+        (closestPosition.liquidation || 0) - currentBtcPrice;
     
     console.log('✅ AUTOMATION - Closest position found:', {
       id: closestPosition.id,
+      side: closestPosition.side,
       liquidation: closestPosition.liquidation,
-      difference: Math.abs((closestPosition.liquidation || 0) - currentBtcPrice)
+      btcPrice: currentBtcPrice,
+      risk: finalRisk,
+      riskDescription: closestPosition.side === 'long' ? 
+        'Liquidação abaixo do preço atual' : 
+        'Liquidação acima do preço atual'
     });
     
     return closestPosition;
