@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 
 export interface HistoricalTrade {
   id: string;
@@ -27,6 +28,7 @@ export interface HistoricalData {
 
 export const useHistoricalData = () => {
   const { user } = useAuthStore();
+  const { userPositions } = useRealtimeData();
   const [data, setData] = useState<HistoricalData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,9 +47,16 @@ export const useHistoricalData = () => {
       setIsLoading(true);
       setError(null);
 
+      console.log('🔍 HISTORICAL DATA HOOK - Fetching trades from API...');
       // Buscar trades históricos
       const tradesResponse = await api.get('/api/lnmarkets/user/trades?limit=100&type=closed');
       const tradesData = tradesResponse.data;
+      
+      console.log('🔍 HISTORICAL DATA HOOK - API Response:', {
+        success: tradesData.success,
+        dataLength: Array.isArray(tradesData.data) ? tradesData.data.length : 'not array',
+        data: tradesData.data
+      });
 
       if (tradesData.success && Array.isArray(tradesData.data)) {
         const trades: HistoricalTrade[] = tradesData.data.map((trade: any) => ({
@@ -71,6 +80,16 @@ export const useHistoricalData = () => {
         const losingPositions = closedTrades.filter(trade => trade.pnl < 0).length;
         const successRate = closedTrades.length > 0 ? (winningPositions / closedTrades.length) * 100 : 0;
 
+        console.log('🔍 HISTORICAL DATA HOOK - Calculated metrics:', {
+          totalTrades: trades.length,
+          closedTrades: closedTrades.length,
+          winningPositions,
+          losingPositions,
+          successRate,
+          totalProfit,
+          totalFees
+        });
+
         setData({
           trades,
           totalProfit,
@@ -81,30 +100,57 @@ export const useHistoricalData = () => {
           losingPositions,
         });
       } else {
-        // Se não há dados históricos, usar dados simulados baseados nas posições atuais
+        console.log('🔍 HISTORICAL DATA HOOK - No historical data available, using current positions as fallback');
+        // Se não há dados históricos, usar dados das posições atuais como fallback
+        const currentPositions = userPositions || [];
+        const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
+        const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
+        const totalPositions = currentPositions.length;
+        const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
+        const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
+        const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+
+        console.log('🔍 HISTORICAL DATA HOOK - Using current positions fallback:', {
+          totalPositions,
+          winningPositions,
+          losingPositions,
+          successRate,
+          totalProfit,
+          totalFees
+        });
+
         setData({
           trades: [],
-          totalProfit: 0,
-          totalFees: 0,
-          successRate: 0,
-          totalPositions: 0,
-          winningPositions: 0,
-          losingPositions: 0,
+          totalProfit,
+          totalFees,
+          successRate,
+          totalPositions,
+          winningPositions,
+          losingPositions,
         });
       }
     } catch (err: any) {
       console.error('Error fetching historical data:', err);
       setError(err.message || 'Failed to fetch historical data');
       
-      // Em caso de erro, usar dados vazios
+      // Em caso de erro, usar dados das posições atuais como fallback
+      console.log('🔍 HISTORICAL DATA HOOK - Error occurred, using current positions as fallback');
+      const currentPositions = userPositions || [];
+      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
+      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
+      const totalPositions = currentPositions.length;
+      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
+      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
+      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+
       setData({
         trades: [],
-        totalProfit: 0,
-        totalFees: 0,
-        successRate: 0,
-        totalPositions: 0,
-        winningPositions: 0,
-        losingPositions: 0,
+        totalProfit,
+        totalFees,
+        successRate,
+        totalPositions,
+        winningPositions,
+        losingPositions,
       });
     } finally {
       setIsLoading(false);
@@ -114,6 +160,30 @@ export const useHistoricalData = () => {
   useEffect(() => {
     fetchHistoricalData();
   }, []);
+
+  // Atualizar dados quando as posições atuais mudarem (para o fallback)
+  useEffect(() => {
+    if (data && userPositions) {
+      console.log('🔍 HISTORICAL DATA HOOK - Updating fallback data with current positions');
+      const currentPositions = userPositions || [];
+      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
+      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
+      const totalPositions = currentPositions.length;
+      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
+      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
+      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+
+      setData(prev => ({
+        ...prev,
+        totalProfit,
+        totalFees,
+        successRate,
+        totalPositions,
+        winningPositions,
+        losingPositions,
+      }));
+    }
+  }, [userPositions]);
 
   return {
     data,
