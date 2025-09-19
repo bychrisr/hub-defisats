@@ -13,7 +13,8 @@ export const usePageTitle = ({
   showPL = true,
   customTitle
 }: UsePageTitleOptions = {}) => {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+  const isAdmin = user?.is_admin || false;
   const totalPL = useTotalPL();
 
   useEffect(() => {
@@ -23,13 +24,15 @@ export const usePageTitle = ({
         showPL, 
         customTitle, 
         baseTitle, 
-        isAuthenticated 
+        isAuthenticated,
+        isAdmin
       });
 
       let title = customTitle || baseTitle;
 
-      if (showPL && !customTitle && isAuthenticated) {
-        // Usar P&L total das posições
+      // Para admin, não mostrar P&L no título
+      if (showPL && !customTitle && isAuthenticated && !isAdmin) {
+        // Usar P&L total das posições apenas para usuários comuns
         const finalPL = totalPL || 0;
         
         console.log('💰 PAGE TITLE - Positions data:', {
@@ -41,7 +44,7 @@ export const usePageTitle = ({
         title = `${plFormatted} sats | ${baseTitle}`;
         console.log('🏷️ PAGE TITLE - Final title with positions PL:', title);
       } else {
-        console.log('🏷️ PAGE TITLE - Using base title (not authenticated or no PL):', title);
+        console.log('🏷️ PAGE TITLE - Using base title (not authenticated, no PL, or admin):', title);
       }
 
       // Forçar atualização do título
@@ -50,7 +53,7 @@ export const usePageTitle = ({
     };
 
     updateTitle();
-  }, [totalPL, baseTitle, showPL, customTitle, isAuthenticated]);
+  }, [totalPL, baseTitle, showPL, customTitle, isAuthenticated, isAdmin]);
 
   return {
     updateTitle: (newTitle: string) => {

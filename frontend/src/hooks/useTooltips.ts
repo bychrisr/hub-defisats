@@ -161,12 +161,13 @@ export const useTooltips = () => {
     return tooltip ? tooltip.tooltip_position : 'top';
   }, [tooltips]);
 
-  // Initialize tooltips on mount when authenticated
+  // Initialize tooltips and cards on mount when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchAllTooltips();
+      fetchCardsWithTooltips();
     }
-  }, [isAuthenticated, fetchAllTooltips]);
+  }, [isAuthenticated, fetchAllTooltips, fetchCardsWithTooltips]);
 
   return {
     tooltips,
