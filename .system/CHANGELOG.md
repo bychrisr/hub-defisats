@@ -6,6 +6,42 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-01-18 - Sistema de Tooltips Configurável & Modernização Visual 🎯 **MAJOR FEATURE**
+
+### 🎯 Sistema de Tooltips Configurável
+- ✅ **Backend Completo**: API REST para gerenciar tooltips e cards do dashboard
+- ✅ **Banco de Dados**: Tabelas `dashboard_cards` e `tooltip_configs` com relacionamentos
+- ✅ **TooltipService**: CRUD completo para cards e configurações de tooltips
+- ✅ **API Endpoints**: 8 endpoints para gerenciar tooltips e cards
+- ✅ **Dados Padrão**: 5 cards pré-configurados com tooltips explicativos
+- ✅ **Frontend Integrado**: Componente Tooltip reutilizável com posicionamento inteligente
+- ✅ **Hook useTooltips**: Gerenciamento de estado e configurações via API
+- ✅ **MetricCard Atualizado**: Suporte a `cardKey` para identificação de tooltips
+- ✅ **Preparado para Admin**: Estrutura pronta para painel administrativo de gerenciamento
+
+### 🎨 Modernização Visual Completa
+- ✅ **Sistema de Cores Vibrante**: Cores baseadas no CoinGecko (#4d7cff, #ffb84d, #1dd1a1, #ff6b7a)
+- ✅ **Fonte Mono para Números**: JetBrains Mono, Fira Code, Monaco, Cascadia Code
+- ✅ **SatsIcon Proporcional**: Tamanhos automáticos baseados no texto (16px-32px)
+- ✅ **Classes CSS Modernas**: .icon-primary, .text-vibrant, .card-modern, .btn-modern
+- ✅ **Gradientes e Efeitos**: Backgrounds com gradientes sutis e hover effects
+- ✅ **Contraste Melhorado**: Textos mais claros (#fafbfc, #b8bcc8) para melhor legibilidade
+- ✅ **UI/UX Profissional**: Interface moderna e vibrante como CoinGecko
+
+### 🔧 Correções e Melhorias
+- ✅ **Cards Dashboard**: Agora mostram SatsIcon ao invés de texto 'sats'
+- ✅ **Fonte Mono Consistente**: Aplicada em todos os números da aplicação
+- ✅ **SatsIcon Proporcional**: Tamanhos ajustados automaticamente
+- ✅ **Visual Consistente**: Todos os componentes com mesmo padrão visual
+- ✅ **Alinhamento Perfeito**: `font-variant-numeric: tabular-nums` para dígitos
+
+### 📊 Benefícios Alcançados
+- ✅ **Configurabilidade**: Tooltips gerenciáveis via painel administrativo
+- ✅ **Modernidade**: Interface vibrante e profissional
+- ✅ **Consistência**: Visual unificado em toda aplicação
+- ✅ **Usabilidade**: Tooltips explicativos para melhor compreensão
+- ✅ **Manutenibilidade**: Sistema preparado para expansão futura
+
 ## [1.3.3] - 2025-01-15 - Correção de Erro de Sintaxe JSX 🐛 **BUGFIX**
 
 ### 🐛 Correções Críticas

@@ -12,6 +12,15 @@ Este documento registra tarefas que dependem de ações externas ao desenvolvime
 - [ ] **Configurar IPs permitidos** para API de produção
 - [ ] **Definir estratégia de backup** para dados da LN Markets
 
+### Sistema de Tooltips Configurável
+- [x] **Backend implementado** com API REST completa ✅ RESOLVIDO
+- [x] **Banco de dados** com tabelas dashboard_cards e tooltip_configs ✅ RESOLVIDO
+- [x] **Frontend integrado** com componente Tooltip reutilizável ✅ RESOLVIDO
+- [ ] **Interface administrativa** para gerenciar tooltips e cards
+- [ ] **Testes de usabilidade** com usuários reais
+- [ ] **Documentação de uso** para administradores
+- [ ] **Migração de dados** para produção
+
 ### Lightning Network
 - [ ] **Configurar LND node** ou **LNbits** para pagamentos externos
 - [ ] **Definir preços em sats** para planos (Basic, Advanced, Pro)

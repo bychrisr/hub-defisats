@@ -37,6 +37,41 @@
   updated_at: datetime (default: now)
   is_active: boolean (default: true)
   session_expires_at: datetime (nullable)
+  is_admin: boolean (default: false) // Nova propriedade para administradores
+}
+```
+
+#### DashboardCard
+```typescript
+{
+  id: UUID (pk, required)
+  key: string (unique, required) // Chave única para identificar o card
+  title: string (required) // Título do card
+  description: string (nullable) // Descrição/tooltip do card
+  icon: string (nullable) // Nome do ícone (ex: "Wallet", "DollarSign")
+  category: string (nullable) // Categoria do card (ex: "positions", "history", "balance")
+  order_index: integer (default: 0) // Ordem de exibição
+  is_active: boolean (default: true) // Se o card está ativo
+  is_admin_only: boolean (default: false) // Se é visível apenas para admins
+  created_at: datetime (default: now)
+  updated_at: datetime (default: now)
+  created_by: string (nullable) // ID do admin que criou
+  updated_by: string (nullable) // ID do admin que atualizou
+}
+```
+
+#### TooltipConfig
+```typescript
+{
+  id: UUID (pk, required)
+  card_key: string (unique, required) // Chave do card associado
+  tooltip_text: string (required) // Texto do tooltip
+  tooltip_position: string (default: "top") // Posição do tooltip (top, bottom, left, right)
+  is_enabled: boolean (default: true) // Se o tooltip está habilitado
+  created_at: datetime (default: now)
+  updated_at: datetime (default: now)
+  created_by: string (nullable) // ID do admin que criou
+  updated_by: string (nullable) // ID do admin que atualizou
 }
 ```
 
@@ -156,6 +191,29 @@ GET    /api/admin/logs             # Logs do sistema
 GET    /api/admin/metrics          # Métricas de performance
 ```
 
+### 3.7 Sistema de Tooltips
+```bash
+# Tooltips
+POST   /api/tooltips               # Criar tooltip
+GET    /api/tooltips/:cardKey      # Buscar tooltip por card
+PUT    /api/tooltips/:cardKey      # Atualizar tooltip
+DELETE /api/tooltips/:cardKey      # Deletar tooltip
+
+# Dashboard Cards
+POST   /api/dashboard-cards        # Criar card
+GET    /api/dashboard-cards        # Listar cards
+GET    /api/dashboard-cards/:key   # Buscar card por chave
+PUT    /api/dashboard-cards/:key   # Atualizar card
+DELETE /api/dashboard-cards/:key   # Deletar card
+PUT    /api/dashboard-cards/reorder # Reordenar cards
+
+# Cards com Tooltips
+GET    /api/cards-with-tooltips    # Buscar cards com tooltips
+
+# Inicialização
+POST   /api/initialize-defaults    # Inicializar dados padrão
+```
+
 ## 4. Workers e Processamento Assíncrono
 
 ### 4.1 Margin Monitor Worker
@@ -208,16 +266,19 @@ DELETE /futures/orders/:id          # Cancelar ordem
 ## 6. Sistema de Segurança
 
 ### 6.1 Autenticação e Autorização
-- **JWT**: Access tokens (15min) + refresh tokens (7d)
+- **JWT**: Access tokens (2h em dev, 15min em prod) + refresh tokens (7d)
 - **2FA**: Obrigatório para admins (Google Authenticator)
 - **Social Auth**: Google/GitHub OAuth2
 - **Session Management**: Controle de sessões ativas
+- **Admin Separation**: Super admin isolado de funcionalidades de trading
+- **Middleware**: authMiddleware, adminMiddleware, superAdminMiddleware
 
 ### 6.2 Criptografia
 - **Senhas**: bcrypt com salt rounds 12
-- **Keys LN Markets**: AES-256
+- **Keys LN Markets**: AES-256 (apenas para usuários com trading)
 - **Dados Sensíveis**: libsodium
 - **Tokens**: JWT com chave secreta forte
+- **Admin Credentials**: Sem credenciais LN Markets obrigatórias
 
 ### 6.3 Proteção contra Ataques
 - **Rate Limiting**: 5 tentativas/15min login, 3 tentativas/1h registro
@@ -225,6 +286,8 @@ DELETE /futures/orders/:id          # Cancelar ordem
 - **CSRF**: Tokens CSRF para operações state-changing
 - **XSS**: DOMPurify, escape de HTML, CSP headers
 - **SQL Injection**: Prisma ORM com prepared statements
+- **Admin Isolation**: Super admin não executa queries LN Markets
+- **Credential Validation**: Verificação de credenciais apenas para usuários de trading
 
 ### 6.4 Headers de Segurança
 - **HTTPS**: Redirecionamento HTTP → HTTPS
@@ -233,6 +296,14 @@ DELETE /futures/orders/:id          # Cancelar ordem
 - **X-Frame-Options**: DENY
 - **X-Content-Type-Options**: nosniff
 
+### 6.5 Estrutura de Autenticação Atualizada
+- **Super Admin**: Usuário com `is_admin: true` sem credenciais LN Markets
+- **Usuário Comum**: Usuário com credenciais LN Markets para trading
+- **Separação de Responsabilidades**: Admin focado em administração, usuário em trading
+- **Queries Condicionais**: Verificação `isAdmin` antes de executar queries LN Markets
+- **Performance**: Admin não executa queries desnecessárias
+- **Segurança**: Credenciais LN Markets não obrigatórias para admin
+
 ## 7. Performance e Escalabilidade
 
 ### 7.1 Otimizações de Performance
@@ -240,12 +311,16 @@ DELETE /futures/orders/:id          # Cancelar ordem
 - **Connection Pooling**: Prisma com pool de conexões
 - **Lazy Loading**: Carregamento sob demanda
 - **CDN**: Assets estáticos via CDN
+- **Admin Optimization**: Super admin não executa queries LN Markets desnecessárias
+- **Conditional Queries**: Verificação `isAdmin` antes de executar queries
 
 ### 7.2 Métricas de Performance
 - **Latência**: < 200ms para automações
 - **Throughput**: 1000+ requests/minuto
 - **Uptime**: 99.5%+ disponibilidade
 - **Memory**: < 512MB por worker
+- **Admin Performance**: Zero queries LN Markets para admin
+- **Resource Optimization**: Menor uso de recursos para admin
 
 ### 7.3 Escalabilidade
 - **Horizontal**: Múltiplas instâncias de workers

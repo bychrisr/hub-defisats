@@ -30,6 +30,60 @@ Este documento registra as decisões arquiteturais e tecnológicas importantes t
 
 ---
 
+## ADR-015: Sistema de Tooltips Configurável
+
+**Data**: 2025-01-18  
+**Status**: Aceito  
+**Contexto**: Implementação de tooltips configuráveis via painel administrativo
+
+### Decisão
+- **Backend**: API REST para gerenciar tooltips e cards do dashboard
+- **Banco de Dados**: Tabelas `dashboard_cards` e `tooltip_configs` com relacionamentos
+- **Frontend**: Componente Tooltip reutilizável com posicionamento inteligente
+- **Arquitetura**: Separação entre dados (cards) e configurações (tooltips)
+
+### Justificativa
+- **Flexibilidade**: Tooltips gerenciáveis sem alteração de código
+- **Escalabilidade**: Sistema preparado para futuras expansões
+- **Usabilidade**: Tooltips explicativos melhoram compreensão do usuário
+- **Manutenibilidade**: Configurações centralizadas e versionadas
+- **Performance**: Tooltips carregados sob demanda
+
+### Consequências
+- Adiciona complexidade ao banco de dados
+- Requer interface administrativa para gerenciamento
+- Aumenta número de endpoints da API
+- Melhora significativamente a experiência do usuário
+
+---
+
+## ADR-016: Modernização Visual com Sistema de Cores Vibrante
+
+**Data**: 2025-01-18  
+**Status**: Aceito  
+**Contexto**: Atualização do design system para cores mais vibrantes e modernas
+
+### Decisão
+- **Paleta de Cores**: Cores vibrantes baseadas no CoinGecko
+- **Fonte Mono**: JetBrains Mono para todos os números
+- **SatsIcon Proporcional**: Tamanhos automáticos baseados no texto
+- **Classes CSS**: Sistema de classes para ícones e textos vibrantes
+
+### Justificativa
+- **Modernidade**: Interface mais vibrante e profissional
+- **Consistência**: Visual unificado em toda aplicação
+- **Legibilidade**: Melhor contraste e tipografia
+- **Usabilidade**: Ícones proporcionais e alinhamento perfeito
+- **Manutenibilidade**: Classes CSS reutilizáveis
+
+### Consequências
+- Requer atualização de todos os componentes existentes
+- Aumenta tamanho do CSS bundle
+- Melhora significativamente a experiência visual
+- Facilita manutenção e expansão futura
+
+---
+
 ## ADR-002: Arquitetura de Microserviços
 
 **Data**: 2024-01-XX  

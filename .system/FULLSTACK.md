@@ -32,9 +32,17 @@
   "axios": "^1.6.2",
   "bcryptjs": "^2.4.3",
   "jsonwebtoken": "^9.0.2",
-  "zod": "^3.22.4"
+  "zod": "^3.22.4",
+  "ws": "^8.14.2",
+  "socket.io": "^4.7.4"
 }
 ```
+
+### 1.4 Novos Serviços Implementados
+- **TooltipService**: Gerenciamento de tooltips e cards do dashboard
+- **MetricsHistoryService**: Histórico de métricas e performance
+- **WebSocketService**: Comunicação em tempo real com LN Markets
+- **AdminMiddleware**: Middleware para verificação de permissões administrativas
 
 ## 2. Frontend
 
@@ -73,16 +81,20 @@
 - **Icons**: Lucide React
 - **Charts**: Recharts
 - **Animations**: Framer Motion
+- **Tooltips**: Sistema customizado com posicionamento inteligente
 
 ### 2.5 Design System
-- **Paleta de Cores**: CoinGecko Inspired
-  - Primária: `#3773f5` (CoinGecko Blue)
-  - Secundária: `#f5ac37` (CoinGecko Orange)
-  - Sucesso: `#0ecb81` (CoinGecko Green)
-  - Destrutiva: `#f6465d` (CoinGecko Red)
+- **Paleta de Cores**: CoinGecko Inspired (Atualizada v1.4.0)
+  - Primária: `#4d7cff` (Vibrant Blue)
+  - Secundária: `#ffb84d` (Vibrant Orange)
+  - Sucesso: `#1dd1a1` (Vibrant Green)
+  - Destrutiva: `#ff6b7a` (Vibrant Red)
+  - Texto: `#fafbfc` (Vibrant White), `#b8bcc8` (Vibrant Secondary)
 - **Tipografia**: Inter (principal) + JetBrains Mono (dados técnicos)
+- **Fonte Mono**: JetBrains Mono, Fira Code, Monaco, Cascadia Code
 - **Temas**: Light/Dark mode com CSS variables
 - **Tokens**: Design tokens centralizados
+- **Classes CSS**: .icon-primary, .text-vibrant, .card-modern, .btn-modern
 
 ### 2.6 Sistema de Internacionalização (i18n)
 - **Bibliotecas**: react-i18next, i18next, i18next-browser-languagedetector

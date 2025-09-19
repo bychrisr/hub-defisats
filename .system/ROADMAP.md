@@ -4,11 +4,11 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v1.3.0 ✅ COMPLETA
+## Status Atual: v1.4.0 ✅ COMPLETA
 
-**Versão**: v1.3.0  
-**Status**: Plataforma Completa com Margin Guard e Simulações em Tempo Real  
-**Data**: 2025-09-15
+**Versão**: v1.4.0  
+**Status**: Sistema de Tooltips Configurável & Modernização Visual Completa  
+**Data**: 2025-01-18
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -17,6 +17,10 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ Dashboard Financeiro Completo
 - ✅ Sistema Seguro com Criptografia
 - ✅ Interface Moderna e Responsiva
+- ✅ **NOVO**: Sistema de Tooltips Configurável
+- ✅ **NOVO**: Modernização Visual com Cores Vibrantes
+- ✅ **NOVO**: Fonte Mono para Números
+- ✅ **NOVO**: SatsIcon Proporcional
 
 ---
 
