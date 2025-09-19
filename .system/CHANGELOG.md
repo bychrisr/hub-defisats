@@ -6,6 +6,48 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.3] - 2025-01-19 - Correção de Rotas de Tooltips & Interface Administrativa 🔧 **CRITICAL FIX**
+
+### 🔧 Correção de Rotas de Tooltips
+- ✅ **Frontend Corrigido**: Rotas de tooltips agora incluem prefixo `/api` correto
+- ✅ **useTooltips Hook**: Corrigidas requisições para `/api/tooltips` e `/api/cards-with-tooltips`
+- ✅ **Proxy Vite**: Configuração correta para redirecionar `/api` para backend
+- ✅ **Interface Admin**: Painel administrativo de tooltips funcionando perfeitamente
+- ✅ **Endpoints Funcionais**: Todas as rotas de tooltips respondendo corretamente
+
+### 🎯 Interface Administrativa de Tooltips
+- ✅ **CRUD Completo**: Gerenciamento completo de tooltips e cards do dashboard
+- ✅ **Dados Padrão**: 5 cards pré-configurados com tooltips explicativos
+- ✅ **Validação**: Testes automatizados confirmando funcionamento correto
+- ✅ **Segurança**: Endpoints protegidos com autenticação adequada
+- ✅ **Performance**: Sistema otimizado e responsivo
+
+### 📊 Resultado Final
+- ✅ **Interface 100% Funcional**: Painel admin de tooltips operacional
+- ✅ **Rotas Corrigidas**: Todas as requisições funcionando corretamente
+- ✅ **Testes Validados**: Sistema testado e funcionando perfeitamente
+- ✅ **Documentação Atualizada**: CHANGELOG e documentação atualizados
+
+## [1.4.2] - 2025-01-19 - Correção WebSocket & Eliminação de Polling Desnecessário 🔧 **CRITICAL FIX**
+
+### 🔧 Correção WebSocket Backend
+- ✅ **Erro de Sintaxe**: Corrigido `connection.socket.send()` para `connection.send()` no Fastify WebSocket
+- ✅ **CORS Configurado**: Ajustado CORS_ORIGIN de `localhost:3000` para `localhost:13000`
+- ✅ **Mensagens Funcionais**: WebSocket agora envia mensagens corretamente sem erros internos
+- ✅ **Logs de Debug**: Adicionados logs detalhados para rastreamento da conexão
+
+### 🔌 Correção WebSocket Frontend
+- ✅ **Conexão Estabelecida**: WebSocket conecta e recebe mensagens em tempo real
+- ✅ **Sistema de Reconexão**: Reconexão automática funcionando corretamente
+- ✅ **Dados Reais**: Posições, saldo e dados de mercado sendo transmitidos via WebSocket
+- ✅ **Eliminação de Polling**: Fallback para polling desnecessário removido
+
+### 📊 Resultado Final
+- ✅ **WebSocket 100% Funcional**: Conexão estável e mensagens sendo recebidas
+- ✅ **Performance Otimizada**: Eliminadas requisições HTTP desnecessárias
+- ✅ **Tempo Real**: Dados atualizados instantaneamente via WebSocket
+- ✅ **Sistema Robusto**: Reconexão automática e tratamento de erros
+
 ## [1.4.1] - 2025-01-19 - Correção de Admin & Otimização de Performance 🔧 **CRITICAL FIX**
 
 ### 🔧 Correção de Requisições LN Markets para Admin

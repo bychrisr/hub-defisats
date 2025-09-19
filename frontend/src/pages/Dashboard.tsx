@@ -43,6 +43,7 @@ import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
 import { RouteGuard } from '@/components/guards/RouteGuard';
+import { useTooltips } from '@/hooks/useTooltips';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -74,6 +75,7 @@ export default function Dashboard() {
   
   // Novos hooks para métricas da dashboard
   const positionsData = usePositionsMetrics();
+  const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
   const historicalData = useHistoricalData();
   const estimatedBalance = useEstimatedBalance();
   const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente
@@ -166,6 +168,7 @@ export default function Dashboard() {
               />
               
               <MetricCard
+                cardKey="positions_count"
                 title="Posições em Execução"
                 value={(positionsData.positionCount || 0).toString()}
                 subtitle={'BTC @ ' + (positionsContextData?.marketIndex?.index ? '$' + positionsContextData.marketIndex.index.toLocaleString() : 'Carregando...')}
@@ -235,6 +238,7 @@ export default function Dashboard() {
               />
 
               <MetricCard
+                cardKey="success_rate"
                 title={t('dashboard.success_rate')}
                 value={(historicalMetrics?.successRate || 0).toFixed(1) + '%'}
                 subtitle={(historicalMetrics?.winningPositions || 0) + '/' + (historicalMetrics?.totalPositions || 0) + ' ' + t('dashboard.trades') + ' | ' + t('dashboard.volatile_btc')}

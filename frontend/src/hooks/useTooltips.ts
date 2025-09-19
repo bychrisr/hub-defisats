@@ -36,7 +36,9 @@ export interface CardWithTooltip extends DashboardCard {
 
 export const useTooltips = () => {
   console.log('🎯 TOOLTIPS - Hook initialized');
+  console.log('🎯 TOOLTIPS - About to call useAuthStore');
   const { isAuthenticated, token } = useAuthStore();
+  console.log('🎯 TOOLTIPS - useAuthStore called:', { isAuthenticated, hasToken: !!token });
   const [tooltips, setTooltips] = useState<Record<string, TooltipConfig>>({});
   const [cards, setCards] = useState<CardWithTooltip[]>([]);
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,7 @@ export const useTooltips = () => {
     }
 
     try {
-      const response = await api.get(`/tooltips/${cardKey}`);
+      const response = await api.get(`/api/tooltips/${cardKey}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching tooltip config:', error);
@@ -67,7 +69,7 @@ export const useTooltips = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.get('/tooltips');
+      const response = await api.get('/api/tooltips');
       const tooltipsMap: Record<string, TooltipConfig> = {};
       
       response.data.data.forEach((tooltip: TooltipConfig) => {
@@ -100,7 +102,7 @@ export const useTooltips = () => {
       if (isActive !== undefined) params.append('is_active', isActive.toString());
 
       console.log('🎯 TOOLTIPS - Making request to /cards-with-tooltips');
-      const response = await api.get(`/cards-with-tooltips?${params}`);
+      const response = await api.get(`/api/cards-with-tooltips?${params}`);
       console.log('🎯 TOOLTIPS - Response received:', response.data);
       setCards(response.data.data);
     } catch (error) {

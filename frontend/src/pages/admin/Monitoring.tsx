@@ -131,7 +131,6 @@ export default function Monitoring() {
     return 'text-red-500';
   };
 
-
   const getTrendIcon = (trend: 'improving' | 'stable' | 'degrading') => {
     switch (trend) {
       case 'improving': return '↗️';

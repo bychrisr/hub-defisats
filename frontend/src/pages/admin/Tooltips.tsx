@@ -89,7 +89,7 @@ export default function TooltipsAdmin() {
   const fetchCardsWithTooltips = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/cards-with-tooltips');
+      const response = await api.get('/api/cards-with-tooltips');
       if (response.data.success) {
         setCards(response.data.data);
       }
@@ -102,7 +102,7 @@ export default function TooltipsAdmin() {
 
   const handleCreateCard = async () => {
     try {
-      const response = await api.post('/admin/dashboard-cards', cardForm);
+      const response = await api.post('/api/dashboard-cards', cardForm);
       if (response.data.success) {
         await fetchCardsWithTooltips();
         setShowCreateCard(false);
@@ -115,7 +115,7 @@ export default function TooltipsAdmin() {
 
   const handleUpdateCard = async (cardKey: string) => {
     try {
-      const response = await api.put(`/admin/dashboard-cards/${cardKey}`, cardForm);
+      const response = await api.put(`/api/dashboard-cards/${cardKey}`, cardForm);
       if (response.data.success) {
         await fetchCardsWithTooltips();
         setEditingCard(null);
@@ -129,7 +129,7 @@ export default function TooltipsAdmin() {
   const handleDeleteCard = async (cardKey: string) => {
     if (window.confirm('Tem certeza que deseja deletar este card?')) {
       try {
-        await api.delete(`/admin/dashboard-cards/${cardKey}`);
+        await api.delete(`/api/dashboard-cards/${cardKey}`);
         await fetchCardsWithTooltips();
       } catch (error) {
         console.error('Error deleting card:', error);
@@ -139,7 +139,7 @@ export default function TooltipsAdmin() {
 
   const handleCreateTooltip = async () => {
     try {
-      const response = await api.post('/admin/tooltips', tooltipForm);
+      const response = await api.post('/api/tooltips', tooltipForm);
       if (response.data.success) {
         await fetchCardsWithTooltips();
         setShowCreateTooltip(false);
@@ -152,7 +152,7 @@ export default function TooltipsAdmin() {
 
   const handleUpdateTooltip = async (cardKey: string) => {
     try {
-      const response = await api.put(`/admin/tooltips/${cardKey}`, tooltipForm);
+      const response = await api.put(`/api/tooltips/${cardKey}`, tooltipForm);
       if (response.data.success) {
         await fetchCardsWithTooltips();
         setEditingTooltip(null);
@@ -166,7 +166,7 @@ export default function TooltipsAdmin() {
   const handleDeleteTooltip = async (cardKey: string) => {
     if (window.confirm('Tem certeza que deseja deletar este tooltip?')) {
       try {
-        await api.delete(`/admin/tooltips/${cardKey}`);
+        await api.delete(`/api/tooltips/${cardKey}`);
         await fetchCardsWithTooltips();
       } catch (error) {
         console.error('Error deleting tooltip:', error);
@@ -176,7 +176,7 @@ export default function TooltipsAdmin() {
 
   const handleReorderCards = async (newOrder: string[]) => {
     try {
-      await api.put('/admin/dashboard-cards/reorder', { cardKeys: newOrder });
+      await api.put('/api/dashboard-cards/reorder', { cardKeys: newOrder });
       await fetchCardsWithTooltips();
     } catch (error) {
       console.error('Error reordering cards:', error);

@@ -110,10 +110,10 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
 
     console.log('🚀 REALTIME DASHBOARD - Starting all intervals...');
 
-    // Atualizar dados principais a cada 5 segundos (posições, saldo, mercado)
+    // Atualizar dados principais a cada 10 segundos (posições, saldo, mercado)
     positionsIntervalRef.current = setInterval(updateMainData, positionsInterval);
 
-    // Atualizar dados históricos a cada 1 minuto
+    // Atualizar dados históricos a cada 2 minutos
     historicalIntervalRef.current = setInterval(updateHistoricalData, historicalInterval);
   }, [
     enabled,
@@ -128,13 +128,14 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
 
   // Efeito para gerenciar os intervalos
   useEffect(() => {
+    // DESABILITAR COMPLETAMENTE para admins
+    if (isAdmin) {
+      console.log('🚀 REALTIME DASHBOARD - Admin user, DISABLING ALL POLLING...');
+      clearAllIntervals();
+      return;
+    }
+
     if (enabled && isAuthenticated && user?.id) {
-      // Pular para admins
-      if (isAdmin) {
-        console.log('🚀 REALTIME DASHBOARD - Admin user, skipping initial updates...');
-        return;
-      }
-      
       // Atualização inicial imediata
       updateMainData();
       updateHistoricalData();

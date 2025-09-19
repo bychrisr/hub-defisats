@@ -2,6 +2,67 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-016: Correção WebSocket & Eliminação de Polling
+
+**Data**: 2025-01-19  
+**Status**: Aceito  
+**Contexto**: Correção de problemas críticos no WebSocket que causavam fallback para polling desnecessário
+
+### Problema
+- WebSocket não funcionava corretamente devido a erro de sintaxe no backend
+- CORS configurado incorretamente (localhost:3000 vs localhost:13000)
+- Sistema fazia fallback para polling HTTP desnecessário
+- Performance degradada por requisições repetitivas
+- Dados não atualizados em tempo real
+
+### Decisão
+- **Backend**: Corrigir `connection.socket.send()` para `connection.send()` no Fastify WebSocket
+- **CORS**: Ajustar CORS_ORIGIN de `localhost:3000` para `localhost:13000`
+- **Logs**: Adicionar logs de debug para rastreamento da conexão
+- **Frontend**: Manter sistema de reconexão automática funcionando
+- **Performance**: Eliminar polling desnecessário, usar apenas WebSocket
+
+### Implementação
+```typescript
+// Backend - Correção do WebSocket
+// ❌ Antes (erro)
+connection.socket.send(JSON.stringify(message));
+
+// ✅ Depois (correto)
+connection.send(JSON.stringify(message));
+
+// CORS - Correção da origem
+// ❌ Antes
+CORS_ORIGIN="http://localhost:3000"
+
+// ✅ Depois
+CORS_ORIGIN="http://localhost:13000"
+
+// Frontend - Logs de debug
+console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
+console.log('🔌 WEBSOCKET - URL completa:', url);
+```
+
+### Justificativa
+- **Funcionalidade**: WebSocket é essencial para dados em tempo real
+- **Performance**: Elimina requisições HTTP desnecessárias
+- **UX**: Dados atualizados instantaneamente
+- **Confiabilidade**: Sistema robusto com reconexão automática
+
+### Consequências
+- ✅ **WebSocket 100% Funcional**: Conexão estável e mensagens sendo recebidas
+- ✅ **Performance Otimizada**: Eliminadas requisições HTTP desnecessárias
+- ✅ **Tempo Real**: Dados atualizados instantaneamente via WebSocket
+- ✅ **Sistema Robusto**: Reconexão automática e tratamento de erros
+- ✅ **Logs Detalhados**: Facilita debugging e monitoramento
+
+### Alternativas Consideradas
+- **Manter Polling**: Rejeitado por ser ineficiente e desnecessário
+- **WebSocket com Fallback**: Mantido para casos de falha temporária
+- **Server-Sent Events**: Rejeitado por ser menos eficiente que WebSocket
+
+---
+
 ## ADR-015: Separação de Responsabilidades Admin vs Usuário
 
 **Data**: 2025-01-19  

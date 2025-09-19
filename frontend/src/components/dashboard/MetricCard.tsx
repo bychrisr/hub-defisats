@@ -35,6 +35,16 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const tooltipText = cardKey ? getTooltipText(cardKey) : null;
   const tooltipPosition = cardKey ? getTooltipPosition(cardKey) : 'top';
   const showTooltip = cardKey ? isTooltipEnabled(cardKey) : false;
+  
+  // Debug log
+  if (cardKey) {
+    console.log(`🎯 METRIC CARD [${cardKey}]:`, {
+      tooltipText,
+      tooltipPosition,
+      showTooltip,
+      hasTooltipText: !!tooltipText
+    });
+  }
   const getVariantStyles = () => {
     switch (variant) {
       case 'success':

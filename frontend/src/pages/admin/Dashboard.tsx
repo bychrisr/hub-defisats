@@ -8,6 +8,8 @@ import { RefreshCw, Users, TrendingUp, AlertTriangle, DollarSign, Gift, Activity
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { apiGet } from '@/lib/fetch';
 import SatsIcon from '@/components/SatsIcon';
+import { useTooltips } from '@/hooks/useTooltips';
+import { MetricCard } from '@/components/dashboard/MetricCard';
 
 interface DashboardKPIs {
   total_users: number;
@@ -40,6 +42,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('24h');
   const [refreshing, setRefreshing] = useState(false);
+  const { cards, loading: cardsLoading } = useTooltips();
 
   const fetchDashboardData = async () => {
     try {
@@ -200,6 +203,45 @@ export default function AdminDashboard() {
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Dashboard Cards */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-vibrant">Dashboard Cards</h2>
+          <Badge variant="outline" className="text-vibrant-secondary">
+            {cards.length} cards configurados
+          </Badge>
+        </div>
+        
+        {cardsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="card-modern">
+                <CardHeader className="animate-pulse">
+                  <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                  <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+                </CardHeader>
+                <CardContent className="animate-pulse">
+                  <div className="h-8 bg-gray-300 rounded w-1/3"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {cards.map((card) => (
+              <MetricCard
+                key={card.id}
+                title={card.title}
+                value={card.description || 'Sem descrição'}
+                subtitle={`Categoria: ${card.category}`}
+                cardKey={card.key}
+                className="card-modern"
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Charts */}
