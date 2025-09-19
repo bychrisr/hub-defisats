@@ -17,6 +17,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Install dev dependencies for building
+RUN npm install typescript @types/node tsx --save-dev
+
 # Generate Prisma client
 RUN npx prisma generate
 

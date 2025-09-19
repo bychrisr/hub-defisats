@@ -39,7 +39,9 @@ services:
 
   # Backend API
   backend:
-    image: ghcr.io/hubdefisats/hub-defisats-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: hub-defisats-backend-prod
     restart: unless-stopped
     environment:
@@ -66,7 +68,9 @@ services:
 
   # Frontend
   frontend:
-    image: ghcr.io/hubdefisats/hub-defisats-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: hub-defisats-frontend-prod
     restart: unless-stopped
     ports:
