@@ -85,12 +85,12 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   const getTitleSizeClass = () => {
     switch (titleSize) {
       case 'lg':
-        return 'text-lg'; // 1.125rem
+        return 'text-lg dashboard-card-title'; // 1.125rem + mobile responsive
       case 'base':
-        return 'text-sm';
+        return 'text-sm dashboard-card-title';
       case 'sm':
       default:
-        return 'text-sm';
+        return 'text-sm dashboard-card-title';
     }
   };
 
@@ -122,20 +122,20 @@ export const PnLCard: React.FC<PnLCardProps> = ({
         </CardHeader>
       <CardContent>
         <div className="flex items-center gap-2">
-          <div className={cn('number-lg', getTextColor())}>
+          <div className={cn('number-lg dashboard-card-value', getTextColor())}>
             {showSatsIcon ? formatSats(pnl, { size: 28, variant: variant === 'neutral' ? 'neutral' : 'auto' }) : pnl.toString()}
           </div>
           {percentage !== undefined && (
             <Badge 
               variant="outline" 
-              className={cn('text-xs font-semibold px-2 py-1 number-xs', getTextColor())}
+              className={cn('text-xs font-semibold px-2 py-1 number-xs dashboard-card-badge', getTextColor())}
             >
               {formatPercentage(percentage)}
             </Badge>
           )}
         </div>
         {subtitle && (
-          <p className="text-sm text-vibrant-secondary mt-2 font-medium">{subtitle}</p>
+          <p className="text-sm text-vibrant-secondary mt-2 font-medium dashboard-card-subtitle">{subtitle}</p>
         )}
       </CardContent>
       </Card>
@@ -143,7 +143,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
       {/* Quadrado "meio para fora" - Dentro do container principal */}
       {floatingIcon && Icon && (
         <div 
-          className="absolute w-10 h-10 bg-card border border-border rounded-lg shadow-lg flex items-center justify-center p-2 z-0"
+          className="absolute w-10 h-10 bg-card border border-border rounded-lg shadow-lg flex items-center justify-center p-2 z-0 dashboard-card-floating-icon"
           style={{ right: '0.60rem', top: '-1.4rem' }}
         >
           <Icon className={cn('h-5 w-5', getIconColor())} />

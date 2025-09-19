@@ -46,7 +46,7 @@ export const useFormatSats = () => {
     return (
       <span className="flex items-center gap-1">
         {formattedNumber}
-        <SatsIcon size={size} variant={iconVariant} />
+        <SatsIcon size={size} variant={iconVariant} className="sats-icon-mobile" />
       </span>
     );
   };

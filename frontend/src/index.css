@@ -618,4 +618,60 @@
   .coingecko-btn-secondary {
     @apply bg-secondary text-secondary-foreground hover:bg-secondary-hover px-4 py-2 rounded-md font-medium transition-all;
   }
+
+  /* Mobile Typography - Baseado na página de Backtests */
+  @media (max-width: 768px) {
+    /* Títulos de cards - Reduzidos proporcionalmente */
+    .dashboard-card-title {
+      font-size: 0.875rem !important; /* 14px - era 1.125rem */
+      font-weight: 700 !important;
+      font-family: 'Inter' !important;
+      padding-top: 12px !important; /* era 20px */
+      padding-bottom: 12px !important; /* era 20px */
+    }
+
+    /* Valores dos cards - Reduzidos proporcionalmente */
+    .dashboard-card-value {
+      font-size: 1.25rem !important; /* 20px - era 1.5rem */
+      font-weight: 700 !important;
+    }
+
+    /* Subtítulos dos cards - Reduzidos proporcionalmente */
+    .dashboard-card-subtitle {
+      font-size: 0.75rem !important; /* 12px - era 0.875rem */
+      font-weight: 500 !important;
+    }
+
+    /* Badges de porcentagem - Reduzidos proporcionalmente */
+    .dashboard-card-badge {
+      font-size: 0.625rem !important; /* 10px - era 0.75rem */
+      padding: 0.25rem 0.5rem !important; /* era 0.5rem 0.75rem */
+    }
+
+    /* Ícones flutuantes - Reduzidos proporcionalmente */
+    .dashboard-card-floating-icon {
+      width: 2rem !important; /* 32px - era 2.5rem */
+      height: 2rem !important; /* 32px - era 2.5rem */
+      padding: 0.375rem !important; /* 6px - era 0.5rem */
+    }
+
+    /* SatsIcon - Reduzido proporcionalmente */
+    .sats-icon-mobile {
+      width: 16px !important; /* era 20px */
+      height: 16px !important; /* era 20px */
+    }
+
+    /* Números grandes - Reduzidos proporcionalmente */
+    .number-lg {
+      font-size: 1.5rem !important; /* 24px - era 1.875rem */
+    }
+
+    .number-xl {
+      font-size: 1.75rem !important; /* 28px - era 2.25rem */
+    }
+
+    .number-2xl {
+      font-size: 2rem !important; /* 32px - era 3rem */
+    }
+  }
 }
