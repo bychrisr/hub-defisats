@@ -29,7 +29,7 @@ export const ResponsiveLayout = ({ children }: ResponsiveLayoutProps) => {
 
       {/* Main Content with proper spacing */}
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-32 md:pt-32">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24 md:pt-24">
           {children}
         </div>
       </main>
