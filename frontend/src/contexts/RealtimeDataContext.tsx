@@ -21,6 +21,7 @@ interface PositionData {
   side: 'long' | 'short';
   quantity: number;
   price: number;
+  liquidation: number;
   margin: number;
   leverage: number;
   pnl: number;
@@ -480,6 +481,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
           side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
           quantity: quantity,
           price: price,
+          liquidation: pos.liquidation || 0, // Valor real da API LN Markets
           margin: margin,
           leverage: leverage,
           pnl: pnl, // Usar o P&L real da LN Markets
@@ -550,6 +552,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
             side: pos.side, // Já transformado pelo PositionsContext
             quantity: quantity,
             price: price,
+            liquidation: pos.liquidation || 0, // Valor real da API LN Markets
             margin: margin,
             leverage: leverage,
             pnl: pnl, // Usar o P&L real da LN Markets

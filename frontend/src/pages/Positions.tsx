@@ -141,7 +141,7 @@ export default function Positions() {
         id: pos.id,
         quantity: pos.quantity,
         price: pos.price,
-        liquidation: pos.price * 0.1, // Calcular liquidação baseada no preço
+        liquidation: (pos as any).liquidation || 0, // Usar valor real da API LN Markets
         leverage: pos.leverage,
         margin: pos.margin,
         pnl: pos.pnl,
