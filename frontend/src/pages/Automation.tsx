@@ -552,10 +552,10 @@ export const Automation = () => {
                                 >
                                   {mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'}
                                 </Badge>
-                                <span className="font-medium text-warning">
+                                <span className="font-bold text-lg text-warning">
                                   ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
                                 </span>
-                                <span className={`font-medium ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                <span className={`font-bold text-lg ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
                                   {(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%
                                 </span>
                               </div>
