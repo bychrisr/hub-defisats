@@ -569,13 +569,7 @@ export const Automation = () => {
                               <div className="flex justify-between">
                                 <span className="text-vibrant-secondary">Margem atual:</span>
                                 <span className={`font-medium ${(mostRiskyPosition.marginRatio || 0) < 20 ? 'text-destructive' : (mostRiskyPosition.marginRatio || 0) < 50 ? 'text-warning' : 'text-success'}`}>
-                                  {(mostRiskyPosition.margin || 0).toLocaleString('pt-BR')} sats (${((mostRiskyPosition.margin || 0) * (btcPrice?.price || 0) / 100000000).toFixed(2)})
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-vibrant-secondary">Alavancagem:</span>
-                                <span className="font-medium">
-                                  {(mostRiskyPosition.leverage || 0).toFixed(0)}X
+                                  {(mostRiskyPosition.margin || 0).toLocaleString('pt-BR')} sats (${((mostRiskyPosition.margin || 0) * (btcPrice?.price || 0) / 100000000).toFixed(2)} × {(mostRiskyPosition.leverage || 0).toFixed(0)}x alavancado)
                                 </span>
                               </div>
                               <div className="flex justify-between">
