@@ -219,6 +219,26 @@ export const Automation = () => {
 
   const activationPrice = getActivationPrice();
 
+  // Calcular distância percentual até a liquidação
+  const getLiquidationDistance = () => {
+    if (!mostRiskyPosition || !btcPrice) return null;
+    
+    const currentPrice = btcPrice.price;
+    const liquidationPrice = mostRiskyPosition.liquidation || 0;
+    
+    if (mostRiskyPosition.side === 'long') {
+      // LONG: distância quando preço cai até liquidação
+      // Fórmula: ((preço_atual - liquidação) / preço_atual) * 100
+      return ((currentPrice - liquidationPrice) / currentPrice) * 100;
+    } else {
+      // SHORT: distância quando preço sobe até liquidação
+      // Fórmula: ((liquidação - preço_atual) / preço_atual) * 100
+      return ((liquidationPrice - currentPrice) / currentPrice) * 100;
+    }
+  };
+
+  const liquidationDistance = getLiquidationDistance();
+
   // Carregar configurações salvas do localStorage
   useEffect(() => {
     const savedMarginGuard = localStorage.getItem('marginGuardSettings');
@@ -542,6 +562,14 @@ export const Automation = () => {
                                 <span className="font-bold text-lg text-warning">
                                   ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
                                 </span>
+                                {liquidationDistance !== null && (
+                                  <Badge 
+                                    variant={liquidationDistance < 5 ? "destructive" : liquidationDistance < 10 ? "secondary" : "default"}
+                                    className="text-xs"
+                                  >
+                                    {liquidationDistance.toFixed(1)}% distância
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>
