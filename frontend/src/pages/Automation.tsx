@@ -48,7 +48,7 @@ export const Automation = () => {
   const [marginGuard, setMarginGuard] = useState<MarginGuardSettings>({
     enabled: true,
     threshold: 90,
-    reduction: 50,
+    reduction: 20,
   });
 
   const [tpsl, setTpsl] = useState<TakeProfitStopLossSettings>({
