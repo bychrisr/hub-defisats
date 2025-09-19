@@ -438,10 +438,10 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     console.log('📊 REALTIME - Carregando posições reais da LN Markets:', positions.length);
     setData(prev => {
       const transformedPositions = positions
-        .filter(pos => typeof pos.pnl === 'number') // Só processar posições com PnL válido
+        .filter(pos => typeof pos.pl === 'number') // Só processar posições com PnL válido
         .map(pos => {
           // Usar dados reais da LN Markets
-          const pnl = pos.pnl; // Já validado que é number
+          const pnl = pos.pl; // Já validado que é number
           const margin = typeof pos.margin === 'number' ? pos.margin : 0;
           const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
           const price = typeof pos.price === 'number' ? pos.price : 0;
@@ -520,12 +520,12 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
     
     setData(prev => {
-      const filteredPositions = positions.filter(pos => typeof pos.pnl === 'number');
-      console.log('🔄 REALTIME - Posições filtradas (com pnl válido):', filteredPositions.length);
+      const filteredPositions = positions.filter(pos => typeof pos.pl === 'number');
+      console.log('🔄 REALTIME - Posições filtradas (com pl válido):', filteredPositions.length);
       
       const transformedPositions = filteredPositions.map(pos => {
           // Usar dados reais da LN Markets
-          const pnl = pos.pnl; // Já validado que é number
+          const pnl = pos.pl; // Já validado que é number
           const margin = typeof pos.margin === 'number' ? pos.margin : 0;
           const quantity = typeof pos.quantity === 'number' ? pos.quantity : 0;
           const price = typeof pos.price === 'number' ? pos.price : 0;
