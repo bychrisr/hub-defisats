@@ -36,6 +36,10 @@ export const useHistoricalData = () => {
   const isAdmin = user?.is_admin || false;
 
   const fetchHistoricalData = async () => {
+    console.log('🔍 HISTORICAL DATA HOOK - Starting fetchHistoricalData');
+    console.log('🔍 HISTORICAL DATA HOOK - isAdmin:', isAdmin);
+    console.log('🔍 HISTORICAL DATA HOOK - userPositions length:', userPositions?.length || 0);
+    
     // Para admins, usar apenas dados das posições atuais
     if (isAdmin) {
       console.log('🔍 HISTORICAL DATA HOOK - Admin user, using current positions only...');
@@ -73,6 +77,8 @@ export const useHistoricalData = () => {
       return;
     }
 
+    console.log('🔍 HISTORICAL DATA HOOK - Non-admin user, fetching from API...');
+    
     try {
       setIsLoading(true);
       setError(null);
@@ -103,7 +109,12 @@ export const useHistoricalData = () => {
         }));
 
         // Calcular métricas históricas
+        console.log('🔍 HISTORICAL DATA HOOK - Raw trades data:', trades.slice(0, 3)); // Mostrar primeiros 3 trades
+        console.log('🔍 HISTORICAL DATA HOOK - Trade statuses:', trades.map(t => ({ id: t.id, status: t.status, pnl: t.pnl })));
+        
         const closedTrades = trades.filter(trade => trade.status === 'closed');
+        console.log('🔍 HISTORICAL DATA HOOK - Closed trades:', closedTrades);
+        
         const totalProfit = closedTrades.reduce((sum, trade) => sum + trade.pnl, 0);
         const totalFees = trades.reduce((sum, trade) => sum + trade.fees, 0);
         const winningPositions = closedTrades.filter(trade => trade.pnl > 0).length;
@@ -131,8 +142,10 @@ export const useHistoricalData = () => {
         });
       } else {
         console.log('🔍 HISTORICAL DATA HOOK - No historical data available, using current positions as fallback');
+        console.log('🔍 HISTORICAL DATA HOOK - tradesData:', tradesData);
         // Se não há dados históricos, usar dados das posições atuais como fallback
         const currentPositions = userPositions || [];
+        console.log('🔍 HISTORICAL DATA HOOK - currentPositions for fallback:', currentPositions);
         const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
         const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
         const totalPositions = currentPositions.length;
@@ -166,6 +179,7 @@ export const useHistoricalData = () => {
       // Em caso de erro, usar dados das posições atuais como fallback
       console.log('🔍 HISTORICAL DATA HOOK - Error occurred, using current positions as fallback');
       const currentPositions = userPositions || [];
+      console.log('🔍 HISTORICAL DATA HOOK - currentPositions for error fallback:', currentPositions);
       const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
       const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
       const totalPositions = currentPositions.length;
@@ -193,6 +207,7 @@ export const useHistoricalData = () => {
 
   // Inicializar dados para admins quando userPositions estiver disponível
   useEffect(() => {
+    console.log('🔍 HISTORICAL DATA HOOK - useEffect admin check:', { isAdmin, userPositionsLength: userPositions?.length, hasData: !!data });
     if (isAdmin && userPositions && !data) {
       console.log('🔍 HISTORICAL DATA HOOK - Initializing admin data with current positions');
       console.log('🔍 HISTORICAL DATA HOOK - userPositions:', userPositions);
@@ -230,6 +245,7 @@ export const useHistoricalData = () => {
 
   // Atualizar dados quando as posições atuais mudarem (para o fallback)
   useEffect(() => {
+    console.log('🔍 HISTORICAL DATA HOOK - useEffect update check:', { hasData: !!data, userPositionsLength: userPositions?.length });
     if (data && userPositions) {
       console.log('🔍 HISTORICAL DATA HOOK - Updating fallback data with current positions');
       console.log('🔍 HISTORICAL DATA HOOK - userPositions for update:', userPositions);
