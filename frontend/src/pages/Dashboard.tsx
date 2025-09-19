@@ -24,13 +24,13 @@ import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
 import { usePositionsMetrics, usePositions, useCredentialsError } from '@/contexts/PositionsContext';
-import LatestPricesWidget from '@/components/market/LatestPricesWidget';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
 import { useFormatSats } from '@/hooks/useFormatSats';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
+import BTCChart from '@/components/charts/BTCChart';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -341,9 +341,9 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Latest Prices Widget - Dados públicos sem autenticação */}
+        {/* BTC Chart - Gráfico de candlesticks */}
         <div className="mt-6">
-          <LatestPricesWidget showRefreshButton={true} compact={false} />
+          <BTCChart height={500} />
         </div>
       </div>
     </RouteGuard>
