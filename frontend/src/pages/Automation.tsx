@@ -543,21 +543,24 @@ export const Automation = () => {
                         {/* Posição mais próxima de ser liquidada */}
                         {mostRiskyPosition && (
                           <div className="p-3 bg-background/50 rounded-lg border border-warning/20">
-                            <div className="flex justify-between items-center">
+                            <div className="flex items-center justify-between mb-2">
                               <span className="text-vibrant-secondary">Posição mais próxima de ser liquidada:</span>
                               <div className="flex items-center gap-2">
-                                <Badge 
-                                  variant={mostRiskyPosition.side === 'long' ? "default" : "destructive"}
-                                  className="text-xs font-bold"
-                                >
-                                  {mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'}
-                                </Badge>
                                 <span className="font-bold text-lg text-warning">
                                   ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
                                 </span>
-                                <span className={`font-bold text-lg ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                <Badge 
+                                  variant={mostRiskyPosition.side === 'long' ? "default" : "destructive"}
+                                  className="text-xs"
+                                >
+                                  {mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'}
+                                </Badge>
+                                <Badge 
+                                  variant={(mostRiskyPosition.pnl || 0) >= 0 ? "default" : "destructive"}
+                                  className="text-xs"
+                                >
                                   {(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%
-                                </span>
+                                </Badge>
                               </div>
                             </div>
                           </div>
