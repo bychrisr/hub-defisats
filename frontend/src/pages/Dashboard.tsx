@@ -281,56 +281,6 @@ export default function Dashboard() {
 
 
 
-          {/* Recent Activity */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-vibrant">Recent Activity</h2>
-            <Card className="card-modern">
-              <CardHeader>
-                <CardTitle className="text-vibrant font-bold">Latest Automation Activity</CardTitle>
-                <CardDescription className="text-vibrant-secondary font-medium">Recent automation events and updates</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {stats?.recentActivity && stats.recentActivity.length > 0 ? (
-                  <div className="space-y-3">
-                    {stats.recentActivity.slice(0, 5).map(activity => (
-                      <div
-                        key={activity.id}
-                        className="flex items-center justify-between p-3 rounded-lg border border-border"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={'w-2 h-2 rounded-full ' + (activity.is_active ? 'bg-green-500' : 'bg-gray-400')}
-                          />
-                          <div>
-                            <div className="text-sm font-medium capitalize">
-                              {activity.type.replace('_', ' ')}
-                            </div>
-                            <div className="text-xs text-text-secondary">
-                              {new Date(activity.updated_at).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </div>
-                        <Badge
-                          variant={activity.is_active ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {activity.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Activity className="h-12 w-12 text-text-secondary mx-auto mb-2" />
-                    <p className="text-sm text-text-secondary">No recent activity</p>
-                    <p className="text-xs text-text-secondary mt-1">
-                      Create your first automation to get started
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Automation Types Overview */}
           {stats && stats.total > 0 && (
