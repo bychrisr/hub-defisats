@@ -115,6 +115,8 @@ export default function Dashboard() {
               <Badge variant="outline" className="text-sm font-semibold px-3 py-1 border-primary/30 text-primary">
                 {user?.plan_type.toUpperCase()} Plan
               </Badge>
+              {/* TODO: Botão Refresh comentado para futuras modificações */}
+              {/* 
               {isRealtimeEnabled && (
                 <Button
                   variant="outline"
@@ -126,6 +128,7 @@ export default function Dashboard() {
                   Refresh
                 </Button>
               )}
+              */}
             </div>
           </div>
 
