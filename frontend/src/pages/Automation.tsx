@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useBtcPrice } from '@/hooks/useBtcPrice';
+import { useUserPositions } from '@/contexts/RealtimeDataContext';
 import { toast } from 'sonner';
 
 interface MarginGuardSettings {
@@ -63,6 +64,30 @@ export const Automation = () => {
   
   // Hook para buscar preço do BTC
   const { data: btcPrice, loading: btcLoading, error: btcError, refetch: refetchBtc } = useBtcPrice();
+  
+  // Hook para acessar posições do usuário
+  const userPositions = useUserPositions();
+
+  // Função para encontrar a posição mais próxima de liquidar
+  const getMostRiskyPosition = () => {
+    if (!userPositions || userPositions.length === 0) return null;
+    
+    // Filtrar apenas posições abertas
+    const openPositions = userPositions.filter(pos => pos.status === 'open');
+    if (openPositions.length === 0) return null;
+    
+    // Encontrar a posição com menor margem (mais próxima de liquidar)
+    return openPositions.reduce((mostRisky, current) => {
+      const currentMarginRatio = current.marginRatio || 0;
+      const mostRiskyMarginRatio = mostRisky.marginRatio || 0;
+      
+      // Menor marginRatio = mais próximo de liquidar
+      return currentMarginRatio < mostRiskyMarginRatio ? current : mostRisky;
+    });
+  };
+
+  // Obter a posição mais arriscada para simulação
+  const mostRiskyPosition = getMostRiskyPosition();
 
   // Carregar configurações salvas do localStorage
   useEffect(() => {
@@ -318,7 +343,9 @@ export const Automation = () => {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="h-5 w-5 text-success" />
-                          <h4 className="font-medium text-success text-vibrant">Simulação</h4>
+                          <h4 className="font-medium text-success text-vibrant">
+                            {mostRiskyPosition ? 'Simulação Real' : 'Simulação'}
+                          </h4>
                         </div>
                         <Button
                           variant="ghost"
@@ -330,6 +357,14 @@ export const Automation = () => {
                           <RefreshCw className={`h-4 w-4 ${btcLoading ? 'animate-spin' : ''}`} />
                         </Button>
                       </div>
+                      
+                      {!mostRiskyPosition && (
+                        <div className="mb-3 p-2 bg-warning/10 border border-warning/20 rounded-lg">
+                          <p className="text-sm text-warning">
+                            ℹ️ Nenhuma posição aberta encontrada. Usando simulação padrão.
+                          </p>
+                        </div>
+                      )}
                       
                       <div className="space-y-3 text-sm">
                         {/* Preço atual do BTC */}
@@ -373,28 +408,64 @@ export const Automation = () => {
 
                         {/* Simulação da posição */}
                         <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-vibrant-secondary">Posição simulada:</span>
-                            <span className="font-medium">
-                              Long BTC/USD {btcPrice ? `$${btcPrice.price.toLocaleString('pt-BR')}` : '$50,000'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-vibrant-secondary">Margem atual:</span>
-                            <span className="font-medium">85% ($2,845)</span>
-                          </div>
-                          <div className="pt-2 border-t border-success/20">
-                            <div className="flex justify-between">
-                              <span className="text-vibrant-secondary">Se atingir {marginGuard.threshold}%:</span>
-                            </div>
-                            <div className="mt-1 font-medium text-success">
-                              Reduzir posição em {marginGuard.reduction}% ($${
-                                btcPrice 
-                                  ? ((btcPrice.price * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
-                                  : ((50000 * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
-                              })
-                            </div>
-                          </div>
+                          {mostRiskyPosition ? (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-vibrant-secondary">Posição mais arriscada:</span>
+                                <span className="font-medium">
+                                  {mostRiskyPosition.side === 'long' ? 'Long' : 'Short'} {mostRiskyPosition.symbol} 
+                                  {btcPrice ? ` $${btcPrice.price.toLocaleString('pt-BR')}` : ` $${mostRiskyPosition.currentPrice.toLocaleString('pt-BR')}`}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-vibrant-secondary">Margem atual:</span>
+                                <span className={`font-medium ${(mostRiskyPosition.marginRatio || 0) < 20 ? 'text-destructive' : (mostRiskyPosition.marginRatio || 0) < 50 ? 'text-warning' : 'text-success'}`}>
+                                  {(mostRiskyPosition.marginRatio || 0).toFixed(1)}% (${(mostRiskyPosition.margin || 0).toLocaleString('pt-BR')})
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-vibrant-secondary">P&L atual:</span>
+                                <span className={`font-medium ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                  ${(mostRiskyPosition.pnl || 0).toLocaleString('pt-BR')} ({(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%)
+                                </span>
+                              </div>
+                              <div className="pt-2 border-t border-success/20">
+                                <div className="flex justify-between">
+                                  <span className="text-vibrant-secondary">Se atingir {marginGuard.threshold}%:</span>
+                                </div>
+                                <div className="mt-1 font-medium text-success">
+                                  Reduzir posição em {marginGuard.reduction}% ($${
+                                    ((mostRiskyPosition.quantity || 0) * (mostRiskyPosition.currentPrice || 0) * marginGuard.reduction / 100).toLocaleString('pt-BR')
+                                  })
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-vibrant-secondary">Posição simulada:</span>
+                                <span className="font-medium">
+                                  Long BTC/USD {btcPrice ? `$${btcPrice.price.toLocaleString('pt-BR')}` : '$50,000'}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-vibrant-secondary">Margem atual:</span>
+                                <span className="font-medium">85% ($2,845)</span>
+                              </div>
+                              <div className="pt-2 border-t border-success/20">
+                                <div className="flex justify-between">
+                                  <span className="text-vibrant-secondary">Se atingir {marginGuard.threshold}%:</span>
+                                </div>
+                                <div className="mt-1 font-medium text-success">
+                                  Reduzir posição em {marginGuard.reduction}% ($${
+                                    btcPrice 
+                                      ? ((btcPrice.price * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
+                                      : ((50000 * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
+                                  })
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
