@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi, CandlestickData, Time } from 'lightweight-charts';
+import { useBTCData } from '@/hooks/useBTCData';
 
 interface BTCChartProps {
   className?: string;
@@ -21,45 +22,13 @@ export const BTCChart: React.FC<BTCChartProps> = ({
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { btcData, isLoading, error, refetch } = useBTCData();
 
-  // Dados de exemplo do BTC (você pode substituir por dados reais da API)
-  const generateSampleData = (): CandlestickDataPoint[] => {
-    const data: CandlestickDataPoint[] = [];
-    const now = new Date();
-    const startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 dias atrás
-    
-    let currentPrice = 110000; // Preço inicial
-    
-    for (let i = 0; i < 168; i++) { // 168 horas = 7 dias
-      const time = new Date(startTime.getTime() + i * 60 * 60 * 1000);
-      
-      // Simular movimento de preço
-      const change = (Math.random() - 0.5) * 2000; // Mudança aleatória de até ±1000
-      const open = currentPrice;
-      const close = currentPrice + change;
-      const high = Math.max(open, close) + Math.random() * 500;
-      const low = Math.min(open, close) - Math.random() * 500;
-      
-      data.push({
-        time: Math.floor(time.getTime() / 1000) as Time,
-        open: Math.round(open * 100) / 100,
-        high: Math.round(high * 100) / 100,
-        low: Math.round(low * 100) / 100,
-        close: Math.round(close * 100) / 100,
-      });
-      
-      currentPrice = close;
-    }
-    
-    return data;
-  };
 
+  // Criar o gráfico uma vez
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    // Criar o gráfico
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: 'solid', color: '#1e1e1e' },
@@ -88,7 +57,6 @@ export const BTCChart: React.FC<BTCChartProps> = ({
       },
     });
 
-    // Criar série de candlesticks
     const candlestickSeries = chart.addCandlestickSeries({
       upColor: '#26a69a',
       downColor: '#ef5350',
@@ -100,33 +68,6 @@ export const BTCChart: React.FC<BTCChartProps> = ({
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;
 
-    // Carregar dados
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Aqui você pode fazer uma chamada para sua API para obter dados reais
-        // const response = await fetch('/api/btc-candles?timeframe=1h');
-        // const realData = await response.json();
-        
-        // Por enquanto, usar dados de exemplo
-        const sampleData = generateSampleData();
-        candlestickSeries.setData(sampleData);
-        
-        // Ajustar o gráfico para mostrar todos os dados
-        chart.timeScale().fitContent();
-        
-        setIsLoading(false);
-      } catch (err) {
-        setError('Erro ao carregar dados do gráfico');
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-
-    // Função para redimensionar o gráfico
     const handleResize = () => {
       if (chartContainerRef.current && chart) {
         chart.applyOptions({
@@ -137,7 +78,6 @@ export const BTCChart: React.FC<BTCChartProps> = ({
 
     window.addEventListener('resize', handleResize);
 
-    // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
       if (chart) {
@@ -145,6 +85,16 @@ export const BTCChart: React.FC<BTCChartProps> = ({
       }
     };
   }, [height]);
+
+  // Atualizar dados quando btcData mudar
+  useEffect(() => {
+    if (btcData && seriesRef.current) {
+      seriesRef.current.setData(btcData.data);
+      if (chartRef.current) {
+        chartRef.current.timeScale().fitContent();
+      }
+    }
+  }, [btcData]);
 
   return (
     <div className={`relative ${className}`}>
@@ -159,14 +109,21 @@ export const BTCChart: React.FC<BTCChartProps> = ({
         </div>
         <div className="flex items-center space-x-4 text-sm">
           <div className="text-right">
-            <div className="text-vibrant font-semibold">117,003.0</div>
-            <div className="text-red-500">-11.5 (-0.01%)</div>
+            <div className="text-vibrant font-semibold">
+              {btcData ? btcData.currentPrice.toLocaleString('en-US', { 
+                minimumFractionDigits: 1, 
+                maximumFractionDigits: 1 
+              }) : '--'}
+            </div>
+            <div className={`${btcData && btcData.priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {btcData ? `${btcData.priceChange >= 0 ? '+' : ''}${btcData.priceChange.toFixed(1)} (${btcData.priceChangePercent.toFixed(2)}%)` : '--'}
+            </div>
           </div>
           <div className="text-vibrant-secondary">
-            <div>O 117,014.5</div>
-            <div>H 117,021.5</div>
-            <div>L 116,910.0</div>
-            <div>C 117,003.0</div>
+            <div>O {btcData ? btcData.ohlc.open.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '--'}</div>
+            <div>H {btcData ? btcData.ohlc.high.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '--'}</div>
+            <div>L {btcData ? btcData.ohlc.low.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '--'}</div>
+            <div>C {btcData ? btcData.ohlc.close.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '--'}</div>
           </div>
         </div>
       </div>
@@ -201,9 +158,9 @@ export const BTCChart: React.FC<BTCChartProps> = ({
       {/* Footer com informações adicionais */}
       <div className="flex items-center justify-between p-3 border-t border-border bg-card/50">
         <div className="flex items-center space-x-4 text-sm text-vibrant-secondary">
-          <span>Volume: 8.51 M</span>
+          <span>Volume: {btcData ? `${btcData.volume} M` : '--'}</span>
           <span>•</span>
-          <span>05:14:08 UTC</span>
+          <span>{new Date().toLocaleTimeString('en-US', { timeZone: 'UTC', hour12: false })} UTC</span>
         </div>
         <div className="flex items-center space-x-2">
           <button className="px-3 py-1 text-xs border border-border rounded hover:bg-card/50 transition-colors">
