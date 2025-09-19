@@ -575,7 +575,8 @@ export const Automation = () => {
                           </div>
                         )}
 
-                        {/* Simulação da posição */}
+                        {/* TODO: Simulação Real - Seção comentada para futuras modificações */}
+                        {/* 
                         <div className="space-y-2">
                           {mostRiskyPosition ? (
                             <>
@@ -629,6 +630,7 @@ export const Automation = () => {
                             </>
                           )}
                         </div>
+                        */}
                       </div>
                     </div>
                   </div>
