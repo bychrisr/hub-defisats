@@ -507,10 +507,12 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Função para atualizar posições com dados reais (sem simulação)
   const updatePositions = useCallback((positions: any[]) => {
     console.log('🔄 REALTIME - Atualizando posições com dados reais da LN Markets:', positions.length);
+    console.log('🔄 REALTIME - Posições recebidas:', positions);
     setData(prev => {
-      const transformedPositions = positions
-        .filter(pos => typeof pos.pl === 'number') // Só processar posições com PnL válido
-        .map(pos => {
+      const filteredPositions = positions.filter(pos => typeof pos.pl === 'number');
+      console.log('🔄 REALTIME - Posições filtradas (com pl válido):', filteredPositions.length);
+      
+      const transformedPositions = filteredPositions.map(pos => {
           // Usar dados reais da LN Markets
           const pnl = pos.pl; // Já validado que é number
           const margin = typeof pos.margin === 'number' ? pos.margin : 0;
