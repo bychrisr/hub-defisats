@@ -35,6 +35,7 @@ export interface CardWithTooltip extends DashboardCard {
 }
 
 export const useTooltips = () => {
+  console.log('🎯 TOOLTIPS - Hook initialized');
   const { isAuthenticated, token } = useAuthStore();
   const [tooltips, setTooltips] = useState<Record<string, TooltipConfig>>({});
   const [cards, setCards] = useState<CardWithTooltip[]>([]);
