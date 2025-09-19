@@ -101,9 +101,9 @@ export default function Dashboard() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <div className="flex items-center space-x-3">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-vibrant">Dashboard</h1>
+                <h1 className="text-4xl font-bold text-vibrant">Dashboard</h1>
                 {isRealtimeEnabled && (
-                  <div className="flex items-center space-x-2">
+                  <div className="hidden sm:flex items-center space-x-2">
                     <div className="w-3 h-3 bg-success rounded-full animate-pulse shadow-lg"></div>
                     <span className="text-sm text-success font-semibold">Live</span>
                   </div>
