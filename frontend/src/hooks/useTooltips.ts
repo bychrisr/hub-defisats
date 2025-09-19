@@ -47,21 +47,8 @@ export const useTooltips = () => {
     }
 
     try {
-      const response = await fetch(`/api/tooltips/${cardKey}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          return null;
-        }
-        throw new Error('Failed to fetch tooltip config');
-      }
-
-      const data = await response.json();
-      return data.data;
+      const response = await api.get(`/tooltips/${cardKey}`);
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching tooltip config:', error);
       return null;
@@ -78,20 +65,10 @@ export const useTooltips = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/tooltips', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch tooltip configs');
-      }
-
-      const data = await response.json();
+      const response = await api.get('/tooltips');
       const tooltipsMap: Record<string, TooltipConfig> = {};
       
-      data.data.forEach((tooltip: TooltipConfig) => {
+      response.data.data.forEach((tooltip: TooltipConfig) => {
         tooltipsMap[tooltip.card_key] = tooltip;
       });
 
@@ -118,18 +95,8 @@ export const useTooltips = () => {
       if (category) params.append('category', category);
       if (isActive !== undefined) params.append('is_active', isActive.toString());
 
-      const response = await fetch(`/api/cards-with-tooltips?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch cards with tooltips');
-      }
-
-      const data = await response.json();
-      setCards(data.data);
+      const response = await api.get(`/cards-with-tooltips?${params}`);
+      setCards(response.data.data);
     } catch (error) {
       console.error('Error fetching cards with tooltips:', error);
       setError(error instanceof Error ? error.message : 'Unknown error');
