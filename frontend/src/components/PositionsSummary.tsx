@@ -23,13 +23,13 @@ export const PositionsSummary = () => {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold flex items-center gap-2">
+          <div className="number-lg flex items-center gap-2">
             {totalPL >= 0 ? (
               <TrendingUp className="h-4 w-4 text-green-500" />
             ) : (
               <TrendingDown className="h-4 w-4 text-red-500" />
             )}
-            {formatSats(totalPL, { size: 20, variant: 'auto' })}
+            {formatSats(totalPL, { size: 28, variant: 'auto' })}
           </div>
         </CardContent>
       </Card>
@@ -41,8 +41,8 @@ export const PositionsSummary = () => {
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {formatSats(totalMargin, { size: 24, variant: 'default' })}
+          <div className="number-lg">
+            {formatSats(totalMargin, { size: 28, variant: 'default' })}
           </div>
         </CardContent>
       </Card>
@@ -54,7 +54,7 @@ export const PositionsSummary = () => {
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className="number-lg">
             {positionCount}
           </div>
           <p className="text-xs text-muted-foreground">ativas</p>
@@ -69,10 +69,10 @@ export const PositionsSummary = () => {
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
-            <Badge variant="default" className="bg-green-100 text-green-800">
+            <Badge variant="default" className="bg-green-100 text-green-800 number-sm">
               Long: {longPositions.length}
             </Badge>
-            <Badge variant="default" className="bg-red-100 text-red-800">
+            <Badge variant="default" className="bg-red-100 text-red-800 number-sm">
               Short: {shortPositions.length}
             </Badge>
           </div>

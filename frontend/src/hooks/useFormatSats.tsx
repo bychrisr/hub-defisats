@@ -13,7 +13,7 @@ export const useFormatSats = () => {
     options: FormatSatsOptions = {}
   ): React.ReactNode => {
     const { 
-      size = 20, 
+      size = 28, 
       showIcon = true, 
       variant = 'auto' 
     } = options;

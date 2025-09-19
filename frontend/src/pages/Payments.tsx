@@ -190,7 +190,7 @@ export const Payments = () => {
                   <TableCell>
                     <span className="flex items-center gap-1">
                       {payment.amount_sats.toLocaleString()}
-                      <SatsIcon size={16} className="text-orange-500" />
+                      <SatsIcon size={20} className="text-orange-500" />
                     </span>
                   </TableCell>
                   <TableCell>

@@ -67,14 +67,14 @@ export const PnLCard: React.FC<PnLCardProps> = ({
         )}
       </CardHeader>
       <CardContent>
-        <div className={cn('text-3xl font-bold', getTextColor())}>
-          {formatSats(pnl, { size: 20, variant: 'auto' })}
+        <div className={cn('number-lg', getTextColor())}>
+          {formatSats(pnl, { size: 28, variant: 'auto' })}
         </div>
         {percentage !== undefined && (
           <div className="flex items-center mt-2">
             <Badge 
               variant="outline" 
-              className={cn('text-xs font-semibold px-2 py-1', getTextColor())}
+              className={cn('text-xs font-semibold px-2 py-1 number-xs', getTextColor())}
             >
               {formatPercentage(percentage)}
             </Badge>

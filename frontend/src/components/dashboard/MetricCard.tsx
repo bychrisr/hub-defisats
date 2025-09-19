@@ -68,7 +68,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         {Icon && <Icon className={cn('h-5 w-5', getIconColor())} />}
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-vibrant">{value}</div>
+        <div className="number-lg text-vibrant">{value}</div>
         {subtitle && (
           <p className="text-sm text-vibrant-secondary mt-1 font-medium">{subtitle}</p>
         )}
@@ -76,7 +76,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           <div className="flex items-center mt-3">
             <Badge 
               variant="outline" 
-              className={cn('text-xs font-semibold px-2 py-1', getTrendColor())}
+              className={cn('text-xs font-semibold px-2 py-1 number-xs', getTrendColor())}
             >
               {trend.value > 0 ? '+' : ''}{trend.value.toFixed(1)}%
             </Badge>
