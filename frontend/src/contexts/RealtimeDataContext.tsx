@@ -508,6 +508,17 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   const updatePositions = useCallback((positions: any[]) => {
     console.log('🔄 REALTIME - Atualizando posições com dados reais da LN Markets:', positions.length);
     console.log('🔄 REALTIME - Posições recebidas:', positions);
+    
+    // Log da primeira posição para ver a estrutura
+    if (positions.length > 0) {
+      console.log('🔄 REALTIME - Estrutura da primeira posição:', {
+        id: positions[0].id,
+        pl: positions[0].pl,
+        pnl: positions[0].pnl,
+        keys: Object.keys(positions[0])
+      });
+    }
+    
     setData(prev => {
       const filteredPositions = positions.filter(pos => typeof pos.pl === 'number');
       console.log('🔄 REALTIME - Posições filtradas (com pl válido):', filteredPositions.length);
