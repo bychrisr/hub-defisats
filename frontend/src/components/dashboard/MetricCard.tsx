@@ -1,8 +1,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip } from '@/components/ui/tooltip';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTooltips } from '@/hooks/useTooltips';
 
 interface MetricCardProps {
   title: string;
@@ -15,6 +17,7 @@ interface MetricCardProps {
   };
   variant?: 'default' | 'success' | 'warning' | 'danger';
   className?: string;
+  cardKey?: string; // Chave para identificar o card e buscar tooltip
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -25,7 +28,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   trend,
   variant = 'default',
   className,
+  cardKey,
 }) => {
+  const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
+  
+  const tooltipText = cardKey ? getTooltipText(cardKey) : null;
+  const tooltipPosition = cardKey ? getTooltipPosition(cardKey) : 'top';
+  const showTooltip = cardKey ? isTooltipEnabled(cardKey) : false;
   const getVariantStyles = () => {
     switch (variant) {
       case 'success':
@@ -59,7 +68,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     }
   };
 
-  return (
+  const cardContent = (
     <Card className={cn(getVariantStyles(), className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-semibold text-vibrant-secondary">
@@ -88,6 +97,20 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       </CardContent>
     </Card>
   );
+
+  if (showTooltip && tooltipText) {
+    return (
+      <Tooltip
+        content={tooltipText}
+        position={tooltipPosition}
+        disabled={!showTooltip}
+      >
+        {cardContent}
+      </Tooltip>
+    );
+  }
+
+  return cardContent;
 };
 
 export default MetricCard;
