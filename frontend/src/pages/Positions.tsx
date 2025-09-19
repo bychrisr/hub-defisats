@@ -205,7 +205,7 @@ export default function Positions() {
       
       console.log('🔍 TRADES - Fetching LN Markets positions...', isInitialLoad ? '(Initial Load)' : '(Background Update)');
       
-      const response = await api.get('/api/lnmarkets/positions');
+      const response = await api.get('/api/lnmarkets/user/positions');
       const data = response.data;
       
       console.log('✅ TRADES - Received positions:', data);

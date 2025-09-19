@@ -512,6 +512,10 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           leverage: pos.leverage,
           pnl: pos.pnl,
           pnlPercent: pos.pnlPercentage,
+          maintenance_margin: pos.maintenance_margin || 0,
+          opening_fee: pos.opening_fee || 0,
+          closing_fee: pos.closing_fee || 0,
+          sum_carry_fees: pos.sum_carry_fees || 0,
           timestamp: Date.now()
         }));
         

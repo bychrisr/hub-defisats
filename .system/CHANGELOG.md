@@ -6,6 +6,38 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.6] - 2025-01-19 - Gráfico BTC Profissional com Lightweight Charts 📈 **MAJOR CHART IMPLEMENTATION**
+
+### 📊 Gráfico BTC Implementado
+- ✅ **Lightweight Charts**: Biblioteca profissional para gráficos financeiros
+- ✅ **Candlesticks 1h**: Gráfico de velas com timeframe de 1 hora
+- ✅ **Interface LN Markets**: Design similar à plataforma de referência
+- ✅ **Dados Dinâmicos**: Hook useBTCData para gerenciamento de dados
+- ✅ **Atualização Automática**: Dados atualizados a cada 5 minutos
+- ✅ **Performance Otimizada**: Separação de criação e atualização do gráfico
+
+### 🎯 Dados em Tempo Real
+- ✅ **Preço Atual**: Exibição do preço BTC em tempo real
+- ✅ **Mudança de Preço**: Cores dinâmicas (verde/vermelho) baseadas na direção
+- ✅ **Dados OHLC**: Open, High, Low, Close atualizados
+- ✅ **Volume Dinâmico**: Volume simulado baseado na volatilidade
+- ✅ **Timestamp UTC**: Hora atual em tempo real
+- ✅ **Formatação**: Números com separadores de milhares
+
+### 🔧 Hook useBTCData
+- ✅ **Simulação Realista**: Dados com volatilidade e tendências cíclicas
+- ✅ **Estados Gerenciados**: Loading, error e dados
+- ✅ **168 Horas**: 7 dias de dados simulados
+- ✅ **Volatilidade**: 2% por hora com tendências diárias
+- ✅ **Memory Management**: Cleanup adequado dos event listeners
+
+### 🎨 Interface Profissional
+- ✅ **Header Completo**: Título, timeframe, status e dados OHLC
+- ✅ **Footer Informativo**: Volume e timestamp UTC
+- ✅ **Botões de Timeframe**: 5y, 1y, 6m, 3m, 1m, 5d, 1d
+- ✅ **Tema Escuro**: Compatível com o design existente
+- ✅ **Responsividade**: Gráfico se adapta ao redimensionamento
+
 ## [1.4.5] - 2025-01-19 - Ícones Flutuantes & Nova Seção Posições Ativas 🎨 **MAJOR UI ENHANCEMENT**
 
 ### 🎨 Ícones Flutuantes Implementados
