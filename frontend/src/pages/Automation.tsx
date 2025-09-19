@@ -84,11 +84,11 @@ export const Automation = () => {
                   <div className="p-2 rounded-xl bg-primary/20">
                     <Settings className="h-6 w-6 text-primary" />
                   </div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-vibrant">
                     Configuração de Automações
                   </h1>
                 </div>
-                <p className="text-muted-foreground text-sm sm:text-base max-w-2xl">
+                <p className="text-vibrant-secondary text-sm sm:text-base max-w-2xl">
                   Configure suas proteções automáticas e estratégias de trading inteligentes
                 </p>
               </div>
@@ -149,8 +149,8 @@ export const Automation = () => {
                       <Shield className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <CardTitle className="text-xl sm:text-2xl">Margin Guard</CardTitle>
-                      <CardDescription className="text-sm sm:text-base">
+                      <CardTitle className="text-xl sm:text-2xl text-vibrant">Margin Guard</CardTitle>
+                      <CardDescription className="text-sm sm:text-base text-vibrant-secondary">
                         Proteção automática contra liquidação de posições
                       </CardDescription>
                     </div>
@@ -178,7 +178,7 @@ export const Automation = () => {
                     <AlertTriangle className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="font-medium text-warning">Atenção</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-vibrant-secondary">
                         O Margin Guard irá executar ações automáticas quando o
                         limite for atingido. Certifique-se de configurar os
                         parâmetros adequadamente.
@@ -192,7 +192,7 @@ export const Automation = () => {
                     {/* Margin Threshold Slider */}
                     <div className="space-y-4 p-4 bg-muted/30 rounded-xl">
                       <div className="flex items-center justify-between">
-                        <Label className="text-base font-medium">
+                        <Label className="text-base font-medium text-vibrant">
                           Limite de Margem
                         </Label>
                         <Badge variant="outline" className="text-lg font-bold">
@@ -209,7 +209,7 @@ export const Automation = () => {
                         step={5}
                         className="w-full"
                       />
-                      <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
+                      <div className="flex justify-between text-xs sm:text-sm text-vibrant-secondary">
                         <span>Conservador (70%)</span>
                         <span>Moderado (85%)</span>
                         <span>Agressivo (95%)</span>
@@ -221,7 +221,7 @@ export const Automation = () => {
                     {/* Action Selection */}
                     <div className="grid lg:grid-cols-2 gap-6">
                       <div className="space-y-4 p-4 bg-muted/20 rounded-xl">
-                        <Label className="text-base font-medium">
+                        <Label className="text-base font-medium text-vibrant">
                           Ação ao Atingir Limite
                         </Label>
                         <div className="space-y-3">
@@ -240,8 +240,8 @@ export const Automation = () => {
                               className="w-4 h-4 text-primary"
                             />
                             <Label htmlFor="reduce" className="cursor-pointer flex-1">
-                              <div className="font-medium">Reduzir Posição</div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="font-medium text-vibrant">Reduzir Posição</div>
+                              <div className="text-sm text-vibrant-secondary">
                                 Diminuir tamanho da posição
                               </div>
                             </Label>
@@ -261,8 +261,8 @@ export const Automation = () => {
                               className="w-4 h-4 text-primary"
                             />
                             <Label htmlFor="close" className="cursor-pointer flex-1">
-                              <div className="font-medium">Fechar Posição</div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="font-medium text-vibrant">Fechar Posição</div>
+                              <div className="text-sm text-vibrant-secondary">
                                 Fechar posição completamente
                               </div>
                             </Label>
@@ -273,7 +273,7 @@ export const Automation = () => {
                       {marginGuard.action === 'reduce' && (
                         <div className="space-y-4 p-4 bg-muted/20 rounded-xl">
                           <div className="flex items-center justify-between">
-                            <Label className="text-base font-medium">
+                            <Label className="text-base font-medium text-vibrant">
                               Percentual de Redução
                             </Label>
                             <Badge variant="outline" className="text-lg font-bold">
@@ -290,7 +290,7 @@ export const Automation = () => {
                             step={10}
                             className="w-full"
                           />
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-vibrant-secondary">
                             Reduzir a posição em {marginGuard.reduction}% quando o
                             limite for atingido
                           </p>
@@ -303,7 +303,7 @@ export const Automation = () => {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="h-5 w-5 text-success" />
-                          <h4 className="font-medium text-success">Simulação</h4>
+                          <h4 className="font-medium text-success text-vibrant">Simulação</h4>
                         </div>
                         <Button
                           variant="ghost"
@@ -320,11 +320,11 @@ export const Automation = () => {
                         {/* Preço atual do BTC */}
                         <div className="p-3 bg-background/50 rounded-lg border border-success/20">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-muted-foreground">Preço atual BTC:</span>
+                            <span className="text-vibrant-secondary">Preço atual BTC:</span>
                             {btcLoading ? (
                               <div className="flex items-center gap-2">
                                 <RefreshCw className="h-3 w-3 animate-spin" />
-                                <span className="text-muted-foreground">Carregando...</span>
+                                <span className="text-vibrant-secondary">Carregando...</span>
                               </div>
                             ) : btcError ? (
                               <span className="text-destructive text-xs">Erro ao carregar</span>
@@ -350,7 +350,7 @@ export const Automation = () => {
                             ) : null}
                           </div>
                           {btcPrice && (
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs text-vibrant-secondary">
                               Atualizado: {btcPrice.lastUpdated}
                             </div>
                           )}
@@ -359,18 +359,18 @@ export const Automation = () => {
                         {/* Simulação da posição */}
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Posição simulada:</span>
+                            <span className="text-vibrant-secondary">Posição simulada:</span>
                             <span className="font-medium">
                               Long BTC/USD {btcPrice ? `$${btcPrice.price.toLocaleString('pt-BR')}` : '$50,000'}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Margem atual:</span>
+                            <span className="text-vibrant-secondary">Margem atual:</span>
                             <span className="font-medium">85% ($2,845)</span>
                           </div>
                           <div className="pt-2 border-t border-success/20">
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">Se atingir {marginGuard.threshold}%:</span>
+                              <span className="text-vibrant-secondary">Se atingir {marginGuard.threshold}%:</span>
                             </div>
                             <div className="mt-1 font-medium text-success">
                               {marginGuard.action === 'reduce'
@@ -399,8 +399,8 @@ export const Automation = () => {
                 <div className="flex items-center gap-3">
                   <TrendingUp className="h-6 w-6 text-primary" />
                   <div>
-                    <CardTitle>Take Profit / Stop Loss</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-vibrant">Take Profit / Stop Loss</CardTitle>
+                    <CardDescription className="text-vibrant-secondary">
                       Automatize suas saídas de posições com TP/SL inteligente
                     </CardDescription>
                   </div>
@@ -416,7 +416,7 @@ export const Automation = () => {
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <Label className="text-base font-medium">
+                      <Label className="text-base font-medium text-vibrant">
                         Take Profit ({tpsl.takeProfitPercent}%)
                       </Label>
                       <Slider
@@ -429,14 +429,14 @@ export const Automation = () => {
                         step={0.5}
                         className="w-full"
                       />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-vibrant-secondary">
                         Realizar lucros quando a posição atingir +
                         {tpsl.takeProfitPercent}%
                       </p>
                     </div>
 
                     <div className="space-y-4">
-                      <Label className="text-base font-medium">
+                      <Label className="text-base font-medium text-vibrant">
                         Stop Loss ({tpsl.stopLossPercent}%)
                       </Label>
                       <Slider
@@ -449,7 +449,7 @@ export const Automation = () => {
                         step={0.5}
                         className="w-full"
                       />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-vibrant-secondary">
                         Limitar perdas quando a posição atingir -
                         {tpsl.stopLossPercent}%
                       </p>
@@ -461,10 +461,10 @@ export const Automation = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base font-medium">
+                        <Label className="text-base font-medium text-vibrant">
                           Trailing Stop
                         </Label>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-vibrant-secondary">
                           Ajustar stop loss automaticamente conforme o lucro
                           aumenta
                         </p>
@@ -479,7 +479,7 @@ export const Automation = () => {
 
                     {tpsl.trailingEnabled && (
                       <div className="space-y-4">
-                        <Label className="text-base font-medium">
+                        <Label className="text-base font-medium text-vibrant">
                           Distância do Trailing ({tpsl.trailingDistance}%)
                         </Label>
                         <Slider
@@ -492,7 +492,7 @@ export const Automation = () => {
                           step={0.5}
                           className="w-full"
                         />
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-vibrant-secondary">
                           Manter stop loss a {tpsl.trailingDistance}% do preço
                           máximo atingido
                         </p>
@@ -501,7 +501,7 @@ export const Automation = () => {
                   </div>
 
                   <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                    <h4 className="font-medium text-primary mb-2">Exemplo</h4>
+                    <h4 className="font-medium text-primary text-vibrant mb-2">Exemplo</h4>
                     <div className="text-sm space-y-1">
                       <p>Posição: Long BTC/USD a $50,000</p>
                       <p>Take Profit: $54,000 (+{tpsl.takeProfitPercent}%)</p>
@@ -524,10 +524,10 @@ export const Automation = () => {
               <div className="flex items-center gap-3">
                 <Zap className="h-6 w-6 text-muted-foreground" />
                 <div>
-                  <CardTitle className="text-muted-foreground">
+                  <CardTitle className="text-muted-foreground text-vibrant">
                     Entradas Automáticas
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-vibrant-secondary">
                     Abrir posições automaticamente baseado em sinais (Em
                     desenvolvimento)
                   </CardDescription>
@@ -537,13 +537,13 @@ export const Automation = () => {
             <CardContent>
               <div className="text-center py-12">
                 <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Em Breve</h3>
-                <p className="text-muted-foreground mb-4">
+                <h3 className="text-lg font-medium mb-2 text-vibrant">Em Breve</h3>
+                <p className="text-vibrant-secondary mb-4">
                   Esta funcionalidade estará disponível em uma próxima
                   atualização. Você poderá configurar entradas automáticas
                   baseadas em:
                 </p>
-                <div className="space-y-2 text-sm text-muted-foreground max-w-md mx-auto">
+                <div className="space-y-2 text-sm text-vibrant-secondary max-w-md mx-auto">
                   <p>• Indicadores técnicos (RSI, MACD, MA)</p>
                   <p>• Breakouts de suporte/resistência</p>
                   <p>• Sinais de volume anômalo</p>
