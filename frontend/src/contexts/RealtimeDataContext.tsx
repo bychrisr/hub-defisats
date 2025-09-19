@@ -80,6 +80,12 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     if (!isAuthenticated || !user?.id) {
       return;
     }
+
+    // Pular para admins - eles não têm credenciais LN Markets
+    if (isAdmin) {
+      console.log('💰 REALTIME - Admin user, skipping balance query...');
+      return;
+    }
     
     try {
       // Usar axios para aproveitar os interceptors de autenticação
@@ -96,7 +102,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     } catch (error) {
       console.error('💰 REALTIME - Erro ao carregar saldo:', error);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, isAdmin]);
 
   // Carregar saldo do usuário quando autenticado
   useEffect(() => {

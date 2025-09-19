@@ -5,6 +5,14 @@ import { LNMarketsAPIService } from '@/services/lnmarkets-api.service';
 export class LNMarketsUserController {
   constructor(private prisma: PrismaClient) {}
 
+  private async checkIfAdmin(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { admin_user: true }
+    });
+    return !!user?.admin_user;
+  }
+
   private async getLNMarketsService(userId: string): Promise<LNMarketsAPIService> {
     console.log(`🔍 GET LN MARKETS SERVICE - Starting for user: ${userId}`);
     
@@ -101,6 +109,20 @@ export class LNMarketsUserController {
         });
       }
 
+      // Verificar se o usuário é admin
+      if (await this.checkIfAdmin(userId)) {
+        console.log('🔍 USER CONTROLLER - Admin user, returning admin user data...');
+        return reply.send({
+          success: true,
+          data: {
+            uid: userId,
+            username: 'admin',
+            email: 'admin@dev.com',
+            role: 'admin'
+          }
+        });
+      }
+
       const lnmarkets = await this.getLNMarketsService(userId);
       const result = await lnmarkets.getUser();
       
@@ -132,6 +154,24 @@ export class LNMarketsUserController {
           success: false,
           error: 'UNAUTHORIZED',
           message: 'User not authenticated'
+        });
+      }
+
+      // Verificar se o usuário é admin
+      if (await this.checkIfAdmin(userId)) {
+        console.log('🔍 USER CONTROLLER - Admin user, returning empty balance...');
+        return reply.send({
+          success: true,
+          data: {
+            balance: 0,
+            synthetic_usd_balance: 0,
+            uid: userId,
+            role: 'admin',
+            username: 'admin',
+            linking_public_key: null,
+            show_leaderboard: false,
+            email: null
+          }
         });
       }
 
@@ -207,6 +247,24 @@ export class LNMarketsUserController {
           success: false,
           error: 'UNAUTHORIZED',
           message: 'User not authenticated'
+        });
+      }
+
+      // Verificar se o usuário é admin
+      if (await this.checkIfAdmin(userId)) {
+        console.log('🔍 USER CONTROLLER - Admin user, returning empty estimated balance...');
+        return reply.send({
+          success: true,
+          data: {
+            wallet_balance: 0,
+            total_margin: 0,
+            total_pnl: 0,
+            total_fees: 0,
+            estimated_balance: 0,
+            total_invested: 0,
+            positions_count: 0,
+            trades_count: 0
+          }
         });
       }
 
@@ -475,6 +533,16 @@ export class LNMarketsUserController {
         });
       }
 
+      // Verificar se o usuário é admin
+      if (await this.checkIfAdmin(userId)) {
+        console.log('🔍 USER CONTROLLER - Admin user, returning empty positions...');
+        return reply.send({
+          success: true,
+          data: [],
+          message: 'Admin user - no trading positions'
+        });
+      }
+
       // Check if user has LN Markets credentials
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
@@ -547,6 +615,16 @@ export class LNMarketsUserController {
           success: false,
           error: 'UNAUTHORIZED',
           message: 'User not authenticated'
+        });
+      }
+
+      // Verificar se o usuário é admin
+      if (await this.checkIfAdmin(userId)) {
+        console.log('🔍 USER CONTROLLER - Admin user, returning empty orders...');
+        return reply.send({
+          success: true,
+          data: [],
+          message: 'Admin user - no trading orders'
         });
       }
 

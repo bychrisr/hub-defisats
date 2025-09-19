@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth';
 
 export interface HistoricalTrade {
   id: string;
@@ -25,11 +26,21 @@ export interface HistoricalData {
 }
 
 export const useHistoricalData = () => {
+  const { user } = useAuthStore();
   const [data, setData] = useState<HistoricalData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const isAdmin = user?.is_admin || false;
 
   const fetchHistoricalData = async () => {
+    // Pular para admins - eles não têm credenciais LN Markets
+    if (isAdmin) {
+      console.log('🔍 HISTORICAL DATA HOOK - Admin user, skipping LN Markets queries...');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);

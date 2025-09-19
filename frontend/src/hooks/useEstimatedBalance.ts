@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth';
 
 interface EstimatedBalanceData {
   wallet_balance: number;
@@ -20,11 +21,21 @@ interface UseEstimatedBalanceReturn {
 }
 
 export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
+  const { user } = useAuthStore();
   const [data, setData] = useState<EstimatedBalanceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const isAdmin = user?.is_admin || false;
 
   const fetchEstimatedBalance = useCallback(async () => {
+    // Pular para admins - eles não têm credenciais LN Markets
+    if (isAdmin) {
+      console.log('🔍 ESTIMATED BALANCE HOOK - Admin user, skipping LN Markets queries...');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -69,7 +80,7 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     fetchEstimatedBalance();
