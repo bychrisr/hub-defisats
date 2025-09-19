@@ -107,6 +107,19 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
         userId,
         timestamp: new Date().toISOString()
       });
+      // Enviar mensagem de erro antes de fechar
+      try {
+        const errorMessage = {
+          type: 'error',
+          data: {
+            message: 'Internal server error',
+            timestamp: Date.now()
+          }
+        };
+        connection.socket.send(JSON.stringify(errorMessage));
+      } catch (sendError) {
+        console.error('❌ WEBSOCKET TEST - Erro ao enviar mensagem de erro:', sendError);
+      }
       connection.close(1011, 'Internal server error');
     }
   });

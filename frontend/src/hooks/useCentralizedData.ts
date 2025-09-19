@@ -158,7 +158,7 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
     if (isAuthenticated && user?.id) {
       refreshData();
     }
-  }, [isAuthenticated, user?.id, refreshData]);
+  }, [isAuthenticated, user?.id]); // Removido refreshData das dependências
 
   return {
     ...data,

@@ -39,6 +39,7 @@ import AdminUsers from '@/pages/admin/Users';
 import AdminCoupons from '@/pages/admin/Coupons';
 import AdminAlerts from '@/pages/admin/Alerts';
 import AdminSettings from '@/pages/admin/Settings';
+import AdminTooltips from '@/pages/admin/Tooltips';
 import TestPermissions from '@/pages/TestPermissions';
 
 const queryClient = new QueryClient();
@@ -383,6 +384,7 @@ const App = () => {
               <Route index element={<AdminDashboard />} />
               <Route path="menus" element={<AdminMenuManagement />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
+              <Route path="tooltips" element={<AdminTooltips />} />
               <Route path="monitoring" element={<AdminMonitoring />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="coupons" element={<AdminCoupons />} />

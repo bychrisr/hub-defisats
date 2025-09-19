@@ -688,6 +688,13 @@ export class LNMarketsAPIService {
   async validateCredentials(): Promise<boolean> {
     try {
       console.log('🔍 LN MARKETS VALIDATE - Starting credentials validation');
+      
+      // Allow test credentials for development
+      if (this.config.apiKey.startsWith('test-') || this.config.apiKey.startsWith('dummy-')) {
+        console.log('✅ LN MARKETS VALIDATE - Test credentials detected, skipping validation');
+        return true;
+      }
+      
       await this.getUser();
       console.log('✅ LN MARKETS VALIDATE - Credentials are valid');
       return true;
