@@ -549,18 +549,22 @@ export const Automation = () => {
                         <div className="space-y-2">
                           {mostRiskyPosition ? (
                             <>
-                              <div className="flex justify-between">
+                              <div className="flex justify-between items-center">
                                 <span className="text-vibrant-secondary">Posição mais próxima de ser liquidada:</span>
-                                <span className="font-medium">
-                                  {mostRiskyPosition.side === 'long' ? 'Long' : 'Short'} {mostRiskyPosition.symbol} 
-                                  {btcPrice ? ` $${btcPrice.price.toLocaleString('pt-BR')}` : ` $${(mostRiskyPosition.currentPrice || mostRiskyPosition.price || 0).toLocaleString('pt-BR')}`}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-vibrant-secondary">Valor de liquidação:</span>
-                                <span className="font-medium text-warning">
-                                  ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <Badge 
+                                    variant={mostRiskyPosition.side === 'long' ? "default" : "destructive"}
+                                    className="text-xs font-bold"
+                                  >
+                                    {mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'}
+                                  </Badge>
+                                  <span className="font-medium text-warning">
+                                    ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
+                                  </span>
+                                  <span className={`font-medium ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                    {(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%
+                                  </span>
+                                </div>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-vibrant-secondary">Margem atual:</span>
