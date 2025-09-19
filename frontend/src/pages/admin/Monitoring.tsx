@@ -202,14 +202,23 @@ export default function Monitoring() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {Object.entries(queue_sizes).map(([queue, size]) => (
-                <div key={queue} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{queue}</span>
-                  <Badge variant={size > 100 ? "destructive" : size > 50 ? "secondary" : "default"}>
-                    {size} jobs
-                  </Badge>
+              {Object.entries(queue_sizes).length > 0 ? (
+                Object.entries(queue_sizes).map(([queue, size]) => (
+                  <div key={queue} className="flex items-center justify-between">
+                    <span className="text-sm font-medium capitalize">
+                      {queue.replace(/-/g, ' ')}
+                    </span>
+                    <Badge variant={size > 100 ? "destructive" : size > 50 ? "secondary" : "default"}>
+                      {size} jobs
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No queue data available</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>

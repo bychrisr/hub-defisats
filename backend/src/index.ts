@@ -32,6 +32,7 @@ import { paymentRoutes } from '@/routes/payment.routes';
 import { securityRoutes } from '@/routes/security.routes';
 import { adminAdvancedRoutes } from '@/routes/admin-advanced.routes';
 import { planRoutes } from '@/routes/plan.routes';
+import { healthRoutes } from '@/routes/health.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/utils/metrics';
@@ -769,6 +770,10 @@ async function registerRoutes() {
   // Validation routes (with /api prefix but without authentication)
   await fastify.register(validationRoutes, { prefix: '/api' });
   console.log('✅ Validation routes registered');
+
+  // Health routes (without authentication)
+  await fastify.register(healthRoutes, { prefix: '/api' });
+  console.log('✅ Health routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler
