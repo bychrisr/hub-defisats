@@ -41,6 +41,8 @@ services:
       context: ../../backend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-backend
+    env_file:
+      - ../../.env
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
@@ -49,7 +51,7 @@ services:
     ports:
       - "13010:3010"
     volumes:
-      - ./backend:/app
+      - ../../backend:/app
       - /app/node_modules
     depends_on:
       postgres:
@@ -68,13 +70,13 @@ services:
   # Frontend
   frontend:
     build:
-      context: ./frontend
+      context: ../../frontend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-frontend
     ports:
       - "13000:3001"
     volumes:
-      - ./frontend:/app
+      - ../../frontend:/app
       - /app/node_modules
     depends_on:
       backend:
@@ -99,7 +101,7 @@ services:
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
       REDIS_URL: redis://redis:6379
     volumes:
-      - ./backend:/app
+      - ../../backend:/app
       - /app/node_modules
     depends_on:
       postgres:
@@ -122,7 +124,7 @@ services:
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
       REDIS_URL: redis://redis:6379
     volumes:
-      - ./backend:/app
+      - ../../backend:/app
       - /app/node_modules
     depends_on:
       postgres:
@@ -145,7 +147,7 @@ services:
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
       REDIS_URL: redis://redis:6379
     volumes:
-      - ./backend:/app
+      - ../../backend:/app
       - /app/node_modules
     depends_on:
       postgres:
@@ -168,7 +170,7 @@ services:
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
       REDIS_URL: redis://redis:6379
     volumes:
-      - ./backend:/app
+      - ../../backend:/app
       - /app/node_modules
     depends_on:
       postgres:
