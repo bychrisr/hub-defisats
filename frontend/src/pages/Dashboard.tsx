@@ -149,52 +149,71 @@ export default function Dashboard() {
             />
           )}
 
-          {/* Linha 1 - Posições Ativas */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-vibrant">Posições Ativas</h2>
+        {/* Posições Ativas */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-vibrant">Posições Ativas</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <PnLCard
                 title="PnL Total"
                 pnl={positionsData.totalPL || 0}
                 percentage={positionsData.totalMargin > 0 ? ((positionsData.totalPL || 0) / positionsData.totalMargin) * 100 : 0}
-                subtitle="Lucro/prejuízo total"
+                titleSize="lg"
+                cardKey="total_pnl"
+                cursor="default"
+                icon={TrendingUp}
+                floatingIcon={true}
               />
               
               <PnLCard
                 title="Profit Estimado"
                 pnl={positionsData.estimatedProfit || 0}
-                subtitle="Se fechadas com take profit"
+                titleSize="lg"
+                cardKey="estimated_profit"
+                cursor="default"
                 icon={Target}
+                floatingIcon={true}
               />
               
-              <MetricCard
+              <PnLCard
+                title="Trades em execução"
+                pnl={positionsData.positionCount || 0}
+                titleSize="lg"
                 cardKey="positions_count"
-                title="Posições em Execução"
-                value={(positionsData.positionCount || 0).toString()}
-                subtitle={'BTC @ ' + (positionsContextData?.marketIndex?.index ? '$' + positionsContextData.marketIndex.index.toLocaleString() : 'Carregando...')}
+                cursor="default"
                 icon={Activity}
-                variant={(positionsData.positionCount || 0) > 0 ? 'default' : 'warning'}
+                variant="neutral"
+                showSatsIcon={false}
+                floatingIcon={true}
               />
               
-              <MetricCard
+              <PnLCard
                 title="Margem Total"
-                value={formatSats(positionsData.totalMargin || 0)}
-                subtitle="Margem utilizada"
-                icon={Wallet}
+                pnl={positionsData.totalMargin || 0}
+                titleSize="lg"
                 cardKey="total_margin"
+                cursor="default"
+                icon={Wallet}
+                variant="neutral"
+                showSatsIcon={true}
+                floatingIcon={true}
               />
               
-              <MetricCard
+              <PnLCard
                 title="Taxas Estimadas"
-                value={formatSats(positionsData.totalFees || 0)}
-                subtitle="Taxas das posições ativas"
-                icon={DollarSign}
+                pnl={positionsData.totalFees || 0}
+                titleSize="lg"
                 cardKey="estimated_fees"
+                cursor="default"
+                icon={DollarSign}
+                variant="neutral"
+                showSatsIcon={true}
+                floatingIcon={true}
               />
             </div>
           </div>
 
-          {/* Linha 2 - Histórico */}
+
+          {/* Histórico */}
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-vibrant">{t('dashboard.history')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">

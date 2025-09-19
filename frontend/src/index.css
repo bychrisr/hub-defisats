@@ -297,8 +297,43 @@
     @apply bg-success/5 border border-success/20;
   }
 
+  .card-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 20px -10px rgba(34, 197, 94, 0.1), 0 10px 10px -5px rgba(34, 197, 94, 0.04);
+  }
+
   .card-danger {
     @apply bg-destructive/5 border border-destructive/20;
+  }
+
+  .card-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 20px -10px rgba(239, 68, 68, 0.1), 0 10px 10px -5px rgba(239, 68, 68, 0.04);
+  }
+
+  .card-warning {
+    @apply bg-warning/5 border border-warning/20;
+  }
+
+  .card-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 20px -10px rgba(245, 158, 11, 0.1), 0 10px 10px -5px rgba(245, 158, 11, 0.04);
+  }
+
+  /* Hover para estilos inline dos componentes */
+  .border-success\/30:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 20px -10px rgba(34, 197, 94, 0.1), 0 10px 10px -5px rgba(34, 197, 94, 0.04);
+  }
+
+  .border-destructive\/30:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 20px -10px rgba(239, 68, 68, 0.1), 0 10px 10px -5px rgba(239, 68, 68, 0.04);
+  }
+
+  .border-warning\/30:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 20px -10px rgba(245, 158, 11, 0.1), 0 10px 10px -5px rgba(245, 158, 11, 0.04);
   }
 
   /* CoinGecko specific components */
@@ -373,9 +408,80 @@
     background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
   }
 
-  .card-modern:hover {
+.card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 10px 10px 20px -10px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
+}
+
+  /* Card Neutral - Sem padding duplo */
+  .card-neutral {
+    @apply bg-card border border-border rounded-xl shadow-coingecko-md hover:shadow-coingecko-lg transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
+  }
+
+.card-neutral:hover {
+  transform: translateY(-2px);
+  box-shadow: 10px 10px 20px -10px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
+}
+
+  /* Dashboard Cards - Configuração Global */
+  .dashboard-card {
+    @apply bg-card border border-border rounded-xl p-6 shadow-coingecko-md hover:shadow-coingecko-lg transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
+  }
+
+  .dashboard-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
+  }
+
+  .dashboard-card-title {
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    font-family: 'Inter', sans-serif !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+    @apply text-vibrant-secondary;
+  }
+
+  .dashboard-card-value {
+    @apply text-3xl font-bold text-vibrant;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dashboard-card-subtitle {
+    @apply text-sm text-vibrant-secondary mt-1 font-medium;
+  }
+
+  .dashboard-card-icon {
+    @apply h-5 w-5;
+  }
+
+  .dashboard-card-help-icon {
+    @apply h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help inline ml-1;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .dashboard-card {
+      @apply p-4;
+    }
+    
+    .dashboard-card-title {
+      font-size: 1rem !important;
+      font-weight: 700 !important;
+      padding-top: 16px !important;
+      padding-bottom: 16px !important;
+    }
+    
+    .dashboard-card-value {
+      @apply text-2xl;
+    }
+    
+    .dashboard-card-subtitle {
+      @apply text-xs;
+    }
   }
 
   /* Button improvements - Mais vibrante */

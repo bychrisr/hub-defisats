@@ -18,6 +18,7 @@ interface MetricCardProps {
   variant?: 'default' | 'success' | 'warning' | 'danger';
   className?: string;
   cardKey?: string; // Chave para identificar o card e buscar tooltip
+  titleSize?: 'sm' | 'base' | 'lg';
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -29,6 +30,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   variant = 'default',
   className,
   cardKey,
+  titleSize = 'sm',
 }) => {
   const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
   
@@ -45,18 +47,6 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       hasTooltipText: !!tooltipText
     });
   }
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'success':
-        return 'border-success/30 bg-success/5 hover:bg-success/10';
-      case 'warning':
-        return 'border-warning/30 bg-warning/5 hover:bg-warning/10';
-      case 'danger':
-        return 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10';
-      default:
-        return 'card-modern';
-    }
-  };
 
   const getTrendColor = () => {
     if (!trend) return '';
@@ -78,32 +68,50 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     }
   };
 
+  const getTitleSizeClass = () => {
+    switch (titleSize) {
+      case 'lg':
+        return 'text-xl'; // 1.25rem
+      case 'base':
+        return 'text-sm';
+      case 'sm':
+      default:
+        return 'text-sm';
+    }
+  };
+
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'success':
+        return 'border-success/30 bg-success/5 hover:bg-success/10';
+      case 'warning':
+        return 'border-warning/30 bg-warning/5 hover:bg-warning/10';
+      case 'danger':
+        return 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10';
+      default:
+        return 'card-modern';
+    }
+  };
+
   const cardContent = (
     <Card className={cn(getVariantStyles(), className)}>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <div className="flex flex-col space-y-1">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-sm font-semibold text-vibrant-secondary">
-              {title}
-            </CardTitle>
-            {showTooltip && tooltipText && (
-              <Tooltip
-                content={tooltipText}
-                position={tooltipPosition}
-                disabled={!showTooltip}
-              >
-                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help" />
-              </Tooltip>
-            )}
-          </div>
-        </div>
-        {Icon && <Icon className={cn('h-5 w-5', getIconColor())} />}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className={cn('dashboard-card-title', getTitleSizeClass())}>
+          {title}
+          {showTooltip && tooltipText && (
+            <Tooltip
+              content={tooltipText}
+              position={tooltipPosition}
+              disabled={!showTooltip}
+            >
+              <HelpCircle className="dashboard-card-help-icon" />
+            </Tooltip>
+          )}
+        </CardTitle>
+        {Icon && <Icon className={cn('dashboard-card-icon', getIconColor())} />}
       </CardHeader>
       <CardContent>
-        <div className="number-lg text-vibrant">{value}</div>
-        {subtitle && (
-          <p className="text-sm text-vibrant-secondary mt-1 font-medium">{subtitle}</p>
-        )}
+        <div className="dashboard-card-value">{value}</div>
         {trend && (
           <div className="flex items-center mt-3">
             <Badge 

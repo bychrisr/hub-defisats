@@ -127,9 +127,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
         <div
           ref={tooltipRef}
           className={cn(
-            'absolute z-50 px-3 py-2 text-sm text-popover-foreground bg-popover border border-border rounded-lg shadow-lg max-w-xs',
+            'absolute z-[9999] px-3 py-2 text-sm text-popover-foreground bg-popover border border-border rounded-lg shadow-lg',
             'animate-in fade-in-0 zoom-in-95 duration-200',
-            'backdrop-blur-sm bg-popover/95'
+            'backdrop-blur-sm bg-popover/95',
+            'min-w-56 max-w-[28rem] whitespace-normal break-words'
           )}
           style={{
             top: tooltipPosition.top,
