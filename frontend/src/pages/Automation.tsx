@@ -522,19 +522,6 @@ export const Automation = () => {
                                 <span className="font-bold text-lg">
                                   ${btcPrice.price.toLocaleString('pt-BR')}
                                 </span>
-                                {btcPrice.changePercent24h !== 0 && (
-                                  <Badge 
-                                    variant={btcPrice.changePercent24h > 0 ? "default" : "destructive"}
-                                    className="text-xs"
-                                  >
-                                    {btcPrice.changePercent24h > 0 ? (
-                                      <TrendingUpIcon className="h-3 w-3 mr-1" />
-                                    ) : (
-                                      <TrendingDown className="h-3 w-3 mr-1" />
-                                    )}
-                                    {Math.abs(btcPrice.changePercent24h).toFixed(2)}%
-                                  </Badge>
-                                )}
                               </div>
                             ) : null}
                           </div>
@@ -555,12 +542,6 @@ export const Automation = () => {
                                 <span className="font-bold text-lg text-warning">
                                   ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
                                 </span>
-                                <Badge 
-                                  variant={(mostRiskyPosition.pnl || 0) >= 0 ? "default" : "destructive"}
-                                  className="text-xs"
-                                >
-                                  {(mostRiskyPosition.pnlPercent || 0).toFixed(1)}%
-                                </Badge>
                               </div>
                             </div>
                           </div>
