@@ -36,9 +36,39 @@ export const useHistoricalData = () => {
   const isAdmin = user?.is_admin || false;
 
   const fetchHistoricalData = async () => {
-    // Pular para admins - eles não têm credenciais LN Markets
+    // Para admins, usar apenas dados das posições atuais
     if (isAdmin) {
-      console.log('🔍 HISTORICAL DATA HOOK - Admin user, skipping LN Markets queries...');
+      console.log('🔍 HISTORICAL DATA HOOK - Admin user, using current positions only...');
+      setIsLoading(true);
+      
+      // Usar dados das posições atuais para admins
+      const currentPositions = userPositions || [];
+      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
+      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
+      const totalPositions = currentPositions.length;
+      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
+      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
+      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+
+      console.log('🔍 HISTORICAL DATA HOOK - Admin fallback data:', {
+        totalPositions,
+        winningPositions,
+        losingPositions,
+        successRate,
+        totalProfit,
+        totalFees
+      });
+
+      setData({
+        trades: [],
+        totalProfit,
+        totalFees,
+        successRate,
+        totalPositions,
+        winningPositions,
+        losingPositions,
+      });
+      
       setIsLoading(false);
       return;
     }
@@ -160,6 +190,30 @@ export const useHistoricalData = () => {
   useEffect(() => {
     fetchHistoricalData();
   }, []);
+
+  // Inicializar dados para admins quando userPositions estiver disponível
+  useEffect(() => {
+    if (isAdmin && userPositions && !data) {
+      console.log('🔍 HISTORICAL DATA HOOK - Initializing admin data with current positions');
+      const currentPositions = userPositions || [];
+      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
+      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
+      const totalPositions = currentPositions.length;
+      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
+      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
+      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+
+      setData({
+        trades: [],
+        totalProfit,
+        totalFees,
+        successRate,
+        totalPositions,
+        winningPositions,
+        losingPositions,
+      });
+    }
+  }, [isAdmin, userPositions, data]);
 
   // Atualizar dados quando as posições atuais mudarem (para o fallback)
   useEffect(() => {
