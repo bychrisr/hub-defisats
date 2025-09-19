@@ -106,18 +106,18 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center space-x-3">
-                <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
+                <h1 className="text-4xl font-bold text-vibrant">Dashboard</h1>
                 {isRealtimeEnabled && (
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-600 font-medium">Live</span>
+                    <div className="w-3 h-3 bg-success rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-sm text-success font-semibold">Live</span>
                   </div>
                 )}
               </div>
-              <p className="text-text-secondary">Welcome back, {user?.email}</p>
+              <p className="text-vibrant-secondary text-lg font-medium">Welcome back, {user?.email}</p>
             </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="outline" className="text-sm">
+            <div className="flex items-center space-x-3">
+              <Badge variant="outline" className="text-sm font-semibold px-3 py-1 border-primary/30 text-primary">
                 {user?.plan_type.toUpperCase()} Plan
               </Badge>
               {isRealtimeEnabled && (
@@ -125,9 +125,9 @@ export default function Dashboard() {
                   variant="outline"
                   size="sm"
                   onClick={refreshAll}
-                  className="text-xs"
+                  className="text-xs btn-modern-primary"
                 >
-                  <Activity className="w-3 h-3 mr-1" />
+                  <Activity className="w-4 h-4 mr-2 icon-primary" />
                   Refresh
                 </Button>
               )}
@@ -149,7 +149,7 @@ export default function Dashboard() {
 
           {/* Linha 1 - Posições Ativas */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-text-primary">Posições Ativas</h2>
+            <h2 className="text-2xl font-bold text-vibrant">Posições Ativas</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <PnLCard
                 title="PnL Total"
@@ -191,7 +191,7 @@ export default function Dashboard() {
 
           {/* Linha 2 - Histórico */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.history')}</h2>
+            <h2 className="text-2xl font-bold text-vibrant">{t('dashboard.history')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
               <MetricCard
                 title="Margem disponível"
@@ -242,22 +242,22 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-text-primary">{t('dashboard.quick_actions')}</h2>
+            <h2 className="text-2xl font-bold text-vibrant">{t('dashboard.quick_actions')}</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card>
+              <Card className="card-modern">
                 <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>Common tasks and automations</CardDescription>
+                  <CardTitle className="text-vibrant font-bold">Quick Actions</CardTitle>
+                  <CardDescription className="text-vibrant-secondary font-medium">Common tasks and automations</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Button asChild className="h-auto p-4">
                       <Link to="/margin-guard">
                         <div className="flex items-center space-x-3">
-                          <Shield className="h-5 w-5" />
+                          <Shield className="h-5 w-5 icon-primary" />
                           <div className="text-left">
-                            <div className="font-medium">Margin Guard</div>
-                            <div className="text-sm opacity-70">
+                            <div className="font-semibold text-vibrant">Margin Guard</div>
+                            <div className="text-sm text-vibrant-secondary">
                               {marginGuardAutomation ? 'Configure' : 'Set up'}{' '}
                               protection
                             </div>
@@ -269,10 +269,10 @@ export default function Dashboard() {
                     <Button asChild variant="outline" className="h-auto p-4">
                       <Link to="/automation">
                         <div className="flex items-center space-x-3">
-                          <Settings className="h-5 w-5" />
+                          <Settings className="h-5 w-5 icon-secondary" />
                           <div className="text-left">
-                            <div className="font-medium">All Automations</div>
-                            <div className="text-sm opacity-70">
+                            <div className="font-semibold text-vibrant">All Automations</div>
+                            <div className="text-sm text-vibrant-secondary">
                               Manage all automations
                             </div>
                           </div>
@@ -283,10 +283,10 @@ export default function Dashboard() {
                     <Button asChild variant="outline" className="h-auto p-4">
                       <Link to="/profile">
                         <div className="flex items-center space-x-3">
-                          <User className="h-5 w-5" />
+                          <User className="h-5 w-5 icon-success" />
                           <div className="text-left">
-                            <div className="font-medium">Profile</div>
-                            <div className="text-sm opacity-70">
+                            <div className="font-semibold text-vibrant">Profile</div>
+                            <div className="text-sm text-vibrant-secondary">
                               Account settings
                             </div>
                           </div>
@@ -297,10 +297,10 @@ export default function Dashboard() {
                     <Button asChild variant="outline" className="h-auto p-4">
                       <Link to="/reports">
                         <div className="flex items-center space-x-3">
-                          <BarChart3 className="h-5 w-5" />
+                          <BarChart3 className="h-5 w-5 icon-warning" />
                           <div className="text-left">
-                            <div className="font-medium">Reports</div>
-                            <div className="text-sm opacity-70">
+                            <div className="font-semibold text-vibrant">Reports</div>
+                            <div className="text-sm text-vibrant-secondary">
                               View automation reports
                             </div>
                           </div>
@@ -315,11 +315,11 @@ export default function Dashboard() {
 
           {/* Recent Activity */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-text-primary">Recent Activity</h2>
-            <Card>
+            <h2 className="text-2xl font-bold text-vibrant">Recent Activity</h2>
+            <Card className="card-modern">
               <CardHeader>
-                <CardTitle>Latest Automation Activity</CardTitle>
-                <CardDescription>Recent automation events and updates</CardDescription>
+                <CardTitle className="text-vibrant font-bold">Latest Automation Activity</CardTitle>
+                <CardDescription className="text-vibrant-secondary font-medium">Recent automation events and updates</CardDescription>
               </CardHeader>
               <CardContent>
                 {stats?.recentActivity && stats.recentActivity.length > 0 ? (

@@ -27,17 +27,22 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   const isNeutral = pnl === 0;
   
   const getVariantStyles = () => {
-    if (isNeutral) return 'border-border bg-card';
+    if (isNeutral) return 'card-modern';
     return isPositive 
-      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950'
-      : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950';
+      ? 'border-success/30 bg-success/5 hover:bg-success/10'
+      : 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10';
   };
 
   const getTextColor = () => {
-    if (isNeutral) return 'text-foreground';
+    if (isNeutral) return 'text-vibrant';
     return isPositive 
-      ? 'text-green-600 dark:text-green-400'
-      : 'text-red-600 dark:text-red-400';
+      ? 'text-success font-bold'
+      : 'text-destructive font-bold';
+  };
+
+  const getIconColor = () => {
+    if (isNeutral) return 'icon-primary';
+    return isPositive ? 'icon-success' : 'icon-danger';
   };
 
   const formatPercentage = (value: number) => {
@@ -48,35 +53,35 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   return (
     <Card className={cn(getVariantStyles(), className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-foreground">
+        <CardTitle className="text-sm font-semibold text-vibrant-secondary">
           {title}
         </CardTitle>
         {Icon ? (
-          <Icon className="h-4 w-4 text-muted-foreground" />
+          <Icon className={cn('h-5 w-5', getIconColor())} />
         ) : (
           isPositive ? (
-            <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <TrendingUp className={cn('h-5 w-5', getIconColor())} />
           ) : isNeutral ? null : (
-            <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <TrendingDown className={cn('h-5 w-5', getIconColor())} />
           )
         )}
       </CardHeader>
       <CardContent>
-        <div className={cn('text-2xl font-bold', getTextColor())}>
+        <div className={cn('text-3xl font-bold', getTextColor())}>
           {formatSats(pnl, { size: 20, variant: 'auto' })}
         </div>
         {percentage !== undefined && (
-          <div className="flex items-center mt-1">
+          <div className="flex items-center mt-2">
             <Badge 
               variant="outline" 
-              className={cn('text-xs', getTextColor())}
+              className={cn('text-xs font-semibold px-2 py-1', getTextColor())}
             >
               {formatPercentage(percentage)}
             </Badge>
           </div>
         )}
         {subtitle && (
-          <p className="text-xs text-muted-foreground mt-2">{subtitle}</p>
+          <p className="text-sm text-vibrant-secondary mt-2 font-medium">{subtitle}</p>
         )}
       </CardContent>
     </Card>

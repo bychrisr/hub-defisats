@@ -107,80 +107,87 @@
   .dark {
     /* ===== DARK MODE - CoinGecko Inspired ===== */
     
-    /* Core Brand Colors */
-    --background: 210 24% 5%; /* #0d0f13 */
-    --foreground: 210 20% 92%; /* #eaecef */
+    /* Core Brand Colors - Mais vibrantes */
+    --background: 210 24% 3%; /* #0a0c0f - Mais escuro */
+    --foreground: 210 20% 96%; /* #f1f3f4 - Mais claro */
 
-    /* Primary - CoinGecko Blue (same as light) */
-    --primary: 220 100% 60%; /* #3773f5 */
+    /* Primary - CoinGecko Blue - Mais vibrante */
+    --primary: 220 100% 65%; /* #4d7cff - Mais vibrante */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 220 100% 65%;
-    --primary-light: 220 100% 55%;
+    --primary-hover: 220 100% 70%;
+    --primary-light: 220 100% 60%;
 
-    /* Secondary - CoinGecko Orange (same as light) */
-    --secondary: 38 100% 60%; /* #f5ac37 */
+    /* Secondary - CoinGecko Orange - Mais vibrante */
+    --secondary: 38 100% 65%; /* #ffb84d - Mais vibrante */
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 38 100% 65%;
-    --secondary-light: 38 100% 55%;
+    --secondary-hover: 38 100% 70%;
+    --secondary-light: 38 100% 60%;
 
-    /* Success - CoinGecko Green (same as light) */
-    --success: 158 100% 40%; /* #0ecb81 */
+    /* Success - CoinGecko Green - Mais vibrante */
+    --success: 158 100% 45%; /* #1dd1a1 - Mais vibrante */
     --success-foreground: 0 0% 100%;
-    --success-hover: 158 100% 45%;
-    --success-light: 158 100% 35%;
+    --success-hover: 158 100% 50%;
+    --success-light: 158 100% 40%;
 
-    /* Destructive - CoinGecko Red (same as light) */
-    --destructive: 350 100% 60%; /* #f6465d */
+    /* Destructive - CoinGecko Red - Mais vibrante */
+    --destructive: 350 100% 65%; /* #ff6b7a - Mais vibrante */
     --destructive-foreground: 0 0% 100%;
-    --destructive-hover: 350 100% 65%;
-    --destructive-light: 350 100% 55%;
+    --destructive-hover: 350 100% 70%;
+    --destructive-light: 350 100% 60%;
 
-    /* Warning - CoinGecko Orange (same as light) */
-    --warning: 38 100% 60%; /* #f5ac37 */
+    /* Warning - CoinGecko Orange - Mais vibrante */
+    --warning: 38 100% 65%; /* #ffb84d - Mais vibrante */
     --warning-foreground: 0 0% 100%;
-    --warning-hover: 38 100% 65%;
-    --warning-light: 38 100% 55%;
+    --warning-hover: 38 100% 70%;
+    --warning-light: 38 100% 60%;
 
-    /* Text Colors */
-    --text-primary: 210 20% 95%; /* Mais claro para melhor contraste */
-    --text-secondary: 210 8% 70%; /* Mais claro para melhor contraste */
+    /* Text Colors - Muito mais claros para melhor contraste */
+    --text-primary: 210 20% 98%; /* #fafbfc - Quase branco */
+    --text-secondary: 210 8% 80%; /* #b8bcc8 - Muito mais claro */
 
-    /* Background Colors */
-    --bg-primary: 210 24% 5%; /* #0d0f13 */
-    --bg-card: 210 24% 8%; /* #16191d */
-    --bg-card-alt: 210 24% 10%; /* #1a1d22 */
-    --bg-header: 210 24% 8%; /* #16191d */
+    /* Background Colors - Gradientes sutis */
+    --bg-primary: 210 24% 3%; /* #0a0c0f */
+    --bg-card: 210 24% 6%; /* #0f1217 - Mais claro */
+    --bg-card-alt: 210 24% 8%; /* #14171c - Mais claro */
+    --bg-header: 210 24% 6%; /* #0f1217 - Mais claro */
 
-    /* Border Colors */
-    --border: 210 24% 12%; /* #21262d */
-    --border-light: 210 24% 15%;
+    /* Border Colors - Mais visíveis */
+    --border: 210 24% 15%; /* #2a2f36 - Mais claro */
+    --border-light: 210 24% 20%;
 
-    /* Neutral Grays */
-    --muted: 210 8% 60%; /* #848e9c */
-    --muted-foreground: 210 8% 40%;
-    --accent: 210 24% 8%;
-    --accent-foreground: 210 20% 92%;
+    /* Neutral Grays - Mais vibrantes */
+    --muted: 210 8% 70%; /* #9ca3af - Mais claro */
+    --muted-foreground: 210 8% 50%;
+    --accent: 210 24% 6%;
+    --accent-foreground: 210 20% 96%;
 
     /* UI Elements */
-    --card: 210 24% 8%;
-    --card-foreground: 210 20% 92%;
-    --popover: 210 24% 8%;
-    --popover-foreground: 210 20% 92%;
-    --input: 210 24% 12%;
-    --ring: 220 100% 60%;
+    --card: 210 24% 6%;
+    --card-foreground: 210 20% 96%;
+    --popover: 210 24% 6%;
+    --popover-foreground: 210 20% 96%;
+    --input: 210 24% 10%;
+    --ring: 220 100% 65%;
 
     /* Sidebar */
-    --sidebar-background: 210 24% 5%;
-    --sidebar-foreground: 210 20% 92%;
-    --sidebar-primary: 220 100% 60%;
+    --sidebar-background: 210 24% 3%;
+    --sidebar-foreground: 210 20% 96%;
+    --sidebar-primary: 220 100% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 24% 8%;
-    --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 210 24% 12%;
-    --sidebar-ring: 220 100% 60%;
+    --sidebar-accent: 210 24% 6%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 210 24% 15%;
+    --sidebar-ring: 220 100% 65%;
 
     /* SatsIcon colors - branco no dark theme para contraste */
     --sats-icon-color: 0 0% 100%;
+
+    /* Novas cores para ícones e elementos especiais */
+    --icon-primary: 220 100% 70%; /* Azul vibrante para ícones */
+    --icon-secondary: 38 100% 70%; /* Laranja vibrante para ícones */
+    --icon-success: 158 100% 50%; /* Verde vibrante para ícones */
+    --icon-warning: 38 100% 70%; /* Laranja vibrante para ícones */
+    --icon-danger: 350 100% 70%; /* Vermelho vibrante para ícones */
   }
 }
 
@@ -326,6 +333,68 @@
 
   .animate-slide-in {
     @apply translate-y-4 opacity-0 animate-in slide-in-from-bottom-4 fade-in duration-500;
+  }
+
+  /* Icon colors - Vibrantes e modernas */
+  .icon-primary {
+    color: hsl(var(--icon-primary));
+  }
+
+  .icon-secondary {
+    color: hsl(var(--icon-secondary));
+  }
+
+  .icon-success {
+    color: hsl(var(--icon-success));
+  }
+
+  .icon-warning {
+    color: hsl(var(--icon-warning));
+  }
+
+  .icon-danger {
+    color: hsl(var(--icon-danger));
+  }
+
+  /* Text improvements - Mais vibrante e legível */
+  .text-vibrant {
+    color: hsl(var(--text-primary));
+    font-weight: 600;
+  }
+
+  .text-vibrant-secondary {
+    color: hsl(var(--text-secondary));
+    font-weight: 500;
+  }
+
+  /* Card improvements - Mais moderno */
+  .card-modern {
+    @apply bg-card border border-border rounded-xl p-6 shadow-coingecko-md hover:shadow-coingecko-lg transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
+  }
+
+  .card-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
+  }
+
+  /* Button improvements - Mais vibrante */
+  .btn-modern {
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105;
+  }
+
+  .btn-modern-primary {
+    @apply btn-modern bg-primary text-primary-foreground hover:bg-primary-hover shadow-coingecko-md hover:shadow-glow;
+  }
+
+  .btn-modern-secondary {
+    @apply btn-modern bg-secondary text-secondary-foreground hover:bg-secondary-hover shadow-coingecko-md hover:shadow-glow;
+  }
+
+  /* Header improvements */
+  .header-modern {
+    @apply bg-bg-header border-b border-border backdrop-blur-sm;
+    background: linear-gradient(135deg, hsl(var(--bg-header)), hsl(var(--bg-card)));
   }
 
   /* Status indicators - CoinGecko inspired */

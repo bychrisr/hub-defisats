@@ -29,45 +29,58 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const getVariantStyles = () => {
     switch (variant) {
       case 'success':
-        return 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950';
+        return 'border-success/30 bg-success/5 hover:bg-success/10';
       case 'warning':
-        return 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950';
+        return 'border-warning/30 bg-warning/5 hover:bg-warning/10';
       case 'danger':
-        return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950';
+        return 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10';
       default:
-        return 'border-border bg-card';
+        return 'card-modern';
     }
   };
 
   const getTrendColor = () => {
     if (!trend) return '';
-    if (trend.value > 0) return 'text-green-600 dark:text-green-400';
-    if (trend.value < 0) return 'text-red-600 dark:text-red-400';
+    if (trend.value > 0) return 'text-success font-semibold';
+    if (trend.value < 0) return 'text-destructive font-semibold';
     return 'text-muted-foreground';
+  };
+
+  const getIconColor = () => {
+    switch (variant) {
+      case 'success':
+        return 'icon-success';
+      case 'warning':
+        return 'icon-warning';
+      case 'danger':
+        return 'icon-danger';
+      default:
+        return 'icon-primary';
+    }
   };
 
   return (
     <Card className={cn(getVariantStyles(), className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-sm font-semibold text-vibrant-secondary">
           {title}
         </CardTitle>
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+        {Icon && <Icon className={cn('h-5 w-5', getIconColor())} />}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-foreground">{value}</div>
+        <div className="text-3xl font-bold text-vibrant">{value}</div>
         {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+          <p className="text-sm text-vibrant-secondary mt-1 font-medium">{subtitle}</p>
         )}
         {trend && (
-          <div className="flex items-center mt-2">
+          <div className="flex items-center mt-3">
             <Badge 
               variant="outline" 
-              className={cn('text-xs', getTrendColor())}
+              className={cn('text-xs font-semibold px-2 py-1', getTrendColor())}
             >
               {trend.value > 0 ? '+' : ''}{trend.value.toFixed(1)}%
             </Badge>
-            <span className="text-xs text-muted-foreground ml-2">
+            <span className="text-xs text-vibrant-secondary ml-2 font-medium">
               {trend.label}
             </span>
           </div>

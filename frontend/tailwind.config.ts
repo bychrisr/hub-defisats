@@ -114,6 +114,12 @@ export default {
         'bg-header': 'hsl(var(--bg-header))',
         // Border colors
         'border-light': 'hsl(var(--border-light))',
+        // Icon colors - Vibrantes
+        'icon-primary': 'hsl(var(--icon-primary))',
+        'icon-secondary': 'hsl(var(--icon-secondary))',
+        'icon-success': 'hsl(var(--icon-success))',
+        'icon-warning': 'hsl(var(--icon-warning))',
+        'icon-danger': 'hsl(var(--icon-danger))',
       },
       borderRadius: {
         lg: 'var(--radius)',
