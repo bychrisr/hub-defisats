@@ -32,7 +32,6 @@ import { toast } from 'sonner';
 interface MarginGuardSettings {
   enabled: boolean;
   threshold: number;
-  action: 'reduce' | 'close';
   reduction: number;
 }
 
@@ -48,7 +47,6 @@ export const Automation = () => {
   const [marginGuard, setMarginGuard] = useState<MarginGuardSettings>({
     enabled: true,
     threshold: 90,
-    action: 'reduce',
     reduction: 50,
   });
 
@@ -251,113 +249,68 @@ export const Automation = () => {
 
                 {marginGuard.enabled && (
                   <div className="space-y-6">
-                    {/* Margin Threshold Slider */}
-                    <div className="space-y-4 p-4 bg-muted/30 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-base font-medium text-vibrant">
-                          Limite de Margem
-                        </Label>
-                        <Badge variant="outline" className="text-lg font-bold">
-                          {marginGuard.threshold}%
-                        </Badge>
-                      </div>
-                      <Slider
-                        value={[marginGuard.threshold]}
-                        onValueChange={([value]) =>
-                          setMarginGuard({ ...marginGuard, threshold: value })
-                        }
-                        max={95}
-                        min={70}
-                        step={5}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs sm:text-sm text-vibrant-secondary">
-                        <span>Conservador (70%)</span>
-                        <span>Moderado (85%)</span>
-                        <span>Agressivo (95%)</span>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Action Selection */}
+                    {/* Two Column Layout */}
                     <div className="grid lg:grid-cols-2 gap-6">
+                      {/* Limite de Margem */}
                       <div className="space-y-4 p-4 bg-muted/20 rounded-xl">
-                        <Label className="text-base font-medium text-vibrant">
-                          Ação ao Atingir Limite
-                        </Label>
-                        <div className="space-y-3">
-                          <div className="flex items-center space-x-3 p-3 rounded-lg border border-muted/50 hover:border-primary/50 transition-colors">
-                            <input
-                              type="radio"
-                              id="reduce"
-                              name="action"
-                              checked={marginGuard.action === 'reduce'}
-                              onChange={() =>
-                                setMarginGuard({
-                                  ...marginGuard,
-                                  action: 'reduce',
-                                })
-                              }
-                              className="w-4 h-4 text-primary"
-                            />
-                            <Label htmlFor="reduce" className="cursor-pointer flex-1">
-                              <div className="font-medium text-vibrant">Reduzir Posição</div>
-                              <div className="text-sm text-vibrant-secondary">
-                                Diminuir tamanho da posição
-                              </div>
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-3 p-3 rounded-lg border border-muted/50 hover:border-primary/50 transition-colors">
-                            <input
-                              type="radio"
-                              id="close"
-                              name="action"
-                              checked={marginGuard.action === 'close'}
-                              onChange={() =>
-                                setMarginGuard({
-                                  ...marginGuard,
-                                  action: 'close',
-                                })
-                              }
-                              className="w-4 h-4 text-primary"
-                            />
-                            <Label htmlFor="close" className="cursor-pointer flex-1">
-                              <div className="font-medium text-vibrant">Fechar Posição</div>
-                              <div className="text-sm text-vibrant-secondary">
-                                Fechar posição completamente
-                              </div>
-                            </Label>
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-base font-medium text-vibrant">
+                            Limite de Margem
+                          </Label>
+                          <Badge variant="outline" className="text-lg font-bold">
+                            {marginGuard.threshold}%
+                          </Badge>
                         </div>
+                        <Slider
+                          value={[marginGuard.threshold]}
+                          onValueChange={([value]) =>
+                            setMarginGuard({ ...marginGuard, threshold: value })
+                          }
+                          max={95}
+                          min={70}
+                          step={5}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-xs sm:text-sm text-vibrant-secondary">
+                          <span>Conservador (70%)</span>
+                          <span>Moderado (85%)</span>
+                          <span>Agressivo (95%)</span>
+                        </div>
+                        <p className="text-sm text-vibrant-secondary">
+                          Reduzir posição quando margem atingir {marginGuard.threshold}%
+                        </p>
                       </div>
 
-                      {marginGuard.action === 'reduce' && (
-                        <div className="space-y-4 p-4 bg-muted/20 rounded-xl">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-base font-medium text-vibrant">
-                              Percentual de Redução
-                            </Label>
-                            <Badge variant="outline" className="text-lg font-bold">
-                              {marginGuard.reduction}%
-                            </Badge>
-                          </div>
-                          <Slider
-                            value={[marginGuard.reduction]}
-                            onValueChange={([value]) =>
-                              setMarginGuard({ ...marginGuard, reduction: value })
-                            }
-                            max={100}
-                            min={10}
-                            step={10}
-                            className="w-full"
-                          />
-                          <p className="text-sm text-vibrant-secondary">
-                            Reduzir a posição em {marginGuard.reduction}% quando o
-                            limite for atingido
-                          </p>
+                      {/* Percentual de Redução */}
+                      <div className="space-y-4 p-4 bg-muted/20 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-base font-medium text-vibrant">
+                            Percentual de Redução
+                          </Label>
+                          <Badge variant="outline" className="text-lg font-bold">
+                            {marginGuard.reduction}%
+                          </Badge>
                         </div>
-                      )}
+                        <Slider
+                          value={[marginGuard.reduction]}
+                          onValueChange={([value]) =>
+                            setMarginGuard({ ...marginGuard, reduction: value })
+                          }
+                          max={100}
+                          min={10}
+                          step={10}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-xs sm:text-sm text-vibrant-secondary">
+                          <span>Conservador (10%)</span>
+                          <span>Moderado (50%)</span>
+                          <span>Agressivo (100%)</span>
+                        </div>
+                        <p className="text-sm text-vibrant-secondary">
+                          Reduzir a posição em {marginGuard.reduction}% quando o
+                          limite for atingido
+                        </p>
+                      </div>
                     </div>
 
                     {/* Simulation Card */}
@@ -435,13 +388,11 @@ export const Automation = () => {
                               <span className="text-vibrant-secondary">Se atingir {marginGuard.threshold}%:</span>
                             </div>
                             <div className="mt-1 font-medium text-success">
-                              {marginGuard.action === 'reduce'
-                                ? `Reduzir posição em ${marginGuard.reduction}% ($${
-                                    btcPrice 
-                                      ? ((btcPrice.price * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
-                                      : ((50000 * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
-                                  })`
-                                : 'Fechar posição completamente'}
+                              Reduzir posição em {marginGuard.reduction}% ($${
+                                btcPrice 
+                                  ? ((btcPrice.price * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
+                                  : ((50000 * 0.1) * marginGuard.reduction / 100).toLocaleString('pt-BR')
+                              })
                             </div>
                           </div>
                         </div>
