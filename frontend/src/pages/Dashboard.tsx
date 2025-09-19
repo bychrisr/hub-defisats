@@ -95,13 +95,13 @@ export default function Dashboard() {
 
   return (
     <RouteGuard isLoading={isLoading}>
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-4 overflow-x-hidden">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <div className="flex items-center space-x-3">
-                <h1 className="text-4xl font-bold text-vibrant">Dashboard</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-vibrant">Dashboard</h1>
                 {isRealtimeEnabled && (
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-success rounded-full animate-pulse shadow-lg"></div>
@@ -110,7 +110,7 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
-                <p className="text-vibrant-secondary text-lg font-medium">Welcome back, {user?.email}</p>
+                <p className="text-vibrant-secondary text-lg font-medium break-all">Welcome back, {user?.email}</p>
                 <Badge variant="outline" className="text-sm font-semibold px-3 py-1 border-primary/30 text-primary w-fit">
                   {user?.plan_type.toUpperCase()} Plan
                 </Badge>
