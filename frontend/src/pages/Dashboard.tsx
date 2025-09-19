@@ -33,7 +33,7 @@ import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
-import { useFormatSatsText } from '@/hooks/useDashboardMetrics';
+import { useFormatSats } from '@/hooks/useFormatSats';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
@@ -77,7 +77,7 @@ export default function Dashboard() {
   const historicalData = useHistoricalData();
   const estimatedBalance = useEstimatedBalance();
   const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente
-  const formatSats = useFormatSatsText();
+  const { formatSats } = useFormatSats();
   
   // Dados históricos para cálculos
   const historicalMetrics = historicalData.data;
