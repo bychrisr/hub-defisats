@@ -85,10 +85,12 @@ export const useTooltips = () => {
   // Fetch cards with tooltips
   const fetchCardsWithTooltips = useCallback(async (category?: string, isActive?: boolean) => {
     if (!isAuthenticated || !token) {
+      console.log('🎯 TOOLTIPS - Not authenticated or no token, skipping fetch');
       return;
     }
 
     try {
+      console.log('🎯 TOOLTIPS - Starting fetchCardsWithTooltips');
       setLoading(true);
       setError(null);
 
@@ -96,10 +98,12 @@ export const useTooltips = () => {
       if (category) params.append('category', category);
       if (isActive !== undefined) params.append('is_active', isActive.toString());
 
+      console.log('🎯 TOOLTIPS - Making request to /cards-with-tooltips');
       const response = await api.get(`/cards-with-tooltips?${params}`);
+      console.log('🎯 TOOLTIPS - Response received:', response.data);
       setCards(response.data.data);
     } catch (error) {
-      console.error('Error fetching cards with tooltips:', error);
+      console.error('🎯 TOOLTIPS - Error fetching cards with tooltips:', error);
       setError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setLoading(false);
