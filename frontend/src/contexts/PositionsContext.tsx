@@ -513,16 +513,16 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         console.log('🔄 POSITIONS CONTEXT - Sample transformed position:', transformedPositions[0]);
         
         // Transformar para o formato esperado pelo RealtimeDataContext
-        const realtimePositions = transformedPositions.map(pos => ({
+        // O RealtimeDataContext espera dados brutos da API, não dados transformados
+        const realtimePositions = positionsData.data.map((pos: any) => ({
           id: pos.id,
-          symbol: pos.symbol,
-          side: pos.side,
+          side: pos.side, // 'b' ou 's' - dados brutos da API
           quantity: pos.quantity,
           price: pos.price,
           margin: pos.margin,
           leverage: pos.leverage,
-          pnl: pos.pnl,
-          pnlPercent: pos.pnlPercentage,
+          pl: pos.pl, // Usar 'pl' que é o campo real da API
+          liquidation: pos.liquidation,
           maintenance_margin: pos.maintenance_margin || 0,
           opening_fee: pos.opening_fee || 0,
           closing_fee: pos.closing_fee || 0,
