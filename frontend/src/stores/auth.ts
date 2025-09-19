@@ -204,6 +204,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       clearError: () => set({ error: null }),
       setLoading: (loading: boolean) => set({ isLoading: loading }),
+      
+      // Getter para token
+      get token() {
+        return localStorage.getItem('access_token');
+      },
     }),
     {
       name: 'auth-storage',
