@@ -478,16 +478,28 @@ export const Automation = () => {
                           {mostRiskyPosition ? (
                             <>
                               <div className="flex justify-between">
-                                <span className="text-vibrant-secondary">Posição mais arriscada:</span>
+                                <span className="text-vibrant-secondary">Posição mais próxima de ser liquidada:</span>
                                 <span className="font-medium">
                                   {mostRiskyPosition.side === 'long' ? 'Long' : 'Short'} {mostRiskyPosition.symbol} 
                                   {btcPrice ? ` $${btcPrice.price.toLocaleString('pt-BR')}` : ` $${mostRiskyPosition.currentPrice.toLocaleString('pt-BR')}`}
                                 </span>
                               </div>
                               <div className="flex justify-between">
+                                <span className="text-vibrant-secondary">Valor de liquidação:</span>
+                                <span className="font-medium text-warning">
+                                  ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
                                 <span className="text-vibrant-secondary">Margem atual:</span>
                                 <span className={`font-medium ${(mostRiskyPosition.marginRatio || 0) < 20 ? 'text-destructive' : (mostRiskyPosition.marginRatio || 0) < 50 ? 'text-warning' : 'text-success'}`}>
-                                  {(mostRiskyPosition.marginRatio || 0).toFixed(1)}% (${(mostRiskyPosition.margin || 0).toLocaleString('pt-BR')})
+                                  {(mostRiskyPosition.margin || 0).toLocaleString('pt-BR')} sats (${((mostRiskyPosition.margin || 0) * (btcPrice?.price || 0) / 100000000).toFixed(2)})
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-vibrant-secondary">Alavancagem:</span>
+                                <span className="font-medium">
+                                  {(mostRiskyPosition.leverage || 0).toFixed(0)}X
                                 </span>
                               </div>
                               <div className="flex justify-between">
