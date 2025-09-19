@@ -80,8 +80,17 @@ export const Automation = () => {
       return null;
     }
     
-    // Filtrar apenas posições abertas
-    const openPositions = userPositions.filter(pos => pos.status === 'open');
+    // Log da primeira posição para ver a estrutura
+    if (userPositions.length > 0) {
+      console.log('🔍 AUTOMATION - First position structure:', {
+        id: userPositions[0].id,
+        status: userPositions[0].status,
+        keys: Object.keys(userPositions[0])
+      });
+    }
+    
+    // Filtrar apenas posições abertas (ou todas se não houver status)
+    const openPositions = userPositions.filter(pos => !pos.status || pos.status === 'open');
     console.log('🔍 AUTOMATION - Open positions:', openPositions.length);
     
     if (openPositions.length === 0) {
