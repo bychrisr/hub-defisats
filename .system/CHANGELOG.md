@@ -6,6 +6,32 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.7] - 2025-01-19 - Correção Crítica de Side Transformation & Liquidation Loop 🔧 **CRITICAL FIX**
+
+### 🔧 Correção Crítica de Side Transformation
+- ✅ **Side Assignment Fix**: Corrigido `pos.side` para `pos.side === 'b' ? 'long' : 'short'` em `updatePositions`
+- ✅ **Consistência de Transformação**: Ambos `loadRealPositions` e `updatePositions` agora usam transformação consistente
+- ✅ **API Data Handling**: Dados da API LN Markets ('b'/'s') corretamente transformados para 'long'/'short'
+- ✅ **Positions Stability**: Posições mantêm valores corretos de side através das atualizações
+
+### 🔧 Correção de Liquidation Loop
+- ✅ **Liquidation Value Fix**: Corrigido `liquidation: pos.price * 0.1` para `liquidation: pos.liquidation || 0`
+- ✅ **Real API Values**: Usando valores reais da API LN Markets ao invés de cálculos mock
+- ✅ **Interface Updates**: Adicionado `liquidation: number` em `RealtimePosition` e `PositionData`
+- ✅ **Data Flow Correction**: Valores de liquidação passam corretamente através dos contextos
+
+### 🔧 Correção de PnL Field Reference
+- ✅ **Filter Fix**: Corrigido `pos.pnl` para `pos.pl` no filtro de `updatePositions`
+- ✅ **Assignment Fix**: Corrigido `pos.pnl` para `pos.pl` na atribuição de PnL
+- ✅ **API Field Names**: Usando nomes corretos dos campos da API LN Markets
+- ✅ **Data Processing**: Todas as posições agora passam pelo filtro corretamente
+
+### 📊 Resultado Final
+- ✅ **Positions Side**: Valores corretos de 'long'/'short' mantidos através das atualizações
+- ✅ **Liquidation Values**: Valores reais da API sem loop entre correto e zero
+- ✅ **PnL Processing**: Todas as posições processadas corretamente sem filtros vazios
+- ✅ **Data Consistency**: Dados consistentes entre carregamento inicial e atualizações
+
 ## [1.4.6] - 2025-01-19 - Gráfico BTC Profissional com Lightweight Charts 📈 **MAJOR CHART IMPLEMENTATION**
 
 ### 📊 Gráfico BTC Implementado
