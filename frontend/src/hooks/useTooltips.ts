@@ -135,9 +135,13 @@ export const useTooltips = () => {
 
   // Initialize tooltips and cards on mount when authenticated
   useEffect(() => {
+    console.log('🎯 TOOLTIPS - useEffect triggered:', { isAuthenticated, token: !!token });
     if (isAuthenticated) {
+      console.log('🎯 TOOLTIPS - User authenticated, calling fetchAllTooltips and fetchCardsWithTooltips');
       fetchAllTooltips();
       fetchCardsWithTooltips();
+    } else {
+      console.log('🎯 TOOLTIPS - User not authenticated, skipping initialization');
     }
   }, [isAuthenticated, fetchAllTooltips, fetchCardsWithTooltips]);
 
