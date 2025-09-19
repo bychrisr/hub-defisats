@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useBtcPrice } from '@/hooks/useBtcPrice';
+import { toast } from 'sonner';
 
 interface MarginGuardSettings {
   enabled: boolean;
@@ -60,15 +61,66 @@ export const Automation = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   // Hook para buscar preço do BTC
   const { data: btcPrice, loading: btcLoading, error: btcError, refetch: refetchBtc } = useBtcPrice();
 
+  // Carregar configurações salvas do localStorage
+  useEffect(() => {
+    const savedMarginGuard = localStorage.getItem('marginGuardSettings');
+    const savedTpsl = localStorage.getItem('tpslSettings');
+    
+    if (savedMarginGuard) {
+      try {
+        const parsed = JSON.parse(savedMarginGuard);
+        setMarginGuard(parsed);
+      } catch (error) {
+        console.error('Erro ao carregar configurações do Margin Guard:', error);
+      }
+    }
+    
+    if (savedTpsl) {
+      try {
+        const parsed = JSON.parse(savedTpsl);
+        setTpsl(parsed);
+      } catch (error) {
+        console.error('Erro ao carregar configurações do TP/SL:', error);
+      }
+    }
+  }, []);
+
+  // Detectar mudanças nas configurações
+  useEffect(() => {
+    setHasUnsavedChanges(true);
+  }, [marginGuard, tpsl]);
+
   const handleSave = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
+    
+    try {
+      // Salvar no localStorage
+      localStorage.setItem('marginGuardSettings', JSON.stringify(marginGuard));
+      localStorage.setItem('tpslSettings', JSON.stringify(tpsl));
+      
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setHasUnsavedChanges(false);
+      toast.success('Configurações salvas com sucesso!', {
+        description: 'Suas configurações de automação foram salvas e estão ativas.',
+        duration: 4000,
+      });
+      
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações', {
+        description: 'Ocorreu um erro ao salvar suas configurações. Tente novamente.',
+        duration: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -93,14 +145,24 @@ export const Automation = () => {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                {hasUnsavedChanges && (
+                  <div className="flex items-center gap-2 text-sm text-warning">
+                    <div className="w-2 h-2 bg-warning rounded-full animate-pulse"></div>
+                    <span>Mudanças não salvas</span>
+                  </div>
+                )}
                 <Button 
                   size="sm" 
                   onClick={handleSave} 
-                  disabled={isLoading}
-                  className="flex-1 sm:flex-none bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  disabled={isLoading || !hasUnsavedChanges}
+                  className={`flex-1 sm:flex-none ${
+                    hasUnsavedChanges 
+                      ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' 
+                      : 'bg-muted text-muted-foreground cursor-not-allowed'
+                  }`}
                 >
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  {isLoading ? 'Salvando...' : 'Salvar Configurações'}
+                  {isLoading ? 'Salvando...' : hasUnsavedChanges ? 'Salvar Configurações' : 'Configurações Salvas'}
                 </Button>
               </div>
             </div>
@@ -157,8 +219,8 @@ export const Automation = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge 
-                      variant={marginGuard.enabled ? "default" : "secondary"}
-                      className="px-3 py-1"
+                      variant={marginGuard.enabled ? "default" : "destructive"}
+                      className={`px-3 py-1 ${marginGuard.enabled ? "bg-success text-success-foreground hover:bg-success/90" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}`}
                     >
                       {marginGuard.enabled ? "Ativo" : "Inativo"}
                     </Badge>
