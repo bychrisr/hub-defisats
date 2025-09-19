@@ -352,7 +352,9 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
         return;
       }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
-      console.log('🔗 REALTIME - URL do WebSocket:', (import.meta.env.VITE_WS_URL || 'ws://localhost:13010') + '/test/ws/realtime?userId=' + user.id);
+      const wsUrl = (import.meta.env.VITE_WS_URL || 'ws://localhost:13010') + '/test/ws/realtime?userId=' + user.id;
+      console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
+      console.log('🔗 REALTIME - VITE_WS_URL env var:', import.meta.env.VITE_WS_URL);
       connect();
     } else {
       console.log('🔄 REALTIME - Desconectando - usuário não autenticado');

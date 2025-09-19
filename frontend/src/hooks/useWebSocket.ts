@@ -48,6 +48,7 @@ export const useWebSocket = ({
     }
 
     console.log('🔌 WEBSOCKET - Criando nova conexão WebSocket');
+    console.log('🔌 WEBSOCKET - URL completa:', url);
     setIsConnecting(true);
     setError(null);
 
