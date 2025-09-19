@@ -296,13 +296,16 @@ DELETE /futures/orders/:id          # Cancelar ordem
 - **X-Frame-Options**: DENY
 - **X-Content-Type-Options**: nosniff
 
-### 6.5 Estrutura de Autenticação Atualizada
-- **Super Admin**: Usuário com `is_admin: true` sem credenciais LN Markets
+### 6.5 Estrutura de Autenticação Atualizada ✅ **IMPLEMENTADO**
+- **Super Admin**: Usuário com relação `admin_user` sem credenciais LN Markets
 - **Usuário Comum**: Usuário com credenciais LN Markets para trading
 - **Separação de Responsabilidades**: Admin focado em administração, usuário em trading
-- **Queries Condicionais**: Verificação `isAdmin` antes de executar queries LN Markets
-- **Performance**: Admin não executa queries desnecessárias
+- **Queries Condicionais**: Verificação `checkIfAdmin()` usando relação `admin_user` do Prisma
+- **Performance**: Admin não executa queries desnecessárias (zero queries LN Markets)
 - **Segurança**: Credenciais LN Markets não obrigatórias para admin
+- **Frontend Otimizado**: Todos os hooks respeitam flag `isAdmin` para pular queries LN Markets
+- **Backend Corrigido**: Retorna dados apropriados para admin sem fazer queries LN Markets
+- **Console Limpo**: Eliminadas referências a posições LN Markets para usuários admin
 
 ## 7. Performance e Escalabilidade
 

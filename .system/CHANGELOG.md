@@ -6,6 +6,36 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.1] - 2025-01-19 - Correção de Admin & Otimização de Performance 🔧 **CRITICAL FIX**
+
+### 🔧 Correção de Requisições LN Markets para Admin
+- ✅ **Frontend Otimizado**: Todos os hooks respeitam flag `isAdmin` para pular queries LN Markets
+- ✅ **Backend Corrigido**: Verificação `checkIfAdmin()` usando relação `admin_user` do Prisma
+- ✅ **Performance Melhorada**: Admin não executa queries desnecessárias de trading
+- ✅ **Dados Apropriados**: Retorna dados admin (role: "admin", username: "admin") sem queries LN Markets
+- ✅ **Console Limpo**: Eliminadas referências a posições LN Markets para usuários admin
+- ✅ **Segurança Mantida**: Admin não precisa de credenciais LN Markets para funcionar
+
+### 🎯 Hooks Frontend Corrigidos
+- ✅ **useEstimatedBalance**: Verificação `isAdmin` implementada
+- ✅ **useMarketTicker**: Verificação `isAdmin` implementada  
+- ✅ **useHistoricalData**: Verificação `isAdmin` implementada
+- ✅ **RealtimeDataContext**: Verificação `isAdmin` em `loadUserBalance`
+- ✅ **useCentralizedData**: Já tinha verificação (mantido)
+
+### 🔧 Backend Corrigido
+- ✅ **getUserBalance**: Retorna dados admin sem queries LN Markets
+- ✅ **getUser**: Retorna dados admin sem queries LN Markets
+- ✅ **getEstimatedBalance**: Retorna dados zerados para admin
+- ✅ **getUserPositions**: Retorna array vazio com mensagem "Admin user - no trading positions"
+- ✅ **getUserOrders**: Retorna array vazio com mensagem "Admin user - no trading orders"
+
+### 📊 Resultado Final
+- ✅ **Admin Funcional**: Super admin funciona perfeitamente como administrador
+- ✅ **Performance Otimizada**: Zero queries LN Markets desnecessárias para admin
+- ✅ **Console Limpo**: Sem mais erros de "Failed to load monitoring data"
+- ✅ **Separação Clara**: Admin focado em administração, usuários em trading
+
 ## [1.4.0] - 2025-01-18 - Sistema de Tooltips Configurável & Modernização Visual 🎯 **MAJOR FEATURE**
 
 ### 🎯 Sistema de Tooltips Configurável

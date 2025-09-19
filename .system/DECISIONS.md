@@ -2,6 +2,59 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-015: Separação de Responsabilidades Admin vs Usuário
+
+**Data**: 2025-01-19  
+**Status**: Aceito  
+**Contexto**: Correção de requisições LN Markets desnecessárias para usuários admin
+
+### Problema
+- Usuários admin estavam fazendo requisições LN Markets desnecessárias
+- Console mostrava erros "Failed to load monitoring data" para admin
+- Performance degradada por queries de trading em usuários administrativos
+- Confusão entre responsabilidades de admin vs usuário comum
+
+### Decisão
+- **Frontend**: Implementar verificação `isAdmin` em todos os hooks que fazem queries LN Markets
+- **Backend**: Criar função `checkIfAdmin()` usando relação `admin_user` do Prisma
+- **Retorno de Dados**: Admin recebe dados apropriados sem fazer queries LN Markets
+- **Performance**: Zero queries LN Markets para usuários admin
+
+### Implementação
+```typescript
+// Frontend - Hook com verificação admin
+const fetchData = useCallback(async () => {
+  if (isAdmin) {
+    console.log('Admin user, skipping LN Markets queries...');
+    return;
+  }
+  // ... queries LN Markets apenas para usuários comuns
+}, [isAdmin]);
+
+// Backend - Verificação admin
+private async checkIfAdmin(userId: string): Promise<boolean> {
+  const user = await this.prisma.user.findUnique({
+    where: { id: userId },
+    select: { admin_user: true }
+  });
+  return !!user?.admin_user;
+}
+```
+
+### Justificativa
+- **Separação Clara**: Admin focado em administração, usuário em trading
+- **Performance**: Elimina queries desnecessárias para admin
+- **Segurança**: Admin não precisa de credenciais LN Markets
+- **UX**: Console limpo sem erros para admin
+
+### Consequências
+- ✅ Admin funciona perfeitamente sem credenciais LN Markets
+- ✅ Performance otimizada (zero queries LN Markets para admin)
+- ✅ Console limpo sem erros de "Failed to load monitoring data"
+- ✅ Separação clara de responsabilidades
+- ⚠️ Desenvolvedores devem lembrar de verificar `isAdmin` em novos hooks
+- ⚠️ Backend deve sempre verificar admin antes de queries LN Markets
+
 ## ADR-001: Stack Tecnológica Principal
 
 **Data**: 2024-01-XX  
