@@ -559,7 +559,7 @@ export const Automation = () => {
                                   variant={(mostRiskyPosition.pnl || 0) >= 0 ? "default" : "destructive"}
                                   className="text-xs"
                                 >
-                                  {(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%
+                                  {(mostRiskyPosition.pnlPercent || 0).toFixed(1)}%
                                 </Badge>
                               </div>
                             </div>
@@ -579,7 +579,7 @@ export const Automation = () => {
                               <div className="flex justify-between">
                                 <span className="text-vibrant-secondary">P&L atual:</span>
                                 <span className={`font-medium ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                  ${(mostRiskyPosition.pnl || 0).toLocaleString('pt-BR')} ({(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%)
+                                  ${(mostRiskyPosition.pnl || 0).toLocaleString('pt-BR')} ({(mostRiskyPosition.pnlPercent || 0).toFixed(1)}%)
                                 </span>
                               </div>
                               <div className="pt-2 border-t border-success/20">
