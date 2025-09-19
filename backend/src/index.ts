@@ -33,6 +33,7 @@ import { securityRoutes } from '@/routes/security.routes';
 import { adminAdvancedRoutes } from '@/routes/admin-advanced.routes';
 import { planRoutes } from '@/routes/plan.routes';
 import { healthRoutes } from '@/routes/health.routes';
+import { tooltipRoutes } from '@/routes/tooltip.routes';
 import { authMiddleware } from '@/middleware/auth.middleware';
 import { monitoring } from '@/services/monitoring.service';
 import { metrics } from '@/utils/metrics';
@@ -661,6 +662,10 @@ async function registerRoutes() {
   // Health routes (without authentication)
   await fastify.register(healthRoutes, { prefix: '/api' });
   console.log('✅ Health routes registered');
+  
+  // Tooltip and Dashboard Card management
+  await fastify.register(tooltipRoutes, { prefix: '/api' });
+  console.log('✅ Tooltip routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler

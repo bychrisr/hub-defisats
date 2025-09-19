@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { AuthService } from '@/services/auth.service';
 import { metrics } from '@/utils/metrics';
+import { metricsHistoryService } from '../services/metrics-history.service';
 
 const prisma = new PrismaClient();
 
@@ -256,28 +257,108 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
   }, async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
-      console.log('🔍 ADMIN MONITORING - Fetching monitoring data...');
+      console.log('🔍 ADMIN MONITORING - Fetching monitoring data with averages...');
       
-      // Simplified implementation with realistic data
+      // Get metrics with historical averages
+      console.log('🔍 ADMIN MONITORING - Getting metrics with averages...');
+      const metricsWithAverages = metricsHistoryService.getMetricsWithAverages();
+      const healthSummary = metricsHistoryService.getHealthSummary();
+      console.log('🔍 ADMIN MONITORING - Metrics with averages:', metricsWithAverages ? 'Available' : 'Not available');
+      console.log('🔍 ADMIN MONITORING - Health summary:', healthSummary ? 'Available' : 'Not available');
+      
+      if (!metricsWithAverages) {
+        // Fallback to basic data if no historical data available
+        const basicData = {
+          api_latency: Math.floor(Math.random() * 100) + 50,
+          error_rate: Math.round((Math.random() * 3) * 100) / 100,
+          queue_sizes: {
+            'automation-execute': Math.floor(Math.random() * 15),
+            'notification': Math.floor(Math.random() * 8),
+            'payment-validator': Math.floor(Math.random() * 5),
+            'email-queue': Math.floor(Math.random() * 12),
+            'webhook-queue': Math.floor(Math.random() * 3)
+          },
+          ln_markets_status: Math.random() > 0.05 ? 'healthy' : 'degraded',
+          system_health: {
+            database: 'healthy',
+            redis: 'healthy',
+            workers: 'healthy'
+          },
+          averages: null,
+          health_summary: {
+            overall_status: 'warning',
+            issues: ['No historical data available'],
+            recommendations: ['Wait for metrics collection to start']
+          }
+        };
+        
+        console.log('⚠️ ADMIN MONITORING - Using fallback data (no historical data)');
+        return basicData;
+      }
+      
+      const { current, averages } = metricsWithAverages;
+      
       const monitoringData = {
-        api_latency: Math.floor(Math.random() * 100) + 50, // 50-150ms
-        error_rate: Math.round((Math.random() * 3) * 100) / 100, // 0-3%
-        queue_sizes: {
-          'automation-execute': Math.floor(Math.random() * 15),
-          'notification': Math.floor(Math.random() * 8),
-          'payment-validator': Math.floor(Math.random() * 5),
-          'email-queue': Math.floor(Math.random() * 12),
-          'webhook-queue': Math.floor(Math.random() * 3)
+        // Current metrics
+        api_latency: current.api_latency,
+        error_rate: current.error_rate,
+        queue_sizes: current.queue_sizes,
+        ln_markets_status: current.ln_markets_status,
+        system_health: current.system_health,
+        memory_usage: current.memory_usage,
+        cpu_usage: current.cpu_usage,
+        active_connections: current.active_connections,
+        
+        // Historical averages and trends
+        averages: {
+          api_latency: {
+            current: averages.api_latency.current,
+            average_1h: averages.api_latency.average_1h,
+            average_24h: averages.api_latency.average_24h,
+            trend: averages.api_latency.trend,
+            status: averages.api_latency.status
+          },
+          error_rate: {
+            current: averages.error_rate.current,
+            average_1h: averages.error_rate.average_1h,
+            average_24h: averages.error_rate.average_24h,
+            trend: averages.error_rate.trend,
+            status: averages.error_rate.status
+          },
+          memory_usage: {
+            current: averages.memory_usage.current,
+            average_1h: averages.memory_usage.average_1h,
+            average_24h: averages.memory_usage.average_24h,
+            trend: averages.memory_usage.trend,
+            status: averages.memory_usage.status
+          },
+          cpu_usage: {
+            current: averages.cpu_usage.current,
+            average_1h: averages.cpu_usage.average_1h,
+            average_24h: averages.cpu_usage.average_24h,
+            trend: averages.cpu_usage.trend,
+            status: averages.cpu_usage.status
+          },
+          queue_health: {
+            total_jobs: averages.queue_health.total_jobs,
+            average_1h: averages.queue_health.average_1h,
+            average_24h: averages.queue_health.average_24h,
+            trend: averages.queue_health.trend,
+            status: averages.queue_health.status
+          }
         },
-        ln_markets_status: Math.random() > 0.05 ? 'healthy' : 'degraded',
-        system_health: {
-          database: 'healthy',
-          redis: 'healthy',
-          workers: 'healthy'
-        }
+        
+        // Health summary
+        health_summary: healthSummary
       };
       
-      console.log('✅ ADMIN MONITORING - Data prepared:', monitoringData);
+      console.log('✅ ADMIN MONITORING - Data prepared with averages:', {
+        api_latency: monitoringData.api_latency,
+        error_rate: monitoringData.error_rate,
+        overall_status: healthSummary.overall_status,
+        issues_count: healthSummary.issues.length
+      });
+      
       return monitoringData;
     } catch (error) {
       console.error('❌ ADMIN MONITORING - Error:', error);

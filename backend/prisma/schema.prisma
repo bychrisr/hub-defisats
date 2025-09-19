@@ -271,3 +271,41 @@ enum PlanType {
   pro
   lifetime
 }
+
+// Sistema de Tooltips e Cards Configuráveis
+model DashboardCard {
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  key               String   @unique // Chave única para identificar o card (ex: "total_margin", "estimated_fees")
+  title             String   // Título do card
+  description       String?  // Descrição/tooltip do card
+  icon              String?  // Nome do ícone (ex: "Wallet", "DollarSign")
+  category          String?  // Categoria do card (ex: "positions", "history", "balance")
+  order_index       Int      @default(0) // Ordem de exibição
+  is_active         Boolean  @default(true) // Se o card está ativo
+  is_admin_only     Boolean  @default(false) // Se é visível apenas para admins
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
+  created_by        String?  // ID do admin que criou
+  updated_by        String?  // ID do admin que atualizou
+
+  @@index([category])
+  @@index([is_active])
+  @@index([order_index])
+  @@map("dashboard_cards")
+}
+
+model TooltipConfig {
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  card_key          String   @unique // Chave do card associado
+  tooltip_text      String   // Texto do tooltip
+  tooltip_position  String   @default("top") // Posição do tooltip (top, bottom, left, right)
+  is_enabled        Boolean  @default(true) // Se o tooltip está habilitado
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
+  created_by        String?  // ID do admin que criou
+  updated_by        String?  // ID do admin que atualizou
+
+  @@index([card_key])
+  @@index([is_enabled])
+  @@map("tooltip_configs")
+}
