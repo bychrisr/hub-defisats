@@ -211,9 +211,9 @@ export default function Positions() {
       console.log('✅ TRADES - Received positions:', data);
       console.log('🔍 TRADES - Full response data:', JSON.stringify(data, null, 2));
       
-      if (data.success && data.data && data.data.positions) {
+      if (data.success && data.data && Array.isArray(data.data)) {
         // Transform LN Markets data to our interface
-        const transformedPositions: LNPosition[] = data.data.positions.map((pos: any) => {
+        const transformedPositions: LNPosition[] = data.data.map((pos: any) => {
           console.log('🔍 TRADES - Transforming position:', pos);
           console.log('🔍 TRADES - TEST LOG - Position ID:', pos.id);
           console.log('🔍 TRADES - TEST LOG - Opening Fee:', pos.opening_fee);
@@ -299,10 +299,10 @@ export default function Positions() {
         // Atualizar contexto de tempo real com dados reais (dados brutos da LN Markets)
         if (isInitialLoad) {
           console.log('🔄 TRADES - Carregando posições iniciais no contexto de tempo real');
-          loadRealPositions(data.data.positions); // Passar dados brutos da LN Markets
+          loadRealPositions(data.data); // Passar dados brutos da LN Markets
         } else {
           console.log('🔄 TRADES - Atualizando posições no contexto de tempo real (silent)');
-          updatePositions(data.data.positions); // Passar dados brutos da LN Markets
+          updatePositions(data.data); // Passar dados brutos da LN Markets
         }
       } else {
         console.error('❌ TRADES - Invalid data structure:', data);
