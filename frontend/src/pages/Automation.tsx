@@ -540,27 +540,33 @@ export const Automation = () => {
                           </div>
                         </div>
 
+                        {/* Posição mais próxima de ser liquidada */}
+                        {mostRiskyPosition && (
+                          <div className="p-3 bg-background/50 rounded-lg border border-warning/20">
+                            <div className="flex justify-between items-center">
+                              <span className="text-vibrant-secondary">Posição mais próxima de ser liquidada:</span>
+                              <div className="flex items-center gap-2">
+                                <Badge 
+                                  variant={mostRiskyPosition.side === 'long' ? "default" : "destructive"}
+                                  className="text-xs font-bold"
+                                >
+                                  {mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'}
+                                </Badge>
+                                <span className="font-medium text-warning">
+                                  ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
+                                </span>
+                                <span className={`font-medium ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                  {(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Simulação da posição */}
                         <div className="space-y-2">
                           {mostRiskyPosition ? (
                             <>
-                              <div className="flex justify-between items-center">
-                                <span className="text-vibrant-secondary">Posição mais próxima de ser liquidada:</span>
-                                <div className="flex items-center gap-2">
-                                  <Badge 
-                                    variant={mostRiskyPosition.side === 'long' ? "default" : "destructive"}
-                                    className="text-xs font-bold"
-                                  >
-                                    {mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'}
-                                  </Badge>
-                                  <span className="font-medium text-warning">
-                                    ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
-                                  </span>
-                                  <span className={`font-medium ${(mostRiskyPosition.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                    {(mostRiskyPosition.pnlPercentage || 0).toFixed(1)}%
-                                  </span>
-                                </div>
-                              </div>
                               <div className="flex justify-between">
                                 <span className="text-vibrant-secondary">Margem atual:</span>
                                 <span className={`font-medium ${(mostRiskyPosition.marginRatio || 0) < 20 ? 'text-destructive' : (mostRiskyPosition.marginRatio || 0) < 50 ? 'text-warning' : 'text-success'}`}>
