@@ -196,6 +196,29 @@ export const Automation = () => {
   // Obter a posição mais arriscada para simulação
   const mostRiskyPosition = getMostRiskyPosition();
 
+  // Calcular o preço de ativação baseado no threshold
+  const getActivationPrice = () => {
+    if (!mostRiskyPosition || !btcPrice) return null;
+    
+    const liquidationPrice = mostRiskyPosition.liquidation || 0;
+    const currentPrice = btcPrice.price;
+    const threshold = marginGuard.threshold / 100; // Converter para decimal
+    
+    if (mostRiskyPosition.side === 'long') {
+      // LONG: ativação quando preço cai para X% da distância até liquidação
+      // Fórmula: preço_atual - (preço_atual - liquidação) * threshold
+      const distanceToLiquidation = currentPrice - liquidationPrice;
+      return currentPrice - (distanceToLiquidation * threshold);
+    } else {
+      // SHORT: ativação quando preço sobe para X% da distância até liquidação
+      // Fórmula: preço_atual + (liquidação - preço_atual) * threshold
+      const distanceToLiquidation = liquidationPrice - currentPrice;
+      return currentPrice + (distanceToLiquidation * threshold);
+    }
+  };
+
+  const activationPrice = getActivationPrice();
+
   // Carregar configurações salvas do localStorage
   useEffect(() => {
     const savedMarginGuard = localStorage.getItem('marginGuardSettings');
@@ -415,7 +438,9 @@ export const Automation = () => {
                           <p className="text-xs font-medium text-vibrant mb-2">Exemplo:</p>
                           <div className="space-y-1 text-xs text-vibrant-secondary">
                             <p>• Minha posição mais próxima de ser liquidada: {mostRiskyPosition ? `${mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'} - ${mostRiskyPosition.symbol || 'BTC/USD'}` : 'LONG - BTC/USD'}</p>
-                            <p>• Valor de ativação nessa operação: $ {mostRiskyPosition ? (mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR') : 'XXXX'}</p>
+                            <p>• Preço atual do Bitcoin: $ {btcPrice ? btcPrice.price.toLocaleString('pt-BR') : 'XXXX'}</p>
+                            <p>• Preço de liquidação: $ {mostRiskyPosition ? (mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR') : 'XXXX'}</p>
+                            <p>• Valor de ativação ({marginGuard.threshold}%): $ {activationPrice ? activationPrice.toLocaleString('pt-BR') : 'XXXX'}</p>
                           </div>
                         </div>
                       </div>
