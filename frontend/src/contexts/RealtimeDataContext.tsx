@@ -549,7 +549,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
           return {
             id: pos.id,
             symbol: 'BTC', // LN Markets only trades BTC futures
-            side: pos.side, // Já transformado pelo PositionsContext
+            side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
             quantity: quantity,
             price: price,
             liquidation: pos.liquidation || 0, // Valor real da API LN Markets
