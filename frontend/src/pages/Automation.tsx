@@ -70,20 +70,78 @@ export const Automation = () => {
 
   // Função para encontrar a posição mais próxima de liquidar
   const getMostRiskyPosition = () => {
-    if (!userPositions || userPositions.length === 0) return null;
+    console.log('🔍 AUTOMATION - getMostRiskyPosition called:', {
+      userPositions: userPositions?.length || 0,
+      btcPrice: btcPrice?.price
+    });
+    
+    if (!userPositions || userPositions.length === 0) {
+      console.log('❌ AUTOMATION - No user positions found');
+      return null;
+    }
     
     // Filtrar apenas posições abertas
     const openPositions = userPositions.filter(pos => pos.status === 'open');
-    if (openPositions.length === 0) return null;
+    console.log('🔍 AUTOMATION - Open positions:', openPositions.length);
     
-    // Encontrar a posição com menor margem (mais próxima de liquidar)
-    return openPositions.reduce((mostRisky, current) => {
-      const currentMarginRatio = current.marginRatio || 0;
-      const mostRiskyMarginRatio = mostRisky.marginRatio || 0;
-      
-      // Menor marginRatio = mais próximo de liquidar
-      return currentMarginRatio < mostRiskyMarginRatio ? current : mostRisky;
+    if (openPositions.length === 0) {
+      console.log('❌ AUTOMATION - No open positions found');
+      return null;
+    }
+    
+    // Log das posições para debug
+    openPositions.forEach((pos, index) => {
+      console.log(`🔍 AUTOMATION - Position ${index}:`, {
+        id: pos.id,
+        side: pos.side,
+        liquidation: pos.liquidation,
+        currentPrice: pos.currentPrice,
+        marginRatio: pos.marginRatio
+      });
     });
+    
+    // Se não temos preço do BTC, usar a primeira posição
+    if (!btcPrice?.price) {
+      console.log('⚠️ AUTOMATION - No BTC price, using first position');
+      return openPositions[0];
+    }
+    
+    const currentBtcPrice = btcPrice.price;
+    console.log('🔍 AUTOMATION - Current BTC price:', currentBtcPrice);
+    
+    // Encontrar a posição cujo preço de liquidação está mais próximo do preço atual do BTC
+    const closestPosition = openPositions.reduce((closestToLiquidation, current) => {
+      const currentLiquidationPrice = current.liquidation || 0;
+      const closestLiquidationPrice = closestToLiquidation.liquidation || 0;
+      
+      // Calcular a diferença absoluta entre preço de liquidação e preço atual do BTC
+      const currentDifference = Math.abs(currentLiquidationPrice - currentBtcPrice);
+      const closestDifference = Math.abs(closestLiquidationPrice - currentBtcPrice);
+      
+      console.log('🔍 AUTOMATION - Comparing positions:', {
+        current: {
+          id: current.id,
+          liquidation: currentLiquidationPrice,
+          difference: currentDifference
+        },
+        closest: {
+          id: closestToLiquidation.id,
+          liquidation: closestLiquidationPrice,
+          difference: closestDifference
+        }
+      });
+      
+      // Menor diferença = mais próximo de liquidar
+      return currentDifference < closestDifference ? current : closestToLiquidation;
+    });
+    
+    console.log('✅ AUTOMATION - Closest position found:', {
+      id: closestPosition.id,
+      liquidation: closestPosition.liquidation,
+      difference: Math.abs((closestPosition.liquidation || 0) - currentBtcPrice)
+    });
+    
+    return closestPosition;
   };
 
   // Obter a posição mais arriscada para simulação
