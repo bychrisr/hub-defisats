@@ -546,15 +546,15 @@ export const Automation = () => {
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-vibrant-secondary">Posição mais próxima de ser liquidada:</span>
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-lg text-warning">
-                                  ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
-                                </span>
                                 <Badge 
                                   variant={mostRiskyPosition.side === 'long' ? "default" : "destructive"}
                                   className="text-xs"
                                 >
                                   {mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'}
                                 </Badge>
+                                <span className="font-bold text-lg text-warning">
+                                  ${(mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR')}
+                                </span>
                                 <Badge 
                                   variant={(mostRiskyPosition.pnl || 0) >= 0 ? "default" : "destructive"}
                                   className="text-xs"
