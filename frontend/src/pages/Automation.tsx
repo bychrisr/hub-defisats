@@ -481,7 +481,7 @@ export const Automation = () => {
                                 <span className="text-vibrant-secondary">Posição mais próxima de ser liquidada:</span>
                                 <span className="font-medium">
                                   {mostRiskyPosition.side === 'long' ? 'Long' : 'Short'} {mostRiskyPosition.symbol} 
-                                  {btcPrice ? ` $${btcPrice.price.toLocaleString('pt-BR')}` : ` $${mostRiskyPosition.currentPrice.toLocaleString('pt-BR')}`}
+                                  {btcPrice ? ` $${btcPrice.price.toLocaleString('pt-BR')}` : ` $${(mostRiskyPosition.currentPrice || mostRiskyPosition.price || 0).toLocaleString('pt-BR')}`}
                                 </span>
                               </div>
                               <div className="flex justify-between">
