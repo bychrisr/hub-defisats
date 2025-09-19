@@ -28,6 +28,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { useBtcPrice } from '@/hooks/useBtcPrice';
 import { useUserPositions } from '@/contexts/RealtimeDataContext';
+import { useAutomationStore } from '@/stores/automation';
 import { toast } from 'sonner';
 
 interface MarginGuardSettings {
@@ -45,6 +46,15 @@ interface TakeProfitStopLossSettings {
 }
 
 export const Automation = () => {
+  const {
+    automations,
+    fetchAutomations,
+    createAutomation,
+    updateAutomation,
+    isLoading: storeLoading,
+    error: storeError,
+  } = useAutomationStore();
+
   const [marginGuard, setMarginGuard] = useState<MarginGuardSettings>({
     enabled: true,
     threshold: 90,
@@ -61,6 +71,11 @@ export const Automation = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [originalValues, setOriginalValues] = useState<{
+    marginGuard: MarginGuardSettings | null;
+    tpsl: TakeProfitStopLossSettings | null;
+  }>({ marginGuard: null, tpsl: null });
   
   // Hook para buscar preço do BTC
   const { data: btcPrice, loading: btcLoading, error: btcError, refetch: refetchBtc } = useBtcPrice();
@@ -263,32 +278,209 @@ export const Automation = () => {
     }
   }, []);
 
-  // Detectar mudanças nas configurações
+  // Carregar automações existentes
   useEffect(() => {
-    setHasUnsavedChanges(true);
-  }, [marginGuard, tpsl]);
+    fetchAutomations();
+  }, [fetchAutomations]);
+
+  // Carregar configurações existentes das automações
+  useEffect(() => {
+    console.log('🔍 AUTOMATION - Loading configurations from store:', {
+      automations,
+      automationsLength: automations.length,
+      storeLoading
+    });
+
+    const marginGuardAutomation = automations.find(a => a.type === 'margin_guard');
+    const tpslAutomation = automations.find(a => a.type === 'tp_sl');
+
+    console.log('🔍 AUTOMATION - Found automations:', {
+      marginGuardAutomation,
+      tpslAutomation
+    });
+
+    const newMarginGuard = {
+      enabled: marginGuardAutomation?.is_active || false,
+      threshold: marginGuardAutomation?.config.margin_threshold || 90,
+      reduction: marginGuardAutomation?.config.new_liquidation_distance || 20,
+    };
+
+    const newTpsl = {
+      enabled: tpslAutomation?.is_active || false,
+      takeProfitPercent: tpslAutomation?.config.take_profit_percentage || 8,
+      stopLossPercent: tpslAutomation?.config.stop_loss_percentage || 3,
+      trailingEnabled: tpslAutomation?.config.trailing_stop || false,
+      trailingDistance: tpslAutomation?.config.trailing_percentage || 2,
+    };
+
+    console.log('🔍 AUTOMATION - New configurations:', {
+      newMarginGuard,
+      newTpsl
+    });
+
+    if (marginGuardAutomation) {
+      setMarginGuard(newMarginGuard);
+    }
+
+    if (tpslAutomation) {
+      setTpsl(newTpsl);
+    }
+
+    // Salvar valores originais para comparação
+    setOriginalValues({
+      marginGuard: marginGuardAutomation ? newMarginGuard : null,
+      tpsl: tpslAutomation ? newTpsl : null,
+    });
+
+    // Reset hasUnsavedChanges quando carregar configurações do banco
+    setHasUnsavedChanges(false);
+    setIsInitialLoad(false);
+    
+    console.log('🔍 AUTOMATION - After loading - hasUnsavedChanges: false, isInitialLoad: false');
+  }, [automations]);
+
+  // Reset do estado quando as automações são carregadas
+  useEffect(() => {
+    if (automations.length > 0 && !storeLoading) {
+      setHasUnsavedChanges(false);
+      setIsInitialLoad(false);
+    }
+  }, [automations, storeLoading]);
+
+  // Detectar mudanças nas configurações (apenas após carregamento inicial)
+  useEffect(() => {
+    console.log('🔍 AUTOMATION - Change detection triggered:', {
+      isInitialLoad,
+      storeLoading,
+      hasOriginalValues: !!(originalValues.marginGuard && originalValues.tpsl),
+      marginGuard,
+      tpsl,
+      originalValues,
+      automationsLength: automations.length
+    });
+    
+    // Só marca como não salvo se não for carregamento inicial e não estiver carregando
+    if (!isInitialLoad && !storeLoading && originalValues.marginGuard && originalValues.tpsl) {
+      let hasRealChanges = false;
+      
+      // Comparar Margin Guard com valores originais
+      if (originalValues.marginGuard) {
+        const mgChanged = marginGuard.enabled !== originalValues.marginGuard.enabled || 
+            marginGuard.threshold !== originalValues.marginGuard.threshold || 
+            marginGuard.reduction !== originalValues.marginGuard.reduction;
+        
+        console.log('🔍 AUTOMATION - Margin Guard comparison:', {
+          current: marginGuard,
+          original: originalValues.marginGuard,
+          changed: mgChanged
+        });
+        
+        if (mgChanged) {
+          hasRealChanges = true;
+        }
+      }
+      
+      // Comparar TP/SL com valores originais
+      if (originalValues.tpsl) {
+        const tpslChanged = tpsl.enabled !== originalValues.tpsl.enabled || 
+            tpsl.takeProfitPercent !== originalValues.tpsl.takeProfitPercent || 
+            tpsl.stopLossPercent !== originalValues.tpsl.stopLossPercent ||
+            tpsl.trailingEnabled !== originalValues.tpsl.trailingEnabled ||
+            tpsl.trailingDistance !== originalValues.tpsl.trailingDistance;
+        
+        console.log('🔍 AUTOMATION - TP/SL comparison:', {
+          current: tpsl,
+          original: originalValues.tpsl,
+          changed: tpslChanged
+        });
+        
+        if (tpslChanged) {
+          hasRealChanges = true;
+        }
+      }
+      
+      console.log('🔍 AUTOMATION - Final change detection result:', hasRealChanges);
+      setHasUnsavedChanges(hasRealChanges);
+    } else {
+      console.log('🔍 AUTOMATION - Skipping change detection:', {
+        reason: !isInitialLoad ? 'isInitialLoad is true' : 
+                storeLoading ? 'storeLoading is true' : 
+                !originalValues.marginGuard ? 'no original marginGuard' :
+                !originalValues.tpsl ? 'no original tpsl' : 'unknown'
+      });
+    }
+  }, [marginGuard, tpsl, isInitialLoad, storeLoading, originalValues, automations.length]);
 
   const handleSave = async () => {
     setIsLoading(true);
     
     try {
-      // Salvar no localStorage
-      localStorage.setItem('marginGuardSettings', JSON.stringify(marginGuard));
-      localStorage.setItem('tpslSettings', JSON.stringify(tpsl));
+      // Salvar Margin Guard
+      const marginGuardAutomation = automations.find(a => a.type === 'margin_guard');
+      const marginGuardConfig = {
+        margin_threshold: marginGuard.threshold,
+        action: 'increase_liquidation_distance',
+        new_liquidation_distance: marginGuard.reduction,
+        enabled: marginGuard.enabled,
+      };
+
+      if (marginGuardAutomation) {
+        await updateAutomation(marginGuardAutomation.id, {
+          config: marginGuardConfig,
+          is_active: marginGuard.enabled,
+        });
+      } else {
+        await createAutomation({
+          type: 'margin_guard',
+          config: marginGuardConfig,
+          is_active: marginGuard.enabled,
+        });
+      }
+
+      // Salvar TP/SL
+      const tpslAutomation = automations.find(a => a.type === 'tp_sl');
+      const tpslConfig = {
+        take_profit_percentage: tpsl.takeProfitPercent,
+        stop_loss_percentage: tpsl.stopLossPercent,
+        trailing_stop: tpsl.trailingEnabled,
+        trailing_percentage: tpsl.trailingDistance,
+        enabled: tpsl.enabled,
+      };
+
+      if (tpslAutomation) {
+        await updateAutomation(tpslAutomation.id, {
+          config: tpslConfig,
+          is_active: tpsl.enabled,
+        });
+      } else {
+        await createAutomation({
+          type: 'tp_sl',
+          config: tpslConfig,
+          is_active: tpsl.enabled,
+        });
+      }
       
-      // Simular delay de API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Atualizar valores originais após salvar
+      const newOriginalValues = {
+        marginGuard: { ...marginGuard },
+        tpsl: { ...tpsl },
+      };
+      
+      console.log('🔍 AUTOMATION - Updating original values after save:', newOriginalValues);
+      setOriginalValues(newOriginalValues);
       
       setHasUnsavedChanges(false);
+      setIsInitialLoad(false); // Permitir detecção de mudanças futuras
+      console.log('🔍 AUTOMATION - After save - hasUnsavedChanges: false, isInitialLoad: false');
       toast.success('Configurações salvas com sucesso!', {
         description: 'Suas configurações de automação foram salvas e estão ativas.',
         duration: 4000,
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar configurações:', error);
       toast.error('Erro ao salvar configurações', {
-        description: 'Ocorreu um erro ao salvar suas configurações. Tente novamente.',
+        description: error.message || 'Ocorreu um erro ao salvar suas configurações. Tente novamente.',
         duration: 4000,
       });
     } finally {
@@ -327,7 +519,7 @@ export const Automation = () => {
                 <Button 
                   size="sm" 
                   onClick={handleSave} 
-                  disabled={isLoading || !hasUnsavedChanges}
+                  disabled={isLoading || storeLoading || !hasUnsavedChanges}
                   className={`flex-1 sm:flex-none ${
                     hasUnsavedChanges 
                       ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' 
@@ -335,8 +527,12 @@ export const Automation = () => {
                   }`}
                 >
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  {isLoading ? 'Salvando...' : hasUnsavedChanges ? 'Salvar Configurações' : 'Configurações Salvas'}
+                  {isLoading || storeLoading ? 'Salvando...' : hasUnsavedChanges ? 'Salvar Configurações' : 'Configurações Salvas'}
                 </Button>
+                {/* Debug info */}
+                <div className="text-xs text-gray-500 mt-2">
+                  Debug: hasUnsavedChanges={hasUnsavedChanges.toString()}, isLoading={isLoading.toString()}, storeLoading={storeLoading.toString()}
+                </div>
               </div>
             </div>
           </div>

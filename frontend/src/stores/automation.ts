@@ -64,16 +64,20 @@ export const useAutomationStore = create<AutomationState & AutomationActions>(
 
     // Actions
     fetchAutomations: async params => {
+      console.log('🔍 AUTOMATION STORE - fetchAutomations called with params:', params);
       set({ isLoading: true, error: null });
 
       try {
         const response = await automationAPI.getAll(params);
+        console.log('🔍 AUTOMATION STORE - fetchAutomations response:', response.data);
         set({
           automations: response.data.data,
           isLoading: false,
           error: null,
         });
+        console.log('🔍 AUTOMATION STORE - automations updated:', response.data.data);
       } catch (error: any) {
+        console.error('🔍 AUTOMATION STORE - fetchAutomations error:', error);
         const errorMessage =
           error.response?.data?.message || 'Failed to fetch automations';
         set({

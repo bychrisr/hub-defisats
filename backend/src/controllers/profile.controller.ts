@@ -126,9 +126,25 @@ export class ProfileController {
       };
 
       if (body.email) updateData.email = body.email;
-      if (body.ln_markets_api_key) updateData.ln_markets_api_key = body.ln_markets_api_key;
-      if (body.ln_markets_api_secret) updateData.ln_markets_api_secret = body.ln_markets_api_secret;
-      if (body.ln_markets_passphrase) updateData.ln_markets_passphrase = body.ln_markets_passphrase;
+      
+      // Encrypt LN Markets credentials before saving
+      if (body.ln_markets_api_key) {
+        console.log('🔒 PROFILE - Encrypting API key...');
+        updateData.ln_markets_api_key = this.authService.encryptData(body.ln_markets_api_key);
+        console.log('✅ PROFILE - API key encrypted successfully');
+      }
+      
+      if (body.ln_markets_api_secret) {
+        console.log('🔒 PROFILE - Encrypting API secret...');
+        updateData.ln_markets_api_secret = this.authService.encryptData(body.ln_markets_api_secret);
+        console.log('✅ PROFILE - API secret encrypted successfully');
+      }
+      
+      if (body.ln_markets_passphrase) {
+        console.log('🔒 PROFILE - Encrypting passphrase...');
+        updateData.ln_markets_passphrase = this.authService.encryptData(body.ln_markets_passphrase);
+        console.log('✅ PROFILE - Passphrase encrypted successfully');
+      }
 
       const updatedProfile = await this.prisma.user.update({
         where: { id: user.id },

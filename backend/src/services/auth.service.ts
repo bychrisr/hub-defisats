@@ -560,7 +560,7 @@ export class AuthService {
   /**
    * Encrypt sensitive data
    */
-  private encryptData(data: string): string {
+  public encryptData(data: string): string {
     // Simple encryption for now - in production, use proper encryption
     // const crypto = require('crypto');
     const algorithm = 'aes-256-cbc';

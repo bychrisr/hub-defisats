@@ -9,8 +9,12 @@ import { notificationQueue } from '../queues/notification.queue';
 import { prisma } from '../lib/prisma';
 import { CredentialCacheService } from '../services/credential-cache.service';
 
-// Create Redis connection
-const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
+// Create Redis connection with BullMQ compatible options
+const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false,
+  lazyConnect: true,
+});
 
 // Create credential cache service
 const credentialCache = new CredentialCacheService(redis);
@@ -29,8 +33,48 @@ const marginCheckQueue = new Queue('margin-check', {
 
 // Note: Credentials are now fetched from database and decrypted on-demand
 
-// Store LN Markets service instances
+// Store LN Markets service instances with connection pooling
 const lnMarketsServices: { [userId: string]: LNMarketsService } = {};
+const serviceCreationTimes: { [userId: string]: number } = {};
+const SERVICE_TTL = 10 * 60 * 1000; // 10 minutes TTL for services
+
+// Function to create or get LN Markets service with connection pooling
+function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarketsService {
+  const now = Date.now();
+  const serviceCreationTime = serviceCreationTimes[userId];
+  
+  // Check if service exists and is not expired
+  if (lnMarketsServices[userId] && serviceCreationTime && (now - serviceCreationTime) < SERVICE_TTL) {
+    console.log(`♻️  MARGIN GUARD - Reusing existing LN Markets service for user ${userId}`);
+    return lnMarketsServices[userId];
+  }
+  
+  // Create new service
+  console.log(`🆕 MARGIN GUARD - Creating new LN Markets service for user ${userId}`);
+  const service = createLNMarketsService(credentials);
+  lnMarketsServices[userId] = service;
+  serviceCreationTimes[userId] = now;
+  
+  return service;
+}
+
+// Function to cleanup expired services
+function cleanupExpiredServices(): void {
+  const now = Date.now();
+  const expiredUsers = Object.keys(serviceCreationTimes).filter(
+    userId => (now - serviceCreationTimes[userId]) >= SERVICE_TTL
+  );
+  
+  expiredUsers.forEach(userId => {
+    console.log(`🧹 MARGIN GUARD - Cleaning up expired service for user ${userId}`);
+    delete lnMarketsServices[userId];
+    delete serviceCreationTimes[userId];
+  });
+  
+  if (expiredUsers.length > 0) {
+    console.log(`🧹 MARGIN GUARD - Cleaned up ${expiredUsers.length} expired services`);
+  }
+}
 
 // Margin Guard configuration from database
 interface MarginGuardConfig {
@@ -49,76 +93,141 @@ async function executeMarginGuardAction(
   config: MarginGuardConfig,
   userId: string
 ): Promise<void> {
+  const actionStartTime = Date.now();
+  
   try {
-    console.log(`🎯 Executing Margin Guard action for user ${userId}, trade ${trade.id}`);
-    console.log(`📋 Action: ${config.action}`);
+    console.log(`🎯 MARGIN GUARD - Executing action for user ${userId}, trade ${trade.id}:`, {
+      action: config.action,
+      trade_id: trade.id,
+      market: trade.market,
+      side: trade.side,
+      size: trade.size
+    });
 
     switch (config.action) {
       case 'close_position':
-        console.log(`🛑 Closing position ${trade.id} for user ${userId}`);
-        await lnMarkets.closePosition(trade.id);
-        console.log(`✅ Successfully closed position ${trade.id}`);
+        console.log(`🛑 MARGIN GUARD - Closing position ${trade.id} for user ${userId}`);
+        try {
+          await lnMarkets.closePosition(trade.id);
+          console.log(`✅ MARGIN GUARD - Successfully closed position ${trade.id} for user ${userId}`);
+        } catch (error: any) {
+          console.error(`❌ MARGIN GUARD - Failed to close position ${trade.id} for user ${userId}:`, {
+            error: error.message,
+            status: error.response?.status,
+            trade_id: trade.id
+          });
+          throw error; // Re-throw to be caught by outer try-catch
+        }
 
         // Queue automation execution notification
-        await marginCheckQueue.add(
-          'automation-execution',
-          {
-            userId,
-            automationId: 'margin-guard-auto', // This should be the actual automation ID
-            action: 'margin_guard_close',
-            tradeId: trade.id,
-          },
-          {
-            priority: 10,
-            removeOnComplete: 50,
-            removeOnFail: 50,
-          }
-        );
+        try {
+          await marginCheckQueue.add(
+            'automation-execution',
+            {
+              userId,
+              automationId: 'margin-guard-auto', // This should be the actual automation ID
+              action: 'margin_guard_close',
+              tradeId: trade.id,
+            },
+            {
+              priority: 10,
+              removeOnComplete: 50,
+              removeOnFail: 50,
+            }
+          );
+          console.log(`✅ MARGIN GUARD - Notification queued for position ${trade.id} close`);
+        } catch (error: any) {
+          console.error(`❌ MARGIN GUARD - Failed to queue notification for position ${trade.id}:`, error);
+          // Don't throw here, as the main action succeeded
+        }
         break;
 
       case 'reduce_position':
         if (config.reduce_percentage) {
           const reduceAmount = (trade.quantity * config.reduce_percentage) / 100;
-          console.log(`📉 Reducing position ${trade.id} by ${config.reduce_percentage}% (${reduceAmount} contracts) for user ${userId}`);
-          await lnMarkets.reducePosition(trade.market || 'btcusd', trade.side, reduceAmount);
-          console.log(`✅ Successfully reduced position ${trade.id}`);
+          console.log(`📉 MARGIN GUARD - Reducing position ${trade.id} by ${config.reduce_percentage}% (${reduceAmount} contracts) for user ${userId}`);
+          try {
+            await lnMarkets.reducePosition(trade.market || 'btcusd', trade.side, reduceAmount);
+            console.log(`✅ MARGIN GUARD - Successfully reduced position ${trade.id} for user ${userId}`);
+          } catch (error: any) {
+            console.error(`❌ MARGIN GUARD - Failed to reduce position ${trade.id} for user ${userId}:`, {
+              error: error.message,
+              status: error.response?.status,
+              reduce_amount: reduceAmount,
+              trade_id: trade.id
+            });
+            throw error;
+          }
         } else {
-          console.warn(`⚠️ Reduce percentage not configured for user ${userId}`);
+          console.warn(`⚠️  MARGIN GUARD - Reduce percentage not configured for user ${userId}`);
+          throw new Error('Reduce percentage not configured');
         }
         break;
 
       case 'add_margin':
         if (config.add_margin_amount) {
-          console.log(`💰 Adding ${config.add_margin_amount} sats margin to position ${trade.id} for user ${userId}`);
-          await lnMarkets.addMargin(trade.id, config.add_margin_amount);
-          console.log(`✅ Successfully added margin to position ${trade.id}`);
+          console.log(`💰 MARGIN GUARD - Adding ${config.add_margin_amount} sats margin to position ${trade.id} for user ${userId}`);
+          try {
+            await lnMarkets.addMargin(trade.id, config.add_margin_amount);
+            console.log(`✅ MARGIN GUARD - Successfully added margin to position ${trade.id} for user ${userId}`);
+          } catch (error: any) {
+            console.error(`❌ MARGIN GUARD - Failed to add margin to position ${trade.id} for user ${userId}:`, {
+              error: error.message,
+              status: error.response?.status,
+              margin_amount: config.add_margin_amount,
+              trade_id: trade.id
+            });
+            throw error;
+          }
         } else {
-          console.warn(`⚠️ Add margin amount not configured for user ${userId}`);
+          console.warn(`⚠️  MARGIN GUARD - Add margin amount not configured for user ${userId}`);
+          throw new Error('Add margin amount not configured');
         }
         break;
 
       default:
         console.warn(`⚠️ Unknown Margin Guard action: ${config.action}`);
     }
-  } catch (error) {
-    console.error(`❌ Failed to execute Margin Guard action for user ${userId}, trade ${trade.id}:`, error);
+  } catch (error: any) {
+    const actionEndTime = Date.now();
+    const actionDuration = actionEndTime - actionStartTime;
+    
+    console.error(`❌ MARGIN GUARD - Failed to execute action for user ${userId}, trade ${trade.id}:`, {
+      error: error.message,
+      stack: error.stack,
+      action: config.action,
+      trade_id: trade.id,
+      duration_ms: actionDuration,
+      status: error.response?.status
+    });
 
-    // Queue error notification
-    await marginCheckQueue.add(
-      'automation-execution',
-      {
-        userId,
-        automationId: 'margin-guard-error',
-        action: 'margin_guard_error',
-        tradeId: trade.id,
-        error: (error as Error).message,
-      },
-      {
-        priority: 5, // Lower priority for errors
-        removeOnComplete: 50,
-        removeOnFail: 50,
-      }
-    );
+    // Queue error notification with retry logic
+    try {
+      await marginCheckQueue.add(
+        'automation-execution',
+        {
+          userId,
+          automationId: 'margin-guard-error',
+          action: 'margin_guard_error',
+          tradeId: trade.id,
+          error: error.message,
+          action_type: config.action,
+          duration_ms: actionDuration
+        },
+        {
+          priority: 5, // Lower priority for errors
+          removeOnComplete: 50,
+          removeOnFail: 50,
+          delay: 5000, // Delay error notification by 5 seconds
+        }
+      );
+      console.log(`✅ MARGIN GUARD - Error notification queued for user ${userId}, trade ${trade.id}`);
+    } catch (notificationError: any) {
+      console.error(`❌ MARGIN GUARD - Failed to queue error notification for user ${userId}:`, notificationError);
+    }
+    
+    // Re-throw the error to be handled by the calling function
+    throw error;
   }
 }
 
@@ -217,18 +326,27 @@ const worker = new Worker(
       userId: string;
     };
 
-    console.log(`🔍 Monitoring margin for user ${userId}`);
+    console.log(`🔍 MARGIN GUARD - Monitoring margin for user ${userId}`);
+    const startTime = Date.now();
 
     try {
       // Get Margin Guard configuration from database
       const config = await getMarginGuardConfig(userId);
       if (!config) {
-        console.log(`ℹ️  No Margin Guard configuration found for user ${userId}`);
+        console.log(`ℹ️  MARGIN GUARD - No configuration found for user ${userId}`);
         return { status: 'skipped', reason: 'no_config' };
       }
 
+      console.log(`📊 MARGIN GUARD - Config loaded for user ${userId}:`, {
+        enabled: config.enabled,
+        margin_threshold: config.margin_threshold,
+        action: config.action,
+        reduce_percentage: config.reduce_percentage,
+        add_margin_amount: config.add_margin_amount
+      });
+
       if (!config.enabled) {
-        console.log(`ℹ️  Margin Guard disabled for user ${userId}`);
+        console.log(`ℹ️  MARGIN GUARD - Disabled for user ${userId}`);
         return { status: 'skipped', reason: 'disabled' };
       }
 
@@ -252,45 +370,102 @@ const worker = new Worker(
           return { status: 'skipped', reason: 'no_credentials' };
         }
 
-        // Import secure storage service
-        const { secureStorage } = await import('../services/secure-storage.service');
+        // Import auth service for decryption
+        const { AuthService } = await import('../services/auth.service');
+        const authService = new AuthService(prisma, {} as any);
         
-        // Decrypt credentials using SecureStorageService
-        try {
-          credentials = await secureStorage.decryptCredentials(user.ln_markets_api_key);
-          
-          // Cache the credentials for future use
-          await credentialCache.set(userId, credentials);
-          console.log(`✅ Credentials cached for user ${userId}`);
-        } catch (error) {
-          console.error(
-            `Failed to decrypt credentials for user ${userId}:`,
-            error
-          );
-          return { status: 'error', reason: 'decryption_failed' };
+        // Decrypt credentials using AuthService with retry logic
+        let decryptionRetries = 0;
+        const maxDecryptionRetries = 2;
+        
+        while (decryptionRetries < maxDecryptionRetries) {
+          try {
+            const apiKey = authService.decryptData(user.ln_markets_api_key);
+            const apiSecret = authService.decryptData(user.ln_markets_api_secret);
+            const passphrase = authService.decryptData(user.ln_markets_passphrase);
+            
+            credentials = {
+              apiKey,
+              apiSecret,
+              passphrase,
+            };
+            
+            // Cache the credentials for future use
+            await credentialCache.set(userId, credentials);
+            console.log(`✅ MARGIN GUARD - Credentials cached for user ${userId}`);
+            break; // Success, exit retry loop
+          } catch (error: any) {
+            decryptionRetries++;
+            console.error(`❌ MARGIN GUARD - Decryption failed (attempt ${decryptionRetries}/${maxDecryptionRetries}) for user ${userId}:`, {
+              error: error.message,
+              stack: error.stack
+            });
+            
+            if (decryptionRetries >= maxDecryptionRetries) {
+              console.error(`❌ MARGIN GUARD - Max decryption retries exceeded for user ${userId}`);
+              return { status: 'error', reason: 'decryption_failed' };
+            }
+            
+            // Wait before retry
+            const delay = 1000 * decryptionRetries; // 1s, 2s
+            console.log(`⏳ MARGIN GUARD - Waiting ${delay}ms before decryption retry for user ${userId}`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
         }
       } else {
         console.log(`✅ Credentials found in cache for user ${userId}`);
       }
 
-      // Get or create LN Markets service
-      let lnMarkets = lnMarketsServices[userId];
-      if (!lnMarkets) {
-        lnMarkets = createLNMarketsService(credentials);
-        lnMarketsServices[userId] = lnMarkets;
+      // Get or create LN Markets service using connection pooling
+      const lnMarkets = getOrCreateLNMarketsService(userId, credentials);
+
+      // Fetch running trades with retry logic
+      console.log(`🔍 MARGIN GUARD - Fetching running trades for user ${userId}`);
+      let runningTrades: any[] = [];
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          runningTrades = await lnMarkets.getRunningTrades();
+          break; // Success, exit retry loop
+        } catch (error: any) {
+          retryCount++;
+          console.warn(`⚠️  MARGIN GUARD - API call failed (attempt ${retryCount}/${maxRetries}) for user ${userId}:`, {
+            error: error.message,
+            status: error.response?.status,
+            url: error.config?.url
+          });
+          
+          if (retryCount >= maxRetries) {
+            console.error(`❌ MARGIN GUARD - Max retries exceeded for user ${userId}, returning empty array`);
+            runningTrades = [];
+            break;
+          }
+          
+          // Wait before retry (exponential backoff)
+          const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+          console.log(`⏳ MARGIN GUARD - Waiting ${delay}ms before retry for user ${userId}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
 
-      // Fetch running trades
-      const runningTrades = await lnMarkets.getRunningTrades();
-
       if (runningTrades.length === 0) {
-        console.log(`ℹ️  User ${userId} has no running trades`);
+        console.log(`ℹ️  MARGIN GUARD - User ${userId} has no running trades`);
         return { status: 'processed', tradesCount: 0, alerts: [] };
       }
 
-      console.log(
-        `📊 User ${userId} has ${runningTrades.length} running trades`
-      );
+      console.log(`📊 MARGIN GUARD - User ${userId} has ${runningTrades.length} running trades`);
+      console.log(`📊 MARGIN GUARD - Trades details:`, runningTrades.map(trade => ({
+        id: trade.id,
+        market: trade.market,
+        side: trade.side,
+        size: trade.size,
+        entry_price: trade.entry_price,
+        liquidation_price: trade.liquidation_price,
+        margin: trade.margin,
+        pl: trade.pl
+      })));
 
       const alerts: Array<{
         tradeId: string;
@@ -300,13 +475,22 @@ const worker = new Worker(
       }> = [];
 
       // Calculate margin ratio for each trade
+      console.log(`🔍 MARGIN GUARD - Calculating margin ratios for user ${userId}`);
       for (const trade of runningTrades) {
         const maintenanceMargin = trade.maintenance_margin || 0;
         const margin = trade.margin || 0;
         const pl = trade.pl || 0;
 
+        console.log(`📊 MARGIN GUARD - Trade ${trade.id} data:`, {
+          maintenance_margin: maintenanceMargin,
+          margin: margin,
+          pl: pl,
+          entry_price: trade.entry_price,
+          liquidation_price: trade.liquidation_price
+        });
+
         if (maintenanceMargin === 0) {
-          console.warn(`⚠️  Trade ${trade.id} has zero maintenance margin`);
+          console.warn(`⚠️  MARGIN GUARD - Trade ${trade.id} has zero maintenance margin`);
           continue;
         }
 
@@ -316,6 +500,13 @@ const worker = new Worker(
         const thresholdDecimal = config.margin_threshold / 100;
         const warningThreshold = thresholdDecimal * 0.8; // Warning at 80% of critical threshold
 
+        console.log(`📊 MARGIN GUARD - Trade ${trade.id} thresholds:`, {
+          margin_ratio: marginRatio.toFixed(4),
+          warning_threshold: warningThreshold.toFixed(4),
+          critical_threshold: thresholdDecimal.toFixed(4),
+          user_threshold_percent: config.margin_threshold
+        });
+
         let level: 'safe' | 'warning' | 'critical' = 'safe';
         if (marginRatio >= thresholdDecimal) {
           level = 'critical';
@@ -323,9 +514,7 @@ const worker = new Worker(
           level = 'warning';
         }
 
-        console.log(
-          `📈 Trade ${trade.id}: Margin Ratio ${marginRatio.toFixed(4)} (${level})`
-        );
+        console.log(`📈 MARGIN GUARD - Trade ${trade.id}: Margin Ratio ${marginRatio.toFixed(4)} (${level})`);
 
         if (level !== 'safe') {
           const message = `⚠️ Margin ${level.toUpperCase()}: Trade ${trade.id} ratio ${marginRatio.toFixed(4)} (threshold: ${thresholdDecimal.toFixed(4)})`;
@@ -353,22 +542,49 @@ const worker = new Worker(
         }
       }
 
+      const endTime = Date.now();
+      const processingTime = endTime - startTime;
+
+      console.log(`✅ MARGIN GUARD - Monitoring completed for user ${userId}:`, {
+        processing_time_ms: processingTime,
+        trades_processed: runningTrades.length,
+        alerts_generated: alerts.length,
+        alerts: alerts.map(alert => ({
+          trade_id: alert.tradeId,
+          level: alert.level,
+          margin_ratio: alert.marginRatio
+        }))
+      });
+
       return {
         status: 'processed',
         tradesCount: runningTrades.length,
         alertsCount: alerts.length,
         alerts,
+        processingTimeMs: processingTime
       };
     } catch (error) {
-      console.error(`❌ Error monitoring margin for user ${userId}:`, error);
-      return { status: 'error', error: (error as Error).message };
+      const endTime = Date.now();
+      const processingTime = endTime - startTime;
+      
+      console.error(`❌ MARGIN GUARD - Error monitoring margin for user ${userId}:`, {
+        error: (error as Error).message,
+        processing_time_ms: processingTime,
+        stack: (error as Error).stack
+      });
+      
+      return { 
+        status: 'error', 
+        error: (error as Error).message,
+        processingTimeMs: processingTime
+      };
     }
   },
   {
     connection: redis,
-    concurrency: 5, // Process up to 5 users simultaneously
+    concurrency: 8, // Increased concurrency for better performance
     limiter: {
-      max: 10, // Max 10 jobs per duration
+      max: 20, // Increased max jobs per duration
       duration: 1000, // Per second
     },
   }
@@ -376,16 +592,29 @@ const worker = new Worker(
 
 // Event handlers
 worker.on('completed', job => {
-  console.log(
-    `✅ Margin monitor job ${job.id} completed for user ${job.data.userId}`
-  );
+  const result = job.returnvalue;
+  console.log(`✅ MARGIN GUARD - Job ${job.id} completed for user ${job.data.userId}:`, {
+    status: result?.status,
+    trades_processed: result?.tradesCount,
+    alerts_generated: result?.alertsCount,
+    processing_time_ms: result?.processingTimeMs
+  });
 });
 
 worker.on('failed', (job, err) => {
-  console.error(
-    `❌ Margin monitor job ${job?.id} failed for user ${job?.data?.userId}:`,
-    err
-  );
+  console.error(`❌ MARGIN GUARD - Job ${job?.id} failed for user ${job?.data?.userId}:`, {
+    error: err.message,
+    stack: err.stack,
+    job_data: job?.data
+  });
+});
+
+worker.on('stalled', jobId => {
+  console.warn(`⚠️  MARGIN GUARD - Job ${jobId} stalled`);
+});
+
+worker.on('progress', (job, progress) => {
+  console.log(`📊 MARGIN GUARD - Job ${job.id} progress: ${progress}%`);
 });
 
 // Helper function to remove user credentials (called when user logs out or deletes account)
@@ -472,9 +701,11 @@ export function startPeriodicMonitoring() {
     return;
   }
 
-  console.log('📅 Starting periodic margin monitoring every 30 seconds');
+  console.log('📅 MARGIN GUARD - Starting periodic monitoring every 20 seconds');
 
   monitoringInterval = setInterval(async () => {
+    // Cleanup expired services first
+    cleanupExpiredServices();
     try {
       // Get all users with active Margin Guard configurations
       const usersWithMarginGuard = await prisma.automation.findMany({
@@ -493,38 +724,83 @@ export function startPeriodicMonitoring() {
         return;
       }
 
-      console.log(`🔄 Monitoring ${usersWithMarginGuard.length} users with Margin Guard`);
+      console.log(`🔄 MARGIN GUARD - Monitoring ${usersWithMarginGuard.length} users with Margin Guard`);
 
-      // Add monitoring jobs for each user
-      for (const { user_id: userId } of usersWithMarginGuard) {
-        try {
-          // Check if user has Margin Guard configured and enabled
-          const config = await getMarginGuardConfig(userId);
-          if (config && config.enabled) {
-            await marginCheckQueue.add(
-              'monitor-margin',
-              {
-                userId,
-              },
-              {
-                priority: 10,
-                delay: 0,
-                removeOnComplete: 50,
-                removeOnFail: 50,
-              }
-            );
-            console.log(`✅ Scheduled margin monitoring for user ${userId}`);
-          } else {
-            console.log(`⏭️  Skipping user ${userId} - no active Margin Guard`);
+      let scheduledCount = 0;
+      let skippedCount = 0;
+      let errorCount = 0;
+
+      // Batch process users for better performance
+      const batchSize = 10; // Process 10 users at a time
+      const batches = [];
+      
+      for (let i = 0; i < usersWithMarginGuard.length; i += batchSize) {
+        batches.push(usersWithMarginGuard.slice(i, i + batchSize));
+      }
+      
+      console.log(`📦 MARGIN GUARD - Processing ${usersWithMarginGuard.length} users in ${batches.length} batches of ${batchSize}`);
+      
+      // Process each batch in parallel
+      for (const batch of batches) {
+        const batchPromises = batch.map(async ({ user_id: userId }) => {
+          try {
+            // Check if user has Margin Guard configured and enabled
+            const config = await getMarginGuardConfig(userId);
+            if (config && config.enabled) {
+              await marginCheckQueue.add(
+                'monitor-margin',
+                {
+                  userId,
+                },
+                {
+                  priority: 10,
+                  delay: 0,
+                  removeOnComplete: 50,
+                  removeOnFail: 50,
+                }
+              );
+              console.log(`✅ MARGIN GUARD - Scheduled monitoring for user ${userId} (threshold: ${config.margin_threshold}%)`);
+              return { status: 'scheduled', userId };
+            } else {
+              console.log(`⏭️  MARGIN GUARD - Skipping user ${userId} - no active Margin Guard`);
+              return { status: 'skipped', userId };
+            }
+          } catch (error) {
+            console.error(`❌ MARGIN GUARD - Failed to check config for user ${userId}:`, error);
+            return { status: 'error', userId, error: error.message };
           }
-        } catch (error) {
-          console.error(`❌ Failed to check Margin Guard config for user ${userId}:`, error);
+        });
+        
+        // Wait for batch to complete
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Count results
+        batchResults.forEach(result => {
+          if (result.status === 'fulfilled') {
+            if (result.value.status === 'scheduled') scheduledCount++;
+            else if (result.value.status === 'skipped') skippedCount++;
+            else if (result.value.status === 'error') errorCount++;
+          } else {
+            errorCount++;
+          }
+        });
+        
+        // Small delay between batches to prevent overwhelming the system
+        if (batches.indexOf(batch) < batches.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
+
+      console.log(`📊 MARGIN GUARD - Scheduling summary:`, {
+        total_users: usersWithMarginGuard.length,
+        scheduled: scheduledCount,
+        skipped: skippedCount,
+        errors: errorCount
+      });
     } catch (error) {
       console.error('❌ Error in periodic monitoring:', error);
     }
-  }, 30000); // Every 30 seconds (more reasonable for production)
+  }, 20000); // Every 20 seconds (optimized for better responsiveness)
 }
 
 export function stopPeriodicMonitoring() {

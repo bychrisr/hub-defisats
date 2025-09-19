@@ -13,6 +13,7 @@ import { AutomationType } from '@/types/api-contracts';
 const CreateAutomationSchema = z.object({
   type: z.enum(['margin_guard', 'tp_sl', 'auto_entry']),
   config: z.record(z.unknown()),
+  is_active: z.boolean().optional(),
 });
 
 const UpdateAutomationSchema = z.object({
@@ -37,12 +38,17 @@ export class AutomationController {
   async createAutomation(request: FastifyRequest, reply: FastifyReply) {
     try {
       const user = (request as any).user;
+      console.log('🔍 AUTOMATION CONTROLLER - Create automation request body:', JSON.stringify(request.body, null, 2));
+      console.log('🔍 AUTOMATION CONTROLLER - Raw config from request:', JSON.stringify(request.body.config, null, 2));
       const body = CreateAutomationSchema.parse(request.body);
+      console.log('🔍 AUTOMATION CONTROLLER - Parsed body:', JSON.stringify(body, null, 2));
+      console.log('🔍 AUTOMATION CONTROLLER - Parsed config:', JSON.stringify(body.config, null, 2));
 
       const automation = await this.automationService.createAutomation({
         userId: user?.id || '',
         type: body.type as AutomationType,
         config: body.config,
+        isActive: body.is_active,
       });
 
       return reply.status(201).send({
@@ -79,13 +85,29 @@ export class AutomationController {
       const automations = await this.automationService.getUserAutomations({
         userId: user?.id || '',
         type: type as any,
-        isActive: is_active === 'true',
-      });
+        isActive: is_active ? is_active === 'true' : undefined,
+      } as any);
 
-      return reply.send({
+      console.log('🔍 AUTOMATION CONTROLLER - Raw automations from service:', JSON.stringify(automations, null, 2));
+      
+      // Fix: manually serialize config field to plain objects
+      const processedAutomations = automations.map(automation => ({
+        ...automation,
+        config: automation.config ? JSON.parse(JSON.stringify(automation.config)) : {}
+      }));
+      
+      console.log('🔍 AUTOMATION CONTROLLER - Processed automations:', JSON.stringify(processedAutomations, null, 2));
+      
+      // Return raw JSON string to ensure proper serialization
+      const jsonString = JSON.stringify({
         success: true,
-        data: automations,
+        data: processedAutomations,
       });
+      
+      console.log('🔍 AUTOMATION CONTROLLER - Final JSON string:', jsonString);
+      
+      reply.type('application/json');
+      return reply.send(jsonString);
     } catch (error) {
       console.error('Get user automations error:', error);
       return reply.status(500).send({
@@ -146,7 +168,11 @@ export class AutomationController {
     try {
       const user = (request as any).user;
       const params = AutomationParamsSchema.parse(request.params);
+      console.log('🔍 AUTOMATION CONTROLLER - Update automation request body:', JSON.stringify(request.body, null, 2));
+      console.log('🔍 AUTOMATION CONTROLLER - Raw config from request:', JSON.stringify(request.body.config, null, 2));
       const body = UpdateAutomationSchema.parse(request.body);
+      console.log('🔍 AUTOMATION CONTROLLER - Parsed body:', JSON.stringify(body, null, 2));
+      console.log('🔍 AUTOMATION CONTROLLER - Parsed config:', JSON.stringify(body.config, null, 2));
 
       // Build updates object only with defined values
       const updates: { config?: any; is_active?: boolean } = {};
@@ -171,10 +197,22 @@ export class AutomationController {
         });
       }
 
-      return reply.send({
+      // Fix: manually serialize config field for update response
+      const processedAutomation = {
+        ...automation,
+        config: automation.config ? JSON.parse(JSON.stringify(automation.config)) : {}
+      };
+      
+      console.log('🔍 AUTOMATION CONTROLLER - Processed update automation:', JSON.stringify(processedAutomation, null, 2));
+      
+      // Return raw JSON string to ensure proper serialization
+      const jsonString = JSON.stringify({
         success: true,
-        data: automation,
+        data: processedAutomation,
       });
+      
+      reply.type('application/json');
+      return reply.send(jsonString);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return reply.status(400).send({

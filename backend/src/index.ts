@@ -819,6 +819,12 @@ async function start() {
     advancedAlerting.startEvaluationLoop(30000); // Every 30 seconds
     console.log('✅ Alert evaluation loop started');
     
+    // Start Margin Guard monitoring
+    console.log('🛡️ Starting Margin Guard monitoring...');
+    const { startPeriodicMonitoring } = await import('./workers/margin-monitor');
+    startPeriodicMonitoring();
+    console.log('✅ Margin Guard monitoring started');
+    
     console.log('✅ Advanced monitoring services started');
   } catch (error) {
     fastify.log.error('Error starting server:', error as any);

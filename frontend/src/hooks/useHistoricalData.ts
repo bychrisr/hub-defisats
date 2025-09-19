@@ -95,18 +95,30 @@ export const useHistoricalData = () => {
       });
 
       if (tradesData.success && Array.isArray(tradesData.data)) {
-        const trades: HistoricalTrade[] = tradesData.data.map((trade: any) => ({
-          id: trade.id,
-          side: trade.side === 'b' ? 'long' : 'short',
-          quantity: trade.quantity || 0,
-          entryPrice: trade.entry_price || trade.price || 0,
-          exitPrice: trade.price || undefined,
-          pnl: trade.pnl || trade.pl || 0,
-          fees: (trade.opening_fee || 0) + (trade.closing_fee || 0) + (trade.sum_carry_fees || 0),
-          status: trade.status === 'closed' || trade.closed ? 'closed' : 'open',
-          createdAt: trade.creation_ts || new Date().toISOString(),
-          closedAt: trade.closed_ts || undefined,
-        }));
+        const trades: HistoricalTrade[] = tradesData.data.map((trade: any) => {
+          const mappedTrade = {
+            id: trade.id,
+            side: trade.side === 'b' ? 'long' : 'short',
+            quantity: trade.quantity || 0,
+            entryPrice: trade.entry_price || trade.price || 0,
+            exitPrice: trade.price || undefined,
+            pnl: trade.pnl || trade.pl || 0,
+            fees: (trade.opening_fee || 0) + (trade.closing_fee || 0) + (trade.sum_carry_fees || 0),
+            status: trade.status === 'closed' || trade.closed ? 'closed' : 'open',
+            createdAt: trade.creation_ts || new Date().toISOString(),
+            closedAt: trade.closed_ts || undefined,
+          };
+          
+          console.log('🔍 HISTORICAL DATA HOOK - Mapped trade:', {
+            id: mappedTrade.id,
+            status: mappedTrade.status,
+            originalStatus: trade.status,
+            closed: trade.closed,
+            pnl: mappedTrade.pnl
+          });
+          
+          return mappedTrade;
+        });
 
         // Calcular métricas históricas
         console.log('🔍 HISTORICAL DATA HOOK - Raw trades data:', trades.slice(0, 3)); // Mostrar primeiros 3 trades
