@@ -21,10 +21,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Settings,
-  Info,
-  Smartphone,
-  Monitor,
-  Tablet,
   RefreshCw,
   TrendingUp as TrendingUpIcon,
   TrendingDown,
@@ -95,26 +91,8 @@ export const Automation = () => {
                 <p className="text-muted-foreground text-sm sm:text-base max-w-2xl">
                   Configure suas proteções automáticas e estratégias de trading inteligentes
                 </p>
-                <div className="flex items-center gap-4 mt-4">
-                  <Badge variant="secondary" className="gap-2">
-                    <Monitor className="h-3 w-3" />
-                    Desktop
-                  </Badge>
-                  <Badge variant="secondary" className="gap-2">
-                    <Tablet className="h-3 w-3" />
-                    Tablet
-                  </Badge>
-                  <Badge variant="secondary" className="gap-2">
-                    <Smartphone className="h-3 w-3" />
-                    Mobile
-                  </Badge>
-                </div>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-                <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
-                  <Info className="mr-2 h-4 w-4" />
-                  Ajuda
-                </Button>
                 <Button 
                   size="sm" 
                   onClick={handleSave} 
