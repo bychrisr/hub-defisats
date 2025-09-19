@@ -57,14 +57,14 @@ mkdir -p backups/manual-$(date +%Y%m%d_%H%M%S)
 cp config/env/.env.production config/env/.env.staging
 
 # Atualizar URLs para staging
-sed -i 's/defisats\.site/staging.defisats.site/g' config/env/.env.staging
-sed -i 's/api\.defisats\.site/staging-api.defisats.site/g' config/env/.env.staging
+sed -i 's/defisats\.site/localhost:13000/g' config/env/.env.staging
+sed -i 's/api\.defisats\.site/localhost:13010/g' config/env/.env.staging
 ```
 
 #### 2.2 Testar Staging
 ```bash
-# Iniciar staging
-docker compose -f docker-compose.staging.yml up -d
+# Iniciar ambiente de desenvolvimento (que serve como staging)
+docker compose -f config/docker/docker-compose.dev.yml up -d
 
 # Verificar se está funcionando
 curl http://localhost:13000

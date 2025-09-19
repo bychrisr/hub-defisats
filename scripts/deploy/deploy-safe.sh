@@ -110,12 +110,12 @@ test_staging() {
         print_warning "Staging environment not configured. Creating from production..."
         cp "config/env/.env.production" "config/env/.env.staging"
         # Update staging URLs
-        sed -i 's/defisats\.site/staging.defisats.site/g' "config/env/.env.staging"
-        sed -i 's/api\.defisats\.site/staging-api.defisats.site/g' "config/env/.env.staging"
+        sed -i 's/defisats\.site/localhost:13000/g' "config/env/.env.staging"
+        sed -i 's/api\.defisats\.site/localhost:13010/g' "config/env/.env.staging"
     fi
     
-    print_status "Starting staging environment..."
-    docker compose -f docker-compose.staging.yml up -d
+    print_status "Starting staging environment (using dev compose)..."
+    docker compose -f config/docker/docker-compose.dev.yml up -d
     
     # Wait for staging to be ready
     print_status "Waiting for staging to be ready..."
