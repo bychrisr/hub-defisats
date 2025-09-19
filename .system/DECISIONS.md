@@ -2,6 +2,65 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-017: Ícones Flutuantes & Nova Seção Posições Ativas
+
+**Data**: 2025-01-19  
+**Status**: Aceito  
+**Contexto**: Implementação de ícones flutuantes e oficialização da nova seção "Posições Ativas" com design moderno
+
+### Problema
+- Cards da dashboard precisavam de melhor organização visual
+- Ícones tradicionais ocupavam espaço interno dos cards
+- Tooltips sobrepostos por ícones devido a problemas de z-index
+- Linha "Teste" precisava ser oficializada como "Posições Ativas"
+- Necessidade de shadows coloridas específicas por estado dos cards
+
+### Decisão
+- **Ícones Flutuantes**: Implementar design "meio para fora" com quadrado flutuante
+- **Posicionamento**: Usar `absolute` com `right: 0.60rem, top: -1.4rem`
+- **Z-index**: Tooltips com `z-[9999]`, ícones com `z-0`
+- **Shadows Coloridas**: Cores específicas por estado (success, danger, warning)
+- **Seção Oficial**: Renomear "Teste" para "Posições Ativas" e remover linha antiga
+- **Props Adicionais**: `floatingIcon`, `variant`, `showSatsIcon` nos componentes
+
+### Implementação
+```typescript
+// PnLCard - Ícone flutuante
+{floatingIcon && Icon && (
+  <div 
+    className="absolute w-10 h-10 bg-card border border-border rounded-lg shadow-lg flex items-center justify-center p-2 z-0"
+    style={{ right: '0.60rem', top: '-1.4rem' }}
+  >
+    <Icon className={cn('h-5 w-5', getIconColor())} />
+  </div>
+)}
+
+// CSS - Shadows coloridas por estado
+.card-success:hover {
+  box-shadow: 10px 10px 20px -10px rgba(34, 197, 94, 0.1), 0 10px 10px -5px rgba(34, 197, 94, 0.04);
+}
+
+.card-danger:hover {
+  box-shadow: 10px 10px 20px -10px rgba(239, 68, 68, 0.1), 0 10px 10px -5px rgba(239, 68, 68, 0.04);
+}
+
+.card-warning:hover {
+  box-shadow: 10px 10px 20px -10px rgba(245, 158, 11, 0.1), 0 10px 10px -5px rgba(245, 158, 11, 0.04);
+}
+```
+
+### Justificativa
+- **UX Melhorada**: Ícones flutuantes economizam espaço interno dos cards
+- **Visual Moderno**: Design "meio para fora" cria sensação de profundidade
+- **Tooltips Funcionais**: Z-index correto garante visibilidade dos tooltips
+- **Consistência**: Shadows coloridas por estado melhoram feedback visual
+- **Organização**: Seção oficial "Posições Ativas" com cards aprimorados
+
+### Consequências
+- **Positivas**: Interface mais moderna e profissional, melhor UX
+- **Neutras**: Requer manutenção de z-index e posicionamento
+- **Riscos**: Ícones podem sobrepor conteúdo em telas muito pequenas
+
 ## ADR-016: Correção WebSocket & Eliminação de Polling
 
 **Data**: 2025-01-19  

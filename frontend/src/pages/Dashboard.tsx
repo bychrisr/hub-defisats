@@ -11,11 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Loader2,
-  Shield,
   TrendingUp,
-  Settings,
-  User,
-  BarChart3,
   DollarSign,
   Wallet,
   Target,
@@ -95,9 +91,6 @@ export default function Dashboard() {
 
   const isLoading = authLoading || automationLoading;
 
-  const marginGuardAutomation = automations.find(
-    a => a.type === 'margin_guard'
-  );
   const activeAutomations = automations.filter(a => a.is_active);
 
   return (
@@ -217,129 +210,76 @@ export default function Dashboard() {
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-vibrant">{t('dashboard.history')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-              <MetricCard
+              <PnLCard
                 title="Margem disponível"
-                value={formatSats(balanceData?.balance || 0)}
-                subtitle="Saldo da conta LN Markets"
+                pnl={balanceData?.balance || 0}
                 icon={Wallet}
-                variant="default"
+                variant="neutral"
                 cardKey="available_margin"
+                titleSize="lg"
+                floatingIcon={true}
+                cursor="default"
+                showSatsIcon={true}
               />
 
               <PnLCard
                 title={t('dashboard.estimated_balance')}
                 pnl={estimatedBalance.data?.estimated_balance || 0}
-                subtitle={estimatedBalance.isLoading ? t('common.loading') : (estimatedBalance.data?.positions_count || 0) + ' ' + t('dashboard.positions')}
                 icon={Wallet}
+                titleSize="lg"
+                floatingIcon={true}
+                cursor="default"
               />
 
-              <MetricCard
+              <PnLCard
                 title={t('dashboard.total_invested')}
-                value={formatSats(estimatedBalance.data?.total_invested || 0)}
-                subtitle={estimatedBalance.isLoading ? t('common.loading') : (estimatedBalance.data?.trades_count || 0) + ' ' + t('dashboard.trades')}
+                pnl={estimatedBalance.data?.total_invested || 0}
                 icon={Target}
                 cardKey="total_invested"
+                variant="neutral"
+                titleSize="lg"
+                floatingIcon={true}
+                cursor="default"
+                showSatsIcon={true}
               />
 
               <PnLCard
                 title={t('dashboard.total_profit')}
                 pnl={historicalMetrics?.totalProfit || 0}
-                subtitle={t('dashboard.sum_of_all_profits')}
                 icon={TrendingUp}
+                variant="neutral"
+                titleSize="lg"
+                floatingIcon={true}
+                cursor="default"
+                showSatsIcon={true}
               />
 
-              <MetricCard
+              <PnLCard
                 title={t('dashboard.fees_paid')}
-                value={formatSats(historicalMetrics?.totalFees || 0)}
-                subtitle={t('dashboard.fees_in_operations')}
+                pnl={historicalMetrics?.totalFees || 0}
                 icon={DollarSign}
                 cardKey="fees_paid"
+                variant="neutral"
+                titleSize="lg"
+                floatingIcon={true}
+                cursor="default"
+                showSatsIcon={true}
               />
 
               <MetricCard
                 cardKey="success_rate"
                 title={t('dashboard.success_rate')}
                 value={(historicalMetrics?.successRate || 0).toFixed(1) + '%'}
-                subtitle={(historicalMetrics?.winningPositions || 0) + '/' + (historicalMetrics?.totalPositions || 0) + ' ' + t('dashboard.trades') + ' | ' + t('dashboard.volatile_btc')}
                 icon={CheckCircle}
+                titleSize="lg"
+                floatingIcon={true}
+                cursor="default"
                 variant={(historicalMetrics?.successRate || 0) >= 50 ? 'success' : 'warning'}
               />
             </div>
           </div>
 
 
-          {/* Quick Actions */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-vibrant">{t('dashboard.quick_actions')}</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card className="card-modern">
-                <CardHeader>
-                  <CardTitle className="text-vibrant font-bold">Quick Actions</CardTitle>
-                  <CardDescription className="text-vibrant-secondary font-medium">Common tasks and automations</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Button asChild className="h-auto p-4">
-                      <Link to="/margin-guard">
-                        <div className="flex items-center space-x-3">
-                          <Shield className="h-5 w-5 icon-primary" />
-                          <div className="text-left">
-                            <div className="font-semibold text-vibrant">Margin Guard</div>
-                            <div className="text-sm text-vibrant-secondary">
-                              {marginGuardAutomation ? 'Configure' : 'Set up'}{' '}
-                              protection
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
-
-                    <Button asChild variant="outline" className="h-auto p-4">
-                      <Link to="/automation">
-                        <div className="flex items-center space-x-3">
-                          <Settings className="h-5 w-5 icon-secondary" />
-                          <div className="text-left">
-                            <div className="font-semibold text-vibrant">All Automations</div>
-                            <div className="text-sm text-vibrant-secondary">
-                              Manage all automations
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
-
-                    <Button asChild variant="outline" className="h-auto p-4">
-                      <Link to="/profile">
-                        <div className="flex items-center space-x-3">
-                          <User className="h-5 w-5 icon-success" />
-                          <div className="text-left">
-                            <div className="font-semibold text-vibrant">Profile</div>
-                            <div className="text-sm text-vibrant-secondary">
-                              Account settings
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
-
-                    <Button asChild variant="outline" className="h-auto p-4">
-                      <Link to="/reports">
-                        <div className="flex items-center space-x-3">
-                          <BarChart3 className="h-5 w-5 icon-warning" />
-                          <div className="text-left">
-                            <div className="font-semibold text-vibrant">Reports</div>
-                            <div className="text-sm text-vibrant-secondary">
-                              View automation reports
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
 
           {/* Recent Activity */}
           <div className="space-y-4">
@@ -381,7 +321,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <BarChart3 className="h-12 w-12 text-text-secondary mx-auto mb-2" />
+                    <Activity className="h-12 w-12 text-text-secondary mx-auto mb-2" />
                     <p className="text-sm text-text-secondary">No recent activity</p>
                     <p className="text-xs text-text-secondary mt-1">
                       Create your first automation to get started
@@ -405,7 +345,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <Shield className="h-5 w-5 text-primary" />
+                      <Target className="h-5 w-5 text-primary" />
                       <div>
                         <div className="font-medium">Margin Guard</div>
                         <div className="text-sm text-text-secondary">
@@ -433,7 +373,7 @@ export default function Dashboard() {
 
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <Settings className="h-5 w-5 text-secondary" />
+                      <Activity className="h-5 w-5 text-secondary" />
                       <div>
                         <div className="font-medium">Auto Entry</div>
                         <div className="text-sm text-text-secondary">

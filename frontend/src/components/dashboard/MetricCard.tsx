@@ -19,6 +19,8 @@ interface MetricCardProps {
   className?: string;
   cardKey?: string; // Chave para identificar o card e buscar tooltip
   titleSize?: 'sm' | 'base' | 'lg';
+  floatingIcon?: boolean;
+  cursor?: 'default' | 'pointer' | 'auto';
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -31,6 +33,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   className,
   cardKey,
   titleSize = 'sm',
+  floatingIcon = false,
+  cursor = 'auto',
 }) => {
   const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
   
@@ -71,7 +75,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const getTitleSizeClass = () => {
     switch (titleSize) {
       case 'lg':
-        return 'text-xl'; // 1.25rem
+        return 'text-lg'; // 1.125rem
       case 'base':
         return 'text-sm';
       case 'sm':
@@ -93,43 +97,53 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     }
   };
 
-  const cardContent = (
-    <Card className={cn(getVariantStyles(), className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className={cn('dashboard-card-title', getTitleSizeClass())}>
-          {title}
-          {showTooltip && tooltipText && (
-            <Tooltip
-              content={tooltipText}
-              position={tooltipPosition}
-              disabled={!showTooltip}
-            >
-              <HelpCircle className="dashboard-card-help-icon" />
-            </Tooltip>
+  return (
+    <div className="relative">
+      <Card className={cn(getVariantStyles(), `cursor-${cursor}`, 'min-h-[120px]', className)}>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pr-12">
+          <CardTitle className={cn('dashboard-card-title', getTitleSizeClass())}>
+            {title}
+            {showTooltip && tooltipText && (
+              <Tooltip
+                content={tooltipText}
+                position={tooltipPosition}
+                disabled={!showTooltip}
+              >
+                <HelpCircle className="dashboard-card-help-icon" />
+              </Tooltip>
+            )}
+          </CardTitle>
+          {!floatingIcon && Icon && <Icon className={cn('dashboard-card-icon', getIconColor())} />}
+        </CardHeader>
+        <CardContent>
+          <div className="dashboard-card-value">{value}</div>
+          {trend && (
+            <div className="flex items-center mt-3">
+              <Badge 
+                variant="outline" 
+                className={cn('text-xs font-semibold px-2 py-1 number-xs', getTrendColor())}
+              >
+                {trend.value > 0 ? '+' : ''}{trend.value.toFixed(1)}%
+              </Badge>
+              <span className="text-xs text-vibrant-secondary ml-2 font-medium">
+                {trend.label}
+              </span>
+            </div>
           )}
-        </CardTitle>
-        {Icon && <Icon className={cn('dashboard-card-icon', getIconColor())} />}
-      </CardHeader>
-      <CardContent>
-        <div className="dashboard-card-value">{value}</div>
-        {trend && (
-          <div className="flex items-center mt-3">
-            <Badge 
-              variant="outline" 
-              className={cn('text-xs font-semibold px-2 py-1 number-xs', getTrendColor())}
-            >
-              {trend.value > 0 ? '+' : ''}{trend.value.toFixed(1)}%
-            </Badge>
-            <span className="text-xs text-vibrant-secondary ml-2 font-medium">
-              {trend.label}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      
+      {/* Quadrado "meio para fora" - Dentro do container principal */}
+      {floatingIcon && Icon && (
+        <div 
+          className="absolute w-10 h-10 bg-card border border-border rounded-lg shadow-lg flex items-center justify-center p-2 z-0"
+          style={{ right: '0.60rem', top: '-1.4rem' }}
+        >
+          <Icon className={cn('h-5 w-5', getIconColor())} />
+        </div>
+      )}
+    </div>
   );
-
-  return cardContent;
 };
 
 export default MetricCard;

@@ -6,6 +6,46 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.5] - 2025-01-19 - Ícones Flutuantes & Nova Seção Posições Ativas 🎨 **MAJOR UI ENHANCEMENT**
+
+### 🎨 Ícones Flutuantes Implementados
+- ✅ **Design "Meio para Fora"**: Quadrado flutuante com ícone posicionado estrategicamente
+- ✅ **Posicionamento Otimizado**: Ícones posicionados com `right: 0.60rem, top: -1.4rem`
+- ✅ **Z-index Correto**: Tooltips sempre visíveis acima dos ícones (`z-[9999]`)
+- ✅ **Consistência Visual**: Todos os cards da linha "Posições Ativas" com ícones flutuantes
+- ✅ **Responsividade**: Ícones se adaptam ao tamanho do card automaticamente
+
+### 🎯 Nova Seção "Posições Ativas" Oficializada
+- ✅ **Substituição Completa**: Linha "Teste" agora é oficialmente "Posições Ativas"
+- ✅ **Cards Aprimorados**: 5 cards com funcionalidades completas
+  - **PnL Total**: Com ícone TrendingUp e tooltip
+  - **Profit Estimado**: Com ícone Target e tooltip
+  - **Trades em execução**: Com ícone Activity e tooltip
+  - **Margem Total**: Com ícone Wallet e tooltip
+  - **Taxas Estimadas**: Com ícone DollarSign e tooltip
+- ✅ **Funcionalidades Unificadas**: Todos os cards com `floatingIcon={true}` e `cursor="default"`
+
+### 🎨 Shadows Coloridas por Estado
+- ✅ **Success (Verde)**: `rgba(34, 197, 94, 0.1)` e `rgba(34, 197, 94, 0.04)`
+- ✅ **Danger (Vermelho)**: `rgba(239, 68, 68, 0.1)` e `rgba(239, 68, 68, 0.04)`
+- ✅ **Warning (Amarelo)**: `rgba(245, 158, 11, 0.1)` e `rgba(245, 158, 11, 0.04)`
+- ✅ **Deslocamento Consistente**: 10px para direita e para baixo em todos os estados
+- ✅ **Transições Suaves**: Animação de 300ms para todos os hovers
+
+### 🔧 Melhorias Técnicas
+- ✅ **CSS Classes**: Criadas classes específicas para cada estado de card
+- ✅ **Props Adicionadas**: `floatingIcon`, `variant`, `showSatsIcon` nos componentes
+- ✅ **Card Neutral**: Nova classe CSS para evitar conflitos de padding
+- ✅ **Z-index Otimizado**: Sistema de camadas correto para tooltips e ícones
+- ✅ **Estrutura Limpa**: Código organizado e reutilizável
+
+### 📊 Resultado Final
+- ✅ **Interface Moderna**: Cards com visual profissional e ícones estratégicos
+- ✅ **UX Aprimorada**: Tooltips sempre visíveis e posicionados corretamente
+- ✅ **Consistência Visual**: Todos os cards seguem o mesmo padrão de design
+- ✅ **Performance**: Sistema otimizado sem conflitos de CSS
+- ✅ **Manutenibilidade**: Código limpo e bem estruturado
+
 ## [1.4.4] - 2025-01-19 - Tooltips Melhorados com Ícones & CSS Otimizado 🎨 **UI/UX IMPROVEMENT**
 
 ### 🎨 Tooltips Melhorados com Ícones

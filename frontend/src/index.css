@@ -436,7 +436,7 @@
   }
 
   .dashboard-card-title {
-    font-size: 1.25rem !important;
+    font-size: 1.125rem !important;
     font-weight: 800 !important;
     font-family: 'Inter', sans-serif !important;
     padding-top: 20px !important;
@@ -469,7 +469,7 @@
     }
     
     .dashboard-card-title {
-      font-size: 1rem !important;
+      font-size: 0.875rem !important;
       font-weight: 700 !important;
       padding-top: 16px !important;
       padding-bottom: 16px !important;

@@ -85,7 +85,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   const getTitleSizeClass = () => {
     switch (titleSize) {
       case 'lg':
-        return 'text-xl'; // 1.25rem
+        return 'text-lg'; // 1.125rem
       case 'base':
         return 'text-sm';
       case 'sm':
