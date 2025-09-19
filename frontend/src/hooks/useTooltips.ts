@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { api } from '@/lib/api';
 
 export interface TooltipConfig {
   id: string;
