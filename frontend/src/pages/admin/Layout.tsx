@@ -19,7 +19,8 @@ import {
   Sun,
   Moon,
   Palette,
-  CreditCard
+  CreditCard,
+  Info
 } from 'lucide-react';
 
 const navigation = [
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Coupons', href: '/admin/coupons', icon: Gift },
   { name: 'Menus', href: '/admin/menus', icon: MenuIcon },
   { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
+  { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor },
   { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Settings', href: '/admin/settings', icon: Settings },

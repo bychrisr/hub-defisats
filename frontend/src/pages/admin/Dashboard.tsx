@@ -106,14 +106,14 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="header-modern flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Monitor system performance and user activity</p>
+          <h1 className="text-3xl font-bold text-vibrant">Admin Dashboard</h1>
+          <p className="text-vibrant-secondary mt-2">Monitor system performance and user activity</p>
         </div>
         <div className="flex items-center space-x-4">
           <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 bg-background/50 backdrop-blur-sm border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
           <Button 
             onClick={fetchDashboardData} 
             disabled={refreshing}
-            variant="outline"
+            className="btn-modern-primary"
             size="sm"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
@@ -137,52 +137,52 @@ export default function AdminDashboard() {
 
       {/* KPIs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="card-modern">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Total Users</CardTitle>
+            <Users className="h-4 w-4 icon-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.total_users.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-vibrant number-lg">{kpis.total_users.toLocaleString()}</div>
+            <p className="text-xs text-vibrant-secondary mt-1">
               {kpis.active_users} active in period
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-modern">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Trade Success Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Trade Success Rate</CardTitle>
+            <TrendingUp className="h-4 w-4 icon-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.success_rate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold text-vibrant number-lg">{kpis.success_rate.toFixed(1)}%</div>
             <div className="flex items-center space-x-2 mt-2">
               <div className={`h-2 w-16 rounded-full ${getSuccessRateColor(kpis.success_rate)}`} />
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-vibrant-secondary">
                 {kpis.trades_success} success, {kpis.trades_error} errors
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-modern">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 icon-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatSats(kpis.revenue_sats)}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-vibrant number-lg">{formatSats(kpis.revenue_sats)}</div>
+            <p className="text-xs text-vibrant-secondary mt-1">
               {kpis.coupons_used} coupons used
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-modern">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Workers Status</CardTitle>
-            <Server className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Workers Status</CardTitle>
+            <Server className="h-4 w-4 icon-primary" />
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-2">
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-vibrant-secondary mt-2">
               {kpis.workers_failed === 0 ? 'All systems operational' : 'Some workers need attention'}
             </p>
           </CardContent>
@@ -204,17 +204,17 @@ export default function AdminDashboard() {
 
       {/* Charts */}
       <Tabs defaultValue="trades" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="trades">Trades Over Time</TabsTrigger>
-          <TabsTrigger value="users">Users Activity</TabsTrigger>
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
+        <TabsList className="bg-background/50 backdrop-blur-sm border-border/50">
+          <TabsTrigger value="trades" className="data-[state=active]:bg-vibrant data-[state=active]:text-white">Trades Over Time</TabsTrigger>
+          <TabsTrigger value="users" className="data-[state=active]:bg-vibrant data-[state=active]:text-white">Users Activity</TabsTrigger>
+          <TabsTrigger value="revenue" className="data-[state=active]:bg-vibrant data-[state=active]:text-white">Revenue</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trades" className="space-y-4">
-          <Card>
+          <Card className="card-modern">
             <CardHeader>
-              <CardTitle>Trades Over Time</CardTitle>
-              <CardDescription>Trade execution volume in the selected period</CardDescription>
+              <CardTitle className="text-vibrant">Trades Over Time</CardTitle>
+              <CardDescription className="text-vibrant-secondary">Trade execution volume in the selected period</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -244,13 +244,13 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="users" className="space-y-4">
-          <Card>
+          <Card className="card-modern">
             <CardHeader>
-              <CardTitle>User Activity</CardTitle>
-              <CardDescription>User registration and activity patterns</CardDescription>
+              <CardTitle className="text-vibrant">User Activity</CardTitle>
+              <CardDescription className="text-vibrant-secondary">User registration and activity patterns</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-80 flex items-center justify-center text-muted-foreground">
+              <div className="h-80 flex items-center justify-center text-vibrant-secondary">
                 <p>User activity chart coming soon...</p>
               </div>
             </CardContent>
@@ -258,13 +258,13 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="revenue" className="space-y-4">
-          <Card>
+          <Card className="card-modern">
             <CardHeader>
-              <CardTitle>Revenue Trends</CardTitle>
-              <CardDescription>Revenue generation over time</CardDescription>
+              <CardTitle className="text-vibrant">Revenue Trends</CardTitle>
+              <CardDescription className="text-vibrant-secondary">Revenue generation over time</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-80 flex items-center justify-center text-muted-foreground">
+              <div className="h-80 flex items-center justify-center text-vibrant-secondary">
                 <p>Revenue chart coming soon...</p>
               </div>
             </CardContent>

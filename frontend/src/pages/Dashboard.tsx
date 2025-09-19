@@ -178,6 +178,7 @@ export default function Dashboard() {
                 value={formatSats(positionsData.totalMargin || 0)}
                 subtitle="Margem utilizada"
                 icon={Wallet}
+                cardKey="total_margin"
               />
               
               <MetricCard
@@ -185,6 +186,7 @@ export default function Dashboard() {
                 value={formatSats(positionsData.totalFees || 0)}
                 subtitle="Taxas das posições ativas"
                 icon={DollarSign}
+                cardKey="estimated_fees"
               />
             </div>
           </div>
@@ -199,6 +201,7 @@ export default function Dashboard() {
                 subtitle="Saldo da conta LN Markets"
                 icon={Wallet}
                 variant="default"
+                cardKey="available_margin"
               />
 
               <PnLCard
@@ -213,6 +216,7 @@ export default function Dashboard() {
                 value={formatSats(estimatedBalance.data?.total_invested || 0)}
                 subtitle={estimatedBalance.isLoading ? t('common.loading') : (estimatedBalance.data?.trades_count || 0) + ' ' + t('dashboard.trades')}
                 icon={Target}
+                cardKey="total_invested"
               />
 
               <PnLCard
@@ -227,6 +231,7 @@ export default function Dashboard() {
                 value={formatSats(historicalMetrics?.totalFees || 0)}
                 subtitle={t('dashboard.fees_in_operations')}
                 icon={DollarSign}
+                cardKey="fees_paid"
               />
 
               <MetricCard
