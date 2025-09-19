@@ -45,42 +45,27 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
     let top = 0;
     let left = 0;
 
     switch (position) {
       case 'top':
-        top = triggerRect.top + scrollTop - tooltipRect.height - 8;
-        left = triggerRect.left + scrollLeft + (triggerRect.width - tooltipRect.width) / 2;
+        top = -tooltipRect.height - 8;
+        left = (triggerRect.width - tooltipRect.width) / 2;
         break;
       case 'bottom':
-        top = triggerRect.bottom + scrollTop + 8;
-        left = triggerRect.left + scrollLeft + (triggerRect.width - tooltipRect.width) / 2;
+        top = triggerRect.height + 8;
+        left = (triggerRect.width - tooltipRect.width) / 2;
         break;
       case 'left':
-        top = triggerRect.top + scrollTop + (triggerRect.height - tooltipRect.height) / 2;
-        left = triggerRect.left + scrollLeft - tooltipRect.width - 8;
+        top = (triggerRect.height - tooltipRect.height) / 2;
+        left = -tooltipRect.width - 8;
         break;
       case 'right':
-        top = triggerRect.top + scrollTop + (triggerRect.height - tooltipRect.height) / 2;
-        left = triggerRect.right + scrollLeft + 8;
+        top = (triggerRect.height - tooltipRect.height) / 2;
+        left = triggerRect.width + 8;
         break;
-    }
-
-    // Ensure tooltip stays within viewport
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    if (left < 8) left = 8;
-    if (left + tooltipRect.width > viewportWidth - 8) {
-      left = viewportWidth - tooltipRect.width - 8;
-    }
-    if (top < 8) top = 8;
-    if (top + tooltipRect.height > viewportHeight + scrollTop - 8) {
-      top = viewportHeight + scrollTop - tooltipRect.height - 8;
     }
 
     setTooltipPosition({ top, left });
@@ -130,7 +115,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   return (
     <div
       ref={triggerRef}
-      className={cn('inline-block', className)}
+      className={cn('inline-block relative', className)}
       onMouseEnter={showTooltip}
       onMouseLeave={hideTooltip}
       onFocus={showTooltip}
@@ -142,7 +127,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         <div
           ref={tooltipRef}
           className={cn(
-            'fixed z-50 px-3 py-2 text-sm text-popover-foreground bg-popover border border-border rounded-lg shadow-lg max-w-xs',
+            'absolute z-50 px-3 py-2 text-sm text-popover-foreground bg-popover border border-border rounded-lg shadow-lg max-w-xs',
             'animate-in fade-in-0 zoom-in-95 duration-200',
             'backdrop-blur-sm bg-popover/95'
           )}

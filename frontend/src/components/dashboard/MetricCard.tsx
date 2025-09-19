@@ -80,20 +80,22 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   const cardContent = (
     <Card className={cn(getVariantStyles(), className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-sm font-semibold text-vibrant-secondary">
-            {title}
-          </CardTitle>
-          {showTooltip && tooltipText && (
-            <Tooltip
-              content={tooltipText}
-              position={tooltipPosition}
-              disabled={!showTooltip}
-            >
-              <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help" />
-            </Tooltip>
-          )}
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-vibrant-secondary">
+              {title}
+            </CardTitle>
+            {showTooltip && tooltipText && (
+              <Tooltip
+                content={tooltipText}
+                position={tooltipPosition}
+                disabled={!showTooltip}
+              >
+                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help" />
+              </Tooltip>
+            )}
+          </div>
         </div>
         {Icon && <Icon className={cn('h-5 w-5', getIconColor())} />}
       </CardHeader>
