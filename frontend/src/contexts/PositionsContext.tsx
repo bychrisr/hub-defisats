@@ -28,6 +28,11 @@ export interface LNPosition {
   takeProfit?: number;
   stopLoss?: number;
   timestamp?: number; // Timestamp da criação da posição para cálculo de funding fees
+  // Campos brutos da API LN Markets para recálculo correto
+  maintenance_margin?: number;
+  opening_fee?: number;
+  closing_fee?: number;
+  sum_carry_fees?: number;
 }
 
 // Interface simplificada para dados em tempo real
@@ -496,6 +501,11 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           stopLoss: pos.stoploss || undefined,
           // Adicionar timestamp para cálculo de funding fees
           timestamp: pos.creation_ts || Date.now(),
+          // Adicionar campos brutos da API para o RealtimeDataContext
+          maintenance_margin: pos.maintenance_margin || 0,
+          opening_fee: pos.opening_fee || 0,
+          closing_fee: pos.closing_fee || 0,
+          sum_carry_fees: pos.sum_carry_fees || 0,
         }));
 
         console.log('🔄 POSITIONS CONTEXT - Updating with real positions:', transformedPositions.length);

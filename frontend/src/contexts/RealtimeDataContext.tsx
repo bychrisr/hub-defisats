@@ -449,16 +449,16 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
           // Calcular P&L percentual de forma segura
           const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
         
-        // Calcular margin ratio (maintenance_margin / (margin + pl))
-        const marginRatio = pos.maintenance_margin > 0 
+        // Usar margin ratio já calculado ou calcular se necessário
+        const marginRatio = pos.marginRatio || (pos.maintenance_margin > 0 
           ? (pos.maintenance_margin / (margin + pnl)) * 100 
           : leverage > 0 
             ? (100 / leverage)
-            : 0;
+            : 0);
         
-        // Calcular fees
-        const tradingFees = (pos.opening_fee || 0) + (pos.closing_fee || 0);
-        const fundingCost = pos.sum_carry_fees || 0;
+        // Usar fees já calculados ou calcular se necessário
+        const tradingFees = pos.tradingFees || ((pos.opening_fee || 0) + (pos.closing_fee || 0));
+        const fundingCost = pos.fundingCost || (pos.sum_carry_fees || 0);
         
         console.log('📊 REALTIME - Transformando posição LN Markets:', {
           id: pos.id,
@@ -519,16 +519,16 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
           // Calcular P&L percentual de forma segura
           const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
           
-          // Calcular margin ratio (maintenance_margin / (margin + pl))
-          const marginRatio = pos.maintenance_margin > 0 
+          // Usar margin ratio já calculado ou calcular se necessário
+          const marginRatio = pos.marginRatio || (pos.maintenance_margin > 0 
             ? (pos.maintenance_margin / (margin + pnl)) * 100 
             : leverage > 0 
               ? (100 / leverage)
-              : 0;
+              : 0);
           
-          // Calcular fees
-          const tradingFees = (pos.opening_fee || 0) + (pos.closing_fee || 0);
-          const fundingCost = pos.sum_carry_fees || 0;
+          // Usar fees já calculados ou calcular se necessário
+          const tradingFees = pos.tradingFees || ((pos.opening_fee || 0) + (pos.closing_fee || 0));
+          const fundingCost = pos.fundingCost || (pos.sum_carry_fees || 0);
           
           console.log('🔄 REALTIME - Atualizando posição LN Markets:', {
             id: pos.id,
