@@ -195,13 +195,26 @@ export const useHistoricalData = () => {
   useEffect(() => {
     if (isAdmin && userPositions && !data) {
       console.log('🔍 HISTORICAL DATA HOOK - Initializing admin data with current positions');
+      console.log('🔍 HISTORICAL DATA HOOK - userPositions:', userPositions);
       const currentPositions = userPositions || [];
+      console.log('🔍 HISTORICAL DATA HOOK - currentPositions length:', currentPositions.length);
+      
       const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
       const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
       const totalPositions = currentPositions.length;
       const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
       const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
       const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+
+      console.log('🔍 HISTORICAL DATA HOOK - Calculated metrics:', {
+        totalPositions,
+        winningPositions,
+        losingPositions,
+        successRate,
+        totalProfit,
+        totalFees,
+        positions: currentPositions.map(pos => ({ id: pos.id, pnl: pos.pnl }))
+      });
 
       setData({
         trades: [],
@@ -219,13 +232,25 @@ export const useHistoricalData = () => {
   useEffect(() => {
     if (data && userPositions) {
       console.log('🔍 HISTORICAL DATA HOOK - Updating fallback data with current positions');
+      console.log('🔍 HISTORICAL DATA HOOK - userPositions for update:', userPositions);
       const currentPositions = userPositions || [];
+      console.log('🔍 HISTORICAL DATA HOOK - currentPositions length for update:', currentPositions.length);
+      
       const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
       const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
       const totalPositions = currentPositions.length;
       const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
       const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
       const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+
+      console.log('🔍 HISTORICAL DATA HOOK - Updated metrics:', {
+        totalPositions,
+        winningPositions,
+        losingPositions,
+        successRate,
+        totalProfit,
+        totalFees
+      });
 
       setData(prev => ({
         ...prev,
