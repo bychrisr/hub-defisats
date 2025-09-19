@@ -42,6 +42,7 @@ export interface RealtimePosition {
   side: 'long' | 'short';
   quantity: number;
   price: number;
+  liquidation: number;
   margin: number;
   leverage: number;
   pnl: number;
@@ -149,7 +150,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       // Por enquanto usando o preço atual, mas isso pode afetar o cálculo do profit estimado
       entryPrice: (pos as any).entryPrice || pos.price, // Tentar pegar entryPrice se disponível
       currentPrice: pos.price,
-      liquidation: pos.price * 0.1, // Calcular liquidação baseada no preço
+      liquidation: pos.liquidation || 0, // Usar valor real da API LN Markets
       leverage: pos.leverage,
       margin: pos.margin,
       pnl: pos.pnl,
