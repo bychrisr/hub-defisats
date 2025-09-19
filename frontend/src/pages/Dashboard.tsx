@@ -98,7 +98,7 @@ export default function Dashboard() {
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <div className="flex items-center space-x-3">
                 <h1 className="text-4xl font-bold text-vibrant">Dashboard</h1>
@@ -109,12 +109,14 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-              <p className="text-vibrant-secondary text-lg font-medium">Welcome back, {user?.email}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+                <p className="text-vibrant-secondary text-lg font-medium">Welcome back, {user?.email}</p>
+                <Badge variant="outline" className="text-sm font-semibold px-3 py-1 border-primary/30 text-primary w-fit">
+                  {user?.plan_type.toUpperCase()} Plan
+                </Badge>
+              </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Badge variant="outline" className="text-sm font-semibold px-3 py-1 border-primary/30 text-primary">
-                {user?.plan_type.toUpperCase()} Plan
-              </Badge>
               {/* TODO: Botão Refresh comentado para futuras modificações */}
               {/* 
               {isRealtimeEnabled && (
