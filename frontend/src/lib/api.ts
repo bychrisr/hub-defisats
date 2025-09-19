@@ -26,15 +26,19 @@ api.interceptors.request.use(
     
     const token = localStorage.getItem('access_token');
     console.log('🔑 Token from localStorage:', token ? 'EXISTS' : 'MISSING');
+    console.log('🔑 Token value:', token ? `${token.substring(0, 20)}...` : 'null');
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log('🔑 Authorization header set:', `Bearer ${token.substring(0, 20)}...`);
+      console.log('🔑 Final headers:', config.headers);
     } else {
       console.log('❌ No token found in localStorage');
     }
     return config;
   },
   error => {
+    console.log('❌ AXIOS REQUEST INTERCEPTOR - Error:', error);
     return Promise.reject(error);
   }
 );

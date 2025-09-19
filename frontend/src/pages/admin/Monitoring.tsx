@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw, Activity, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
 import SystemHealth from '@/components/system/SystemHealth';
 import { useAuthStore } from '@/stores/auth';
+import { api } from '@/lib/api';
 
 interface MonitoringData {
   api_latency: number;
@@ -29,20 +30,22 @@ export default function Monitoring() {
   const fetchMonitoringData = async () => {
     try {
       setRefreshing(true);
-      const response = await fetch('/api/admin/monitoring', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      console.log('🔍 MONITORING - Fetching monitoring data...');
+      console.log('🔍 MONITORING - Token in localStorage:', localStorage.getItem('access_token') ? 'EXISTS' : 'MISSING');
+      console.log('🔍 MONITORING - Auth state:', { isAuthenticated, authLoading });
+      
+      const response = await api.get('/api/admin/monitoring');
+      console.log('✅ MONITORING - Data received:', response.data);
+      
+      setMonitoringData(response.data);
+    } catch (error: any) {
+      console.error('❌ MONITORING - Error fetching monitoring data:', error);
+      console.error('❌ MONITORING - Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch monitoring data');
-      }
-
-      const data = await response.json();
-      setMonitoringData(data);
-    } catch (error) {
-      console.error('Error fetching monitoring data:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
