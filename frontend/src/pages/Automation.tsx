@@ -409,8 +409,15 @@ export const Automation = () => {
                           <span>Agressivo (95%)</span>
                         </div>
                         <p className="text-sm text-vibrant-secondary">
-                          Reduzir posição quando margem atingir {marginGuard.threshold}%
+                          Quando o preço do Bitcoin chegar na distância de {marginGuard.threshold}% do preço de liquidação
                         </p>
+                        <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-muted/50">
+                          <p className="text-xs font-medium text-vibrant mb-2">Exemplo:</p>
+                          <div className="space-y-1 text-xs text-vibrant-secondary">
+                            <p>• Minha posição mais próxima de ser liquidada: {mostRiskyPosition ? `${mostRiskyPosition.side === 'long' ? 'LONG' : 'SHORT'} - ${mostRiskyPosition.symbol || 'BTC/USD'}` : 'LONG - BTC/USD'}</p>
+                            <p>• Valor de ativação nessa operação: $ {mostRiskyPosition ? (mostRiskyPosition.liquidation || 0).toLocaleString('pt-BR') : 'XXXX'}</p>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Percentual de Redução */}
