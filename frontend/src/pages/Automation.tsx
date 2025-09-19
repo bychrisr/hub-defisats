@@ -538,11 +538,6 @@ export const Automation = () => {
                               </div>
                             ) : null}
                           </div>
-                          {btcPrice && (
-                            <div className="text-xs text-vibrant-secondary">
-                              Atualizado: {btcPrice.lastUpdated}
-                            </div>
-                          )}
                         </div>
 
                         {/* Simulação da posição */}
