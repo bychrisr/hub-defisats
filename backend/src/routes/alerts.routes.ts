@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { alerting } from '@/services/alerting.service';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { alerting } from '../services/alerting.service';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function alertsRoutes(fastify: FastifyInstance) {
   // Aplicar middleware de autenticação em todas as rotas

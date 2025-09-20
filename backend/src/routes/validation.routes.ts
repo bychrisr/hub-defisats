@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { checkPasswordStrength, isCommonPassword } from '@/utils/password.validator';
+import { checkPasswordStrength, isCommonPassword } from '../utils/password.validator';
 import { PrismaClient } from '@prisma/client';
 
 // Schema para validação de senha

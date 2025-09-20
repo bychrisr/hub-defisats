@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { websocketManager } from '@/services/websocket-manager.service';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { websocketManager } from '../services/websocket-manager.service';
 
 export async function websocketRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();

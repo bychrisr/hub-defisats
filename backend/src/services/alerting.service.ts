@@ -1,6 +1,6 @@
 import { monitoring } from './monitoring.service';
 import { metrics } from './metrics.service';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 
 // Interface for metric values
 interface MetricValue {

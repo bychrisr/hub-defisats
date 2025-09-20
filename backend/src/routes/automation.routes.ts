@@ -1,12 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { AutomationController } from '@/controllers/automation.controller';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { AutomationController } from '../controllers/automation.controller';
+import { authMiddleware } from '../middleware/auth.middleware';
 import {
   requireAutomationAccess,
   // requireResourceAccess,
-} from '@/middleware/idor.middleware';
-import { automationRateLimitMiddleware } from '@/middleware/user-rate-limit.middleware';
+} from '../middleware/idor.middleware';
+import { automationRateLimitMiddleware } from '../middleware/user-rate-limit.middleware';
 
 export async function automationRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { AuthController } from '@/controllers/auth.controller';
+import { AuthController } from '../controllers/auth.controller';
 import { PrismaClient } from '@prisma/client';
-import { testSandboxCredentials } from '@/services/lnmarkets.service';
+import { testSandboxCredentials } from '../services/lnmarkets.service';
 // import {
 //   RegisterRequestSchema,
 //   LoginRequestSchema,
@@ -13,13 +13,13 @@ import { testSandboxCredentials } from '@/services/lnmarkets.service';
 import {
   validateRegisterInput,
   validateLoginInput,
-} from '@/middleware/validation.middleware';
+} from '../middleware/validation.middleware';
 import {
   loginRateLimitMiddleware,
   // registrationRateLimitMiddleware,
   // passwordResetRateLimitMiddleware,
-} from '@/middleware/user-rate-limit.middleware';
-import { authMiddleware } from '@/middleware/auth.middleware';
+} from '../middleware/user-rate-limit.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 // Interfaces for testing
 interface MockRequest {

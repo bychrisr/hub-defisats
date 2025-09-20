@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { Redis } from 'ioredis';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 import { EmailService } from './email.service';
 import { HIBPService } from './hibp.service';
-import { PasswordSchema } from '@/utils/password.validator';
+import { PasswordSchema } from '../utils/password.validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 

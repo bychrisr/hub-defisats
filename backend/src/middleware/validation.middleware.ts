@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { Sanitizer } from '@/utils/sanitizer';
+import { Sanitizer } from '../utils/sanitizer';
 import { z } from 'zod';
 
 // Schema de validação para registro

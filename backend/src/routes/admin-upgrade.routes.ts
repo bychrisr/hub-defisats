@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { authMiddleware, authenticateAdmin } from '@/middleware/auth.middleware';
+import { authMiddleware, authenticateAdmin } from '../middleware/auth.middleware';
 
 // Schema para validação de upgrade
 const upgradeUserPlanSchema = z.object({

@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { LNMarketsWebSocketService } from '@/services/lnmarkets-websocket.service';
+import { LNMarketsWebSocketService } from '../services/lnmarkets-websocket.service';
 
 export async function websocketMarketRoutes(fastify: FastifyInstance) {
   const lnMarketsWS = new LNMarketsWebSocketService(false);

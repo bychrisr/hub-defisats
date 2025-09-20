@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsAPIService } from '@/services/lnmarkets-api.service';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 const prisma = new PrismaClient();
 

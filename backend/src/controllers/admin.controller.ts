@@ -41,8 +41,8 @@ export class AdminController {
       const previousPeriod = new Date(startDate.getTime() - (now.getTime() - startDate.getTime()));
       const previousMetrics = await this.getUserMetrics(previousPeriod);
 
-      const growthRate = previousMetrics.totalUsers > 0
-        ? ((userMetrics.totalUsers - previousMetrics.totalUsers) / previousMetrics.totalUsers) * 100
+      const growthRate = previousMetrics.total_users > 0
+        ? ((userMetrics.total_users - previousMetrics.total_users) / previousMetrics.total_users) * 100
         : 0;
 
       reply.send({
@@ -227,7 +227,7 @@ export class AdminController {
    * Get notification-related metrics
    */
   private async getNotificationMetrics(startDate: Date) {
-    const notificationStats = await prisma.notificationLog.groupBy({
+    const notificationStats = await prisma.notification.groupBy({
       by: ['status'],
       where: { created_at: { gte: startDate } },
       _count: { status: true },
@@ -332,12 +332,23 @@ export class AdminController {
    */
   async createCoupon(request: FastifyRequest<{ Body: any }>, reply: FastifyReply) {
     try {
-      const couponData = request.body;
+      const couponData = request.body as {
+        code: string;
+        plan_type: string;
+        usage_limit: number;
+        expires_at?: string;
+        value_type?: string;
+        value_amount?: number;
+        time_type?: string;
+        time_days?: number;
+        description?: string;
+        is_active?: boolean;
+      };
 
       const coupon = await prisma.coupon.create({
         data: {
           code: couponData.code,
-          plan_type: couponData.plan_type,
+          plan_type: couponData.plan_type as any,
           usage_limit: couponData.usage_limit,
           expires_at: couponData.expires_at ? new Date(couponData.expires_at) : null,
           value_type: couponData.value_type || 'fixed',
@@ -368,7 +379,12 @@ export class AdminController {
   async updateCoupon(request: FastifyRequest<{ Params: { id: string }; Body: any }>, reply: FastifyReply) {
     try {
       const { id } = request.params;
-      const updateData = request.body;
+      const updateData = request.body as {
+        usage_limit?: number;
+        expires_at?: string;
+        is_active?: boolean;
+        description?: string;
+      };
 
       const coupon = await prisma.coupon.update({
         where: { id },
@@ -465,7 +481,14 @@ export class AdminController {
    */
   async bulkUserOperation(request: FastifyRequest<{ Body: { operation: string; userIds: string[]; data?: any } }>, reply: FastifyReply) {
     try {
-      const { operation, userIds, data } = request.body;
+      const body = request.body as {
+        operation: string;
+        userIds: string[];
+        data?: {
+          plan_type?: string;
+        };
+      };
+      const { operation, userIds, data } = body;
 
       let result;
 
@@ -534,6 +557,16 @@ export class AdminController {
    */
   async getAdvancedLogs(request: FastifyRequest<{ Querystring: any }>, reply: FastifyReply) {
     try {
+      const query = request.query as {
+        page?: string;
+        limit?: string;
+        level?: string;
+        service?: string;
+        start_date?: string;
+        end_date?: string;
+        search?: string;
+      };
+
       const {
         page = '1',
         limit = '50',
@@ -542,7 +575,7 @@ export class AdminController {
         start_date,
         end_date,
         search
-      } = request.query;
+      } = query;
 
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
@@ -593,7 +626,15 @@ export class AdminController {
    */
   async exportData(request: FastifyRequest<{ Body: { type: string; format: string; filters?: any } }>, reply: FastifyReply) {
     try {
-      const { type, format = 'json', filters } = request.body;
+      const body = request.body as {
+        type: string;
+        format: string;
+        filters?: {
+          plan_type?: string;
+          start_date?: string;
+        };
+      };
+      const { type, format = 'json', filters } = body;
 
       let data;
 

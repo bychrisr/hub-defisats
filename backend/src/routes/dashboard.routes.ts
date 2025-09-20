@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { metrics } from '@/services/metrics.service';
-import { alerting } from '@/services/alerting.service';
-// import { monitoring } from '@/services/monitoring.service';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { metrics } from '../services/metrics.service';
+import { alerting } from '../services/alerting.service';
+// import { monitoring } from '../services/monitoring.service';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 // Interfaces for metrics
 interface MetricValue {

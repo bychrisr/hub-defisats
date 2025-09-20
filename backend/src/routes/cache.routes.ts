@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { cacheService } from '@/services/cache.service';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { cacheService } from '../services/cache.service';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function cacheRoutes(fastify: FastifyInstance) {
   // Aplicar middleware de autenticação em todas as rotas

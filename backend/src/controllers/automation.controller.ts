@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { AutomationService } from '@/services/automation.service';
+import { AutomationService } from '../services/automation.service';
 import { PrismaClient } from '@prisma/client';
-import { AutomationType } from '@/types/api-contracts';
+import { AutomationType } from '../types/api-contracts';
 
 // Interface for authenticated requests - user is declared globally in auth.middleware.ts
 // interface AuthenticatedRequest extends FastifyRequest {

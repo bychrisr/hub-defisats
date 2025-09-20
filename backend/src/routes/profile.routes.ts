@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { ProfileController } from '@/controllers/profile.controller';
+import { ProfileController } from '../controllers/profile.controller';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();

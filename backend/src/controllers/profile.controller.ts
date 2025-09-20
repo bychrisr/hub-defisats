@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { AuthService } from '@/services/auth.service';
+import { AuthService } from '../services/auth.service';
 
 export class ProfileController {
   private prisma: PrismaClient;

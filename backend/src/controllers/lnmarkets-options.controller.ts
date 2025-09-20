@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsAPIService } from '@/services/lnmarkets-api.service';
+import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
 
 interface OptionsTradeRequest {
   side: 'b' | 's';

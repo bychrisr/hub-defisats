@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsOptionsController } from '@/controllers/lnmarkets-options.controller';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { LNMarketsOptionsController } from '../controllers/lnmarkets-options.controller';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function lnmarketsOptionsRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();

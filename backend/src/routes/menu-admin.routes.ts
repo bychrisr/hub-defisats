@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { MenuService, CreateMenuItemData } from '@/services/menu.service';
-import { superAdminAuthMiddleware } from '@/middleware/auth.middleware';
+import { MenuService, CreateMenuItemData } from '../services/menu.service';
+import { superAdminAuthMiddleware } from '../middleware/auth.middleware';
 
 const menuService = new MenuService();
 

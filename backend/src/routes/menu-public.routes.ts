@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { MenuService } from '@/services/menu.service';
+import { MenuService } from '../services/menu.service';
 
 const menuService = new MenuService();
 

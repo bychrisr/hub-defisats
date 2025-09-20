@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { PrismaClient, User } from '@prisma/client';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 import { FastifyInstance } from 'fastify';
 import {
   RegisterRequest,
@@ -9,7 +9,7 @@ import {
   AuthResponse,
   RefreshTokenResponse,
   PlanType,
-} from '@/types/api-contracts';
+} from '../types/api-contracts';
 // import { createLNMarketsService } from './lnmarkets.service';
 import { OptimizedQueriesService } from './optimized-queries.service';
 // import { cacheService } from './cache.service';

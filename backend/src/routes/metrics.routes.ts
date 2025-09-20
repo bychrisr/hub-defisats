@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { metrics } from '@/utils/metrics';
+import { metrics } from '../utils/metrics';
 
 export async function metricsRoutes(fastify: FastifyInstance) {
   // Endpoint para métricas Prometheus

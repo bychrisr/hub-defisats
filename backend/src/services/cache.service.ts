@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 
 export interface CacheOptions {
   ttl?: number; // Time to live in seconds

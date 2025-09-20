@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
-import { AutomationService } from '@/services/automation.service';
+import { AutomationService } from './services/automation.service';
 
 describe('AutomationService', () => {
   let prisma: PrismaClient;

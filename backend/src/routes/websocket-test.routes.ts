@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-// import { websocketManager } from '@/services/websocket-manager.service';
+// import { websocketManager } from '../services/websocket-manager.service';
 
 export async function websocketTestRoutes(fastify: FastifyInstance) {
   console.log('🔌 WEBSOCKET TEST - Registrando rota WebSocket');

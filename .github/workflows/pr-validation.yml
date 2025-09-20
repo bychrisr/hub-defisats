@@ -1,0 +1,150 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hubdefisats_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: Lint backend
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Lint frontend
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Type check backend
+        run: |
+          cd backend
+          npm run type-check
+
+      - name: Type check frontend
+        run: |
+          cd frontend
+          npm run type-check
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm run test -- --coverage
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/hubdefisats_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_jwt_secret
+          JWT_REFRESH_SECRET: test_refresh_secret
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm run test -- --coverage
+
+      - name: Security audit
+        run: |
+          cd backend && npm audit --audit-level moderate
+          cd ../frontend && npm audit --audit-level moderate
+
+      - name: Build applications
+        run: |
+          cd backend && npm run build
+          cd ../frontend && npm run build
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage/lcov.info,./frontend/coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Comment PR with test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('## 🧪 Test Results')
+            );
+            
+            const testResults = `
+            ## 🧪 Test Results
+            
+            **Status**: ${{ job.status === 'success' ? '✅ Passed' : '❌ Failed' }}
+            
+            **Backend Tests**: ${{ steps.backend-tests.outcome === 'success' ? '✅ Passed' : '❌ Failed' }}
+            **Frontend Tests**: ${{ steps.frontend-tests.outcome === 'success' ? '✅ Passed' : '❌ Failed' }}
+            **Linting**: ${{ steps.lint.outcome === 'success' ? '✅ Passed' : '❌ Failed' }}
+            **Type Checking**: ${{ steps.type-check.outcome === 'success' ? '✅ Passed' : '❌ Failed' }}
+            **Security Audit**: ${{ steps.security-audit.outcome === 'success' ? '✅ Passed' : '❌ Failed' }}
+            **Build**: ${{ steps.build.outcome === 'success' ? '✅ Passed' : '❌ Failed' }}
+            
+            **Commit**: \`${{ github.sha }}\`
+            **Branch**: \`${{ github.head_ref }}\`
+            `;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: testResults
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: testResults
+              });
+            }

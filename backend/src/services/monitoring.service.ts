@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 
 export class MonitoringService {
   private static instance: MonitoringService;

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { CreateCouponRequest, CouponResponse, PlanType } from '@/types/api-contracts';
+import { CreateCouponRequest, CouponResponse, PlanType } from '../types/api-contracts';
 
 export class CouponService {
   private prisma: PrismaClient;

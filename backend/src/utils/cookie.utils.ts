@@ -1,5 +1,5 @@
 import { FastifyReply } from 'fastify';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 
 export class CookieUtils {
   /**

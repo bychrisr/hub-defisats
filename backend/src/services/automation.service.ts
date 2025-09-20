@@ -1,6 +1,6 @@
 import { PrismaClient, Automation } from '@prisma/client';
 import { z } from 'zod';
-import { AutomationType } from '@/types/api-contracts';
+import { AutomationType } from '../types/api-contracts';
 
 // Configuration schemas for each automation type
 const MarginGuardConfigSchema = z.object({

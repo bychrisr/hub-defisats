@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Redis } from 'ioredis';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 import crypto from 'crypto';
 
 export class CSRFMiddleware {

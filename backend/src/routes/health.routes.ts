@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { Redis } from 'ioredis';
-import { config } from '@/config/env';
-import { metrics } from '@/utils/metrics';
+import { config } from '../config/env';
+import { metrics } from '../utils/metrics';
 
 export async function healthRoutes(fastify: FastifyInstance) {
   // Create new instances instead of accessing from fastify

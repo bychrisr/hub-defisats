@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { AuthService } from '@/services/auth.service';
-import { metrics } from '@/utils/metrics';
+import { AuthService } from '../services/auth.service';
+import { metrics } from '../utils/metrics';
 import { metricsHistoryService } from '../services/metrics-history.service';
 
 const prisma = new PrismaClient();

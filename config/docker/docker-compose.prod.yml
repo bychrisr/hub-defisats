@@ -39,7 +39,9 @@ services:
 
   # Backend API
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
     container_name: hub-defisats-backend
     environment:
       NODE_ENV: production
@@ -80,7 +82,9 @@ services:
 
   # Frontend Application
   frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:latest
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
     container_name: hub-defisats-frontend
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3010}
@@ -121,7 +125,9 @@ services:
 
   # Worker Services
   margin-monitor:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
     container_name: hub-defisats-margin-monitor
     command: ["npm", "run", "worker:margin-monitor"]
     environment:
@@ -143,7 +149,9 @@ services:
     restart: unless-stopped
 
   automation-executor:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
     container_name: hub-defisats-automation-executor
     command: ["npm", "run", "worker:automation-executor"]
     environment:
@@ -165,7 +173,9 @@ services:
     restart: unless-stopped
 
   notification-worker:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
     container_name: hub-defisats-notification-worker
     command: ["npm", "run", "worker:notification"]
     environment:
@@ -184,7 +194,9 @@ services:
     restart: unless-stopped
 
   payment-validator:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
     container_name: hub-defisats-payment-validator
     command: ["npm", "run", "worker:payment-validator"]
     environment:
@@ -204,7 +216,9 @@ services:
     restart: unless-stopped
 
   simulation-executor:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
     container_name: hub-defisats-simulation-executor
     command: ["npm", "run", "worker:simulation-executor"]
     environment:

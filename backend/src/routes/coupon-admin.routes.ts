@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { adminAuthMiddleware } from '@/middleware/auth.middleware';
-import { CouponService } from '@/services/coupon.service';
-import { CreateCouponRequestSchema } from '@/types/api-contracts';
+import { adminAuthMiddleware } from '../middleware/auth.middleware';
+import { CouponService } from '../services/coupon.service';
+import { CreateCouponRequestSchema } from '../types/api-contracts';
 
 export async function couponAdminRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();

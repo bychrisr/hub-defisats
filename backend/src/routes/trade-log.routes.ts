@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { TradeLogController } from '@/controllers/trade-log.controller';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { TradeLogController } from '../controllers/trade-log.controller';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function tradeLogRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();

@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { AuthService } from '@/services/auth.service';
+import { AuthService } from '../services/auth.service';
 import { PrismaClient } from '@prisma/client';
-// import { config } from '@/config/env';
+// import { config } from '../config/env';
 
 // Interface for authenticated requests
 // interface AuthenticatedRequest extends FastifyRequest {
