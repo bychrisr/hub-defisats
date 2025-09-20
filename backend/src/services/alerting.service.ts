@@ -59,7 +59,7 @@ export class AlertingService {
         id: 'high_response_time',
         name: 'High Response Time',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const responseTimeMetric = metricsData.find(
             (m: any) => m.name === 'http_request_duration_seconds'
           );
@@ -80,7 +80,7 @@ export class AlertingService {
         id: 'high_error_rate',
         name: 'High Error Rate',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const errorRateMetric = metricsData.find(
             (m: any) => m.name === 'http_requests_total'
           );
@@ -103,7 +103,7 @@ export class AlertingService {
         id: 'high_memory_usage',
         name: 'High Memory Usage',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const memoryMetric = metricsData.find(
             (m: any) => m.name === 'memory_usage_bytes' && m.labels?.type === 'heapUsed'
           );
@@ -121,7 +121,7 @@ export class AlertingService {
         id: 'high_cpu_usage',
         name: 'High CPU Usage',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const cpuMetric = metricsData.find(
             (m: any) => m.name === 'cpu_usage_percent'
           );
@@ -139,7 +139,7 @@ export class AlertingService {
         id: 'high_auth_failures',
         name: 'High Authentication Failures',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const authFailuresMetric = metricsData.find(
             (m: any) => m.name === 'auth_failures_total'
           );
@@ -162,7 +162,7 @@ export class AlertingService {
         id: 'rate_limit_abuse',
         name: 'Rate Limit Abuse',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const rateLimitMetric = metricsData.find(
             (m: any) => m.name === 'rate_limit_blocks_total'
           );
@@ -186,7 +186,7 @@ export class AlertingService {
         id: 'lnmarkets_api_errors',
         name: 'LN Markets API Errors',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const apiErrorsMetric = metricsData.find(
             (m: any) => m.name === 'lnmarkets_api_errors_total'
           );
@@ -210,7 +210,7 @@ export class AlertingService {
         id: 'worker_job_failures',
         name: 'Worker Job Failures',
         condition: async () => {
-          const metricsData = await metrics.getMetricsAsJSON();
+          const metricsData = await metrics.getMetricsAsJson();
           const workerFailuresMetric = metricsData.find(
             (m: any) => m.name === 'worker_job_failures_total'
           );

@@ -34,8 +34,10 @@ model User {
   locked_until               DateTime?            @db.Timestamp(6)
   last_login_ip              String?
   last_login_user_agent      String?
+  last_login_at              DateTime?            @db.Timestamp(6)
   ln_markets_passphrase      String?              @db.VarChar(255)
   plan_type                  PlanType             @default(free)
+  preferences                Json?
   admin_user                 AdminUser?
   automations                Automation[]
   backtest_reports           BacktestReport[]
@@ -45,6 +47,8 @@ model User {
   user_coupons               UserCoupon[]         @relation("UserCouponRelation")
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
+  simulations                Simulation[]
+  notification_logs          NotificationLog[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -91,6 +95,7 @@ model Notification {
   created_at     DateTime @default(now()) @db.Timestamp(6)
   updated_at     DateTime @default(now()) @db.Timestamp(6)
   user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  logs           NotificationLog[]
 
   @@index([user_id], map: "idx_notification_user_id")
 }
@@ -105,9 +110,16 @@ model Payment {
   created_at        DateTime  @default(now()) @db.Timestamp(6)
   updated_at        DateTime  @default(now()) @db.Timestamp(6)
   plan_type         PlanType
+  description       String?
+  expires_at        DateTime? @db.Timestamp(6)
+  payment_hash      String?
+  preimage          String?
+  expiry_seconds    Int?
   user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_payment_user_id")
+  @@index([payment_hash])
+  @@index([expires_at])
 }
 
 model BacktestReport {
@@ -308,4 +320,95 @@ model TooltipConfig {
   @@index([card_key])
   @@index([is_enabled])
   @@map("tooltip_configs")
+}
+
+// Tabela de Planos
+model Plan {
+  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name          String   @unique
+  slug          String   @unique
+  description   String?
+  price_sats    Int      @default(0)
+  price_monthly Int?
+  price_yearly  Int?
+  features      Json?    // Array de features do plano
+  is_active     Boolean  @default(true)
+  order         Int      @default(0)
+  stripe_price_id String?
+  has_api_access Boolean @default(false)
+  has_advanced  Boolean  @default(false)
+  has_priority  Boolean  @default(false)
+  max_notifications Int  @default(0)
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([slug])
+  @@index([is_active])
+  @@index([order])
+  @@map("plans")
+}
+
+// Tabela de Simulações
+model Simulation {
+  id              String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id         String
+  name            String
+  description     String?
+  config          Json     // Configuração da simulação
+  status          String   @default("pending") // pending, running, completed, failed
+  automation_type String?
+  price_scenario  String?
+  duration        Int?
+  initial_price   Float?
+  started_at      DateTime? @db.Timestamp(6)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
+  completed_at    DateTime? @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  results SimulationResult[]
+
+  @@index([user_id])
+  @@index([status])
+  @@index([automation_type])
+  @@map("simulations")
+}
+
+// Tabela de Resultados de Simulação
+model SimulationResult {
+  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  simulation_id String
+  result_data   Json     // Dados do resultado
+  timestamp     DateTime @default(now()) @db.Timestamp(6)
+  action_type   String?
+  success_rate  Float?
+  pnl           Float?
+  account_balance Float?
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+
+  simulation Simulation @relation(fields: [simulation_id], references: [id], onDelete: Cascade)
+
+  @@index([simulation_id])
+  @@index([timestamp])
+  @@map("simulation_results")
+}
+
+// Tabela de Logs de Notificação
+model NotificationLog {
+  id             String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  notification_id String
+  user_id        String?
+  status         String   // sent, failed, pending
+  error_message  String?
+  channel        String?
+  sent_at        DateTime? @db.Timestamp(6)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+
+  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([notification_id])
+  @@index([user_id])
+  @@index([status])
+  @@map("notification_logs")
 }

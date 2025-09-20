@@ -120,7 +120,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
         console.log('🔍 DASHBOARD - Starting dashboard data fetch...');
         
         console.log('🔍 DASHBOARD - Getting metrics data...');
-        const metricsData = await metrics.getMetricsAsJSON();
+        const metricsData = await metrics.getMetricsAsJson();
         console.log('✅ DASHBOARD - Metrics data retrieved:', metricsData.length, 'metrics');
         
         console.log('🔍 DASHBOARD - Getting active alerts...');
@@ -384,7 +384,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
         // const query = request.query as { timeRange?: string };
         // const timeRange = query.timeRange || '24h';
 
-        const metricsData = await metrics.getMetricsAsJSON();
+        const metricsData = await metrics.getMetricsAsJson();
 
         // Filtrar métricas por período (simplificado)
         // const now = Date.now();
