@@ -9,6 +9,15 @@ export async function healthRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
   const redis = new Redis(config.redis.url);
 
+  // Hook para garantir que as rotas de health sejam públicas
+  fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
+    // Pular autenticação para rotas de health
+    if (request.url.startsWith('/health') || request.url.startsWith('/api/health')) {
+      return; // Continue sem autenticação
+    }
+    // Para outras rotas, aplicar autenticação normal se necessário
+  });
+
   // Basic health check
   fastify.get('/health', async (_request: FastifyRequest, reply: FastifyReply) => {
     const startTime = Date.now();

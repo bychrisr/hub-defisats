@@ -200,13 +200,13 @@ export async function websocketRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Apply authentication middleware to all routes (except WebSocket routes above)
-  fastify.addHook('preHandler', authMiddleware);
+  // Authentication middleware will be applied per route as needed
 
   // Connect to WebSocket
   fastify.post(
     '/websocket/connect',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Connect to LN Markets WebSocket',
         tags: ['WebSocket'],
@@ -309,6 +309,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/websocket/subscribe/market',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Subscribe to market data updates',
         tags: ['WebSocket'],
@@ -366,6 +367,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/websocket/subscribe/positions',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Subscribe to position updates',
         tags: ['WebSocket'],
@@ -416,6 +418,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/websocket/subscribe/margin',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Subscribe to margin updates',
         tags: ['WebSocket'],
@@ -466,6 +469,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/websocket/status',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get WebSocket connection status',
         tags: ['WebSocket'],
@@ -518,6 +522,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/websocket/disconnect',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Disconnect from WebSocket',
         tags: ['WebSocket'],

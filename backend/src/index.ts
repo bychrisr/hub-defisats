@@ -151,7 +151,7 @@ async function registerPlugins() {
       code: 429,
       error: 'Too Many Requests',
       message: 'Rate limit exceeded',
-      retryAfter: Math.round(context.after / 1000)
+      retryAfter: Math.round(Number(context.after) / 1000)
     })
   });
   console.log('✅ Rate limiting plugin registered');
@@ -409,6 +409,14 @@ async function registerRoutes() {
               }
             }
           }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
         }
       }
     }
@@ -543,6 +551,8 @@ async function registerRoutes() {
   await fastify.register(authRoutes, { prefix: '/api/auth' });
   console.log('✅ Auth routes registered');
 
+  // Tooltip routes moved to the end to avoid hook leakage
+
   // Metrics routes (commented out - using public /metrics endpoint instead)
   // await fastify.register(metricsRoutes, { prefix: '/api/metrics' });
   // console.log('✅ Metrics routes registered');
@@ -662,8 +672,8 @@ async function registerRoutes() {
   // Health routes (without authentication)
   await fastify.register(healthRoutes, { prefix: '/api' });
   console.log('✅ Health routes registered');
-  
-  // Tooltip and Dashboard Card management
+
+  // Tooltip and Dashboard Card management (public routes - register last to avoid hook leakage)
   await fastify.register(tooltipRoutes, { prefix: '/api' });
   console.log('✅ Tooltip routes registered');
 
@@ -772,7 +782,7 @@ async function gracefulShutdown(signal: string) {
     fastify.log.info('Server closed successfully');
     process.exit(0);
   } catch (error) {
-    fastify.log.error('Error during shutdown:', error as any);
+    fastify.log.error('Error during shutdown:', error as Error);
     process.exit(1);
   }
 }
@@ -827,7 +837,7 @@ async function start() {
     
     console.log('✅ Advanced monitoring services started');
   } catch (error) {
-    fastify.log.error('Error starting server:', error as any);
+    fastify.log.error('Error starting server:', error as Error);
     console.error('❌ Full error details:', error);
     console.error('❌ Error stack:', (error as Error).stack);
     process.exit(1);

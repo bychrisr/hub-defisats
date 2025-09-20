@@ -12,14 +12,15 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       userId,
       remoteAddress: req.socket?.remoteAddress || 'unknown',
       userAgent: req.headers['user-agent'] || 'unknown',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      query: req.query
     });
     
-           if (!userId) {
-             console.log('❌ WEBSOCKET TEST - User ID não fornecido, fechando conexão');
-             connection.close(1008, 'User ID is required');
-             return;
-           }
+    if (!userId) {
+      console.log('❌ WEBSOCKET TEST - User ID não fornecido, fechando conexão');
+      connection.socket.close(1008, 'User ID is required');
+      return;
+    }
 
     console.log('🔌 WEBSOCKET TEST - Processando conexão para usuário:', userId);
     
@@ -120,7 +121,7 @@ export async function websocketTestRoutes(fastify: FastifyInstance) {
       } catch (sendError) {
         console.error('❌ WEBSOCKET TEST - Erro ao enviar mensagem de erro:', sendError);
       }
-      connection.close(1011, 'Internal server error');
+      connection.socket.close(1011, 'Internal server error');
     }
   });
 }
