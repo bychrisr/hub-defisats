@@ -64,7 +64,10 @@ export const DesktopNavigation = ({ isScrolled = false }: { isScrolled?: boolean
       'hidden md:flex items-center justify-center space-x-8 transition-all duration-300',
       isScrolled ? 'h-12 space-x-6' : 'h-16 space-x-8'
     )}>
-      {navigation.map((item) => {
+      {navigation.length === 0 ? (
+        <div className="text-red-500">No navigation items found</div>
+      ) : (
+        navigation.map((item) => {
         const Icon = item.icon;
         const active = isActive(item.href);
 
@@ -89,7 +92,7 @@ export const DesktopNavigation = ({ isScrolled = false }: { isScrolled?: boolean
             <span>{item.name}</span>
           </Link>
         );
-      })}
+      }))}
     </nav>
   );
 };
@@ -163,7 +166,7 @@ export const DesktopHeader = () => {
     )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className={cn(
-          'flex items-center transition-all duration-300',
+          'flex items-center justify-between transition-all duration-300',
           isScrolled ? 'h-12' : 'h-16'
         )}>
           {/* Logo */}
@@ -186,8 +189,8 @@ export const DesktopHeader = () => {
             </span>
           </div>
 
-          {/* Navigation - Perfectly Centered */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
+          {/* Navigation - Centered */}
+          <div className="flex-1 flex justify-center">
             <DesktopNavigation isScrolled={isScrolled} />
           </div>
 

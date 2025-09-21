@@ -22,14 +22,14 @@ export const ResponsiveLayout = ({ children }: ResponsiveLayoutProps) => {
         <LNMarketsHeader />
 
         {/* Desktop Header - Hidden on mobile */}
-        <div className="hidden md:block">
+        <div className="hidden md:block relative z-10">
           <DesktopHeader />
         </div>
       </div>
 
       {/* Main Content with proper spacing */}
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24 md:pt-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-32 md:pt-32">
           {children}
         </div>
       </main>
