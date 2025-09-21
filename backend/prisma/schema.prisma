@@ -49,6 +49,9 @@ model User {
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
   simulations                Simulation[]
   notification_logs          NotificationLog[]
+  security_audit_logs        SecurityAuditLog[]
+  refresh_tokens             RefreshToken[]
+  security_configs_updated   SecurityConfig[] @relation("SecurityConfigUpdatedBy")
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -411,4 +414,58 @@ model NotificationLog {
   @@index([user_id])
   @@index([status])
   @@map("notification_logs")
+}
+
+model SecurityConfig {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  key         String   @unique
+  value       String
+  description String?
+  category    String   @default("authentication")
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_by  String?
+
+  updated_by_user User? @relation("SecurityConfigUpdatedBy", fields: [updated_by], references: [id], onDelete: SetNull)
+
+  @@map("SecurityConfig")
+}
+
+model SecurityAuditLog {
+  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id    String?
+  action     String
+  resource   String?
+  ip_address String?
+  user_agent String?
+  success    Boolean  @default(true)
+  details    Json?
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([action])
+  @@index([created_at])
+  @@map("SecurityAuditLog")
+}
+
+model RefreshToken {
+  id           String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id      String
+  token        String    @unique
+  expires_at   DateTime  @db.Timestamp(6)
+  is_revoked   Boolean   @default(false)
+  ip_address   String?
+  user_agent   String?
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  last_used_at DateTime? @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([expires_at])
+  @@index([is_revoked])
+  @@map("RefreshToken")
 }

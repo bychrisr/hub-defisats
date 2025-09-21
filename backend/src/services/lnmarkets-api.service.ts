@@ -48,7 +48,11 @@ export class LNMarketsAPIService {
     });
 
     // Initialize circuit breaker with 5 failures threshold and 60s timeout
-    this.circuitBreaker = new CircuitBreaker(5, 60000);
+    this.circuitBreaker = new CircuitBreaker({ 
+      failureThreshold: 5, 
+      recoveryTimeout: 60000,
+      monitoringPeriod: 60000
+    });
     this.retryService = new RetryService(logger);
     this.logger = logger;
 
@@ -690,7 +694,7 @@ export class LNMarketsAPIService {
       console.log('🔍 LN MARKETS VALIDATE - Starting credentials validation');
       
       // Allow test credentials for development
-      if (this.config.apiKey.startsWith('test-') || this.config.apiKey.startsWith('dummy-')) {
+      if (this.credentials.apiKey.startsWith('test-') || this.credentials.apiKey.startsWith('dummy-')) {
         console.log('✅ LN MARKETS VALIDATE - Test credentials detected, skipping validation');
         return true;
       }

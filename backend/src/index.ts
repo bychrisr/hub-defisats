@@ -30,6 +30,7 @@ import { notificationRoutes } from './routes/notification.routes';
 import { backtestRoutes } from './routes/backtest.routes';
 import { paymentRoutes } from './routes/payment.routes';
 import { securityRoutes } from './routes/security.routes';
+import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
 import { planRoutes } from './routes/plan.routes';
 import { healthRoutes } from './routes/health.routes';
@@ -659,6 +660,9 @@ async function registerRoutes() {
   // Security routes
   await fastify.register(securityRoutes);
   console.log('✅ Security routes registered');
+
+  await fastify.register(securityConfigRoutes);
+  console.log('✅ Security config routes registered');
 
   // Advanced admin routes
   await fastify.register(adminAdvancedRoutes);

@@ -560,15 +560,53 @@ export class LNMarketsUserController {
         });
       }
 
-      const lnmarkets = await this.getLNMarketsService(userId);
-      const result = await lnmarkets.getUserPositions();
-      
-      console.log(`[UserController] User positions retrieved for user ${userId}`);
+      // Check if credentials are placeholders
+      try {
+        const { AuthService } = await import('../services/auth.service');
+        const authService = new AuthService(this.prisma, {} as any);
+        
+        const decryptedApiKey = authService.decryptData(user.ln_markets_api_key);
+        const decryptedApiSecret = authService.decryptData(user.ln_markets_api_secret);
+        
+        if (decryptedApiKey === 'your_api_key_here' || decryptedApiSecret === 'your_api_secret_here') {
+          console.log(`[UserController] User ${userId} has placeholder LN Markets credentials`);
+          
+          return reply.send({
+            success: true,
+            data: [], // Empty array
+            message: 'LN Markets credentials are not configured. Please update your API credentials in settings with real LN Markets API key, secret, and passphrase.'
+          });
+        }
+      } catch (decryptError) {
+        console.log(`[UserController] Error decrypting credentials for user ${userId}:`, decryptError);
+        // Continue with normal flow if decryption fails
+      }
 
-      return reply.send({
-        success: true,
-        data: result
-      });
+      try {
+        const lnmarkets = await this.getLNMarketsService(userId);
+        const result = await lnmarkets.getUserPositions();
+        
+        console.log(`[UserController] User positions retrieved for user ${userId}`);
+
+        return reply.send({
+          success: true,
+          data: result
+        });
+      } catch (lnmarketsError: any) {
+        console.error(`[UserController] Error with LN Markets service for user ${userId}:`, lnmarketsError);
+        
+        // Check if it's a decryption error
+        if (lnmarketsError.message?.includes('bad decrypt')) {
+          return reply.send({
+            success: true,
+            data: [],
+            message: 'LN Markets credentials are corrupted or encrypted with a different key. Please reconfigure your API credentials in settings.'
+          });
+        }
+        
+        // Re-throw other errors to be handled by the outer catch
+        throw lnmarketsError;
+      }
     } catch (error: any) {
       console.error('[UserController] Error getting user positions:', error);
       console.error('[UserController] Error details:', {
