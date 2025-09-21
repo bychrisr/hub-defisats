@@ -19,9 +19,9 @@ const badgeVariants = cva(
           'border-transparent bg-gradient-accent text-black hover:neon-accent',
         // Custom variants for market data
         success:
-          'border-transparent bg-axisor-success text-white hover:neon-success',
+          'border-transparent bg-axisor-success text-white',
         danger:
-          'border-transparent bg-axisor-destructive text-white hover:neon-success',
+          'border-transparent bg-axisor-destructive text-white',
       },
     },
     defaultVariants: {

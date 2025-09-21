@@ -112,7 +112,7 @@ const LNMarketsHeader: React.FC = () => {
 
   const format24hChange = (value: number) => {
     const sign = value >= 0 ? '+' : '';
-    return sign + value.toFixed(1) + '%';
+    return sign + value.toFixed(2) + '%';
   };
 
   const formatRate = (value: number) => {
