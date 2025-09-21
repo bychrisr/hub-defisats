@@ -66,8 +66,8 @@ export const PnLCard: React.FC<PnLCardProps> = ({
     
     if (isNeutral) return 'text-vibrant';
     return isPositive 
-      ? 'text-success font-bold'
-      : 'text-destructive font-bold';
+      ? 'text-green-200 font-bold'
+      : 'text-red-200 font-bold';
   };
 
   const getIconColor = () => {
