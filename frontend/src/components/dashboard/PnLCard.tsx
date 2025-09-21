@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, LucideIcon, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFormatSats } from '@/hooks/useFormatSats';
 import { useTooltips } from '@/hooks/useTooltips';
+import SatsIcon from '@/components/SatsIcon';
 
 interface PnLCardProps {
   title: string;
@@ -124,7 +125,16 @@ export const PnLCard: React.FC<PnLCardProps> = ({
         <CardContent className="dashboard-card-content">
           <div className="flex items-center gap-2">
             <div className={cn('number-lg dashboard-card-value', getTextColor())}>
-              {showSatsIcon ? formatSats(pnl, { size: 28, variant: variant === 'neutral' ? 'neutral' : 'auto' }) : pnl.toString()}
+              {showSatsIcon ? (
+                <span className="flex items-center gap-1">
+                  {formatSats(pnl, { size: 28, showIcon: false, variant: variant === 'neutral' ? 'neutral' : 'auto' })}
+                  <SatsIcon 
+                    size={28} 
+                    variant={variant === 'neutral' ? 'neutral' : (isPositive ? 'positive' : isNeutral ? 'neutral' : 'negative')} 
+                    className={cn('sats-icon-mobile', getTextColor())}
+                  />
+                </span>
+              ) : pnl.toString()}
             </div>
             {percentage !== undefined && (
               <Badge 
