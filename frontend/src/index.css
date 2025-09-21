@@ -847,8 +847,15 @@
 
   /* LN Markets Header - Specific class for straight corners */
   .card-lnmarkets-header {
-    @apply bg-bg-header border border-border p-0 transition-all duration-300;
+    @apply bg-bg-header border border-border transition-all duration-300;
     border-radius: 0 !important;
+    padding: 0.5rem 0; /* Padding mínimo para mobile */
+  }
+
+  @media (min-width: 768px) {
+    .card-lnmarkets-header {
+      padding: 0.75rem 0; /* Padding maior para desktop */
+    }
   }
 
   /* Navigation Menu Animations */

@@ -129,7 +129,7 @@ const LNMarketsHeader: React.FC = () => {
   };
 
   return (
-    <Card className="card-lnmarkets-header border-b-0 py-1 md:py-2 cursor-default hover:border-border">
+    <Card className="card-lnmarkets-header border-b-0 cursor-default hover:border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile Layout - Two lines horizontal */}
         <div className="md:hidden">
