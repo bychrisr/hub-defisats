@@ -158,6 +158,11 @@ Toda a documentação está organizada na pasta `.system/`:
 - **Limpeza automática** de tokens expirados
 - **Rastreamento de IP e User-Agent** para todas as ações
 - **Configurações dinâmicas** via banco de dados
+- **🛡️ Segurança em Mercados Voláteis**: [Documentação completa](./docs/VOLATILE_MARKET_SAFETY.md)
+  - Zero tolerância a dados antigos ou simulados
+  - Cache máximo de 30 segundos para dados de mercado
+  - Validação rigorosa de timestamps
+  - Interface educativa sobre riscos de dados desatualizados
 
 #### APIs de Segurança (Admin)
 ```bash

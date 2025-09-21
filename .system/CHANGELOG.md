@@ -6,6 +6,59 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.1] - 2025-01-21 - Segurança em Mercados Voláteis 🛡️ **CRITICAL SECURITY UPDATE**
+
+### 🛡️ Remoção de Dados Antigos e Simulados
+- ✅ **Zero Tolerância a Dados Antigos**: Removidos todos os fallbacks com dados desatualizados
+- ✅ **Cache Reduzido**: TTL reduzido de 5 minutos para 30 segundos (dados em tempo real)
+- ✅ **Validação Rigorosa**: Dados rejeitados se > 30 segundos de idade
+- ✅ **Nenhum Dados Simulados**: Removidos todos os dados padrão/fallback
+- ✅ **Erro Transparente**: Interface clara quando dados indisponíveis
+
+### 🔧 Melhorias de Segurança
+- ✅ **MarketDataError Component**: Interface educativa sobre riscos de dados antigos
+- ✅ **Validação de Timestamp**: Verificação rigorosa de idade dos dados
+- ✅ **Cache Inteligente**: Apenas 30s para evitar spam, nunca em caso de erro
+- ✅ **Retry Logic**: Sistema de retry sem comprometer segurança
+- ✅ **Logs Detalhados**: Rastreamento completo de validação de dados
+
+### 📊 Princípios de Segurança Implementados
+- ✅ **Mercados Voláteis**: Bitcoin pode variar 5-10% em 1 hora
+- ✅ **Dados Antigos Perigosos**: Podem causar perdas financeiras reais
+- ✅ **Transparência Total**: Usuário sempre sabe quando dados indisponíveis
+- ✅ **Educação do Usuário**: Interface explica por que dados antigos são perigosos
+- ✅ **Integridade Garantida**: Dados sempre atuais ou erro claro
+
+### 🗄️ Arquivos Modificados
+- ✅ **Backend**: `market-data.routes.ts` - Cache de 30s, zero fallback
+- ✅ **Frontend**: `useCentralizedData.ts` - Validação rigorosa
+- ✅ **Frontend**: `useMarketTicker.ts` - Removidos dados padrão
+- ✅ **UI**: `MarketDataError.tsx` - Componente educativo
+- ✅ **Teste**: `test-market-index.js` - Validação de cache de 30s
+
+### 📚 Documentação
+- ✅ **VOLATILE_MARKET_SAFETY.md**: Documentação completa de princípios de segurança
+- ✅ **Exemplos Reais**: Casos de volatilidade e riscos
+- ✅ **Checklist de Segurança**: Validação de implementação
+- ✅ **Referências**: APIs e melhores práticas
+
+### 🎯 Benefícios Alcançados
+- ✅ **Segurança Financeira**: Zero risco de dados desatualizados
+- ✅ **Confiança do Usuário**: Sistema honesto sobre limitações
+- ✅ **Integridade de Dados**: Sempre atuais ou erro claro
+- ✅ **Educação**: Usuário entende riscos de dados antigos
+- ✅ **Performance**: Cache otimizado sem comprometer segurança
+
+### ⚠️ Breaking Changes
+- ❌ **Dados Padrão Removidos**: Interface pode mostrar erro em vez de dados simulados
+- ❌ **Cache Reduzido**: Dados podem ser recarregados mais frequentemente
+- ❌ **Validação Rigorosa**: Dados antigos são rejeitados automaticamente
+
+### 🔗 Referências
+- [Documentação de Segurança](./docs/VOLATILE_MARKET_SAFETY.md)
+- [Princípios de Mercados Voláteis](./docs/VOLATILE_MARKET_SAFETY.md#contexto-mercados-financeiros-voláteis)
+- [Checklist de Segurança](./docs/VOLATILE_MARKET_SAFETY.md#checklist-de-segurança)
+
 ## [1.5.0] - 2025-01-21 - Sistema de Segurança Robusto 🔐 **MAJOR SECURITY UPDATE**
 
 ### 🔐 Sistema de Segurança Avançado
