@@ -6,6 +6,38 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.4] - 2025-01-21 - Correção Mobile Navigation e Melhoria Profile Page 📱 **MOBILE FIX & PROFILE ENHANCEMENT**
+
+### 🔧 **Correções Mobile Navigation**
+- **Classe CSS Ausente**: Adicionada classe `h-15` (3.75rem) para altura do menu mobile
+- **Z-index Conflicts**: Corrigido conflito entre menu mobile (z-50) e header
+- **MobileDrawer Layering**: Atualizado z-index para z-[60] para aparecer acima de outros elementos
+- **Visibilidade Forçada**: Adicionada classe `mobile-nav` com regras CSS para garantir exibição
+- **Responsividade**: Menu mobile agora funciona corretamente em todas as telas
+
+### 🎨 **Melhorias Profile Page**
+- **Layout Padronizado**: Adicionado container com `py-8 px-4` e `max-w-7xl mx-auto`
+- **Espaçamento Correto**: Título não mais colado no menu, seguindo padrão das outras páginas
+- **Cores Consistentes**: `text-text-primary` e `text-text-secondary` para hierarquia visual
+- **Estrutura Unificada**: Mesmo padrão do Dashboard, Positions e outras páginas
+
+### ✨ **Profile Tabs com Glow Effect**
+- **profile-tabs-glow**: Classe para tema escuro com gradientes e sombras
+- **profile-tabs-glow-light**: Classe para tema claro com efeitos sutis
+- **Gradientes Brand**: Cores azul, roxo e ciano da identidade visual
+- **Hover Effects**: `translateY(-1px)` e background sutil
+- **Active State**: Glow intenso com sombras múltiplas
+- **Transições Suaves**: 0.3s ease para movimento profissional
+
+### 🔧 **Melhorias Técnicas**
+- **Theme Integration**: Importação de `useTheme` e `cn` para estilização condicional
+- **CSS Classes**: Criação de classes específicas para efeitos glow
+- **Responsive Design**: Adaptação perfeita para mobile e desktop
+- **Accessibility**: Mantém funcionalidade e acessibilidade
+
+### 🎯 **Resultado**
+Mobile navigation funcionando perfeitamente e Profile page com layout consistente e efeitos glow elegantes que mantêm a identidade visual da aplicação.
+
 ## [1.5.2] - 2025-01-21 - Interface Moderna e Glassmorphism ✨ **UI/UX ENHANCEMENT**
 
 ### 🎨 Melhorias de Interface

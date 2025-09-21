@@ -36,6 +36,7 @@ import { useMainMenu } from '@/hooks/useDynamicMenus';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { MAIN_NAVIGATION } from '@/constants/navigation';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import { AccountSelector } from '@/components/account/AccountSelector';
 
 // Fallback para quando a API não estiver disponível
 const fallbackNavigation = MAIN_NAVIGATION;
@@ -192,7 +193,7 @@ export const DesktopHeader = () => {
       'w-full border-b transition-all duration-500 ease-in-out transform header-fade-in glassmorphism-header relative',
       isScrolled ? 'shadow-coingecko-md' : '',
       isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0',
-      scrollDirection === 'down' ? 'pointer-events-none' : 'pointer-events-auto'
+      'pointer-events-auto'
     )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className={cn(
@@ -227,6 +228,9 @@ export const DesktopHeader = () => {
 
           {/* Right side - User Profile */}
           <div className="ml-auto flex items-center space-x-4">
+            {/* Account Selector */}
+            <AccountSelector />
+
             {/* Notifications */}
             <NotificationDropdown isScrolled={isScrolled} />
 

@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { RealtimeDataProvider } from '@/contexts/RealtimeDataContext';
 import { PositionsProvider } from '@/contexts/PositionsContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { AccountProvider } from '@/contexts/AccountContext';
 import { Layout } from '@/components/layout/Layout';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -211,7 +212,8 @@ const App = () => {
         <RealtimeDataProvider>
           <PositionsProvider>
             <NotificationProvider>
-              <TooltipProvider>
+              <AccountProvider>
+                <TooltipProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter
@@ -396,7 +398,8 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-            </TooltipProvider>
+                </TooltipProvider>
+              </AccountProvider>
             </NotificationProvider>
           </PositionsProvider>
         </RealtimeDataProvider>
