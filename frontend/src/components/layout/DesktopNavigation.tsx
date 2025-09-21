@@ -54,15 +54,22 @@ export const DesktopNavigation = ({ isScrolled = false }: { isScrolled?: boolean
   };
 
   // Usar dados dinâmicos ou fallback
-  const rawNavigation = isLoading || error ? fallbackNavigation : menuItems;
+  const rawNavigation = (isLoading || error || !menuItems || menuItems.length === 0) ? fallbackNavigation : menuItems;
   
   // Filtrar navegação baseada em permissões
-  const navigation = rawNavigation.filter(item => canAccessRoute(item.href));
+  const navigation = rawNavigation.filter(item => {
+    try {
+      return canAccessRoute(item.href);
+    } catch (error) {
+      console.warn('Error checking route access:', error);
+      return true; // Fallback para permitir acesso se houver erro
+    }
+  });
 
   return (
     <nav className={cn(
       'hidden md:flex items-center justify-center space-x-8 transition-all duration-300',
-      isScrolled ? 'h-12 space-x-6' : 'h-16 space-x-8'
+      isScrolled ? 'h-16 space-x-8' : 'h-12 space-x-6'
     )}>
       {navigation.length === 0 ? (
         <div className="text-red-500">No navigation items found</div>
@@ -77,17 +84,17 @@ export const DesktopNavigation = ({ isScrolled = false }: { isScrolled?: boolean
             to={item.href}
             className={cn(
               'flex items-center justify-center space-x-2 font-medium uppercase tracking-wide transition-all duration-300 px-2',
-              isScrolled ? 'text-xs h-12' : 'text-sm h-16',
+              isScrolled ? 'text-sm h-16' : 'text-xs h-12',
               active
-                ? 'text-[#3773f5] border-b-2 border-[#3773f5]'
+                ? 'text-[#3773F5] border-b-2 border-[#3773F5]'
                 : theme === 'dark' 
-                  ? 'text-gray-300 hover:text-[#3773f5]'
-                  : 'text-[#13161c] hover:text-[#3773f5]'
+                  ? 'text-[#B8BCC8] hover:text-[#3773F5]'
+                  : 'text-[#0B0F1A] hover:text-[#3773F5]'
             )}
           >
             <Icon className={cn(
               'transition-all duration-300',
-              isScrolled ? 'h-3 w-3' : 'h-4 w-4'
+              isScrolled ? 'h-4 w-4' : 'h-3 w-3'
             )} />
             <span>{item.name}</span>
           </Link>
@@ -109,6 +116,7 @@ export const DesktopHeader = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
+      // Inverter a lógica: quando não há scroll, header expandido; quando há scroll, header reduzido
       setIsScrolled(scrollTop > 50);
     };
 
@@ -167,20 +175,20 @@ export const DesktopHeader = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className={cn(
           'flex items-center justify-between transition-all duration-300',
-          isScrolled ? 'h-12' : 'h-16'
+          isScrolled ? 'h-16' : 'h-12'
         )}>
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className={cn(
               'logo-placeholder transition-all duration-300',
-              isScrolled ? 'w-6 h-6' : 'w-8 h-8'
+              isScrolled ? 'w-8 h-8' : 'w-6 h-6'
             )}>
               {/* LOGO AQUI */}
             </div>
             <span className={cn(
               'font-heading transition-all duration-300',
               theme === 'dark' ? 'text-[#E6E6E6]' : 'text-[#0B0F1A]',
-              isScrolled ? 'text-lg' : 'text-xl'
+              isScrolled ? 'text-xl' : 'text-lg'
             )}>
               Axisor
             </span>

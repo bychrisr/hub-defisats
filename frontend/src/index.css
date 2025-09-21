@@ -426,8 +426,7 @@
 
   /* Dashboard Cards - Configuração Global com Flexbox */
   .dashboard-card {
-    @apply bg-card border border-border rounded-xl p-6 shadow-coingecko-md hover:shadow-coingecko-lg transition-all duration-300;
-    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
+    @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -438,6 +437,7 @@
   .dashboard-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
+    border-color: #3773F5;
   }
 
   /* Container dos cards com grid responsivo */
@@ -470,10 +470,10 @@
   .dashboard-card-title {
     font-size: 1.125rem !important;
     font-weight: 800 !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: 'Rubik', 'Inter', sans-serif !important;
     padding-top: 20px !important;
     padding-bottom: 20px !important;
-    @apply text-vibrant-secondary;
+    color: #B8BCC8 !important;
     display: -webkit-box;
     -webkit-line-clamp: 2; /* Limita a 2 linhas */
     -webkit-box-orient: vertical;
@@ -483,24 +483,35 @@
   }
 
   .dashboard-card-value {
-    @apply text-3xl font-bold text-vibrant;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', monospace;
+    font-size: 1.875rem !important;
+    font-weight: 700 !important;
+    color: #E6E6E6 !important;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', monospace;
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
     margin-top: auto; /* Empurra para baixo */
   }
 
   .dashboard-card-subtitle {
-    @apply text-sm text-vibrant-secondary mt-1 font-medium;
+    font-size: 0.875rem !important;
+    color: #B8BCC8 !important;
+    margin-top: 0.25rem !important;
+    font-weight: 500 !important;
     line-height: 1.2;
   }
 
   .dashboard-card-icon {
     @apply h-5 w-5;
+    color: #3773F5;
   }
 
   .dashboard-card-help-icon {
-    @apply h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help inline ml-1;
+    @apply h-4 w-4 transition-colors cursor-help inline ml-1;
+    color: #B8BCC8;
+  }
+
+  .dashboard-card-help-icon:hover {
+    color: #E6E6E6;
   }
 
   /* Card header com flexbox para alinhamento perfeito */
@@ -536,11 +547,11 @@
     }
     
     .dashboard-card-value {
-      @apply text-2xl;
+      font-size: 1.5rem !important;
     }
     
     .dashboard-card-subtitle {
-      @apply text-xs;
+      font-size: 0.75rem !important;
     }
     
     .dashboard-cards-container {

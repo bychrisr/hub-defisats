@@ -121,11 +121,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             <div className="flex items-center mt-3">
               <Badge 
                 variant="outline" 
-                className={cn('text-xs font-semibold px-2 py-1 number-xs', getTrendColor())}
+                className={cn('text-xs font-semibold px-2 py-1 number-xs border-[#2A3441]', getTrendColor())}
               >
                 {trend.value > 0 ? '+' : ''}{trend.value.toFixed(1)}%
               </Badge>
-              <span className="text-xs text-vibrant-secondary ml-2 font-medium">
+              <span className="text-xs text-[#B8BCC8] ml-2 font-medium">
                 {trend.label}
               </span>
             </div>
@@ -136,7 +136,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       {/* Quadrado "meio para fora" - Dentro do container principal */}
       {floatingIcon && Icon && (
         <div 
-          className="absolute w-10 h-10 bg-card border border-border rounded-lg shadow-lg flex items-center justify-center p-2 z-0"
+          className="absolute w-10 h-10 bg-[#1A1F2E] border border-[#2A3441] rounded-lg shadow-lg flex items-center justify-center p-2 z-0"
           style={{ right: '0.60rem', top: '-1.4rem' }}
         >
           <Icon className={cn('h-5 w-5', getIconColor())} />
