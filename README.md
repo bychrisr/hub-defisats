@@ -146,6 +146,41 @@ Toda a documentação está organizada na pasta `.system/`:
 - Dashboard cards financeiros com cálculos precisos
 - Validação matemática 100% precisa
 
+### 🔐 Sistema de Segurança Avançado
+- **JWT de acesso**: 2 horas (configurável)
+- **Refresh tokens**: 7 dias (configurável)
+- **Criptografia AES-256-CBC** para credenciais sensíveis
+- **Sistema de auditoria completo** com logs detalhados
+- **Revogação de tokens** por usuário ou global
+- **Monitoramento de sessões** e atividades suspeitas
+- **Painel administrativo** para configurações de segurança
+- **Detecção de tentativas** de login suspeitas
+- **Limpeza automática** de tokens expirados
+- **Rastreamento de IP e User-Agent** para todas as ações
+- **Configurações dinâmicas** via banco de dados
+
+#### APIs de Segurança (Admin)
+```bash
+GET    /api/admin/security/configs              # Listar configurações
+PUT    /api/admin/security/configs/:key         # Atualizar configuração
+GET    /api/admin/security/audit-logs           # Logs de auditoria
+POST   /api/admin/security/revoke-tokens/:userId # Revogar tokens
+POST   /api/admin/security/cleanup-tokens       # Limpar tokens expirados
+GET    /api/admin/security/dashboard            # Dashboard de segurança
+```
+
+#### Configurações de Segurança Disponíveis
+| Configuração | Padrão | Descrição |
+|-------------|--------|-----------|
+| `jwt_expires_in` | `2h` | Expiração do JWT de acesso |
+| `refresh_token_expires_in` | `7d` | Expiração do refresh token |
+| `max_login_attempts` | `5` | Máximo de tentativas de login |
+| `lockout_duration` | `15m` | Duração do bloqueio |
+| `session_timeout` | `30m` | Timeout de sessão |
+| `require_2fa` | `false` | Obrigar 2FA |
+| `token_rotation_enabled` | `true` | Rotação automática de tokens |
+| `max_concurrent_sessions` | `3` | Máximo de sessões simultâneas |
+
 ## 🏗️ Arquitetura
 
 ### Backend

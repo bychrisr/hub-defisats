@@ -6,6 +6,72 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-01-21 - Sistema de Segurança Robusto 🔐 **MAJOR SECURITY UPDATE**
+
+### 🔐 Sistema de Segurança Avançado
+- ✅ **JWT de Acesso**: 2 horas de duração (configurável)
+- ✅ **Refresh Tokens**: 7 dias de duração (configurável)
+- ✅ **Criptografia AES-256-CBC**: Para credenciais sensíveis
+- ✅ **Sistema de Auditoria**: Logs completos de todas as ações
+- ✅ **Revogação de Tokens**: Por usuário ou global
+- ✅ **Monitoramento de Sessões**: Detecção de atividades suspeitas
+- ✅ **Painel Administrativo**: Configurações de segurança dinâmicas
+- ✅ **Limpeza Automática**: Tokens expirados removidos automaticamente
+
+### 🛡️ Melhorias de Segurança
+- ✅ **Configurações Dinâmicas**: Alterações sem reinicialização
+- ✅ **Rastreamento de IP/UA**: Para todas as ações de segurança
+- ✅ **Detecção de Anomalias**: Tentativas de login suspeitas
+- ✅ **Rotação Automática**: Renovação silenciosa de tokens
+- ✅ **Controle de Sessões**: Máximo de sessões simultâneas
+- ✅ **Logs Estruturados**: JSON com contexto completo
+
+### 🗄️ Banco de Dados
+- ✅ **SecurityConfig**: Tabela para configurações dinâmicas
+- ✅ **SecurityAuditLog**: Logs de auditoria completos
+- ✅ **RefreshToken**: Gerenciamento avançado de tokens
+- ✅ **Migrações**: Aplicadas com configurações padrão
+- ✅ **Índices**: Otimizados para performance
+
+### 🔧 APIs Administrativas
+- ✅ **GET /api/admin/security/configs**: Listar configurações
+- ✅ **PUT /api/admin/security/configs/:key**: Atualizar configuração
+- ✅ **GET /api/admin/security/audit-logs**: Logs de auditoria
+- ✅ **POST /api/admin/security/revoke-tokens/:userId**: Revogar tokens
+- ✅ **POST /api/admin/security/cleanup-tokens**: Limpar tokens expirados
+- ✅ **GET /api/admin/security/dashboard**: Dashboard de segurança
+
+### 📊 Configurações de Segurança
+| Configuração | Padrão | Descrição |
+|-------------|--------|-----------|
+| `jwt_expires_in` | `2h` | Expiração do JWT de acesso |
+| `refresh_token_expires_in` | `7d` | Expiração do refresh token |
+| `max_login_attempts` | `5` | Máximo de tentativas de login |
+| `lockout_duration` | `15m` | Duração do bloqueio |
+| `session_timeout` | `30m` | Timeout de sessão |
+| `require_2fa` | `false` | Obrigar 2FA |
+| `token_rotation_enabled` | `true` | Rotação automática de tokens |
+| `max_concurrent_sessions` | `3` | Máximo de sessões simultâneas |
+
+### 🔧 Correções
+- ✅ **Erro 401 Unauthorized**: Resolvido problema de expiração do JWT
+- ✅ **Criptografia LN Markets**: Chave correta para descriptografia
+- ✅ **Validação de Tokens**: Melhorada com configurações dinâmicas
+- ✅ **Sessões Expiradas**: Gerenciamento automático
+
+### 📚 Documentação
+- ✅ **SECURITY.md**: Documentação completa de segurança
+- ✅ **README.md**: Seção de segurança atualizada
+- ✅ **APIs**: Documentação das APIs administrativas
+- ✅ **Configurações**: Tabela de configurações disponíveis
+
+### 🎯 Benefícios
+- ✅ **Redução de Risco**: Tokens de curta duração
+- ✅ **Conformidade**: Melhores práticas de segurança
+- ✅ **Monitoramento**: Visibilidade completa das atividades
+- ✅ **Flexibilidade**: Configuração sem reinicialização
+- ✅ **Profissionalismo**: Sistema de nível enterprise
+
 ## [1.4.7] - 2025-01-19 - Correção Crítica de Side Transformation & Liquidation Loop 🔧 **CRITICAL FIX**
 
 ### 🔧 Correção Crítica de Side Transformation
