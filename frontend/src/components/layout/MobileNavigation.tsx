@@ -36,7 +36,7 @@ export const MobileNavigation = () => {
     <>
       {/* Mobile Bottom Navigation */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 md:hidden z-40"
+        className="mobile-nav fixed bottom-0 left-0 right-0 md:hidden z-50"
         style={{
           backgroundColor: 'hsl(var(--bg-card))',
           borderTop: '1px solid hsl(var(--border))'

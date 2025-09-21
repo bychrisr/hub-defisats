@@ -1154,6 +1154,68 @@
     z-index: 9999 !important;
   }
 
+  /* Mobile Navigation Height */
+  .h-15 {
+    height: 3.75rem; /* 60px */
+  }
+
+  /* Profile Tabs Glow Effect */
+  .profile-tabs-glow {
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.1) 0%, 
+      rgba(138, 43, 226, 0.05) 50%, 
+      rgba(0, 255, 221, 0.1) 100%
+    );
+    border: 1px solid rgba(55, 115, 245, 0.2);
+    box-shadow: 
+      0 4px 16px 0 rgba(55, 115, 245, 0.1),
+      0 0 0 1px rgba(55, 115, 245, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .profile-tabs-glow-light {
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.05) 0%, 
+      rgba(138, 43, 226, 0.02) 50%, 
+      rgba(0, 255, 221, 0.05) 100%
+    );
+    border: 1px solid rgba(55, 115, 245, 0.15);
+    box-shadow: 
+      0 4px 16px 0 rgba(55, 115, 245, 0.05),
+      0 0 0 1px rgba(55, 115, 245, 0.02),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .profile-tab-trigger {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .profile-tab-trigger:hover {
+    background-color: rgba(55, 115, 245, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .profile-tab-trigger[data-state="active"] {
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.15) 0%, 
+      rgba(138, 43, 226, 0.08) 50%, 
+      rgba(0, 255, 221, 0.15) 100%
+    );
+    box-shadow: 
+      0 2px 8px 0 rgba(55, 115, 245, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* Mobile Navigation Visibility */
+  @media (max-width: 768px) {
+    .mobile-nav {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+  }
+
   /* Fix submenu positioning */
   .dropdown-glassmorphism,
   .dropdown-glassmorphism-light {

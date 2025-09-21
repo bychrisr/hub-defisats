@@ -74,13 +74,13 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 z-50 md:hidden"
+        className="fixed inset-0 bg-black/50 z-[60] md:hidden"
         onClick={onClose}
       />
       
       {/* Drawer */}
       <div 
-        className="fixed inset-y-0 left-0 w-80 z-50 md:hidden transform transition-transform duration-300 ease-in-out"
+        className="fixed inset-y-0 left-0 w-80 z-[60] md:hidden transform transition-transform duration-300 ease-in-out"
         style={{ backgroundColor: 'hsl(var(--bg-card))' }}
       >
         <div className="flex flex-col h-full">

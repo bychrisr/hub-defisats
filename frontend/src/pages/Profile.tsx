@@ -30,6 +30,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
+import { useTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 
 const profileSchema = z.object({
@@ -56,6 +58,7 @@ export default function Profile() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
+  const { theme } = useTheme();
 
   const {
     register,
@@ -153,14 +156,15 @@ export default function Profile() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your profile, LN Markets credentials, and account settings
-        </p>
-      </div>
+    <div className="container mx-auto py-8 px-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-text-primary">Profile</h1>
+          <p className="text-text-secondary">
+            Manage your profile, LN Markets credentials, and account settings
+          </p>
+        </div>
 
       {/* Success/Error Messages */}
       {success && (
@@ -182,9 +186,22 @@ export default function Profile() {
       )}
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="credentials">LN Markets</TabsTrigger>
+        <TabsList className={cn(
+          "grid w-full grid-cols-2",
+          theme === 'dark' ? 'profile-tabs-glow' : 'profile-tabs-glow-light'
+        )}>
+          <TabsTrigger 
+            value="profile" 
+            className="profile-tab-trigger"
+          >
+            Profile
+          </TabsTrigger>
+          <TabsTrigger 
+            value="credentials" 
+            className="profile-tab-trigger"
+          >
+            LN Markets
+          </TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -458,6 +475,7 @@ export default function Profile() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
