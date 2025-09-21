@@ -170,14 +170,13 @@ export const DesktopHeader = () => {
       theme === 'dark' 
         ? 'bg-[#0B0F1A] border-[#2A3441]' 
         : 'bg-white border-[#e6e8ec]',
-      isScrolled ? 'shadow-lg neon-glow' : '',
-      isScrolled ? 'h-12' : 'h-16'
+      isScrolled ? 'shadow-lg neon-glow' : ''
     )}>
-      <div className={cn(
-        'container mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300',
-        isScrolled ? 'py-2' : 'py-4'
-      )}>
-        <div className="flex items-center justify-between h-full transition-all duration-300">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={cn(
+          'flex items-center justify-between transition-all duration-300',
+          isScrolled ? 'h-12' : 'h-16'
+        )}>
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className={cn(
