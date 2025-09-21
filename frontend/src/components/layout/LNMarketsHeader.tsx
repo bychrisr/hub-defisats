@@ -148,7 +148,7 @@ const LNMarketsHeader: React.FC = () => {
                   </span>
                   <Badge 
                     variant={marketData.index24hChange >= 0 ? "success" : "danger"}
-                    className="text-xs font-mono hover:bg-opacity-100"
+                    className="text-xs font-mono"
                   >
                     {marketData.index24hChange >= 0 ? (
                       <TrendingUp className="w-3 h-3 mr-1" />
@@ -288,7 +288,7 @@ const LNMarketsHeader: React.FC = () => {
                     </span>
                     <Badge 
                       variant={marketData.index24hChange >= 0 ? "success" : "danger"}
-                      className="text-xs font-mono hover:bg-opacity-100"
+                      className="text-xs font-mono"
                     >
                       {marketData.index24hChange >= 0 ? (
                         <TrendingUp className="w-3 h-3 mr-1" />
