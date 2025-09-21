@@ -184,17 +184,17 @@ export const DesktopHeader = () => {
               isScrolled ? 'w-6 h-6' : 'w-8 h-8'
             )}>
               <span className={cn(
-                'font-bold text-white',
+                'text-white',
                 isScrolled ? 'text-xs' : 'text-sm'
               )}>
-                AX
+                🤖
               </span>
             </div>
             <span className={cn(
               'font-heading transition-all duration-300 text-text-primary',
               isScrolled ? 'text-lg' : 'text-xl'
             )}>
-              Axisor
+              Axisor Bot
             </span>
           </div>
 
