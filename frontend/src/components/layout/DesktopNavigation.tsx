@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { 
   User,
-  Bell,
   LogOut,
   Globe,
   DollarSign,
@@ -36,6 +35,7 @@ import {
 import { useMainMenu } from '@/hooks/useDynamicMenus';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { MAIN_NAVIGATION } from '@/constants/navigation';
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 // Fallback para quando a API não estiver disponível
 const fallbackNavigation = MAIN_NAVIGATION;
@@ -228,21 +228,7 @@ export const DesktopHeader = () => {
           {/* Right side - User Profile */}
           <div className="ml-auto flex items-center space-x-4">
             {/* Notifications */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                'transition-all duration-300 text-text-secondary hover:text-primary hover:bg-accent/50 relative group subtle-hover',
-                isScrolled ? 'h-7 w-7' : 'h-9 w-9'
-              )}
-            >
-              <Bell className={cn(
-                'transition-all duration-300',
-                isScrolled ? 'h-3 w-3' : 'h-4 w-4'
-              )} />
-              {/* Notification Badge */}
-              <div className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full notification-badge" />
-            </Button>
+            <NotificationDropdown isScrolled={isScrolled} />
 
             {/* User Profile Dropdown */}
             <DropdownMenu>
@@ -270,23 +256,40 @@ export const DesktopHeader = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-56 bg-popover border-border transition-colors duration-200"
+                className={cn(
+                  "w-56 transition-all duration-300 relative overflow-visible",
+                  theme === 'dark' 
+                    ? 'dropdown-glassmorphism text-text-primary' 
+                    : 'dropdown-glassmorphism-light text-text-primary'
+                )}
                 align="end"
                 forceMount
               >
-                <DropdownMenuLabel className="font-normal text-popover-foreground transition-colors duration-200">
+                <DropdownMenuLabel className={cn(
+                  "font-normal transition-colors duration-200",
+                  theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                )}>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none text-popover-foreground transition-colors duration-200">
+                    <p className={cn(
+                      "text-sm font-medium leading-none transition-colors duration-200",
+                      theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                    )}>
                       {user?.email || 'User'}
                     </p>
-                    <p className="text-xs leading-none text-muted-foreground transition-colors duration-200">
+                    <p className={cn(
+                      "text-xs leading-none transition-colors duration-200",
+                      theme === 'dark' ? 'text-text-secondary' : 'text-text-secondary'
+                    )}>
                       {user?.plan_type?.toUpperCase() || 'FREE'} Plan
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem 
-                  className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                  className={cn(
+                    "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                    theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                  )}
                   asChild
                 >
                   <Link to="/profile">
@@ -298,19 +301,38 @@ export const DesktopHeader = () => {
                 
                 {/* Language Selection */}
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
+                  <DropdownMenuSubTrigger 
+                    className={cn(
+                      "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                      theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                    )}
+                  >
                     <Globe className="mr-2 h-4 w-4" />
                     <span>Idioma</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-popover border-border transition-colors duration-200">
+                  <DropdownMenuSubContent 
+                    className={cn(
+                      "w-48 transition-all duration-300 relative",
+                      theme === 'dark' 
+                        ? 'dropdown-glassmorphism text-text-primary' 
+                        : 'dropdown-glassmorphism-light text-text-primary'
+                    )}
+                    sideOffset={4}
+                  >
                     <DropdownMenuItem 
-                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                      className={cn(
+                        "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                        theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                      )}
                       onClick={() => handleLanguageChange('pt-BR')}
                     >
                       <span>🇧🇷 Português (BR)</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                      className={cn(
+                        "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                        theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                      )}
                       onClick={() => handleLanguageChange('en-US')}
                     >
                       <span>🇺🇸 English (US)</span>
@@ -320,19 +342,38 @@ export const DesktopHeader = () => {
 
                 {/* Currency Selection */}
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
+                  <DropdownMenuSubTrigger 
+                    className={cn(
+                      "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                      theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                    )}
+                  >
                     <DollarSign className="mr-2 h-4 w-4" />
                     <span>Moeda</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-popover border-border transition-colors duration-200">
+                  <DropdownMenuSubContent 
+                    className={cn(
+                      "w-48 transition-all duration-300 relative",
+                      theme === 'dark' 
+                        ? 'dropdown-glassmorphism text-text-primary' 
+                        : 'dropdown-glassmorphism-light text-text-primary'
+                    )}
+                    sideOffset={4}
+                  >
                     <DropdownMenuItem 
-                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                      className={cn(
+                        "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                        theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                      )}
                       onClick={() => handleCurrencyChange('SATS')}
                     >
                       <span>₿ SATS</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                      className={cn(
+                        "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                        theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                      )}
                       onClick={() => handleCurrencyChange('USD')}
                     >
                       <span>$ USD</span>
@@ -342,27 +383,49 @@ export const DesktopHeader = () => {
 
                 {/* Theme Selection */}
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
+                  <DropdownMenuSubTrigger 
+                    className={cn(
+                      "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                      theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                    )}
+                  >
                     {getThemeIcon()}
                     <span className="ml-2">Tema</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-popover border-border transition-colors duration-200">
+                  <DropdownMenuSubContent 
+                    className={cn(
+                      "w-48 transition-all duration-300 relative",
+                      theme === 'dark' 
+                        ? 'dropdown-glassmorphism text-text-primary' 
+                        : 'dropdown-glassmorphism-light text-text-primary'
+                    )}
+                    sideOffset={4}
+                  >
                     <DropdownMenuItem 
-                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                      className={cn(
+                        "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                        theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                      )}
                       onClick={() => handleThemeChange('light')}
                     >
                       <Sun className="mr-2 h-4 w-4" />
                       <span>Claro</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                      className={cn(
+                        "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                        theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                      )}
                       onClick={() => handleThemeChange('dark')}
                     >
                       <Moon className="mr-2 h-4 w-4" />
                       <span>Escuro</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                      className={cn(
+                        "hover:bg-accent hover:text-accent-foreground transition-all duration-200 dropdown-item-glassmorphism",
+                        theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
+                      )}
                       onClick={() => handleThemeChange('system')}
                     >
                       <Monitor className="mr-2 h-4 w-4" />
@@ -374,10 +437,10 @@ export const DesktopHeader = () => {
                 <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem
                   className={cn(
-                    'text-red-600 hover:text-red-700 transition-colors duration-200',
+                    'text-red-600 hover:text-red-700 transition-all duration-200 dropdown-item-glassmorphism',
                     theme === 'dark' 
-                      ? 'hover:bg-gray-700' 
-                      : 'hover:bg-gray-100'
+                      ? 'hover:bg-red-900/20' 
+                      : 'hover:bg-red-50'
                   )}
                   onClick={handleLogout}
                 >

@@ -995,7 +995,7 @@
 
   /* Notification Badge Animation */
   .notification-badge {
-    animation: notificationPulse 3s ease-in-out infinite;
+    animation: notificationPulse 2s ease-in-out infinite;
   }
 
   @keyframes notificationPulse {
@@ -1004,7 +1004,7 @@
       transform: scale(1);
     }
     50% {
-      opacity: 0.8;
+      opacity: 0.9;
       transform: scale(1.05);
     }
   }
@@ -1023,6 +1023,185 @@
       opacity: 0.9;
       box-shadow: 0 0 0 2px rgba(34, 197, 94, 0);
     }
+  }
+
+  /* Fix scrollbar flicker when dropdowns open */
+  html {
+    overflow-y: scroll;
+  }
+
+  /* Ensure consistent scrollbar behavior */
+  body {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
+  /* Custom scrollbar styling to prevent flicker */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+  }
+
+  /* Dark theme scrollbar */
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.3);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(75, 85, 99, 0.5);
+  }
+
+  /* Dropdown Glassmorphism Effects */
+  .dropdown-glassmorphism {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, 
+      rgba(26, 31, 46, 0.9) 0%, 
+      rgba(36, 43, 61, 0.8) 50%, 
+      rgba(26, 31, 46, 0.9) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.37),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .dropdown-glassmorphism::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.1) 0%, 
+      rgba(138, 43, 226, 0.05) 50%, 
+      rgba(0, 255, 221, 0.1) 100%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Light theme dropdown glassmorphism */
+  .dropdown-glassmorphism-light {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(248, 250, 252, 0.8) 50%, 
+      rgba(255, 255, 255, 0.9) 100%
+    );
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .dropdown-glassmorphism-light::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.05) 0%, 
+      rgba(138, 43, 226, 0.03) 50%, 
+      rgba(0, 255, 221, 0.05) 100%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Dropdown item - no hover effects */
+  .dropdown-item-glassmorphism {
+    position: relative;
+  }
+
+  /* Glow effect for active items */
+  .dropdown-item-active {
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.1) 0%, 
+      rgba(55, 115, 245, 0.05) 100%
+    );
+    box-shadow: 
+      0 0 20px rgba(55, 115, 245, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Ensure submenus appear above other elements */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
+
+  [data-radix-popper-content] {
+    z-index: 9999 !important;
+  }
+
+  /* Fix submenu positioning */
+  .dropdown-glassmorphism,
+  .dropdown-glassmorphism-light {
+    z-index: 9999;
+  }
+
+  /* Ensure submenus are visible */
+  [data-radix-dropdown-menu-sub-content] {
+    z-index: 10000 !important;
+    position: fixed !important;
+  }
+
+  /* Fix overflow issues */
+  [data-radix-dropdown-menu-content] {
+    overflow: visible !important;
+  }
+
+  /* Glassmorphism for submenus */
+  [data-radix-dropdown-menu-sub-content].dropdown-glassmorphism,
+  [data-radix-dropdown-menu-sub-content].dropdown-glassmorphism-light {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  [data-radix-dropdown-menu-sub-content].dropdown-glassmorphism {
+    background: linear-gradient(135deg, 
+      rgba(26, 31, 46, 0.9) 0%, 
+      rgba(36, 43, 61, 0.8) 50%, 
+      rgba(26, 31, 46, 0.9) 100%
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.37),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  }
+
+  [data-radix-dropdown-menu-sub-content].dropdown-glassmorphism-light {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(248, 250, 252, 0.8) 50%, 
+      rgba(255, 255, 255, 0.9) 100%
+    ) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
   }
 
   /* Text Colors */

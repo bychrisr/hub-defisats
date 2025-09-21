@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { RealtimeDataProvider } from '@/contexts/RealtimeDataContext';
 import { PositionsProvider } from '@/contexts/PositionsContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
 import { Layout } from '@/components/layout/Layout';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -209,7 +210,8 @@ const App = () => {
       <ThemeProvider>
         <RealtimeDataProvider>
           <PositionsProvider>
-            <TooltipProvider>
+            <NotificationProvider>
+              <TooltipProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter
@@ -395,6 +397,7 @@ const App = () => {
           </Routes>
         </BrowserRouter>
             </TooltipProvider>
+            </NotificationProvider>
           </PositionsProvider>
         </RealtimeDataProvider>
       </ThemeProvider>

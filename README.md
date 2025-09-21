@@ -4,6 +4,12 @@
 
 O Axisor é uma plataforma completa de automação de trading para LN Markets, construída com Node.js 18+, Fastify e Next.js, rodando em containers Docker. A plataforma oferece funcionalidades avançadas como Margin Guard, simulações em tempo real, sistema de cupons e muito mais.
 
+### ✨ Interface Moderna
+- **Glassmorphism Design**: Header com efeito de vidro fosco e backdrop blur
+- **Animações Sutis**: Hover effects padronizados e refinados
+- **Responsividade Completa**: Interface adaptável para todos os dispositivos
+- **UX Profissional**: Design limpo focado na experiência do usuário
+
 ## 🏗️ Estrutura do Projeto
 
 ```

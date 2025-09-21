@@ -6,6 +6,27 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.2] - 2025-01-21 - Interface Moderna e Glassmorphism ✨ **UI/UX ENHANCEMENT**
+
+### 🎨 Melhorias de Interface
+- ✅ **Glassmorphism Header**: Efeito de vidro fosco com backdrop blur de 20px
+- ✅ **Remoção de Shine Effect**: Menu de navegação com aparência limpa e uniforme
+- ✅ **Indicador de Scroll Removido**: Header mais minimalista sem barra de progresso
+- ✅ **Animações Sutis**: Padronização de hover effects com escala de apenas 2%
+- ✅ **Container Transparente**: Navegação integrada ao glassmorphism do header
+
+### 🔧 Melhorias Técnicas
+- ✅ **Classe .subtle-hover**: Hover effect padronizado para todos os botões
+- ✅ **Animações Otimizadas**: Durações aumentadas para experiência mais suave
+- ✅ **Performance**: Removidas animações desnecessárias (bounce, rings, shadows)
+- ✅ **Consistência Visual**: Todos os elementos interativos com mesmo comportamento
+
+### 🎯 Experiência do Usuário
+- ✅ **Visual Profissional**: Header com aparência moderna e elegante
+- ✅ **Interações Refinadas**: Hover effects sutis e consistentes
+- ✅ **Foco no Conteúdo**: Interface limpa sem elementos visuais excessivos
+- ✅ **Responsividade**: Glassmorphism funciona em todas as telas
+
 ## [1.5.1] - 2025-01-21 - Segurança em Mercados Voláteis 🛡️ **CRITICAL SECURITY UPDATE**
 
 ### 🛡️ Remoção de Dados Antigos e Simulados
