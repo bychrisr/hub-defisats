@@ -130,7 +130,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
                   {formatSats(pnl, { size: 28, showIcon: false, variant: variant === 'neutral' ? 'neutral' : 'auto' })}
                   <SatsIcon 
                     size={28} 
-                    variant={variant === 'neutral' ? 'neutral' : (isPositive ? 'positive' : isNeutral ? 'neutral' : 'negative')} 
+                    variant="default"
                     className={cn('sats-icon-mobile', getTextColor())}
                   />
                 </span>
