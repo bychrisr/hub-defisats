@@ -151,75 +151,8 @@ export default function Dashboard() {
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-vibrant">Posições Ativas</h2>
           
-          {/* Mobile Layout - Agrupado */}
-          <div className="block md:hidden space-y-4">
-            {/* PnL Total - 100% */}
-            <PnLCard
-              title="PnL Total"
-              pnl={positionsData.totalPL || 0}
-              percentage={positionsData.totalMargin > 0 ? ((positionsData.totalPL || 0) / positionsData.totalMargin) * 100 : 0}
-              titleSize="lg"
-              cardKey="total_pnl"
-              cursor="default"
-              icon={TrendingUp}
-              floatingIcon={true}
-            />
-            
-            {/* Linha 2: Profit Estimado (50%) + Trades em execução (50%) */}
-            <div className="grid grid-cols-2 gap-4">
-              <PnLCard
-                title="Profit Estimado"
-                pnl={positionsData.estimatedProfit || 0}
-                titleSize="lg"
-                cardKey="estimated_profit"
-                cursor="default"
-                icon={Target}
-                floatingIcon={true}
-              />
-              
-              <PnLCard
-                title="Trades em execução"
-                pnl={positionsData.positionCount || 0}
-                titleSize="lg"
-                cardKey="positions_count"
-                cursor="default"
-                icon={Activity}
-                variant="neutral"
-                showSatsIcon={false}
-                floatingIcon={true}
-              />
-            </div>
-            
-            {/* Linha 3: Margem Total (50%) + Taxas Estimadas (50%) */}
-            <div className="grid grid-cols-2 gap-4">
-              <PnLCard
-                title="Margem Total"
-                pnl={positionsData.totalMargin || 0}
-                titleSize="lg"
-                cardKey="total_margin"
-                cursor="default"
-                icon={Wallet}
-                variant="neutral"
-                showSatsIcon={true}
-                floatingIcon={true}
-              />
-              
-              <PnLCard
-                title="Taxas Estimadas"
-                pnl={positionsData.totalFees || 0}
-                titleSize="lg"
-                cardKey="estimated_fees"
-                cursor="default"
-                icon={DollarSign}
-                variant="neutral"
-                showSatsIcon={true}
-                floatingIcon={true}
-              />
-            </div>
-          </div>
-          
-          {/* Desktop Layout - Original */}
-          <div className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Cards com altura uniforme - Responsivo */}
+          <div className="dashboard-cards-container">
             <PnLCard
               title="PnL Total"
               pnl={positionsData.totalPL || 0}
@@ -283,7 +216,7 @@ export default function Dashboard() {
           {/* Histórico */}
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-vibrant">{t('dashboard.history')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="dashboard-cards-container">
               <PnLCard
                 title="Margem disponível"
                 pnl={balanceData?.balance || 0}

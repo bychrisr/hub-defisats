@@ -25,15 +25,11 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Verificar se há tema salvo no localStorage
-    const savedTheme = localStorage.getItem('coingecko-theme');
+    const savedTheme = localStorage.getItem('axisor-theme');
     if (savedTheme === 'light' || savedTheme === 'dark') {
       return savedTheme;
     }
-    // Verificar preferência do sistema
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    // Se não conseguir detectar, definir padrão como dark
+    // Padrão: dark mode (Axisor primary theme)
     return 'dark';
   });
 
@@ -47,7 +43,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Aplicar tema ao documento com transição suave
-    console.log('🎨 COINGECKO THEME - Applying theme:', theme);
+    console.log('🎨 AXISOR THEME - Applying theme:', theme);
     
     // Adicionar classe de transição para suavizar a mudança
     document.documentElement.classList.add('theme-transitioning');
@@ -57,7 +53,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     document.documentElement.className = theme;
     
     // Salvar no localStorage
-    localStorage.setItem('coingecko-theme', theme);
+    localStorage.setItem('axisor-theme', theme);
     
     // Remover classe de transição após um delay
     setTimeout(() => {

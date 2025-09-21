@@ -1,8 +1,8 @@
-# 🎨 Design System - Hub DeFiSats
+# 🎨 Design System - Axisor
 
 ## 📋 Visão Geral
 
-Este documento complementa o Guia de Identidade Visual com especificações técnicas detalhadas, exemplos de código e diretrizes de implementação para o design system do Hub DeFiSats.
+Este documento complementa o Guia de Identidade Visual com especificações técnicas detalhadas, exemplos de código e diretrizes de implementação para o design system do Axisor.
 
 ---
 

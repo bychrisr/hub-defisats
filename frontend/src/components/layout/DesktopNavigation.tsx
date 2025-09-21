@@ -160,9 +160,9 @@ export const DesktopHeader = () => {
     <header className={cn(
       'w-full border-b transition-all duration-300',
       theme === 'dark' 
-        ? 'bg-gray-900 border-gray-700' 
+        ? 'bg-[#0B0F1A] border-[#2A3441]' 
         : 'bg-white border-[#e6e8ec]',
-      isScrolled ? 'shadow-lg' : ''
+      isScrolled ? 'shadow-lg neon-glow' : ''
     )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className={cn(
@@ -172,20 +172,17 @@ export const DesktopHeader = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className={cn(
-              'bg-gradient-to-r from-[#3773f5] to-[#2c5aa0] rounded-lg flex items-center justify-center transition-all duration-300',
+              'logo-placeholder transition-all duration-300',
               isScrolled ? 'w-6 h-6' : 'w-8 h-8'
             )}>
-              <span className={cn(
-                'text-white font-bold transition-all duration-300',
-                isScrolled ? 'text-xs' : 'text-sm'
-              )}>HD</span>
+              {/* LOGO AQUI */}
             </div>
             <span className={cn(
-              'font-bold transition-all duration-300',
-              theme === 'dark' ? 'text-white' : 'text-[#13161c]',
+              'font-heading transition-all duration-300',
+              theme === 'dark' ? 'text-[#E6E6E6]' : 'text-[#0B0F1A]',
               isScrolled ? 'text-lg' : 'text-xl'
             )}>
-              defiSATS
+              Axisor
             </span>
           </div>
 

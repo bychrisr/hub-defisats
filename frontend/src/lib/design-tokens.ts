@@ -1,49 +1,51 @@
 /**
- * CoinGecko Inspired Design Tokens
+ * Axisor Design Tokens
  * 
- * Este arquivo contém todos os tokens de design inspirados no CoinGecko,
+ * Este arquivo contém todos os tokens de design da marca Axisor,
  * incluindo cores, tipografia, espaçamentos e outros elementos visuais.
  * 
- * Mantém a tipografia Inter conforme especificado.
+ * Tema principal: Dark Mode com paleta tech futurista
  */
 
 export const designTokens = {
   // ===== CORES PRIMÁRIAS =====
   colors: {
-    // Cores principais (consistentes em ambos os temas)
-    primary: '#3773f5',      // CoinGecko Blue
-    secondary: '#f5ac37',    // CoinGecko Orange
-    success: '#0ecb81',      // CoinGecko Green (valores positivos)
-    destructive: '#f6465d',  // CoinGecko Red (valores negativos)
+    // Cores principais (tema dark principal)
+    primary: '#3773F5',      // Axisor Blue
+    secondary: '#8A2BE2',    // Axisor Purple
+    accent: '#00FFDD',       // Axisor Cyan
+    success: '#0ECB81',      // Axisor Green (valores positivos)
+    destructive: '#F6465D',  // Axisor Red (valores negativos)
     
-    // Modo Claro
-    light: {
-      background: '#ffffff',           // Fundo principal
-      textPrimary: '#13161c',          // Texto principal
-      textSecondary: '#62666f',        // Texto secundário
-      border: '#e6e8ec',               // Linhas/divisores
-      header: '#f6f7f8',               // Fundo cabeçalho tabela
-      card: '#f9fafb',                 // Fundo cards (alternativo)
-      cardAlt: '#f6f7f8',              // Fundo cards alternativo
+    // Modo Escuro (Principal)
+    dark: {
+      background: '#0B0F1A',           // Fundo principal
+      card: '#1A1F2E',                 // Fundo cards/containers
+      cardAlt: '#242B3D',              // Fundo cards (alternativo)
+      textPrimary: '#E6E6E6',          // Texto principal
+      textSecondary: '#B8BCC8',        // Texto secundário
+      border: '#2A3441',               // Linhas/divisores
+      header: '#1A1F2E',               // Fundo cabeçalho tabela
     },
     
-    // Modo Escuro
-    dark: {
-      background: '#0d0f13',           // Fundo principal
-      card: '#16191d',                 // Fundo cards/containers
-      cardAlt: '#1a1d22',              // Fundo cards (alternativo)
-      textPrimary: '#f1f3f4',          // Texto principal (mais claro para melhor contraste)
-      textSecondary: '#a8b0b8',        // Texto secundário (mais claro para melhor contraste)
-      border: '#21262d',               // Linhas/divisores
-      header: '#16191d',               // Fundo cabeçalho tabela
+    // Modo Claro (Secundário)
+    light: {
+      background: '#FFFFFF',           // Fundo principal
+      textPrimary: '#0B0F1A',          // Texto principal
+      textSecondary: '#4A5568',        // Texto secundário
+      border: '#E2E8F0',               // Linhas/divisores
+      header: '#F7FAFC',               // Fundo cabeçalho tabela
+      card: '#FFFFFF',                 // Fundo cards
+      cardAlt: '#F7FAFC',              // Fundo cards alternativo
     },
   },
 
   // ===== TIPOGRAFIA =====
   typography: {
     fontFamily: {
-      sans: ['Inter', 'system-ui', 'sans-serif'],
-      mono: ['JetBrains Mono', 'Fira Code', 'Monaco', 'monospace'],
+      sans: ['Inter', 'system-ui', 'sans-serif'],           // Corpo de texto e menus
+      heading: ['Rubik', 'Inter', 'system-ui', 'sans-serif'], // Títulos (h1, h2, h3)
+      mono: ['Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', 'monospace'], // Números e dashboards
     },
     fontSize: {
       xs: '0.75rem',      // 12px
@@ -98,10 +100,21 @@ export const designTokens = {
 
   // ===== GRADIENTES =====
   gradients: {
-    primary: 'linear-gradient(135deg, #3773f5, #2c5ce6)',
-    success: 'linear-gradient(135deg, #0ecb81, #0bb870)',
-    warning: 'linear-gradient(135deg, #f5ac37, #e69a2e)',
-    hero: 'linear-gradient(135deg, #3773f5, #f5ac37)',
+    primary: 'linear-gradient(135deg, #3773F5, #8A2BE2)',      // Azul → Roxo
+    secondary: 'linear-gradient(135deg, #8A2BE2, #00FFDD)',    // Roxo → Ciano
+    accent: 'linear-gradient(135deg, #00FFDD, #3773F5)',       // Ciano → Azul
+    success: 'linear-gradient(135deg, #0ECB81, #00FFDD)',      // Verde → Ciano
+    hero: 'linear-gradient(135deg, #3773F5, #8A2BE2, #00FFDD)', // Azul → Roxo → Ciano
+    card: 'linear-gradient(135deg, #1A1F2E, #242B3D)',         // Card gradient
+  },
+
+  // ===== EFEITOS NEON =====
+  neon: {
+    primary: '0 0 20px rgba(55, 115, 245, 0.4), 0 0 40px rgba(55, 115, 245, 0.2)',
+    secondary: '0 0 20px rgba(138, 43, 226, 0.4), 0 0 40px rgba(138, 43, 226, 0.2)',
+    accent: '0 0 20px rgba(0, 255, 221, 0.4), 0 0 40px rgba(0, 255, 221, 0.2)',
+    success: '0 0 20px rgba(14, 203, 129, 0.4), 0 0 40px rgba(14, 203, 129, 0.2)',
+    glow: '0 0 30px rgba(55, 115, 245, 0.3)',
   },
 
   // ===== ANIMAÇÕES =====

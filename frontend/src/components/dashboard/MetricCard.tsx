@@ -98,9 +98,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   };
 
   return (
-    <div className="relative">
-      <Card className={cn(getVariantStyles(), `cursor-${cursor}`, 'min-h-[120px]', className)}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pr-12">
+    <div className="relative h-full">
+      <Card className={cn(getVariantStyles(), `cursor-${cursor}`, 'dashboard-card h-full', className)}>
+        <CardHeader className="dashboard-card-header pr-12">
           <CardTitle className={cn('dashboard-card-title', getTitleSizeClass())}>
             {title}
             {showTooltip && tooltipText && (
@@ -115,7 +115,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           </CardTitle>
           {!floatingIcon && Icon && <Icon className={cn('dashboard-card-icon', getIconColor())} />}
         </CardHeader>
-        <CardContent>
+        <CardContent className="dashboard-card-content">
           <div className="dashboard-card-value">{value}</div>
           {trend && (
             <div className="flex items-center mt-3">

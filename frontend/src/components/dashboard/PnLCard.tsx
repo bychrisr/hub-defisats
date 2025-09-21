@@ -95,9 +95,9 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   };
 
   return (
-    <div className="relative">
-      <Card className={cn(getVariantStyles(), `cursor-${cursor}`, 'min-h-[120px]', className)}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pr-12">
+    <div className="relative h-full">
+      <Card className={cn(getVariantStyles(), `cursor-${cursor}`, 'dashboard-card h-full', className)}>
+        <CardHeader className="dashboard-card-header pr-12">
           <CardTitle className={cn('font-semibold text-vibrant-secondary', getTitleSizeClass())}>
             {title}
             {showTooltip && tooltipText && (
@@ -106,38 +106,38 @@ export const PnLCard: React.FC<PnLCardProps> = ({
                 position={tooltipPosition}
                 disabled={!showTooltip}
               >
-                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help inline ml-1" />
+                <HelpCircle className="dashboard-card-help-icon" />
               </Tooltip>
             )}
           </CardTitle>
           {!floatingIcon && Icon ? (
-            <Icon className={cn('h-5 w-5', getIconColor())} />
+            <Icon className={cn('dashboard-card-icon', getIconColor())} />
           ) : !floatingIcon && (
             isPositive ? (
-              <TrendingUp className={cn('h-5 w-5', getIconColor())} />
+              <TrendingUp className={cn('dashboard-card-icon', getIconColor())} />
             ) : isNeutral ? null : (
-              <TrendingDown className={cn('h-5 w-5', getIconColor())} />
+              <TrendingDown className={cn('dashboard-card-icon', getIconColor())} />
             )
           )}
         </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2">
-          <div className={cn('number-lg dashboard-card-value', getTextColor())}>
-            {showSatsIcon ? formatSats(pnl, { size: 28, variant: variant === 'neutral' ? 'neutral' : 'auto' }) : pnl.toString()}
+        <CardContent className="dashboard-card-content">
+          <div className="flex items-center gap-2">
+            <div className={cn('number-lg dashboard-card-value', getTextColor())}>
+              {showSatsIcon ? formatSats(pnl, { size: 28, variant: variant === 'neutral' ? 'neutral' : 'auto' }) : pnl.toString()}
+            </div>
+            {percentage !== undefined && (
+              <Badge 
+                variant="outline" 
+                className={cn('text-xs font-semibold px-2 py-1 number-xs dashboard-card-badge', getTextColor())}
+              >
+                {formatPercentage(percentage)}
+              </Badge>
+            )}
           </div>
-          {percentage !== undefined && (
-            <Badge 
-              variant="outline" 
-              className={cn('text-xs font-semibold px-2 py-1 number-xs dashboard-card-badge', getTextColor())}
-            >
-              {formatPercentage(percentage)}
-            </Badge>
+          {subtitle && (
+            <p className="dashboard-card-subtitle">{subtitle}</p>
           )}
-        </div>
-        {subtitle && (
-          <p className="text-sm text-vibrant-secondary mt-2 font-medium dashboard-card-subtitle">{subtitle}</p>
-        )}
-      </CardContent>
+        </CardContent>
       </Card>
       
       {/* Quadrado "meio para fora" - Dentro do container principal */}

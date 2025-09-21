@@ -1,13 +1,13 @@
-# Hub DeFiSats - Plataforma de Automação de Trading
+# Axisor - Plataforma de Automação de Trading
 
 ## 🎯 Visão Geral
 
-O Hub DeFiSats é uma plataforma completa de automação de trading para LN Markets, construída com Node.js 18+, Fastify e Next.js, rodando em containers Docker. A plataforma oferece funcionalidades avançadas como Margin Guard, simulações em tempo real, sistema de cupons e muito mais.
+O Axisor é uma plataforma completa de automação de trading para LN Markets, construída com Node.js 18+, Fastify e Next.js, rodando em containers Docker. A plataforma oferece funcionalidades avançadas como Margin Guard, simulações em tempo real, sistema de cupons e muito mais.
 
 ## 🏗️ Estrutura do Projeto
 
 ```
-hub-defisats/
+axisor/
 ├── 📁 backend/                    # API Node.js + Fastify
 ├── 📁 frontend/                   # Interface React + Next.js
 ├── 📁 .system/                    # Documentação completa

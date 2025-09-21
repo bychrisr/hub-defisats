@@ -1,52 +1,54 @@
-# 🎨 Guia de Identidade Visual - Hub DeFiSats
+# 🎨 Guia de Identidade Visual - Axisor
 
 ## 📋 Visão Geral
 
-O Hub DeFiSats é uma plataforma de automação de trading para LN Markets que combina funcionalidade avançada com uma identidade visual moderna e profissional. Nossa identidade visual é inspirada no CoinGecko, mantendo a confiabilidade e clareza necessárias para uma plataforma financeira, enquanto adiciona elementos únicos que refletem nossa especialização em Bitcoin e Lightning Network.
+O Axisor é uma plataforma de automação de trading para LN Markets que combina funcionalidade avançada com uma identidade visual futurista e tech. Nossa identidade visual é baseada em dark mode com paleta de cores vibrantes, mantendo a confiabilidade e clareza necessárias para uma plataforma financeira, enquanto adiciona elementos únicos que refletem nossa especialização em Bitcoin, Lightning Network e tecnologia blockchain.
 
 ---
 
 ## 🏷️ Marca e Logo
 
 ### Logo Principal
-- **Nome**: Hub DeFiSats
-- **Abreviação**: HD
+- **Nome**: Axisor
+- **Abreviação**: AX
 - **Tagline**: "Plataforma de Automação de Trading para LN Markets"
 
 ### Elementos do Logo
 
 #### Logo Completo
 ```
-[HD] defiSATS
+[AX] Axisor
 ```
 
 #### Especificações Técnicas
-- **Ícone**: Gradiente azul (#3773f5 → #2c5aa0) com bordas arredondadas
-- **Texto**: Fonte Inter Bold
+- **Ícone**: Gradiente azul → roxo (#3773F5 → #8A2BE2) com bordas arredondadas
+- **Texto**: Fonte Rubik Bold
 - **Cores**: 
-  - Ícone: Gradiente azul
-  - Texto: #13161c (claro) / #f1f3f4 (escuro)
+  - Ícone: Gradiente azul → roxo
+  - Texto: #E6E6E6 (dark mode) / #0B0F1A (light mode)
 - **Tamanhos**:
   - Desktop: 32x32px (ícone) + 20px (texto)
   - Mobile: 24x24px (ícone) + 18px (texto)
 
 #### Versões do Logo
-1. **Versão Completa**: Ícone + texto "defiSATS"
-2. **Versão Compacta**: Apenas o ícone "HD"
+1. **Versão Completa**: Ícone + texto "Axisor"
+2. **Versão Compacta**: Apenas o ícone "AX"
 3. **Versão Monocromática**: Para fundos coloridos
+4. **Placeholder**: `/* LOGO AQUI */` para desenvolvimento
 
 ---
 
 ## 🌈 Paleta de Cores
 
-### Cores Primárias (Consistentes em Ambos os Temas)
+### Cores Primárias (Tema Dark Principal)
 
 | Cor | Hex | RGB | HSL | Uso Principal |
 |-----|-----|-----|-----|---------------|
-| **Primária** | `#3773f5` | 55, 115, 245 | 220°, 100%, 60% | Botões primários, links, CTAs |
-| **Secundária** | `#f5ac37` | 245, 172, 55 | 38°, 100%, 60% | Badges, alertas, destaques |
-| **Sucesso** | `#0ecb81` | 14, 203, 129 | 158°, 100%, 40% | Valores positivos, confirmações |
-| **Destrutiva** | `#f6465d` | 246, 70, 93 | 350°, 100%, 60% | Valores negativos, erros |
+| **Primária** | `#3773F5` | 55, 115, 245 | 220°, 100%, 60% | Botões primários, links, CTAs |
+| **Secundária** | `#8A2BE2` | 138, 43, 226 | 271°, 100%, 50% | Badges, alertas, destaques |
+| **Accent** | `#00FFDD` | 0, 255, 221 | 180°, 100%, 50% | Elementos especiais, highlights |
+| **Sucesso** | `#0ECB81` | 14, 203, 129 | 158°, 100%, 40% | Valores positivos, confirmações |
+| **Destrutiva** | `#F6465D` | 246, 70, 93 | 350°, 100%, 60% | Valores negativos, erros |
 
 ### Modo Claro (Light Mode)
 
@@ -59,17 +61,17 @@ O Hub DeFiSats é uma plataforma de automação de trading para LN Markets que c
 | **Header** | `#f6f7f8` | 246, 247, 248 | Cabeçalhos de tabela | Table headers |
 | **Cards** | `#f9fafb` | 249, 250, 251 | Fundo de cards | Card backgrounds |
 
-### Modo Escuro (Dark Mode)
+### Modo Escuro (Dark Mode - Principal)
 
 | Elemento | Hex | RGB | Uso | Exemplo |
 |----------|-----|-----|-----|---------|
-| **Fundo Principal** | `#0d0f13` | 13, 15, 19 | Background da aplicação | Body, containers principais |
-| **Cards** | `#16191d` | 22, 25, 29 | Fundo de cards/containers | Card backgrounds |
-| **Cards Alt** | `#1a1d22` | 26, 29, 34 | Fundo alternativo | Hover states |
-| **Texto Principal** | `#f1f3f4` | 241, 243, 244 | Títulos, textos importantes | Headers, labels |
-| **Texto Secundário** | `#a8b0b8` | 168, 176, 184 | Textos auxiliares | Descriptions, subtitles |
-| **Bordas** | `#21262d` | 33, 38, 45 | Divisores, bordas | Separadores, cards |
-| **Header** | `#16191d` | 22, 25, 29 | Cabeçalhos de tabela | Table headers |
+| **Fundo Principal** | `#0B0F1A` | 11, 15, 26 | Background da aplicação | Body, containers principais |
+| **Cards** | `#1A1F2E` | 26, 31, 46 | Fundo de cards/containers | Card backgrounds |
+| **Cards Alt** | `#242B3D` | 36, 43, 61 | Fundo alternativo | Hover states |
+| **Texto Principal** | `#E6E6E6` | 230, 230, 230 | Títulos, textos importantes | Headers, labels |
+| **Texto Secundário** | `#B8BCC8` | 184, 188, 200 | Textos auxiliares | Descriptions, subtitles |
+| **Bordas** | `#2A3441` | 42, 52, 65 | Divisores, bordas | Separadores, cards |
+| **Header** | `#1A1F2E` | 26, 31, 46 | Cabeçalhos de tabela | Table headers |
 
 ### Cores de Status
 
@@ -86,28 +88,35 @@ O Hub DeFiSats é uma plataforma de automação de trading para LN Markets que c
 
 ### Família de Fontes
 
-#### Fonte Principal: Inter
-- **Uso**: Textos, títulos, interface
-- **Pesos**: 400 (Normal), 500 (Medium), 600 (Semibold), 700 (Bold)
-- **Características**: Moderna, legível, otimizada para interfaces
+#### Fonte de Títulos: Rubik Bold
+- **Uso**: Títulos (h1, h2, h3), headers, elementos destacados
+- **Pesos**: 400 (Normal), 500 (Medium), 600 (Semibold), 700 (Bold), 800 (Extra Bold), 900 (Black)
+- **Características**: Moderna, tech, futurista, otimizada para títulos
 
-#### Fonte Monospace: JetBrains Mono
-- **Uso**: Código, valores numéricos, dados técnicos
-- **Pesos**: 400 (Normal), 500 (Medium)
-- **Características**: Clara, espaçamento consistente
+#### Fonte Principal: Inter
+- **Uso**: Corpo de texto, menus, interface
+- **Pesos**: 400 (Normal), 500 (Medium), 600 (Semibold), 700 (Bold)
+- **Características**: Legível, otimizada para interfaces, boa para textos longos
+
+#### Fonte Monospace: Source Code Pro
+- **Uso**: Números, dashboards, dados técnicos, código
+- **Pesos**: 400 (Normal), 500 (Medium), 600 (Semibold), 700 (Bold)
+- **Características**: Clara, espaçamento consistente, ideal para dados numéricos
 
 ### Hierarquia Tipográfica
 
-| Elemento | Tamanho | Peso | Altura da Linha | Uso |
-|----------|---------|------|-----------------|-----|
-| **H1** | 2.25rem (36px) | 700 | 1.25 | Títulos principais |
-| **H2** | 1.875rem (30px) | 600 | 1.25 | Títulos de seção |
-| **H3** | 1.5rem (24px) | 600 | 1.25 | Subtítulos |
-| **H4** | 1.25rem (20px) | 500 | 1.5 | Títulos de card |
-| **Body Large** | 1.125rem (18px) | 400 | 1.75 | Texto principal |
-| **Body** | 1rem (16px) | 400 | 1.5 | Texto padrão |
-| **Body Small** | 0.875rem (14px) | 400 | 1.5 | Texto secundário |
-| **Caption** | 0.75rem (12px) | 400 | 1.25 | Labels, captions |
+| Elemento | Tamanho | Peso | Fonte | Altura da Linha | Uso |
+|----------|---------|------|-------|-----------------|-----|
+| **H1** | 2.25rem (36px) | 700 | Rubik | 1.25 | Títulos principais |
+| **H2** | 1.875rem (30px) | 600 | Rubik | 1.25 | Títulos de seção |
+| **H3** | 1.5rem (24px) | 600 | Rubik | 1.25 | Subtítulos |
+| **H4** | 1.25rem (20px) | 500 | Rubik | 1.5 | Títulos de card |
+| **Body Large** | 1.125rem (18px) | 400 | Inter | 1.75 | Texto principal |
+| **Body** | 1rem (16px) | 400 | Inter | 1.5 | Texto padrão |
+| **Body Small** | 0.875rem (14px) | 400 | Inter | 1.5 | Texto secundário |
+| **Caption** | 0.75rem (12px) | 400 | Inter | 1.25 | Labels, captions |
+| **Numbers** | 1rem (16px) | 500 | Source Code Pro | 1.5 | Dados numéricos |
+| **Dashboard** | 1.5rem (24px) | 600 | Source Code Pro | 1.25 | Valores de dashboard |
 
 ---
 
