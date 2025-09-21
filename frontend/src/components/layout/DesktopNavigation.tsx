@@ -68,38 +68,43 @@ export const DesktopNavigation = ({ isScrolled = false }: { isScrolled?: boolean
 
   return (
     <nav className={cn(
-      'hidden md:flex items-center justify-center space-x-8 transition-all duration-300',
-      isScrolled ? 'h-12 space-x-6' : 'h-16 space-x-8'
+      'hidden md:flex items-center justify-center transition-all duration-300',
+      isScrolled ? 'h-12' : 'h-16'
     )}>
-      {navigation.length === 0 ? (
-        <div className="text-red-500">No navigation items found</div>
-      ) : (
-        navigation.map((item) => {
-        const Icon = item.icon;
-        const active = isActive(item.href);
+      <div className={cn(
+        'nav-container',
+        isScrolled ? 'space-x-1' : 'space-x-2'
+      )}>
+        {navigation.length === 0 ? (
+          <div className="text-red-500">No navigation items found</div>
+        ) : (
+          navigation.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
 
-        return (
-          <Link
-            key={item.name}
-            to={item.href}
-            className={cn(
-              'flex items-center justify-center space-x-2 font-medium uppercase tracking-wide transition-all duration-300 px-2',
-              isScrolled ? 'text-xs h-12' : 'text-sm h-16',
-              active
-                ? 'text-[#3773F5] border-b-2 border-[#3773F5]'
-                : theme === 'dark' 
-                  ? 'text-[#B8BCC8] hover:text-[#3773F5]'
-                  : 'text-[#0B0F1A] hover:text-[#3773F5]'
-            )}
-          >
-            <Icon className={cn(
-              'transition-all duration-300',
-              isScrolled ? 'h-3 w-3' : 'h-4 w-4'
-            )} />
-            <span>{item.name}</span>
-          </Link>
-        );
-      }))}
+          return (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={cn(
+                'nav-item',
+                isScrolled ? 'text-xs h-10' : 'text-sm h-12',
+                active
+                  ? 'nav-item-active'
+                  : theme === 'dark' 
+                    ? 'text-text-secondary hover:text-primary'
+                    : 'text-text-primary hover:text-primary'
+              )}
+            >
+              <Icon className={cn(
+                'nav-item-icon',
+                isScrolled ? 'h-3 w-3' : 'h-4 w-4'
+              )} />
+              <span className="nav-item-text">{item.name}</span>
+            </Link>
+          );
+        }))}
+      </div>
     </nav>
   );
 };
