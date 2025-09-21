@@ -542,6 +542,13 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // Cache para dados de mercado (30 segundos - apenas para evitar spam de requisições)
+  let marketDataCache = {
+    data: null,
+    timestamp: 0,
+    ttl: 30 * 1000 // 30 segundos - dados devem ser muito recentes
+  };
+
   // PUBLIC ENDPOINT - Get basic market index data (no auth required)
   fastify.get('/market/index/public', {
     schema: {
@@ -580,75 +587,103 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
     try {
       console.log('🔍 PUBLIC MARKET INDEX - Getting market index data');
 
-      // 1. Get current index from LN Markets
-      let lnMarketsData = null;
-      try {
-        console.log('🔍 PUBLIC MARKET INDEX - Getting current index from LN Markets...');
-        const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {
-          timeout: 10000
+      // Verificar cache apenas para evitar spam (30 segundos máximo)
+      const now = Date.now();
+      if (marketDataCache.data && (now - marketDataCache.timestamp) < marketDataCache.ttl) {
+        console.log('✅ PUBLIC MARKET INDEX - Using recent cached data (30s)');
+        return reply.status(200).send({
+          success: true,
+          data: marketDataCache.data
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          lnMarketsData = {
-            index: data.index || data.price,
-            source: 'lnmarkets'
-          };
-          console.log('✅ PUBLIC MARKET INDEX - LN Markets index success:', lnMarketsData);
-        } else {
-          console.log('⚠️ PUBLIC MARKET INDEX - LN Markets response not ok:', response.status, response.statusText);
-        }
-      } catch (lnMarketsError) {
-        console.log('⚠️ PUBLIC MARKET INDEX - LN Markets failed:', lnMarketsError.message);
       }
 
-      // 2. Get historical data to calculate 24h change
-      let change24hData = null;
-      try {
-        console.log('🔍 PUBLIC MARKET INDEX - Getting historical data for 24h change calculation...');
+      // 1. Get current index from LN Markets com retry
+      let lnMarketsData = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`🔍 PUBLIC MARKET INDEX - Attempt ${attempt}/3 - Getting current index from LN Markets...`);
+          const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {
+            timeout: 15000 // Aumentado para 15 segundos
+          });
         
-        // Get current price from Binance
-        const currentResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
-          timeout: 10000
-        });
-        
-        // Get price from 24h ago from Binance
-        const historicalResponse = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=2', {
-          timeout: 10000
-        });
-        
-        if (currentResponse.ok && historicalResponse.ok) {
-          const currentData = await currentResponse.json();
-          const historicalData = await historicalResponse.json();
-          
-          const currentPrice = parseFloat(currentData.price);
-          const price24hAgo = parseFloat(historicalData[0][4]); // Close price from 24h ago
-          
-          if (currentPrice && price24hAgo && price24hAgo > 0) {
-            const change24h = ((currentPrice - price24hAgo) / price24hAgo) * 100;
-            change24hData = {
-              change24h: parseFloat(change24h.toFixed(3))
+          if (response.ok) {
+            const data = await response.json();
+            lnMarketsData = {
+              index: data.index || data.price || data.lastPrice,
+              source: 'lnmarkets'
             };
-            console.log('✅ PUBLIC MARKET INDEX - 24h change calculated:', {
-              currentPrice,
-              price24hAgo,
-              change24h: change24hData.change24h
-            });
+            console.log('✅ PUBLIC MARKET INDEX - LN Markets index success:', lnMarketsData);
+            break; // Sucesso, sair do loop
+          } else {
+            console.log(`⚠️ PUBLIC MARKET INDEX - LN Markets attempt ${attempt} failed:`, response.status, response.statusText);
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Backoff
+            }
           }
-        } else {
-          console.log('⚠️ PUBLIC MARKET INDEX - Binance historical data response not ok');
+        } catch (lnMarketsError) {
+          console.log(`⚠️ PUBLIC MARKET INDEX - LN Markets attempt ${attempt} error:`, lnMarketsError.message);
+          if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Backoff
+          }
         }
-      } catch (binanceError) {
-        console.log('⚠️ PUBLIC MARKET INDEX - Binance historical data failed:', binanceError.message);
+      }
+
+      // 2. Get historical data to calculate 24h change com retry
+      let change24hData = null;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          console.log(`🔍 PUBLIC MARKET INDEX - Attempt ${attempt}/2 - Getting historical data for 24h change calculation...`);
+          
+          // Get current price from Binance
+          const currentResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
+            timeout: 15000
+          });
+          
+          // Get price from 24h ago from Binance
+          const historicalResponse = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=2', {
+            timeout: 15000
+          });
+          
+          if (currentResponse.ok && historicalResponse.ok) {
+            const currentData = await currentResponse.json();
+            const historicalData = await historicalResponse.json();
+            
+            const currentPrice = parseFloat(currentData.price);
+            const price24hAgo = parseFloat(historicalData[0][4]); // Close price from 24h ago
+            
+            if (currentPrice && price24hAgo && price24hAgo > 0) {
+              const change24h = ((currentPrice - price24hAgo) / price24hAgo) * 100;
+              change24hData = {
+                change24h: parseFloat(change24h.toFixed(3))
+              };
+              console.log('✅ PUBLIC MARKET INDEX - 24h change calculated:', {
+                currentPrice,
+                price24hAgo,
+                change24h: change24hData.change24h
+              });
+              break; // Sucesso, sair do loop
+            }
+          } else {
+            console.log(`⚠️ PUBLIC MARKET INDEX - Binance attempt ${attempt} response not ok`);
+            if (attempt < 2) {
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Backoff
+            }
+          }
+        } catch (binanceError) {
+          console.log(`⚠️ PUBLIC MARKET INDEX - Binance attempt ${attempt} error:`, binanceError.message);
+          if (attempt < 2) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Backoff
+          }
+        }
       }
 
       // 3. Fallback to CoinCap if Binance fails
       if (!change24hData) {
         try {
           console.log('🔍 PUBLIC MARKET INDEX - Trying CoinCap as fallback for 24h change...');
-          const response = await fetch('https://api.coincap.io/v2/assets/bitcoin', {
-            timeout: 10000
-          });
+        const response = await fetch('https://api.coincap.io/v2/assets/bitcoin', {
+          timeout: 15000
+        });
           
           if (response.ok) {
             const data = await response.json();
@@ -701,21 +736,30 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           ? `${minutesToNext}m ${secondsToNext}s`
           : `${hoursToNext}h ${minutesToNext}m ${secondsToNext}s`;
 
+        const responseData = {
+          index: Math.round(marketData.index),
+          index24hChange: parseFloat(marketData.change24h.toFixed(3)),
+          tradingFees: 0.1, // LN Markets standard fee
+          nextFunding: nextFunding,
+          rate: 0.0001, // 0.01% in decimal
+          timestamp: new Date().toISOString(),
+          source: marketData.source // Include data source
+        };
+
+        // Atualizar cache (apenas 30 segundos)
+        marketDataCache = {
+          data: responseData,
+          timestamp: now,
+          ttl: 30 * 1000
+        };
+
         return reply.status(200).send({
           success: true,
-          data: {
-            index: Math.round(marketData.index),
-            index24hChange: parseFloat(marketData.change24h.toFixed(3)),
-            tradingFees: 0.1, // LN Markets standard fee
-            nextFunding: nextFunding,
-            rate: 0.0001, // 0.01% in decimal
-            timestamp: new Date().toISOString(),
-            source: marketData.source // Include data source
-          }
+          data: responseData
         });
       }
 
-      // 4. No data available - return error instead of fake data
+      // 5. No data available - return error (NUNCA usar dados antigos em mercado volátil)
       console.log('❌ PUBLIC MARKET INDEX - No reliable data source available');
       return reply.status(503).send({
         success: false,
@@ -725,6 +769,8 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
 
     } catch (error: any) {
       console.error('❌ PUBLIC MARKET INDEX - Error getting market index:', error);
+      
+      // NUNCA usar cache em caso de erro - dados podem estar desatualizados
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_ERROR',

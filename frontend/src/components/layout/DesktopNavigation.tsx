@@ -168,9 +168,9 @@ export const DesktopHeader = () => {
     <header className={cn(
       'w-full border-b transition-all duration-300',
       theme === 'dark' 
-        ? 'bg-[#0B0F1A] border-[#2A3441]' 
-        : 'bg-white border-[#e6e8ec]',
-      isScrolled ? 'shadow-lg neon-glow' : ''
+        ? 'bg-bg-primary border-border' 
+        : 'bg-background border-border',
+      isScrolled ? 'shadow-coingecko-md' : ''
     )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className={cn(
@@ -180,14 +180,18 @@ export const DesktopHeader = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className={cn(
-              'logo-placeholder transition-all duration-300',
+              'bg-gradient-primary rounded-lg flex items-center justify-center transition-all duration-300',
               isScrolled ? 'w-6 h-6' : 'w-8 h-8'
             )}>
-              {/* LOGO AQUI */}
+              <span className={cn(
+                'font-bold text-white',
+                isScrolled ? 'text-xs' : 'text-sm'
+              )}>
+                AX
+              </span>
             </div>
             <span className={cn(
-              'font-heading transition-all duration-300',
-              theme === 'dark' ? 'text-[#E6E6E6]' : 'text-[#0B0F1A]',
+              'font-heading transition-all duration-300 text-text-primary',
               isScrolled ? 'text-lg' : 'text-xl'
             )}>
               Axisor
@@ -206,11 +210,8 @@ export const DesktopHeader = () => {
               variant="ghost"
               size="icon"
               className={cn(
-                'transition-all duration-300',
-                isScrolled ? 'h-7 w-7' : 'h-9 w-9',
-                theme === 'dark'
-                  ? 'text-gray-300 hover:text-[#3773f5] hover:bg-gray-800'
-                  : 'text-[#13161c] hover:text-[#3773f5] hover:bg-gray-100'
+                'transition-all duration-300 text-text-secondary hover:text-primary hover:bg-accent',
+                isScrolled ? 'h-7 w-7' : 'h-9 w-9'
               )}
             >
               <Bell className={cn(
@@ -234,11 +235,8 @@ export const DesktopHeader = () => {
                     isScrolled ? 'h-6 w-6' : 'h-8 w-8'
                   )}>
                     <AvatarFallback className={cn(
-                      'font-medium transition-all duration-300',
-                      isScrolled ? 'text-xs' : 'text-xs',
-                      theme === 'dark' 
-                        ? 'bg-[#3773f5] text-white' 
-                        : 'bg-[#3773f5] text-white'
+                      'font-medium transition-all duration-300 bg-primary text-primary-foreground',
+                      isScrolled ? 'text-xs' : 'text-xs'
                     )}>
                       {user ? getUserInitials(user.email) : 'U'}
                     </AvatarFallback>
@@ -246,44 +244,23 @@ export const DesktopHeader = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className={cn(
-                  'w-56 transition-colors duration-200',
-                  theme === 'dark' 
-                    ? 'bg-gray-800 border-gray-700' 
-                    : 'bg-white border-gray-200'
-                )}
+                className="w-56 bg-popover border-border transition-colors duration-200"
                 align="end"
                 forceMount
               >
-                <DropdownMenuLabel className={cn(
-                  'font-normal transition-colors duration-200',
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-900'
-                )}>
+                <DropdownMenuLabel className="font-normal text-popover-foreground transition-colors duration-200">
                   <div className="flex flex-col space-y-1">
-                    <p className={cn(
-                      'text-sm font-medium leading-none transition-colors duration-200',
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
-                    )}>
+                    <p className="text-sm font-medium leading-none text-popover-foreground transition-colors duration-200">
                       {user?.email || 'User'}
                     </p>
-                    <p className={cn(
-                      'text-xs leading-none transition-colors duration-200',
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    )}>
+                    <p className="text-xs leading-none text-muted-foreground transition-colors duration-200">
                       {user?.plan_type?.toUpperCase() || 'FREE'} Plan
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className={cn(
-                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
-                )} />
+                <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem 
-                  className={cn(
-                    'transition-colors duration-200',
-                    theme === 'dark' 
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                      : 'text-gray-900 hover:bg-gray-100'
-                  )}
+                  className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                   asChild
                 >
                   <Link to="/profile">
@@ -291,45 +268,23 @@ export const DesktopHeader = () => {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className={cn(
-                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
-                )} />
+                <DropdownMenuSeparator className="bg-border" />
                 
                 {/* Language Selection */}
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className={cn(
-                    'transition-colors duration-200',
-                    theme === 'dark' 
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                      : 'text-gray-900 hover:bg-gray-100'
-                  )}>
+                  <DropdownMenuSubTrigger className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
                     <Globe className="mr-2 h-4 w-4" />
                     <span>Idioma</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className={cn(
-                    'transition-colors duration-200',
-                    theme === 'dark' 
-                      ? 'bg-gray-800 border-gray-700' 
-                      : 'bg-white border-gray-200'
-                  )}>
+                  <DropdownMenuSubContent className="bg-popover border-border transition-colors duration-200">
                     <DropdownMenuItem 
-                      className={cn(
-                        'transition-colors duration-200',
-                        theme === 'dark' 
-                          ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                          : 'text-gray-900 hover:bg-gray-100'
-                      )}
+                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                       onClick={() => handleLanguageChange('pt-BR')}
                     >
                       <span>🇧🇷 Português (BR)</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className={cn(
-                        'transition-colors duration-200',
-                        theme === 'dark' 
-                          ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                          : 'text-gray-900 hover:bg-gray-100'
-                      )}
+                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                       onClick={() => handleLanguageChange('en-US')}
                     >
                       <span>🇺🇸 English (US)</span>
@@ -339,39 +294,19 @@ export const DesktopHeader = () => {
 
                 {/* Currency Selection */}
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className={cn(
-                    'transition-colors duration-200',
-                    theme === 'dark' 
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                      : 'text-gray-900 hover:bg-gray-100'
-                  )}>
+                  <DropdownMenuSubTrigger className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
                     <DollarSign className="mr-2 h-4 w-4" />
                     <span>Moeda</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className={cn(
-                    'transition-colors duration-200',
-                    theme === 'dark' 
-                      ? 'bg-gray-800 border-gray-700' 
-                      : 'bg-white border-gray-200'
-                  )}>
+                  <DropdownMenuSubContent className="bg-popover border-border transition-colors duration-200">
                     <DropdownMenuItem 
-                      className={cn(
-                        'transition-colors duration-200',
-                        theme === 'dark' 
-                          ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                          : 'text-gray-900 hover:bg-gray-100'
-                      )}
+                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                       onClick={() => handleCurrencyChange('SATS')}
                     >
                       <span>₿ SATS</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className={cn(
-                        'transition-colors duration-200',
-                        theme === 'dark' 
-                          ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                          : 'text-gray-900 hover:bg-gray-100'
-                      )}
+                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                       onClick={() => handleCurrencyChange('USD')}
                     >
                       <span>$ USD</span>
@@ -381,52 +316,27 @@ export const DesktopHeader = () => {
 
                 {/* Theme Selection */}
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className={cn(
-                    'transition-colors duration-200',
-                    theme === 'dark' 
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                      : 'text-gray-900 hover:bg-gray-100'
-                  )}>
+                  <DropdownMenuSubTrigger className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
                     {getThemeIcon()}
                     <span className="ml-2">Tema</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className={cn(
-                    'transition-colors duration-200',
-                    theme === 'dark' 
-                      ? 'bg-gray-800 border-gray-700' 
-                      : 'bg-white border-gray-200'
-                  )}>
+                  <DropdownMenuSubContent className="bg-popover border-border transition-colors duration-200">
                     <DropdownMenuItem 
-                      className={cn(
-                        'transition-colors duration-200',
-                        theme === 'dark' 
-                          ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                          : 'text-gray-900 hover:bg-gray-100'
-                      )}
+                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                       onClick={() => handleThemeChange('light')}
                     >
                       <Sun className="mr-2 h-4 w-4" />
                       <span>Claro</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className={cn(
-                        'transition-colors duration-200',
-                        theme === 'dark' 
-                          ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                          : 'text-gray-900 hover:bg-gray-100'
-                      )}
+                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                       onClick={() => handleThemeChange('dark')}
                     >
                       <Moon className="mr-2 h-4 w-4" />
                       <span>Escuro</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className={cn(
-                        'transition-colors duration-200',
-                        theme === 'dark' 
-                          ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                          : 'text-gray-900 hover:bg-gray-100'
-                      )}
+                      className="text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                       onClick={() => handleThemeChange('system')}
                     >
                       <Monitor className="mr-2 h-4 w-4" />
@@ -435,9 +345,7 @@ export const DesktopHeader = () => {
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
 
-                <DropdownMenuSeparator className={cn(
-                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
-                )} />
+                <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem
                   className={cn(
                     'text-red-600 hover:text-red-700 transition-colors duration-200',

@@ -33,6 +33,13 @@ interface UseCentralizedDataReturn extends CentralizedData {
   isConnected: boolean;
 }
 
+// Cache global para dados centralizados (30 segundos - apenas para evitar spam)
+let globalCache = {
+  data: null as CentralizedData | null,
+  timestamp: 0,
+  ttl: 30 * 1000 // 30 segundos - dados devem ser muito recentes
+};
+
 export const useCentralizedData = (): UseCentralizedDataReturn => {
   const { isAuthenticated, user } = useAuthStore();
   
@@ -68,16 +75,29 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
       return;
     }
 
+    // Verificar cache apenas para evitar spam (30 segundos máximo)
+    const now = Date.now();
+    if (globalCache.data && (now - globalCache.timestamp) < globalCache.ttl) {
+      console.log('✅ CENTRALIZED DATA - Using recent cached data (30s)');
+      setData(globalCache.data);
+      return;
+    }
+
     setData(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
       console.log('🔄 CENTRALIZED DATA - Fetching all data in single request...');
 
-      // Fazer todas as requisições em paralelo
+      // Fazer todas as requisições em paralelo com retry para market data
       const [balanceResponse, positionsResponse, marketResponse, menuResponse] = await Promise.allSettled([
         api.get('/api/lnmarkets/user/balance'),
         api.get('/api/lnmarkets/user/positions'),
-        api.get('/api/market/index/public'),
+        // Retry para market data se falhar
+        api.get('/api/market/index/public').catch(async () => {
+          console.log('🔄 CENTRALIZED DATA - Market data failed, retrying...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return api.get('/api/market/index/public');
+        }),
         api.get('/api/menu')
       ]);
 
@@ -101,39 +121,56 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
             timestamp: marketResponse.value.data.data.timestamp || Date.now(),
             source: marketResponse.value.data.data.source || 'lnmarkets'
           }
-        : {
-            index: 0,
-            index24hChange: 0,
-            tradingFees: 0,
-            nextFunding: '--',
-            rate: 0,
-            rateChange: 0,
-            timestamp: 0,
-            source: 'lnmarkets'
-          };
+        : null; // NUNCA usar dados padrão em mercado volátil
 
       const menuData = menuResponse.status === 'fulfilled' && menuResponse.value.data.success 
         ? menuResponse.value.data.data 
         : null;
 
-      // Verificar se houve erros
-      const errors = [
-        balanceResponse.status === 'rejected' ? 'Balance' : null,
-        positionsResponse.status === 'rejected' ? 'Positions' : null,
-        marketResponse.status === 'rejected' ? 'Market' : null,
-        menuResponse.status === 'rejected' ? 'Menu' : null
-      ].filter(Boolean);
+      // Verificar se houve erros críticos (market data é obrigatório)
+      const criticalErrors = [];
+      if (marketResponse.status === 'rejected' || !marketIndex) {
+        criticalErrors.push('Market data indisponível - dados podem estar desatualizados');
+      }
+      if (balanceResponse.status === 'rejected') {
+        criticalErrors.push('Balance');
+      }
+      if (positionsResponse.status === 'rejected') {
+        criticalErrors.push('Positions');
+      }
+      if (menuResponse.status === 'rejected') {
+        criticalErrors.push('Menu');
+      }
 
-      setData(prev => ({
-        ...prev,
+      // Se market data não estiver disponível, não atualizar cache e mostrar erro
+      if (criticalErrors.length > 0 && (!marketIndex || marketResponse.status === 'rejected')) {
+        console.log('❌ CENTRALIZED DATA - Market data indisponível, não atualizando cache');
+        setData(prev => ({
+          ...prev,
+          isLoading: false,
+          error: `Dados de mercado indisponíveis: ${criticalErrors.join(', ')}`
+        }));
+        return;
+      }
+
+      const newData = {
         userBalance,
         userPositions,
         marketIndex,
         menuData,
         isLoading: false,
         lastUpdate: Date.now(),
-        error: errors.length > 0 ? `Erro ao carregar: ${errors.join(', ')}` : null
-      }));
+        error: criticalErrors.length > 0 ? `Erro ao carregar: ${criticalErrors.join(', ')}` : null
+      };
+
+      // Atualizar cache apenas se market data estiver disponível
+      globalCache = {
+        data: newData,
+        timestamp: now,
+        ttl: 30 * 1000
+      };
+
+      setData(newData);
 
       console.log('✅ CENTRALIZED DATA - All data updated successfully');
       console.log('📊 CENTRALIZED DATA - Summary:', {

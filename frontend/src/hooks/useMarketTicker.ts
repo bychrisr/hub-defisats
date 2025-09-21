@@ -45,16 +45,9 @@ export const useMarketTicker = () => {
     } catch (err: any) {
       console.error('❌ MARKET TICKER HOOK - Error:', err);
       setError(err.message || 'Failed to fetch market ticker');
-
-      // Em caso de erro, usar dados padrão
-      setData({
-        index: 115000,
-        lastPrice: 115000,
-        askPrice: 115100,
-        bidPrice: 114900,
-        carryFeeRate: 0.0001,
-        timestamp: Date.now()
-      });
+      
+      // NUNCA usar dados padrão em mercado volátil
+      setData(null);
     } finally {
       setIsLoading(false);
     }
