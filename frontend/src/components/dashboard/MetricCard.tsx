@@ -87,11 +87,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const getVariantStyles = () => {
     switch (variant) {
       case 'success':
-        return 'border-success/30 bg-success/5 hover:bg-success/10';
+        return '!border-success !bg-success/5 hover:!bg-success/10 !bg-gradient-to-br !from-success/10 !to-success/5';
       case 'warning':
-        return 'border-warning/30 bg-warning/5 hover:bg-warning/10';
+        return '!border-warning !bg-warning/5 hover:!bg-warning/10 !bg-gradient-to-br !from-warning/10 !to-warning/5';
       case 'danger':
-        return 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10';
+        return '!border-destructive !bg-destructive/5 hover:!bg-destructive/10 !bg-gradient-to-br !from-destructive/10 !to-destructive/5';
       default:
         return 'card-modern';
     }

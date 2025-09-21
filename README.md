@@ -11,6 +11,7 @@ O Axisor é uma plataforma completa de automação de trading para LN Markets, c
 - **UX Profissional**: Design limpo focado na experiência do usuário
 - **Mobile Navigation**: Menu mobile funcional com z-index otimizado
 - **Profile Page**: Layout consistente com tabs com efeito glow elegante
+- **Account Selector**: Sistema de seleção de múltiplas contas com design minimalista
 
 ## 🏗️ Estrutura do Projeto
 

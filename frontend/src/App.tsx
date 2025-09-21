@@ -43,6 +43,7 @@ import AdminAlerts from '@/pages/admin/Alerts';
 import AdminSettings from '@/pages/admin/Settings';
 import AdminTooltips from '@/pages/admin/Tooltips';
 import TestPermissions from '@/pages/TestPermissions';
+import DesignSystem from '@/pages/DesignSystem';
 
 const queryClient = new QueryClient();
 
@@ -371,6 +372,18 @@ const App = () => {
                 element={
                 <ProtectedRoute>
                   <TestPermissions />
+                </ProtectedRoute>
+              }
+            />
+                  <Route
+              path="/design-system"
+                element={
+                <ProtectedRoute>
+                  <RouteGuard>
+                    <ResponsiveLayout>
+                      <DesignSystem />
+                    </ResponsiveLayout>
+                  </RouteGuard>
                 </ProtectedRoute>
               }
             />

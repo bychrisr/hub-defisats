@@ -44,6 +44,12 @@
     --destructive-hover: 350 100% 55%;
     --destructive-light: 350 100% 65%;
 
+    /* Warning - Axisor Yellow */
+    --warning: 45 100% 60%; /* #F5AC37 */
+    --warning-foreground: 0 0% 100%;
+    --warning-hover: 45 100% 55%;
+    --warning-light: 45 100% 65%;
+
     /* Text Colors */
     --text-primary: 0 0% 90%; /* #E6E6E6 */
     --text-secondary: 220 15% 72%; /* #B8BCC8 */
@@ -140,6 +146,12 @@
     --destructive-foreground: 0 0% 100%;
     --destructive-hover: 350 100% 55%;
     --destructive-light: 350 100% 65%;
+
+    /* Warning - Axisor Yellow */
+    --warning: 45 100% 60%; /* #F5AC37 */
+    --warning-foreground: 0 0% 100%;
+    --warning-hover: 45 100% 55%;
+    --warning-light: 45 100% 65%;
 
     /* Text Colors */
     --text-primary: 220 25% 7%; /* #0B0F1A */
@@ -424,14 +436,9 @@
   box-shadow: 10px 10px 20px -10px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
 }
 
-  /* Dashboard Cards - Configuração Global com Flexbox */
+  /* Dashboard Cards - Configuração Global */
   .dashboard-card {
     @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 140px; /* Altura mínima uniforme */
-    height: 100%; /* Garante que todos os cards tenham a mesma altura */
   }
 
   .dashboard-card:hover {
@@ -443,27 +450,57 @@
   /* Container dos cards com grid responsivo */
   .dashboard-cards-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
-    align-items: stretch; /* Garante que todos os cards tenham a mesma altura */
   }
 
-  /* Mobile: 1 coluna, Desktop: 2-5 colunas */
+  /* Mobile: 1 coluna */
   @media (max-width: 768px) {
     .dashboard-cards-container {
       grid-template-columns: 1fr;
+      gap: 0.75rem;
     }
   }
 
+  /* Tablet: 2 colunas */
   @media (min-width: 769px) and (max-width: 1024px) {
     .dashboard-cards-container {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
+  /* Desktop: 3 colunas para melhor distribuição */
   @media (min-width: 1025px) {
     .dashboard-cards-container {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Telas muito grandes: 4 colunas */
+  @media (min-width: 1400px) {
+    .dashboard-cards-container {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Posições Ativas: 5 cards na horizontal no desktop - LAYOUT ORIGINAL */
+  .positions-active-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 1024px) {
+    .positions-active-cards {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .positions-active-cards {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
     }
   }
 
@@ -489,7 +526,6 @@
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', monospace;
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
-    margin-top: auto; /* Empurra para baixo */
   }
 
   .dashboard-card-subtitle {
@@ -514,28 +550,11 @@
     color: #E6E6E6;
   }
 
-  /* Card header com flexbox para alinhamento perfeito */
-  .dashboard-card-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    flex-shrink: 0; /* Não encolhe */
-  }
-
-  /* Card content com flexbox para empurrar valor para baixo */
-  .dashboard-card-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    flex-grow: 1; /* Cresce para ocupar espaço disponível */
-  }
 
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .dashboard-card {
       @apply p-4;
-      min-height: 120px; /* Altura menor no mobile */
     }
     
     .dashboard-card-title {
@@ -554,10 +573,6 @@
       font-size: 0.75rem !important;
     }
     
-    .dashboard-cards-container {
-      grid-template-columns: 1fr; /* 1 coluna no mobile */
-      gap: 0.75rem;
-    }
   }
 
   /* Button improvements - Mais vibrante */
@@ -695,47 +710,6 @@
     @apply bg-secondary text-secondary-foreground hover:bg-secondary-hover px-4 py-2 rounded-md font-medium transition-all;
   }
 
-  /* Mobile Typography - Baseado na página de Backtests */
-  @media (max-width: 768px) {
-    /* Títulos de cards - Reduzidos proporcionalmente */
-    .dashboard-card-title {
-      font-size: 0.875rem !important; /* 14px - era 1.125rem */
-      font-weight: 700 !important;
-      font-family: 'Inter' !important;
-      padding-top: 12px !important; /* era 20px */
-      padding-bottom: 12px !important; /* era 20px */
-    }
-
-    /* Valores dos cards - Reduzidos proporcionalmente */
-    .dashboard-card-value {
-      font-size: 1.25rem !important; /* 20px - era 1.5rem */
-      font-weight: 700 !important;
-    }
-
-    /* Subtítulos dos cards - Reduzidos proporcionalmente */
-    .dashboard-card-subtitle {
-      font-size: 0.75rem !important; /* 12px - era 0.875rem */
-      font-weight: 500 !important;
-    }
-
-    /* Badges de porcentagem - Reduzidos proporcionalmente */
-    .dashboard-card-badge {
-      font-size: 0.625rem !important; /* 10px - era 0.75rem */
-      padding: 0.25rem 0.5rem !important; /* era 0.5rem 0.75rem */
-    }
-
-    /* Ícones flutuantes - Reduzidos proporcionalmente */
-    .dashboard-card-floating-icon {
-      width: 2rem !important; /* 32px - era 2.5rem */
-      height: 2rem !important; /* 32px - era 2.5rem */
-      padding: 0.375rem !important; /* 6px - era 0.5rem */
-    }
-
-    /* SatsIcon - Reduzido proporcionalmente */
-    .sats-icon-mobile {
-      width: 16px !important; /* era 20px */
-      height: 16px !important; /* era 20px */
-    }
 
     /* Números grandes - Reduzidos proporcionalmente */
     .number-lg {
@@ -750,7 +724,6 @@
       font-size: 2rem !important; /* 32px - era 3rem */
     }
   }
-}
 
 /* ===== AXISOR DESIGN SYSTEM UTILITIES ===== */
 
@@ -763,6 +736,202 @@
 
   .font-mono {
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  /* Axisor Typography System */
+  .text-display-2xl {
+    @apply text-7xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-display-xl {
+    @apply text-6xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-display-lg {
+    @apply text-5xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-display-md {
+    @apply text-4xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-display-sm {
+    @apply text-3xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-display-xs {
+    @apply text-2xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Headings */
+  .text-h1 {
+    @apply text-4xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-h2 {
+    @apply text-3xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-h3 {
+    @apply text-2xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-h4 {
+    @apply text-xl font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-h5 {
+    @apply text-lg font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  .text-h6 {
+    @apply text-base font-bold leading-tight tracking-tight;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Body Text */
+  .text-body-xl {
+    @apply text-xl font-normal leading-relaxed;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .text-body-lg {
+    @apply text-lg font-normal leading-relaxed;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .text-body-md {
+    @apply text-base font-normal leading-relaxed;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .text-body-sm {
+    @apply text-sm font-normal leading-relaxed;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .text-body-xs {
+    @apply text-xs font-normal leading-relaxed;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Labels and Captions */
+  .text-label-lg {
+    @apply text-sm font-semibold leading-tight tracking-wide uppercase;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .text-label-md {
+    @apply text-xs font-semibold leading-tight tracking-wide uppercase;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .text-label-sm {
+    @apply text-xs font-medium leading-tight tracking-wide uppercase;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .text-caption {
+    @apply text-xs font-normal leading-tight text-text-secondary;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Code and Monospace */
+  .text-code-lg {
+    @apply text-lg font-mono leading-relaxed;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  .text-code-md {
+    @apply text-base font-mono leading-relaxed;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  .text-code-sm {
+    @apply text-sm font-mono leading-relaxed;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  .text-code-xs {
+    @apply text-xs font-mono leading-relaxed;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  /* Numbers and Data */
+  .text-number-2xl {
+    @apply text-5xl font-bold leading-none tracking-tight;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-number-xl {
+    @apply text-4xl font-bold leading-none tracking-tight;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-number-lg {
+    @apply text-3xl font-bold leading-none tracking-tight;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-number-md {
+    @apply text-2xl font-bold leading-none tracking-tight;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-number-sm {
+    @apply text-xl font-bold leading-none tracking-tight;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-number-xs {
+    @apply text-lg font-bold leading-none tracking-tight;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Responsive Typography */
+  @media (max-width: 768px) {
+    .text-display-2xl { @apply text-5xl; }
+    .text-display-xl { @apply text-4xl; }
+    .text-display-lg { @apply text-3xl; }
+    .text-display-md { @apply text-2xl; }
+    .text-display-sm { @apply text-xl; }
+    .text-display-xs { @apply text-lg; }
+    
+    .text-h1 { @apply text-3xl; }
+    .text-h2 { @apply text-2xl; }
+    .text-h3 { @apply text-xl; }
+    .text-h4 { @apply text-lg; }
+    .text-h5 { @apply text-base; }
+    .text-h6 { @apply text-sm; }
+    
+    .text-body-xl { @apply text-lg; }
+    .text-body-lg { @apply text-base; }
+    .text-body-md { @apply text-sm; }
+    .text-body-sm { @apply text-xs; }
+    
+    .text-number-2xl { @apply text-4xl; }
+    .text-number-xl { @apply text-3xl; }
+    .text-number-lg { @apply text-2xl; }
+    .text-number-md { @apply text-xl; }
+    .text-number-sm { @apply text-lg; }
+    .text-number-xs { @apply text-base; }
   }
 
   /* Gradient Classes */
@@ -823,17 +992,372 @@
     transform: translateY(-2px);
   }
 
-  /* Button Variants */
+  /* Button Variants - More Subtle Hover */
   .btn-axisor-primary {
-    @apply bg-gradient-primary text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 hover:neon-primary hover:scale-105;
+    @apply bg-gradient-primary text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:neon-primary;
+  }
+
+  .btn-axisor-primary:hover {
+    transform: scale(1.02);
   }
 
   .btn-axisor-secondary {
-    @apply bg-gradient-secondary text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 hover:neon-secondary hover:scale-105;
+    @apply bg-gradient-secondary text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:neon-secondary;
+  }
+
+  .btn-axisor-secondary:hover {
+    transform: scale(1.02);
   }
 
   .btn-axisor-accent {
-    @apply bg-gradient-accent text-black font-medium px-6 py-3 rounded-lg transition-all duration-300 hover:neon-accent hover:scale-105;
+    @apply bg-gradient-accent text-black font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:neon-accent;
+  }
+
+  .btn-axisor-accent:hover {
+    transform: scale(1.02);
+  }
+
+  /* Axisor Brand Solid Colors for Traditional Buttons - Subtle Hover */
+  .btn-axisor-primary-solid {
+    @apply bg-[#3773F5] hover:bg-[#2B5CE6] text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#3773F5]/15;
+  }
+
+  .btn-axisor-primary-solid:hover {
+    transform: scale(1.02);
+  }
+
+  .btn-axisor-secondary-solid {
+    @apply bg-[#8A2BE2] hover:bg-[#7B1FA2] text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#8A2BE2]/15;
+  }
+
+  .btn-axisor-secondary-solid:hover {
+    transform: scale(1.02);
+  }
+
+  .btn-axisor-accent-solid {
+    @apply bg-[#00FFDD] hover:bg-[#00E6C7] text-black font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#00FFDD]/15;
+  }
+
+  .btn-axisor-accent-solid:hover {
+    transform: scale(1.02);
+  }
+
+  .btn-axisor-success-solid {
+    @apply bg-[#0ECB81] hover:bg-[#0DB870] text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#0ECB81]/15;
+  }
+
+  .btn-axisor-success-solid:hover {
+    transform: scale(1.02);
+  }
+
+  .btn-axisor-destructive-solid {
+    @apply bg-[#F6465D] hover:bg-[#E53E55] text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#F6465D]/15;
+  }
+
+  .btn-axisor-destructive-solid:hover {
+    transform: scale(1.02);
+  }
+
+  /* Axisor Brand Outline Variants - Subtle Hover */
+  .btn-axisor-primary-outline {
+    @apply border-2 border-[#3773F5] text-[#3773F5] hover:bg-[#3773F5] hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-secondary-outline {
+    @apply border-2 border-[#8A2BE2] text-[#8A2BE2] hover:bg-[#8A2BE2] hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-accent-outline {
+    @apply border-2 border-[#00FFDD] text-[#00FFDD] hover:bg-[#00FFDD] hover:text-black font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-success-outline {
+    @apply border-2 border-[#0ECB81] text-[#0ECB81] hover:bg-[#0ECB81] hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-destructive-outline {
+    @apply border-2 border-[#F6465D] text-[#F6465D] hover:bg-[#F6465D] hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  /* Axisor Brand Ghost Variants - Subtle Hover */
+  .btn-axisor-primary-ghost {
+    @apply text-[#3773F5] hover:bg-[#3773F5]/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-secondary-ghost {
+    @apply text-[#8A2BE2] hover:bg-[#8A2BE2]/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-accent-ghost {
+    @apply text-[#00FFDD] hover:bg-[#00FFDD]/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-success-ghost {
+    @apply text-[#0ECB81] hover:bg-[#0ECB81]/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-axisor-destructive-ghost {
+    @apply text-[#F6465D] hover:bg-[#F6465D]/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  /* Custom Scale Classes for Subtle Hover */
+  .hover-scale-102:hover {
+    transform: scale(1.02);
+  }
+
+  /* Transparent Textarea */
+  .textarea-transparent {
+    @apply bg-transparent border border-border text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300;
+  }
+
+  .textarea-transparent:focus {
+    @apply bg-transparent;
+  }
+
+  /* Automation Card - Gradient Background with Glow */
+  .automation-card-container {
+    @apply relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300;
+  }
+
+  .automation-card {
+    @apply relative p-6 min-h-[200px] flex flex-col justify-between;
+    background: linear-gradient(135deg, 
+      rgba(26, 31, 46, 0.95) 0%, 
+      rgba(36, 43, 61, 0.9) 25%,
+      rgba(55, 115, 245, 0.1) 50%,
+      rgba(138, 43, 226, 0.05) 75%,
+      rgba(26, 31, 46, 0.95) 100%
+    );
+    border: 1px solid rgba(55, 115, 245, 0.2);
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.37),
+      0 0 0 1px rgba(55, 115, 245, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .automation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.1) 0%, 
+      rgba(138, 43, 226, 0.05) 50%, 
+      rgba(0, 255, 221, 0.08) 100%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .automation-card-saved {
+    @apply relative p-6 min-h-[200px] flex flex-col justify-between;
+    background: linear-gradient(135deg, 
+      rgba(34, 197, 94, 0.1) 0%, 
+      rgba(26, 31, 46, 0.95) 25%,
+      rgba(36, 43, 61, 0.9) 50%,
+      rgba(34, 197, 94, 0.05) 75%,
+      rgba(26, 31, 46, 0.95) 100%
+    );
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    box-shadow: 
+      0 8px 32px 0 rgba(34, 197, 94, 0.2),
+      0 0 0 1px rgba(34, 197, 94, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .automation-card-loading {
+    @apply relative p-6 min-h-[200px] flex flex-col justify-between;
+    background: linear-gradient(135deg, 
+      rgba(251, 191, 36, 0.1) 0%, 
+      rgba(26, 31, 46, 0.95) 25%,
+      rgba(36, 43, 61, 0.9) 50%,
+      rgba(251, 191, 36, 0.05) 75%,
+      rgba(26, 31, 46, 0.95) 100%
+    );
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    box-shadow: 
+      0 8px 32px 0 rgba(251, 191, 36, 0.2),
+      0 0 0 1px rgba(251, 191, 36, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .automation-card-content {
+    @apply relative z-10 h-full flex flex-col;
+  }
+
+  .automation-card-header {
+    @apply flex items-start gap-4 mb-4;
+  }
+
+  .automation-card-icon {
+    @apply w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary flex-shrink-0;
+    box-shadow: 0 0 20px rgba(55, 115, 245, 0.3);
+  }
+
+  .automation-card-title {
+    @apply text-xl font-bold text-white leading-tight;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .automation-card-description {
+    @apply text-gray-300 text-sm leading-relaxed flex-grow;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .automation-card-status {
+    @apply flex items-center gap-2 text-green-400 text-sm font-medium mt-4;
+  }
+
+  .automation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 40px 0 rgba(31, 38, 135, 0.5),
+      0 0 0 1px rgba(55, 115, 245, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .automation-card-saved:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 40px 0 rgba(34, 197, 94, 0.3),
+      0 0 0 1px rgba(34, 197, 94, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .automation-card-loading:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 40px 0 rgba(251, 191, 36, 0.3),
+      0 0 0 1px rgba(251, 191, 36, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  /* Semantic Button Colors for Financial Applications - Subtle Hover */
+  .btn-success {
+    @apply bg-green-500 hover:bg-green-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102 shadow-lg hover:shadow-green-500/15;
+  }
+
+  .btn-success-outline {
+    @apply border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-success-ghost {
+    @apply text-green-500 hover:bg-green-500/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102 shadow-lg hover:shadow-red-500/15;
+  }
+
+  .btn-danger-outline {
+    @apply border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-danger-ghost {
+    @apply text-red-500 hover:bg-red-500/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-warning {
+    @apply bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102 shadow-lg hover:shadow-yellow-500/15;
+  }
+
+  .btn-warning-outline {
+    @apply border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-warning-ghost {
+    @apply text-yellow-500 hover:bg-yellow-500/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-info {
+    @apply bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102 shadow-lg hover:shadow-blue-500/15;
+  }
+
+  .btn-info-outline {
+    @apply border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  .btn-info-ghost {
+    @apply text-blue-500 hover:bg-blue-500/10 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102;
+  }
+
+  /* Financial Specific Buttons - Subtle Hover */
+  .btn-profit {
+    @apply bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102 shadow-lg hover:shadow-green-600/20;
+  }
+
+  .btn-loss {
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102 shadow-lg hover:shadow-red-600/20;
+  }
+
+  .btn-neutral {
+    @apply bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover-scale-102 shadow-lg hover:shadow-gray-500/20;
+  }
+
+  /* Badge Semantic Colors */
+  .badge-success {
+    @apply bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800;
+  }
+
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800;
+  }
+
+  /* Traditional Badge Variants - Green, Red, Neutral */
+  .badge-green {
+    @apply bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800;
+  }
+
+  .badge-red {
+    @apply bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800;
+  }
+
+  .badge-neutral-traditional {
+    @apply bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800;
+  }
+
+  /* Financial Specific Badges - Dark Background with Border */
+  .badge-profit {
+    @apply bg-gray-900 text-green-400 border-green-500 font-semibold dark:bg-gray-800;
+  }
+
+  .badge-loss {
+    @apply bg-gray-900 text-red-400 border-red-500 font-semibold dark:bg-gray-800;
+  }
+
+  .badge-neutral-financial {
+    @apply bg-gray-900 text-gray-400 border-gray-500 font-semibold dark:bg-gray-800;
+  }
+
+  /* Badge with Glow Effects - Dark Background with Border */
+  .badge-profit-glow {
+    @apply bg-gray-900 text-green-400 border-green-500 font-semibold shadow-lg dark:bg-gray-800;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), 0 0 40px rgba(34, 197, 94, 0.1);
+  }
+
+  .badge-loss-glow {
+    @apply bg-gray-900 text-red-400 border-red-500 font-semibold shadow-lg dark:bg-gray-800;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.1);
+  }
+
+  .badge-neutral-glow {
+    @apply bg-gray-900 text-gray-400 border-gray-500 font-semibold shadow-lg dark:bg-gray-800;
+    box-shadow: 0 0 20px rgba(107, 114, 128, 0.3), 0 0 40px rgba(107, 114, 128, 0.1);
   }
 
   /* Card Variants */
@@ -888,21 +1412,21 @@
   }
 
   .nav-item:hover .nav-item-icon {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.05) rotate(2deg);
   }
 
   .nav-item-active .nav-item-icon {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 8px rgba(55, 115, 245, 0.4));
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 4px rgba(55, 115, 245, 0.3));
   }
 
   .nav-item-text {
-    @apply transition-all duration-300;
+    @apply transition-all duration-200;
     position: relative;
   }
 
   .nav-item:hover .nav-item-text {
-    transform: translateY(-1px);
+    transform: translateY(-0.5px);
   }
 
   .nav-item-active .nav-item-text {
@@ -974,23 +1498,23 @@
     pointer-events: none;
   }
 
-  /* Logo Hover Effects */
+  /* Logo Hover Effects - More Subtle */
   .logo-container {
-    @apply transition-all duration-300;
+    @apply transition-all duration-200;
   }
 
   .logo-container:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
   }
 
-  /* Subtle Hover Effect */
+  /* Subtle Hover Effect - More Discreet */
   .subtle-hover {
-    @apply transition-all duration-300;
+    @apply transition-all duration-200;
   }
 
   .subtle-hover:hover {
-    transform: scale(1.02);
-    background-color: rgba(55, 115, 245, 0.1);
+    transform: scale(1.01);
+    background-color: rgba(55, 115, 245, 0.05);
   }
 
   /* Notification Badge Animation */
@@ -1188,12 +1712,12 @@
 
   .profile-tab-trigger {
     position: relative;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
   }
 
   .profile-tab-trigger:hover {
-    background-color: rgba(55, 115, 245, 0.08);
-    transform: translateY(-1px);
+    background-color: rgba(55, 115, 245, 0.05);
+    transform: translateY(-0.5px);
   }
 
   .profile-tab-trigger[data-state="active"] {
@@ -1361,5 +1885,36 @@
     content: "/* LOGO AQUI */";
     font-size: 0.75rem;
     opacity: 0.8;
+  }
+
+  /* Fixed Sidebar for Design System */
+  .design-system-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 16rem; /* 256px */
+    z-index: 40;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 1024px) {
+    .design-system-sidebar {
+      transform: translateX(-100%);
+    }
+    
+    .design-system-sidebar.open {
+      transform: translateX(0);
+    }
+  }
+
+  .design-system-content {
+    margin-left: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .design-system-content {
+      margin-left: 16rem; /* 256px */
+    }
   }
 }

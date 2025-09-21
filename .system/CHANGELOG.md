@@ -6,6 +6,61 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.5] - 2025-01-21 - Sistema de Seleção de Contas e Correção Header 🏦 **ACCOUNT SELECTOR & HEADER FIX**
+
+### 🏦 **Sistema de Seleção de Contas**
+- **AccountSelector Component**: Dropdown elegante para seleção de múltiplas contas
+- **AccountContext**: Gerenciamento global de estado para contas
+- **Tipos TypeScript**: Estrutura completa para diferentes provedores
+- **Suporte Multi-Provider**: LN Markets, Binance, Coinbase, Kraken e outros
+- **Design Minimalista**: Interface limpa sem ícones ou círculos conforme solicitado
+
+### 🎨 **Características Visuais**
+- **Design Glassmorphism**: Efeito de vidro fosco consistente com identidade visual
+- **Busca Funcional**: Campo de pesquisa para filtrar contas
+- **Indicador Ativo**: Linha roxa para conta selecionada
+- **Tamanho Padronizado**: w-56 (224px) igual ao dropdown de usuário
+- **Tema Adaptativo**: Suporte completo para dark/light mode
+
+### 🔧 **Funcionalidades Técnicas**
+- **CRUD Completo**: Adicionar, remover, atualizar e alternar contas
+- **Estado Persistente**: Conta ativa mantida durante a sessão
+- **Integração Header**: Posicionado entre logo e notificações
+- **Provider Colors**: Cores específicas para cada provedor
+- **Responsividade**: Design adaptável para diferentes telas
+
+### 🐛 **Correção Header Clickability**
+- **Problema Identificado**: `pointer-events-none` desabilitava cliques quando header encolhia
+- **Solução Aplicada**: Removido condição que impedia interações
+- **Resultado**: Todos os elementos do header permanecem clicáveis
+- **Funcionalidades Restauradas**: AccountSelector, NotificationDropdown, User Profile
+
+### 📱 **Integração Mobile**
+- **Provider Hierarchy**: AccountProvider adicionado ao App.tsx
+- **Context Global**: Acessível em toda a aplicação
+- **Z-index Management**: Dropdowns aparecem corretamente
+- **Acessibilidade**: Navegação por teclado e indicadores visuais
+
+### 🎯 **Preparação Backend**
+- **Estrutura Extensível**: Fácil integração com API de múltiplas contas
+- **Tipos Definidos**: Interfaces prontas para dados do backend
+- **Estado Gerenciado**: Context pronto para sincronização
+- **UI Completa**: Frontend preparado para funcionalidades futuras
+
+### 🎨 **Design System**
+```typescript
+// Provedores Suportados
+ACCOUNT_PROVIDERS = {
+  lnmarkets: { name: 'LN Markets', color: '#3773F5', icon: '⚡' },
+  binance: { name: 'Binance', color: '#F0B90B', icon: '🟡' },
+  coinbase: { name: 'Coinbase', color: '#0052FF', icon: '🔵' },
+  kraken: { name: 'Kraken', color: '#4D4D4D', icon: '⚫' }
+}
+```
+
+### 🎯 **Resultado**
+Sistema completo de seleção de contas implementado com design minimalista e funcionalidade total, preparado para integração com backend de múltiplas credenciais.
+
 ## [1.5.4] - 2025-01-21 - Correção Mobile Navigation e Melhoria Profile Page 📱 **MOBILE FIX & PROFILE ENHANCEMENT**
 
 ### 🔧 **Correções Mobile Navigation**

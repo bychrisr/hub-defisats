@@ -52,9 +52,10 @@ export const PnLCard: React.FC<PnLCardProps> = ({
     }
     
     if (isNeutral) return 'card-modern';
+    
     return isPositive 
-      ? 'border-success/30 bg-success/5 hover:bg-success/10'
-      : 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10';
+      ? '!border-success !bg-success/5 hover:!bg-success/10 !bg-gradient-to-br !from-success/10 !to-success/5'
+      : '!border-destructive !bg-destructive/5 hover:!bg-destructive/10 !bg-gradient-to-br !from-destructive/10 !to-destructive/5';
   };
 
   const getTextColor = () => {
@@ -96,7 +97,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
 
   return (
     <div className="relative h-full">
-      <Card className={cn(getVariantStyles(), `cursor-${cursor}`, 'dashboard-card h-full', className)}>
+      <Card className={cn('dashboard-card h-full', getVariantStyles(), `cursor-${cursor}`, className)}>
         <CardHeader className="dashboard-card-header pr-12">
           <CardTitle className={cn('font-semibold text-vibrant-secondary', getTitleSizeClass())}>
             {title}

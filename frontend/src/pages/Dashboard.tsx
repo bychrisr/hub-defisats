@@ -152,7 +152,7 @@ export default function Dashboard() {
           <h2 className="text-2xl font-bold text-vibrant">Posições Ativas</h2>
           
           {/* Cards com altura uniforme - Responsivo */}
-          <div className="dashboard-cards-container">
+          <div className="positions-active-cards">
             <PnLCard
               title="PnL Total"
               pnl={positionsData.totalPL || 0}
