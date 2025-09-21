@@ -6,6 +6,64 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.6] - 2025-01-21 - Reversão Layout Cards e Design System Completo 🎨 **LAYOUT REVERT & DESIGN SYSTEM**
+
+### 🔄 **Reversão Layout Cards**
+- ✅ **Removida Lógica Forçada**: Eliminada toda lógica de altura uniforme dos cards
+- ✅ **Layout Natural Restaurado**: Cards voltam ao comportamento original baseado no conteúdo
+- ✅ **Flexbox Forçado Removido**: Sem `display: flex`, `justify-content: space-between`
+- ✅ **Altura Natural**: Sem `height: 100%`, `min-height: 140px` forçados
+- ✅ **Grid Responsivo Mantido**: 5 colunas no desktop, responsivo em mobile
+- ✅ **Comportamento Original**: Cards com altura natural conforme conteúdo
+
+### 🎨 **Design System Completo Implementado**
+- ✅ **Página Interna**: `/design-system` com documentação completa
+- ✅ **Sidebar Fixo**: Navegação lateral com detecção automática de seção ativa
+- ✅ **Seções Documentadas**: Layout, Tipografia, Cores, Componentes, Ícones
+- ✅ **Código Exemplos**: JSX/HTML + CSS classes para cada elemento
+- ✅ **Mobile-First**: Design responsivo em todos os elementos
+- ✅ **Dark Mode**: Suporte completo para tema escuro
+
+### 🎯 **Componentes Documentados**
+- ✅ **Typography Classes**: `text-display-*`, `text-h1` a `text-h6`, `text-body-*`
+- ✅ **Semantic Colors**: Botões e badges para aplicações financeiras
+- ✅ **Axisor Brand**: Variações sólidas, outline e ghost da identidade visual
+- ✅ **AutomationCard**: Componente com gradientes e efeitos glow
+- ✅ **Badges Financeiros**: Versões com fundo escuro e bordas coloridas
+- ✅ **Form Elements**: Textarea transparente e outros elementos
+
+### 🔧 **Melhorias Técnicas**
+- ✅ **Intersection Observer**: Detecção eficiente de seção ativa no scroll
+- ✅ **CSS Utilities**: Classes customizadas para tipografia e cores
+- ✅ **Hover Effects**: Efeitos sutis e profissionais em toda aplicação
+- ✅ **Code Examples**: Snippets prontos para uso em cada seção
+- ✅ **Navigation**: Sistema de navegação interno com scroll suave
+
+### 📱 **Responsividade Aprimorada**
+- ✅ **Mobile Header**: Hamburger menu para navegação mobile
+- ✅ **Breakpoints**: Sistema responsivo consistente
+- ✅ **Touch Friendly**: Elementos otimizados para touch
+- ✅ **Performance**: Carregamento otimizado e animações suaves
+
+### 🎨 **Identidade Visual Axisor**
+- ✅ **Cores Semânticas**: Verde (profit), vermelho (loss), neutro
+- ✅ **Gradientes**: Backgrounds com efeitos visuais modernos
+- ✅ **Glow Effects**: Efeitos de brilho para elementos especiais
+- ✅ **Consistência**: Padrões visuais unificados em toda aplicação
+
+### 📚 **Documentação Técnica**
+- ✅ **CHANGELOG Atualizado**: Registro completo das mudanças
+- ✅ **README Atualizado**: Informações sobre Design System
+- ✅ **Code Examples**: Exemplos práticos para desenvolvedores
+- ✅ **Best Practices**: Guias de uso para cada componente
+
+### 🎯 **Resultado Final**
+- **Cards com Layout Natural**: Altura baseada no conteúdo, sem forçamento
+- **Design System Completo**: Documentação interna para padronização
+- **Interface Consistente**: Elementos visuais unificados
+- **Desenvolvimento Eficiente**: Guias e exemplos para rápida implementação
+- **Manutenibilidade**: Código organizado e bem documentado
+
 ## [1.5.5] - 2025-01-21 - Sistema de Seleção de Contas e Correção Header 🏦 **ACCOUNT SELECTOR & HEADER FIX**
 
 ### 🏦 **Sistema de Seleção de Contas**
