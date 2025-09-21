@@ -131,6 +131,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
                   <SatsIcon 
                     size={28} 
                     variant="default"
+                    forceColor={true}
                     className={cn('sats-icon-mobile', getTextColor())}
                   />
                 </span>

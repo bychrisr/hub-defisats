@@ -4,14 +4,17 @@ interface SatsIconProps {
   size?: number;
   className?: string;
   variant?: 'default' | 'positive' | 'negative' | 'neutral';
+  forceColor?: boolean; // Força a cor do className a sobrescrever a variante
 }
 
 const SatsIcon: React.FC<SatsIconProps> = ({ 
   size = 20, 
   className = '', 
-  variant = 'default' 
+  variant = 'default',
+  forceColor = false
 }) => {
   const getVariantClass = () => {
+    if (forceColor) return ''; // Não aplica cor da variante se forceColor for true
     switch (variant) {
       case 'positive':
         return 'text-green-600 dark:text-green-400';
