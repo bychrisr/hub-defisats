@@ -1642,6 +1642,166 @@ function ThemedComponent() {
   variant="loading"
 />`} />
               </div>
+
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-text-primary">Gradient Cards with Floating Icons</h4>
+                <p className="text-text-secondary">
+                  Cards especiais com background degradê e ícones flutuantes externos que animam no hover.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Red Gradient Card */}
+                  <div className="relative group">
+                    <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                      <div className="w-12 h-12 bg-red-600/20 backdrop-blur-sm border border-red-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-red-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                        <TrendingUp className="w-6 h-6 text-red-300 stroke-2 group-hover:text-red-200 transition-colors duration-500" />
+                      </div>
+                    </div>
+                    <Card className="gradient-card gradient-card-red border-2 border-red-500 hover:border-red-400 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30 cursor-default">
+                      <div className="card-content">
+                        <div className="p-6">
+                          <div className="mb-4">
+                            <CardTitle className="text-h3 text-vibrant">Total PnL</CardTitle>
+                          </div>
+                          <div className="mb-3">
+                            <div className="text-number-lg text-red-200">-7.089</div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-label-sm px-2 py-1 border-red-400/60 text-red-200 bg-red-600/20">
+                              -15.6%
+                            </Badge>
+                            <span className="text-caption text-red-300/80">vs Margin</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Green Gradient Card */}
+                  <div className="relative group">
+                    <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                      <div className="w-12 h-12 bg-green-600/20 backdrop-blur-sm border border-green-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-green-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                        <TrendingUp className="w-6 h-6 text-green-300 stroke-2 group-hover:text-green-200 transition-colors duration-500" />
+                      </div>
+                    </div>
+                    <Card className="gradient-card gradient-card-green border-2 border-green-500 hover:border-green-400 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 cursor-default">
+                      <div className="card-content">
+                        <div className="p-6">
+                          <div className="mb-4">
+                            <CardTitle className="text-h3 text-vibrant">Estimated Profit</CardTitle>
+                          </div>
+                          <div className="mb-3">
+                            <div className="text-number-lg text-green-200">6.840</div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-label-sm px-2 py-1 border-green-400/60 text-green-200 bg-green-600/20">
+                              +12.5%
+                            </Badge>
+                            <span className="text-caption text-green-300/80">estimated</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Blue Gradient Card */}
+                  <div className="relative group">
+                    <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                      <div className="w-12 h-12 bg-blue-600/20 backdrop-blur-sm border border-blue-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-blue-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                        <Activity className="w-6 h-6 text-blue-300 stroke-2 group-hover:text-blue-200 transition-colors duration-500" />
+                      </div>
+                    </div>
+                    <Card className="gradient-card gradient-card-blue border-2 border-blue-500 hover:border-blue-400 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 cursor-default">
+                      <div className="card-content">
+                        <div className="p-6">
+                          <div className="mb-4">
+                            <CardTitle className="text-h3 text-vibrant">Active Trades</CardTitle>
+                          </div>
+                          <div className="mb-3">
+                            <div className="text-number-lg text-blue-200">11</div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-label-sm px-2 py-1 border-blue-400/60 text-blue-200 bg-blue-600/20">
+                              Active
+                            </Badge>
+                            <span className="text-caption text-blue-300/80">positions</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-base text-text-primary">Floating Icon Component</h5>
+                  <p className="text-text-secondary">
+                    O <strong>Floating Icon</strong> é um elemento especial que aparece fora dos limites do card, 
+                    criando um design moderno e interativo. Características:
+                  </p>
+                  <ul className="list-disc list-inside space-y-2 text-text-secondary ml-4">
+                    <li><strong>Efeito Glassmorphism</strong>: Fundo semi-transparente com backdrop blur</li>
+                    <li><strong>Animação Float Sutil</strong>: Movimento suave para cima e para baixo no hover</li>
+                    <li><strong>Efeito Scale</strong>: Aumento de 5% no tamanho no hover para feedback sutil</li>
+                    <li><strong>Transições de Cor</strong>: Mudanças suaves de cor que combinam com o tema do card</li>
+                    <li><strong>Melhoria de Sombra</strong>: Sombra dinâmica que combina com a cor do card</li>
+                  </ul>
+                </div>
+
+                <CodeExample code={`{/* Gradient Card with Floating Icon */}
+<div className="relative group">
+  {/* Floating Icon */}
+  <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+    <div className="w-12 h-12 bg-red-600/20 backdrop-blur-sm border border-red-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-red-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+      <TrendingUp className="w-6 h-6 text-red-300 stroke-2 group-hover:text-red-200 transition-colors duration-500" />
+    </div>
+  </div>
+  
+  <Card className="gradient-card gradient-card-red border-2 border-red-500 hover:border-red-400 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30 cursor-default">
+    <div className="card-content">
+      <div className="p-6">
+        <div className="mb-4">
+          <CardTitle className="text-h3 text-vibrant">Card Title</CardTitle>
+        </div>
+        <div className="mb-3">
+          <div className="text-number-lg text-red-200">Value</div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge variant="outline" className="text-label-sm px-2 py-1 border-red-400/60 text-red-200 bg-red-600/20">
+            Badge
+          </Badge>
+          <span className="text-caption text-red-300/80">Label</span>
+        </div>
+      </div>
+    </div>
+  </Card>
+</div>`} />
+
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-base text-text-primary">Variantes de Gradiente Disponíveis</h5>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-lg gradient-card-red border-2 border-red-500"></div>
+                      <p className="text-sm text-text-secondary">gradient-card-red</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-lg gradient-card-green border-2 border-green-500"></div>
+                      <p className="text-sm text-text-secondary">gradient-card-green</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-lg gradient-card-blue border-2 border-blue-500"></div>
+                      <p className="text-sm text-text-secondary">gradient-card-blue</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-lg gradient-card-purple border-2 border-purple-500"></div>
+                      <p className="text-sm text-text-secondary">gradient-card-purple</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-lg gradient-card-orange border-2 border-orange-500"></div>
+                      <p className="text-sm text-text-secondary">gradient-card-orange</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

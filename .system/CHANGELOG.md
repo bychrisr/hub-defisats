@@ -6,6 +6,40 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.7] - 2025-01-25 - Gradient Cards com Floating Icons 🎨 **GRADIENT CARDS & FLOATING ICONS**
+
+### ✨ **Gradient Cards Implementados**
+- ✅ **Cards com Degradê**: Background degradê completo cobrindo todo o card
+- ✅ **Floating Icons**: Ícones posicionados externamente com efeito glassmorphism
+- ✅ **Animações Sutis**: Movimento suave de 2px com duração de 2s
+- ✅ **5 Variantes de Cor**: Red, green, blue, purple, orange
+- ✅ **Hover Effects**: Scale 5% e transições de cor suaves
+
+### 🎨 **Floating Icon Component**
+- ✅ **Nome Oficial**: "Floating Icon" - elemento especial da UI
+- ✅ **Glassmorphism**: Fundo semi-transparente com backdrop blur
+- ✅ **Posicionamento**: `absolute -top-3 -right-3` fora do card
+- ✅ **Tamanho**: 48x48px (w-12 h-12) com ícone 24x24px
+- ✅ **Animações**: Float sutil, scale, cor e sombra dinâmicas
+
+### 🔧 **Melhorias Técnicas**
+- ✅ **CSS Customizado**: Classes `.gradient-card` e `.icon-float`
+- ✅ **Pseudo-elementos**: `::before` para degradê completo
+- ✅ **Transições**: 500ms duration com ease-out timing
+- ✅ **Z-index**: Sistema de camadas para ícones flutuantes
+
+### 📚 **Documentação Atualizada**
+- ✅ **Seção Gradient Cards**: Documentação completa na Design System
+- ✅ **Code Examples**: Exemplos de uso para todos os componentes
+- ✅ **Variantes de Cor**: Visualização de todas as 5 opções
+- ✅ **Floating Icon Guide**: Explicação detalhada do componente
+
+### 🌐 **Internacionalização**
+- ✅ **Dashboard em Inglês**: Todos os textos traduzidos
+- ✅ **Títulos**: "Total PnL", "Estimated Profit", "Active Trades"
+- ✅ **Labels**: "vs Margin", "estimated", "positions"
+- ✅ **Consistência**: Interface 100% em inglês
+
 ## [1.5.6] - 2025-01-21 - Reversão Layout Cards e Design System Completo 🎨 **LAYOUT REVERT & DESIGN SYSTEM**
 
 ### 🔄 **Reversão Layout Cards**
