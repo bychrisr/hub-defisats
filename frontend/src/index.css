@@ -838,11 +838,17 @@
 
   /* Card Variants */
   .card-axisor {
-    @apply bg-gradient-card border border-[#2A3441] p-6 transition-all duration-300 hover:border-[#3773F5] hover:neon-glow;
+    @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 transition-all duration-300 hover:border-[#3773F5] hover:neon-glow;
   }
 
   .card-axisor-elevated {
     @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-[#3773F5] hover:neon-glow hover:shadow-2xl;
+  }
+
+  /* LN Markets Header - Specific class for straight corners */
+  .card-lnmarkets-header {
+    @apply bg-bg-header border border-border p-0 transition-all duration-300;
+    border-radius: 0 !important;
   }
 
   /* Text Colors */
