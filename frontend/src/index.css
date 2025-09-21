@@ -889,19 +889,19 @@
 
   .text-number-md {
     @apply text-2xl font-bold leading-none tracking-tight;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
     font-variant-numeric: tabular-nums;
   }
 
   .text-number-sm {
     @apply text-xl font-bold leading-none tracking-tight;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
     font-variant-numeric: tabular-nums;
   }
 
   .text-number-xs {
     @apply text-lg font-bold leading-none tracking-tight;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
+    font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
     font-variant-numeric: tabular-nums;
   }
 
@@ -1103,6 +1103,58 @@
   /* Custom Scale Classes for Subtle Hover */
   .hover-scale-102:hover {
     transform: scale(1.02);
+  }
+
+  /* Custom gradient card styles */
+  .gradient-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gradient-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .gradient-card-red::before {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.25), rgba(185, 28, 28, 0.2));
+  }
+
+  .gradient-card-green::before {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.25), rgba(21, 128, 61, 0.2));
+  }
+
+  .gradient-card-blue::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.25), rgba(29, 78, 216, 0.2));
+  }
+
+  .gradient-card-purple::before {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(147, 51, 234, 0.25), rgba(126, 34, 206, 0.2));
+  }
+
+  .gradient-card-orange::before {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(234, 88, 12, 0.25), rgba(194, 65, 12, 0.2));
+  }
+
+  .gradient-card .card-content {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Animação sutil para ícones dos cards */
+  @keyframes subtle-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-2px); }
+  }
+
+  .icon-float {
+    animation: subtle-float 2s ease-in-out infinite;
   }
 
   /* Transparent Textarea */
