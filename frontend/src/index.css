@@ -862,23 +862,8 @@
   .nav-item {
     @apply relative flex items-center justify-center space-x-2 font-medium uppercase tracking-wide transition-all duration-300 px-4 py-2 rounded-lg;
     position: relative;
-    overflow: hidden;
   }
 
-  .nav-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(55, 115, 245, 0.1), transparent);
-    transition: left 0.5s ease;
-  }
-
-  .nav-item:hover::before {
-    left: 100%;
-  }
 
   .nav-item-active {
     @apply text-primary bg-primary/10 border border-primary/20;
@@ -939,11 +924,105 @@
   /* Navigation Container */
   .nav-container {
     @apply flex items-center justify-center space-x-2;
-    background: linear-gradient(135deg, rgba(26, 31, 46, 0.1), rgba(36, 43, 61, 0.1));
-    backdrop-filter: blur(10px);
+    background: transparent;
     border-radius: 12px;
     padding: 4px;
-    border: 1px solid rgba(55, 115, 245, 0.1);
+  }
+
+  /* Header Animations */
+  .header-fade-in {
+    animation: headerFadeIn 0.6s ease-out forwards;
+  }
+
+  @keyframes headerFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Glassmorphism Header */
+  .glassmorphism-header {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, 
+      rgba(26, 31, 46, 0.8) 0%, 
+      rgba(36, 43, 61, 0.6) 50%, 
+      rgba(26, 31, 46, 0.8) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+
+  .glassmorphism-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(55, 115, 245, 0.1) 0%, 
+      rgba(138, 43, 226, 0.05) 50%, 
+      rgba(0, 255, 221, 0.1) 100%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  /* Logo Hover Effects */
+  .logo-container {
+    @apply transition-all duration-300;
+  }
+
+  .logo-container:hover {
+    transform: scale(1.05);
+  }
+
+  /* Subtle Hover Effect */
+  .subtle-hover {
+    @apply transition-all duration-300;
+  }
+
+  .subtle-hover:hover {
+    transform: scale(1.02);
+    background-color: rgba(55, 115, 245, 0.1);
+  }
+
+  /* Notification Badge Animation */
+  .notification-badge {
+    animation: notificationPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes notificationPulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  /* Online Status Indicator */
+  .online-indicator {
+    animation: onlinePulse 4s ease-in-out infinite;
+  }
+
+  @keyframes onlinePulse {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+    }
+    50% {
+      opacity: 0.9;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0);
+    }
   }
 
   /* Text Colors */

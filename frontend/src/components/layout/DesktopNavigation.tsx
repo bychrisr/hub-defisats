@@ -116,16 +116,34 @@ export const DesktopHeader = () => {
   const [language, setLanguage] = useState('pt-BR');
   const [currency, setCurrency] = useState('SATS');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
 
-  // Detectar scroll para reduzir header
+  // Detectar scroll para reduzir header e controlar visibilidade
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+    
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      // Inverter a lógica: quando não há scroll, header expandido; quando há scroll, header reduzido
+      
+      // Detectar direção do scroll
+      if (scrollTop > lastScrollY && scrollTop > 100) {
+        // Scroll para baixo - esconder header
+        setScrollDirection('down');
+        setIsVisible(false);
+      } else if (scrollTop < lastScrollY) {
+        // Scroll para cima - mostrar header
+        setScrollDirection('up');
+        setIsVisible(true);
+      }
+      
+      // Reduzir header quando há scroll
       setIsScrolled(scrollTop > 50);
+      
+      lastScrollY = scrollTop;
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -171,32 +189,31 @@ export const DesktopHeader = () => {
 
   return (
     <header className={cn(
-      'w-full border-b transition-all duration-300',
-      theme === 'dark' 
-        ? 'bg-bg-primary border-border' 
-        : 'bg-background border-border',
-      isScrolled ? 'shadow-coingecko-md' : ''
+      'w-full border-b transition-all duration-500 ease-in-out transform header-fade-in glassmorphism-header relative',
+      isScrolled ? 'shadow-coingecko-md' : '',
+      isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0',
+      scrollDirection === 'down' ? 'pointer-events-none' : 'pointer-events-auto'
     )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className={cn(
-          'flex items-center justify-between transition-all duration-300',
+          'flex items-center justify-between transition-all duration-300 relative z-10',
           isScrolled ? 'h-12' : 'h-16'
         )}>
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 group cursor-pointer logo-container" onClick={() => navigate('/dashboard')}>
             <div className={cn(
-              'bg-gradient-primary rounded-lg flex items-center justify-center transition-all duration-300',
+              'bg-gradient-primary rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:shadow-lg',
               isScrolled ? 'w-6 h-6' : 'w-8 h-8'
             )}>
               <span className={cn(
-                'text-white',
+                'text-white transition-all duration-300 group-hover:animate-pulse',
                 isScrolled ? 'text-xs' : 'text-sm'
               )}>
                 🤖
               </span>
             </div>
             <span className={cn(
-              'font-heading transition-all duration-300 text-text-primary',
+              'font-heading transition-all duration-300 text-text-primary group-hover:text-primary',
               isScrolled ? 'text-lg' : 'text-xl'
             )}>
               Axisor Bot
@@ -215,7 +232,7 @@ export const DesktopHeader = () => {
               variant="ghost"
               size="icon"
               className={cn(
-                'transition-all duration-300 text-text-secondary hover:text-primary hover:bg-accent',
+                'transition-all duration-300 text-text-secondary hover:text-primary hover:bg-accent/50 relative group subtle-hover',
                 isScrolled ? 'h-7 w-7' : 'h-9 w-9'
               )}
             >
@@ -223,6 +240,8 @@ export const DesktopHeader = () => {
                 'transition-all duration-300',
                 isScrolled ? 'h-3 w-3' : 'h-4 w-4'
               )} />
+              {/* Notification Badge */}
+              <div className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full notification-badge" />
             </Button>
 
             {/* User Profile Dropdown */}
@@ -231,7 +250,7 @@ export const DesktopHeader = () => {
                 <Button
                   variant="ghost"
                   className={cn(
-                    'relative rounded-full p-0 transition-all duration-300',
+                    'relative rounded-full p-0 transition-all duration-300 group subtle-hover',
                     isScrolled ? 'h-6 w-6' : 'h-8 w-8'
                   )}
                 >
@@ -246,6 +265,8 @@ export const DesktopHeader = () => {
                       {user ? getUserInitials(user.email) : 'U'}
                     </AvatarFallback>
                   </Avatar>
+                  {/* Online Status Indicator */}
+                  <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-background online-indicator" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
