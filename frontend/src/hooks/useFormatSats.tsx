@@ -34,7 +34,7 @@ export const useFormatSats = () => {
     if (value === 0) {
       formattedNumber = '0';
     } else if (Math.abs(value) < 1000000) {
-      formattedNumber = value.toLocaleString();
+      formattedNumber = Math.round(value).toLocaleString();
     } else {
       formattedNumber = `${Math.round(value / 1000000)}M`;
     }
@@ -46,7 +46,7 @@ export const useFormatSats = () => {
     return (
       <span className="flex items-center gap-1">
         {formattedNumber}
-        <SatsIcon size={size} variant={iconVariant} className="sats-icon-mobile" />
+        <SatsIcon size={size} variant="default" className="sats-icon-mobile" />
       </span>
     );
   };
@@ -58,7 +58,7 @@ export const useFormatSats = () => {
 export const useFormatSatsText = () => {
   return (value: number): string => {
     if (value === 0) return '0 sats';
-    if (Math.abs(value) < 1000000) return `${value.toLocaleString()} sats`;
+    if (Math.abs(value) < 1000000) return `${Math.round(value).toLocaleString()} sats`;
     return `${Math.round(value / 1000000)}M sats`;
   };
 };

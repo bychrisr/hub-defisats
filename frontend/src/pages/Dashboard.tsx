@@ -184,7 +184,7 @@ export default function Dashboard() {
                         variant="outline" 
                         className="text-label-sm px-2 py-1 border-red-400/60 text-red-200 bg-red-600/20"
                       >
-                        {positionsData.totalMargin > 0 ? `+${((positionsData.totalPL || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '0.0%'}
+                        {positionsData.totalMargin > 0 ? `${((positionsData.totalPL || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '0.0%'}
                       </Badge>
                       <span className="text-caption text-red-300/80">vs Margin</span>
                     </div>
@@ -215,7 +215,7 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className="text-number-lg text-green-200">
-                        {formatSats((positionsData.totalPL || 0) * 0.8, { size: 24, variant: 'auto' })}
+                        {formatSats(positionsData.estimatedProfit || 0, { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -225,9 +225,9 @@ export default function Dashboard() {
                         variant="outline" 
                         className="text-label-sm px-2 py-1 border-green-400/60 text-green-200 bg-green-600/20"
                       >
-                        +12.5%
+                        {positionsData.totalMargin > 0 ? `+${((positionsData.estimatedProfit || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '+0.0%'}
                       </Badge>
-                      <span className="text-caption text-green-300/80">estimated</span>
+                      <span className="text-caption text-green-300/80">vs Margin</span>
                     </div>
                   </div>
                 </div>
@@ -256,20 +256,62 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className="text-number-lg text-blue-200">
-                        {positionsData.positions?.length || 0}
+                        {(() => {
+                          // Debug detalhado
+                          console.log('🔍 ACTIVE TRADES - DEBUG COMPLETO:', {
+                            positionsData: positionsData,
+                            positionsArray: positionsData.positions,
+                            positionsLength: positionsData.positions?.length,
+                            positionCount: positionsData.positionCount,
+                            hasPositions: !!(positionsData.positions && positionsData.positions.length > 0)
+                          });
+                          
+                          if (positionsData.positions && positionsData.positions.length > 0) {
+                            const runningPositions = positionsData.positions.filter(pos => pos.status === 'running').length;
+                            console.log('🔍 ACTIVE TRADES - Usando positions array:', runningPositions);
+                            return runningPositions;
+                          }
+                          
+                          console.log('🔍 ACTIVE TRADES - Usando positionCount fallback:', positionsData.positionCount);
+                          return positionsData.positionCount || 0;
+                        })()}
                       </div>
                     </div>
                     
-                    {/* Badge e label */}
-                    <div className="flex items-center space-x-2">
-                      <Badge 
-                        variant="outline" 
-                        className="text-label-sm px-2 py-1 border-blue-400/60 text-blue-200 bg-blue-600/20"
-                      >
-                        Active
-                      </Badge>
-                      <span className="text-caption text-blue-300/80">positions</span>
+                    {/* Contagem Long/Short como Badges */}
+                    <div className="mb-3">
+                      <div className="flex items-center gap-3">
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs px-2 py-1 border-green-400/60 text-green-200 bg-green-600/20 whitespace-nowrap"
+                        >
+                          {(() => {
+                            if (positionsData.positions && positionsData.positions.length > 0) {
+                              const longCount = positionsData.positions.filter(pos => pos.status === 'running' && pos.side === 'long').length;
+                              console.log('🔍 LONG COUNT - positions array:', longCount, positionsData.positions.map(p => ({ id: p.id, side: p.side, status: p.status })));
+                              return longCount;
+                            }
+                            console.log('🔍 LONG COUNT - No positions array, returning 0');
+                            return 0;
+                          })()} Long
+                        </Badge>
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs px-2 py-1 border-red-400/60 text-red-200 bg-red-600/20 whitespace-nowrap"
+                        >
+                          {(() => {
+                            if (positionsData.positions && positionsData.positions.length > 0) {
+                              const shortCount = positionsData.positions.filter(pos => pos.status === 'running' && pos.side === 'short').length;
+                              console.log('🔍 SHORT COUNT - positions array:', shortCount, positionsData.positions.map(p => ({ id: p.id, side: p.side, status: p.status })));
+                              return shortCount;
+                            }
+                            console.log('🔍 SHORT COUNT - No positions array, returning 0');
+                            return 0;
+                          })()} Short
+                        </Badge>
+                      </div>
                     </div>
+                    
                   </div>
                 </div>
                 {/* Efeito de brilho */}
@@ -301,16 +343,6 @@ export default function Dashboard() {
                       </div>
                     </div>
                     
-                    {/* Badge e label */}
-                    <div className="flex items-center space-x-2">
-                      <Badge 
-                        variant="outline" 
-                        className="text-label-sm px-2 py-1 border-purple-400/60 text-purple-200 bg-purple-600/20"
-                      >
-                        Total
-                      </Badge>
-                      <span className="text-caption text-purple-300/80">available</span>
-                    </div>
                   </div>
                 </div>
                 {/* Efeito de brilho */}
@@ -338,7 +370,7 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className="text-number-lg text-orange-200">
-                        {formatSats((positionsData.totalMargin || 0) * 0.01, { size: 24, variant: 'auto' })}
+                        {formatSats(positionsData.estimatedFees || 0, { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -425,7 +457,6 @@ export default function Dashboard() {
             />
           </div>
         </div>
-
 
           {/* Histórico */}
           <div className="space-y-4">

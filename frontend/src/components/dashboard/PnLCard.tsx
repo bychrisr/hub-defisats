@@ -80,7 +80,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   };
 
   const formatPercentage = (value: number) => {
-    const sign = value >= 0 ? '+' : '';
+    const sign = value > 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}%`;
   };
 
@@ -132,7 +132,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
                     size={28} 
                     variant="default"
                     forceColor={true}
-                    className={cn('sats-icon-mobile', getTextColor())}
+                    className={cn('sats-icon-mobile', isPositive ? 'text-green-200' : 'text-red-200')}
                   />
                 </span>
               ) : pnl.toString()}

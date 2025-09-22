@@ -34,7 +34,7 @@ const SatsIcon: React.FC<SatsIconProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`${getVariantClass()} ${className}`}
+      className={`${getVariantClass()} ${className} ${forceColor ? '!text-current' : ''}`}
     >
       {/* Símbolo oficial de satoshi - baseado no código SVG oficial */}
       {/* Barra superior - quadrada */}
