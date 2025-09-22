@@ -8,6 +8,8 @@ import { RealtimeDataProvider } from '@/contexts/RealtimeDataContext';
 import { PositionsProvider } from '@/contexts/PositionsContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { AccountProvider } from '@/contexts/AccountContext';
+import { VersionProvider } from '@/contexts/VersionContext';
+import UpdateNotification from '@/components/UpdateNotification';
 import { Layout } from '@/components/layout/Layout';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -220,13 +222,15 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <RealtimeDataProvider>
-          <PositionsProvider>
-            <NotificationProvider>
-              <AccountProvider>
-                <TooltipProvider>
+        <VersionProvider autoCheck={true}>
+          <RealtimeDataProvider>
+            <PositionsProvider>
+              <NotificationProvider>
+                <AccountProvider>
+                  <TooltipProvider>
               <Toaster />
               <Sonner />
+              <UpdateNotification />
               <BrowserRouter
                 future={{
                   v7_startTransition: true,
@@ -436,6 +440,7 @@ const App = () => {
             </NotificationProvider>
           </PositionsProvider>
         </RealtimeDataProvider>
+        </VersionProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
