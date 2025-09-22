@@ -231,7 +231,7 @@ export default function Dashboard() {
                           Total PnL
                         </CardTitle>
                         <Tooltip 
-                          content="Profit and Loss total de todas as suas posições ativas. Mostra o lucro ou prejuízo real baseado nos preços atuais do mercado. Valores positivos em verde indicam lucro, valores negativos em vermelho indicam prejuízo."
+                          content="Quanto você está ganhando (ou perdendo) AGORA nas posições que ainda estão abertas."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -311,7 +311,7 @@ export default function Dashboard() {
                           Estimated Profit
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Lucro ou prejuízo estimado se você fechar TODAS as posições abertas AGORA."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -384,7 +384,7 @@ export default function Dashboard() {
                           Active Trades
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Número de posições que estão abertas e ativas agora."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -483,7 +483,7 @@ export default function Dashboard() {
                           Total Margin
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Soma de todas as margens alocadas nas suas posições abertas."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -529,7 +529,7 @@ export default function Dashboard() {
                           Estimated Fees
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Estimativa de taxas que você pagará para fechar suas posições + funding das próximas 24h."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -598,7 +598,7 @@ export default function Dashboard() {
                           Available Margin
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Quanto você tem livre agora para abrir novas posições."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -668,7 +668,7 @@ export default function Dashboard() {
                           Estimated Balance
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Seu saldo total se fechar TUDO agora: disponível + lucro das posições - taxas futuras."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -725,16 +725,16 @@ export default function Dashboard() {
                           Total Invested
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Soma de todas as margens iniciais que você usou para abrir suas posições (abertas e fechadas)."
                           position="top"
                           delay={200}
                           className="z-50"
                         >
                           <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
-                      </div>
-                    </div>
-                    
+            </div>
+          </div>
+
                     <div className="mb-3">
                       <div className="text-number-lg text-blue-200">
                         {formatSats(estimatedBalance.data?.total_invested || 0, { size: 24, variant: 'auto' })}
@@ -778,7 +778,7 @@ export default function Dashboard() {
                           Net Profit
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Seu lucro real: total de PnL - total de taxas pagas."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -835,7 +835,7 @@ export default function Dashboard() {
                           Fees Paid
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Soma de todas as taxas de abertura, fechamento e funding que você já pagou."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -885,7 +885,7 @@ export default function Dashboard() {
                           Success Rate
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Porcentagem de trades que deram lucro entre todas as fechadas."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -949,7 +949,7 @@ export default function Dashboard() {
                           Total Profitability
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Porcentagem de lucro sobre o total investido: (lucro líquido / total investido) x 100."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -1002,7 +1002,7 @@ export default function Dashboard() {
                           Total Trades
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Número total de trades que você já fez (abertas + fechadas)."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -1040,7 +1040,7 @@ export default function Dashboard() {
                           Winning Trades
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Número de trades fechadas que deram lucro (PnL > 0)."
                           position="top"
                           delay={200}
                           className="z-50"
@@ -1078,7 +1078,7 @@ export default function Dashboard() {
                           Lost Trades
                         </CardTitle>
                         <Tooltip 
-                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          content="Número de trades fechadas que deram prejuízo (PnL < 0)."
                           position="top"
                           delay={200}
                           className="z-50"
