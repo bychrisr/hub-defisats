@@ -55,6 +55,7 @@ model User {
   security_audit_logs        SecurityAuditLog[]
   refresh_tokens             RefreshToken[]
   security_configs_updated   SecurityConfig[] @relation("SecurityConfigUpdatedBy")
+  audit_logs                 AuditLog[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -67,12 +68,19 @@ model Automation {
   type       String
   config     Json
   is_active  Boolean    @default(true)
+  status     String     @default("active") // active, paused, stopped, error
+  risk_level String?    // low, medium, high
+  plan_type  PlanType?  // User plan at time of creation
   created_at DateTime   @default(now()) @db.Timestamp(6)
   updated_at DateTime   @default(now()) @db.Timestamp(6)
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   trade_logs TradeLog[]
 
   @@index([user_id], map: "idx_automation_user_id")
+  @@index([type])
+  @@index([status])
+  @@index([risk_level])
+  @@index([plan_type])
 }
 
 model TradeLog {
@@ -82,6 +90,11 @@ model TradeLog {
   /// LN Markets trade ID
   trade_id      String
   status        String
+  action        String?     // buy, sell, hold
+  plan_type     PlanType?   // User plan at time of trade
+  pnl           Float?      // Profit/Loss
+  amount        Float?      // Trade amount
+  price         Float?      // Trade price
   error_message String?
   executed_at   DateTime    @db.Timestamp(6)
   created_at    DateTime    @default(now()) @db.Timestamp(6)
@@ -90,6 +103,10 @@ model TradeLog {
 
   @@index([automation_id], map: "idx_tradelog_automation_id")
   @@index([user_id], map: "idx_tradelog_user_id")
+  @@index([status])
+  @@index([action])
+  @@index([plan_type])
+  @@index([executed_at])
 }
 
 model Notification {
@@ -121,11 +138,17 @@ model Payment {
   payment_hash      String?
   preimage          String?
   expiry_seconds    Int?
+  payment_method    String?   // lightning, card, bank_transfer
+  amount            Float?    // Amount in fiat currency
   user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_payment_user_id")
   @@index([payment_hash])
   @@index([expires_at])
+  @@index([status])
+  @@index([payment_method])
+  @@index([plan_type])
+  @@index([created_at])
 }
 
 model BacktestReport {
@@ -133,10 +156,20 @@ model BacktestReport {
   user_id    String
   config     Json
   result     Json
+  status     String   @default("pending") // pending, running, completed, failed
+  strategy   String?  // Strategy name
+  plan_type  PlanType? // User plan at time of creation
+  execution_time Int? // Execution time in seconds
   created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  completed_at DateTime? @db.Timestamp(6)
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_backtestreport_user_id")
+  @@index([status])
+  @@index([strategy])
+  @@index([plan_type])
+  @@index([created_at])
 }
 
 model AdminUser {
@@ -362,21 +395,26 @@ model Simulation {
   description     String?
   config          Json     // Configuração da simulação
   status          String   @default("pending") // pending, running, completed, failed
+  simulation_type String?  // backtest, forward_test, paper_trading
   automation_type String?
   price_scenario  String?
   duration        Int?
   initial_price   Float?
+  progress        Float?   @default(0) // Progress percentage
   started_at      DateTime? @db.Timestamp(6)
   created_at      DateTime @default(now()) @db.Timestamp(6)
   updated_at      DateTime @default(now()) @db.Timestamp(6)
   completed_at    DateTime? @db.Timestamp(6)
+  plan_type       PlanType? // User plan at time of creation
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   results SimulationResult[]
 
   @@index([user_id])
   @@index([status])
+  @@index([simulation_type])
   @@index([automation_type])
+  @@index([plan_type])
   @@map("simulations")
 }
 
@@ -471,4 +509,69 @@ model RefreshToken {
   @@index([expires_at])
   @@index([is_revoked])
   @@map("RefreshToken")
+}
+
+// Tabelas do Painel Administrativo
+
+model NotificationTemplate {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name        String
+  description String?
+  channel     String   // email, sms, push, webhook
+  category    String   // system, marketing, security, trading
+  template    String   // Template content
+  variables   Json?    // Available variables
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  created_by  String?  // Admin user ID
+
+  @@index([channel])
+  @@index([category])
+  @@index([is_active])
+  @@map("notification_templates")
+}
+
+model SystemReport {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  type        String   // daily, weekly, monthly, custom
+  status      String   // pending, generating, completed, failed
+  title       String
+  description String?
+  config      Json?    // Report configuration
+  file_path   String?  // Path to generated file
+  file_size   Int?     // File size in bytes
+  generated_at DateTime? @db.Timestamp(6)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  created_by  String?  // Admin user ID
+
+  @@index([type])
+  @@index([status])
+  @@index([created_at])
+  @@map("system_reports")
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id    String?
+  action     String   // create, update, delete, login, logout, etc.
+  resource   String?  // Table or resource name
+  resource_id String? // ID of the affected resource
+  old_values Json?    // Previous values
+  new_values Json?    // New values
+  ip_address String?
+  user_agent String?
+  severity   String   @default("info") // info, warning, error, critical
+  details    Json?    // Additional details
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([action])
+  @@index([resource])
+  @@index([severity])
+  @@index([created_at])
+  @@map("audit_logs")
 }
