@@ -19,6 +19,7 @@ import {
   TrendingDown,
   CheckCircle,
   PieChart,
+  BarChart3,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
@@ -519,82 +520,451 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* History */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-vibrant">History</h2>
+          <div className="grid grid-cols-5 gap-6">
+            {/* Available Margin */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
+                  (balanceData?.total_balance || 0) > 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <Wallet className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
+                    (balanceData?.total_balance || 0) > 0 ? 'text-green-300 group-hover:text-green-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                (balanceData?.total_balance || 0) > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Available Margin') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`text-number-lg ${
+                        positionsLoading ? 'text-gray-200' :
+                        (balanceData?.total_balance || 0) > 0 ? 'text-green-200' :
+                        'text-gray-200'
+                      }`}>
+                        {formatSats(balanceData?.total_balance || 0, { size: 24, variant: 'auto' })}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
+                          (balanceData?.total_balance || 0) > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {(balanceData?.total_balance || 0) > 0 ? 'Available' : 'Empty'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
 
-          {/* Histórico */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-vibrant">{t('dashboard.history')}</h2>
-            <div className="dashboard-cards-container">
-              <PnLCard
-                title="Margem disponível"
-                pnl={balanceData?.total_balance || 0}
-                icon={Wallet}
-                variant="neutral"
-                cardKey="available_margin"
-                titleSize="lg"
-                floatingIcon={true}
-                cursor="default"
-                showSatsIcon={true}
-              />
+            {/* Estimated Balance */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
+                  (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <Wallet className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
+                    (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'text-green-300 group-hover:text-green-200' :
+                    (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'text-red-300 group-hover:text-red-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Balance') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`text-number-lg ${
+                        positionsLoading ? 'text-gray-200' :
+                        (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'text-green-200' :
+                        (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'text-red-200' :
+                        'text-gray-200'
+                      }`}>
+                        {formatSats(estimatedBalance.data?.estimated_balance || 0, { size: 24, variant: 'auto' })}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
+                          (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {(estimatedBalance.data?.estimated_balance || 0) > 0 ? 'Positive' : (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'Negative' : 'Neutral'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
 
-              <PnLCard
-                title={t('dashboard.estimated_balance')}
-                pnl={estimatedBalance.data?.estimated_balance || 0}
-                icon={Wallet}
-                titleSize="lg"
-                floatingIcon={true}
-                cursor="default"
-              />
+            {/* Total Invested */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className="w-12 h-12 bg-blue-600/20 backdrop-blur-sm border border-blue-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-blue-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                  <Target className="w-6 h-6 text-blue-300 stroke-2 group-hover:text-blue-200 transition-colors duration-500" />
+                </div>
+              </div>
+              
+              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Invested') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className="text-number-lg text-blue-200">
+                        {formatSats(estimatedBalance.data?.total_invested || 0, { size: 24, variant: 'auto' })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
 
-              <PnLCard
-                title={t('dashboard.total_invested')}
-                pnl={estimatedBalance.data?.total_invested || 0}
-                icon={Target}
-                cardKey="total_invested"
-                variant="neutral"
-                titleSize="lg"
-                floatingIcon={true}
-                cursor="default"
-                showSatsIcon={true}
-              />
+            {/* Net Profit */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
+                  (historicalMetrics?.totalProfit || 0) > 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  (historicalMetrics?.totalProfit || 0) < 0 ? 'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
+                    (historicalMetrics?.totalProfit || 0) > 0 ? 'text-green-300 group-hover:text-green-200' :
+                    (historicalMetrics?.totalProfit || 0) < 0 ? 'text-red-300 group-hover:text-red-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                (historicalMetrics?.totalProfit || 0) > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                (historicalMetrics?.totalProfit || 0) < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Net Profit') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`text-number-lg ${
+                        positionsLoading ? 'text-gray-200' :
+                        (historicalMetrics?.totalProfit || 0) > 0 ? 'text-green-200' :
+                        (historicalMetrics?.totalProfit || 0) < 0 ? 'text-red-200' :
+                        'text-gray-200'
+                      }`}>
+                        {formatSats(historicalMetrics?.totalProfit || 0, { size: 24, variant: 'auto' })}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
+                          (historicalMetrics?.totalProfit || 0) > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          (historicalMetrics?.totalProfit || 0) < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {(historicalMetrics?.totalProfit || 0) > 0 ? 'Profit' : (historicalMetrics?.totalProfit || 0) < 0 ? 'Loss' : 'Neutral'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
 
-              <PnLCard
-                title={t('dashboard.total_profit')}
-                pnl={historicalMetrics?.totalProfit || 0}
-                icon={TrendingUp}
-                variant="neutral"
-                titleSize="lg"
-                floatingIcon={true}
-                cursor="default"
-                showSatsIcon={true}
-              />
+            {/* Fees Paid */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className="w-12 h-12 bg-orange-600/20 backdrop-blur-sm border border-orange-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-orange-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                  <DollarSign className="w-6 h-6 text-orange-300 stroke-2 group-hover:text-orange-200 transition-colors duration-500" />
+                </div>
+              </div>
+              
+              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Fees Paid') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className="text-number-lg text-orange-200">
+                        {formatSats(historicalMetrics?.totalFees || 0, { size: 24, variant: 'auto' })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
 
-              <PnLCard
-                title={t('dashboard.fees_paid')}
-                pnl={historicalMetrics?.totalFees || 0}
-                icon={DollarSign}
-                cardKey="fees_paid"
-                variant="neutral"
-                titleSize="lg"
-                floatingIcon={true}
-                cursor="default"
-                showSatsIcon={true}
-              />
+            {/* Success Rate */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  (historicalMetrics?.successRate || 0) >= 50 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  (historicalMetrics?.successRate || 0) >= 30 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
+                  'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30'
+                }`}>
+                  <CheckCircle className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    (historicalMetrics?.successRate || 0) >= 50 ? 'text-green-300 group-hover:text-green-200' :
+                    (historicalMetrics?.successRate || 0) >= 30 ? 'text-yellow-300 group-hover:text-yellow-200' :
+                    'text-red-300 group-hover:text-red-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                (historicalMetrics?.successRate || 0) >= 50 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                (historicalMetrics?.successRate || 0) >= 30 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
+                'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Success Rate') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`text-number-lg ${
+                        (historicalMetrics?.successRate || 0) >= 50 ? 'text-green-200' :
+                        (historicalMetrics?.successRate || 0) >= 30 ? 'text-yellow-200' :
+                        'text-red-200'
+                      }`}>
+                        {(historicalMetrics?.successRate || 0).toFixed(1)}%
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          (historicalMetrics?.successRate || 0) >= 50 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          (historicalMetrics?.successRate || 0) >= 30 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
+                          'border-red-400/60 text-red-200 bg-red-600/20'
+                        }`}
+                      >
+                        {(historicalMetrics?.successRate || 0) >= 50 ? 'Good' : (historicalMetrics?.successRate || 0) >= 30 ? 'Fair' : 'Poor'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
 
-              <MetricCard
-                cardKey="success_rate"
-                title={t('dashboard.success_rate')}
-                value={(historicalMetrics?.successRate || 0).toFixed(1) + '%'}
-                icon={CheckCircle}
-                titleSize="lg"
-                floatingIcon={true}
-                cursor="default"
-                variant={(historicalMetrics?.successRate || 0) >= 50 ? 'success' : 'warning'}
-              />
+            {/* Total Profitability */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30'
+                }`}>
+                  <PieChart className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'text-green-300 group-hover:text-green-200' :
+                    'text-red-300 group-hover:text-red-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Profitability') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`text-number-lg ${
+                        ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'text-green-200' :
+                        'text-red-200'
+                      }`}>
+                        {((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          'border-red-400/60 text-red-200 bg-red-600/20'
+                        }`}
+                      >
+                        {((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'Positive' : 'Negative'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Total Trades */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className="w-12 h-12 bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-purple-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                  <BarChart3 className="w-6 h-6 text-purple-300 stroke-2 group-hover:text-purple-200 transition-colors duration-500" />
+                </div>
+              </div>
+              
+              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Trades') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className="text-number-lg text-purple-200">
+                        {(historicalMetrics?.totalTrades || 0).toString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Winning Trades */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className="w-12 h-12 bg-green-600/20 backdrop-blur-sm border border-green-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-green-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                  <TrendingUp className="w-6 h-6 text-green-300 stroke-2 group-hover:text-green-200 transition-colors duration-500" />
+                </div>
+              </div>
+              
+              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Winning Trades') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className="text-number-lg text-green-200">
+                        {(historicalMetrics?.winningTrades || 0).toString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Lost Trades */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className="w-12 h-12 bg-red-600/20 backdrop-blur-sm border border-red-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-red-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                  <TrendingDown className="w-6 h-6 text-red-300 stroke-2 group-hover:text-red-200 transition-colors duration-500" />
+                </div>
+              </div>
+              
+              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Lost Trades') }}
+                      />
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className="text-number-lg text-red-200">
+                        {(historicalMetrics?.lostTrades || 0).toString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
             </div>
           </div>
-
-
-
+        </div>
 
           {/* Automation Types Overview */}
           {stats && stats.total > 0 && (
