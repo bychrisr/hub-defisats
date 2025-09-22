@@ -149,9 +149,9 @@ async function registerPlugins() {
   console.log('✅ Helmet plugin registered');
 
   console.log('🔌 Registering rate limiting plugin...');
-  // Rate limiting - more permissive in development
+  // Rate limiting - more permissive for production
   await fastify.register(rateLimit, {
-    max: config.isDevelopment ? 1000 : 100, // 1000 requests per minute in dev, 100 in prod
+    max: config.isDevelopment ? 1000 : 1000, // 1000 requests per minute in both dev and prod
     timeWindow: '1 minute',
     errorResponseBuilder: (request, context) => ({
       code: 429,
