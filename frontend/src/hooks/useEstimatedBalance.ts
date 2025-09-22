@@ -11,6 +11,22 @@ interface EstimatedBalanceData {
   total_invested: number;
   positions_count: number;
   trades_count: number;
+  // Novos campos para os cards adicionais
+  success_rate: number;
+  winning_trades: number;
+  lost_trades: number;
+  total_trades: number;
+  active_positions: number;
+  average_pnl: number;
+  win_rate: number;
+  max_drawdown: number;
+  sharpe_ratio: number;
+  volatility: number;
+  // 4 novas métricas
+  win_streak: number;
+  best_trade: number;
+  risk_reward_ratio: number;
+  trading_frequency: number;
 }
 
 interface UseEstimatedBalanceReturn {
@@ -21,7 +37,7 @@ interface UseEstimatedBalanceReturn {
 }
 
 export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
-  const { user } = useAuthStore();
+  const { user, isAuthenticated, isInitialized } = useAuthStore();
   const [data, setData] = useState<EstimatedBalanceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,16 +48,23 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
   console.log('🔍 ESTIMATED BALANCE HOOK - Will make API call:', !isAdmin && user?.id);
 
   const fetchEstimatedBalance = useCallback(async () => {
-    // Pular para admins - eles não têm credenciais LN Markets
-    if (isAdmin) {
-      console.log('🔍 ESTIMATED BALANCE HOOK - Admin user, skipping LN Markets queries...');
-      setIsLoading(false);
+    // Aguardar inicialização do store de autenticação
+    if (!isInitialized) {
+      console.log('🔍 ESTIMATED BALANCE HOOK - Auth store not initialized yet, waiting...');
+      setIsLoading(true);
       return;
     }
     
     // Verificar se usuário está autenticado
-    if (!user?.id) {
-      console.log('🔍 ESTIMATED BALANCE HOOK - No user ID, skipping...');
+    if (!isAuthenticated || !user?.id) {
+      console.log('🔍 ESTIMATED BALANCE HOOK - User not authenticated:', { isAuthenticated, userId: user?.id });
+      setIsLoading(false);
+      return;
+    }
+    
+    // Pular para admins - eles não têm credenciais LN Markets
+    if (isAdmin) {
+      console.log('🔍 ESTIMATED BALANCE HOOK - Admin user, skipping LN Markets queries...');
       setIsLoading(false);
       return;
     }
@@ -68,6 +91,22 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
           total_invested: balanceData.total_invested || 0,
           positions_count: balanceData.positions_count || 0,
           trades_count: balanceData.trades_count || 0,
+          // Novos campos
+          success_rate: balanceData.success_rate || 0,
+          winning_trades: balanceData.winning_trades || 0,
+          lost_trades: balanceData.lost_trades || 0,
+          total_trades: balanceData.total_trades || 0,
+          active_positions: balanceData.active_positions || 0,
+          average_pnl: balanceData.average_pnl || 0,
+          win_rate: balanceData.win_rate || 0,
+          max_drawdown: balanceData.max_drawdown || 0,
+          sharpe_ratio: balanceData.sharpe_ratio || 0,
+          volatility: balanceData.volatility || 0,
+          // 4 novas métricas
+          win_streak: balanceData.win_streak || 0,
+          best_trade: balanceData.best_trade || 0,
+          risk_reward_ratio: balanceData.risk_reward_ratio || 0,
+          trading_frequency: balanceData.trading_frequency || 0,
         });
       } else {
         throw new Error('Invalid response format');
@@ -87,14 +126,36 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
         total_invested: 0,
         positions_count: 0,
         trades_count: 0,
+        // Novos campos com valores padrão
+        success_rate: 0,
+        winning_trades: 0,
+        lost_trades: 0,
+        total_trades: 0,
+        active_positions: 0,
+        average_pnl: 0,
+        win_rate: 0,
+        max_drawdown: 0,
+        sharpe_ratio: 0,
+        volatility: 0,
+        // 4 novas métricas
+        win_streak: 0,
+        best_trade: 0,
+        risk_reward_ratio: 0,
+        trading_frequency: 0,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, user?.id, isAuthenticated, isInitialized]);
 
   useEffect(() => {
-    console.log('🔍 ESTIMATED BALANCE HOOK - useEffect triggered:', { userId: user?.id, isAdmin });
+    console.log('🔍 ESTIMATED BALANCE HOOK - useEffect triggered:', { 
+      userId: user?.id, 
+      isAdmin, 
+      isAuthenticated,
+      isInitialized,
+      hasToken: !!localStorage.getItem('access_token')
+    });
     fetchEstimatedBalance();
     
     // Desabilitar polling automático - será controlado pelo useRealtimeDashboard

@@ -1161,6 +1161,10 @@
     background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(234, 88, 12, 0.25), rgba(194, 65, 12, 0.2));
   }
 
+  .gradient-card-yellow::before {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(202, 138, 4, 0.25), rgba(161, 98, 7, 0.2));
+  }
+
   .gradient-card-gray::before {
     background: linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(75, 85, 99, 0.25), rgba(55, 65, 81, 0.2));
   }

@@ -77,7 +77,7 @@ export default function Dashboard() {
   const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente e positionsLoading
   const historicalData = useHistoricalData();
   const estimatedBalance = useEstimatedBalance();
-  const { formatSats } = useFormatSats();
+  const { formatSats, getDynamicSize } = useFormatSats();
   
   // Estado de carregamento das posições
   const positionsLoading = positionsContextData?.isLoading || false;
@@ -101,6 +101,7 @@ export default function Dashboard() {
     }
   };
 
+
   // Funções para determinar cores dinâmicas
   const getPnLColor = (value: number) => {
     if (positionsLoading) return 'neutral';
@@ -123,6 +124,23 @@ export default function Dashboard() {
   
   // Dados históricos para cálculos
   const historicalMetrics = historicalData.data;
+  
+  // Debug: Log dos dados principais
+  console.log('🔍 DASHBOARD - Main data sources:', {
+    estimatedBalance: {
+      hasData: !!estimatedBalance.data,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error,
+      totalFees: estimatedBalance.data?.total_fees,
+      totalInvested: estimatedBalance.data?.total_invested
+    },
+    historicalData: {
+      hasData: !!historicalData.data,
+      isLoading: historicalData.isLoading,
+      error: historicalData.error,
+      totalFees: historicalData.data?.totalFees
+    }
+  });
   
   // Funções de cálculo baseadas no PAINEL_METRICAS.md
   const calculateActiveTrades = () => {
@@ -151,22 +169,39 @@ export default function Dashboard() {
   };
   
   const calculateTotalInvested = () => {
+    console.log('🔍 DASHBOARD - calculateTotalInvested called:', {
+      hasData: !!estimatedBalance.data,
+      data: estimatedBalance.data,
+      total_invested: estimatedBalance.data?.total_invested,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
     if (!estimatedBalance.data) return 0;
     return estimatedBalance.data.total_invested || 0;
   };
   
   const calculateNetProfit = () => {
     const totalPnl = positionsData.totalPL || 0;
-    const feesPaid = historicalMetrics?.totalFees || 0;
+    const feesPaid = calculateFeesPaid();
     return totalPnl - feesPaid;
   };
   
   const calculateFeesPaid = () => {
+    console.log('🔍 DASHBOARD - calculateFeesPaid called:', {
+      hasEstimatedBalance: !!estimatedBalance.data,
+      estimatedBalanceFees: estimatedBalance.data?.total_fees,
+      hasHistoricalData: !!historicalData.data,
+      historicalMetrics: historicalMetrics,
+      historicalFees: historicalMetrics?.totalFees,
+      isLoading: historicalData.isLoading,
+      error: historicalData.error
+    });
+    // Usar dados do estimated-balance como fonte primária para fees
+    if (estimatedBalance.data?.total_fees !== undefined) {
+      return estimatedBalance.data.total_fees;
+    }
+    // Fallback para dados históricos se disponível
     return historicalMetrics?.totalFees || 0;
-  };
-  
-  const calculateSuccessRate = () => {
-    return historicalMetrics?.successRate || 0;
   };
   
   const calculateTotalProfitability = () => {
@@ -176,16 +211,218 @@ export default function Dashboard() {
     return (netProfit / totalInvested) * 100;
   };
   
-  const calculateTotalTrades = () => {
-    return historicalMetrics?.totalTrades || 0;
-  };
-  
-  const calculateWinningTrades = () => {
-    return historicalMetrics?.winningTrades || 0;
-  };
-  
   const calculateLostTrades = () => {
     return historicalMetrics?.lostTrades || 0;
+  };
+
+  // Novas funções para os cards adicionais
+  const calculateSuccessRate = () => {
+    console.log('🔍 DASHBOARD - calculateSuccessRate called:', {
+      hasData: !!estimatedBalance.data,
+      successRate: estimatedBalance.data?.success_rate,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.success_rate || 0;
+  };
+
+  const calculateTotalTrades = () => {
+    console.log('🔍 DASHBOARD - calculateTotalTrades called:', {
+      hasData: !!estimatedBalance.data,
+      totalTrades: estimatedBalance.data?.total_trades,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.total_trades || 0;
+  };
+
+  const calculateWinningTrades = () => {
+    console.log('🔍 DASHBOARD - calculateWinningTrades called:', {
+      hasData: !!estimatedBalance.data,
+      winningTrades: estimatedBalance.data?.winning_trades,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.winning_trades || 0;
+  };
+
+  const calculateLostTradesNew = () => {
+    console.log('🔍 DASHBOARD - calculateLostTradesNew called:', {
+      hasData: !!estimatedBalance.data,
+      lostTrades: estimatedBalance.data?.lost_trades,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.lost_trades || 0;
+  };
+
+  const calculateActivePositions = () => {
+    console.log('🔍 DASHBOARD - calculateActivePositions called:', {
+      hasData: !!estimatedBalance.data,
+      activePositions: estimatedBalance.data?.active_positions,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.active_positions || 0;
+  };
+
+  const calculateAveragePnL = () => {
+    console.log('🔍 DASHBOARD - calculateAveragePnL called:', {
+      hasData: !!estimatedBalance.data,
+      averagePnL: estimatedBalance.data?.average_pnl,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.average_pnl || 0;
+  };
+
+  const calculateMaxDrawdown = () => {
+    console.log('🔍 DASHBOARD - calculateMaxDrawdown called:', {
+      hasData: !!estimatedBalance.data,
+      maxDrawdown: estimatedBalance.data?.max_drawdown,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.max_drawdown || 0;
+  };
+
+  const calculateSharpeRatio = () => {
+    console.log('🔍 DASHBOARD - calculateSharpeRatio called:', {
+      hasData: !!estimatedBalance.data,
+      sharpeRatio: estimatedBalance.data?.sharpe_ratio,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.sharpe_ratio || 0;
+  };
+
+  const calculateVolatility = () => {
+    console.log('🔍 DASHBOARD - calculateVolatility called:', {
+      hasData: !!estimatedBalance.data,
+      volatility: estimatedBalance.data?.volatility,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.volatility || 0;
+  };
+
+  // 4 novas funções para os cards adicionais
+  const calculateWinStreak = () => {
+    console.log('🔍 DASHBOARD - calculateWinStreak called:', {
+      hasData: !!estimatedBalance.data,
+      winStreak: estimatedBalance.data?.win_streak,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.win_streak || 0;
+  };
+
+  const calculateBestTrade = () => {
+    console.log('🔍 DASHBOARD - calculateBestTrade called:', {
+      hasData: !!estimatedBalance.data,
+      bestTrade: estimatedBalance.data?.best_trade,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.best_trade || 0;
+  };
+
+  const calculateRiskRewardRatio = () => {
+    console.log('🔍 DASHBOARD - calculateRiskRewardRatio called:', {
+      hasData: !!estimatedBalance.data,
+      riskRewardRatio: estimatedBalance.data?.risk_reward_ratio,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.risk_reward_ratio || 0;
+  };
+
+  const calculateTradingFrequency = () => {
+    console.log('🔍 DASHBOARD - calculateTradingFrequency called:', {
+      hasData: !!estimatedBalance.data,
+      tradingFrequency: estimatedBalance.data?.trading_frequency,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.trading_frequency || 0;
+  };
+
+  // Função para calcular o tamanho global baseado no menor valor entre todos os cards
+  const getGlobalDynamicSize = () => {
+    // Coletar todos os valores numéricos dos cards
+    const allValues = [
+      positionsData.totalPL || 0,
+      positionsData.estimatedProfit || 0,
+      calculateTotalMargin(),
+      positionsData.estimatedFees || 0,
+      calculateAvailableMargin(),
+      calculateEstimatedBalance(),
+      calculateTotalInvested(),
+      calculateNetProfit(),
+      calculateFeesPaid()
+    ];
+
+    // Encontrar o menor valor absoluto (excluindo zeros)
+    const nonZeroValues = allValues.filter(value => value !== 0);
+    if (nonZeroValues.length === 0) {
+      return { textSize: 'text-number-lg', iconSize: 24 }; // Padrão se todos forem zero
+    }
+
+    const minValue = Math.min(...nonZeroValues.map(Math.abs));
+    
+    // Se o menor valor for zero, usar tamanho padrão
+    if (minValue === 0) {
+      return { textSize: 'text-number-lg', iconSize: 24 };
+    }
+    
+    const digits = Math.floor(Math.log10(minValue)) + 1;
+    
+    let result;
+    if (digits <= 3) {
+      result = { textSize: 'text-number-lg', iconSize: 24 };
+    } else if (digits <= 6) {
+      result = { textSize: 'text-number-md', iconSize: 20 };
+    } else if (digits <= 9) {
+      result = { textSize: 'text-number-sm', iconSize: 16 };
+    } else {
+      result = { textSize: 'text-number-xs', iconSize: 12 };
+    }
+    
+    console.log('🔍 Global Dynamic Size Debug:', {
+      allValues,
+      nonZeroValues,
+      minValue,
+      digits,
+      result
+    });
+    
+    return result;
   };
   
 
@@ -291,9 +528,10 @@ export default function Dashboard() {
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Total PnL
-                        </CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PL') }}
+                        />
                         <Tooltip 
                           content="Quanto você está ganhando (ou perdendo) AGORA nas posições que ainda estão abertas."
                           position="top"
@@ -307,13 +545,13 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
                         getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-200' :
                         getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(positionsData.totalPL || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(positionsData.totalPL || 0, { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -330,12 +568,6 @@ export default function Dashboard() {
                       >
                         {positionsData.totalMargin > 0 ? `${((positionsData.totalPL || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '0.0%'}
                       </Badge>
-                      <span className={`text-caption ${
-                        positionsLoading ? 'text-gray-300/80' :
-                        getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-300/80' :
-                        getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-300/80' :
-                        'text-gray-300/80'
-                      }`}>vs Margin</span>
                     </div>
                   </div>
                 </div>
@@ -371,9 +603,10 @@ export default function Dashboard() {
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Estimated Profit
-                        </CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Profit') }}
+                      />
                         <Tooltip 
                           content="Lucro ou prejuízo estimado se você fechar TODAS as posições abertas AGORA."
                           position="top"
@@ -387,12 +620,12 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
                         getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(positionsData.estimatedProfit || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(positionsData.estimatedProfit || 0, { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -444,9 +677,10 @@ export default function Dashboard() {
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Active Trades
-                        </CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Active Trades') }}
+                      />
                         <Tooltip 
                           content="Número de posições que estão abertas e ativas agora."
                           position="top"
@@ -460,12 +694,12 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
                         getTradesColor(calculateActiveTrades()) === 'positive' ? 'text-blue-200' :
                         'text-gray-200'
                       }`}>
-                        {calculateActiveTrades()}
+                        {formatSats(calculateActiveTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -525,9 +759,10 @@ export default function Dashboard() {
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Total Margin
-                        </CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Margin') }}
+                      />
                         <Tooltip 
                           content="Soma de todas as margens alocadas nas suas posições abertas."
                           position="top"
@@ -541,8 +776,8 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className="text-number-lg text-purple-200">
-                        {formatSats(calculateTotalMargin(), { size: 24, variant: 'auto' })}
+                      <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
+                        {formatSats(calculateTotalMargin(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -571,9 +806,10 @@ export default function Dashboard() {
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Estimated Fees
-                        </CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Fees') }}
+                      />
                         <Tooltip 
                           content="Estimativa de taxas que você pagará para fechar suas posições + funding das próximas 24h."
                           position="top"
@@ -587,8 +823,8 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className="text-number-lg text-orange-200">
-                        {formatSats(positionsData.estimatedFees || 0, { size: 24, variant: 'auto' })}
+                      <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
+                        {formatSats(positionsData.estimatedFees || 0, { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -640,9 +876,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Available Margin
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Available Margin') }}
+                        />
                         <Tooltip 
                           content="Quanto você tem livre agora para abrir novas posições."
                           position="top"
@@ -655,12 +892,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
                         calculateAvailableMargin() > 0 ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateAvailableMargin(), { size: 24, variant: 'auto' })}
+                        {formatSats(calculateAvailableMargin(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -710,9 +947,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Estimated Balance
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Balance') }}
+                        />
                         <Tooltip 
                           content="Seu saldo total se fechar TUDO agora: disponível + lucro das posições - taxas futuras."
                           position="top"
@@ -725,13 +963,13 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
                         calculateEstimatedBalance() > 0 ? 'text-green-200' :
                         calculateEstimatedBalance() < 0 ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateEstimatedBalance(), { size: 24, variant: 'auto' })}
+                        {formatSats(calculateEstimatedBalance(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -767,9 +1005,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Total Invested
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Invested') }}
+                        />
                         <Tooltip 
                           content="Soma de todas as margens iniciais que você usou para abrir suas posições (abertas e fechadas)."
                           position="top"
@@ -782,8 +1021,8 @@ export default function Dashboard() {
           </div>
 
                     <div className="mb-3">
-                      <div className="text-number-lg text-blue-200">
-                        {formatSats(calculateTotalInvested(), { size: 24, variant: 'auto' })}
+                      <div className={`${getGlobalDynamicSize().textSize} text-blue-200`}>
+                        {formatSats(calculateTotalInvested(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                   </div>
@@ -820,9 +1059,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Net Profit
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Net Profit') }}
+                        />
                         <Tooltip 
                           content="Seu lucro real: total de PnL - total de taxas pagas."
                           position="top"
@@ -835,13 +1075,13 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
                         calculateNetProfit() > 0 ? 'text-green-200' :
                         calculateNetProfit() < 0 ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateNetProfit(), { size: 24, variant: 'auto' })}
+                        {formatSats(calculateNetProfit(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -877,9 +1117,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Fees Paid
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Fees Paid') }}
+                        />
                         <Tooltip 
                           content="Soma de todas as taxas de abertura, fechamento e funding que você já pagou."
                           position="top"
@@ -892,8 +1133,8 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className="text-number-lg text-orange-200">
-                        {formatSats(calculateFeesPaid(), { size: 24, variant: 'auto' })}
+                      <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
+                        {formatSats(calculateFeesPaid(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                   </div>
@@ -927,9 +1168,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Success Rate
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Success Rate') }}
+                        />
                         <Tooltip 
                           content="Porcentagem de trades que deram lucro entre todas as fechadas."
                           position="top"
@@ -938,11 +1180,11 @@ export default function Dashboard() {
                         >
                           <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
-                      </div>
-                    </div>
-                    
+            </div>
+          </div>
+
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         calculateSuccessRate() >= 50 ? 'text-green-200' :
                         calculateSuccessRate() >= 30 ? 'text-yellow-200' :
                         'text-red-200'
@@ -991,9 +1233,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Total Profitability
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Profitability') }}
+                        />
                         <Tooltip 
                           content="Porcentagem de lucro sobre o total investido: (lucro líquido / total investido) x 100."
                           position="top"
@@ -1006,7 +1249,7 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`text-number-lg ${
+                      <div className={`${getGlobalDynamicSize().textSize} ${
                         calculateTotalProfitability() >= 0 ? 'text-green-200' :
                         'text-red-200'
                       }`}>
@@ -1044,9 +1287,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Total Trades
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Trades') }}
+                        />
                         <Tooltip 
                           content="Número total de trades que você já fez (abertas + fechadas)."
                           position="top"
@@ -1059,8 +1303,8 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className="text-number-lg text-purple-200">
-                        {calculateTotalTrades().toString()}
+                      <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
+                        {formatSats(calculateTotalTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                   </div>
@@ -1082,9 +1326,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Winning Trades
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Winning Trades') }}
+                        />
                         <Tooltip 
                           content="Número de trades fechadas que deram lucro (PnL > 0)."
                           position="top"
@@ -1097,8 +1342,8 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className="text-number-lg text-green-200">
-                        {calculateWinningTrades().toString()}
+                      <div className={`${getGlobalDynamicSize().textSize} text-green-200`}>
+                        {formatSats(calculateWinningTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
                     </div>
                   </div>
@@ -1120,9 +1365,10 @@ export default function Dashboard() {
                   <div className="p-6">
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-h3 text-vibrant">
-                          Lost Trades
-                        </CardTitle>
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Lost Trades') }}
+                        />
                         <Tooltip 
                           content="Número de trades fechadas que deram prejuízo (PnL < 0)."
                           position="top"
@@ -1135,9 +1381,591 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className="text-number-lg text-red-200">
-                        {calculateLostTrades().toString()}
+                      <div className={`${getGlobalDynamicSize().textSize} text-red-200`}>
+                        {formatSats(calculateLostTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
                       </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Success Rate */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateSuccessRate() >= 50 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  calculateSuccessRate() >= 30 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
+                  'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30'
+                }`}>
+                  <Target className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateSuccessRate() >= 50 ? 'text-green-300 group-hover:text-green-200' :
+                    calculateSuccessRate() >= 30 ? 'text-yellow-300 group-hover:text-yellow-200' :
+                    'text-red-300 group-hover:text-red-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateSuccessRate() >= 50 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateSuccessRate() >= 30 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
+                'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Success Rate') }}
+                        />
+                        <Tooltip 
+                          content="Percentual de trades vencedores em relação ao total de trades fechados."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateSuccessRate() >= 50 ? 'text-green-200' :
+                        calculateSuccessRate() >= 30 ? 'text-yellow-200' :
+                        'text-red-200'
+                      }`}>
+                        {calculateSuccessRate().toFixed(1)}%
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          calculateSuccessRate() >= 50 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          calculateSuccessRate() >= 30 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
+                          'border-red-400/60 text-red-200 bg-red-600/20'
+                        }`}
+                      >
+                        {calculateSuccessRate() >= 50 ? 'Good' : calculateSuccessRate() >= 30 ? 'Fair' : 'Poor'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Active Positions */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateActivePositions() > 0 ? 'bg-blue-600/20 border-blue-500/30 group-hover:shadow-blue-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <Activity className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateActivePositions() > 0 ? 'text-blue-300 group-hover:text-blue-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateActivePositions() > 0 ? 'gradient-card-blue border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Active Positions') }}
+                        />
+                        <Tooltip 
+                          content="Número de posições que estão atualmente abertas e sendo negociadas."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateActivePositions() > 0 ? 'text-blue-200' :
+                        'text-gray-200'
+                      }`}>
+                        {calculateActivePositions()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Average PnL */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateAveragePnL() > 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  calculateAveragePnL() < 0 ? 'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateAveragePnL() > 0 ? 'text-green-300 group-hover:text-green-200' :
+                    calculateAveragePnL() < 0 ? 'text-red-300 group-hover:text-red-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateAveragePnL() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateAveragePnL() < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Average PnL') }}
+                        />
+                        <Tooltip 
+                          content="PnL médio por trade fechado."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateAveragePnL() > 0 ? 'text-green-200' :
+                        calculateAveragePnL() < 0 ? 'text-red-200' :
+                        'text-gray-200'
+                      }`}>
+                        {formatSats(calculateAveragePnL(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Max Drawdown */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className="w-12 h-12 bg-orange-600/20 backdrop-blur-sm border border-orange-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-orange-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                  <TrendingDown className="w-6 h-6 text-orange-300 stroke-2 group-hover:text-orange-200 transition-colors duration-500" />
+                </div>
+              </div>
+              
+              <Card className="gradient-card gradient-card-orange border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 hover:shadow-xl cursor-default">
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Max Drawdown') }}
+                        />
+                        <Tooltip 
+                          content="Maior perda consecutiva registrada nos trades fechados."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
+                        {formatSats(calculateMaxDrawdown(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Sharpe Ratio */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateSharpeRatio() > 1 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  calculateSharpeRatio() > 0 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <BarChart3 className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateSharpeRatio() > 1 ? 'text-green-300 group-hover:text-green-200' :
+                    calculateSharpeRatio() > 0 ? 'text-yellow-300 group-hover:text-yellow-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateSharpeRatio() > 1 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateSharpeRatio() > 0 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Sharpe Ratio') }}
+                        />
+                        <Tooltip 
+                          content="Índice de Sharpe - medida de retorno ajustado ao risco (retorno médio / desvio padrão)."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateSharpeRatio() > 1 ? 'text-green-200' :
+                        calculateSharpeRatio() > 0 ? 'text-yellow-200' :
+                        'text-gray-200'
+                      }`}>
+                        {calculateSharpeRatio().toFixed(2)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          calculateSharpeRatio() > 1 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          calculateSharpeRatio() > 0 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {calculateSharpeRatio() > 1 ? 'Excellent' : calculateSharpeRatio() > 0 ? 'Good' : 'Poor'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Volatility */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className="w-12 h-12 bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-purple-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
+                  <PieChart className="w-6 h-6 text-purple-300 stroke-2 group-hover:text-purple-200 transition-colors duration-500" />
+                </div>
+              </div>
+              
+              <Card className="gradient-card gradient-card-purple border-2 border-purple-500 hover:border-purple-400 transition-all duration-300 hover:shadow-xl cursor-default">
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Volatility') }}
+                        />
+                        <Tooltip 
+                          content="Volatilidade das posições atuais - medida de variação dos retornos."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
+                        {formatSats(calculateVolatility(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Win Streak */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateWinStreak() > 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <CheckCircle className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateWinStreak() > 0 ? 'text-green-300 group-hover:text-green-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateWinStreak() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Win Streak') }}
+                        />
+                        <Tooltip 
+                          content="Número de trades vencedores consecutivos mais recentes."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateWinStreak() > 0 ? 'text-green-200' :
+                        'text-gray-200'
+                      }`}>
+                        {calculateWinStreak()}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          calculateWinStreak() > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {calculateWinStreak() > 0 ? 'Hot' : 'Cold'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Best Trade */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateBestTrade() > 0 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateBestTrade() > 0 ? 'text-yellow-300 group-hover:text-yellow-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateBestTrade() > 0 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Best Trade') }}
+                        />
+                        <Tooltip 
+                          content="Maior lucro obtido em um único trade fechado."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateBestTrade() > 0 ? 'text-yellow-200' :
+                        'text-gray-200'
+                      }`}>
+                        {formatSats(calculateBestTrade(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          calculateBestTrade() > 0 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {calculateBestTrade() > 0 ? 'Record' : 'None'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Risk/Reward Ratio */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateRiskRewardRatio() > 1 ? 'bg-blue-600/20 border-blue-500/30 group-hover:shadow-blue-500/30' :
+                  calculateRiskRewardRatio() > 0 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <BarChart3 className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateRiskRewardRatio() > 1 ? 'text-blue-300 group-hover:text-blue-200' :
+                    calculateRiskRewardRatio() > 0 ? 'text-yellow-300 group-hover:text-yellow-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateRiskRewardRatio() > 1 ? 'gradient-card-blue border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30' :
+                calculateRiskRewardRatio() > 0 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Risk/Reward') }}
+                        />
+                        <Tooltip 
+                          content="Relação risco/retorno - eficiência da estratégia (ganho médio / perda média)."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateRiskRewardRatio() > 1 ? 'text-blue-200' :
+                        calculateRiskRewardRatio() > 0 ? 'text-yellow-200' :
+                        'text-gray-200'
+                      }`}>
+                        {calculateRiskRewardRatio().toFixed(2)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          calculateRiskRewardRatio() > 1 ? 'border-blue-400/60 text-blue-200 bg-blue-600/20' :
+                          calculateRiskRewardRatio() > 0 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {calculateRiskRewardRatio() > 1 ? 'Good' : calculateRiskRewardRatio() > 0 ? 'Fair' : 'Poor'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
+              </Card>
+            </div>
+
+            {/* Trading Frequency */}
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  calculateTradingFrequency() > 1 ? 'bg-purple-600/20 border-purple-500/30 group-hover:shadow-purple-500/30' :
+                  calculateTradingFrequency() > 0 ? 'bg-blue-600/20 border-blue-500/30 group-hover:shadow-blue-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <Activity className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    calculateTradingFrequency() > 1 ? 'text-purple-300 group-hover:text-purple-200' :
+                    calculateTradingFrequency() > 0 ? 'text-blue-300 group-hover:text-blue-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
+                </div>
+              </div>
+              
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                calculateTradingFrequency() > 1 ? 'gradient-card-purple border-purple-500 hover:border-purple-400 hover:shadow-purple-500/30' :
+                calculateTradingFrequency() > 0 ? 'gradient-card-blue border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
+                <div className="card-content">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Trading Frequency') }}
+                        />
+                        <Tooltip 
+                          content="Número de trades por dia nos últimos 30 dias - indica estilo de trading."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className={`${getGlobalDynamicSize().textSize} ${
+                        calculateTradingFrequency() > 1 ? 'text-purple-200' :
+                        calculateTradingFrequency() > 0 ? 'text-blue-200' :
+                        'text-gray-200'
+                      }`}>
+                        {calculateTradingFrequency().toFixed(1)}/day
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-label-sm px-2 py-1 ${
+                          calculateTradingFrequency() > 1 ? 'border-purple-400/60 text-purple-200 bg-purple-600/20' :
+                          calculateTradingFrequency() > 0 ? 'border-blue-400/60 text-blue-200 bg-blue-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
+                      >
+                        {calculateTradingFrequency() > 1 ? 'Scalper' : calculateTradingFrequency() > 0 ? 'Active' : 'Inactive'}
+                      </Badge>
                     </div>
                   </div>
                 </div>

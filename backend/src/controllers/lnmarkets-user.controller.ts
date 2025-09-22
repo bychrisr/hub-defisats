@@ -279,7 +279,23 @@ export class LNMarketsUserController {
             estimated_balance: 0,
             total_invested: 0,
             positions_count: 0,
-            trades_count: 0
+            trades_count: 0,
+            // Novos campos com valores padrão para admin
+            success_rate: 0,
+            winning_trades: 0,
+            lost_trades: 0,
+            total_trades: 0,
+            active_positions: 0,
+            average_pnl: 0,
+            win_rate: 0,
+            max_drawdown: 0,
+            sharpe_ratio: 0,
+            volatility: 0,
+            // 4 novas métricas
+            win_streak: 0,
+            best_trade: 0,
+            risk_reward_ratio: 0,
+            trading_frequency: 0
           }
         });
       }
@@ -329,6 +345,7 @@ export class LNMarketsUserController {
       let totalInvested = 0; // Total investido = margem inicial de TODAS as posições
       
       if (Array.isArray(positions)) {
+        console.log('🔍 USER CONTROLLER - Processing positions for margin calculation...');
         for (const position of positions) {
           // Margem inicial (entry_margin ou margin)
           const margin = position.entry_margin || position.margin || 0;
@@ -347,33 +364,64 @@ export class LNMarketsUserController {
           console.log(`🔍 Position ${position.id}:`, {
             margin,
             pnl,
-            fees: openingFee + closingFee + carryFees
+            fees: openingFee + closingFee + carryFees,
+            entry_margin: position.entry_margin,
+            margin_field: position.margin,
+            status: position.status
           });
         }
+        console.log('✅ USER CONTROLLER - Total margin calculated from positions:', totalMargin);
+      } else {
+        console.log('⚠️ USER CONTROLLER - No positions array or positions is not an array:', positions);
       }
       
-      // 4. Calcular Total Investido 
-      if (Array.isArray(allTrades) && allTrades.length > 0) {
-        // Se conseguiu buscar trades históricos, usar todos
-        for (const trade of allTrades) {
-          const tradeMargin = trade.entry_margin || trade.margin || 0;
-          totalInvested += tradeMargin;
-          
-          console.log(`🔍 Trade ${trade.id}:`, {
-            status: trade.status,
-            margin: tradeMargin,
-            side: trade.side,
-            quantity: trade.quantity
-          });
+      // 4. Calcular Total Investido - Soma de todas as margens iniciais (abertas + fechadas)
+      console.log('🔍 USER CONTROLLER - Calculating Total Investido...');
+      console.log('🔍 USER CONTROLLER - Positions data:', {
+        isArray: Array.isArray(positions),
+        length: Array.isArray(positions) ? positions.length : 0,
+        sample: Array.isArray(positions) && positions.length > 0 ? positions[0] : null
+      });
+      
+      // Primeiro, somar margens das posições abertas
+      if (Array.isArray(positions) && positions.length > 0) {
+        for (const position of positions) {
+          const margin = position.entry_margin || position.margin || 0;
+          totalInvested += margin;
+          console.log(`🔍 Open Position ${position.id}: margin = ${margin} (entry_margin: ${position.entry_margin}, margin: ${position.margin})`);
         }
       } else {
-        // Se não conseguiu buscar trades, usar apenas posições abertas como base
-        console.log('⚠️ USER CONTROLLER - Using open positions as proxy for Total Investido');
-        totalInvested = totalMargin; // Usar margem das posições abertas como estimativa
+        console.log('⚠️ USER CONTROLLER - No open positions found for Total Investido calculation');
       }
       
-      console.log('📊 Total Investido Calculation:', {
-        totalTradesAnalyzed: Array.isArray(allTrades) ? allTrades.length : 0,
+      // Depois, somar margens das posições fechadas (trades)
+      console.log('🔍 USER CONTROLLER - All trades data:', {
+        isArray: Array.isArray(allTrades),
+        length: Array.isArray(allTrades) ? allTrades.length : 0,
+        sample: Array.isArray(allTrades) && allTrades.length > 0 ? allTrades[0] : null
+      });
+      
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        let closedTradesCount = 0;
+        for (const trade of allTrades) {
+          // Só somar se NÃO for uma posição running (ou seja, todas as fechadas)
+          if (trade.status !== 'running') {
+            const margin = trade.entry_margin || trade.margin || 0;
+            totalInvested += margin;
+            closedTradesCount++;
+            console.log(`🔍 Closed Trade ${trade.id} (status: ${trade.status}): margin = ${margin} (entry_margin: ${trade.entry_margin}, margin: ${trade.margin})`);
+          }
+        }
+        console.log(`✅ USER CONTROLLER - Processed ${closedTradesCount} closed trades for Total Investido`);
+      } else {
+        console.log('⚠️ USER CONTROLLER - No closed trades found for Total Investido calculation');
+      }
+      
+      console.log('✅ USER CONTROLLER - Total Investido calculated:', totalInvested);
+      
+      console.log('📊 Total Investido Final:', {
+        openPositions: Array.isArray(positions) ? positions.length : 0,
+        closedTrades: Array.isArray(allTrades) ? allTrades.filter(t => t.status !== 'running').length : 0,
         totalInvested
       });
       
@@ -410,9 +458,9 @@ export class LNMarketsUserController {
           
           // 3. Funding estimado para 24h (3 eventos)
           // (quantity / indexPrice) * funding_rate * 100_000_000 * 3
+          let funding24h = 0;
           if (quantity > 0 && indexPrice > 0) {
             const fundingPorEvento = (quantity / indexPrice) * fundingRate * 100_000_000;
-            let funding24h = 0;
             
             if (position.side === 'b') { // Long
               funding24h = fundingRate > 0 ? 3 * Math.abs(fundingPorEvento) : 3 * (-Math.abs(fundingPorEvento));
@@ -432,7 +480,7 @@ export class LNMarketsUserController {
             maintenanceMargin,
             saldoPosicao,
             taxaFechamento: quantity > 0 && lastPrice > 0 ? Math.round((quantity / lastPrice) * feeRate * 100_000_000) : 0,
-            funding24h: quantity > 0 && indexPrice > 0 ? Math.round(funding24h) : 0
+            funding24h: Math.round(funding24h)
           });
         }
       }
@@ -452,6 +500,183 @@ export class LNMarketsUserController {
         lastPrice
       });
       
+      // 6. Calcular métricas adicionais para os novos cards
+      console.log('🔍 USER CONTROLLER - Calculating additional metrics...');
+      
+      // Success Rate - Taxa de sucesso dos trades fechados
+      let successRate = 0;
+      let winningTrades = 0;
+      let lostTrades = 0;
+      let totalTrades = 0;
+      
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const closedTrades = allTrades.filter(trade => trade.status !== 'running');
+        totalTrades = allTrades.length;
+        
+        if (closedTrades.length > 0) {
+          winningTrades = closedTrades.filter(trade => (trade.pnl || trade.pl || 0) > 0).length;
+          lostTrades = closedTrades.filter(trade => (trade.pnl || trade.pl || 0) < 0).length;
+          successRate = (winningTrades / closedTrades.length) * 100;
+        }
+        
+        console.log('📊 Success Rate Calculation:', {
+          totalTrades,
+          closedTrades: closedTrades.length,
+          winningTrades,
+          lostTrades,
+          successRate: successRate.toFixed(2)
+        });
+      }
+      
+      // Active Positions - Posições ativas (running)
+      const activePositions = Array.isArray(positions) ? positions.filter(pos => pos.status === 'running').length : 0;
+      
+      // Average PnL - PnL médio por trade fechado
+      let averagePnL = 0;
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const closedTrades = allTrades.filter(trade => trade.status !== 'running');
+        if (closedTrades.length > 0) {
+          const totalPnLClosed = closedTrades.reduce((sum, trade) => sum + (trade.pnl || trade.pl || 0), 0);
+          averagePnL = totalPnLClosed / closedTrades.length;
+        }
+      }
+      
+      // Win Rate - Taxa de trades vencedores (mesmo que success rate)
+      const winRate = successRate;
+      
+      // Max Drawdown - Maior perda consecutiva (simplificado)
+      let maxDrawdown = 0;
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const closedTrades = allTrades.filter(trade => trade.status !== 'running');
+        if (closedTrades.length > 0) {
+          let currentDrawdown = 0;
+          let maxDrawdownSoFar = 0;
+          
+          for (const trade of closedTrades) {
+            const pnl = trade.pnl || trade.pl || 0;
+            if (pnl < 0) {
+              currentDrawdown += Math.abs(pnl);
+              maxDrawdownSoFar = Math.max(maxDrawdownSoFar, currentDrawdown);
+            } else {
+              currentDrawdown = 0;
+            }
+          }
+          
+          maxDrawdown = maxDrawdownSoFar;
+        }
+      }
+      
+      // Sharpe Ratio - Índice de Sharpe (simplificado)
+      let sharpeRatio = 0;
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const closedTrades = allTrades.filter(trade => trade.status !== 'running');
+        if (closedTrades.length > 1) {
+          const pnls = closedTrades.map(trade => trade.pnl || trade.pl || 0);
+          const mean = pnls.reduce((sum, pnl) => sum + pnl, 0) / pnls.length;
+          const variance = pnls.reduce((sum, pnl) => sum + Math.pow(pnl - mean, 2), 0) / pnls.length;
+          const stdDev = Math.sqrt(variance);
+          
+          if (stdDev > 0) {
+            sharpeRatio = mean / stdDev;
+          }
+        }
+      }
+      
+      // Volatility - Volatilidade das posições (simplificada)
+      let volatility = 0;
+      if (Array.isArray(positions) && positions.length > 0) {
+        const pnls = positions.map(pos => pos.pl || 0);
+        if (pnls.length > 1) {
+          const mean = pnls.reduce((sum, pnl) => sum + pnl, 0) / pnls.length;
+          const variance = pnls.reduce((sum, pnl) => sum + Math.pow(pnl - mean, 2), 0) / pnls.length;
+          volatility = Math.sqrt(variance);
+        }
+      }
+      
+      // 7. Calcular as 4 novas métricas para os cards adicionais
+      console.log('🔍 USER CONTROLLER - Calculating 4 new metrics...');
+      
+      // Win Streak - Sequência de vitórias consecutivas mais recentes
+      let winStreak = 0;
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const closedTrades = allTrades.filter(trade => trade.status !== 'running');
+        // Ordenar por data de fechamento (mais recente primeiro)
+        const sortedTrades = closedTrades.sort((a, b) => {
+          const dateA = new Date(a.closing_date || a.created_at || 0);
+          const dateB = new Date(b.closing_date || b.created_at || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        // Contar vitórias consecutivas a partir do mais recente
+        for (const trade of sortedTrades) {
+          const pnl = trade.pnl || trade.pl || 0;
+          if (pnl > 0) {
+            winStreak++;
+          } else {
+            break; // Para na primeira derrota
+          }
+        }
+      }
+      
+      // Best Trade - Maior lucro em um único trade
+      let bestTrade = 0;
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const closedTrades = allTrades.filter(trade => trade.status !== 'running');
+        if (closedTrades.length > 0) {
+          const maxPnL = Math.max(...closedTrades.map(trade => trade.pnl || trade.pl || 0));
+          bestTrade = Math.max(0, maxPnL); // Só considerar lucros positivos
+        }
+      }
+      
+      // Risk/Reward Ratio - Relação risco/retorno
+      let riskRewardRatio = 0;
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const closedTrades = allTrades.filter(trade => trade.status !== 'running');
+        if (closedTrades.length > 0) {
+          const pnls = closedTrades.map(trade => trade.pnl || trade.pl || 0);
+          const positivePnls = pnls.filter(pnl => pnl > 0);
+          const negativePnls = pnls.filter(pnl => pnl < 0);
+          
+          if (positivePnls.length > 0 && negativePnls.length > 0) {
+            const avgGain = positivePnls.reduce((sum, pnl) => sum + pnl, 0) / positivePnls.length;
+            const avgLoss = Math.abs(negativePnls.reduce((sum, pnl) => sum + pnl, 0) / negativePnls.length);
+            riskRewardRatio = avgGain / avgLoss;
+          }
+        }
+      }
+      
+      // Trading Frequency - Frequência de trading (trades por dia nos últimos 30 dias)
+      let tradingFrequency = 0;
+      if (Array.isArray(allTrades) && allTrades.length > 0) {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const recentTrades = allTrades.filter(trade => {
+          const tradeDate = new Date(trade.created_at || trade.opening_date || 0);
+          return tradeDate >= thirtyDaysAgo;
+        });
+        
+        tradingFrequency = recentTrades.length / 30; // Trades por dia
+      }
+      
+      console.log('📊 Additional Metrics Calculated:', {
+        successRate: successRate.toFixed(2),
+        winningTrades,
+        lostTrades,
+        totalTrades,
+        activePositions,
+        averagePnL: averagePnL.toFixed(2),
+        winRate: winRate.toFixed(2),
+        maxDrawdown: maxDrawdown.toFixed(2),
+        sharpeRatio: sharpeRatio.toFixed(2),
+        volatility: volatility.toFixed(2),
+        // Novas métricas
+        winStreak,
+        bestTrade: bestTrade.toFixed(2),
+        riskRewardRatio: riskRewardRatio.toFixed(2),
+        tradingFrequency: tradingFrequency.toFixed(2)
+      });
+
       const result = {
         wallet_balance: walletBalance,
         total_margin: totalMargin,
@@ -460,8 +685,44 @@ export class LNMarketsUserController {
         estimated_balance: estimatedBalance,
         total_invested: totalInvested, // Margem inicial de TODAS as posições (abertas + fechadas)
         positions_count: Array.isArray(positions) ? positions.length : 0,
-        trades_count: Array.isArray(allTrades) ? allTrades.length : 0
+        trades_count: Array.isArray(allTrades) ? allTrades.length : 0,
+        // Novos campos para os cards adicionais
+        success_rate: successRate,
+        winning_trades: winningTrades,
+        lost_trades: lostTrades,
+        total_trades: totalTrades,
+        active_positions: activePositions,
+        average_pnl: averagePnL,
+        win_rate: winRate,
+        max_drawdown: maxDrawdown,
+        sharpe_ratio: sharpeRatio,
+        volatility: volatility,
+        // 4 novas métricas
+        win_streak: winStreak,
+        best_trade: bestTrade,
+        risk_reward_ratio: riskRewardRatio,
+        trading_frequency: tradingFrequency
       };
+
+      console.log('✅ USER CONTROLLER - Estimated balance calculated successfully');
+      console.log('📊 USER CONTROLLER - Final response data:', {
+        wallet_balance: walletBalance,
+        total_margin: totalMargin,
+        total_pnl: totalPnL,
+        total_fees: totalFees,
+        estimated_balance: estimatedBalance,
+        total_invested: totalInvested,
+        positions_count: Array.isArray(positions) ? positions.length : 0,
+        trades_count: Array.isArray(allTrades) ? allTrades.length : 0,
+        debug: {
+          allTradesLength: Array.isArray(allTrades) ? allTrades.length : 'Not an array',
+          totalMarginFromPositions: totalMargin,
+          totalInvestedCalculation: totalInvested,
+          walletBalanceValue: walletBalance,
+          hasTrades: Array.isArray(allTrades) && allTrades.length > 0,
+          hasPositions: Array.isArray(positions) && positions.length > 0
+        }
+      });
 
       return reply.send({
         success: true,
@@ -491,7 +752,23 @@ export class LNMarketsUserController {
           estimated_balance: 0,
           total_invested: 0,
           positions_count: 0,
-          trades_count: 0
+          trades_count: 0,
+          // Novos campos com valores padrão
+          success_rate: 0,
+          winning_trades: 0,
+          lost_trades: 0,
+          total_trades: 0,
+          active_positions: 0,
+          average_pnl: 0,
+          win_rate: 0,
+          max_drawdown: 0,
+          sharpe_ratio: 0,
+          volatility: 0,
+          // 4 novas métricas
+          win_streak: 0,
+          best_trade: 0,
+          risk_reward_ratio: 0,
+          trading_frequency: 0
         },
         message: 'Unable to calculate estimated balance. Please check your API credentials.',
         error: 'CALCULATION_FAILED'

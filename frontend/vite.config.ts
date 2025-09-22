@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://backend:3010', // ✅ Usar nome do serviço Docker e porta interna
+        target: 'http://backend:3010', // ✅ Conectar no serviço backend dentro da rede Docker
         changeOrigin: true,
         secure: false,
         // rewrite: (path) => path.replace(/^\/api/, ''), // ❌ REMOVIDO: backend espera prefixo /api

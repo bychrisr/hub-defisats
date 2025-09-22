@@ -197,7 +197,7 @@ calculateEstimatedBalance(
 
 ### 🧮 Cálculo:
 ```ts
-totalInvested = soma de `entry_margin` (se existir) OU `margin` (fallback) de TODAS as posições (running + closed)
+totalInvested = soma de `entry_margin` (se existir) OU `margin` (fallback) de TODAS as posições fechadas (status !== 'running')
 ```
 
 > ✅ Alinhado com a documentação: “Trade Margin is the Bitcoin collateral deposited to secure a derivatives position.”
@@ -206,15 +206,19 @@ totalInvested = soma de `entry_margin` (se existir) OU `margin` (fallback) de TO
 ```ts
 calculateTotalInvested(allTrades: LnMarketsTrade[]): number {
   return allTrades.reduce((sum, trade) => {
-    return sum + (trade.entry_margin !== null && trade.entry_margin !== undefined
-      ? trade.entry_margin
-      : trade.margin);
+    // Só somar se NÃO for uma posição running (ou seja, todas as fechadas)
+    if (trade.status !== 'running') {
+      return sum + (trade.entry_margin !== null && trade.entry_margin !== undefined
+        ? trade.entry_margin
+        : trade.margin);
+    }
+    return sum;
   }, 0);
 }
 ```
 
 ### 💡 Tooltip:
-> “Soma de todas as margens iniciais que você usou para abrir suas posições (abertas e fechadas).”
+> "Soma de todas as margens iniciais que você usou para abrir posições que já foram fechadas."
 
 ---
 

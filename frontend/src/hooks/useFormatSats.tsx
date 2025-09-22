@@ -43,15 +43,45 @@ export const useFormatSats = () => {
       return formattedNumber;
     }
 
+    console.log('🔍 SatsIcon Debug:', {
+      value,
+      formattedNumber,
+      size,
+      iconVariant,
+      variant
+    });
+
     return (
       <span className="flex items-center gap-1">
         {formattedNumber}
-        <SatsIcon size={size} variant="default" className="sats-icon-mobile" />
+        <SatsIcon size={size} variant={iconVariant} />
       </span>
     );
   };
 
-  return { formatSats };
+  // Função para calcular tamanho dinâmico do texto e ícone baseado no valor
+  const getDynamicSize = (value: number) => {
+    const absValue = Math.abs(value);
+    
+    // Se o valor for zero, usar tamanho padrão
+    if (absValue === 0) {
+      return { textSize: 'text-number-lg', iconSize: 24 };
+    }
+    
+    const digits = Math.floor(Math.log10(absValue)) + 1;
+    
+    if (digits <= 3) {
+      return { textSize: 'text-number-lg', iconSize: 24 };
+    } else if (digits <= 6) {
+      return { textSize: 'text-number-md', iconSize: 20 };
+    } else if (digits <= 9) {
+      return { textSize: 'text-number-sm', iconSize: 16 };
+    } else {
+      return { textSize: 'text-number-xs', iconSize: 12 };
+    }
+  };
+
+  return { formatSats, getDynamicSize };
 };
 
 // Hook para formatação simples (apenas texto)
