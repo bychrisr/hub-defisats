@@ -10,6 +10,7 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import { AccountProvider } from '@/contexts/AccountContext';
 import { VersionProvider } from '@/contexts/VersionContext';
 import UpdateNotification from '@/components/UpdateNotification';
+import RouteRedirectMiddleware from '@/components/RouteRedirectMiddleware';
 import { Layout } from '@/components/layout/Layout';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -54,6 +55,7 @@ import AutomationManagement from '@/pages/admin/AutomationManagement';
 import NotificationManagement from '@/pages/admin/NotificationManagement';
 import SystemReports from '@/pages/admin/SystemReports';
 import AuditLogs from '@/pages/admin/AuditLogs';
+import RouteRedirects from '@/pages/admin/RouteRedirects';
 import TestPermissions from '@/pages/TestPermissions';
 import DesignSystem from '@/pages/DesignSystem';
 
@@ -237,9 +239,10 @@ const App = () => {
                   v7_relativeSplatPath: true,
                 }}
               >
-                <GlobalPageTitle />
-                <GlobalDynamicFavicon />
-                <Routes>
+                <RouteRedirectMiddleware>
+                  <GlobalPageTitle />
+                  <GlobalDynamicFavicon />
+                  <Routes>
                   <Route path="/" element={
                     <PublicRoute>
                       <Landing />
@@ -422,6 +425,7 @@ const App = () => {
               <Route path="notification-management" element={<NotificationManagement />} />
               <Route path="system-reports" element={<SystemReports />} />
               <Route path="audit-logs" element={<AuditLogs />} />
+              <Route path="route-redirects" element={<RouteRedirects />} />
               <Route path="menus" element={<AdminMenuManagement />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />
@@ -434,6 +438,7 @@ const App = () => {
             </Route>
                   <Route path="*" element={<NotFound />} />
           </Routes>
+                </RouteRedirectMiddleware>
         </BrowserRouter>
                 </TooltipProvider>
               </AccountProvider>

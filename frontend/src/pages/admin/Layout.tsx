@@ -29,7 +29,8 @@ import {
   Cpu,
   Bot,
   BarChart2,
-  Bell
+  Bell,
+  ArrowRightLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -44,6 +45,7 @@ const navigation = [
   { name: 'Notification Management', href: '/admin/notification-management', icon: Bell },
   { name: 'System Reports', href: '/admin/system-reports', icon: FileText },
   { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
+  { name: 'Route Redirects', href: '/admin/route-redirects', icon: ArrowRightLeft },
   { name: 'Plans', href: '/admin/plans', icon: CreditCard },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Coupons', href: '/admin/coupons', icon: Gift },

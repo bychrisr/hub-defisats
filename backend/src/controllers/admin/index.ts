@@ -8,4 +8,12 @@ export { getAutomationManagement } from './automation-management.controller';
 export { getNotificationManagement } from './notification-management.controller';
 export { getSystemReports } from './system-reports.controller';
 export { getAuditLogs } from './audit-logs.controller';
+export {
+  getRouteRedirects,
+  createRouteRedirect,
+  updateRouteRedirect,
+  deleteRouteRedirect,
+  getRouteRedirectById,
+  toggleRouteRedirect
+} from './route-redirects.controller';
 

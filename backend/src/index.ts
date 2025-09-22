@@ -37,6 +37,8 @@ import { healthRoutes } from './routes/health.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
 import { versionRoutes } from './routes/version.routes';
+import { routeRedirectsRoutes } from './routes/route-redirects.routes';
+import { routeRedirectRoutes } from './routes/route-redirect.routes';
 import { authMiddleware } from './middleware/auth.middleware';
 import { monitoring } from './services/monitoring.service';
 import { metrics } from './utils/metrics';
@@ -699,6 +701,14 @@ async function registerRoutes() {
   // Version routes (public)
   await fastify.register(versionRoutes, { prefix: '/api' });
   console.log('✅ Version routes registered');
+
+  // Route redirects admin routes
+  await fastify.register(routeRedirectsRoutes, { prefix: '/api/admin/route-redirects' });
+  console.log('✅ Route redirects admin routes registered');
+
+  // Route redirects public routes
+  await fastify.register(routeRedirectRoutes, { prefix: '/api/redirects' });
+  console.log('✅ Route redirects public routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler
