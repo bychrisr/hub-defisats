@@ -6,6 +6,63 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-09-22 - Sistema de Verificação de Versão 🔄 **VERSION CHECK**
+
+### ✨ **Sistema de Verificação de Versão Implementado**
+- ✅ **Endpoint /api/version**: Retorna informações da versão atual da aplicação
+- ✅ **VersionService Frontend**: Verificação periódica automática a cada 5 minutos
+- ✅ **VersionContext React**: Gerenciamento de estado global da versão
+- ✅ **UpdateNotification Component**: Popup elegante e responsivo para notificação
+- ✅ **Integração Automática**: Sistema ativo em toda a aplicação
+
+### 🔧 **Backend (Node.js + Fastify + TypeScript)**
+- ✅ **VersionController**: Lê package.json e build-info.json para informações de versão
+- ✅ **VersionRoutes**: Endpoint público com cache de 5 minutos e ETag
+- ✅ **Build Info System**: Arquivo build-info.json para controle de versão
+- ✅ **Error Handling**: Tratamento robusto de erros com logs detalhados
+
+### 🎨 **Frontend (React + TypeScript)**
+- ✅ **VersionService**: Serviço singleton para verificação de versão
+- ✅ **VersionContext**: Contexto React com hooks customizados
+- ✅ **UpdateNotification**: Componente de popup com design moderno
+- ✅ **Auto-Integration**: Integração automática no App.tsx
+
+### 🎯 **Funcionalidades**
+- ✅ **Verificação Automática**: A cada 5 minutos quando usuário logado
+- ✅ **Comparação Inteligente**: Semantic versioning para detectar atualizações
+- ✅ **Cache Local**: Evita notificações duplicadas
+- ✅ **Persistência**: Notificações já vistas são lembradas
+- ✅ **UX Otimizada**: Interface não intrusiva e elegante
+
+### 📦 **Arquivos Criados/Modificados**
+- `backend/src/controllers/version.controller.ts` - Controller de versão
+- `backend/src/routes/version.routes.ts` - Rotas de versão
+- `backend/build-info.json` - Informações de build e versão
+- `frontend/src/services/version.service.ts` - Serviço de verificação
+- `frontend/src/contexts/VersionContext.tsx` - Contexto React
+- `frontend/src/components/UpdateNotification.tsx` - Componente de popup
+- `frontend/src/App.tsx` - Integração do sistema
+
+### 🧪 **Testes e Validação**
+- ✅ **Simulação de Versão**: Testado com versão 1.0.0 → 1.3.0
+- ✅ **Endpoint Funcionando**: Retorna versão correta (1.3.0)
+- ✅ **Features Detectadas**: Novas funcionalidades listadas corretamente
+- ✅ **Sistema Pronto**: Funcionando perfeitamente em produção
+
+### 🚀 **Deploy e Produção**
+- ✅ **Zero Configuração**: Sistema funciona automaticamente
+- ✅ **Performance Otimizada**: Cache e verificação eficiente
+- ✅ **Monitoramento**: Logs detalhados para debug
+- ✅ **Documentação Completa**: Guia técnico completo
+
+### 📚 **Documentação**
+- ✅ **VERSION_CHECK_SYSTEM.md**: Documentação técnica completa
+- ✅ **API Reference**: Documentação do endpoint /api/version
+- ✅ **Troubleshooting**: Guia de resolução de problemas
+- ✅ **Exemplos de Uso**: Código de exemplo e testes
+
+---
+
 ## [1.2.0] - 2025-01-22 - Painel Administrativo Completo 🎯 **ADMIN PANEL**
 
 ### ✨ **Painel Administrativo Implementado**
