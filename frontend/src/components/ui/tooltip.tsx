@@ -51,7 +51,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
     switch (position) {
       case 'top':
-        top = -tooltipRect.height - 8;
+        top = -tooltipRect.height - 12;
         left = (triggerRect.width - tooltipRect.width) / 2;
         break;
       case 'bottom':
@@ -100,7 +100,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     
     switch (position) {
       case 'top':
-        return `${baseClasses} -bottom-1 left-1/2 -translate-x-1/2 bg-popover border-r border-b border-border`;
+        return `${baseClasses} -bottom-1 left-1/2 -translate-x-1/2 bg-gray-900 border-r border-b border-gray-700`;
       case 'bottom':
         return `${baseClasses} -top-1 left-1/2 -translate-x-1/2 bg-popover border-l border-t border-border`;
       case 'left':
@@ -127,10 +127,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
         <div
           ref={tooltipRef}
           className={cn(
-            'absolute z-[9999] px-3 py-2 text-sm text-popover-foreground bg-popover border border-border rounded-lg shadow-lg',
+            'absolute z-[9999] px-4 py-3 text-sm text-white bg-gray-900 border border-gray-700 rounded-lg shadow-xl',
             'animate-in fade-in-0 zoom-in-95 duration-200',
-            'backdrop-blur-sm bg-popover/95',
-            'min-w-56 max-w-[28rem] whitespace-normal break-words'
+            'backdrop-blur-sm bg-gray-900/95',
+            'min-w-64 max-w-[32rem] whitespace-normal break-words'
           )}
           style={{
             top: tooltipPosition.top,

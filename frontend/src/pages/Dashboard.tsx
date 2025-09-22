@@ -227,14 +227,15 @@ export default function Dashboard() {
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                        <CardTitle 
-                          className="text-h3 text-vibrant"
-                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PnL') }}
-                        />
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PnL') }}
+                      />
                         <Tooltip 
                           content="Profit and Loss total de todas as suas posições ativas. Mostra o lucro ou prejuízo real baseado nos preços atuais do mercado. Valores positivos em verde indicam lucro, valores negativos em vermelho indicam prejuízo."
                           position="top"
-                          delay={300}
+                          delay={200}
+                          className="z-50"
                         >
                           <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
@@ -530,7 +531,7 @@ export default function Dashboard() {
         </div>
 
         {/* History */}
-        <div className="space-y-4">
+          <div className="space-y-4">
           <h2 className="text-2xl font-bold text-vibrant">History</h2>
           <div className="grid grid-cols-5 gap-6">
             {/* Available Margin */}
@@ -930,8 +931,8 @@ export default function Dashboard() {
                       <CardTitle 
                         className="text-h3 text-vibrant"
                         dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Winning Trades') }}
-                      />
-                    </div>
+              />
+            </div>
                     
                     <div className="mb-3">
                       <div className="text-number-lg text-green-200">
@@ -942,7 +943,7 @@ export default function Dashboard() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
               </Card>
-            </div>
+          </div>
 
             {/* Lost Trades */}
             <div className="relative group">
