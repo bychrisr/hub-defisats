@@ -12,6 +12,7 @@ O Axisor é uma plataforma completa de automação de trading para LN Markets, c
 - **Mobile Navigation**: Menu mobile funcional com z-index otimizado
 - **Profile Page**: Layout consistente com tabs com efeito glow elegante
 - **Account Selector**: Sistema de seleção de múltiplas contas com design minimalista
+- **Image Upload System**: Sistema completo de upload com editor integrado, redimensionamento e crop
 - **Design System**: Documentação interna completa com Gradient Cards e Floating Icons
 
 ## 🏗️ Estrutura do Projeto
@@ -213,6 +214,7 @@ GET    /api/admin/security/dashboard            # Dashboard de segurança
 - **Charts**: Recharts + lightweight-charts
 - **Estado**: Zustand
 - **i18n**: react-i18next
+- **Image Processing**: Canvas API + Sharp (backend)
 
 ### Workers
 - **Margin Monitor**: Monitoramento contínuo de margem
@@ -220,6 +222,25 @@ GET    /api/admin/security/dashboard            # Dashboard de segurança
 - **Simulation Executor**: Simulações em tempo real
 - **Notification**: Sistema de notificações
 - **Payment Validator**: Validação de pagamentos
+
+## 📸 Sistema de Upload de Imagens
+
+### Funcionalidades
+- **Drag & Drop**: Interface intuitiva para upload
+- **Editor Integrado**: Zoom, rotação e crop manual
+- **Processamento Automático**: Redimensionamento para 400x400px
+- **Compressão Otimizada**: JPEG com 90% de qualidade
+- **Validação Robusta**: Tipos MIME e tamanho (max 5MB)
+- **Preview em Tempo Real**: Visualização instantânea
+
+### Tecnologias
+- **Frontend**: Canvas API + React hooks
+- **Backend**: @fastify/multipart + Sharp
+- **Armazenamento**: Sistema de arquivos local
+- **Segurança**: Validação de tipos + autenticação JWT
+
+### Documentação
+- 📄 [Sistema de Upload Completo](./IMAGE_UPLOAD_SYSTEM_DOCUMENTATION.md)
 
 ## 🔒 Segurança
 
