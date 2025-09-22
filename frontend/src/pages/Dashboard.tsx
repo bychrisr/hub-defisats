@@ -72,11 +72,53 @@ export default function Dashboard() {
   
   // Novos hooks para métricas da dashboard
   const positionsData = usePositionsMetrics();
+  const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente e positionsLoading
   const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
   const historicalData = useHistoricalData();
   const estimatedBalance = useEstimatedBalance();
-  const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente
   const { formatSats } = useFormatSats();
+  
+  // Estado de carregamento das posições
+  const positionsLoading = positionsContextData?.isLoading || false;
+  
+  // Função para quebrar títulos em duas linhas
+  const breakTitleIntoTwoLines = (title: string) => {
+    const words = title.split(' ');
+    if (words.length === 1) {
+      // Se só tem uma palavra, adiciona quebra no meio
+      const mid = Math.ceil(title.length / 2);
+      return `${title.slice(0, mid)}<br>${title.slice(mid)}`;
+    } else if (words.length === 2) {
+      // Se tem duas palavras, quebra entre elas
+      return `${words[0]}<br>${words[1]}`;
+    } else {
+      // Se tem mais de duas palavras, quebra no meio
+      const mid = Math.ceil(words.length / 2);
+      const firstLine = words.slice(0, mid).join(' ');
+      const secondLine = words.slice(mid).join(' ');
+      return `${firstLine}<br>${secondLine}`;
+    }
+  };
+
+  // Funções para determinar cores dinâmicas
+  const getPnLColor = (value: number) => {
+    if (positionsLoading) return 'neutral';
+    if (value > 0) return 'positive';
+    if (value < 0) return 'negative';
+    return 'neutral';
+  };
+  
+  const getProfitColor = (value: number) => {
+    if (positionsLoading) return 'neutral';
+    if (value > 0) return 'positive';
+    return 'neutral';
+  };
+  
+  const getTradesColor = (value: number) => {
+    if (positionsLoading) return 'neutral';
+    if (value > 0) return 'positive';
+    return 'neutral';
+  };
   
   // Dados históricos para cálculos
   const historicalMetrics = historicalData.data;
@@ -154,26 +196,49 @@ export default function Dashboard() {
           
           {/* Cards com degradês coloridos */}
           <div className="grid grid-cols-5 gap-6">
-            {/* Card PnL Total com degradê vermelho - NOVO DESIGN */}
+            {/* Card PnL Total com cores dinâmicas */}
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className="w-12 h-12 bg-red-600/20 backdrop-blur-sm border border-red-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-red-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
-                  <TrendingUp className="w-6 h-6 text-red-300 stroke-2 group-hover:text-red-200 transition-colors duration-500" />
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
+                  getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
+                    getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-300 group-hover:text-green-200' :
+                    getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-300 group-hover:text-red-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
                 </div>
               </div>
               
-              <Card className="gradient-card gradient-card-red border-2 border-red-500 hover:border-red-400 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30 cursor-default">
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
                 <div className="card-content">
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle className="text-h3 text-vibrant">Total PnL</CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PnL') }}
+                      />
                     </div>
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className="text-number-lg text-red-200">
+                      <div className={`text-number-lg ${
+                        positionsLoading ? 'text-gray-200' :
+                        getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-200' :
+                        getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-200' :
+                        'text-gray-200'
+                      }`}>
                         {formatSats(positionsData.totalPL || 0, { size: 24, variant: 'auto' })}
                       </div>
                     </div>
@@ -182,11 +247,21 @@ export default function Dashboard() {
                     <div className="flex items-center space-x-2">
                       <Badge 
                         variant="outline" 
-                        className="text-label-sm px-2 py-1 border-red-400/60 text-red-200 bg-red-600/20"
+                        className={`text-label-sm px-2 py-1 ${
+                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
+                          getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'border-red-400/60 text-red-200 bg-red-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
                       >
                         {positionsData.totalMargin > 0 ? `${((positionsData.totalPL || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '0.0%'}
                       </Badge>
-                      <span className="text-caption text-red-300/80">vs Margin</span>
+                      <span className={`text-caption ${
+                        positionsLoading ? 'text-gray-300/80' :
+                        getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-300/80' :
+                        getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-300/80' :
+                        'text-gray-300/80'
+                      }`}>vs Margin</span>
                     </div>
                   </div>
                 </div>
@@ -195,26 +270,45 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Card Estimated Profit com degradê verde - NOVO DESIGN */}
+            {/* Card Estimated Profit com cores dinâmicas */}
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className="w-12 h-12 bg-green-600/20 backdrop-blur-sm border border-green-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-green-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
-                  <TrendingUp className="w-6 h-6 text-green-300 stroke-2 group-hover:text-green-200 transition-colors duration-500" />
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
+                  getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
+                    getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-300 group-hover:text-green-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
                 </div>
               </div>
               
-              <Card className="gradient-card gradient-card-green border-2 border-green-500 hover:border-green-400 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 cursor-default">
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                'gradient-card-gray border-gray-500 hover:border-gray-400'
+              }`}>
                 <div className="card-content">
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle className="text-h3 text-vibrant">Estimated Profit</CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Profit') }}
+                      />
                     </div>
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className="text-number-lg text-green-200">
+                      <div className={`text-number-lg ${
+                        positionsLoading ? 'text-gray-200' :
+                        getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-200' :
+                        'text-gray-200'
+                      }`}>
                         {formatSats(positionsData.estimatedProfit || 0, { size: 24, variant: 'auto' })}
                       </div>
                     </div>
@@ -223,11 +317,19 @@ export default function Dashboard() {
                     <div className="flex items-center space-x-2">
                       <Badge 
                         variant="outline" 
-                        className="text-label-sm px-2 py-1 border-green-400/60 text-green-200 bg-green-600/20"
+                        className={`text-label-sm px-2 py-1 ${
+                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
+                          getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          'border-gray-400/60 text-gray-200 bg-gray-600/20'
+                        }`}
                       >
                         {positionsData.totalMargin > 0 ? `+${((positionsData.estimatedProfit || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '+0.0%'}
                       </Badge>
-                      <span className="text-caption text-green-300/80">vs Margin</span>
+                      <span className={`text-caption ${
+                        positionsLoading ? 'text-gray-300/80' :
+                        getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-300/80' :
+                        'text-gray-300/80'
+                      }`}>vs Margin</span>
                     </div>
                   </div>
                 </div>
@@ -236,26 +338,41 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Card Active Trades com degradê azul - NOVO DESIGN */}
+            {/* Card Active Trades com cores dinâmicas */}
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className="w-12 h-12 bg-blue-600/20 backdrop-blur-sm border border-blue-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-blue-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
-                  <Activity className="w-6 h-6 text-blue-300 stroke-2 group-hover:text-blue-200 transition-colors duration-500" />
+                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
+                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
+                  getTradesColor(positionsData.positionCount || 0) === 'positive' ? 'bg-blue-600/20 border-blue-500/30 group-hover:shadow-blue-500/30' :
+                  'bg-gray-600/20 border-gray-500/30'
+                }`}>
+                  <Activity className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
+                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
+                    getTradesColor(positionsData.positionCount || 0) === 'positive' ? 'text-blue-300 group-hover:text-blue-200' :
+                    'text-gray-300 group-hover:text-gray-200'
+                  }`} />
                 </div>
               </div>
               
-              <Card className="gradient-card gradient-card-blue border-2 border-blue-500 hover:border-blue-400 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 cursor-default">
+              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle className="text-h3 text-vibrant">Active Trades</CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Active Trades') }}
+                      />
                     </div>
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className="text-number-lg text-blue-200">
+                      <div className={`text-number-lg ${
+                        positionsLoading ? 'text-gray-200' :
+                        getTradesColor(positionsData.positionCount || 0) === 'positive' ? 'text-blue-200' :
+                        'text-gray-200'
+                      }`}>
                         {(() => {
                           // Debug detalhado
                           console.log('🔍 ACTIVE TRADES - DEBUG COMPLETO:', {
@@ -328,12 +445,15 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <Card className="gradient-card gradient-card-purple border-2 border-purple-500 hover:border-purple-400 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/30 cursor-default">
+              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle className="text-h3 text-vibrant">Total Margin</CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Margin') }}
+                      />
                     </div>
                     
                     {/* Valor principal */}
@@ -359,12 +479,18 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <Card className="gradient-card gradient-card-orange border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/30 cursor-default">
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                'gradient-card-orange border-orange-500 hover:border-orange-400 hover:shadow-orange-500/30'
+              }`}>
                 <div className="card-content">
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle className="text-h3 text-vibrant">Estimated Fees</CardTitle>
+                      <CardTitle 
+                        className="text-h3 text-vibrant"
+                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Fees') }}
+                      />
                     </div>
                     
                     {/* Valor principal */}
@@ -393,70 +519,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Active Positions */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-vibrant">Active Positions</h2>
-          
-          {/* Cards com altura uniforme - Responsivo */}
-          <div className="positions-active-cards">
-            <PnLCard
-              title="PnL Total"
-              pnl={positionsData.totalPL || 0}
-              percentage={positionsData.totalMargin > 0 ? ((positionsData.totalPL || 0) / positionsData.totalMargin) * 100 : 0}
-              titleSize="lg"
-              cardKey="total_pnl"
-              cursor="default"
-              icon={TrendingUp}
-              floatingIcon={true}
-            />
-            
-            <PnLCard
-              title="Profit Estimado"
-              pnl={positionsData.estimatedProfit || 0}
-              titleSize="lg"
-              cardKey="estimated_profit"
-              cursor="default"
-              icon={Target}
-              floatingIcon={true}
-            />
-            
-            <PnLCard
-              title="Trades em execução"
-              pnl={positionsData.positionCount || 0}
-              titleSize="lg"
-              cardKey="positions_count"
-              cursor="default"
-              icon={Activity}
-              variant="neutral"
-              showSatsIcon={false}
-              floatingIcon={true}
-            />
-            
-            <PnLCard
-              title="Margem Total"
-              pnl={positionsData.totalMargin || 0}
-              titleSize="lg"
-              cardKey="total_margin"
-              cursor="default"
-              icon={Wallet}
-              variant="neutral"
-              showSatsIcon={true}
-              floatingIcon={true}
-            />
-            
-            <PnLCard
-              title="Taxas Estimadas"
-              pnl={positionsData.totalFees || 0}
-              titleSize="lg"
-              cardKey="estimated_fees"
-              cursor="default"
-              icon={DollarSign}
-              variant="neutral"
-              showSatsIcon={true}
-              floatingIcon={true}
-            />
-          </div>
-        </div>
 
           {/* Histórico */}
           <div className="space-y-4">
@@ -464,7 +526,7 @@ export default function Dashboard() {
             <div className="dashboard-cards-container">
               <PnLCard
                 title="Margem disponível"
-                pnl={balanceData?.balance || 0}
+                pnl={balanceData?.total_balance || 0}
                 icon={Wallet}
                 variant="neutral"
                 cardKey="available_margin"
