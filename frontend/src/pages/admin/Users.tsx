@@ -6,10 +6,26 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RefreshCw, Search, Filter, MoreHorizontal, UserCheck, UserX, Eye, Crown, Trash2 } from 'lucide-react';
+import { 
+  RefreshCw, 
+  Search, 
+  Filter, 
+  MoreHorizontal, 
+  UserCheck, 
+  UserX, 
+  Eye, 
+  Crown, 
+  Trash2,
+  Users,
+  BarChart3,
+  Loader2,
+  Shield,
+  Activity
+} from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { apiGet } from '@/lib/fetch';
 import UserUpgradeModal from '@/components/admin/UserUpgradeModal';
+import { cn } from '@/lib/utils';
 
 interface User {
   id: string;
@@ -193,39 +209,76 @@ export default function Users() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Card className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardContent className="p-8">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full blur-xl"></div>
+                    <Loader2 className="h-8 w-8 animate-spin text-primary relative z-10" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-text-primary">Loading Users</h3>
+                    <p className="text-sm text-text-secondary">Fetching user data...</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground">Manage users, plans, and account status</p>
-        </div>
-        <Button 
-          onClick={() => fetchUsers(pagination.page)} 
-          disabled={refreshing}
-          variant="outline"
-          size="sm"
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
+            <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardContent className="p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                        <Users className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                          User Management
+                        </h1>
+                        <p className="text-text-secondary">Manage users, plans, and account status</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => fetchUsers(pagination.page)} 
+                    disabled={refreshing}
+                    className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
+                    size="sm"
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Filter className="h-5 w-5" />
-            <span>Filters</span>
-          </CardTitle>
-        </CardHeader>
+          {/* Filters */}
+          <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                  <Filter className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-xl font-semibold">Filters</CardTitle>
+              </div>
+            </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
@@ -272,46 +325,108 @@ export default function Users() {
         </CardContent>
       </Card>
 
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Users ({pagination.total})</CardTitle>
-          <CardDescription>
-            Showing {users.length} of {pagination.total} users
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Last Activity</TableHead>
-                <TableHead className="w-[50px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{user.email}</div>
-                      <div className="text-sm text-muted-foreground">@{user.username}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getPlanBadgeVariant(user.plan_type)}>
-                      {user.plan_type.toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                      {user.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
+          {/* Users Table */}
+          <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-semibold">Users ({pagination.total})</CardTitle>
+                  <CardDescription className="text-text-secondary">
+                    Showing {users.length} of {pagination.total} users
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto rounded-lg border border-border/50">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
+                      <TableHead className="font-semibold text-text-primary">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          User
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold text-text-primary">
+                        <div className="flex items-center gap-2">
+                          <Crown className="h-4 w-4" />
+                          Plan
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold text-text-primary">
+                        <div className="flex items-center gap-2">
+                          <Activity className="h-4 w-4" />
+                          Status
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold text-text-primary">
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4" />
+                          Created
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold text-text-primary">
+                        <div className="flex items-center gap-2">
+                          <Activity className="h-4 w-4" />
+                          Last Activity
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold text-text-primary w-[50px]">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user, index) => (
+                      <TableRow 
+                        key={user.id}
+                        className={cn(
+                          "hover:bg-background/50 transition-colors duration-200",
+                          index % 2 === 0 ? "bg-background/20" : "bg-background/10"
+                        )}
+                      >
+                        <TableCell className="font-medium text-text-primary">
+                          <div>
+                            <div className="font-medium">{user.email}</div>
+                            <div className="text-sm text-text-secondary">@{user.username}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={getPlanBadgeVariant(user.plan_type)}
+                            className={cn(
+                              "font-semibold px-3 py-1 rounded-full border-0",
+                              user.plan_type === 'lifetime' 
+                                ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/25'
+                                : user.plan_type === 'pro'
+                                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25'
+                                  : user.plan_type === 'advanced'
+                                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25'
+                                    : user.plan_type === 'basic'
+                                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/25'
+                                      : 'bg-gradient-to-r from-gray-500 to-slate-500 text-white shadow-lg shadow-gray-500/25'
+                            )}
+                          >
+                            {user.plan_type.toUpperCase()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={user.is_active ? 'default' : 'secondary'}
+                            className={cn(
+                              "font-semibold px-3 py-1 rounded-full border-0",
+                              user.is_active 
+                                ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25'
+                                : 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25'
+                            )}
+                          >
+                            {user.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       {formatDate(user.created_at)}
@@ -409,13 +524,15 @@ export default function Users() {
         </CardContent>
       </Card>
 
-      {/* Modal de Upgrade */}
-      <UserUpgradeModal
-        user={upgradeModal.user}
-        isOpen={upgradeModal.isOpen}
-        onClose={handleCloseUpgradeModal}
-        onSuccess={handleUpgradeSuccess}
-      />
+          {/* Modal de Upgrade */}
+          <UserUpgradeModal
+            user={upgradeModal.user}
+            isOpen={upgradeModal.isOpen}
+            onClose={handleCloseUpgradeModal}
+            onSuccess={handleUpgradeSuccess}
+          />
+        </div>
+      </div>
     </div>
   );
 }

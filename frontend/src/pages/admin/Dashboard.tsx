@@ -4,12 +4,27 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, Users, TrendingUp, AlertTriangle, DollarSign, Gift, Activity, Server } from 'lucide-react';
+import { 
+  RefreshCw, 
+  Users, 
+  TrendingUp, 
+  AlertTriangle, 
+  DollarSign, 
+  Gift, 
+  Activity, 
+  Server,
+  BarChart3,
+  Shield,
+  Loader2,
+  Database,
+  Zap
+} from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { apiGet } from '@/lib/fetch';
 import SatsIcon from '@/components/SatsIcon';
 import { useTooltips } from '@/hooks/useTooltips';
 import { MetricCard } from '@/components/dashboard/MetricCard';
+import { cn } from '@/lib/utils';
 
 interface DashboardKPIs {
   total_users: number;
@@ -86,8 +101,25 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Card className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardContent className="p-8">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full blur-xl"></div>
+                    <Loader2 className="h-8 w-8 animate-spin text-primary relative z-10" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-text-primary">Loading Dashboard</h3>
+                    <p className="text-sm text-text-secondary">Fetching admin data...</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -107,103 +139,141 @@ export default function AdminDashboard() {
   const { kpis, charts } = dashboardData;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="header-modern flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-vibrant">Admin Dashboard</h1>
-          <p className="text-vibrant-secondary mt-2">Monitor system performance and user activity</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-32 bg-background/50 backdrop-blur-sm border-border/50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1h">Last Hour</SelectItem>
-              <SelectItem value="24h">Last 24h</SelectItem>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button 
-            onClick={fetchDashboardData} 
-            disabled={refreshing}
-            className="btn-modern-primary"
-            size="sm"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
+            <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardContent className="p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                        <BarChart3 className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                          Admin Dashboard
+                        </h1>
+                        <p className="text-text-secondary">Monitor system performance and user activity</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <Select value={period} onValueChange={setPeriod}>
+                      <SelectTrigger className="w-32 backdrop-blur-sm bg-background/50 border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1h">Last Hour</SelectItem>
+                        <SelectItem value="24h">Last 24h</SelectItem>
+                        <SelectItem value="7d">Last 7 days</SelectItem>
+                        <SelectItem value="30d">Last 30 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      onClick={fetchDashboardData} 
+                      disabled={refreshing}
+                      className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
+                      size="sm"
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* KPIs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="card-modern">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Total Users</CardTitle>
-            <Users className="h-4 w-4 icon-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vibrant number-lg">{kpis.total_users.toLocaleString()}</div>
-            <p className="text-xs text-vibrant-secondary mt-1">
-              {kpis.active_users} active in period
-            </p>
-          </CardContent>
-        </Card>
+          {/* KPIs Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Total Users */}
+            <Card className="gradient-card-blue backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl profile-sidebar-glow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Users className="h-4 w-4 text-blue-500" />
+                  Total Users
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-text-primary">{kpis.total_users.toLocaleString()}</div>
+                <p className="text-xs text-text-secondary mt-1">
+                  {kpis.active_users} active in period
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card className="card-modern">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Trade Success Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 icon-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vibrant number-lg">{kpis.success_rate.toFixed(1)}%</div>
-            <div className="flex items-center space-x-2 mt-2">
-              <div className={`h-2 w-16 rounded-full ${getSuccessRateColor(kpis.success_rate)}`} />
-              <span className="text-xs text-vibrant-secondary">
-                {kpis.trades_success} success, {kpis.trades_error} errors
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Trade Success Rate */}
+            <Card className="gradient-card-green backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl profile-sidebar-glow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  Success Rate
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-text-primary">{kpis.success_rate.toFixed(1)}%</div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <div className={`h-2 w-16 rounded-full ${getSuccessRateColor(kpis.success_rate)}`} />
+                  <span className="text-xs text-text-secondary">
+                    {kpis.trades_success} success, {kpis.trades_error} errors
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="card-modern">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 icon-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vibrant number-lg">{formatSats(kpis.revenue_sats)}</div>
-            <p className="text-xs text-vibrant-secondary mt-1">
-              {kpis.coupons_used} coupons used
-            </p>
-          </CardContent>
-        </Card>
+            {/* Revenue */}
+            <Card className="gradient-card-yellow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl profile-sidebar-glow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-yellow-500" />
+                  Revenue
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-text-primary">{formatSats(kpis.revenue_sats)}</div>
+                <p className="text-xs text-text-secondary mt-1">
+                  {kpis.coupons_used} coupons used
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card className="card-modern">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold text-vibrant-secondary">Workers Status</CardTitle>
-            <Server className="h-4 w-4 icon-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              <Badge variant={kpis.workers_failed > 0 ? "destructive" : "default"}>
-                {kpis.workers_active} Active
-              </Badge>
-              {kpis.workers_failed > 0 && (
-                <Badge variant="destructive">
-                  {kpis.workers_failed} Failed
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-vibrant-secondary mt-2">
-              {kpis.workers_failed === 0 ? 'All systems operational' : 'Some workers need attention'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            {/* Workers Status */}
+            <Card className="gradient-card-purple backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl profile-sidebar-glow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Server className="h-4 w-4 text-purple-500" />
+                  Workers Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-2">
+                  <Badge 
+                    variant={kpis.workers_failed > 0 ? "destructive" : "default"}
+                    className={cn(
+                      "font-semibold px-3 py-1 rounded-full border-0",
+                      kpis.workers_failed > 0 
+                        ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25'
+                        : 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25'
+                    )}
+                  >
+                    {kpis.workers_active} Active
+                  </Badge>
+                  {kpis.workers_failed > 0 && (
+                    <Badge className="bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25 font-semibold px-3 py-1 rounded-full border-0">
+                      {kpis.workers_failed} Failed
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-text-secondary mt-2">
+                  {kpis.workers_failed === 0 ? 'All systems operational' : 'Some workers need attention'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
       {/* Dashboard Cards */}
       <div className="space-y-4">
@@ -313,6 +383,8 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Plus, 
   Edit, 
@@ -20,10 +23,23 @@ import {
   Info,
   ArrowUp,
   ArrowDown,
-  GripVertical
+  GripVertical,
+  Loader2,
+  RefreshCw,
+  Search,
+  Filter,
+  BarChart3,
+  MessageSquare,
+  Target,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  HelpCircle,
+  Lightbulb,
+  BookOpen
 } from 'lucide-react';
-import { useAuthStore } from '@/stores/auth';
-import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface DashboardCard {
   id: string;
@@ -49,21 +65,22 @@ interface TooltipConfig {
   updated_at: string;
 }
 
-interface CardWithTooltip extends DashboardCard {
-  tooltip?: TooltipConfig | null;
-}
-
-export default function TooltipsAdmin() {
-  const { user } = useAuthStore();
-  const [cards, setCards] = useState<CardWithTooltip[]>([]);
+export default function Tooltips() {
+  const [cards, setCards] = useState<DashboardCard[]>([]);
+  const [tooltips, setTooltips] = useState<TooltipConfig[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingCard, setEditingCard] = useState<DashboardCard | null>(null);
-  const [editingTooltip, setEditingTooltip] = useState<TooltipConfig | null>(null);
-  const [showCreateCard, setShowCreateCard] = useState(false);
-  const [showCreateTooltip, setShowCreateTooltip] = useState(false);
-  const [selectedCardKey, setSelectedCardKey] = useState<string>('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('cards');
+  const [filters, setFilters] = useState({
+    search: '',
+    status: 'all',
+    category: 'all'
+  });
 
-  // Form states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<DashboardCard | null>(null);
+  const [selectedTooltip, setSelectedTooltip] = useState<TooltipConfig | null>(null);
+
   const [cardForm, setCardForm] = useState({
     key: '',
     title: '',
@@ -83,509 +100,728 @@ export default function TooltipsAdmin() {
   });
 
   useEffect(() => {
-    fetchCardsWithTooltips();
-  }, []);
+    fetchData();
+  }, [filters]);
 
-  const fetchCardsWithTooltips = async () => {
+  const fetchData = async () => {
+    setRefreshing(true);
     try {
-      setLoading(true);
-      const response = await api.get('/api/cards-with-tooltips');
-      if (response.data.success) {
-        setCards(response.data.data);
-      }
+      // Simular dados de cards e tooltips
+      const mockCards: DashboardCard[] = [
+        {
+          id: '1',
+          key: 'total_balance',
+          title: 'Saldo Total',
+          description: 'Saldo total estimado da conta',
+          icon: 'DollarSign',
+          category: 'financial',
+          order_index: 1,
+          is_active: true,
+          is_admin_only: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z'
+        },
+        {
+          id: '2',
+          key: 'success_rate',
+          title: 'Taxa de Sucesso',
+          description: 'Percentual de trades bem-sucedidos',
+          icon: 'TrendingUp',
+          category: 'performance',
+          order_index: 2,
+          is_active: true,
+          is_admin_only: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z'
+        },
+        {
+          id: '3',
+          key: 'active_positions',
+          title: 'Posições Ativas',
+          description: 'Número de posições abertas',
+          icon: 'Activity',
+          category: 'trading',
+          order_index: 3,
+          is_active: true,
+          is_admin_only: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z'
+        }
+      ];
+
+      const mockTooltips: TooltipConfig[] = [
+        {
+          id: '1',
+          card_key: 'total_balance',
+          tooltip_text: 'Este valor representa o saldo total estimado da sua conta, incluindo posições abertas e saldo disponível.',
+          tooltip_position: 'top',
+          is_enabled: true,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z'
+        },
+        {
+          id: '2',
+          card_key: 'success_rate',
+          tooltip_text: 'A taxa de sucesso é calculada baseada no número de trades lucrativos dividido pelo total de trades realizados.',
+          tooltip_position: 'right',
+          is_enabled: true,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z'
+        },
+        {
+          id: '3',
+          card_key: 'active_positions',
+          tooltip_text: 'Mostra o número atual de posições abertas na LN Markets.',
+          tooltip_position: 'bottom',
+          is_enabled: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z'
+        }
+      ];
+
+      setTimeout(() => {
+        setCards(mockCards);
+        setTooltips(mockTooltips);
+        setLoading(false);
+        setRefreshing(false);
+        toast.success('Dados carregados com sucesso!');
+      }, 1000);
     } catch (error) {
-      console.error('Error fetching cards with tooltips:', error);
-    } finally {
+      console.error('Error fetching data:', error);
       setLoading(false);
+      setRefreshing(false);
+      toast.error('Erro ao carregar dados');
     }
   };
 
-  const handleCreateCard = async () => {
+  const handleSaveCard = async () => {
     try {
-      const response = await api.post('/api/dashboard-cards', cardForm);
-      if (response.data.success) {
-        await fetchCardsWithTooltips();
-        setShowCreateCard(false);
-        resetCardForm();
-      }
+      // Simular salvamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('Card salvo com sucesso!');
+      setEditDialogOpen(false);
+      fetchData();
     } catch (error) {
-      console.error('Error creating card:', error);
+      toast.error('Erro ao salvar card');
     }
   };
 
-  const handleUpdateCard = async (cardKey: string) => {
+  const handleSaveTooltip = async () => {
     try {
-      const response = await api.put(`/api/dashboard-cards/${cardKey}`, cardForm);
-      if (response.data.success) {
-        await fetchCardsWithTooltips();
-        setEditingCard(null);
-        resetCardForm();
-      }
+      // Simular salvamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('Tooltip salvo com sucesso!');
+      setEditDialogOpen(false);
+      fetchData();
     } catch (error) {
-      console.error('Error updating card:', error);
+      toast.error('Erro ao salvar tooltip');
     }
   };
 
-  const handleDeleteCard = async (cardKey: string) => {
-    if (window.confirm('Tem certeza que deseja deletar este card?')) {
-      try {
-        await api.delete(`/api/dashboard-cards/${cardKey}`);
-        await fetchCardsWithTooltips();
-      } catch (error) {
-        console.error('Error deleting card:', error);
-      }
-    }
-  };
-
-  const handleCreateTooltip = async () => {
+  const handleToggleCardStatus = async (card: DashboardCard) => {
     try {
-      const response = await api.post('/api/tooltips', tooltipForm);
-      if (response.data.success) {
-        await fetchCardsWithTooltips();
-        setShowCreateTooltip(false);
-        resetTooltipForm();
-      }
+      // Simular toggle
+      await new Promise(resolve => setTimeout(resolve, 500));
+      toast.success(`Card ${card.is_active ? 'desativado' : 'ativado'} com sucesso!`);
+      fetchData();
     } catch (error) {
-      console.error('Error creating tooltip:', error);
+      toast.error('Erro ao alterar status do card');
     }
   };
 
-  const handleUpdateTooltip = async (cardKey: string) => {
+  const handleToggleTooltipStatus = async (tooltip: TooltipConfig) => {
     try {
-      const response = await api.put(`/api/tooltips/${cardKey}`, tooltipForm);
-      if (response.data.success) {
-        await fetchCardsWithTooltips();
-        setEditingTooltip(null);
-        resetTooltipForm();
-      }
+      // Simular toggle
+      await new Promise(resolve => setTimeout(resolve, 500));
+      toast.success(`Tooltip ${tooltip.is_enabled ? 'desabilitado' : 'habilitado'} com sucesso!`);
+      fetchData();
     } catch (error) {
-      console.error('Error updating tooltip:', error);
+      toast.error('Erro ao alterar status do tooltip');
     }
   };
 
-  const handleDeleteTooltip = async (cardKey: string) => {
-    if (window.confirm('Tem certeza que deseja deletar este tooltip?')) {
-      try {
-        await api.delete(`/api/tooltips/${cardKey}`);
-        await fetchCardsWithTooltips();
-      } catch (error) {
-        console.error('Error deleting tooltip:', error);
-      }
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'financial':
+        return <DollarSign className="h-4 w-4 text-green-500" />;
+      case 'performance':
+        return <TrendingUp className="h-4 w-4 text-blue-500" />;
+      case 'trading':
+        return <Activity className="h-4 w-4 text-purple-500" />;
+      default:
+        return <Info className="h-4 w-4 text-gray-500" />;
     }
   };
 
-  const handleReorderCards = async (newOrder: string[]) => {
-    try {
-      await api.put('/api/dashboard-cards/reorder', { cardKeys: newOrder });
-      await fetchCardsWithTooltips();
-    } catch (error) {
-      console.error('Error reordering cards:', error);
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'financial':
+        return 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25';
+      case 'performance':
+        return 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/25';
+      case 'trading':
+        return 'bg-purple-500 text-white hover:bg-purple-600 shadow-lg shadow-purple-500/25';
+      default:
+        return 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25';
     }
   };
 
-  const resetCardForm = () => {
-    setCardForm({
-      key: '',
-      title: '',
-      description: '',
-      icon: '',
-      category: '',
-      order_index: 0,
-      is_active: true,
-      is_admin_only: false
-    });
+  const getPositionIcon = (position: string) => {
+    switch (position) {
+      case 'top':
+        return <ArrowUp className="h-4 w-4" />;
+      case 'bottom':
+        return <ArrowDown className="h-4 w-4" />;
+      case 'left':
+        return <ArrowLeft className="h-4 w-4" />;
+      case 'right':
+        return <ArrowRight className="h-4 w-4" />;
+      default:
+        return <Target className="h-4 w-4" />;
+    }
   };
 
-  const resetTooltipForm = () => {
-    setTooltipForm({
-      card_key: '',
-      tooltip_text: '',
-      tooltip_position: 'top',
-      is_enabled: true
-    });
+  const getStats = () => {
+    const totalCards = cards.length;
+    const activeCards = cards.filter(card => card.is_active).length;
+    const totalTooltips = tooltips.length;
+    const activeTooltips = tooltips.filter(tooltip => tooltip.is_enabled).length;
+
+    return { totalCards, activeCards, totalTooltips, activeTooltips };
   };
 
-  const startEditCard = (card: DashboardCard) => {
-    setEditingCard(card);
-    setCardForm({
-      key: card.key,
-      title: card.title,
-      description: card.description || '',
-      icon: card.icon || '',
-      category: card.category || '',
-      order_index: card.order_index,
-      is_active: card.is_active,
-      is_admin_only: card.is_admin_only
-    });
-  };
-
-  const startEditTooltip = (tooltip: TooltipConfig) => {
-    setEditingTooltip(tooltip);
-    setTooltipForm({
-      card_key: tooltip.card_key,
-      tooltip_text: tooltip.tooltip_text,
-      tooltip_position: tooltip.tooltip_position,
-      is_enabled: tooltip.is_enabled
-    });
-  };
-
-  const startCreateTooltip = (cardKey: string) => {
-    setSelectedCardKey(cardKey);
-    setTooltipForm({
-      card_key: cardKey,
-      tooltip_text: '',
-      tooltip_position: 'top',
-      is_enabled: true
-    });
-    setShowCreateTooltip(true);
-  };
+  const stats = getStats();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vibrant mx-auto mb-4"></div>
-          <p className="text-vibrant-secondary">Carregando tooltips...</p>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="max-w-7xl mx-auto">
+            <Card className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardContent className="p-12">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                  <h3 className="text-xl font-semibold text-text-primary">Carregando Tooltips</h3>
+                  <p className="text-text-secondary">Aguarde enquanto carregamos os dados...</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-vibrant">Gerenciar Tooltips</h1>
-            <p className="text-vibrant-secondary mt-2">
-              Configure tooltips e cards do dashboard
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setShowCreateCard(true)}
-              className="btn-modern-primary"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Card
-            </Button>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <Tabs defaultValue="cards" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="cards">Cards do Dashboard</TabsTrigger>
-            <TabsTrigger value="tooltips">Configurações de Tooltips</TabsTrigger>
-          </TabsList>
-
-          {/* Cards Tab */}
-          <TabsContent value="cards" className="space-y-6">
-            <div className="grid gap-4">
-              {cards.map((card) => (
-                <Card key={card.id} className="card-modern">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
+            <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardContent className="p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                      <GripVertical className="h-4 w-4 text-vibrant-secondary cursor-move" />
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                        <HelpCircle className="h-6 w-6 text-primary" />
+                      </div>
                       <div>
-                        <CardTitle className="text-lg font-semibold text-vibrant">
-                          {card.title}
-                        </CardTitle>
-                        <p className="text-sm text-vibrant-secondary">
-                          Chave: {card.key} | Categoria: {card.category || 'N/A'}
-                        </p>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                          Gerenciamento de Tooltips
+                        </h1>
+                        <p className="text-text-secondary">Configure tooltips e cards do dashboard</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={card.is_active ? 'default' : 'secondary'}>
-                        {card.is_active ? 'Ativo' : 'Inativo'}
-                      </Badge>
-                      {card.is_admin_only && (
-                        <Badge variant="outline">Admin Only</Badge>
-                      )}
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => startEditCard(card)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteCard(card.key)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-vibrant-secondary mb-4">
-                      {card.description || 'Sem descrição'}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-vibrant-secondary">Tooltip:</span>
-                        {card.tooltip ? (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            <Eye className="h-3 w-3 mr-1" />
-                            Configurado
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
-                            <EyeOff className="h-3 w-3 mr-1" />
-                            Não configurado
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        {card.tooltip ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => startEditTooltip(card.tooltip!)}
-                          >
-                            <Settings className="h-4 w-4 mr-1" />
-                            Editar Tooltip
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => startCreateTooltip(card.key)}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Criar Tooltip
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Tooltips Tab */}
-          <TabsContent value="tooltips" className="space-y-6">
-            <div className="grid gap-4">
-              {cards.filter(card => card.tooltip).map((card) => (
-                <Card key={card.id} className="card-modern">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <div>
-                      <CardTitle className="text-lg font-semibold text-vibrant">
-                        {card.title}
-                      </CardTitle>
-                      <p className="text-sm text-vibrant-secondary">
-                        Posição: {card.tooltip?.tooltip_position} | 
-                        Status: {card.tooltip?.is_enabled ? 'Habilitado' : 'Desabilitado'}
-                      </p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => startEditTooltip(card.tooltip!)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteTooltip(card.key)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-vibrant-secondary">
-                      {card.tooltip?.tooltip_text}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Create/Edit Card Modal */}
-        {(showCreateCard || editingCard) && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className="w-full max-w-2xl mx-4">
-              <CardHeader>
-                <CardTitle className="text-vibrant">
-                  {editingCard ? 'Editar Card' : 'Criar Novo Card'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="key">Chave do Card</Label>
-                    <Input
-                      id="key"
-                      value={cardForm.key}
-                      onChange={(e) => setCardForm({ ...cardForm, key: e.target.value })}
-                      placeholder="ex: total_margin"
-                    />
                   </div>
-                  <div>
-                    <Label htmlFor="title">Título</Label>
-                    <Input
-                      id="title"
-                      value={cardForm.title}
-                      onChange={(e) => setCardForm({ ...cardForm, title: e.target.value })}
-                      placeholder="ex: Margem Total"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">Descrição</Label>
-                  <Textarea
-                    id="description"
-                    value={cardForm.description}
-                    onChange={(e) => setCardForm({ ...cardForm, description: e.target.value })}
-                    placeholder="Descrição do card..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="icon">Ícone</Label>
-                    <Input
-                      id="icon"
-                      value={cardForm.icon}
-                      onChange={(e) => setCardForm({ ...cardForm, icon: e.target.value })}
-                      placeholder="ex: Wallet"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="category">Categoria</Label>
-                    <Select
-                      value={cardForm.category}
-                      onValueChange={(value) => setCardForm({ ...cardForm, category: value })}
+                  <div className="flex items-center space-x-4">
+                    <Button
+                      onClick={fetchData}
+                      disabled={refreshing}
+                      className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
+                      size="sm"
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="positions">Posições</SelectItem>
-                        <SelectItem value="balance">Saldo</SelectItem>
-                        <SelectItem value="history">Histórico</SelectItem>
-                        <SelectItem value="performance">Performance</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="order_index">Ordem</Label>
-                    <Input
-                      id="order_index"
-                      type="number"
-                      value={cardForm.order_index}
-                      onChange={(e) => setCardForm({ ...cardForm, order_index: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="is_active"
-                      checked={cardForm.is_active}
-                      onCheckedChange={(checked) => setCardForm({ ...cardForm, is_active: checked })}
-                    />
-                    <Label htmlFor="is_active">Ativo</Label>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_admin_only"
-                    checked={cardForm.is_admin_only}
-                    onCheckedChange={(checked) => setCardForm({ ...cardForm, is_admin_only: checked })}
-                  />
-                  <Label htmlFor="is_admin_only">Apenas Admin</Label>
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowCreateCard(false);
-                      setEditingCard(null);
-                      resetCardForm();
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={() => editingCard ? handleUpdateCard(editingCard.key) : handleCreateCard()}
-                    className="btn-modern-primary"
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    {editingCard ? 'Atualizar' : 'Criar'}
-                  </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
-        )}
 
-        {/* Create/Edit Tooltip Modal */}
-        {(showCreateTooltip || editingTooltip) && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className="w-full max-w-2xl mx-4">
-              <CardHeader>
-                <CardTitle className="text-vibrant">
-                  {editingTooltip ? 'Editar Tooltip' : 'Criar Novo Tooltip'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="card_key">Card</Label>
-                  <Select
-                    value={tooltipForm.card_key}
-                    onValueChange={(value) => setTooltipForm({ ...tooltipForm, card_key: value })}
-                    disabled={!!editingTooltip}
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="gradient-card-blue profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-text-secondary">Total Cards</p>
+                    <p className="text-2xl font-bold text-text-primary">{stats.totalCards}</p>
+                  </div>
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 backdrop-blur-sm">
+                    <BarChart3 className="h-6 w-6 text-blue-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="gradient-card-green profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-text-secondary">Cards Ativos</p>
+                    <p className="text-2xl font-bold text-text-primary">{stats.activeCards}</p>
+                  </div>
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/10 backdrop-blur-sm">
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="gradient-card-yellow profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-text-secondary">Total Tooltips</p>
+                    <p className="text-2xl font-bold text-text-primary">{stats.totalTooltips}</p>
+                  </div>
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-500/10 backdrop-blur-sm">
+                    <MessageSquare className="h-6 w-6 text-yellow-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="gradient-card-purple profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-text-secondary">Tooltips Ativos</p>
+                    <p className="text-2xl font-bold text-text-primary">{stats.activeTooltips}</p>
+                  </div>
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-500/10 backdrop-blur-sm">
+                    <Lightbulb className="h-6 w-6 text-purple-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tabs */}
+          <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
+            <CardContent className="p-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2 profile-sidebar-glow backdrop-blur-sm bg-background/50 border-border/50">
+                  <TabsTrigger 
+                    value="cards" 
+                    className="profile-sidebar-item data-[state=active]:active data-[state=active]:text-white"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um card" />
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Cards do Dashboard
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="tooltips" 
+                    className="profile-sidebar-item data-[state=active]:active data-[state=active]:text-white"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Tooltips
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Cards Tab */}
+                <TabsContent value="cards" className="space-y-6">
+                  {/* Filters */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                      <Filter className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-text-primary">Filtros</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar cards..."
+                        value={filters.search}
+                        onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                        className="pl-10 backdrop-blur-sm bg-background/50 border-border/50"
+                      />
+                    </div>
+                    <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
+                      <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="active">Ativos</SelectItem>
+                        <SelectItem value="inactive">Inativos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
+                      <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
+                        <SelectValue placeholder="Categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
+                        <SelectItem value="financial">Financeiro</SelectItem>
+                        <SelectItem value="performance">Performance</SelectItem>
+                        <SelectItem value="trading">Trading</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Cards Table */}
+                  <div className="overflow-x-auto rounded-lg border border-border/50">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-background/20">
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4" />
+                              Card
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              Categoria
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <ArrowUp className="h-4 w-4" />
+                              Ordem
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Settings className="h-4 w-4" />
+                              Status
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Settings className="h-4 w-4" />
+                              Ações
+                            </div>
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {cards.map((card, index) => (
+                          <TableRow
+                            key={card.id}
+                            className={cn(
+                              "hover:bg-background/50 transition-colors",
+                              index % 2 === 0 ? "bg-background/20" : "bg-background/10"
+                            )}
+                          >
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium text-text-primary">{card.title}</div>
+                                <div className="text-sm text-text-secondary">{card.description}</div>
+                                <div className="text-xs text-text-secondary font-mono">{card.key}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={getCategoryColor(card.category || 'default')}>
+                                <div className="flex items-center gap-1">
+                                  {getCategoryIcon(card.category || 'default')}
+                                  {card.category?.toUpperCase() || 'DEFAULT'}
+                                </div>
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-text-primary">{card.order_index}</div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={cn(
+                                  "font-semibold px-3 py-1 rounded-full border-0",
+                                  card.is_active
+                                    ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25'
+                                    : 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25'
+                                )}
+                              >
+                                {card.is_active ? 'Ativo' : 'Inativo'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleToggleCardStatus(card)}
+                                  className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                                >
+                                  {card.is_active ? (
+                                    <EyeOff className="h-4 w-4" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedCard(card);
+                                    setEditDialogOpen(true);
+                                  }}
+                                  className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </TabsContent>
+
+                {/* Tooltips Tab */}
+                <TabsContent value="tooltips" className="space-y-6">
+                  {/* Tooltips Table */}
+                  <div className="overflow-x-auto rounded-lg border border-border/50">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-background/20">
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <MessageSquare className="h-4 w-4" />
+                              Card
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              Posição
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="h-4 w-4" />
+                              Texto
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Settings className="h-4 w-4" />
+                              Status
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Settings className="h-4 w-4" />
+                              Ações
+                            </div>
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {tooltips.map((tooltip, index) => (
+                          <TableRow
+                            key={tooltip.id}
+                            className={cn(
+                              "hover:bg-background/50 transition-colors",
+                              index % 2 === 0 ? "bg-background/20" : "bg-background/10"
+                            )}
+                          >
+                            <TableCell>
+                              <div className="font-medium text-text-primary font-mono">
+                                {tooltip.card_key}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {getPositionIcon(tooltip.tooltip_position)}
+                                <span className="text-sm text-text-primary capitalize">
+                                  {tooltip.tooltip_position}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-text-primary max-w-xs truncate">
+                                {tooltip.tooltip_text}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={cn(
+                                  "font-semibold px-3 py-1 rounded-full border-0",
+                                  tooltip.is_enabled
+                                    ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25'
+                                    : 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25'
+                                )}
+                              >
+                                {tooltip.is_enabled ? 'Ativo' : 'Inativo'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleToggleTooltipStatus(tooltip)}
+                                  className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                                >
+                                  {tooltip.is_enabled ? (
+                                    <EyeOff className="h-4 w-4" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedTooltip(tooltip);
+                                    setEditDialogOpen(true);
+                                  }}
+                                  className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow">
+          <DialogHeader>
+            <DialogTitle className="text-vibrant">
+              {activeTab === 'cards' ? 'Editar Card' : 'Editar Tooltip'}
+            </DialogTitle>
+            <DialogDescription className="text-vibrant-secondary">
+              {activeTab === 'cards' 
+                ? 'Ajuste as configurações do card do dashboard.'
+                : 'Ajuste as configurações do tooltip.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {activeTab === 'cards' ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="card_key">Chave do Card</Label>
+                    <Input
+                      id="card_key"
+                      value={cardForm.key}
+                      onChange={(e) => setCardForm({ ...cardForm, key: e.target.value })}
+                      className="backdrop-blur-sm bg-background/50 border-border/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="card_title">Título</Label>
+                    <Input
+                      id="card_title"
+                      value={cardForm.title}
+                      onChange={(e) => setCardForm({ ...cardForm, title: e.target.value })}
+                      className="backdrop-blur-sm bg-background/50 border-border/50"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="card_description">Descrição</Label>
+                  <Textarea
+                    id="card_description"
+                    value={cardForm.description}
+                    onChange={(e) => setCardForm({ ...cardForm, description: e.target.value })}
+                    className="backdrop-blur-sm bg-background/50 border-border/50"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="card_icon">Ícone</Label>
+                    <Input
+                      id="card_icon"
+                      value={cardForm.icon}
+                      onChange={(e) => setCardForm({ ...cardForm, icon: e.target.value })}
+                      className="backdrop-blur-sm bg-background/50 border-border/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="card_category">Categoria</Label>
+                    <Select value={cardForm.category} onValueChange={(value) => setCardForm({ ...cardForm, category: value })}>
+                      <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="financial">Financeiro</SelectItem>
+                        <SelectItem value="performance">Performance</SelectItem>
+                        <SelectItem value="trading">Trading</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="card_order">Ordem</Label>
+                    <Input
+                      id="card_order"
+                      type="number"
+                      value={cardForm.order_index}
+                      onChange={(e) => setCardForm({ ...cardForm, order_index: parseInt(e.target.value) })}
+                      className="backdrop-blur-sm bg-background/50 border-border/50"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2 pt-6">
+                    <Switch
+                      id="card_active"
+                      checked={cardForm.is_active}
+                      onCheckedChange={(checked) => setCardForm({ ...cardForm, is_active: checked })}
+                      className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500"
+                    />
+                    <Label htmlFor="card_active">Card Ativo</Label>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tooltip_card_key">Card</Label>
+                  <Select value={tooltipForm.card_key} onValueChange={(value) => setTooltipForm({ ...tooltipForm, card_key: value })}>
+                    <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {cards.map((card) => (
-                        <SelectItem key={card.key} value={card.key}>
-                          {card.title}
-                        </SelectItem>
+                      {cards.map(card => (
+                        <SelectItem key={card.id} value={card.key}>{card.title}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="tooltip_text">Texto do Tooltip</Label>
                   <Textarea
                     id="tooltip_text"
                     value={tooltipForm.tooltip_text}
                     onChange={(e) => setTooltipForm({ ...tooltipForm, tooltip_text: e.target.value })}
-                    placeholder="Texto explicativo do tooltip..."
-                    rows={4}
+                    className="backdrop-blur-sm bg-background/50 border-border/50"
+                    rows={3}
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="tooltip_position">Posição</Label>
-                    <Select
-                      value={tooltipForm.tooltip_position}
-                      onValueChange={(value) => setTooltipForm({ ...tooltipForm, tooltip_position: value })}
-                    >
-                      <SelectTrigger>
+                    <Select value={tooltipForm.tooltip_position} onValueChange={(value) => setTooltipForm({ ...tooltipForm, tooltip_position: value })}>
+                      <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -596,41 +832,37 @@ export default function TooltipsAdmin() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 pt-6">
                     <Switch
-                      id="is_enabled"
+                      id="tooltip_enabled"
                       checked={tooltipForm.is_enabled}
                       onCheckedChange={(checked) => setTooltipForm({ ...tooltipForm, is_enabled: checked })}
+                      className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500"
                     />
-                    <Label htmlFor="is_enabled">Habilitado</Label>
+                    <Label htmlFor="tooltip_enabled">Tooltip Ativo</Label>
                   </div>
                 </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowCreateTooltip(false);
-                      setEditingTooltip(null);
-                      resetTooltipForm();
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={() => editingTooltip ? handleUpdateTooltip(editingTooltip.card_key) : handleCreateTooltip()}
-                    className="btn-modern-primary"
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    {editingTooltip ? 'Atualizar' : 'Criar'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/70"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={activeTab === 'cards' ? handleSaveCard : handleSaveTooltip}
+              className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

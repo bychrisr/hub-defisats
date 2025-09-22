@@ -42,6 +42,7 @@ import AdminCoupons from '@/pages/admin/Coupons';
 import AdminAlerts from '@/pages/admin/Alerts';
 import AdminSettings from '@/pages/admin/Settings';
 import AdminTooltips from '@/pages/admin/Tooltips';
+import { Plans } from '@/pages/admin/Plans';
 import TestPermissions from '@/pages/TestPermissions';
 import DesignSystem from '@/pages/DesignSystem';
 
@@ -404,6 +405,7 @@ const App = () => {
               <Route path="tooltips" element={<AdminTooltips />} />
               <Route path="monitoring" element={<AdminMonitoring />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="plans" element={<Plans />} />
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="alerts" element={<AdminAlerts />} />
               <Route path="settings" element={<AdminSettings />} />
