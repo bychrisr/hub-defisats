@@ -1,10 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip } from '@/components/ui/tooltip';
 import { LucideIcon, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTooltips } from '@/hooks/useTooltips';
 
 interface MetricCardProps {
   title: string;
@@ -36,21 +34,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   floatingIcon = false,
   cursor = 'auto',
 }) => {
-  const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
   
-  const tooltipText = cardKey ? getTooltipText(cardKey) : null;
-  const tooltipPosition = cardKey ? getTooltipPosition(cardKey) : 'top';
-  const showTooltip = cardKey ? isTooltipEnabled(cardKey) : false;
-  
-  // Debug log
-  if (cardKey) {
-    console.log(`🎯 METRIC CARD [${cardKey}]:`, {
-      tooltipText,
-      tooltipPosition,
-      showTooltip,
-      hasTooltipText: !!tooltipText
-    });
-  }
 
   const getTrendColor = () => {
     if (!trend) return '';
@@ -103,15 +87,6 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         <CardHeader className="dashboard-card-header pr-12">
           <CardTitle className={cn('dashboard-card-title', getTitleSizeClass())}>
             {title}
-            {showTooltip && tooltipText && (
-              <Tooltip
-                content={tooltipText}
-                position={tooltipPosition}
-                disabled={!showTooltip}
-              >
-                <HelpCircle className="dashboard-card-help-icon" />
-              </Tooltip>
-            )}
           </CardTitle>
           {!floatingIcon && Icon && <Icon className={cn('dashboard-card-icon', getIconColor())} />}
         </CardHeader>

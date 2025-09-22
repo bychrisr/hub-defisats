@@ -41,7 +41,6 @@ import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
 import { RouteGuard } from '@/components/guards/RouteGuard';
-import { useTooltips } from '@/hooks/useTooltips';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -74,7 +73,6 @@ export default function Dashboard() {
   // Novos hooks para métricas da dashboard
   const positionsData = usePositionsMetrics();
   const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente e positionsLoading
-  const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
   const historicalData = useHistoricalData();
   const estimatedBalance = useEstimatedBalance();
   const { formatSats } = useFormatSats();

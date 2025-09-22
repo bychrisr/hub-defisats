@@ -1,11 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip } from '@/components/ui/tooltip';
 import { TrendingUp, TrendingDown, LucideIcon, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFormatSats } from '@/hooks/useFormatSats';
-import { useTooltips } from '@/hooks/useTooltips';
 import SatsIcon from '@/components/SatsIcon';
 
 interface PnLCardProps {
@@ -38,11 +36,6 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   floatingIcon = false,
 }) => {
   const { formatSats } = useFormatSats();
-  const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
-  
-  const tooltipText = cardKey ? getTooltipText(cardKey) : null;
-  const tooltipPosition = cardKey ? getTooltipPosition(cardKey) : 'top';
-  const showTooltip = cardKey ? isTooltipEnabled(cardKey) : false;
   
   const isPositive = pnl >= 0;
   const isNeutral = pnl === 0;
@@ -102,15 +95,6 @@ export const PnLCard: React.FC<PnLCardProps> = ({
         <CardHeader className="dashboard-card-header pr-12">
           <CardTitle className={cn('font-semibold text-vibrant-secondary', getTitleSizeClass())}>
             {title}
-            {showTooltip && tooltipText && (
-              <Tooltip
-                content={tooltipText}
-                position={tooltipPosition}
-                disabled={!showTooltip}
-              >
-                <HelpCircle className="dashboard-card-help-icon" />
-              </Tooltip>
-            )}
           </CardTitle>
           {!floatingIcon && Icon ? (
             <Icon className={cn('dashboard-card-icon', getIconColor())} />
@@ -129,7 +113,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
                 <span className="flex items-center gap-1">
                   {formatSats(pnl, { size: 28, showIcon: false, variant: variant === 'neutral' ? 'neutral' : 'auto' })}
                   <SatsIcon 
-                    size={28} 
+                    size={32} 
                     variant="default"
                     forceColor={true}
                     className={cn('sats-icon-mobile', isPositive ? 'text-green-200' : 'text-red-200')}
