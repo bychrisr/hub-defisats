@@ -24,6 +24,9 @@ export interface HistoricalData {
   totalPositions: number;
   winningPositions: number;
   losingPositions: number;
+  totalTrades: number;
+  winningTrades: number;
+  lostTrades: number;
 }
 
 export const useHistoricalData = () => {
@@ -132,6 +135,9 @@ export const useHistoricalData = () => {
         const winningPositions = closedTrades.filter(trade => trade.pnl > 0).length;
         const losingPositions = closedTrades.filter(trade => trade.pnl < 0).length;
         const successRate = closedTrades.length > 0 ? (winningPositions / closedTrades.length) * 100 : 0;
+        const totalTrades = trades.length;
+        const winningTrades = winningPositions;
+        const lostTrades = losingPositions;
 
         console.log('🔍 HISTORICAL DATA HOOK - Calculated metrics:', {
           totalTrades: trades.length,
@@ -151,6 +157,9 @@ export const useHistoricalData = () => {
           totalPositions: trades.length,
           winningPositions,
           losingPositions,
+          totalTrades,
+          winningTrades,
+          lostTrades,
         });
       } else {
         console.log('🔍 HISTORICAL DATA HOOK - No historical data available, using current positions as fallback');
@@ -164,6 +173,9 @@ export const useHistoricalData = () => {
         const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
         const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
         const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
+        const totalTrades = totalPositions;
+        const winningTrades = winningPositions;
+        const lostTrades = losingPositions;
 
         console.log('🔍 HISTORICAL DATA HOOK - Using current positions fallback:', {
           totalPositions,
@@ -182,6 +194,9 @@ export const useHistoricalData = () => {
           totalPositions,
           winningPositions,
           losingPositions,
+          totalTrades,
+          winningTrades,
+          lostTrades,
         });
       }
     } catch (err: any) {
@@ -288,6 +303,9 @@ export const useHistoricalData = () => {
         totalPositions,
         winningPositions,
         losingPositions,
+        totalTrades: totalPositions,
+        winningTrades: winningPositions,
+        lostTrades: losingPositions,
       }));
     }
   }, [userPositions]);

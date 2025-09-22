@@ -5,12 +5,22 @@ import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
 export class LNMarketsUserController {
   constructor(private prisma: PrismaClient) {}
 
+  // Get fee rate from tier
+  private getFeeRateFromTier(feeTier: number): number {
+    const tiers: { [key: number]: number } = {
+      0: 0.001,  // 0.1%
+      1: 0.0008, // 0.08%
+      2: 0.0007, // 0.07%
+      3: 0.0006  // 0.06%
+    };
+    return tiers[feeTier] || 0.001; // Default to tier 0
+  }
+
   private async checkIfAdmin(userId: string): Promise<boolean> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { admin_user: true }
+    const adminUser = await this.prisma.adminUser.findFirst({
+      where: { user_id: userId }
     });
-    return !!user?.admin_user;
+    return !!adminUser;
   }
 
   private async getLNMarketsService(userId: string): Promise<LNMarketsAPIService> {
@@ -187,7 +197,10 @@ export class LNMarketsUserController {
 
       // Create a clean object to ensure proper serialization
       const cleanBalance = {
-        balance: result.balance || 0,
+        total_balance: result.balance || 0,
+        available_balance: result.balance || 0, // Para LN Markets, o balance é o saldo disponível
+        margin_used: 0, // Será calculado baseado nas posições
+        balance: result.balance || 0, // Manter compatibilidade
         synthetic_usd_balance: result.synthetic_usd_balance || 0,
         uid: result.uid || userId,
         role: result.role || 'user',
@@ -238,6 +251,9 @@ export class LNMarketsUserController {
 
   async getEstimatedBalance(request: FastifyRequest, reply: FastifyReply) {
     console.log('🔍 USER CONTROLLER - getEstimatedBalance called');
+    console.log('🔍 USER CONTROLLER - Request headers:', request.headers);
+    console.log('🔍 USER CONTROLLER - Request method:', request.method);
+    console.log('🔍 USER CONTROLLER - Request url:', request.url);
     try {
       const userId = (request as any).user?.id;
       console.log('🔍 USER CONTROLLER - userId:', userId);
@@ -277,7 +293,15 @@ export class LNMarketsUserController {
       const walletBalance = balanceResult.balance || 0;
       console.log('✅ USER CONTROLLER - Wallet balance:', walletBalance);
       
-      // 2. Buscar posições abertas
+      // 2. Buscar dados do ticker (funding rate, index price, last price)
+      console.log('🔍 USER CONTROLLER - Fetching ticker data...');
+      const tickerData = await lnmarkets.getFuturesTicker();
+      const fundingRate = tickerData.carryFeeRate || 0;
+      const indexPrice = tickerData.index || 0;
+      const lastPrice = tickerData.lastPrice || 0;
+      console.log('✅ USER CONTROLLER - Ticker data:', { fundingRate, indexPrice, lastPrice });
+      
+      // 3. Buscar posições abertas
       console.log('🔍 USER CONTROLLER - Fetching open positions...');
       const positions = await lnmarkets.getUserPositions();
       console.log('✅ USER CONTROLLER - Positions found:', Array.isArray(positions) ? positions.length : 0);
@@ -353,16 +377,79 @@ export class LNMarketsUserController {
         totalInvested
       });
       
-      // 5. Calcular Saldo Estimado
-      // Fórmula: saldo da wallet + margem inicial + profit estimado - taxas a pagar
-      const estimatedBalance = walletBalance + totalMargin + totalPnL - totalFees;
+      // 5. Calcular Saldo Estimado usando a fórmula da documentação
+      // Fórmula: saldo_disponivel_atual + soma_dos_saldos_estimados_das_posicoes_running - soma_das_taxas_estimadas_para_fechamento_das_posicoes - soma_das_taxas_de_funding_estimadas_para_as_proximas_24h
       
-      console.log('📊 Estimated Balance Calculation:', {
+      let somaSaldosPosicoes = 0;
+      let somaTaxasFechamento = 0;
+      let somaFunding24h = 0;
+      
+      // Obter fee_tier do usuário
+      const feeTier = balanceResult.fee_tier || 0;
+      const feeRate = this.getFeeRateFromTier(feeTier);
+      
+      console.log('🔍 USER CONTROLLER - Fee calculation:', { feeTier, feeRate });
+      
+      if (Array.isArray(positions)) {
+        for (const position of positions) {
+          // 1. Saldo estimado da posição (antes de taxas)
+          // margin + pl + maintenance_margin
+          const margin = position.entry_margin || position.margin || 0;
+          const pl = position.pl || 0;
+          const maintenanceMargin = position.maintenance_margin || 0;
+          const saldoPosicao = margin + pl + maintenanceMargin;
+          somaSaldosPosicoes += saldoPosicao;
+          
+          // 2. Taxa de fechamento estimada
+          // (quantity / lastPrice) * fee_rate * 100_000_000
+          const quantity = position.quantity || 0;
+          if (quantity > 0 && lastPrice > 0) {
+            const taxaFechamento = (quantity / lastPrice) * feeRate * 100_000_000;
+            somaTaxasFechamento += Math.round(taxaFechamento);
+          }
+          
+          // 3. Funding estimado para 24h (3 eventos)
+          // (quantity / indexPrice) * funding_rate * 100_000_000 * 3
+          if (quantity > 0 && indexPrice > 0) {
+            const fundingPorEvento = (quantity / indexPrice) * fundingRate * 100_000_000;
+            let funding24h = 0;
+            
+            if (position.side === 'b') { // Long
+              funding24h = fundingRate > 0 ? 3 * Math.abs(fundingPorEvento) : 3 * (-Math.abs(fundingPorEvento));
+            } else { // Short
+              funding24h = fundingRate > 0 ? 3 * (-Math.abs(fundingPorEvento)) : 3 * Math.abs(fundingPorEvento);
+            }
+            
+            somaFunding24h += Math.round(funding24h);
+          }
+          
+          console.log('🔍 USER CONTROLLER - Position calculation:', {
+            id: position.id,
+            side: position.side,
+            quantity,
+            margin,
+            pl,
+            maintenanceMargin,
+            saldoPosicao,
+            taxaFechamento: quantity > 0 && lastPrice > 0 ? Math.round((quantity / lastPrice) * feeRate * 100_000_000) : 0,
+            funding24h: quantity > 0 && indexPrice > 0 ? Math.round(funding24h) : 0
+          });
+        }
+      }
+      
+      const estimatedBalance = walletBalance + somaSaldosPosicoes - somaTaxasFechamento - somaFunding24h;
+      
+      console.log('📊 Estimated Balance Calculation (New Formula):', {
         walletBalance,
-        totalMargin,
-        totalPnL,
-        totalFees,
-        estimatedBalance
+        somaSaldosPosicoes,
+        somaTaxasFechamento,
+        somaFunding24h,
+        estimatedBalance,
+        feeTier,
+        feeRate,
+        fundingRate,
+        indexPrice,
+        lastPrice
       });
       
       const result = {

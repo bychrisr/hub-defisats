@@ -27,11 +27,21 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
   const [error, setError] = useState<string | null>(null);
   
   const isAdmin = user?.is_admin || false;
+  
+  console.log('🔍 ESTIMATED BALANCE HOOK - Hook initialized:', { user: user?.id, isAdmin });
+  console.log('🔍 ESTIMATED BALANCE HOOK - Will make API call:', !isAdmin && user?.id);
 
   const fetchEstimatedBalance = useCallback(async () => {
     // Pular para admins - eles não têm credenciais LN Markets
     if (isAdmin) {
       console.log('🔍 ESTIMATED BALANCE HOOK - Admin user, skipping LN Markets queries...');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Verificar se usuário está autenticado
+    if (!user?.id) {
+      console.log('🔍 ESTIMATED BALANCE HOOK - No user ID, skipping...');
       setIsLoading(false);
       return;
     }
@@ -43,6 +53,7 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
       console.log('🔍 ESTIMATED BALANCE HOOK - Fetching estimated balance from API...');
       
       const response = await api.get('/api/lnmarkets/user/estimated-balance');
+      console.log('🔍 ESTIMATED BALANCE HOOK - Response received:', response.data);
       
       if (response.data.success && response.data.data) {
         const balanceData = response.data.data;
@@ -83,6 +94,7 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
   }, [isAdmin]);
 
   useEffect(() => {
+    console.log('🔍 ESTIMATED BALANCE HOOK - useEffect triggered:', { userId: user?.id, isAdmin });
     fetchEstimatedBalance();
     
     // Desabilitar polling automático - será controlado pelo useRealtimeDashboard

@@ -781,6 +781,35 @@ export class LNMarketsAPIService {
     return timeframes[timeframe] || 60 * 60 * 1000; // Default to 1 hour
   }
 
+  // Get futures ticker data (funding rate, index price, last price)
+  async getFuturesTicker() {
+    console.log('🔍 LN MARKETS TICKER - Starting getFuturesTicker');
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'GET',
+        path: '/futures/ticker'
+      });
+      
+      console.log('✅ LN MARKETS TICKER - Raw response:', JSON.stringify(result, null, 2));
+      
+      return {
+        carryFeeRate: result.carryFeeRate || 0,
+        index: result.index || 0,
+        lastPrice: result.lastPrice || 0,
+        fundingRate: result.carryFeeRate || 0
+      };
+    } catch (error: any) {
+      console.log('❌ LN MARKETS TICKER - Error caught:', {
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        message: error?.message,
+        data: error?.response?.data
+      });
+      throw error;
+    }
+  }
+
   // Get credentials (for debugging)
   getCredentials() {
     return {

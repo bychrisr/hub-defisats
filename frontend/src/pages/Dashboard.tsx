@@ -227,10 +227,9 @@ export default function Dashboard() {
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PnL') }}
-                      />
+                        <CardTitle className="text-h3 text-vibrant">
+                          Total PnL
+                        </CardTitle>
                         <Tooltip 
                           content="Profit and Loss total de todas as suas posições ativas. Mostra o lucro ou prejuízo real baseado nos preços atuais do mercado. Valores positivos em verde indicam lucro, valores negativos em vermelho indicam prejuízo."
                           position="top"
@@ -307,10 +306,19 @@ export default function Dashboard() {
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Profit') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Estimated Profit
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     {/* Valor principal */}
@@ -371,10 +379,19 @@ export default function Dashboard() {
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Active Trades') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Active Trades
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     {/* Valor principal */}
@@ -461,10 +478,19 @@ export default function Dashboard() {
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Margin') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Total Margin
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     {/* Valor principal */}
@@ -498,10 +524,19 @@ export default function Dashboard() {
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Fees') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Estimated Fees
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     {/* Valor principal */}
@@ -558,10 +593,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Available Margin') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Available Margin
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -619,10 +663,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Balance') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Estimated Balance
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -667,10 +720,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Invested') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Total Invested
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -711,10 +773,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Net Profit') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Net Profit
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -759,10 +830,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Fees Paid') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Fees Paid
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -800,10 +880,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Success Rate') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Success Rate
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -855,10 +944,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Profitability') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Total Profitability
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -899,10 +997,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Trades') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Total Trades
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">
@@ -928,11 +1035,20 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Winning Trades') }}
-              />
-            </div>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Winning Trades
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
+                    </div>
                     
                     <div className="mb-3">
                       <div className="text-number-lg text-green-200">
@@ -957,10 +1073,19 @@ export default function Dashboard() {
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Lost Trades') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-h3 text-vibrant">
+                          Lost Trades
+                        </CardTitle>
+                        <Tooltip 
+                          content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                          position="top"
+                          delay={200}
+                          className="z-50"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     <div className="mb-3">

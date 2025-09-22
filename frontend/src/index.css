@@ -572,6 +572,25 @@
     .dashboard-card-subtitle {
       font-size: 0.75rem !important;
     }
+
+    /* Ajustes para valores responsivos em mobile */
+    .text-number-lg {
+      font-size: 1.25rem !important; /* 20px */
+    }
+    
+    .text-number-md {
+      font-size: 1.125rem !important; /* 18px */
+    }
+    
+    .text-number-sm {
+      font-size: 1rem !important; /* 16px */
+    }
+
+    /* Ajustes para SatsIcon em mobile */
+    .sats-icon-mobile {
+      width: 16px !important;
+      height: 16px !important;
+    }
     
   }
 
@@ -1142,6 +1161,10 @@
     background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(234, 88, 12, 0.25), rgba(194, 65, 12, 0.2));
   }
 
+  .gradient-card-gray::before {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(75, 85, 99, 0.25), rgba(55, 65, 81, 0.2));
+  }
+
   .gradient-card .card-content {
     position: relative;
     z-index: 10;
@@ -1155,6 +1178,60 @@
 
   .icon-float {
     animation: subtle-float 2s ease-in-out infinite;
+  }
+
+  /* Animações de transição para cards */
+  @keyframes card-color-transition {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+  }
+
+  .card-color-transition {
+    animation: card-color-transition 0.5s ease-in-out;
+  }
+
+  /* Animação de pulso para valores em mudança */
+  @keyframes value-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  .value-pulse {
+    animation: value-pulse 0.3s ease-in-out;
+  }
+
+  /* Animação de fade-in para novos cards */
+  @keyframes card-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .card-fade-in {
+    animation: card-fade-in 0.6s ease-out;
+  }
+
+  /* Animação de shimmer para loading */
+  @keyframes shimmer {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
   }
 
   /* Transparent Textarea */

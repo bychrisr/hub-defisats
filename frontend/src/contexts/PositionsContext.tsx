@@ -133,6 +133,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     totalFees: 0,
     totalTradingFees: 0,
     totalFundingCost: 0,
+    estimatedFees: 0,
   });
   
   const [credentialsError, setCredentialsError] = useState<string | null>(null);
@@ -326,16 +327,88 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       totalPL: totalPL
     });
 
-    // Calcular saldo estimado (saldo da wallet + P&L atual + profit estimado)
+    // Calcular saldo estimado seguindo a fórmula correta da LN Markets
     const walletBalance = userBalance?.total_balance || 0;
-    const estimatedBalance = walletBalance + totalPL + finalEstimatedProfit;
     
-    console.log('💰 SALDO ESTIMADO CALCULADO:', {
+    // 1. Soma dos saldos estimados das posições running
+    // Para cada posição: margin + pl + maintenance_margin
+    const somaSaldosPosicoes = positions.reduce((sum, pos) => {
+      if (pos.status === 'running') {
+        const saldoPosicao = pos.margin + pos.pnl + (pos.maintenance_margin || 0);
+        console.log('💰 SALDO POSIÇÃO:', {
+          positionId: pos.id,
+          margin: pos.margin,
+          pl: pos.pnl,
+          maintenance_margin: pos.maintenance_margin || 0,
+          saldoPosicao
+        });
+        return sum + saldoPosicao;
+      }
+      return sum;
+    }, 0);
+    
+    // 2. Taxas de fechamento estimadas (já calculadas em estimatedFees)
+    const taxasFechamentoEstimadas = estimatedFees;
+    
+    // 3. Taxas de funding estimadas para 24h (3 eventos)
+    // Usar carryFeeRate do market index (que vem do ticker da LN Markets)
+    const fundingRate = marketIndex?.rate || 0; // Este é o carryFeeRate
+    const precoIndex = marketIndex?.index || 0;
+    
+    const somaFunding24h = positions.reduce((sum, pos) => {
+      if (pos.status === 'running' && precoIndex > 0) {
+        // Funding por evento: (quantity / preco_index) * funding_rate * 100_000_000
+        const fundingPorEvento = (pos.quantity / precoIndex) * fundingRate * 100_000_000;
+        
+        // Aplicar lógica de direção (long/short)
+        let fundingTotal;
+        if (pos.side === 'long') {
+          // Long: paga se funding > 0, recebe se funding < 0
+          fundingTotal = fundingRate > 0 ? 3 * Math.abs(fundingPorEvento) : 3 * (-Math.abs(fundingPorEvento));
+        } else {
+          // Short: recebe se funding > 0, paga se funding < 0
+          fundingTotal = fundingRate > 0 ? 3 * (-Math.abs(fundingPorEvento)) : 3 * Math.abs(fundingPorEvento);
+        }
+        
+        // Debug detalhado para verificar a lógica
+        console.log('💰 FUNDING DEBUG:', {
+          positionId: pos.id,
+          side: pos.side,
+          fundingRate,
+          fundingPorEvento,
+          fundingTotal: Math.round(fundingTotal),
+          isLong: pos.side === 'long',
+          isFundingPositive: fundingRate > 0,
+          expectedSign: pos.side === 'long' ? (fundingRate > 0 ? 'positive (paga)' : 'negative (recebe)') : (fundingRate > 0 ? 'negative (recebe)' : 'positive (paga)')
+        });
+        
+        console.log('💰 FUNDING 24H POSIÇÃO:', {
+          positionId: pos.id,
+          side: pos.side,
+          quantity: pos.quantity,
+          fundingRate,
+          precoIndex,
+          fundingPorEvento,
+          fundingTotal: Math.round(fundingTotal)
+        });
+        
+        return sum + Math.round(fundingTotal);
+      }
+      return sum;
+    }, 0);
+    
+    // Fórmula correta do saldo estimado
+    const estimatedBalance = walletBalance + somaSaldosPosicoes - taxasFechamentoEstimadas - somaFunding24h;
+    
+    console.log('💰 SALDO ESTIMADO CALCULADO (FÓRMULA CORRETA):', {
       walletBalance,
-      totalPL,
-      finalEstimatedProfit,
+      somaSaldosPosicoes,
+      taxasFechamentoEstimadas,
+      somaFunding24h,
       estimatedBalance,
-      userBalance: userBalance
+      fundingRate,
+      precoIndex,
+      positionsCount: positions.filter(p => p.status === 'running').length
     });
     
     return {
@@ -647,7 +720,11 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           isLoading: false,
           error: null,
           marketIndex,
-          marketIndexError
+          marketIndexError,
+          totalFees: 0,
+          totalTradingFees: 0,
+          totalFundingCost: 0,
+          estimatedFees: 0,
         });
       }
     } catch (error) {
@@ -708,6 +785,10 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         error: null,
         marketIndex: null,
         marketIndexError: null,
+        totalFees: 0,
+        totalTradingFees: 0,
+        totalFundingCost: 0,
+        estimatedFees: 0,
       });
     }
   }, [isAuthenticated, isAdmin]);
