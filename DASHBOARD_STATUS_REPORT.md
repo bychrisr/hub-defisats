@@ -3,6 +3,8 @@
 ## 🎯 Status Atual (22 de Setembro de 2025)
 
 ### ✅ Cards Funcionando
+
+#### Cards Básicos
 1. **Total Invested** - ✅ Funcionando
    - **Valor**: 156,341 sats
    - **Fonte**: `estimatedBalance.data.total_invested`
@@ -22,6 +24,27 @@
    - **Valor**: -11,300 sats
    - **Fonte**: `positionsData.totalPL`
    - **Backend**: PnL das posições atuais
+
+#### Cards Avançados (v2.0)
+5. **Win Streak** - ✅ Funcionando
+   - **Valor**: 0 (sequência de vitórias)
+   - **Fonte**: `estimatedBalance.data.win_streak`
+   - **Backend**: Cálculo de vitórias consecutivas
+
+6. **Best Trade** - ✅ Funcionando
+   - **Valor**: 801 sats
+   - **Fonte**: `estimatedBalance.data.best_trade`
+   - **Backend**: Maior lucro em trade único
+
+7. **Risk/Reward Ratio** - ✅ Funcionando
+   - **Valor**: 0.086
+   - **Fonte**: `estimatedBalance.data.risk_reward_ratio`
+   - **Backend**: Relação ganho médio/perda média
+
+8. **Trading Frequency** - ✅ Funcionando
+   - **Valor**: 0 trades/dia
+   - **Fonte**: `estimatedBalance.data.trading_frequency`
+   - **Backend**: Trades por dia (últimos 30 dias)
 
 ### 🔧 Configuração Atual
 
@@ -72,15 +95,21 @@ docker compose -f config/docker/docker-compose.dev.yml ps
 
 ## 📋 Próximos Passos
 
-### 1. Cards Sugeridos para Implementar
-- [ ] **Success Rate** - Taxa de sucesso dos trades
-- [ ] **Active Positions** - Número de posições ativas
-- [ ] **Total Trades** - Total de trades executados
-- [ ] **Win Rate** - Taxa de trades vencedores
-- [ ] **Average PnL** - PnL médio por trade
-- [ ] **Max Drawdown** - Maior perda consecutiva
-- [ ] **Sharpe Ratio** - Índice de Sharpe
-- [ ] **Volatility** - Volatilidade das posições
+### 1. Cards Implementados ✅
+- [x] **Success Rate** - Taxa de sucesso dos trades
+- [x] **Active Positions** - Número de posições ativas
+- [x] **Total Trades** - Total de trades executados
+- [x] **Win Rate** - Taxa de trades vencedores
+- [x] **Average PnL** - PnL médio por trade
+- [x] **Max Drawdown** - Maior perda consecutiva
+- [x] **Sharpe Ratio** - Índice de Sharpe
+- [x] **Volatility** - Volatilidade das posições
+
+### 2. Novos Cards Avançados ✅ (v2.0)
+- [x] **Win Streak** - Sequência de vitórias consecutivas
+- [x] **Best Trade** - Maior lucro em um único trade
+- [x] **Risk/Reward Ratio** - Eficiência da estratégia
+- [x] **Trading Frequency** - Trades por dia (últimos 30 dias)
 
 ### 2. Melhorias Técnicas
 - [ ] **Cache de Dados**: Implementar cache para reduzir chamadas à API
