@@ -1,7 +1,7 @@
 {
-  "name": "hub-defisats-backend",
+  "name": "axisor-bot-backend",
   "version": "0.0.1",
-  "description": "Backend API for hub-defisats - LN Markets automation platform",
+  "description": "Backend API for axisor-bot - LN Markets automation platform",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -58,7 +58,7 @@
     "fastify",
     "typescript"
   ],
-  "author": "hub-defisats",
+  "author": "axisor-bot",
   "license": "MIT",
   "dependencies": {
     "@fastify/cookie": "^10.0.1",
