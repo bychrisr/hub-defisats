@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PlanAvatar } from '@/components/ui/PlanAvatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/stores/auth';
 import { useNavigate } from 'react-router-dom';
@@ -88,11 +89,12 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {user ? getUserInitials(user.email) : 'U'}
-                  </AvatarFallback>
-                </Avatar>
+                <PlanAvatar
+                  email={user?.email}
+                  planType={(user as any)?.plan_type || 'free'}
+                  size="md"
+                  showBadge={true}
+                />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>

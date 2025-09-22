@@ -14,6 +14,7 @@ import {
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuthStore } from '@/stores/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PlanAvatar } from '@/components/ui/PlanAvatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -244,19 +245,13 @@ export const DesktopHeader = () => {
                     isScrolled ? 'h-6 w-6' : 'h-8 w-8'
                   )}
                 >
-                  <Avatar className={cn(
-                    'transition-all duration-300',
-                    isScrolled ? 'h-6 w-6' : 'h-8 w-8'
-                  )}>
-                    <AvatarFallback className={cn(
-                      'font-medium transition-all duration-300 bg-primary text-primary-foreground',
-                      isScrolled ? 'text-xs' : 'text-xs'
-                    )}>
-                      {user ? getUserInitials(user.email) : 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  {/* Online Status Indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-background online-indicator" />
+                  <PlanAvatar
+                    email={user?.email}
+                    planType={(user as any)?.plan_type || 'free'}
+                    size={isScrolled ? 'sm' : 'md'}
+                    showBadge={true}
+                    className="relative"
+                  />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 

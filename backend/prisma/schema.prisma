@@ -38,6 +38,9 @@ model User {
   ln_markets_passphrase      String?              @db.VarChar(255)
   plan_type                  PlanType             @default(free)
   preferences                Json?
+  bio                        String?              @db.Text
+  birthday                   DateTime?            @db.Date
+  website                    String?              @db.VarChar(255)
   admin_user                 AdminUser?
   automations                Automation[]
   backtest_reports           BacktestReport[]

@@ -333,16 +333,50 @@ export class AuthController {
       
       const isAdmin = adminUser?.role === 'superadmin';
 
-      // Return user info
+      // Decrypt LN Markets credentials for display
+      let decryptedCredentials = {
+        ln_markets_api_key: (user as any).ln_markets_api_key,
+        ln_markets_api_secret: (user as any).ln_markets_api_secret,
+        ln_markets_passphrase: (user as any).ln_markets_passphrase,
+      };
+      
+      try {
+        if ((user as any).ln_markets_api_key) {
+          console.log('🔓 AUTH ME - Decrypting API key...');
+          decryptedCredentials.ln_markets_api_key = this.authService.decryptData((user as any).ln_markets_api_key);
+        }
+        
+        if ((user as any).ln_markets_api_secret) {
+          console.log('🔓 AUTH ME - Decrypting API secret...');
+          decryptedCredentials.ln_markets_api_secret = this.authService.decryptData((user as any).ln_markets_api_secret);
+        }
+        
+        if ((user as any).ln_markets_passphrase) {
+          console.log('🔓 AUTH ME - Decrypting passphrase...');
+          decryptedCredentials.ln_markets_passphrase = this.authService.decryptData((user as any).ln_markets_passphrase);
+        }
+        
+        console.log('🔓 AUTH ME - All credentials decrypted for display');
+      } catch (error) {
+        console.error('❌ AUTH ME - Error decrypting credentials:', error);
+        // Return encrypted data with indication if decryption fails
+        decryptedCredentials = {
+          ln_markets_api_key: (user as any).ln_markets_api_key ? '[ENCRYPTED]' : null,
+          ln_markets_api_secret: (user as any).ln_markets_api_secret ? '[ENCRYPTED]' : null,
+          ln_markets_passphrase: (user as any).ln_markets_passphrase ? '[ENCRYPTED]' : null,
+        };
+      }
+
+      // Return user info with decrypted credentials
       return reply.status(200).send({
         id: user.id,
         email: user.email,
         plan_type: user.plan_type,
         created_at: (user as any).created_at,
         last_activity_at: (user as any).last_activity_at,
-        ln_markets_api_key: (user as any).ln_markets_api_key,
-        ln_markets_api_secret: (user as any).ln_markets_api_secret,
-        ln_markets_passphrase: (user as any).ln_markets_passphrase,
+        ln_markets_api_key: decryptedCredentials.ln_markets_api_key,
+        ln_markets_api_secret: decryptedCredentials.ln_markets_api_secret,
+        ln_markets_passphrase: decryptedCredentials.ln_markets_passphrase,
         is_admin: isAdmin,
       });
     } catch (error) {
