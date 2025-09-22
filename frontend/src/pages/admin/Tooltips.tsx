@@ -314,9 +314,9 @@ export default function Tooltips() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
-      <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
+        {/* Header */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
             <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
@@ -327,16 +327,16 @@ export default function Tooltips() {
                       <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
                         <HelpCircle className="h-6 w-6 text-primary" />
                       </div>
-                      <div>
+          <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
                           Gerenciamento de Tooltips
                         </h1>
                         <p className="text-text-secondary">Configure tooltips e cards do dashboard</p>
                       </div>
                     </div>
-                  </div>
+          </div>
                   <div className="flex items-center space-x-4">
-                    <Button
+            <Button
                       onClick={fetchData}
                       disabled={refreshing}
                       className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
@@ -344,8 +344,8 @@ export default function Tooltips() {
                     >
                       <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                       Refresh
-                    </Button>
-                  </div>
+            </Button>
+          </div>
                 </div>
               </CardContent>
             </Card>
@@ -408,9 +408,9 @@ export default function Tooltips() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+        </div>
 
-          {/* Tabs */}
+        {/* Tabs */}
           <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
             <CardContent className="p-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -429,17 +429,17 @@ export default function Tooltips() {
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Tooltips
                   </TabsTrigger>
-                </TabsList>
+          </TabsList>
 
-                {/* Cards Tab */}
-                <TabsContent value="cards" className="space-y-6">
+          {/* Cards Tab */}
+          <TabsContent value="cards" className="space-y-6">
                   {/* Filters */}
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
                       <Filter className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-lg font-semibold text-text-primary">Filtros</h3>
-                  </div>
+                      </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="relative">
                       <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -503,7 +503,7 @@ export default function Tooltips() {
                             </div>
                           </TableHead>
                           <TableHead className="font-semibold text-text-primary">
-                            <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                               <Settings className="h-4 w-4" />
                               Ações
                             </div>
@@ -562,10 +562,10 @@ export default function Tooltips() {
                                   ) : (
                                     <Eye className="h-4 w-4" />
                                   )}
-                                </Button>
-                                <Button
+                          </Button>
+                          <Button
                                   variant="ghost"
-                                  size="sm"
+                            size="sm"
                                   onClick={() => {
                                     setSelectedCard(card);
                                     setEditDialogOpen(true);
@@ -573,18 +573,18 @@ export default function Tooltips() {
                                   className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                                 >
                                   <Edit className="h-4 w-4" />
-                                </Button>
-                              </div>
+                          </Button>
+                      </div>
                             </TableCell>
                           </TableRow>
-                        ))}
+              ))}
                       </TableBody>
                     </Table>
-                  </div>
-                </TabsContent>
+            </div>
+          </TabsContent>
 
-                {/* Tooltips Tab */}
-                <TabsContent value="tooltips" className="space-y-6">
+          {/* Tooltips Tab */}
+          <TabsContent value="tooltips" className="space-y-6">
                   {/* Tooltips Table */}
                   <div className="overflow-x-auto rounded-lg border border-border/50">
                     <Table>
@@ -647,7 +647,7 @@ export default function Tooltips() {
                             <TableCell>
                               <div className="text-sm text-text-primary max-w-xs truncate">
                                 {tooltip.tooltip_text}
-                              </div>
+                    </div>
                             </TableCell>
                             <TableCell>
                               <Badge
@@ -663,9 +663,9 @@ export default function Tooltips() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center space-x-2">
-                                <Button
+                      <Button
                                   variant="ghost"
-                                  size="sm"
+                        size="sm"
                                   onClick={() => handleToggleTooltipStatus(tooltip)}
                                   className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                                 >
@@ -676,25 +676,25 @@ export default function Tooltips() {
                                   )}
                                 </Button>
                                 <Button
-                                  variant="ghost"
+                        variant="ghost"
                                   size="sm"
                                   onClick={() => {
                                     setSelectedTooltip(tooltip);
                                     setEditDialogOpen(true);
                                   }}
                                   className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              </div>
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
                             </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
-                  </div>
-                </TabsContent>
-              </Tabs>
+            </div>
+          </TabsContent>
+        </Tabs>
             </CardContent>
           </Card>
         </div>
@@ -791,7 +791,7 @@ export default function Tooltips() {
                     <Label htmlFor="card_active">Card Ativo</Label>
                   </div>
                 </div>
-              </div>
+                </div>
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -846,20 +846,20 @@ export default function Tooltips() {
             )}
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
+                  <Button
+                    variant="outline"
               onClick={() => setEditDialogOpen(false)}
               className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/70"
             >
-              Cancelar
-            </Button>
-            <Button
+                    Cancelar
+                  </Button>
+                  <Button
               onClick={activeTab === 'cards' ? handleSaveCard : handleSaveTooltip}
               className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
-            >
-              <Save className="h-4 w-4 mr-2" />
+                  >
+                    <Save className="h-4 w-4 mr-2" />
               Salvar
-            </Button>
+                  </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

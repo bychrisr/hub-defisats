@@ -493,7 +493,7 @@ export default function Profile() {
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-600 rounded-lg">
                 <Hash className="h-5 w-5 text-white" />
-              </div>
+                  </div>
                   <div>
                 <p className="font-medium">Discord</p>
                 <p className="text-sm text-muted-foreground">

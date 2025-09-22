@@ -24,12 +24,26 @@ import {
   Shield,
   Activity,
   Database,
-  BarChart3
+  BarChart3,
+  FileText,
+  Cpu,
+  Bot,
+  BarChart2,
+  Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Trading Analytics', href: '/admin/trading-analytics', icon: BarChart3 },
+  { name: 'Trade Logs', href: '/admin/trade-logs', icon: FileText },
+  { name: 'Payment Analytics', href: '/admin/payment-analytics', icon: CreditCard },
+  { name: 'Backtest Reports', href: '/admin/backtest-reports', icon: BarChart2 },
+  { name: 'Simulation Analytics', href: '/admin/simulation-analytics', icon: Cpu },
+  { name: 'Automation Management', href: '/admin/automation-management', icon: Bot },
+  { name: 'Notification Management', href: '/admin/notification-management', icon: Bell },
+  { name: 'System Reports', href: '/admin/system-reports', icon: FileText },
+  { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
   { name: 'Plans', href: '/admin/plans', icon: CreditCard },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Coupons', href: '/admin/coupons', icon: Gift },

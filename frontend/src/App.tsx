@@ -43,6 +43,15 @@ import AdminAlerts from '@/pages/admin/Alerts';
 import AdminSettings from '@/pages/admin/Settings';
 import AdminTooltips from '@/pages/admin/Tooltips';
 import { Plans } from '@/pages/admin/Plans';
+import TradingAnalytics from '@/pages/admin/TradingAnalytics';
+import TradeLogs from '@/pages/admin/TradeLogs';
+import PaymentAnalytics from '@/pages/admin/PaymentAnalytics';
+import BacktestReports from '@/pages/admin/BacktestReports';
+import SimulationAnalytics from '@/pages/admin/SimulationAnalytics';
+import AutomationManagement from '@/pages/admin/AutomationManagement';
+import NotificationManagement from '@/pages/admin/NotificationManagement';
+import SystemReports from '@/pages/admin/SystemReports';
+import AuditLogs from '@/pages/admin/AuditLogs';
 import TestPermissions from '@/pages/TestPermissions';
 import DesignSystem from '@/pages/DesignSystem';
 
@@ -400,6 +409,15 @@ const App = () => {
               }
             >
               <Route index element={<AdminDashboard />} />
+              <Route path="trading-analytics" element={<TradingAnalytics />} />
+              <Route path="trade-logs" element={<TradeLogs />} />
+              <Route path="payment-analytics" element={<PaymentAnalytics />} />
+              <Route path="backtest-reports" element={<BacktestReports />} />
+              <Route path="simulation-analytics" element={<SimulationAnalytics />} />
+              <Route path="automation-management" element={<AutomationManagement />} />
+              <Route path="notification-management" element={<NotificationManagement />} />
+              <Route path="system-reports" element={<SystemReports />} />
+              <Route path="audit-logs" element={<AuditLogs />} />
               <Route path="menus" element={<AdminMenuManagement />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />

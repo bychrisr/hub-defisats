@@ -220,7 +220,7 @@ export default function Alerts() {
       // Simular toggle
       await new Promise(resolve => setTimeout(resolve, 500));
       toast.success(`Alerta ${alert.is_active ? 'desativado' : 'ativado'} com sucesso!`);
-      fetchAlerts();
+    fetchAlerts();
     } catch (error) {
       toast.error('Erro ao alterar status do alerta');
     }
@@ -317,7 +317,7 @@ export default function Alerts() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
+      {/* Header */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
             <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
@@ -328,24 +328,24 @@ export default function Alerts() {
                       <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
                         <Bell className="h-6 w-6 text-primary" />
                       </div>
-                      <div>
+        <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
                           Gerenciamento de Alertas
                         </h1>
                         <p className="text-text-secondary">Monitore e gerencie alertas do sistema</p>
                       </div>
                     </div>
-                  </div>
+        </div>
                   <div className="flex items-center space-x-4">
-                    <Button
-                      onClick={fetchAlerts}
-                      disabled={refreshing}
+          <Button 
+            onClick={fetchAlerts} 
+            disabled={refreshing}
                       className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
-                      size="sm"
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </Button>
+            size="sm"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
                     <Button
                       onClick={() => setCreateDialogOpen(true)}
                       className="backdrop-blur-sm bg-green-600/90 hover:bg-green-600 text-white shadow-lg shadow-green-600/25"
@@ -353,11 +353,11 @@ export default function Alerts() {
                       <Plus className="h-4 w-4 mr-2" />
                       Novo Alerta
                     </Button>
-                  </div>
+        </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
+      </div>
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -372,8 +372,8 @@ export default function Alerts() {
                     <Bell className="h-6 w-6 text-blue-500" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
             <Card className="gradient-card-green profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
               <CardContent className="p-6">
@@ -386,8 +386,8 @@ export default function Alerts() {
                     <CheckCircle className="h-6 w-6 text-green-500" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
             <Card className="gradient-card-yellow profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
               <CardContent className="p-6">
@@ -400,8 +400,8 @@ export default function Alerts() {
                     <AlertTriangle className="h-6 w-6 text-yellow-500" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
             <Card className="gradient-card-purple profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
               <CardContent className="p-6">
@@ -414,9 +414,9 @@ export default function Alerts() {
                     <CheckCircle className="h-6 w-6 text-purple-500" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+          </CardContent>
+        </Card>
+      </div>
 
           {/* Filters */}
           <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
@@ -550,7 +550,7 @@ export default function Alerts() {
                         <TableCell>
                           <Badge className={getSeverityColor(alert.severity)}>
                             <div className="flex items-center gap-1">
-                              {getSeverityIcon(alert.severity)}
+                    {getSeverityIcon(alert.severity)}
                               {alert.severity.toUpperCase()}
                             </div>
                           </Badge>
@@ -566,7 +566,7 @@ export default function Alerts() {
                         <TableCell>
                           <div className="text-sm text-text-primary">
                             {new Date(alert.created_at).toLocaleString()}
-                          </div>
+                  </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -579,13 +579,13 @@ export default function Alerts() {
                               )}
                             >
                               {alert.is_active ? 'Ativo' : 'Resolvido'}
-                            </Badge>
-                            {alert.is_global && (
+                        </Badge>
+                        {alert.is_global && (
                               <Badge className="bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/25">
                                 Global
                               </Badge>
-                            )}
-                          </div>
+                        )}
+                      </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
@@ -692,8 +692,8 @@ export default function Alerts() {
                     <SelectItem value="system">Sistema</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-            </div>
+                      </div>
+                    </div>
             <div className="space-y-2">
               <Label htmlFor="alert_description">Descrição</Label>
               <Textarea
@@ -723,8 +723,8 @@ export default function Alerts() {
                   className="data-[state=checked]:bg-red-500 data-[state=unchecked]:bg-gray-500"
                 />
                 <Label htmlFor="alert_action_required">Ação Necessária</Label>
-              </div>
-            </div>
+                  </div>
+                </div>
           </div>
           <DialogFooter>
             <Button

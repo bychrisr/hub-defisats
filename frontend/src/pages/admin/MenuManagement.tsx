@@ -386,9 +386,9 @@ export default function MenuManagement() {
                       onClick={() => setEditDialogOpen(true)}
                       className="backdrop-blur-sm bg-green-600/90 hover:bg-green-600 text-white shadow-lg shadow-green-600/25"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Novo Item
-                    </Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Item
+        </Button>
                   </div>
                 </div>
               </CardContent>
@@ -452,7 +452,7 @@ export default function MenuManagement() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+      </div>
 
           {/* Tabs */}
           <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
@@ -472,8 +472,8 @@ export default function MenuManagement() {
                   >
                     <Navigation className="h-4 w-4 mr-2" />
                     Tipos de Menu
-                  </TabsTrigger>
-                </TabsList>
+            </TabsTrigger>
+        </TabsList>
 
                 {/* Items Tab */}
                 <TabsContent value="items" className="space-y-6">
@@ -510,7 +510,7 @@ export default function MenuManagement() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos</SelectItem>
-                        {menuTypes.map(type => (
+        {menuTypes.map(type => (
                           <SelectItem key={type.id} value={type.id}>{type.displayName}</SelectItem>
                         ))}
                       </SelectContent>
@@ -538,19 +538,19 @@ export default function MenuManagement() {
                             <div className="flex items-center gap-2">
                               <ArrowUp className="h-4 w-4" />
                               Ordem
-                            </div>
+                        </div>
                           </TableHead>
                           <TableHead className="font-semibold text-text-primary">
                             <div className="flex items-center gap-2">
                               <Settings className="h-4 w-4" />
                               Status
-                            </div>
+                          </div>
                           </TableHead>
                           <TableHead className="font-semibold text-text-primary">
                             <div className="flex items-center gap-2">
                               <Settings className="h-4 w-4" />
                               Ações
-                            </div>
+                        </div>
                           </TableHead>
                         </TableRow>
                       </TableHeader>
@@ -568,11 +568,11 @@ export default function MenuManagement() {
                                 <div className="flex items-center gap-2">
                                   {getIconComponent(item.icon)}
                                   <span className="font-medium text-text-primary">{item.name}</span>
-                                  {item.badge && (
+                        {item.badge && (
                                     <Badge className={getBadgeColor(item.badgeColor || 'blue')}>
-                                      {item.badge}
-                                    </Badge>
-                                  )}
+                            {item.badge}
+                          </Badge>
+                        )}
                                 </div>
                                 <div className="text-sm text-text-secondary">{item.description}</div>
                                 <div className="text-xs text-text-secondary font-mono">{item.href}</div>
@@ -596,8 +596,8 @@ export default function MenuManagement() {
                                       : 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25'
                                   )}
                                 >
-                                  {item.isActive ? 'Ativo' : 'Inativo'}
-                                </Badge>
+                            {item.isActive ? 'Ativo' : 'Inativo'}
+                          </Badge>
                                 <Badge
                                   className={cn(
                                     "font-semibold px-3 py-1 rounded-full border-0",
@@ -606,9 +606,9 @@ export default function MenuManagement() {
                                       : 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25'
                                   )}
                                 >
-                                  {item.isVisible ? 'Visível' : 'Oculto'}
-                                </Badge>
-                              </div>
+                            {item.isVisible ? 'Visível' : 'Oculto'}
+                          </Badge>
+                        </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center space-x-2">
@@ -624,9 +624,9 @@ export default function MenuManagement() {
                                     <Eye className="h-4 w-4" />
                                   )}
                                 </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
+                        <Button
+                          variant="ghost"
+                          size="sm"
                                   onClick={() => handleToggleVisibility(item)}
                                   className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                                 >
@@ -635,30 +635,30 @@ export default function MenuManagement() {
                                   ) : (
                                     <Eye className="h-4 w-4" />
                                   )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                                   onClick={() => {
                                     setSelectedItem(item);
                                     setEditDialogOpen(true);
                                   }}
                                   className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                                   onClick={() => {
                                     setSelectedItem(item);
                                     setDeleteDialogOpen(true);
                                   }}
                                   className="hover:bg-destructive hover:text-destructive-foreground cursor-pointer transition-colors text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -733,17 +733,17 @@ export default function MenuManagement() {
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                              </div>
+                    </div>
                             </TableCell>
                           </TableRow>
-                        ))}
+                  ))}
                       </TableBody>
                     </Table>
-                  </div>
+                </div>
                 </TabsContent>
               </Tabs>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
         </div>
       </div>
 
@@ -764,7 +764,7 @@ export default function MenuManagement() {
           <div className="space-y-6">
             {activeTab === 'items' ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="item_name">Nome</Label>
                     <Input
@@ -776,7 +776,7 @@ export default function MenuManagement() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="item_mobile_name">Nome Mobile</Label>
-                    <Input
+                  <Input
                       id="item_mobile_name"
                       value={itemForm.mobileName}
                       onChange={(e) => setItemForm({ ...itemForm, mobileName: e.target.value })}
@@ -807,10 +807,10 @@ export default function MenuManagement() {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
+              </div>
                   <div className="space-y-2">
                     <Label htmlFor="item_order">Ordem</Label>
-                    <Input
+                  <Input
                       id="item_order"
                       type="number"
                       value={itemForm.order}
@@ -870,7 +870,7 @@ export default function MenuManagement() {
                       className="data-[state=checked]:bg-blue-500 data-[state=unchecked]:bg-gray-500"
                     />
                     <Label htmlFor="item_visible">Item Visível</Label>
-                  </div>
+                </div>
                 </div>
               </div>
             ) : (
@@ -886,7 +886,7 @@ export default function MenuManagement() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="type_display_name">Nome de Exibição</Label>
-                  <Input
+                <Input
                     id="type_display_name"
                     value={typeForm.displayName}
                     onChange={(e) => setTypeForm({ ...typeForm, displayName: e.target.value })}
@@ -906,20 +906,20 @@ export default function MenuManagement() {
             )}
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
+                <Button
+                  variant="outline"
               onClick={() => setEditDialogOpen(false)}
               className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/70"
             >
-              Cancelar
-            </Button>
+                  Cancelar
+                </Button>
             <Button
               onClick={activeTab === 'items' ? handleSaveItem : handleSaveType}
               className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
             >
-              <Save className="h-4 w-4 mr-2" />
-              Salvar
-            </Button>
+                  <Save className="h-4 w-4 mr-2" />
+                  Salvar
+                </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,13 +70,17 @@ export default function Users() {
     user: null
   });
 
-  const fetchUsers = async (page = 1) => {
+  // Ref para controlar se é o carregamento inicial
+  const isInitialLoad = useRef(true);
+  const lastFilters = useRef(filters);
+
+  const fetchUsers = async (page = 1, limit = 20) => {
     try {
-      console.log('🔍 USERS COMPONENT - Starting fetchUsers');
+      console.log('🔍 USERS COMPONENT - Starting fetchUsers', { page, limit, filters });
       setRefreshing(true);
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: pagination.limit.toString(),
+        limit: limit.toString(),
         ...(filters.search && { search: filters.search }),
         ...(filters.plan_type && filters.plan_type !== 'all' && { plan_type: filters.plan_type }),
         ...(filters.is_active && filters.is_active !== 'all' && { is_active: filters.is_active })
@@ -99,9 +103,35 @@ export default function Users() {
     }
   };
 
+  // Apenas carrega uma vez no início
   useEffect(() => {
+    console.log('🔍 USERS COMPONENT - Initial load useEffect triggered');
     fetchUsers();
-  }, [filters]);
+    isInitialLoad.current = false;
+  }, []);
+
+  // Recarrega quando os filtros mudam (mas não em loop)
+  useEffect(() => {
+    console.log('🔍 USERS COMPONENT - Filter change useEffect triggered', { 
+      isInitialLoad: isInitialLoad.current,
+      filters: { search: filters.search, plan_type: filters.plan_type, is_active: filters.is_active },
+      lastFilters: lastFilters.current
+    });
+    
+    // Só executa se não for o carregamento inicial e se os filtros realmente mudaram
+    if (!isInitialLoad.current) {
+      const filtersChanged = 
+        lastFilters.current.search !== filters.search ||
+        lastFilters.current.plan_type !== filters.plan_type ||
+        lastFilters.current.is_active !== filters.is_active;
+      
+      if (filtersChanged) {
+        console.log('🔍 USERS COMPONENT - Filters changed, executing fetchUsers');
+        lastFilters.current = { ...filters };
+        fetchUsers();
+      }
+    }
+  }, [filters.search, filters.plan_type, filters.is_active]);
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
@@ -536,3 +566,4 @@ export default function Users() {
     </div>
   );
 }
+
