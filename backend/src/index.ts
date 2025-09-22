@@ -35,6 +35,7 @@ import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
 import { planRoutes } from './routes/plan.routes';
 import { healthRoutes } from './routes/health.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
+import { uploadRoutes } from './routes/upload.routes';
 import { authMiddleware } from './middleware/auth.middleware';
 import { monitoring } from './services/monitoring.service';
 import { metrics } from './utils/metrics';
@@ -52,6 +53,7 @@ import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import websocket from '@fastify/websocket';
+import multipart from '@fastify/multipart';
 
 // Initialize monitoring
 // monitoring.initialize();
@@ -163,6 +165,15 @@ async function registerPlugins() {
     secret: config.jwt.secret,
   });
   console.log('✅ JWT plugin registered');
+
+  console.log('🔌 Registering multipart plugin...');
+  // Multipart for file uploads
+  await fastify.register(multipart, {
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB
+    }
+  });
+  console.log('✅ Multipart plugin registered');
 
   console.log('🔌 Registering WebSocket plugin...');
   // WebSocket
@@ -680,6 +691,9 @@ async function registerRoutes() {
   // Tooltip and Dashboard Card management (public routes - register last to avoid hook leakage)
   await fastify.register(tooltipRoutes, { prefix: '/api' });
   console.log('✅ Tooltip routes registered');
+  
+  await fastify.register(uploadRoutes);
+  console.log('✅ Upload routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler

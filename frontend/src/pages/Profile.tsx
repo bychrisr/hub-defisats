@@ -52,6 +52,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 const profileSchema = z.object({
   // Profile Information
@@ -134,6 +135,42 @@ export default function Profile() {
         return <Check className="h-3 w-3" />;
     }
   };
+
+  // Função para lidar com upload de imagem
+  const handleImageUpload = async (file: File | null) => {
+    setProfileImage(file);
+    
+    if (file) {
+      setIsUploadingImage(true);
+      try {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        const response = await fetch('/api/upload/avatar', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+        
+        const result = await response.json();
+        console.log('Upload successful:', result);
+        
+        setSuccess('Foto de perfil atualizada com sucesso!');
+        setTimeout(() => setSuccess(null), 5000);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        setError('Erro ao fazer upload da imagem. Tente novamente.');
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+  };
   const [showApiSecret, setShowApiSecret] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [showPassphrase, setShowPassphrase] = useState(false);
@@ -141,6 +178,8 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
   const { theme } = useTheme();
 
@@ -267,7 +306,7 @@ export default function Profile() {
   }
 
   if (!user) {
-    return (
+  return (
       <div className="flex items-center justify-center min-h-screen">
         <Alert>
           <AlertTriangle className="h-4 w-4" />
@@ -283,49 +322,64 @@ export default function Profile() {
   const renderProfileSection = () => (
     <div className="space-y-6">
       {/* About me Section */}
-      <Card>
-        <CardHeader>
+          <Card>
+            <CardHeader>
           <CardTitle className="text-xl font-semibold">About me</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+            </CardHeader>
+            <CardContent className="space-y-6">
           {/* Avatar Section */}
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <div className={cn(
-                "absolute -inset-1 rounded-full",
-                getPlanColors((user as any)?.plan_type || 'free').bg,
-                getPlanColors((user as any)?.plan_type || 'free').ring
-              )}></div>
-              <div className={cn(
-                "absolute -inset-0.5 rounded-full",
-                getPlanColors((user as any)?.plan_type || 'free').border,
-                "border-2"
-              )}></div>
-              <Avatar className="h-20 w-20 relative z-10">
-                <AvatarImage src="/avatars/01.png" />
-                <AvatarFallback className="text-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                  {user.email?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {/* Plan Icon Badge */}
-              <div className={cn(
-                "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center",
-                getPlanColors((user as any)?.plan_type || 'free').bg,
-                getPlanColors((user as any)?.plan_type || 'free').border,
-                "border-2"
-              )}>
-                {getPlanIcon((user as any)?.plan_type || 'free')}
+          <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className={cn(
+                  "absolute -inset-1 rounded-full",
+                  getPlanColors((user as any)?.plan_type || 'free').bg,
+                  getPlanColors((user as any)?.plan_type || 'free').ring
+                )}></div>
+                <div className={cn(
+                  "absolute -inset-0.5 rounded-full",
+                  getPlanColors((user as any)?.plan_type || 'free').border,
+                  "border-2"
+                )}></div>
+                <Avatar className="h-20 w-20 relative z-10">
+                  <AvatarImage src={profileImage ? URL.createObjectURL(profileImage) : "/avatars/01.png"} />
+                  <AvatarFallback className="text-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Plan Icon Badge */}
+                <div className={cn(
+                  "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center",
+                  getPlanColors((user as any)?.plan_type || 'free').bg,
+                  getPlanColors((user as any)?.plan_type || 'free').border,
+                  "border-2"
+                )}>
+                  {getPlanIcon((user as any)?.plan_type || 'free')}
+                </div>
+              </div>
+                <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Foto de Perfil</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Clique para editar sua foto de perfil
+                </p>
               </div>
             </div>
-            <div className="space-y-2">
-              <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <p className="text-sm text-muted-foreground cursor-pointer hover:text-blue-500">
-                Get Avatar Frame &gt;
-              </p>
-            </div>
+            
+            {/* Image Upload Component */}
+            <ImageUpload
+              onImageChange={handleImageUpload}
+              currentImage={profileImage ? URL.createObjectURL(profileImage) : undefined}
+              maxSize={5}
+              acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}
+              className="max-w-md"
+            />
+            
+            {isUploadingImage && (
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Fazendo upload da imagem...</span>
+              </div>
+            )}
           </div>
 
           {/* Form Fields */}
@@ -346,13 +400,13 @@ export default function Profile() {
                   {watchedFields.username?.length || 0}/20
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                 * Username can only be changed once per 7 days
-              </p>
+                  </p>
               {errors.username && (
                 <p className="text-sm text-red-500">{errors.username.message}</p>
               )}
-            </div>
+                </div>
 
             <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
@@ -373,7 +427,7 @@ export default function Profile() {
               {errors.bio && (
                 <p className="text-sm text-red-500">{errors.bio.message}</p>
               )}
-            </div>
+              </div>
 
 
             <div className="flex justify-end">
@@ -401,19 +455,19 @@ export default function Profile() {
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-black rounded-lg">
                 <Twitter className="h-5 w-5 text-white" />
-              </div>
-              <div>
+                  </div>
+                  <div>
                 <p className="font-medium">X (Twitter)</p>
                 <p className="text-sm text-muted-foreground">
                   Connect to your Twitter account to complete relevant tasks in Quest
                 </p>
-              </div>
-            </div>
+                    </div>
+                  </div>
             <Button variant="outline" size="sm" className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600">
               <Link className="mr-2 h-4 w-4" />
               Connect
             </Button>
-          </div>
+                </div>
 
           {/* Telegram */}
           <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -421,12 +475,12 @@ export default function Profile() {
               <div className="p-2 bg-blue-500 rounded-lg">
                 <MessageCircle className="h-5 w-5 text-white" />
               </div>
-              <div>
+                  <div>
                 <p className="font-medium">Telegram</p>
                 <p className="text-sm text-muted-foreground">
                   Connect to your Telegram account to complete relevant tasks in Quest
-                </p>
-              </div>
+                    </p>
+                  </div>
             </div>
             <Button variant="outline" size="sm" className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600">
               <Link className="mr-2 h-4 w-4" />
@@ -440,38 +494,38 @@ export default function Profile() {
               <div className="p-2 bg-indigo-600 rounded-lg">
                 <Hash className="h-5 w-5 text-white" />
               </div>
-              <div>
+                  <div>
                 <p className="font-medium">Discord</p>
                 <p className="text-sm text-muted-foreground">
                   Connect to your Discord account to complete relevant tasks in Quest
-                </p>
-              </div>
-            </div>
+                    </p>
+                  </div>
+                </div>
             <Button variant="outline" size="sm" className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600">
               <Link className="mr-2 h-4 w-4" />
               Connect
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            </CardContent>
+          </Card>
 
       {/* Community Section */}
-      <Card>
-        <CardHeader>
+          <Card>
+            <CardHeader>
           <CardTitle className="text-xl font-semibold">Community</CardTitle>
-        </CardHeader>
+            </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
-            <div>
+                  <div>
               <p className="font-medium">Blocked accounts</p>
               <p className="text-sm text-muted-foreground">
                 The people you block won't be able to follow or message you, and you won't see notifications from them.
               </p>
-            </div>
+                  </div>
             <Button variant="outline" size="sm" className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600">
               Manage
             </Button>
-          </div>
+                </div>
         </CardContent>
       </Card>
 
@@ -489,7 +543,7 @@ export default function Profile() {
             <Button variant="outline" size="sm" className="bg-red-600 hover:bg-red-700 text-white border-red-600">
               Request Account Deletion
             </Button>
-          </div>
+              </div>
         </CardContent>
       </Card>
     </div>
@@ -521,7 +575,7 @@ export default function Profile() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* API Key Card */}
               <div className="space-y-3">
@@ -531,35 +585,35 @@ export default function Profile() {
                     API Key
                   </Label>
                 </div>
-                <div className="relative">
-                  <Input
-                    id="ln_markets_api_key"
-                    type={showApiKey ? 'text' : 'password'}
-                    {...register('ln_markets_api_key')}
+                    <div className="relative">
+                      <Input
+                        id="ln_markets_api_key"
+                        type={showApiKey ? 'text' : 'password'}
+                        {...register('ln_markets_api_key')}
                     className={cn(
                       "pr-10 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
                       errors.ln_markets_api_key ? 'border-red-500' : ''
                     )}
                     placeholder="Enter your API key"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                  >
-                    {showApiKey ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                {errors.ln_markets_api_key && (
+                        onClick={() => setShowApiKey(!showApiKey)}
+                      >
+                        {showApiKey ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.ln_markets_api_key && (
                   <p className="text-xs text-red-500">{errors.ln_markets_api_key.message}</p>
-                )}
-              </div>
+                    )}
+                  </div>
 
               {/* API Secret Card */}
               <div className="space-y-3">
@@ -569,36 +623,36 @@ export default function Profile() {
                     API Secret
                   </Label>
                 </div>
-                <div className="relative">
-                  <Input
-                    id="ln_markets_api_secret"
-                    type={showApiSecret ? 'text' : 'password'}
-                    {...register('ln_markets_api_secret')}
+                    <div className="relative">
+                      <Input
+                        id="ln_markets_api_secret"
+                        type={showApiSecret ? 'text' : 'password'}
+                        {...register('ln_markets_api_secret')}
                     className={cn(
                       "pr-10 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
                       errors.ln_markets_api_secret ? 'border-red-500' : ''
                     )}
                     placeholder="Enter your API secret"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                    onClick={() => setShowApiSecret(!showApiSecret)}
-                  >
-                    {showApiSecret ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                {errors.ln_markets_api_secret && (
+                        onClick={() => setShowApiSecret(!showApiSecret)}
+                      >
+                        {showApiSecret ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.ln_markets_api_secret && (
                   <p className="text-xs text-red-500">{errors.ln_markets_api_secret.message}</p>
-                )}
+                    )}
               </div>
-            </div>
+                  </div>
 
             {/* Passphrase Card - Full Width */}
             <div className="space-y-3">
@@ -608,35 +662,35 @@ export default function Profile() {
                   Passphrase
                 </Label>
               </div>
-              <div className="relative">
-                <Input
-                  id="ln_markets_passphrase"
-                  type={showPassphrase ? 'text' : 'password'}
-                  {...register('ln_markets_passphrase')}
+                    <div className="relative">
+                      <Input
+                        id="ln_markets_passphrase"
+                        type={showPassphrase ? 'text' : 'password'}
+                        {...register('ln_markets_passphrase')}
                   className={cn(
                     "pr-10 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
                     errors.ln_markets_passphrase ? 'border-red-500' : ''
                   )}
                   placeholder="Enter your passphrase"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  onClick={() => setShowPassphrase(!showPassphrase)}
-                >
-                  {showPassphrase ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              {errors.ln_markets_passphrase && (
+                        onClick={() => setShowPassphrase(!showPassphrase)}
+                      >
+                        {showPassphrase ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.ln_markets_passphrase && (
                 <p className="text-xs text-red-500">{errors.ln_markets_passphrase.message}</p>
-              )}
-            </div>
+                    )}
+                </div>
 
             {/* Action Buttons */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -645,13 +699,13 @@ export default function Profile() {
                 <span>Your credentials are encrypted and stored securely</span>
               </div>
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
+                      <Button
+                        type="button"
+                        variant="outline"
                   className="border-gray-300 dark:border-gray-600"
                 >
                   Test Connection
-                </Button>
+                      </Button>
                 <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -663,10 +717,10 @@ export default function Profile() {
                   )}
                 </Button>
               </div>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
 
       {/* Future: Account Information Card */}
       <Card className="border-gray-200 dark:border-gray-700 opacity-60">
