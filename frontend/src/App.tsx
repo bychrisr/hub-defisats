@@ -6,6 +6,11 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { RealtimeDataProvider } from '@/contexts/RealtimeDataContext';
 import { PositionsProvider } from '@/contexts/PositionsContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import { AccountProvider } from '@/contexts/AccountContext';
+import { VersionProvider } from '@/contexts/VersionContext';
+import UpdateNotification from '@/components/UpdateNotification';
+import RouteRedirectMiddleware from '@/components/RouteRedirectMiddleware';
 import { Layout } from '@/components/layout/Layout';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -40,7 +45,19 @@ import AdminCoupons from '@/pages/admin/Coupons';
 import AdminAlerts from '@/pages/admin/Alerts';
 import AdminSettings from '@/pages/admin/Settings';
 import AdminTooltips from '@/pages/admin/Tooltips';
+import { Plans } from '@/pages/admin/Plans';
+import TradingAnalytics from '@/pages/admin/TradingAnalytics';
+import TradeLogs from '@/pages/admin/TradeLogs';
+import PaymentAnalytics from '@/pages/admin/PaymentAnalytics';
+import BacktestReports from '@/pages/admin/BacktestReports';
+import SimulationAnalytics from '@/pages/admin/SimulationAnalytics';
+import AutomationManagement from '@/pages/admin/AutomationManagement';
+import NotificationManagement from '@/pages/admin/NotificationManagement';
+import SystemReports from '@/pages/admin/SystemReports';
+import AuditLogs from '@/pages/admin/AuditLogs';
+import RouteRedirects from '@/pages/admin/RouteRedirects';
 import TestPermissions from '@/pages/TestPermissions';
+import DesignSystem from '@/pages/DesignSystem';
 
 const queryClient = new QueryClient();
 
@@ -207,20 +224,25 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <RealtimeDataProvider>
-          <PositionsProvider>
-            <TooltipProvider>
+        <VersionProvider autoCheck={true}>
+          <RealtimeDataProvider>
+            <PositionsProvider>
+              <NotificationProvider>
+                <AccountProvider>
+                  <TooltipProvider>
               <Toaster />
               <Sonner />
+              <UpdateNotification />
               <BrowserRouter
                 future={{
                   v7_startTransition: true,
                   v7_relativeSplatPath: true,
                 }}
               >
-                <GlobalPageTitle />
-                <GlobalDynamicFavicon />
-                <Routes>
+                <RouteRedirectMiddleware>
+                  <GlobalPageTitle />
+                  <GlobalDynamicFavicon />
+                  <Routes>
                   <Route path="/" element={
                     <PublicRoute>
                       <Landing />
@@ -370,6 +392,18 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+                  <Route
+              path="/design-system"
+                element={
+                <ProtectedRoute>
+                  <RouteGuard>
+                    <ResponsiveLayout>
+                      <DesignSystem />
+                    </ResponsiveLayout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
             {/* Admin Routes */}
                   <Route
               path="/admin"
@@ -382,21 +416,36 @@ const App = () => {
               }
             >
               <Route index element={<AdminDashboard />} />
+              <Route path="trading-analytics" element={<TradingAnalytics />} />
+              <Route path="trade-logs" element={<TradeLogs />} />
+              <Route path="payment-analytics" element={<PaymentAnalytics />} />
+              <Route path="backtest-reports" element={<BacktestReports />} />
+              <Route path="simulation-analytics" element={<SimulationAnalytics />} />
+              <Route path="automation-management" element={<AutomationManagement />} />
+              <Route path="notification-management" element={<NotificationManagement />} />
+              <Route path="system-reports" element={<SystemReports />} />
+              <Route path="audit-logs" element={<AuditLogs />} />
+              <Route path="route-redirects" element={<RouteRedirects />} />
               <Route path="menus" element={<AdminMenuManagement />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />
               <Route path="monitoring" element={<AdminMonitoring />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="plans" element={<Plans />} />
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="alerts" element={<AdminAlerts />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
                   <Route path="*" element={<NotFound />} />
           </Routes>
+                </RouteRedirectMiddleware>
         </BrowserRouter>
-            </TooltipProvider>
+                </TooltipProvider>
+              </AccountProvider>
+            </NotificationProvider>
           </PositionsProvider>
         </RealtimeDataProvider>
+        </VersionProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

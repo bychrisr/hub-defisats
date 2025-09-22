@@ -71,7 +71,7 @@ export class TooltipService {
 
   // Tooltip Config CRUD
   async createTooltipConfig(data: CreateTooltipConfigData): Promise<TooltipConfig> {
-    return await this.prisma.tooltipConfig.create({
+    const result = await this.prisma.tooltipConfig.create({
       data: {
         card_key: data.card_key,
         tooltip_text: data.tooltip_text,
@@ -80,28 +80,50 @@ export class TooltipService {
         created_by: data.created_by,
       },
     });
+    
+    return {
+      ...result,
+      tooltip_position: result.tooltip_position as 'top' | 'bottom' | 'left' | 'right',
+    };
   }
 
   async getTooltipConfig(cardKey: string): Promise<TooltipConfig | null> {
-    return await this.prisma.tooltipConfig.findUnique({
+    const result = await this.prisma.tooltipConfig.findUnique({
       where: { card_key: cardKey },
     });
+    
+    if (!result) return null;
+    
+    return {
+      ...result,
+      tooltip_position: result.tooltip_position as 'top' | 'bottom' | 'left' | 'right',
+    };
   }
 
   async getAllTooltipConfigs(): Promise<TooltipConfig[]> {
-    return await this.prisma.tooltipConfig.findMany({
+    const results = await this.prisma.tooltipConfig.findMany({
       orderBy: { card_key: 'asc' },
     });
+    
+    return results.map(result => ({
+      ...result,
+      tooltip_position: result.tooltip_position as 'top' | 'bottom' | 'left' | 'right',
+    }));
   }
 
   async updateTooltipConfig(cardKey: string, data: UpdateTooltipConfigData): Promise<TooltipConfig> {
-    return await this.prisma.tooltipConfig.update({
+    const result = await this.prisma.tooltipConfig.update({
       where: { card_key: cardKey },
       data: {
         ...data,
         updated_at: new Date(),
       },
     });
+    
+    return {
+      ...result,
+      tooltip_position: result.tooltip_position as 'top' | 'bottom' | 'left' | 'right',
+    };
   }
 
   async deleteTooltipConfig(cardKey: string): Promise<void> {

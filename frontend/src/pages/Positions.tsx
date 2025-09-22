@@ -30,8 +30,16 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  BarChart3,
+  DollarSign,
+  Shield,
+  Activity,
+  Zap,
+  Target,
+  PieChart,
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 interface LNPosition {
   id: string;
@@ -102,12 +110,10 @@ export default function Positions() {
       : <ArrowDown className="h-4 w-4 text-primary" />;
   };
 
-  // Função para formatar valores USD de forma mais amigável
+  // Função para formatar valores USD como na LN Markets
   const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(1)}M`;
-    } else if (value >= 1000) {
-      return `$${(value / 1000).toFixed(1)}K`;
+    if (value >= 1000) {
+      return `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
     } else {
       return `$${value.toFixed(0)}`;
     }
@@ -146,7 +152,7 @@ export default function Positions() {
         margin: pos.margin,
         pnl: pos.pnl,
         pnlPercentage: pos.pnlPercent,
-        marginRatio: (pos as any).marginRatio || (pos.leverage > 0 ? (100 / pos.leverage) : 0),
+        marginRatio: (pos as any).marginRatio || 0, // Usar apenas valor calculado ou 0
         tradingFees: (pos as any).tradingFees || 0,
         fundingCost: (pos as any).fundingCost || 0,
         status: 'open' as const,
@@ -233,12 +239,11 @@ export default function Positions() {
           const pnlPercentage = pos.margin > 0 ? (pos.pl / pos.margin) * 100 : 0;
           
           // Calculate margin ratio (maintenance_margin / (margin + pl))
-          // Se maintenance_margin não estiver disponível, calcular baseado no leverage
+          // Fórmula correta: maintenance_margin / (margin + pl) * 100
+          // Se maintenance_margin não estiver disponível, não é possível calcular corretamente
           const marginRatio = pos.maintenance_margin > 0 
             ? (pos.maintenance_margin / (pos.margin + pos.pl)) * 100 
-            : pos.leverage > 0 
-              ? (100 / pos.leverage) 
-              : 0;
+            : 0; // Se não há maintenance_margin, retorna 0
           
           console.log('🔍 TRADES - Margin ratio calculation:', {
             maintenance_margin: pos.maintenance_margin,
@@ -248,7 +253,7 @@ export default function Positions() {
             calculated_marginRatio: marginRatio,
             formula: pos.maintenance_margin > 0 
               ? `(${pos.maintenance_margin} / (${pos.margin} + ${pos.pl})) * 100 = ${marginRatio}`
-              : `100 / ${pos.leverage} = ${marginRatio}`
+              : `No maintenance_margin available - returning 0`
           });
           
           const tradingFees = (pos.opening_fee || 0) + (pos.closing_fee || 0);
@@ -386,11 +391,23 @@ export default function Positions() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex items-center space-x-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Loading positions from LN Markets...</span>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Card className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl">
+              <CardContent className="p-8">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full blur-xl"></div>
+                    <Loader2 className="h-8 w-8 animate-spin text-primary relative z-10" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-text-primary">Loading Positions</h3>
+                    <p className="text-sm text-text-secondary">Fetching data from LN Markets...</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -399,18 +416,28 @@ export default function Positions() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-2xl mx-auto">
-          <LNMarketsError 
-            error={error}
-            onConfigure={() => window.location.href = '/profile'}
-            showConfigureButton={error.includes('MISSING_CREDENTIALS') || error.includes('INVALID_CREDENTIALS')}
-          />
-          <div className="mt-4 text-center">
-            <Button onClick={handleRefresh} variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Try Again
-            </Button>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="max-w-2xl mx-auto">
+            <Card className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl">
+              <CardContent className="p-6">
+                <LNMarketsError 
+                  error={error}
+                  onConfigure={() => window.location.href = '/profile'}
+                  showConfigureButton={error.includes('MISSING_CREDENTIALS') || error.includes('INVALID_CREDENTIALS')}
+                />
+                <div className="mt-6 text-center">
+                  <Button 
+                    onClick={handleRefresh} 
+                    variant="outline"
+                    className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/80 transition-all duration-200"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Try Again
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -419,242 +446,353 @@ export default function Positions() {
 
   return (
     <LNMarketsGuard>
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-text-primary">Positions</h1>
-            <p className="text-text-secondary">Monitor your active positions on LN Markets</p>
-            <div className="flex items-center gap-4 mt-2">
-              <RealtimeStatus />
-              {isUpdating && (
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  <span>Updating data...</span>
-                </div>
-              )}
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="max-w-7xl mx-auto space-y-8">
+            {/* Header */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
+              <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
+                <CardContent className="p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                          <BarChart3 className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                            Positions
+                          </h1>
+                          <p className="text-text-secondary">Monitor your active positions on LN Markets</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 mt-4">
+                        <RealtimeStatus />
+                        {isUpdating && (
+                          <div className="flex items-center gap-2 text-sm text-text-secondary">
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                            <span>Updating data...</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleRefresh} 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={isUpdating}
+                      className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/80 transition-all duration-200"
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
+                      {isUpdating ? 'Updating...' : 'Refresh'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-          <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isUpdating}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
-            {isUpdating ? 'Updating...' : 'Refresh'}
-          </Button>
-        </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Margin</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatSats(totalValue)}</div>
-              <p className="text-xs text-muted-foreground">
-                Total margin at risk
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total P&L</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${getPnlColor(totalPnl)}`}>
-                {formatSats(totalPnl)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Unrealized profit/loss
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Margin</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatSats(totalMargin)}</div>
-              <p className="text-xs text-muted-foreground">
-                Total margin used
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Total Margin Card */}
+              <Card className={cn(
+                "gradient-card-blue backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl",
+                isUpdating ? 'opacity-75' : 'opacity-100'
+              )}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-blue-500" />
+                    Total Margin
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-text-primary">{formatSats(totalValue)}</div>
+                  <p className="text-xs text-text-secondary mt-1">
+                    Total margin at risk
+                  </p>
+                </CardContent>
+              </Card>
+              
+              {/* Total P&L Card */}
+              <Card className={cn(
+                "gradient-card-green backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl",
+                isUpdating ? 'opacity-75' : 'opacity-100'
+              )}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    Total P&L
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${getPnlColor(totalPnl)}`}>
+                    {formatSats(totalPnl)}
+                  </div>
+                  <p className="text-xs text-text-secondary mt-1">
+                    Unrealized profit/loss
+                  </p>
+                </CardContent>
+              </Card>
+              
+              {/* Active Positions Card */}
+              <Card className={cn(
+                "gradient-card-purple backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl",
+                isUpdating ? 'opacity-75' : 'opacity-100'
+              )}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-purple-500" />
+                    Active Positions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-text-primary">{positions.length}</div>
+                  <p className="text-xs text-text-secondary mt-1">
+                    {positions.length === 1 ? 'Position' : 'Positions'} open
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Positions Table */}
-        <Card className={`transition-opacity duration-300 ${isUpdating ? 'opacity-75' : 'opacity-100'}`}>
-          <CardHeader>
-            <CardTitle>Active Positions</CardTitle>
-            <CardDescription>
-              {positions.length === 0 
-                ? 'No active positions found' 
-                : `Showing ${positions.length} active position${positions.length !== 1 ? 's' : ''}`
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {positions.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-text-secondary mb-4">
-                  <TrendingUp className="h-12 w-12 mx-auto mb-2" />
-                  <p>No active positions</p>
-                  <p className="text-sm">Your positions from LN Markets will appear here</p>
+            {/* Positions Table */}
+            <Card className={cn(
+              "backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300",
+              isUpdating ? 'opacity-75' : 'opacity-100'
+            )}>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                    <PieChart className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-semibold">Active Positions</CardTitle>
+                    <CardDescription className="text-text-secondary">
+                      {positions.length === 0 
+                        ? 'No active positions found' 
+                        : `Showing ${positions.length} active position${positions.length !== 1 ? 's' : ''}`
+                      }
+                    </CardDescription>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('side')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Side
-                          {getSortIcon('side')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('quantity')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Quantity
-                          {getSortIcon('quantity')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('price')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Price
-                          {getSortIcon('price')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('liquidation')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Liquidation
-                          {getSortIcon('liquidation')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('leverage')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Leverage
-                          {getSortIcon('leverage')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('margin')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Margin
-                          {getSortIcon('margin')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('pnl')}
-                      >
-                        <div className="flex items-center gap-2">
-                          P&L
-                          {getSortIcon('pnl')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('marginRatio')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Margin Ratio
-                          {getSortIcon('marginRatio')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('tradingFees')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Fees
-                          {getSortIcon('tradingFees')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-bg-header select-none"
-                        onClick={() => sortPositions('fundingCost')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Funding
-                          {getSortIcon('fundingCost')}
-                        </div>
-                      </TableHead>
+              </CardHeader>
+              <CardContent>
+                {positions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="relative mb-6">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full blur-2xl"></div>
+                      <div className="relative bg-gradient-to-br from-primary/20 to-primary/10 rounded-full p-6 w-24 h-24 mx-auto flex items-center justify-center">
+                        <TrendingUp className="h-12 w-12 text-primary/60" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-text-primary mb-2">No Active Positions</h3>
+                    <p className="text-text-secondary">Your positions from LN Markets will appear here</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg border border-border/50">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('side')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              #
+                              {getSortIcon('side')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('quantity')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4" />
+                              Quantity
+                              {getSortIcon('quantity')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('price')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="h-4 w-4" />
+                              Price
+                              {getSortIcon('price')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('liquidation')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <AlertTriangle className="h-4 w-4" />
+                              Liquidation
+                              {getSortIcon('liquidation')}
+                            </div>
+                          </TableHead>
+                          {/* <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              Stoploss
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              Takeprofit
+                            </div>
+                          </TableHead> */}
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('leverage')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Zap className="h-4 w-4" />
+                              Leverage
+                              {getSortIcon('leverage')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('margin')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Shield className="h-4 w-4" />
+                              Margin
+                              {getSortIcon('margin')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('pnl')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4" />
+                              PL
+                              {getSortIcon('pnl')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('marginRatio')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <PieChart className="h-4 w-4" />
+                              Margin Ratio
+                              {getSortIcon('marginRatio')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('tradingFees')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4" />
+                              Trading fees
+                              {getSortIcon('tradingFees')}
+                            </div>
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer hover:bg-background/80 select-none transition-colors duration-200 font-semibold text-text-primary"
+                            onClick={() => sortPositions('fundingCost')}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Activity className="h-4 w-4" />
+                              Funding cost
+                              {getSortIcon('fundingCost')}
+                            </div>
+                          </TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {getSortedPositions().map((position) => (
-                      <TableRow key={position.id}>
-                        <TableCell>
-                          <Badge 
-                            variant={position.side === 'long' ? 'default' : 'destructive'}
-                            className={position.side === 'long' ? 'bg-success/20 text-success hover:bg-success/30' : 'bg-destructive/20 text-destructive hover:bg-destructive/30'}
+                      <TableBody>
+                        {getSortedPositions().map((position, index) => (
+                          <TableRow 
+                            key={position.id}
+                            className={cn(
+                              "hover:bg-background/50 transition-colors duration-200",
+                              index % 2 === 0 ? "bg-background/20" : "bg-background/10"
+                            )}
                           >
-                            {position.side === 'long' ? 'LONG' : 'SHORT'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatCurrency(position.quantity)}</TableCell>
-                        <TableCell>{formatCurrency(position.price)}</TableCell>
-                        <TableCell>{formatCurrency(position.liquidation)}</TableCell>
-                        <TableCell>{position.leverage.toFixed(1)}x</TableCell>
-                        <TableCell>{formatSats(position.margin)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            {getPnlIcon(position.pnl)}
-                            <span className={getPnlColor(position.pnl)}>
-                              {formatSats(position.pnl)}
-                            </span>
-                            <span className={`text-sm ${getPnlColor(position.pnl)}`}>
-                              ({formatPercentage(position.pnlPercentage)})
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {(() => {
-                            console.log('🔍 TRADES - DISPLAY - marginRatio:', position.marginRatio);
-                            return position.marginRatio.toFixed(1) + '%';
-                          })()}
-                        </TableCell>
-                        <TableCell>
-                          {(() => {
-                            console.log('🔍 TRADES - DISPLAY - tradingFees:', position.tradingFees);
-                            return formatSats(position.tradingFees);
-                          })()}
-                        </TableCell>
-                        <TableCell>
-                          {(() => {
-                            console.log('🔍 TRADES - DISPLAY - fundingCost:', position.fundingCost);
-                            return formatSats(position.fundingCost);
-                          })()}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                            <TableCell className="font-medium">
+                              <Badge 
+                                variant={position.side === 'long' ? 'default' : 'destructive'}
+                                className={cn(
+                                  "font-semibold px-3 py-1 rounded-full border-0",
+                                  position.side === 'long' 
+                                    ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25' 
+                                    : 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25'
+                                )}
+                              >
+                                {position.side === 'long' ? 'LONG' : 'SHORT'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="font-mono text-text-primary">
+                              {formatCurrency(position.quantity)}
+                            </TableCell>
+                            <TableCell className="font-mono text-text-primary">
+                              {formatCurrency(position.price)}
+                            </TableCell>
+                            <TableCell className="font-mono text-text-primary">
+                              {formatCurrency(position.liquidation)}
+                            </TableCell>
+                            {/* <TableCell className="text-center text-text-secondary">
+                              <span className="text-lg">+</span>
+                            </TableCell>
+                            <TableCell className="text-center text-text-secondary">
+                              <span className="text-lg">+</span>
+                            </TableCell> */}
+                            <TableCell className="font-mono">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 text-primary font-semibold">
+                                {position.leverage.toFixed(2)}x
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-mono text-text-primary">
+                              {formatSats(position.margin)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                {getPnlIcon(position.pnl)}
+                                <div className="flex flex-col">
+                                  <span className={cn("font-mono font-semibold", getPnlColor(position.pnl))}>
+                                    {formatSats(position.pnl)}
+                                  </span>
+                                  <span className={cn("text-xs font-mono", getPnlColor(position.pnl))}>
+                                    ({formatPercentage(position.pnlPercentage)})
+                                  </span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-mono">
+                              <span className={cn(
+                                "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold",
+                                position.marginRatio > 50 
+                                  ? "bg-red-500/20 text-red-600" 
+                                  : position.marginRatio > 25 
+                                    ? "bg-yellow-500/20 text-yellow-600"
+                                    : "bg-green-500/20 text-green-600"
+                              )}>
+                                {position.marginRatio.toFixed(1)}%
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-mono text-text-primary">
+                              {formatSats(position.tradingFees)}
+                            </TableCell>
+                            <TableCell className="font-mono text-text-primary">
+                              {formatSats(position.fundingCost)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
-    </div>
     </LNMarketsGuard>
   );
 }

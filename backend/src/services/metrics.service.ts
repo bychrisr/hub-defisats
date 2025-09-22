@@ -583,7 +583,7 @@ export class MetricsService {
    */
   async getMetricsAsJson(): Promise<any> {
     try {
-      return await register.getMetricsAsJSON();
+      return await register.getMetricsAsJson();
     } catch (error) {
       this.logger.error('Failed to get metrics as JSON', { error });
       throw error;

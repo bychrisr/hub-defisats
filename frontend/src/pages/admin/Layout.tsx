@@ -20,11 +20,32 @@ import {
   Moon,
   Palette,
   CreditCard,
-  Info
+  Info,
+  Shield,
+  Activity,
+  Database,
+  BarChart3,
+  FileText,
+  Cpu,
+  Bot,
+  BarChart2,
+  Bell,
+  ArrowRightLeft
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Trading Analytics', href: '/admin/trading-analytics', icon: BarChart3 },
+  { name: 'Trade Logs', href: '/admin/trade-logs', icon: FileText },
+  { name: 'Payment Analytics', href: '/admin/payment-analytics', icon: CreditCard },
+  { name: 'Backtest Reports', href: '/admin/backtest-reports', icon: BarChart2 },
+  { name: 'Simulation Analytics', href: '/admin/simulation-analytics', icon: Cpu },
+  { name: 'Automation Management', href: '/admin/automation-management', icon: Bot },
+  { name: 'Notification Management', href: '/admin/notification-management', icon: Bell },
+  { name: 'System Reports', href: '/admin/system-reports', icon: FileText },
+  { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
+  { name: 'Route Redirects', href: '/admin/route-redirects', icon: ArrowRightLeft },
   { name: 'Plans', href: '/admin/plans', icon: CreditCard },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Coupons', href: '/admin/coupons', icon: Gift },
@@ -79,27 +100,23 @@ export default function AdminLayout() {
   };
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{ backgroundColor: 'hsl(var(--bg-primary))' }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div 
           className="fixed inset-0 bg-black bg-opacity-50" 
           onClick={() => setSidebarOpen(false)} 
         />
-        <div 
-          className="fixed inset-y-0 left-0 flex w-64 flex-col"
-          style={{ backgroundColor: 'hsl(var(--bg-card))' }}
-        >
+        <div className="fixed inset-y-0 left-0 flex w-64 flex-col backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
           <div className="flex h-16 items-center justify-between px-4">
-            <h1 
-              className="text-xl font-bold"
-              style={{ color: 'hsl(var(--text-primary))' }}
-            >
-              Admin Panel
-            </h1>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                <Shield className="h-5 w-5 text-primary" />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                Admin Panel
+              </h1>
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -114,8 +131,11 @@ export default function AdminLayout() {
               return (
                 <Button
                   key={item.name}
-                  variant={isActive ? 'default' : 'ghost'}
-                  className="w-full justify-start"
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start profile-sidebar-item",
+                    isActive ? "active text-white" : "text-muted-foreground hover:text-foreground"
+                  )}
                   onClick={() => {
                     navigate(item.href);
                     setSidebarOpen(false);
@@ -159,20 +179,16 @@ export default function AdminLayout() {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div 
-          className="flex flex-col flex-grow"
-          style={{ 
-            backgroundColor: 'hsl(var(--bg-card))',
-            borderRight: '1px solid hsl(var(--border))'
-          }}
-        >
+        <div className="flex flex-col flex-grow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
           <div className="flex h-16 items-center px-4">
-            <h1 
-              className="text-xl font-bold"
-              style={{ color: 'hsl(var(--text-primary))' }}
-            >
-              Admin Panel
-            </h1>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                <Shield className="h-5 w-5 text-primary" />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                Admin Panel
+              </h1>
+            </div>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
@@ -180,8 +196,11 @@ export default function AdminLayout() {
               return (
                 <Button
                   key={item.name}
-                  variant={isActive ? 'default' : 'ghost'}
-                  className="w-full justify-start"
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start profile-sidebar-item",
+                    isActive ? "active text-white" : "text-muted-foreground hover:text-foreground"
+                  )}
                   onClick={() => navigate(item.href)}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
@@ -223,13 +242,7 @@ export default function AdminLayout() {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div 
-          className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8"
-          style={{ 
-            borderBottom: '1px solid hsl(var(--border))',
-            backgroundColor: 'hsl(var(--bg-card))'
-          }}
-        >
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 backdrop-blur-xl bg-card/30 border-border/50 profile-sidebar-glow">
           <Button
             variant="ghost"
             size="sm"
@@ -258,17 +271,20 @@ export default function AdminLayout() {
               
               {/* Status indicator */}
               <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 bg-green-500 rounded-full" />
-                <span 
-                  className="text-sm"
-                  style={{ color: 'hsl(var(--text-secondary))' }}
-                >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-green-500 rounded-full blur-sm opacity-50"></div>
+                  <div className="h-2 w-2 bg-green-500 rounded-full relative"></div>
+                </div>
+                <span className="text-sm text-text-secondary">
                   System Online
                 </span>
               </div>
               
               {/* Admin badge */}
-              <Badge variant="default">Superadmin</Badge>
+              <Badge className="backdrop-blur-sm bg-gradient-to-r from-primary/90 to-primary/80 text-white shadow-lg shadow-primary/25">
+                <Shield className="mr-1 h-3 w-3" />
+                Superadmin
+              </Badge>
             </div>
           </div>
         </div>

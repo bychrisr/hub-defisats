@@ -492,7 +492,7 @@ export const Automation = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Page Header */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 sm:p-8">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 sm:p-8 profile-sidebar-glow">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="relative">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -541,10 +541,10 @@ export const Automation = () => {
         <Tabs defaultValue="margin-guard" className="space-y-6">
           {/* Mobile-First Tab Navigation */}
           <div className="relative">
-            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-2 p-1 h-auto bg-muted/30 rounded-xl">
+            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-2 p-1 h-auto bg-muted/30 rounded-xl profile-sidebar-glow">
               <TabsTrigger 
                 value="margin-guard" 
-                className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-3 profile-sidebar-item data-[state=active]:active data-[state=active]:text-white rounded-lg transition-all duration-200"
               >
                 <Shield className="h-4 w-4" />
                 <span className="hidden sm:inline">Margin Guard</span>
@@ -552,7 +552,7 @@ export const Automation = () => {
               </TabsTrigger>
               <TabsTrigger 
                 value="tp-sl" 
-                className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-3 profile-sidebar-item data-[state=active]:active data-[state=active]:text-white rounded-lg transition-all duration-200"
               >
                 <TrendingUp className="h-4 w-4" />
                 <span className="hidden sm:inline">Take Profit / Stop Loss</span>
@@ -560,7 +560,7 @@ export const Automation = () => {
               </TabsTrigger>
               <TabsTrigger 
                 value="entry" 
-                className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-3 profile-sidebar-item data-[state=active]:active data-[state=active]:text-white rounded-lg transition-all duration-200"
               >
                 <Zap className="h-4 w-4" />
                 <span className="hidden sm:inline">Entradas Automáticas</span>
@@ -571,7 +571,7 @@ export const Automation = () => {
 
           {/* Margin Guard Tab */}
           <TabsContent value="margin-guard" className="space-y-6">
-            <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-background via-background to-muted/20">
+            <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-background via-background to-muted/20 profile-sidebar-glow">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-warning/5"></div>
               <CardHeader className="relative">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -837,7 +837,7 @@ export const Automation = () => {
 
         {/* Take Profit / Stop Loss Tab */}
         <TabsContent value="tp-sl" className="space-y-6">
-          <Card className="card-gradient">
+          <Card className="card-gradient profile-sidebar-glow">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

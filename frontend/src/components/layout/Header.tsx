@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PlanAvatar } from '@/components/ui/PlanAvatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/stores/auth';
 import { useNavigate } from 'react-router-dom';
@@ -53,9 +54,9 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">HD</span>
+              <span className="text-white text-sm">🤖</span>
             </div>
-            <span className={`font-bold text-lg ${themeClasses.textPrimary}`}>Hub-defisats</span>
+            <span className={`font-bold text-lg ${themeClasses.textPrimary}`}>Axisor Bot</span>
           </div>
         </div>
 
@@ -88,11 +89,12 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {user ? getUserInitials(user.email) : 'U'}
-                  </AvatarFallback>
-                </Avatar>
+                <PlanAvatar
+                  email={user?.email}
+                  planType={(user as any)?.plan_type || 'free'}
+                  size="md"
+                  showBadge={true}
+                />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>

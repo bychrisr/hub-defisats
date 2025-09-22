@@ -1,34 +1,27 @@
-import { PrismaClient } from '@prisma/client';
-import { FastifyInstance } from 'fastify';
+import { jest } from '@jest/globals';
 
-// Global test setup
-let prisma: PrismaClient;
-let app: FastifyInstance;
+// Mock global console methods to reduce noise in tests
+global.console = {
+  ...console,
+  log: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+};
 
-beforeAll(async () => {
-  // Initialize Prisma for testing
-  prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env['DATABASE_URL'] || 'postgresql://postgres:postgres@localhost:15432/hub_defisats_test'
-      }
-    }
-  });
+// Mock environment variables
+process.env.NODE_ENV = 'test';
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+process.env.REDIS_URL = 'redis://localhost:6379';
+process.env.JWT_SECRET = 'test-jwt-secret-key-32-chars-minimum';
+process.env.REFRESH_TOKEN_SECRET = 'test-refresh-secret-key-32-chars-minimum';
+process.env.ENCRYPTION_KEY = 'test-encryption-key-32-chars';
 
-  // Initialize Fastify app for testing
-  // Note: App initialization will be done in individual tests
-  app = null as any;
+// Global test timeout
+jest.setTimeout(10000);
+
+// Clean up after each test
+afterEach(() => {
+  jest.clearAllMocks();
 });
-
-afterAll(async () => {
-  // Cleanup
-  if (prisma) {
-    await prisma.$disconnect();
-  }
-  if (app) {
-    await app.close();
-  }
-});
-
-// Export for use in tests
-export { prisma, app };

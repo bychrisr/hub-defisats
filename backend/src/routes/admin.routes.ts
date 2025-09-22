@@ -1,454 +1,81 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { PrismaClient } from '@prisma/client';
-import { AuthService } from '../services/auth.service';
-import { metrics } from '../utils/metrics';
-import { metricsHistoryService } from '../services/metrics-history.service';
-
-const prisma = new PrismaClient();
+import { FastifyInstance } from 'fastify';
+import {
+  getDashboardMetrics,
+  getTradingAnalytics,
+  getTradeLogs,
+  getPaymentAnalytics,
+  getBacktestReports,
+  getSimulationAnalytics,
+  getAutomationManagement,
+  getNotificationManagement,
+  getSystemReports,
+  getAuditLogs
+} from '../controllers/admin';
+import { adminMiddleware } from '../middleware/admin.middleware';
 
 export async function adminRoutes(fastify: FastifyInstance) {
-  // Middleware para verificar se é superadmin
-  fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      console.log('🔍 ADMIN MIDDLEWARE - Starting authentication check');
-      console.log('🔍 Request URL:', request.url);
-      console.log('🔍 Headers:', request.headers.authorization);
-      
-      // Get token from Authorization header
-      const authHeader = request.headers.authorization;
-
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('❌ No valid authorization header');
-        return reply.status(401).send({
-          error: 'UNAUTHORIZED',
-          message: 'Authorization header with Bearer token is required',
-        });
-      }
-
-      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-      console.log('🔍 Token extracted:', token.substring(0, 20) + '...');
-      
-      // Initialize auth service
-      const authService = new AuthService(prisma, request.server);
-      
-      // Validate token and get user
-      console.log('🔍 Validating session...');
-      const user = await authService.validateSession(token);
-      console.log('🔍 User from validateSession:', user?.email, 'ID:', user?.id);
-      
-      if (!user) {
-        console.log('❌ No user found from validateSession');
-        return reply.status(401).send({
-          error: 'UNAUTHORIZED',
-          message: 'Invalid token'
-        });
-      }
-      
-      // Verificar se o usuário é superadmin
-      console.log('🔍 Checking admin user record...');
-      const adminUser = await prisma.adminUser.findUnique({
-        where: { user_id: user.id },
-        include: { user: true }
-      });
-      
-      console.log('🔍 Admin user found:', adminUser);
-
-      if (!adminUser) {
-        console.log('❌ No admin user record found for user:', user.id);
-        return reply.status(403).send({
-          error: 'FORBIDDEN',
-          message: 'Admin user record not found'
-        });
-      }
-
-      if (adminUser.role !== 'superadmin') {
-        console.log('❌ Access denied - not superadmin, role:', adminUser.role);
-        return reply.status(403).send({
-          error: 'FORBIDDEN',
-          message: 'Access denied. Superadmin role required.'
-        });
-      }
-      
-      console.log('✅ Admin access granted for:', user.email);
-    } catch (error) {
-      console.log('❌ Admin middleware error:', (error as Error).message);
-      console.log('❌ Admin middleware (error as Error).stack:', (error as Error).stack);
-      return reply.status(401).send({
-        error: 'UNAUTHORIZED',
-        message: 'Authentication required'
-      });
-    }
-  });
-
-  // Dashboard com KPIs em tempo real
-  fastify.get('/dashboard', {
+  // Dashboard Metrics
+  fastify.get('/dashboard/metrics', {
+    preHandler: [adminMiddleware],
     schema: {
-      description: 'Get admin dashboard KPIs',
-      tags: ['Admin'],
+      description: 'Get general dashboard metrics',
+      tags: ['admin', 'dashboard'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            totalUsers: { type: 'number' },
+            activeUsers: { type: 'number' },
+            monthlyRevenue: { type: 'number' },
+            totalTrades: { type: 'number' },
+            systemUptime: { type: 'number' },
+            uptimePercentage: { type: 'number' }
+          }
+        }
+      }
+    }
+  }, getDashboardMetrics);
+
+  // Trading Analytics
+  fastify.get('/trading/analytics', {
+    preHandler: [adminMiddleware],
+    schema: {
+      description: 'Get trading analytics with filtering and pagination',
+      tags: ['admin', 'trading'],
       querystring: {
         type: 'object',
         properties: {
-          period: { 
-            type: 'string',
-            enum: ['1h', '24h', '7d', '30d'],
-            default: '24h'
-          }
+          search: { type: 'string' },
+          planType: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['totalTrades', 'winRate', 'pnl', 'createdAt'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
         }
       },
       response: {
         200: {
           type: 'object',
           properties: {
-            kpis: {
-              type: 'object',
-              properties: {
-                total_users: { type: 'number' },
-                active_users: { type: 'number' },
-                trades_success: { type: 'number' },
-                trades_error: { type: 'number' },
-                success_rate: { type: 'number' },
-                revenue_sats: { type: 'number' },
-                coupons_used: { type: 'number' },
-                workers_active: { type: 'number' },
-                workers_failed: { type: 'number' }
-              }
-            },
-            charts: {
-              type: 'object',
-              properties: {
-                trades_over_time: { type: 'array' },
-                users_over_time: { type: 'array' },
-                revenue_over_time: { type: 'array' }
-              }
-            }
-          }
-        }
-      }
-    }
-  }, async (request: FastifyRequest<{ Querystring: { period: string } }>, reply: FastifyReply) => {
-    const { period } = request.query;
-    
-    // Calcular período
-    const now = new Date();
-    const periodMap = {
-      '1h': new Date(now.getTime() - 60 * 60 * 1000),
-      '24h': new Date(now.getTime() - 24 * 60 * 60 * 1000),
-      '7d': new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      '30d': new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-    };
-    const startDate = periodMap[period as keyof typeof periodMap];
-
-    try {
-      console.log('🔍 ADMIN DASHBOARD - Starting data fetch for period:', period);
-      
-      // KPIs principais
-      const [
-        totalUsers,
-        activeUsers,
-        tradesData,
-        revenueData,
-        couponsData
-      ] = await Promise.all([
-        // Total de usuários
-        prisma.user.count(),
-        
-        // Usuários ativos no período
-        prisma.user.count({
-          where: {
-            last_activity_at: {
-              gte: startDate
-            }
-          }
-        }),
-        
-        // Dados de trades
-        prisma.tradeLog.groupBy({
-          by: ['status'],
-          where: {
-            executed_at: {
-              gte: startDate
-            }
-          },
-          _count: {
-            status: true
-          }
-        }),
-        
-        // Receita em sats (temporariamente desabilitado devido a problema de schema)
-        Promise.resolve({ _sum: { amount_sats: 0 } }),
-        
-        // Cupons usados
-        prisma.userCoupon.count({
-          where: {
-            used_at: {
-              gte: startDate
-            }
-          }
-        })
-      ]);
-
-      // Calcular taxa de sucesso
-      const successTrades = tradesData.find(t => t.status === 'success')?._count.status || 0;
-      const errorTrades = tradesData.filter(t => t.status !== 'success').reduce((sum, t) => sum + t._count.status, 0);
-      const totalTrades = successTrades + errorTrades;
-      const successRate = totalTrades > 0 ? (successTrades / totalTrades) * 100 : 0;
-
-      // Dados para gráficos (últimas 24 horas por hora)
-      const hourlyData = await prisma.tradeLog.groupBy({
-        by: ['executed_at'],
-        where: {
-          executed_at: {
-            gte: new Date(now.getTime() - 24 * 60 * 60 * 1000)
-          }
-        },
-        _count: {
-          executed_at: true
-        }
-      });
-
-      return {
-        kpis: {
-          total_users: totalUsers,
-          active_users: activeUsers,
-          trades_success: successTrades,
-          trades_error: errorTrades,
-          success_rate: Math.round(successRate * 100) / 100,
-          revenue_sats: revenueData._sum.amount_sats || 0,
-          coupons_used: couponsData,
-          workers_active: 4, // TODO: implementar verificação real dos workers
-          workers_failed: 0  // TODO: implementar verificação real dos workers
-        },
-        charts: {
-          trades_over_time: hourlyData.map(d => ({
-            time: d.executed_at,
-            count: d._count.executed_at
-          })),
-          users_over_time: [], // TODO: implementar
-          revenue_over_time: [] // TODO: implementar
-        }
-      };
-    } catch (error) {
-      console.log('❌ ADMIN DASHBOARD ERROR:', error);
-      fastify.log.error('Error fetching dashboard data:', error as any);
-      return reply.status(500).send({
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch dashboard data'
-      });
-    }
-  });
-
-  // Monitoramento de infraestrutura
-  fastify.get('/monitoring', {
-    schema: {
-      description: 'Get infrastructure monitoring data',
-      tags: ['Admin'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            api_latency: { type: 'number' },
-            error_rate: { type: 'number' },
-            queue_sizes: { type: 'object' },
-            ln_markets_status: { type: 'string' },
-            system_health: { type: 'object' }
-          }
-        }
-      }
-    }
-  }, async (_request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      console.log('🔍 ADMIN MONITORING - Fetching monitoring data with averages...');
-      
-      // Get metrics with historical averages
-      console.log('🔍 ADMIN MONITORING - Getting metrics with averages...');
-      const metricsWithAverages = metricsHistoryService.getMetricsWithAverages();
-      const healthSummary = metricsHistoryService.getHealthSummary();
-      console.log('🔍 ADMIN MONITORING - Metrics with averages:', metricsWithAverages ? 'Available' : 'Not available');
-      console.log('🔍 ADMIN MONITORING - Health summary:', healthSummary ? 'Available' : 'Not available');
-      
-      if (!metricsWithAverages) {
-        // Fallback to basic data if no historical data available
-        const basicData = {
-          api_latency: Math.floor(Math.random() * 100) + 50,
-          error_rate: Math.round((Math.random() * 3) * 100) / 100,
-          queue_sizes: {
-            'automation-execute': Math.floor(Math.random() * 15),
-            'notification': Math.floor(Math.random() * 8),
-            'payment-validator': Math.floor(Math.random() * 5),
-            'email-queue': Math.floor(Math.random() * 12),
-            'webhook-queue': Math.floor(Math.random() * 3)
-          },
-          ln_markets_status: Math.random() > 0.05 ? 'healthy' : 'degraded',
-          system_health: {
-            database: 'healthy',
-            redis: 'healthy',
-            workers: 'healthy'
-          },
-          averages: null,
-          health_summary: {
-            overall_status: 'warning',
-            issues: ['No historical data available'],
-            recommendations: ['Wait for metrics collection to start']
-          }
-        };
-        
-        console.log('⚠️ ADMIN MONITORING - Using fallback data (no historical data)');
-        return basicData;
-      }
-      
-      const { current, averages } = metricsWithAverages;
-      
-      const monitoringData = {
-        // Current metrics
-        api_latency: current.api_latency,
-        error_rate: current.error_rate,
-        queue_sizes: current.queue_sizes,
-        ln_markets_status: current.ln_markets_status,
-        system_health: current.system_health,
-        memory_usage: current.memory_usage,
-        cpu_usage: current.cpu_usage,
-        active_connections: current.active_connections,
-        
-        // Historical averages and trends
-        averages: {
-          api_latency: {
-            current: averages.api_latency.current,
-            average_1h: averages.api_latency.average_1h,
-            average_24h: averages.api_latency.average_24h,
-            trend: averages.api_latency.trend,
-            status: averages.api_latency.status
-          },
-          error_rate: {
-            current: averages.error_rate.current,
-            average_1h: averages.error_rate.average_1h,
-            average_24h: averages.error_rate.average_24h,
-            trend: averages.error_rate.trend,
-            status: averages.error_rate.status
-          },
-          memory_usage: {
-            current: averages.memory_usage.current,
-            average_1h: averages.memory_usage.average_1h,
-            average_24h: averages.memory_usage.average_24h,
-            trend: averages.memory_usage.trend,
-            status: averages.memory_usage.status
-          },
-          cpu_usage: {
-            current: averages.cpu_usage.current,
-            average_1h: averages.cpu_usage.average_1h,
-            average_24h: averages.cpu_usage.average_24h,
-            trend: averages.cpu_usage.trend,
-            status: averages.cpu_usage.status
-          },
-          queue_health: {
-            total_jobs: averages.queue_health.total_jobs,
-            average_1h: averages.queue_health.average_1h,
-            average_24h: averages.queue_health.average_24h,
-            trend: averages.queue_health.trend,
-            status: averages.queue_health.status
-          }
-        },
-        
-        // Health summary
-        health_summary: healthSummary
-      };
-      
-      console.log('✅ ADMIN MONITORING - Data prepared with averages:', {
-        api_latency: monitoringData.api_latency,
-        error_rate: monitoringData.error_rate,
-        overall_status: healthSummary.overall_status,
-        issues_count: healthSummary.issues.length
-      });
-      
-      return monitoringData;
-    } catch (error) {
-      console.error('❌ ADMIN MONITORING - Error:', error);
-      fastify.log.error('Error fetching monitoring data:', error as any);
-      return reply.status(500).send({
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch monitoring data'
-      });
-    }
-  });
-
-  // Alertas do sistema
-  fastify.get('/alerts', {
-    schema: {
-      description: 'Get system alerts',
-      tags: ['Admin'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            alerts: {
+            data: {
               type: 'array',
               items: {
                 type: 'object',
                 properties: {
-                  id: { type: 'string' },
-                  message: { type: 'string' },
-                  severity: { type: 'string' },
-                  created_at: { type: 'string' },
-                  is_global: { type: 'boolean' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }, async (_request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const alerts = await prisma.systemAlert.findMany({
-        orderBy: {
-          created_at: 'desc'
-        },
-        take: 50
-      });
-
-      return { alerts };
-    } catch (error) {
-      fastify.log.error('Error fetching alerts:', error as any);
-      return reply.status(500).send({
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch alerts'
-      });
-    }
-  });
-
-  // Gerenciamento de usuários
-  fastify.get('/users', {
-    schema: {
-      description: 'Get users list',
-      tags: ['Admin'],
-      querystring: {
-        type: 'object',
-        properties: {
-          page: { type: 'string', default: '1' },
-          limit: { type: 'string', default: '20' },
-          plan_type: { 
-            type: 'string',
-            enum: ['free', 'basic', 'advanced', 'pro', 'lifetime']
-          },
-          is_active: { type: 'string' },
-          search: { type: 'string' }
-        }
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            users: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  email: { type: 'string' },
+                  userId: { type: 'string' },
                   username: { type: 'string' },
-                  plan_type: { type: 'string' },
-                  is_active: { type: 'boolean' },
-                  created_at: { type: 'string' },
-                  last_activity_at: { type: 'string' }
+                  email: { type: 'string' },
+                  planType: { type: 'string' },
+                  totalTrades: { type: 'number' },
+                  winningTrades: { type: 'number' },
+                  losingTrades: { type: 'number' },
+                  winRate: { type: 'number' },
+                  totalPnL: { type: 'number' },
+                  avgPnL: { type: 'number' },
+                  lastTradeAt: { type: 'string', format: 'date-time' },
+                  createdAt: { type: 'string', format: 'date-time' }
                 }
               }
             },
@@ -458,321 +85,576 @@ export async function adminRoutes(fastify: FastifyInstance) {
                 page: { type: 'number' },
                 limit: { type: 'number' },
                 total: { type: 'number' },
-                pages: { type: 'number' }
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalUsers: { type: 'number' },
+                activeUsers: { type: 'number' },
+                totalTrades: { type: 'number' },
+                totalPnL: { type: 'number' },
+                avgWinRate: { type: 'number' }
               }
             }
           }
         }
       }
     }
-  }, async (request: FastifyRequest<{ Querystring: { page?: string; limit?: string; plan_type?: string; is_active?: string; search?: string } }>, reply: FastifyReply) => {
-    console.log('🔍 ADMIN USERS ROUTE - Starting user fetch');
-    const { page, limit, plan_type, is_active, search } = request.query;
-    const pageNum = parseInt(page || '1') || 1;
-    const limitNum = parseInt(limit || '20') || 20;
-    const skip = (pageNum - 1) * limitNum;
+  }, getTradingAnalytics);
 
-    console.log('🔍 Query params:', { page, limit, plan_type, is_active, search });
-
-    try {
-      const where: any = {};
-      
-      if (plan_type) where.plan_type = plan_type;
-      if (is_active !== undefined) where.is_active = is_active;
-      if (search) {
-        where.OR = [
-          { email: { contains: search, mode: 'insensitive' } },
-          { username: { contains: search, mode: 'insensitive' } }
-        ];
-      }
-
-      console.log('🔍 Where clause:', where);
-
-      console.log('🔍 Fetching users from database...');
-      const [users, total] = await Promise.all([
-        prisma.user.findMany({
-          where,
-          select: {
-            id: true,
-            email: true,
-            username: true,
-            plan_type: true,
-            is_active: true,
-            created_at: true,
-            last_activity_at: true
-          },
-          skip,
-          take: limitNum,
-          orderBy: {
-            created_at: 'desc'
-          }
-        }),
-        prisma.user.count({ where })
-      ]);
-
-      console.log('✅ Users fetched successfully:', { usersCount: users.length, total });
-
-      return {
-        users,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          pages: Math.ceil(total / limitNum)
-        }
-      };
-    } catch (error) {
-      console.log('❌ Error fetching users:', error);
-      console.log('❌ Error stack:', (error as Error).stack);
-      fastify.log.error('Error fetching users:', error as any);
-      return reply.status(500).send({
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch users',
-        details: (error as Error).message
-      });
-    }
-  });
-
-  // Ativar/Desativar usuário
-  fastify.patch('/users/:id/toggle', {
+  // Trade Logs
+  fastify.get('/trades/logs', {
+    preHandler: [adminMiddleware],
     schema: {
-      description: 'Toggle user active status',
-      tags: ['Admin'],
-      params: {
+      description: 'Get trade logs with filtering and pagination',
+      tags: ['admin', 'trades'],
+      querystring: {
         type: 'object',
         properties: {
-          id: { type: 'string' }
+          search: { type: 'string' },
+          status: { type: 'string' },
+          action: { type: 'string' },
+          planType: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['executedAt', 'createdAt', 'pnl', 'amount'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
         }
-      }
-    }
-  }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = request.params;
-    console.log('🔍 ADMIN TOGGLE ROUTE - Starting toggle for user:', id);
-
-    try {
-      console.log('🔍 ADMIN TOGGLE ROUTE - Finding user in database...');
-      const user = await prisma.user.findUnique({
-        where: { id },
-        select: { is_active: true }
-      });
-
-      console.log('🔍 ADMIN TOGGLE ROUTE - User found:', user);
-
-      if (!user) {
-        console.log('❌ ADMIN TOGGLE ROUTE - User not found');
-        return reply.status(404).send({
-          error: 'NOT_FOUND',
-          message: 'User not found'
-        });
-      }
-
-      console.log('🔍 ADMIN TOGGLE ROUTE - Current status:', user.is_active, '-> New status:', !user.is_active);
-
-      const updatedUser = await prisma.user.update({
-        where: { id },
-        data: { 
-          is_active: !user.is_active,
-          // Invalidate all sessions when deactivating user
-          ...(user.is_active && { session_expires_at: null })
-        },
-        select: {
-          id: true,
-          email: true,
-          is_active: true
-        }
-      });
-
-      console.log('✅ ADMIN TOGGLE ROUTE - User updated successfully:', updatedUser);
-
-      // Log da ação (temporariamente desabilitado devido a problemas de migração)
-      console.log('🔍 ADMIN TOGGLE ROUTE - Skipping system alert creation for now');
-
-      return updatedUser;
-    } catch (error) {
-      console.log('❌ ADMIN TOGGLE ROUTE - Error:', error);
-      console.log('❌ ADMIN TOGGLE ROUTE - Error stack:', (error as Error).stack);
-      fastify.log.error('Error toggling user status:', error as any);
-      return reply.status(500).send({
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to toggle user status',
-        details: (error as Error).message
-      });
-    }
-  });
-
-  // Delete user
-  fastify.delete('/users/:id', {
-    schema: {
-      description: 'Delete user permanently',
-      tags: ['Admin'],
-      params: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', format: 'uuid' }
-        },
-        required: ['id']
       },
       response: {
         200: {
           type: 'object',
           properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' }
-          }
-        },
-        404: {
-          type: 'object',
-          properties: {
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            error: { type: 'string' },
-            message: { type: 'string' }
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  userId: { type: 'string' },
+                  username: { type: 'string' },
+                  automationId: { type: 'string' },
+                  tradeId: { type: 'string' },
+                  status: { type: 'string' },
+                  action: { type: 'string' },
+                  planType: { type: 'string' },
+                  pnl: { type: 'number' },
+                  amount: { type: 'number' },
+                  price: { type: 'number' },
+                  errorMessage: { type: 'string' },
+                  executedAt: { type: 'string', format: 'date-time' },
+                  createdAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalTrades: { type: 'number' },
+                successfulTrades: { type: 'number' },
+                failedTrades: { type: 'number' },
+                totalPnL: { type: 'number' },
+                avgPnL: { type: 'number' }
+              }
+            }
           }
         }
       }
     }
-  }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = request.params;
-    console.log('🗑️ ADMIN DELETE ROUTE - Starting delete for user:', id);
+  }, getTradeLogs);
 
-    try {
-      console.log('🗑️ ADMIN DELETE ROUTE - Finding user in database...');
-      const user = await prisma.user.findUnique({
-        where: { id },
-        select: { 
-          id: true, 
-          email: true, 
-          username: true,
-          is_active: true 
-        }
-      });
-
-      console.log('🗑️ ADMIN DELETE ROUTE - User found:', user);
-
-      if (!user) {
-        console.log('❌ ADMIN DELETE ROUTE - User not found');
-        return reply.status(404).send({
-          error: 'NOT_FOUND',
-          message: 'User not found'
-        });
-      }
-
-      console.log('🗑️ ADMIN DELETE ROUTE - Deleting user:', user.email);
-
-      // Delete user permanently
-      await prisma.user.delete({
-        where: { id }
-      });
-
-      console.log('✅ ADMIN DELETE ROUTE - User deleted successfully:', user.email);
-
-      return reply.status(200).send({
-        success: true,
-        message: `User ${user.email} deleted successfully`
-      });
-    } catch (error) {
-      console.log('❌ ADMIN DELETE ROUTE - Error:', error);
-      console.log('❌ ADMIN DELETE ROUTE - Error stack:', (error as Error).stack);
-      fastify.log.error('Error deleting user:', error as any);
-      return reply.status(500).send({
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to delete user',
-        details: (error as Error).message
-      });
-    }
-  });
-
-  // Configurações globais
-  fastify.get('/settings', {
+  // Payment Analytics
+  fastify.get('/payments/analytics', {
+    preHandler: [adminMiddleware],
     schema: {
-      description: 'Get global settings',
-      tags: ['Admin'],
+      description: 'Get payment analytics with filtering and pagination',
+      tags: ['admin', 'payments'],
+      querystring: {
+        type: 'object',
+        properties: {
+          search: { type: 'string' },
+          status: { type: 'string' },
+          paymentMethod: { type: 'string' },
+          planType: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['createdAt', 'paidAt', 'amount', 'amountSats'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
+        }
+      },
       response: {
         200: {
           type: 'object',
           properties: {
-            rate_limiting: { type: 'object' },
-            captcha: { type: 'object' },
-            smtp: { type: 'object' },
-            webhooks: { type: 'object' }
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  userId: { type: 'string' },
+                  username: { type: 'string' },
+                  email: { type: 'string' },
+                  amountSats: { type: 'number' },
+                  amount: { type: 'number' },
+                  status: { type: 'string' },
+                  paymentMethod: { type: 'string' },
+                  planType: { type: 'string' },
+                  description: { type: 'string' },
+                  paidAt: { type: 'string', format: 'date-time' },
+                  createdAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalRevenue: { type: 'number' },
+                totalTransactions: { type: 'number' },
+                conversionRate: { type: 'number' },
+                avgTransactionValue: { type: 'number' },
+                completedPayments: { type: 'number' },
+                pendingPayments: { type: 'number' },
+                failedPayments: { type: 'number' }
+              }
+            }
           }
         }
       }
     }
-  }, async (_request: FastifyRequest, _reply: FastifyReply) => {
-    // TODO: Implementar configurações reais
-    return {
-      rate_limiting: {
-        max_attempts: 100,
-        window_minutes: 60
-      },
-      captcha: {
-        enabled: false,
-        site_key: '',
-        secret_key: ''
-      },
-      smtp: {
-        host: '',
-        port: 587,
-        user: '',
-        enabled: false
-      },
-      webhooks: {
-        slack: {
-          url: '',
-          channel: '',
-          enabled: false
-        },
-        telegram: {
-          bot_token: '',
-          chat_id: '',
-          enabled: false
-        }
-      }
-    };
-  });
+  }, getPaymentAnalytics);
 
-  // Atualizar configurações
-  fastify.put('/settings', {
+  // Backtest Reports
+  fastify.get('/backtests/reports', {
+    preHandler: [adminMiddleware],
     schema: {
-      description: 'Update global settings',
-      tags: ['Admin'],
-      body: {
+      description: 'Get backtest reports with filtering and pagination',
+      tags: ['admin', 'backtests'],
+      querystring: {
         type: 'object',
         properties: {
-          rate_limiting: { type: 'object' },
-          captcha: { type: 'object' },
-          smtp: { type: 'object' },
-          webhooks: { type: 'object' }
+          search: { type: 'string' },
+          status: { type: 'string' },
+          strategy: { type: 'string' },
+          planType: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['createdAt', 'completedAt', 'executionTime'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  userId: { type: 'string' },
+                  username: { type: 'string' },
+                  strategy: { type: 'string' },
+                  status: { type: 'string' },
+                  planType: { type: 'string' },
+                  executionTime: { type: 'number' },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  completedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalReports: { type: 'number' },
+                completedReports: { type: 'number' },
+                runningReports: { type: 'number' },
+                failedReports: { type: 'number' },
+                avgExecutionTime: { type: 'number' }
+              }
+            }
+          }
         }
       }
     }
-  }, async (_request: FastifyRequest<{ Body: any }>, _reply: FastifyReply) => {
-    // const settings = request.body;
+  }, getBacktestReports);
 
-    try {
-      // TODO: Implementar salvamento real das configurações
-      // Por enquanto, apenas log da ação
-      await prisma.systemAlert.create({
-        data: {
-          message: 'Global settings updated by admin',
-          severity: 'info',
-          is_global: true
+  // Simulation Analytics
+  fastify.get('/simulations/analytics', {
+    preHandler: [adminMiddleware],
+    schema: {
+      description: 'Get simulation analytics with filtering and pagination',
+      tags: ['admin', 'simulations'],
+      querystring: {
+        type: 'object',
+        properties: {
+          search: { type: 'string' },
+          simulationType: { type: 'string' },
+          status: { type: 'string' },
+          planType: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['createdAt', 'startedAt', 'completedAt', 'progress'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
         }
-      });
-
-      return { message: 'Settings updated successfully' };
-    } catch (error) {
-      fastify.log.error('Error updating settings:', error as any);
-      return _reply.status(500).send({
-        error: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to update settings'
-      });
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  userId: { type: 'string' },
+                  username: { type: 'string' },
+                  name: { type: 'string' },
+                  simulationType: { type: 'string' },
+                  status: { type: 'string' },
+                  planType: { type: 'string' },
+                  progress: { type: 'number' },
+                  duration: { type: 'number' },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  startedAt: { type: 'string', format: 'date-time' },
+                  completedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalSimulations: { type: 'number' },
+                completedSimulations: { type: 'number' },
+                runningSimulations: { type: 'number' },
+                failedSimulations: { type: 'number' },
+                avgProgress: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
     }
-  });
+  }, getSimulationAnalytics);
+
+  // Automation Management
+  fastify.get('/automations/management', {
+    preHandler: [adminMiddleware],
+    schema: {
+      description: 'Get automation management data with filtering and pagination',
+      tags: ['admin', 'automations'],
+      querystring: {
+        type: 'object',
+        properties: {
+          search: { type: 'string' },
+          type: { type: 'string' },
+          status: { type: 'string' },
+          riskLevel: { type: 'string' },
+          planType: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['createdAt', 'updatedAt', 'type', 'status'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  userId: { type: 'string' },
+                  username: { type: 'string' },
+                  type: { type: 'string' },
+                  status: { type: 'string' },
+                  riskLevel: { type: 'string' },
+                  planType: { type: 'string' },
+                  isActive: { type: 'boolean' },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalAutomations: { type: 'number' },
+                activeAutomations: { type: 'number' },
+                pausedAutomations: { type: 'number' },
+                stoppedAutomations: { type: 'number' },
+                errorAutomations: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, getAutomationManagement);
+
+  // Notification Management
+  fastify.get('/notifications/management', {
+    preHandler: [adminMiddleware],
+    schema: {
+      description: 'Get notification management data with filtering and pagination',
+      tags: ['admin', 'notifications'],
+      querystring: {
+        type: 'object',
+        properties: {
+          search: { type: 'string' },
+          channel: { type: 'string' },
+          category: { type: 'string' },
+          isActive: { type: 'boolean' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['createdAt', 'updatedAt', 'name', 'channel'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  channel: { type: 'string' },
+                  category: { type: 'string' },
+                  isActive: { type: 'boolean' },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalTemplates: { type: 'number' },
+                activeTemplates: { type: 'number' },
+                totalNotifications: { type: 'number' },
+                sentNotifications: { type: 'number' },
+                failedNotifications: { type: 'number' },
+                successRate: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, getNotificationManagement);
+
+  // System Reports
+  fastify.get('/reports/system', {
+    preHandler: [adminMiddleware],
+    schema: {
+      description: 'Get system reports with filtering and pagination',
+      tags: ['admin', 'reports'],
+      querystring: {
+        type: 'object',
+        properties: {
+          search: { type: 'string' },
+          type: { type: 'string' },
+          status: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['createdAt', 'generatedAt', 'title', 'fileSize'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  type: { type: 'string' },
+                  status: { type: 'string' },
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  filePath: { type: 'string' },
+                  fileSize: { type: 'number' },
+                  generatedAt: { type: 'string', format: 'date-time' },
+                  createdAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalReports: { type: 'number' },
+                completedReports: { type: 'number' },
+                generatingReports: { type: 'number' },
+                failedReports: { type: 'number' },
+                scheduledReports: { type: 'number' },
+                totalFileSize: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, getSystemReports);
+
+  // Audit Logs
+  fastify.get('/audit/logs', {
+    preHandler: [adminMiddleware],
+    schema: {
+      description: 'Get audit logs with filtering and pagination',
+      tags: ['admin', 'audit'],
+      querystring: {
+        type: 'object',
+        properties: {
+          search: { type: 'string' },
+          action: { type: 'string' },
+          resource: { type: 'string' },
+          severity: { type: 'string' },
+          userId: { type: 'string' },
+          dateFrom: { type: 'string', format: 'date' },
+          dateTo: { type: 'string', format: 'date' },
+          sortBy: { type: 'string', enum: ['createdAt', 'action', 'severity', 'userId'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+          page: { type: 'number', minimum: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  userId: { type: 'string' },
+                  username: { type: 'string' },
+                  action: { type: 'string' },
+                  resource: { type: 'string' },
+                  resourceId: { type: 'string' },
+                  severity: { type: 'string' },
+                  ipAddress: { type: 'string' },
+                  userAgent: { type: 'string' },
+                  createdAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                total: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            },
+            metrics: {
+              type: 'object',
+              properties: {
+                totalLogs: { type: 'number' },
+                criticalLogs: { type: 'number' },
+                highLogs: { type: 'number' },
+                mediumLogs: { type: 'number' },
+                lowLogs: { type: 'number' },
+                uniqueUsers: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, getAuditLogs);
 }

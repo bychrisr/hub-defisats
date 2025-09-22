@@ -48,7 +48,11 @@ export class LNMarketsAPIService {
     });
 
     // Initialize circuit breaker with 5 failures threshold and 60s timeout
-    this.circuitBreaker = new CircuitBreaker(5, 60000);
+    this.circuitBreaker = new CircuitBreaker({ 
+      failureThreshold: 5, 
+      recoveryTimeout: 60000,
+      monitoringPeriod: 60000
+    });
     this.retryService = new RetryService(logger);
     this.logger = logger;
 
@@ -468,19 +472,54 @@ export class LNMarketsAPIService {
   }) {
     console.log('🔍 LN MARKETS TRADES - Getting user trades with params:', params);
     try {
-      const result = await this.makeRequest({
-        method: 'GET',
-        path: '/futures', // Mesmo endpoint das posições, diferenciado por parâmetros
-        params
-      });
-      console.log('✅ LN MARKETS TRADES - Success:', Array.isArray(result) ? result.length : 'unknown', 'trades');
+      // Tentar primeiro o endpoint específico para trades
+      let result;
+      try {
+        console.log('🔍 LN MARKETS TRADES - Trying /futures/trades endpoint...');
+        result = await this.makeRequest({
+          method: 'GET',
+          path: '/futures/trades',
+          params
+        });
+        console.log('✅ LN MARKETS TRADES - /futures/trades success:', Array.isArray(result) ? result.length : 'unknown', 'trades');
+      } catch (tradesError: any) {
+        console.log('⚠️ LN MARKETS TRADES - /futures/trades failed, trying /futures:', tradesError?.response?.status);
+        // Se falhar, tentar o endpoint /futures com parâmetros
+        result = await this.makeRequest({
+          method: 'GET',
+          path: '/futures',
+          params
+        });
+        console.log('✅ LN MARKETS TRADES - /futures success:', Array.isArray(result) ? result.length : 'unknown', 'trades');
+      }
+      
+      if (Array.isArray(result) && result.length > 0) {
+        console.log('📊 LN MARKETS TRADES - Sample trade data:', {
+          id: result[0].id,
+          status: result[0].status,
+          entry_margin: result[0].entry_margin,
+          margin: result[0].margin,
+          side: result[0].side,
+          quantity: result[0].quantity,
+          allKeys: Object.keys(result[0])
+        });
+      }
       return result;
     } catch (error: any) {
       console.log('❌ LN MARKETS TRADES - Error:', error?.response?.status, error?.response?.statusText);
+      console.log('❌ LN MARKETS TRADES - Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          params: error.config?.params
+        }
+      });
 
       // Se o endpoint não existir (404), retornar array vazio em vez de erro
       if (error?.response?.status === 404) {
-        console.log('⚠️ LN MARKETS TRADES - Endpoint /futures not available, returning empty trades array');
+        console.log('⚠️ LN MARKETS TRADES - Endpoint not available, returning empty trades array');
         return [];
       }
 
@@ -535,7 +574,19 @@ export class LNMarketsAPIService {
         closedCount: closedArray.length,
         totalBeforeDedup: runningArray.length + closedArray.length,
         totalAfterDedup: allTrades.length,
-        duplicatesRemoved: (runningArray.length + closedArray.length) - allTrades.length
+        duplicatesRemoved: (runningArray.length + closedArray.length) - allTrades.length,
+        sampleRunningTrade: runningArray.length > 0 ? {
+          id: runningArray[0].id,
+          status: runningArray[0].status,
+          entry_margin: runningArray[0].entry_margin,
+          margin: runningArray[0].margin
+        } : 'No running trades',
+        sampleClosedTrade: closedArray.length > 0 ? {
+          id: closedArray[0].id,
+          status: closedArray[0].status,
+          entry_margin: closedArray[0].entry_margin,
+          margin: closedArray[0].margin
+        } : 'No closed trades'
       });
 
       return allTrades;
@@ -690,7 +741,7 @@ export class LNMarketsAPIService {
       console.log('🔍 LN MARKETS VALIDATE - Starting credentials validation');
       
       // Allow test credentials for development
-      if (this.config.apiKey.startsWith('test-') || this.config.apiKey.startsWith('dummy-')) {
+      if (this.credentials.apiKey.startsWith('test-') || this.credentials.apiKey.startsWith('dummy-')) {
         console.log('✅ LN MARKETS VALIDATE - Test credentials detected, skipping validation');
         return true;
       }
@@ -775,6 +826,35 @@ export class LNMarketsAPIService {
       '1d': 24 * 60 * 60 * 1000
     };
     return timeframes[timeframe] || 60 * 60 * 1000; // Default to 1 hour
+  }
+
+  // Get futures ticker data (funding rate, index price, last price)
+  async getFuturesTicker() {
+    console.log('🔍 LN MARKETS TICKER - Starting getFuturesTicker');
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'GET',
+        path: '/futures/ticker'
+      });
+      
+      console.log('✅ LN MARKETS TICKER - Raw response:', JSON.stringify(result, null, 2));
+      
+      return {
+        carryFeeRate: result.carryFeeRate || 0,
+        index: result.index || 0,
+        lastPrice: result.lastPrice || 0,
+        fundingRate: result.carryFeeRate || 0
+      };
+    } catch (error: any) {
+      console.log('❌ LN MARKETS TICKER - Error caught:', {
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        message: error?.message,
+        data: error?.response?.data
+      });
+      throw error;
+    }
   }
 
   // Get credentials (for debugging)

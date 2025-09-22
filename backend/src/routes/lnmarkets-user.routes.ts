@@ -7,8 +7,14 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
   const userController = new LNMarketsUserController(prisma);
 
-  // Apply authentication middleware to all routes
-  fastify.addHook('preHandler', authMiddleware);
+  // Apply authentication middleware to all routes except public ones
+  fastify.addHook('preHandler', async (request, reply) => {
+    // Skip auth for public routes
+    if (request.url === '/lnmarkets/market/ticker' || request.url === '/api/lnmarkets/market/ticker') {
+      return;
+    }
+    return authMiddleware(request, reply);
+  });
 
   // Get user data
   fastify.get(

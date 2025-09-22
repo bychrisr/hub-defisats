@@ -1,13 +1,24 @@
-# Hub DeFiSats - Plataforma de Automação de Trading
+# Axisor - Plataforma de Automação de Trading
 
 ## 🎯 Visão Geral
 
-O Hub DeFiSats é uma plataforma completa de automação de trading para LN Markets, construída com Node.js 18+, Fastify e Next.js, rodando em containers Docker. A plataforma oferece funcionalidades avançadas como Margin Guard, simulações em tempo real, sistema de cupons e muito mais.
+O Axisor é uma plataforma completa de automação de trading para LN Markets, construída com Node.js 18+, Fastify e Next.js, rodando em containers Docker. A plataforma oferece funcionalidades avançadas como Margin Guard, simulações em tempo real, sistema de cupons e muito mais.
+
+### ✨ Interface Moderna
+- **Glassmorphism Design**: Header com efeito de vidro fosco e backdrop blur
+- **Animações Sutis**: Hover effects padronizados e refinados
+- **Responsividade Completa**: Interface adaptável para todos os dispositivos
+- **UX Profissional**: Design limpo focado na experiência do usuário
+- **Mobile Navigation**: Menu mobile funcional com z-index otimizado
+- **Profile Page**: Layout consistente com tabs com efeito glow elegante
+- **Account Selector**: Sistema de seleção de múltiplas contas com design minimalista
+- **Image Upload System**: Sistema completo de upload com editor integrado, redimensionamento e crop
+- **Design System**: Documentação interna completa com Gradient Cards e Floating Icons
 
 ## 🏗️ Estrutura do Projeto
 
 ```
-hub-defisats/
+axisor/
 ├── 📁 backend/                    # API Node.js + Fastify
 ├── 📁 frontend/                   # Interface React + Next.js
 ├── 📁 .system/                    # Documentação completa
@@ -146,6 +157,46 @@ Toda a documentação está organizada na pasta `.system/`:
 - Dashboard cards financeiros com cálculos precisos
 - Validação matemática 100% precisa
 
+### 🔐 Sistema de Segurança Avançado
+- **JWT de acesso**: 2 horas (configurável)
+- **Refresh tokens**: 7 dias (configurável)
+- **Criptografia AES-256-CBC** para credenciais sensíveis
+- **Sistema de auditoria completo** com logs detalhados
+- **Revogação de tokens** por usuário ou global
+- **Monitoramento de sessões** e atividades suspeitas
+- **Painel administrativo** para configurações de segurança
+- **Detecção de tentativas** de login suspeitas
+- **Limpeza automática** de tokens expirados
+- **Rastreamento de IP e User-Agent** para todas as ações
+- **Configurações dinâmicas** via banco de dados
+- **🛡️ Segurança em Mercados Voláteis**: [Documentação completa](./docs/VOLATILE_MARKET_SAFETY.md)
+  - Zero tolerância a dados antigos ou simulados
+  - Cache máximo de 30 segundos para dados de mercado
+  - Validação rigorosa de timestamps
+  - Interface educativa sobre riscos de dados desatualizados
+
+#### APIs de Segurança (Admin)
+```bash
+GET    /api/admin/security/configs              # Listar configurações
+PUT    /api/admin/security/configs/:key         # Atualizar configuração
+GET    /api/admin/security/audit-logs           # Logs de auditoria
+POST   /api/admin/security/revoke-tokens/:userId # Revogar tokens
+POST   /api/admin/security/cleanup-tokens       # Limpar tokens expirados
+GET    /api/admin/security/dashboard            # Dashboard de segurança
+```
+
+#### Configurações de Segurança Disponíveis
+| Configuração | Padrão | Descrição |
+|-------------|--------|-----------|
+| `jwt_expires_in` | `2h` | Expiração do JWT de acesso |
+| `refresh_token_expires_in` | `7d` | Expiração do refresh token |
+| `max_login_attempts` | `5` | Máximo de tentativas de login |
+| `lockout_duration` | `15m` | Duração do bloqueio |
+| `session_timeout` | `30m` | Timeout de sessão |
+| `require_2fa` | `false` | Obrigar 2FA |
+| `token_rotation_enabled` | `true` | Rotação automática de tokens |
+| `max_concurrent_sessions` | `3` | Máximo de sessões simultâneas |
+
 ## 🏗️ Arquitetura
 
 ### Backend
@@ -163,6 +214,7 @@ Toda a documentação está organizada na pasta `.system/`:
 - **Charts**: Recharts + lightweight-charts
 - **Estado**: Zustand
 - **i18n**: react-i18next
+- **Image Processing**: Canvas API + Sharp (backend)
 
 ### Workers
 - **Margin Monitor**: Monitoramento contínuo de margem
@@ -170,6 +222,25 @@ Toda a documentação está organizada na pasta `.system/`:
 - **Simulation Executor**: Simulações em tempo real
 - **Notification**: Sistema de notificações
 - **Payment Validator**: Validação de pagamentos
+
+## 📸 Sistema de Upload de Imagens
+
+### Funcionalidades
+- **Drag & Drop**: Interface intuitiva para upload
+- **Editor Integrado**: Zoom, rotação e crop manual
+- **Processamento Automático**: Redimensionamento para 400x400px
+- **Compressão Otimizada**: JPEG com 90% de qualidade
+- **Validação Robusta**: Tipos MIME e tamanho (max 5MB)
+- **Preview em Tempo Real**: Visualização instantânea
+
+### Tecnologias
+- **Frontend**: Canvas API + React hooks
+- **Backend**: @fastify/multipart + Sharp
+- **Armazenamento**: Sistema de arquivos local
+- **Segurança**: Validação de tipos + autenticação JWT
+
+### Documentação
+- 📄 [Sistema de Upload Completo](./IMAGE_UPLOAD_SYSTEM_DOCUMENTATION.md)
 
 ## 🔒 Segurança
 

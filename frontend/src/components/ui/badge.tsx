@@ -4,22 +4,24 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
     variants: {
       variant: {
         default:
-          'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+          'border-transparent bg-gradient-primary text-white hover:neon-primary',
         secondary:
-          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'border-transparent bg-gradient-secondary text-white hover:neon-secondary',
         destructive:
-          'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
+          'border-transparent bg-axisor-destructive text-white hover:neon-success',
+        outline: 'text-foreground border-axisor-primary',
+        accent:
+          'border-transparent bg-gradient-accent text-black hover:neon-accent',
         // Custom variants for market data
         success:
-          'border-transparent bg-[#00d4aa] text-black hover:bg-[#00b894]',
+          'border-transparent bg-axisor-success text-white',
         danger:
-          'border-transparent bg-[#ff6b6b] text-white hover:bg-[#ff5252]',
+          'border-transparent bg-axisor-destructive text-white',
       },
     },
     defaultVariants: {

@@ -23,8 +23,8 @@ RUN npm install typescript @types/node tsx --save-dev
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build the application (skip TypeScript for now)
-RUN npm run build || echo "Build failed, continuing with development mode"
+# Skip TypeScript compilation for now - use tsx directly
+RUN echo "Skipping TypeScript build, using tsx directly"
 
 # Production image, copy all the files and run the app
 FROM base AS runner
@@ -37,8 +37,7 @@ RUN apk add --no-cache openssl curl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
-# Copy the built application
-COPY --from=builder /app/dist ./dist
+# Copy the source code (no dist folder since we're using tsx)
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
@@ -59,4 +58,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3010/health || exit 1
 
 # Start the application with tsx (production environment)
-CMD ["npm", "run", "prod"]
+CMD ["npx", "tsx", "src/index.ts"]

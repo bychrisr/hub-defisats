@@ -12,6 +12,7 @@ import {
 } from '../types/api-contracts';
 // import { createLNMarketsService } from './lnmarkets.service';
 import { OptimizedQueriesService } from './optimized-queries.service';
+import { SecurityConfigService } from './security-config.service';
 // import { cacheService } from './cache.service';
 
 // Define SocialProvider enum
@@ -25,11 +26,13 @@ export class AuthService {
   private prisma: PrismaClient;
   private fastify: FastifyInstance;
   private optimizedQueries: OptimizedQueriesService;
+  private securityConfig: SecurityConfigService;
 
   constructor(prisma: PrismaClient, fastify: FastifyInstance) {
     this.prisma = prisma;
     this.fastify = fastify;
     this.optimizedQueries = new OptimizedQueriesService(prisma);
+    this.securityConfig = new SecurityConfigService(prisma, fastify);
   }
 
   /**
@@ -169,8 +172,8 @@ export class AuthService {
 
     console.log('🎫 Generating JWT tokens...');
     // Generate tokens
-    const token = this.generateAccessToken(user);
-    const refreshToken = this.generateRefreshToken(user);
+    const token = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
     console.log('✅ JWT tokens generated successfully');
 
     console.log('💾 Storing refresh token in database...');
@@ -231,8 +234,8 @@ export class AuthService {
     });
 
     // Generate tokens
-    const token = this.generateAccessToken(user);
-    const refreshToken = this.generateRefreshToken(user);
+    const token = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
 
     // Store refresh token in database
     await this.storeRefreshToken(user.id, refreshToken);
@@ -459,8 +462,8 @@ export class AuthService {
     });
 
     // Generate tokens
-    const token = this.generateAccessToken(user);
-    const refreshToken = this.generateRefreshToken(user);
+    const token = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
 
     // Store refresh token in database
     await this.storeRefreshToken(user.id, refreshToken);
@@ -476,7 +479,8 @@ export class AuthService {
   /**
    * Generate access token
    */
-  private generateAccessToken(user: User): string {
+  private async generateAccessToken(user: User): Promise<string> {
+    const expiresIn = await this.securityConfig.getJWTExpiration();
     return this.fastify.jwt.sign(
       {
         userId: user.id,
@@ -484,7 +488,7 @@ export class AuthService {
         planType: user.plan_type,
       },
       {
-        expiresIn: config.jwt.expiresIn,
+        expiresIn,
       }
     );
   }
@@ -492,14 +496,15 @@ export class AuthService {
   /**
    * Generate refresh token
    */
-  private generateRefreshToken(user: User): string {
+  private async generateRefreshToken(user: User): Promise<string> {
+    const expiresIn = await this.securityConfig.getRefreshTokenExpiration();
     return this.fastify.jwt.sign(
       {
         userId: user.id,
         type: 'refresh',
       },
       {
-        expiresIn: config.jwt.refreshExpiresIn,
+        expiresIn,
       }
     );
   }

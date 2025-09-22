@@ -34,7 +34,7 @@ export const useFormatSats = () => {
     if (value === 0) {
       formattedNumber = '0';
     } else if (Math.abs(value) < 1000000) {
-      formattedNumber = value.toLocaleString();
+      formattedNumber = Math.round(value).toLocaleString();
     } else {
       formattedNumber = `${Math.round(value / 1000000)}M`;
     }
@@ -43,22 +43,52 @@ export const useFormatSats = () => {
       return formattedNumber;
     }
 
+    console.log('🔍 SatsIcon Debug:', {
+      value,
+      formattedNumber,
+      size,
+      iconVariant,
+      variant
+    });
+
     return (
       <span className="flex items-center gap-1">
         {formattedNumber}
-        <SatsIcon size={size} variant={iconVariant} className="sats-icon-mobile" />
+        <SatsIcon size={size} variant={iconVariant} />
       </span>
     );
   };
 
-  return { formatSats };
+  // Função para calcular tamanho dinâmico do texto e ícone baseado no valor
+  const getDynamicSize = (value: number) => {
+    const absValue = Math.abs(value);
+    
+    // Se o valor for zero, usar tamanho padrão
+    if (absValue === 0) {
+      return { textSize: 'text-number-lg', iconSize: 24 };
+    }
+    
+    const digits = Math.floor(Math.log10(absValue)) + 1;
+    
+    if (digits <= 3) {
+      return { textSize: 'text-number-lg', iconSize: 24 };
+    } else if (digits <= 6) {
+      return { textSize: 'text-number-md', iconSize: 20 };
+    } else if (digits <= 9) {
+      return { textSize: 'text-number-sm', iconSize: 16 };
+    } else {
+      return { textSize: 'text-number-xs', iconSize: 12 };
+    }
+  };
+
+  return { formatSats, getDynamicSize };
 };
 
 // Hook para formatação simples (apenas texto)
 export const useFormatSatsText = () => {
   return (value: number): string => {
     if (value === 0) return '0 sats';
-    if (Math.abs(value) < 1000000) return `${value.toLocaleString()} sats`;
+    if (Math.abs(value) < 1000000) return `${Math.round(value).toLocaleString()} sats`;
     return `${Math.round(value / 1000000)}M sats`;
   };
 };

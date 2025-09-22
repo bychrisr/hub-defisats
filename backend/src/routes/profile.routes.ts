@@ -24,6 +24,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
                 id: { type: 'string' },
                 email: { type: 'string' },
                 username: { type: 'string' },
+                bio: { type: 'string' },
                 plan_type: { type: 'string' },
                 created_at: { type: 'string' },
                 last_activity_at: { type: 'string' },
@@ -66,6 +67,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
         properties: {
           email: { type: 'string', format: 'email' },
           username: { type: 'string' },
+          bio: { type: 'string' },
           ln_markets_api_key: { type: 'string' },
           ln_markets_api_secret: { type: 'string' },
           ln_markets_passphrase: { type: 'string' },
@@ -82,6 +84,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
                 id: { type: 'string' },
                 email: { type: 'string' },
                 username: { type: 'string' },
+                bio: { type: 'string' },
                 plan_type: { type: 'string' },
                 created_at: { type: 'string' },
                 last_activity_at: { type: 'string' },

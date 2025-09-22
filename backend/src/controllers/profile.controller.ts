@@ -126,6 +126,8 @@ export class ProfileController {
       };
 
       if (body.email) updateData.email = body.email;
+      if (body.username) updateData.username = body.username;
+      if (body.bio !== undefined) updateData.bio = body.bio;
       
       // Encrypt LN Markets credentials before saving
       if (body.ln_markets_api_key) {
@@ -153,6 +155,7 @@ export class ProfileController {
           id: true,
           email: true,
           username: true,
+          bio: true,
           plan_type: true,
           created_at: true,
           last_activity_at: true,

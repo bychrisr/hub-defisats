@@ -1,11 +1,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip } from '@/components/ui/tooltip';
 import { TrendingUp, TrendingDown, LucideIcon, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFormatSats } from '@/hooks/useFormatSats';
-import { useTooltips } from '@/hooks/useTooltips';
+import SatsIcon from '@/components/SatsIcon';
 
 interface PnLCardProps {
   title: string;
@@ -37,11 +36,6 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   floatingIcon = false,
 }) => {
   const { formatSats } = useFormatSats();
-  const { getTooltipText, getTooltipPosition, isTooltipEnabled } = useTooltips();
-  
-  const tooltipText = cardKey ? getTooltipText(cardKey) : null;
-  const tooltipPosition = cardKey ? getTooltipPosition(cardKey) : 'top';
-  const showTooltip = cardKey ? isTooltipEnabled(cardKey) : false;
   
   const isPositive = pnl >= 0;
   const isNeutral = pnl === 0;
@@ -52,9 +46,10 @@ export const PnLCard: React.FC<PnLCardProps> = ({
     }
     
     if (isNeutral) return 'card-modern';
+    
     return isPositive 
-      ? 'border-success/30 bg-success/5 hover:bg-success/10'
-      : 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10';
+      ? '!border-success !bg-success/5 hover:!bg-success/10 !bg-gradient-to-br !from-success/10 !to-success/5'
+      : '!border-destructive !bg-destructive/5 hover:!bg-destructive/10 !bg-gradient-to-br !from-destructive/10 !to-destructive/5';
   };
 
   const getTextColor = () => {
@@ -64,8 +59,8 @@ export const PnLCard: React.FC<PnLCardProps> = ({
     
     if (isNeutral) return 'text-vibrant';
     return isPositive 
-      ? 'text-success font-bold'
-      : 'text-destructive font-bold';
+      ? 'text-green-200 font-bold'
+      : 'text-red-200 font-bold';
   };
 
   const getIconColor = () => {
@@ -78,7 +73,7 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   };
 
   const formatPercentage = (value: number) => {
-    const sign = value >= 0 ? '+' : '';
+    const sign = value > 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}%`;
   };
 
@@ -95,49 +90,50 @@ export const PnLCard: React.FC<PnLCardProps> = ({
   };
 
   return (
-    <div className="relative">
-      <Card className={cn(getVariantStyles(), `cursor-${cursor}`, 'min-h-[120px]', className)}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pr-12">
+    <div className="relative h-full">
+      <Card className={cn('dashboard-card h-full', getVariantStyles(), `cursor-${cursor}`, className)}>
+        <CardHeader className="dashboard-card-header pr-12">
           <CardTitle className={cn('font-semibold text-vibrant-secondary', getTitleSizeClass())}>
             {title}
-            {showTooltip && tooltipText && (
-              <Tooltip
-                content={tooltipText}
-                position={tooltipPosition}
-                disabled={!showTooltip}
-              >
-                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help inline ml-1" />
-              </Tooltip>
-            )}
           </CardTitle>
           {!floatingIcon && Icon ? (
-            <Icon className={cn('h-5 w-5', getIconColor())} />
+            <Icon className={cn('dashboard-card-icon', getIconColor())} />
           ) : !floatingIcon && (
             isPositive ? (
-              <TrendingUp className={cn('h-5 w-5', getIconColor())} />
+              <TrendingUp className={cn('dashboard-card-icon', getIconColor())} />
             ) : isNeutral ? null : (
-              <TrendingDown className={cn('h-5 w-5', getIconColor())} />
+              <TrendingDown className={cn('dashboard-card-icon', getIconColor())} />
             )
           )}
         </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2">
-          <div className={cn('number-lg dashboard-card-value', getTextColor())}>
-            {showSatsIcon ? formatSats(pnl, { size: 28, variant: variant === 'neutral' ? 'neutral' : 'auto' }) : pnl.toString()}
+        <CardContent className="dashboard-card-content">
+          <div className="flex items-center gap-2">
+            <div className={cn('number-lg dashboard-card-value', getTextColor())}>
+              {showSatsIcon ? (
+                <span className="flex items-center gap-1">
+                  {formatSats(pnl, { size: 28, showIcon: false, variant: variant === 'neutral' ? 'neutral' : 'auto' })}
+                  <SatsIcon 
+                    size={32} 
+                    variant="default"
+                    forceColor={true}
+                    className={cn('sats-icon-mobile', isPositive ? 'text-green-200' : 'text-red-200')}
+                  />
+                </span>
+              ) : pnl.toString()}
+            </div>
+            {percentage !== undefined && (
+              <Badge 
+                variant="outline" 
+                className={cn('text-xs font-semibold px-2 py-1 number-xs dashboard-card-badge', getTextColor())}
+              >
+                {formatPercentage(percentage)}
+              </Badge>
+            )}
           </div>
-          {percentage !== undefined && (
-            <Badge 
-              variant="outline" 
-              className={cn('text-xs font-semibold px-2 py-1 number-xs dashboard-card-badge', getTextColor())}
-            >
-              {formatPercentage(percentage)}
-            </Badge>
+          {subtitle && (
+            <p className="dashboard-card-subtitle">{subtitle}</p>
           )}
-        </div>
-        {subtitle && (
-          <p className="text-sm text-vibrant-secondary mt-2 font-medium dashboard-card-subtitle">{subtitle}</p>
-        )}
-      </CardContent>
+        </CardContent>
       </Card>
       
       {/* Quadrado "meio para fora" - Dentro do container principal */}

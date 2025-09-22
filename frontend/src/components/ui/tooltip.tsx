@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
 interface TooltipProps {
@@ -19,7 +20,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   delay = 200,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0, width: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -45,30 +46,39 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    
+    // Encontrar o card pai (elemento com classe que contém 'card')
+    const cardElement = triggerRef.current.closest('[class*="card"]') || 
+                       triggerRef.current.closest('.bg-gradient-to-br') ||
+                       triggerRef.current.closest('.bg-gradient-to-r');
+    
+    const cardRect = cardElement ? cardElement.getBoundingClientRect() : triggerRect;
 
     let top = 0;
     let left = 0;
 
     switch (position) {
       case 'top':
-        top = -tooltipRect.height - 8;
-        left = (triggerRect.width - tooltipRect.width) / 2;
+        // Altura que expande para cima
+        top = cardRect.top - tooltipRect.height - 12;
+        // Centralizar o tooltip (1.5x maior) em relação ao card
+        left = cardRect.left - (cardRect.width * 0.25);
         break;
       case 'bottom':
-        top = triggerRect.height + 8;
-        left = (triggerRect.width - tooltipRect.width) / 2;
+        top = cardRect.bottom + 8;
+        left = cardRect.left - (cardRect.width * 0.25);
         break;
       case 'left':
-        top = (triggerRect.height - tooltipRect.height) / 2;
-        left = -tooltipRect.width - 8;
+        top = cardRect.top + (cardRect.height - tooltipRect.height) / 2;
+        left = cardRect.left - tooltipRect.width - 8;
         break;
       case 'right':
-        top = (triggerRect.height - tooltipRect.height) / 2;
-        left = triggerRect.width + 8;
+        top = cardRect.top + (cardRect.height - tooltipRect.height) / 2;
+        left = cardRect.right + 8;
         break;
     }
 
-    setTooltipPosition({ top, left });
+    setTooltipPosition({ top, left, width: cardRect.width * 1.5 });
   };
 
   useEffect(() => {
@@ -100,7 +110,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     
     switch (position) {
       case 'top':
-        return `${baseClasses} -bottom-1 left-1/2 -translate-x-1/2 bg-popover border-r border-b border-border`;
+        return `${baseClasses} -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-r border-b border-gray-600/30`;
       case 'bottom':
         return `${baseClasses} -top-1 left-1/2 -translate-x-1/2 bg-popover border-l border-t border-border`;
       case 'left':
@@ -113,35 +123,42 @@ export const Tooltip: React.FC<TooltipProps> = ({
   };
 
   return (
-    <div
-      ref={triggerRef}
-      className={cn('inline-block relative', className)}
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
-      onFocus={showTooltip}
-      onBlur={hideTooltip}
-    >
-      {children}
+    <>
+      <div
+        ref={triggerRef}
+        className={cn('inline-block relative', className)}
+        onMouseEnter={showTooltip}
+        onMouseLeave={hideTooltip}
+        onFocus={showTooltip}
+        onBlur={hideTooltip}
+      >
+        {children}
+      </div>
       
-      {isVisible && content && (
+      {isVisible && content && createPortal(
         <div
           ref={tooltipRef}
           className={cn(
-            'absolute z-[9999] px-3 py-2 text-sm text-popover-foreground bg-popover border border-border rounded-lg shadow-lg',
+            'fixed z-[99999] px-4 py-3 text-sm text-white bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-gray-600/30 rounded-xl shadow-2xl',
             'animate-in fade-in-0 zoom-in-95 duration-200',
-            'backdrop-blur-sm bg-popover/95',
-            'min-w-56 max-w-[28rem] whitespace-normal break-words'
+            'backdrop-blur-md',
+            'whitespace-normal break-words',
+            'ring-1 ring-gray-700/20'
           )}
           style={{
             top: tooltipPosition.top,
             left: tooltipPosition.left,
+            width: tooltipPosition.width || 'auto',
+            minHeight: 'auto',
+            maxHeight: 'none',
           }}
         >
           {content}
           <div className={getArrowClasses()} />
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 };
 

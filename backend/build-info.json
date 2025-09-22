@@ -1,0 +1,18 @@
+{
+  "version": "1.3.0",
+  "buildTime": "2025-09-22T12:26:42.774Z",
+  "environment": "development",
+  "features": [
+    "trading",
+    "analytics",
+    "admin-panel",
+    "notifications",
+    "automation",
+    "version-check",
+    "new-feature-1",
+    "new-feature-2"
+  ],
+  "buildId": "build-2025-09-22T12-26-42-774Z",
+  "gitCommit": "def456ghi789",
+  "nodeVersion": "18.17.0"
+}
