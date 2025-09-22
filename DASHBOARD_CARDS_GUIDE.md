@@ -29,6 +29,38 @@ frontend/src/
 3. **Estado Negativo**: Vermelho - quando valor < 0
 4. **Estado Neutro Permanente**: Cinza - para cards específicos (Active Trades, Total Margin)
 
+## 💡 Sistema de Tooltips
+
+### Características dos Tooltips
+- **Renderização**: Portal React no `document.body` para garantir visibilidade
+- **Largura**: 1.5x a largura do card pai
+- **Posicionamento**: Centralizado acima do card
+- **Z-index**: `z-[99999]` para ficar acima de todos os elementos
+- **Ícone**: HelpCircle inline com o título do card
+- **Texto**: Atualmente "Lorem Ipsum" (temporário)
+
+### Implementação
+```typescript
+// Estrutura do tooltip
+<div className="flex items-center gap-2">
+  <CardTitle className="text-h3 text-vibrant">
+    Nome do Card
+  </CardTitle>
+  <Tooltip 
+    content="Lorem ipsum dolor sit amet, consectetur adipiscing elit..."
+    position="top"
+    delay={200}
+    className="z-50"
+  >
+    <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+  </Tooltip>
+</div>
+```
+
+### Cards com Tooltips
+- **Key Metrics**: 5 cards (Total PnL, Estimated Profit, Active Trades, Total Margin, Estimated Fees)
+- **History**: 10 cards (Available Margin, Estimated Balance, Total Invested, Net Profit, Fees Paid, Success Rate, Total Profitability, Total Trades, Winning Trades, Lost Trades)
+
 ### Implementação das Cores
 ```typescript
 // Função para determinar cor do PnL

@@ -16,6 +16,12 @@ Este documento descreve o sistema de cores implementado nos cards do dashboard, 
 - **Cores fixas**: Sempre as mesmas, independente dos valores
 - **Cores neutras**: Para cards informativos que não precisam de feedback visual
 
+### 3. **Sistema de Tooltips**
+- **Ícone HelpCircle**: Sempre `text-muted-foreground` com hover `text-vibrant`
+- **Tooltip**: Fundo escuro com gradiente (`from-gray-900/95 to-gray-800/95`)
+- **Borda**: `border-gray-600/30` para contraste sutil
+- **Z-index**: `z-[99999]` para garantir visibilidade acima de todos os elementos
+
 ## 🏷️ Categorização dos Cards
 
 ### **Cards com Cores Dinâmicas (Baseadas em Valores)**
@@ -247,6 +253,37 @@ Cards fixos → Cores específicas
 - `text-orange-300`: Ícone laranja (fixo)
 - `text-yellow-300`: Ícone amarelo (regular)
 
+## 💡 Sistema de Cores dos Tooltips
+
+### Cores dos Ícones HelpCircle
+- **Estado Normal**: `text-muted-foreground` (cinza suave)
+- **Estado Hover**: `text-vibrant` (cor vibrante do tema)
+- **Transição**: `transition-colors` para mudança suave
+
+### Cores do Tooltip
+- **Fundo**: `bg-gradient-to-br from-gray-900/95 to-gray-800/95` (gradiente escuro)
+- **Borda**: `border-gray-600/30` (borda sutil)
+- **Texto**: `text-white` (branco para contraste)
+- **Sombra**: `shadow-2xl` (sombra forte)
+- **Ring**: `ring-1 ring-gray-700/20` (anel sutil)
+
+### Classes CSS dos Tooltips
+```css
+/* Ícone HelpCircle */
+.help-icon {
+  @apply w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply fixed z-[99999] px-4 py-3 text-sm text-white;
+  @apply bg-gradient-to-br from-gray-900/95 to-gray-800/95;
+  @apply border border-gray-600/30 rounded-xl shadow-2xl;
+  @apply backdrop-blur-md whitespace-normal break-words;
+  @apply ring-1 ring-gray-700/20;
+}
+```
+
 ## ✅ Benefícios do Sistema
 
 1. **Consistência Visual**: Todos os cards seguem o mesmo padrão
@@ -255,6 +292,8 @@ Cards fixos → Cores específicas
 4. **Experiência Suave**: Transições fluidas entre estados
 5. **Acessibilidade**: Contraste adequado e significado semântico
 6. **Manutenibilidade**: Código organizado e reutilizável
+7. **Tooltips Informativos**: Sistema de ajuda integrado em todos os cards
+8. **Visibilidade Garantida**: Portal React e z-index alto para tooltips sempre visíveis
 
 ## 🚀 Próximos Passos
 
@@ -263,6 +302,9 @@ Cards fixos → Cores específicas
 - [ ] Criar variações de cores para diferentes tipos de usuário
 - [ ] Implementar notificações visuais para mudanças críticas
 - [ ] Adicionar suporte a cores personalizáveis pelo usuário
+- [ ] Personalizar textos dos tooltips com informações específicas de cada card
+- [ ] Implementar tooltips responsivos para dispositivos móveis
+- [ ] Adicionar animações de entrada/saída dos tooltips
 
 ---
 
