@@ -124,6 +124,70 @@ export default function Dashboard() {
   // Dados históricos para cálculos
   const historicalMetrics = historicalData.data;
   
+  // Funções de cálculo baseadas no PAINEL_METRICAS.md
+  const calculateActiveTrades = () => {
+    if (!positionsData.positions) return 0;
+    return positionsData.positions.filter(pos => pos.status === 'running').length;
+  };
+  
+  const calculateTotalMargin = () => {
+    if (!positionsData.positions) return 0;
+    return positionsData.positions
+      .filter(pos => pos.status === 'running')
+      .reduce((sum, pos) => sum + (pos.margin || 0), 0);
+  };
+  
+  const calculateAvailableMargin = () => {
+    return balanceData?.total_balance || 0;
+  };
+  
+  const calculateEstimatedBalance = () => {
+    const availableMargin = calculateAvailableMargin();
+    const totalMargin = calculateTotalMargin();
+    const estimatedProfit = positionsData.estimatedProfit || 0;
+    const estimatedFees = positionsData.estimatedFees || 0;
+    
+    return availableMargin + totalMargin + estimatedProfit - estimatedFees;
+  };
+  
+  const calculateTotalInvested = () => {
+    if (!estimatedBalance.data) return 0;
+    return estimatedBalance.data.total_invested || 0;
+  };
+  
+  const calculateNetProfit = () => {
+    const totalPnl = positionsData.totalPL || 0;
+    const feesPaid = historicalMetrics?.totalFees || 0;
+    return totalPnl - feesPaid;
+  };
+  
+  const calculateFeesPaid = () => {
+    return historicalMetrics?.totalFees || 0;
+  };
+  
+  const calculateSuccessRate = () => {
+    return historicalMetrics?.successRate || 0;
+  };
+  
+  const calculateTotalProfitability = () => {
+    const netProfit = calculateNetProfit();
+    const totalInvested = calculateTotalInvested();
+    if (totalInvested === 0) return 0;
+    return (netProfit / totalInvested) * 100;
+  };
+  
+  const calculateTotalTrades = () => {
+    return historicalMetrics?.totalTrades || 0;
+  };
+  
+  const calculateWinningTrades = () => {
+    return historicalMetrics?.winningTrades || 0;
+  };
+  
+  const calculateLostTrades = () => {
+    return historicalMetrics?.lostTrades || 0;
+  };
+  
 
   useEffect(() => {
     if (!user) {
@@ -398,28 +462,10 @@ export default function Dashboard() {
                     <div className="mb-3">
                       <div className={`text-number-lg ${
                         positionsLoading ? 'text-gray-200' :
-                        getTradesColor(positionsData.positionCount || 0) === 'positive' ? 'text-blue-200' :
+                        getTradesColor(calculateActiveTrades()) === 'positive' ? 'text-blue-200' :
                         'text-gray-200'
                       }`}>
-                        {(() => {
-                          // Debug detalhado
-                          console.log('🔍 ACTIVE TRADES - DEBUG COMPLETO:', {
-                            positionsData: positionsData,
-                            positionsArray: positionsData.positions,
-                            positionsLength: positionsData.positions?.length,
-                            positionCount: positionsData.positionCount,
-                            hasPositions: !!(positionsData.positions && positionsData.positions.length > 0)
-                          });
-                          
-                          if (positionsData.positions && positionsData.positions.length > 0) {
-                            const runningPositions = positionsData.positions.filter(pos => pos.status === 'running').length;
-                            console.log('🔍 ACTIVE TRADES - Usando positions array:', runningPositions);
-                            return runningPositions;
-                          }
-                          
-                          console.log('🔍 ACTIVE TRADES - Usando positionCount fallback:', positionsData.positionCount);
-                          return positionsData.positionCount || 0;
-                        })()}
+                        {calculateActiveTrades()}
                       </div>
                     </div>
                     
@@ -496,7 +542,7 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className="text-number-lg text-purple-200">
-                        {formatSats(positionsData.totalMargin || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(calculateTotalMargin(), { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -587,7 +633,7 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                (balanceData?.total_balance || 0) > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateAvailableMargin() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
@@ -611,10 +657,10 @@ export default function Dashboard() {
                     <div className="mb-3">
                       <div className={`text-number-lg ${
                         positionsLoading ? 'text-gray-200' :
-                        (balanceData?.total_balance || 0) > 0 ? 'text-green-200' :
+                        calculateAvailableMargin() > 0 ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(balanceData?.total_balance || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(calculateAvailableMargin(), { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -623,11 +669,11 @@ export default function Dashboard() {
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
                           positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
-                          (balanceData?.total_balance || 0) > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          calculateAvailableMargin() > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
                       >
-                        {(balanceData?.total_balance || 0) > 0 ? 'Available' : 'Empty'}
+                        {calculateAvailableMargin() > 0 ? 'Available' : 'Empty'}
                       </Badge>
                     </div>
                   </div>
@@ -656,8 +702,8 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
+                calculateEstimatedBalance() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateEstimatedBalance() < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
@@ -681,11 +727,11 @@ export default function Dashboard() {
                     <div className="mb-3">
                       <div className={`text-number-lg ${
                         positionsLoading ? 'text-gray-200' :
-                        (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'text-green-200' :
-                        (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'text-red-200' :
+                        calculateEstimatedBalance() > 0 ? 'text-green-200' :
+                        calculateEstimatedBalance() < 0 ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(estimatedBalance.data?.estimated_balance || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(calculateEstimatedBalance(), { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -694,12 +740,12 @@ export default function Dashboard() {
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
                           positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
-                          (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
-                          (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
+                          calculateEstimatedBalance() > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          calculateEstimatedBalance() < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
                       >
-                        {(estimatedBalance.data?.estimated_balance || 0) > 0 ? 'Positive' : (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'Negative' : 'Neutral'}
+                        {calculateEstimatedBalance() > 0 ? 'Positive' : calculateEstimatedBalance() < 0 ? 'Negative' : 'Neutral'}
                       </Badge>
                     </div>
                   </div>
@@ -737,7 +783,7 @@ export default function Dashboard() {
 
                     <div className="mb-3">
                       <div className="text-number-lg text-blue-200">
-                        {formatSats(estimatedBalance.data?.total_invested || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(calculateTotalInvested(), { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                   </div>
@@ -766,8 +812,8 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                (historicalMetrics?.totalProfit || 0) > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                (historicalMetrics?.totalProfit || 0) < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
+                calculateNetProfit() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateNetProfit() < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
@@ -791,11 +837,11 @@ export default function Dashboard() {
                     <div className="mb-3">
                       <div className={`text-number-lg ${
                         positionsLoading ? 'text-gray-200' :
-                        (historicalMetrics?.totalProfit || 0) > 0 ? 'text-green-200' :
-                        (historicalMetrics?.totalProfit || 0) < 0 ? 'text-red-200' :
+                        calculateNetProfit() > 0 ? 'text-green-200' :
+                        calculateNetProfit() < 0 ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(historicalMetrics?.totalProfit || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(calculateNetProfit(), { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                     
@@ -804,12 +850,12 @@ export default function Dashboard() {
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
                           positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
-                          (historicalMetrics?.totalProfit || 0) > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
-                          (historicalMetrics?.totalProfit || 0) < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
+                          calculateNetProfit() > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          calculateNetProfit() < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
                       >
-                        {(historicalMetrics?.totalProfit || 0) > 0 ? 'Profit' : (historicalMetrics?.totalProfit || 0) < 0 ? 'Loss' : 'Neutral'}
+                        {calculateNetProfit() > 0 ? 'Profit' : calculateNetProfit() < 0 ? 'Loss' : 'Neutral'}
                       </Badge>
                     </div>
                   </div>
@@ -847,7 +893,7 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className="text-number-lg text-orange-200">
-                        {formatSats(historicalMetrics?.totalFees || 0, { size: 24, variant: 'auto' })}
+                        {formatSats(calculateFeesPaid(), { size: 24, variant: 'auto' })}
                       </div>
                     </div>
                   </div>
@@ -873,8 +919,8 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                (historicalMetrics?.successRate || 0) >= 50 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                (historicalMetrics?.successRate || 0) >= 30 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
+                calculateSuccessRate() >= 50 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateSuccessRate() >= 30 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
                 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
               }`}>
                 <div className="card-content">
@@ -897,11 +943,11 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`text-number-lg ${
-                        (historicalMetrics?.successRate || 0) >= 50 ? 'text-green-200' :
-                        (historicalMetrics?.successRate || 0) >= 30 ? 'text-yellow-200' :
+                        calculateSuccessRate() >= 50 ? 'text-green-200' :
+                        calculateSuccessRate() >= 30 ? 'text-yellow-200' :
                         'text-red-200'
                       }`}>
-                        {(historicalMetrics?.successRate || 0).toFixed(1)}%
+                        {calculateSuccessRate().toFixed(1)}%
                       </div>
                     </div>
                     
@@ -909,12 +955,12 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          (historicalMetrics?.successRate || 0) >= 50 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
-                          (historicalMetrics?.successRate || 0) >= 30 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
+                          calculateSuccessRate() >= 50 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          calculateSuccessRate() >= 30 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
                           'border-red-400/60 text-red-200 bg-red-600/20'
                         }`}
                       >
-                        {(historicalMetrics?.successRate || 0) >= 50 ? 'Good' : (historicalMetrics?.successRate || 0) >= 30 ? 'Fair' : 'Poor'}
+                        {calculateSuccessRate() >= 50 ? 'Good' : calculateSuccessRate() >= 30 ? 'Fair' : 'Poor'}
                       </Badge>
                     </div>
                   </div>
@@ -938,7 +984,7 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                calculateTotalProfitability() >= 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
                 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
               }`}>
                 <div className="card-content">
@@ -961,10 +1007,10 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`text-number-lg ${
-                        ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'text-green-200' :
+                        calculateTotalProfitability() >= 0 ? 'text-green-200' :
                         'text-red-200'
                       }`}>
-                        {((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100).toFixed(1)}%
+                        {calculateTotalProfitability().toFixed(1)}%
                       </div>
                     </div>
                     
@@ -972,11 +1018,11 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          calculateTotalProfitability() >= 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           'border-red-400/60 text-red-200 bg-red-600/20'
                         }`}
                       >
-                        {((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'Positive' : 'Negative'}
+                        {calculateTotalProfitability() >= 0 ? 'Positive' : 'Negative'}
                       </Badge>
                     </div>
                   </div>
@@ -1014,7 +1060,7 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className="text-number-lg text-purple-200">
-                        {(historicalMetrics?.totalTrades || 0).toString()}
+                        {calculateTotalTrades().toString()}
                       </div>
                     </div>
                   </div>
@@ -1052,7 +1098,7 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className="text-number-lg text-green-200">
-                        {(historicalMetrics?.winningTrades || 0).toString()}
+                        {calculateWinningTrades().toString()}
                       </div>
                     </div>
                   </div>
@@ -1090,7 +1136,7 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className="text-number-lg text-red-200">
-                        {(historicalMetrics?.lostTrades || 0).toString()}
+                        {calculateLostTrades().toString()}
                       </div>
                     </div>
                   </div>
