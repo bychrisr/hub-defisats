@@ -20,6 +20,7 @@ import {
   CheckCircle,
   PieChart,
   BarChart3,
+  HelpCircle,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
@@ -41,6 +42,7 @@ import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
 import { RouteGuard } from '@/components/guards/RouteGuard';
+import { Tooltip } from '@/components/ui/tooltip';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -224,10 +226,19 @@ export default function Dashboard() {
                   <div className="p-6">
                     {/* Título maior */}
                     <div className="mb-4">
-                      <CardTitle 
-                        className="text-h3 text-vibrant"
-                        dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PnL') }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <CardTitle 
+                          className="text-h3 text-vibrant"
+                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PnL') }}
+                        />
+                        <Tooltip 
+                          content="Profit and Loss total de todas as suas posições ativas. Mostra o lucro ou prejuízo real baseado nos preços atuais do mercado. Valores positivos em verde indicam lucro, valores negativos em vermelho indicam prejuízo."
+                          position="top"
+                          delay={300}
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                        </Tooltip>
+                      </div>
                     </div>
                     
                     {/* Valor principal */}
