@@ -32,8 +32,8 @@ export async function checkRedirect(request: FastifyRequest<{ Querystring: Redir
     });
 
     if (!redirect) {
-      return reply.status(404).send({
-        error: 'NOT_FOUND',
+      return reply.status(200).send({
+        found: false,
         message: 'No redirect found for this path'
       });
     }

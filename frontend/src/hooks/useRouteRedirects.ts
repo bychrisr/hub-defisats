@@ -44,15 +44,17 @@ export const useRouteRedirects = (): UseRouteRedirectsReturn => {
     try {
       const response = await fetch(`/api/redirects/check?path=${encodeURIComponent(path)}`);
       
-      if (response.status === 404) {
-        return null; // No redirect found
-      }
-
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
+      
+      // Check if redirect was found
+      if (data.found === false) {
+        return null; // No redirect found
+      }
+
       return data;
     } catch (err) {
       console.error('❌ ROUTE REDIRECTS - Error checking redirect:', err);
