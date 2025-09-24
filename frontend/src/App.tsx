@@ -58,6 +58,7 @@ import AuditLogs from '@/pages/admin/AuditLogs';
 import RouteRedirects from '@/pages/admin/RouteRedirects';
 import TestPermissions from '@/pages/TestPermissions';
 import DesignSystem from '@/pages/DesignSystem';
+import Documentation from '@/pages/admin/Documentation';
 
 const queryClient = new QueryClient();
 
@@ -435,6 +436,7 @@ const App = () => {
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="alerts" element={<AdminAlerts />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="documentation" element={<Documentation />} />
             </Route>
                   <Route path="*" element={<NotFound />} />
           </Routes>

@@ -37,6 +37,7 @@ import { healthRoutes } from './routes/health.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
 import { versionRoutes } from './routes/version.routes';
+import { docsRoutes } from './routes/docs.routes';
 import { routeRedirectsRoutes } from './routes/route-redirects.routes';
 import { routeRedirectRoutes } from './routes/route-redirect.routes';
 import { authMiddleware } from './middleware/auth.middleware';
@@ -701,6 +702,10 @@ async function registerRoutes() {
   // Version routes (public)
   await fastify.register(versionRoutes, { prefix: '/api' });
   console.log('✅ Version routes registered');
+
+  // Documentation routes (admin only)
+  await fastify.register(docsRoutes, { prefix: '/api' });
+  console.log('✅ Documentation routes registered');
 
   // Route redirects admin routes
   await fastify.register(routeRedirectsRoutes, { prefix: '/api/admin/route-redirects' });

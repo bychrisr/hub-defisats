@@ -30,7 +30,8 @@ import {
   Bot,
   BarChart2,
   Bell,
-  ArrowRightLeft
+  ArrowRightLeft,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -53,6 +54,7 @@ const navigation = [
   { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
   { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor },
+  { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
   { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
