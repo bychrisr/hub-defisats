@@ -42,6 +42,7 @@ import { docsRoutes } from './routes/docs.routes';
 import { routeRedirectsRoutes } from './routes/route-redirects.routes';
 import { routeRedirectRoutes } from './routes/route-redirect.routes';
 import { rateLimitConfigRoutes } from './routes/admin/rate-limit-config.routes';
+import { cacheRoutes } from './routes/admin/cache.routes';
 import { authMiddleware } from './middleware/auth.middleware';
 import { monitoring } from './services/monitoring.service';
 import { metrics } from './utils/metrics';
@@ -758,6 +759,7 @@ async function registerRoutes() {
 
   // Rate limit config admin routes
   await fastify.register(rateLimitConfigRoutes, { prefix: '/api/admin/rate-limit-config' });
+  await fastify.register(cacheRoutes, { prefix: '/api/admin/cache' });
   console.log('✅ Rate limit config admin routes registered');
 
   // Rate limit test routes (development only)
