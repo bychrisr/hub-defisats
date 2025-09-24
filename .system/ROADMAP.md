@@ -464,11 +464,11 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
 
 ## ETAPA 11: ANÁLISES AVANÇADAS (PLANEJADA)
 
-### Tarefa 11.1: Backtesting Histórico
-- [ ] Teste com dados reais do passado
-- [ ] Múltiplos timeframes de análise
-- [ ] Comparação de estratégias
-- [ ] Otimização de parâmetros
+### Tarefa 11.1: Backtesting Histórico ✅ COMPLETA
+- ✅ Teste com dados reais do passado
+- ✅ Múltiplos timeframes de análise
+- ✅ Comparação de estratégias
+- ✅ Otimização de parâmetros
 
 ### Tarefa 11.2: Machine Learning
 - [ ] Algoritmos de predição de mercado

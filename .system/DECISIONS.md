@@ -75,6 +75,65 @@ Este documento registra as decisões arquiteturais e tecnológicas importantes t
 - **Manutenção**: Mais serviços para manter e monitorar
 - **Testes**: Necessidade de testes abrangentes para todos os serviços
 
+## ADR-021: Sistema de Backtesting Histórico
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Implementação de sistema completo de backtesting para teste de estratégias com dados históricos
+
+### Problema
+- Necessidade de testar estratégias de trading com dados históricos
+- Validação de performance antes da execução real
+- Otimização de parâmetros de estratégias
+- Comparação de múltiplas estratégias
+- Análise de métricas avançadas de performance
+
+### Decisão
+- **BacktestingService**: Sistema completo de backtesting histórico
+- **Múltiplos Timeframes**: Suporte a diferentes períodos de análise
+- **Otimização de Parâmetros**: Otimização automática de parâmetros
+- **Comparação de Estratégias**: Comparação automática de performance
+- **Métricas Avançadas**: Cálculo de métricas de risco e performance
+
+### Implementação
+
+#### **📊 Sistema de Backtesting**
+- **Dados Históricos**: Simulação de dados históricos para teste
+- **Múltiplos Timeframes**: Suporte a 1m, 5m, 15m, 1h, 4h, 1d
+- **Estratégias Configuráveis**: Estratégias com parâmetros personalizáveis
+- **Simulação Realística**: Simulação com comissões e slippage
+
+#### **🔧 Otimização de Parâmetros**
+- **Grid Search**: Busca em grade de parâmetros
+- **Métricas de Otimização**: Otimização baseada em Sharpe Ratio
+- **Validação Cruzada**: Validação de parâmetros otimizados
+- **Resultados Comparativos**: Comparação de diferentes configurações
+
+#### **📈 Métricas Avançadas**
+- **Métricas de Performance**: Return, Sharpe Ratio, Sortino Ratio, Calmar Ratio
+- **Métricas de Risco**: VaR, Expected Shortfall, Maximum Drawdown
+- **Métricas de Trading**: Win Rate, Profit Factor, Average Trade
+- **Métricas de Tempo**: Holding Time, Recovery Time
+
+#### **🔄 Comparação de Estratégias**
+- **Execução Paralela**: Execução simultânea de múltiplas estratégias
+- **Ranking Automático**: Ranking baseado em métricas de performance
+- **Análise Comparativa**: Comparação detalhada de resultados
+- **Relatórios Consolidados**: Relatórios unificados de comparação
+
+### Benefícios
+- **Validação**: Teste de estratégias antes da execução real
+- **Otimização**: Otimização automática de parâmetros
+- **Comparação**: Comparação objetiva de estratégias
+- **Análise**: Análise detalhada de performance e risco
+- **Confiabilidade**: Maior confiança na execução real
+
+### Consequências
+- **Complexidade**: Sistema complexo de simulação e análise
+- **Performance**: Processamento intensivo de dados históricos
+- **Armazenamento**: Necessidade de armazenar resultados de backtest
+- **Manutenção**: Manutenção de estratégias e parâmetros
+
 ## ADR-019: Arquitetura Reestruturada - Separação de Ambientes
 
 **Data**: 2025-01-20  
