@@ -482,6 +482,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/refresh',
     {
+      preHandler: [dynamicRateLimiters.auth],
       schema: {
         description: 'Refresh access token using refresh token',
         tags: ['Authentication'],

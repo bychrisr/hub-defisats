@@ -13,34 +13,34 @@ export async function getVersion(request: FastifyRequest, reply: FastifyReply) {
   try {
     console.log('🔍 VERSION CONTROLLER - Getting version info...');
     
-    // Lê a versão do package.json
-    const packagePath = join(__dirname, '../../package.json');
-    console.log('📦 VERSION CONTROLLER - Package path:', packagePath);
-    
-    let packageJson;
-    try {
-      packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));
-      console.log('✅ VERSION CONTROLLER - Package.json loaded:', packageJson.version);
-    } catch (packageError) {
-      console.warn('⚠️ VERSION CONTROLLER - Could not read package.json, using defaults');
-      packageJson = { version: '1.0.0' };
-    }
-    
-    // Lê informações de build se existirem
+    // Valores padrão
+    let version = '1.3.0';
     let buildTime = new Date().toISOString();
     let environment = process.env.NODE_ENV || 'development';
-    let features = ['trading', 'analytics', 'admin-panel', 'notifications', 'automation'];
-    let version = packageJson.version || '1.0.0';
+    let features = ['trading', 'analytics', 'admin-panel', 'notifications', 'automation', 'version-check'];
     
+    // Tenta ler o package.json
     try {
-      const buildInfoPath = join(__dirname, '../../build-info.json');
+      const packagePath = join(process.cwd(), 'package.json');
+      console.log('📦 VERSION CONTROLLER - Package path:', packagePath);
+      
+      const packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));
+      version = packageJson.version || version;
+      console.log('✅ VERSION CONTROLLER - Package.json loaded:', version);
+    } catch (packageError) {
+      console.warn('⚠️ VERSION CONTROLLER - Could not read package.json, using defaults');
+    }
+    
+    // Tenta ler o build-info.json
+    try {
+      const buildInfoPath = join(process.cwd(), 'build-info.json');
       console.log('📦 VERSION CONTROLLER - Build info path:', buildInfoPath);
       
       const buildInfo = JSON.parse(readFileSync(buildInfoPath, 'utf8'));
       buildTime = buildInfo.buildTime || buildTime;
       environment = buildInfo.environment || environment;
       features = buildInfo.features || features;
-      version = buildInfo.version || version; // Usa a versão do build-info se disponível
+      version = buildInfo.version || version;
       
       console.log('✅ VERSION CONTROLLER - Build info loaded:', {
         version,

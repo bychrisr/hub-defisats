@@ -430,6 +430,13 @@ export class CacheService {
   async clearUserCache(userId: string): Promise<number> {
     return this.clearPattern(`*user:${userId}:*`);
   }
+
+  /**
+   * Invalidate cache by pattern (alias for clearPattern)
+   */
+  async invalidatePattern(pattern: string): Promise<number> {
+    return this.clearPattern(pattern);
+  }
 }
 
 // Instância singleton do cache

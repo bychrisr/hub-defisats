@@ -152,9 +152,9 @@ async function registerPlugins() {
   console.log('✅ Helmet plugin registered');
 
   console.log('🔌 Registering rate limiting plugin...');
-  // Rate limiting - more permissive for production
+  // Rate limiting - very permissive for development
   await fastify.register(rateLimit, {
-    max: config.isDevelopment ? 1000 : 1000, // 1000 requests per minute in both dev and prod
+    max: config.isDevelopment ? 10000 : 1000, // 10000 requests per minute in dev, 1000 in prod
     timeWindow: '1 minute',
     errorResponseBuilder: (request, context) => ({
       code: 429,
@@ -291,6 +291,45 @@ async function registerRoutes() {
     };
   });
   console.log('✅ Health check route registered');
+
+  // Version endpoint
+  fastify.get('/version', {
+    schema: {
+      description: 'Get application version information',
+      tags: ['System'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            version: { type: 'string' },
+            buildTime: { type: 'string' },
+            environment: { type: 'string' },
+            uptime: { type: 'number' },
+            features: { 
+              type: 'array',
+              items: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+  }, async (_request, _reply) => {
+    return {
+      version: '0.0.2',
+      buildTime: new Date().toISOString(),
+      environment: config.env.NODE_ENV,
+      uptime: process.uptime(),
+      features: [
+        'authentication',
+        'trading',
+        'automation',
+        'notifications',
+        'analytics',
+        'api'
+      ]
+    };
+  });
+  console.log('✅ Version route registered');
 
   // Advanced health check endpoint
   fastify.get('/api/health/advanced', {

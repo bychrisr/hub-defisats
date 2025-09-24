@@ -18,13 +18,22 @@ export async function routeRedirectRoutes(fastify: FastifyInstance) {
         200: {
           type: 'object',
           properties: {
+            found: { type: 'boolean' },
+            message: { type: 'string' },
             from_path: { type: 'string' },
             to_path: { type: 'string' },
             redirect_type: { type: 'string' },
             status_code: { type: 'number' }
           }
         },
-        404: {
+        400: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
           type: 'object',
           properties: {
             error: { type: 'string' },
