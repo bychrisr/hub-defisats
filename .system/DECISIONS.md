@@ -2075,7 +2075,76 @@ Implementar sistema de rate limiting dinâmico que permite configuração em tem
 
 ---
 
+## ADR-026: Sistema de Load Balancing para Workers
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Necessidade de um sistema de load balancing para distribuir eficientemente tarefas entre múltiplos workers, garantindo alta disponibilidade e performance otimizada.
+
+**Decisão**: Implementar um sistema completo de load balancing com escalonamento automático e gerenciamento inteligente de workers.
+
+### Componentes Implementados
+
+1. **LoadBalancerService**
+   - Escalonamento automático baseado em métricas de CPU e memória
+   - Seleção inteligente de workers baseada em scores de carga
+   - Health checks automáticos e monitoramento de heartbeat
+   - Integração com Redis e BullMQ para gerenciamento de filas
+   - Configuração flexível de thresholds e cooldowns
+
+2. **WorkerManagerService**
+   - Gerenciamento de ciclo de vida de workers individuais
+   - Criação e remoção dinâmica de workers
+   - Monitoramento de performance e recursos
+   - Heartbeat automático para load balancer
+   - Graceful shutdown de workers
+
+3. **LoadBalancerController**
+   - API administrativa completa para controle
+   - Monitoramento de estatísticas em tempo real
+   - Controle manual de escalonamento
+   - Health checks e diagnósticos
+   - Gerenciamento de workers individuais
+
+### Estratégias de Load Balancing
+
+1. **Seleção por Score de Carga**
+   - Cálculo baseado em CPU, memória e jobs ativos
+   - Seleção do worker com menor carga
+   - Consideração de capacidades e status
+
+2. **Escalonamento Automático**
+   - Scale up quando carga > 80%
+   - Scale down quando carga < 30%
+   - Cooldown de 1 minuto entre escalonamentos
+   - Respeito aos limites mínimo (2) e máximo (10)
+
+3. **Prioridades de Fila**
+   - margin-check: prioridade 10 (alta)
+   - automation-executor: prioridade 8
+   - payment-validator: prioridade 7
+   - simulation: prioridade 6
+   - notification: prioridade 4 (baixa)
+
+### Monitoramento e Health Checks
+
+- **Heartbeat**: A cada 10 segundos
+- **Health Check**: A cada 30 segundos
+- **Detecção de Workers Stale**: > 1 minuto sem heartbeat
+- **Métricas**: CPU, memória, jobs ativos, tempo de resposta
+
+**Consequências**:
+- ✅ Distribuição eficiente de carga entre workers
+- ✅ Escalonamento automático baseado em demanda
+- ✅ Alta disponibilidade e tolerância a falhas
+- ✅ Monitoramento completo de performance
+- ✅ Controle administrativo em tempo real
+- ✅ Otimização automática de recursos
+- ✅ Integração seamless com sistema existente
+
+---
+
 **Documento**: Decisões Arquiteturais e Tecnológicas  
-**Versão**: 1.5.0  
+**Versão**: 1.6.0  
 **Última Atualização**: 2025-01-25  
 **Responsável**: Equipe de Desenvolvimento

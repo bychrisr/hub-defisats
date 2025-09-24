@@ -6,7 +6,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
-### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas + Rate Limiting Dinâmico + Cache Redis Estratégico**
+### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas + Rate Limiting Dinâmico + Cache Redis Estratégico + Load Balancing**
 - ✅ **TradingConfirmationService**: Sistema completo de confirmação de ordens
 - ✅ **TradingValidationService**: Validação avançada de saldo e margem
 - ✅ **TradingLoggerService**: Logs detalhados de execução real
@@ -28,6 +28,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **TTL Configurável**: Tempos de vida específicos por tipo de dados
 - ✅ **Serialização Inteligente**: Otimização automática de dados
 - ✅ **Testes Completos**: 31 testes para todas as funcionalidades de cache
+- ✅ **LoadBalancerService**: Sistema de load balancing com escalonamento automático
+- ✅ **WorkerManagerService**: Gerenciamento de workers individuais
+- ✅ **LoadBalancerController**: API administrativa para controle de load balancing
+- ✅ **Escalonamento Dinâmico**: Baseado em CPU, memória e carga de jobs
+- ✅ **Health Checks**: Monitoramento automático de workers
+- ✅ **Seleção Inteligente**: Algoritmo de seleção baseado em scores de carga
+- ✅ **Integração BullMQ**: Gerenciamento de filas com prioridades
+- ✅ **API Administrativa**: Controle completo via painel admin
+- ✅ **Testes Abrangentes**: 27 testes para todas as funcionalidades
 
 ### 🔧 **Backend (Node.js + Fastify + TypeScript)**
 - ✅ **Serviços de Trading**: Implementação completa dos serviços de trading real

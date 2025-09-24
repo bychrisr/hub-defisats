@@ -500,7 +500,17 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
   - ✅ Métricas de performance e monitoramento
   - ✅ TTL configurável por tipo de dados
   - ✅ Serialização inteligente e refresh automático
-- [ ] Load balancing entre workers
+- [x] **Load balancing entre workers**
+  - ✅ LoadBalancerService com escalonamento automático
+  - ✅ WorkerManagerService para gerenciamento de workers individuais
+  - ✅ Controller e rotas para gerenciamento via admin
+  - ✅ Suporte a múltiplas prioridades de fila e capacidades de worker
+  - ✅ Health checks automáticos e monitoramento de heartbeat
+  - ✅ Escalonamento dinâmico baseado em CPU/memória e carga de jobs
+  - ✅ Algoritmo de seleção de worker baseado em scores de carga
+  - ✅ Integração com Redis e BullMQ para gerenciamento de filas
+  - ✅ API administrativa para monitoramento e controle
+  - ✅ Testes abrangentes com 27 casos de teste
 - [ ] Otimização de queries do banco
 
 ### Tarefa 12.2: Monitoramento Avançado
