@@ -93,7 +93,15 @@ export class DynamicRateLimiter {
         // Em caso de erro, usar configuração de desenvolvimento como fallback
         const fallbackConfig = DevelopmentRateLimiter.createDevelopmentConfig();
         const fallbackRateLimiter = fallbackConfig[endpointType as keyof typeof fallbackConfig] || fallbackConfig.global;
-        await fallbackRateLimiter(request, reply);
+        
+        // Verificar se é uma função middleware ou objeto de configuração
+        if (typeof fallbackRateLimiter === 'function') {
+          await fallbackRateLimiter(request, reply);
+        } else {
+          // Se for objeto de configuração, criar middleware
+          const middleware = RateLimiter.create(fallbackRateLimiter);
+          await middleware(request, reply);
+        }
       }
     };
   }
