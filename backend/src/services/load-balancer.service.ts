@@ -1,408 +1,499 @@
-import { Logger } from 'winston';
+import { EventEmitter } from 'events';
+import { Redis } from 'ioredis';
+import { Worker, Queue } from 'bullmq';
+import { strategicCache } from './strategic-cache.service';
+
+export interface WorkerNode {
+  id: string;
+  host: string;
+  port: number;
+  status: 'active' | 'inactive' | 'overloaded';
+  cpuUsage: number;
+  memoryUsage: number;
+  activeJobs: number;
+  maxJobs: number;
+  lastHeartbeat: Date;
+  capabilities: string[];
+}
 
 export interface LoadBalancerConfig {
-  algorithm: 'round_robin' | 'least_connections' | 'weighted_round_robin' | 'ip_hash';
-  healthCheckInterval: number; // milliseconds
-  healthCheckTimeout: number; // milliseconds
-  maxRetries: number;
-  retryDelay: number; // milliseconds
+  maxWorkers: number;
+  minWorkers: number;
+  healthCheckInterval: number;
+  overloadThreshold: number;
+  underloadThreshold: number;
+  scalingCooldown: number;
+  queuePriorities: Record<string, number>;
 }
 
-export interface ServiceInstance {
-  id: string;
-  url: string;
-  weight: number;
-  isHealthy: boolean;
-  activeConnections: number;
-  lastHealthCheck: Date;
-  responseTime: number;
-  metadata?: Record<string, any>;
+export interface JobDistribution {
+  workerId: string;
+  queueName: string;
+  jobCount: number;
+  estimatedLoad: number;
 }
 
-export interface LoadBalancerStats {
-  totalRequests: number;
-  successfulRequests: number;
-  failedRequests: number;
-  averageResponseTime: number;
-  healthyInstances: number;
-  totalInstances: number;
-  uptime: number;
-}
-
-export class LoadBalancerService {
-  private logger: Logger;
+export class LoadBalancerService extends EventEmitter {
+  private redis: Redis;
+  private workers: Map<string, WorkerNode> = new Map();
+  private queues: Map<string, Queue> = new Map();
   private config: LoadBalancerConfig;
-  private instances: Map<string, ServiceInstance> = new Map();
-  private currentIndex = 0;
-  private stats = {
-    totalRequests: 0,
-    successfulRequests: 0,
-    failedRequests: 0,
-    totalResponseTime: 0,
-    startTime: Date.now()
-  };
   private healthCheckInterval: NodeJS.Timeout | null = null;
+  private lastScalingTime: number = 0;
+  private isRunning: boolean = false;
 
-  constructor(logger: Logger, config: Partial<LoadBalancerConfig> = {}) {
-    this.logger = logger;
+  constructor(config: Partial<LoadBalancerConfig> = {}) {
+    super();
+    
     this.config = {
-      algorithm: 'round_robin',
+      maxWorkers: 10,
+      minWorkers: 2,
       healthCheckInterval: 30000, // 30 seconds
-      healthCheckTimeout: 5000, // 5 seconds
-      maxRetries: 3,
-      retryDelay: 1000, // 1 second
-      ...config
-    };
-  }
-
-  /**
-   * Add a service instance
-   */
-  addInstance(instance: Omit<ServiceInstance, 'isHealthy' | 'activeConnections' | 'lastHealthCheck' | 'responseTime'>): void {
-    const serviceInstance: ServiceInstance = {
-      ...instance,
-      isHealthy: true,
-      activeConnections: 0,
-      lastHealthCheck: new Date(),
-      responseTime: 0
+      overloadThreshold: 80, // 80% CPU or memory
+      underloadThreshold: 30, // 30% CPU or memory
+      scalingCooldown: 60000, // 1 minute
+      queuePriorities: {
+        'margin-check': 10,
+        'automation-executor': 8,
+        'simulation': 6,
+        'notification': 4,
+        'payment-validator': 7,
+      },
+      ...config,
     };
 
-    this.instances.set(instance.id, serviceInstance);
-    this.logger.info('Service instance added', { 
-      instanceId: instance.id, 
-      url: instance.url,
-      weight: instance.weight 
-    });
+    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    this.initializeQueues();
   }
 
   /**
-   * Remove a service instance
+   * Initialize BullMQ queues
    */
-  removeInstance(instanceId: string): boolean {
-    const removed = this.instances.delete(instanceId);
-    if (removed) {
-      this.logger.info('Service instance removed', { instanceId });
-    }
-    return removed;
-  }
-
-  /**
-   * Get all service instances
-   */
-  getInstances(): ServiceInstance[] {
-    return Array.from(this.instances.values());
-  }
-
-  /**
-   * Get healthy service instances
-   */
-  getHealthyInstances(): ServiceInstance[] {
-    return Array.from(this.instances.values()).filter(instance => instance.isHealthy);
-  }
-
-  /**
-   * Select the next instance based on the load balancing algorithm
-   */
-  selectInstance(): ServiceInstance | null {
-    const healthyInstances = this.getHealthyInstances();
+  private initializeQueues(): void {
+    const queueNames = Object.keys(this.config.queuePriorities);
     
-    if (healthyInstances.length === 0) {
-      this.logger.warn('No healthy instances available');
-      return null;
-    }
-
-    switch (this.config.algorithm) {
-      case 'round_robin':
-        return this.selectRoundRobin(healthyInstances);
-      case 'least_connections':
-        return this.selectLeastConnections(healthyInstances);
-      case 'weighted_round_robin':
-        return this.selectWeightedRoundRobin(healthyInstances);
-      case 'ip_hash':
-        return this.selectIpHash(healthyInstances);
-      default:
-        return this.selectRoundRobin(healthyInstances);
-    }
-  }
-
-  /**
-   * Round robin selection
-   */
-  private selectRoundRobin(instances: ServiceInstance[]): ServiceInstance {
-    const instance = instances[this.currentIndex % instances.length];
-    this.currentIndex++;
-    return instance;
-  }
-
-  /**
-   * Least connections selection
-   */
-  private selectLeastConnections(instances: ServiceInstance[]): ServiceInstance {
-    return instances.reduce((min, current) => 
-      current.activeConnections < min.activeConnections ? current : min
-    );
-  }
-
-  /**
-   * Weighted round robin selection
-   */
-  private selectWeightedRoundRobin(instances: ServiceInstance[]): ServiceInstance {
-    // Simple weighted round robin implementation
-    const totalWeight = instances.reduce((sum, instance) => sum + instance.weight, 0);
-    let random = Math.random() * totalWeight;
-    
-    for (const instance of instances) {
-      random -= instance.weight;
-      if (random <= 0) {
-        return instance;
-      }
-    }
-    
-    return instances[0]; // Fallback
-  }
-
-  /**
-   * IP hash selection
-   */
-  private selectIpHash(instances: ServiceInstance[]): ServiceInstance {
-    // This would typically use the client's IP address
-    // For now, we'll use a simple hash of the current time
-    const hash = this.simpleHash(Date.now().toString());
-    return instances[hash % instances.length];
-  }
-
-  /**
-   * Simple hash function
-   */
-  private simpleHash(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash);
-  }
-
-  /**
-   * Execute a request through the load balancer
-   */
-  async executeRequest<T>(
-    requestFn: (instance: ServiceInstance) => Promise<T>,
-    options: {
-      retries?: number;
-      timeout?: number;
-    } = {}
-  ): Promise<T> {
-    const retries = options.retries || this.config.maxRetries;
-    let lastError: Error | null = null;
-
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      const instance = this.selectInstance();
+    queueNames.forEach(queueName => {
+      const queue = new Queue(queueName, {
+        connection: this.redis,
+        defaultJobOptions: {
+          priority: this.config.queuePriorities[queueName],
+          removeOnComplete: 100,
+          removeOnFail: 50,
+        },
+      });
       
-      if (!instance) {
-        throw new Error('No healthy instances available');
-      }
+      this.queues.set(queueName, queue);
+    });
+  }
 
-      try {
-        this.stats.totalRequests++;
-        instance.activeConnections++;
-
-        const startTime = Date.now();
-        const result = await this.executeWithTimeout(
-          requestFn(instance),
-          options.timeout || 30000
-        );
-        
-        const responseTime = Date.now() - startTime;
-        instance.responseTime = responseTime;
-        this.stats.totalResponseTime += responseTime;
-        this.stats.successfulRequests++;
-
-        this.logger.debug('Request successful', {
-          instanceId: instance.id,
-          attempt: attempt + 1,
-          responseTime
-        });
-
-        return result;
-
-      } catch (error) {
-        lastError = error as Error;
-        this.stats.failedRequests++;
-
-        this.logger.warn('Request failed', {
-          instanceId: instance.id,
-          attempt: attempt + 1,
-          error: lastError.message
-        });
-
-        // Mark instance as unhealthy if it fails multiple times
-        if (attempt >= 2) {
-          instance.isHealthy = false;
-          this.logger.warn('Instance marked as unhealthy', { instanceId: instance.id });
-        }
-
-        // Wait before retry
-        if (attempt < retries) {
-          await this.delay(this.config.retryDelay);
-        }
-
-      } finally {
-        instance.activeConnections = Math.max(0, instance.activeConnections - 1);
-      }
+  /**
+   * Start the load balancer
+   */
+  async start(): Promise<void> {
+    if (this.isRunning) {
+      console.log('⚠️ Load balancer already running');
+      return;
     }
 
-    throw lastError || new Error('Request failed after all retries');
+    console.log('🚀 Starting Load Balancer Service...');
+    
+    this.isRunning = true;
+    
+    // Start health check monitoring
+    this.startHealthCheck();
+    
+    // Initialize with minimum workers
+    await this.scaleWorkers(this.config.minWorkers);
+    
+    console.log('✅ Load Balancer Service started successfully');
+    this.emit('started');
   }
 
   /**
-   * Execute a function with timeout
+   * Stop the load balancer
    */
-  private async executeWithTimeout<T>(
-    promise: Promise<T>,
-    timeout: number
-  ): Promise<T> {
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), timeout);
-    });
+  async stop(): Promise<void> {
+    if (!this.isRunning) {
+      return;
+    }
 
-    return Promise.race([promise, timeoutPromise]);
-  }
-
-  /**
-   * Start health checking
-   */
-  startHealthChecking(): void {
-    if (this.healthCheckInterval) return;
-
-    this.healthCheckInterval = setInterval(() => {
-      this.performHealthChecks();
-    }, this.config.healthCheckInterval);
-
-    this.logger.info('Health checking started', { 
-      interval: this.config.healthCheckInterval 
-    });
-  }
-
-  /**
-   * Stop health checking
-   */
-  stopHealthChecking(): void {
+    console.log('🛑 Stopping Load Balancer Service...');
+    
+    this.isRunning = false;
+    
+    // Stop health check
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
       this.healthCheckInterval = null;
-      this.logger.info('Health checking stopped');
+    }
+    
+    // Scale down to 0 workers
+    await this.scaleWorkers(0);
+    
+    // Close Redis connection
+    await this.redis.quit();
+    
+    console.log('✅ Load Balancer Service stopped');
+    this.emit('stopped');
+  }
+
+  /**
+   * Register a worker node
+   */
+  async registerWorker(workerNode: Omit<WorkerNode, 'lastHeartbeat'>): Promise<void> {
+    const node: WorkerNode = {
+      ...workerNode,
+      lastHeartbeat: new Date(),
+    };
+
+    this.workers.set(node.id, node);
+    
+    // Cache worker info
+    await strategicCache.set('config', `worker:${node.id}`, node);
+    
+    console.log(`📝 Registered worker: ${node.id} (${node.host}:${node.port})`);
+    this.emit('workerRegistered', node);
+  }
+
+  /**
+   * Unregister a worker node
+   */
+  async unregisterWorker(workerId: string): Promise<void> {
+    const worker = this.workers.get(workerId);
+    if (!worker) {
+      return;
+    }
+
+    this.workers.delete(workerId);
+    await strategicCache.delete('config', `worker:${workerId}`);
+    
+    console.log(`🗑️ Unregistered worker: ${workerId}`);
+    this.emit('workerUnregistered', worker);
+  }
+
+  /**
+   * Update worker status
+   */
+  async updateWorkerStatus(workerId: string, status: Partial<WorkerNode>): Promise<void> {
+    const worker = this.workers.get(workerId);
+    if (!worker) {
+      return;
+    }
+
+    const updatedWorker = {
+      ...worker,
+      ...status,
+      lastHeartbeat: new Date(),
+    };
+
+    this.workers.set(workerId, updatedWorker);
+    await strategicCache.set('config', `worker:${workerId}`, updatedWorker);
+    
+    this.emit('workerStatusUpdated', updatedWorker);
+  }
+
+  /**
+   * Get optimal worker for a job
+   */
+  async getOptimalWorker(queueName: string, jobData?: any): Promise<WorkerNode | null> {
+    const availableWorkers = Array.from(this.workers.values())
+      .filter(worker => 
+        worker.status === 'active' && 
+        worker.activeJobs < worker.maxJobs &&
+        worker.capabilities.includes(queueName)
+      );
+
+    if (availableWorkers.length === 0) {
+      return null;
+    }
+
+    // Calculate load score for each worker
+    const workersWithScore = availableWorkers.map(worker => {
+      const cpuScore = worker.cpuUsage / 100;
+      const memoryScore = worker.memoryUsage / 100;
+      const jobScore = worker.activeJobs / worker.maxJobs;
+      
+      const loadScore = (cpuScore + memoryScore + jobScore) / 3;
+      
+      return {
+        worker,
+        loadScore,
+      };
+    });
+
+    // Sort by load score (lowest first)
+    workersWithScore.sort((a, b) => a.loadScore - b.loadScore);
+    
+    return workersWithScore[0].worker;
+  }
+
+  /**
+   * Distribute jobs across workers
+   */
+  async distributeJobs(): Promise<JobDistribution[]> {
+    const distributions: JobDistribution[] = [];
+    
+    for (const [queueName, queue] of this.queues) {
+      const waitingJobs = await queue.getWaiting();
+      const activeJobs = await queue.getActive();
+      const totalJobs = waitingJobs.length + activeJobs.length;
+      
+      if (totalJobs === 0) {
+        continue;
+      }
+
+      const availableWorkers = Array.from(this.workers.values())
+        .filter(worker => 
+          worker.status === 'active' && 
+          worker.capabilities.includes(queueName)
+        );
+
+      if (availableWorkers.length === 0) {
+        continue;
+      }
+
+      // Distribute jobs based on worker capacity
+      const totalCapacity = availableWorkers.reduce((sum, worker) => sum + worker.maxJobs, 0);
+      
+      for (const worker of availableWorkers) {
+        const workerCapacity = worker.maxJobs;
+        const distributionRatio = workerCapacity / totalCapacity;
+        const assignedJobs = Math.floor(totalJobs * distributionRatio);
+        
+        distributions.push({
+          workerId: worker.id,
+          queueName,
+          jobCount: assignedJobs,
+          estimatedLoad: (worker.activeJobs + assignedJobs) / worker.maxJobs * 100,
+        });
+      }
+    }
+    
+    return distributions;
+  }
+
+  /**
+   * Scale workers based on load
+   */
+  async scaleWorkers(targetCount: number): Promise<void> {
+    const currentCount = this.workers.size;
+    
+    if (targetCount === currentCount) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - this.lastScalingTime < this.config.scalingCooldown) {
+      console.log('⏳ Scaling cooldown active, skipping scaling');
+      return;
+    }
+
+    this.lastScalingTime = now;
+
+    if (targetCount > currentCount) {
+      // Scale up
+      const workersToAdd = targetCount - currentCount;
+      console.log(`📈 Scaling up: adding ${workersToAdd} workers`);
+      
+      for (let i = 0; i < workersToAdd; i++) {
+        await this.createWorker();
+      }
+    } else {
+      // Scale down
+      const workersToRemove = currentCount - targetCount;
+      console.log(`📉 Scaling down: removing ${workersToRemove} workers`);
+      
+      const workersToRemoveList = Array.from(this.workers.values())
+        .sort((a, b) => a.activeJobs - b.activeJobs)
+        .slice(0, workersToRemove);
+      
+      for (const worker of workersToRemoveList) {
+        await this.removeWorker(worker.id);
+      }
     }
   }
 
   /**
-   * Perform health checks on all instances
+   * Create a new worker
    */
-  private async performHealthChecks(): Promise<void> {
-    const instances = Array.from(this.instances.values());
+  private async createWorker(): Promise<void> {
+    const workerId = `worker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const host = process.env.WORKER_HOST || 'localhost';
+    const port = parseInt(process.env.WORKER_PORT || '3001') + this.workers.size;
     
-    const healthCheckPromises = instances.map(instance => 
-      this.checkInstanceHealth(instance)
-    );
+    const worker: WorkerNode = {
+      id: workerId,
+      host,
+      port,
+      status: 'active',
+      cpuUsage: 0,
+      memoryUsage: 0,
+      activeJobs: 0,
+      maxJobs: 10,
+      lastHeartbeat: new Date(),
+      capabilities: Object.keys(this.config.queuePriorities),
+    };
 
-    await Promise.allSettled(healthCheckPromises);
+    await this.registerWorker(worker);
+    
+    // Start actual worker process (in real implementation, this would spawn a new process)
+    await this.startWorkerProcess(worker);
   }
 
   /**
-   * Check health of a specific instance
+   * Start worker process
    */
-  private async checkInstanceHealth(instance: ServiceInstance): Promise<void> {
-    try {
-      const startTime = Date.now();
-      
-      // Simple health check - try to connect to the instance
-      const response = await fetch(`${instance.url}/health`, {
-        method: 'GET',
-        timeout: this.config.healthCheckTimeout
-      });
+  private async startWorkerProcess(worker: WorkerNode): Promise<void> {
+    console.log(`🔄 Starting worker process: ${worker.id}`);
+    
+    // In a real implementation, this would spawn a new Node.js process
+    // For now, we'll simulate the worker startup
+    setTimeout(() => {
+      console.log(`✅ Worker process started: ${worker.id}`);
+      this.emit('workerProcessStarted', worker);
+    }, 1000);
+  }
 
-      const responseTime = Date.now() - startTime;
+  /**
+   * Remove a worker
+   */
+  private async removeWorker(workerId: string): Promise<void> {
+    const worker = this.workers.get(workerId);
+    if (!worker) {
+      return;
+    }
+
+    console.log(`🔄 Stopping worker process: ${workerId}`);
+    
+    // In a real implementation, this would terminate the worker process
+    await this.unregisterWorker(workerId);
+    
+    console.log(`✅ Worker process stopped: ${workerId}`);
+    this.emit('workerProcessStopped', worker);
+  }
+
+  /**
+   * Start health check monitoring
+   */
+  private startHealthCheck(): void {
+    this.healthCheckInterval = setInterval(async () => {
+      await this.performHealthCheck();
+    }, this.config.healthCheckInterval);
+  }
+
+  /**
+   * Perform health check on all workers
+   */
+  private async performHealthCheck(): Promise<void> {
+    const now = new Date();
+    const staleThreshold = 60000; // 1 minute
+    
+    for (const [workerId, worker] of this.workers) {
+      const timeSinceHeartbeat = now.getTime() - worker.lastHeartbeat.getTime();
       
-      if (response.ok) {
-        instance.isHealthy = true;
-        instance.responseTime = responseTime;
-        instance.lastHealthCheck = new Date();
-        
-        this.logger.debug('Instance health check passed', {
-          instanceId: instance.id,
-          responseTime
-        });
-      } else {
-        instance.isHealthy = false;
-        this.logger.warn('Instance health check failed', {
-          instanceId: instance.id,
-          status: response.status
-        });
+      if (timeSinceHeartbeat > staleThreshold) {
+        console.log(`⚠️ Worker ${workerId} is stale, marking as inactive`);
+        await this.updateWorkerStatus(workerId, { status: 'inactive' });
       }
+      
+      // Check for overloaded workers
+      if (worker.cpuUsage > this.config.overloadThreshold || 
+          worker.memoryUsage > this.config.overloadThreshold) {
+        await this.updateWorkerStatus(workerId, { status: 'overloaded' });
+      }
+    }
+    
+    // Auto-scaling based on load
+    await this.performAutoScaling();
+  }
 
-    } catch (error) {
-      instance.isHealthy = false;
-      this.logger.warn('Instance health check error', {
-        instanceId: instance.id,
-        error: (error as Error).message
-      });
+  /**
+   * Perform auto-scaling based on current load
+   */
+  private async performAutoScaling(): Promise<void> {
+    const activeWorkers = Array.from(this.workers.values())
+      .filter(worker => worker.status === 'active');
+    
+    if (activeWorkers.length === 0) {
+      return;
+    }
+
+    const avgCpuUsage = activeWorkers.reduce((sum, worker) => sum + worker.cpuUsage, 0) / activeWorkers.length;
+    const avgMemoryUsage = activeWorkers.reduce((sum, worker) => sum + worker.memoryUsage, 0) / activeWorkers.length;
+    const avgLoad = (avgCpuUsage + avgMemoryUsage) / 2;
+
+    // Scale up if overloaded
+    if (avgLoad > this.config.overloadThreshold && activeWorkers.length < this.config.maxWorkers) {
+      console.log(`📈 Auto-scaling up: avg load ${avgLoad.toFixed(1)}% > ${this.config.overloadThreshold}%`);
+      await this.scaleWorkers(activeWorkers.length + 1);
+    }
+    
+    // Scale down if underloaded
+    if (avgLoad < this.config.underloadThreshold && activeWorkers.length > this.config.minWorkers) {
+      console.log(`📉 Auto-scaling down: avg load ${avgLoad.toFixed(1)}% < ${this.config.underloadThreshold}%`);
+      await this.scaleWorkers(activeWorkers.length - 1);
     }
   }
 
   /**
    * Get load balancer statistics
    */
-  getStats(): LoadBalancerStats {
-    const healthyInstances = this.getHealthyInstances().length;
-    const averageResponseTime = this.stats.successfulRequests > 0 
-      ? this.stats.totalResponseTime / this.stats.successfulRequests 
-      : 0;
-
+  async getStats(): Promise<any> {
+    const activeWorkers = Array.from(this.workers.values())
+      .filter(worker => worker.status === 'active');
+    
+    const totalJobs = await this.getTotalJobs();
+    
     return {
-      totalRequests: this.stats.totalRequests,
-      successfulRequests: this.stats.successfulRequests,
-      failedRequests: this.stats.failedRequests,
-      averageResponseTime,
-      healthyInstances,
-      totalInstances: this.instances.size,
-      uptime: Date.now() - this.stats.startTime
+      totalWorkers: this.workers.size,
+      activeWorkers: activeWorkers.length,
+      inactiveWorkers: this.workers.size - activeWorkers.length,
+      totalJobs,
+      avgCpuUsage: activeWorkers.length > 0 ? 
+        activeWorkers.reduce((sum, worker) => sum + worker.cpuUsage, 0) / activeWorkers.length : 0,
+      avgMemoryUsage: activeWorkers.length > 0 ? 
+        activeWorkers.reduce((sum, worker) => sum + worker.memoryUsage, 0) / activeWorkers.length : 0,
+      workers: Array.from(this.workers.values()),
+      distributions: await this.distributeJobs(),
     };
   }
 
   /**
-   * Update instance weight
+   * Get total jobs across all queues
    */
-  updateInstanceWeight(instanceId: string, weight: number): boolean {
-    const instance = this.instances.get(instanceId);
-    if (instance) {
-      instance.weight = weight;
-      this.logger.info('Instance weight updated', { instanceId, weight });
-      return true;
+  private async getTotalJobs(): Promise<number> {
+    let totalJobs = 0;
+    
+    for (const [_, queue] of this.queues) {
+      const waiting = await queue.getWaiting();
+      const active = await queue.getActive();
+      totalJobs += waiting.length + active.length;
     }
-    return false;
+    
+    return totalJobs;
   }
 
   /**
-   * Get instance by ID
+   * Get worker by ID
    */
-  getInstance(instanceId: string): ServiceInstance | undefined {
-    return this.instances.get(instanceId);
+  getWorker(workerId: string): WorkerNode | undefined {
+    return this.workers.get(workerId);
   }
 
   /**
-   * Clear all instances
+   * Get all workers
    */
-  clearInstances(): void {
-    this.instances.clear();
-    this.currentIndex = 0;
-    this.logger.info('All instances cleared');
+  getAllWorkers(): WorkerNode[] {
+    return Array.from(this.workers.values());
   }
 
   /**
-   * Delay utility
+   * Check if load balancer is running
    */
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  isLoadBalancerRunning(): boolean {
+    return this.isRunning;
   }
 }
+
+// Singleton instance
+export const loadBalancer = new LoadBalancerService();
