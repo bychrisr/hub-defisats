@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { globalDebug } from './useDebug';
 import { useErrorDisplay } from './useErrorDisplay';
+import { useTranslation } from './useTranslation';
 
 interface ApiError {
   message: string;
@@ -16,9 +17,14 @@ interface ErrorHandlerOptions {
   logError?: boolean;
   customMessage?: string;
   onError?: (error: ApiError) => void;
+  retryAction?: () => void;
+  contactSupportAction?: () => void;
 }
 
-export const useApiErrorHandler = () => {
+export const useApiErrorHandlerV2 = () => {
+  const { displayError } = useErrorDisplay();
+  const { t } = useTranslation();
+  
   const handleApiError = useCallback((
     error: AxiosError | Error,
     options: ErrorHandlerOptions = {}
@@ -28,6 +34,8 @@ export const useApiErrorHandler = () => {
       logError = true,
       customMessage,
       onError,
+      retryAction,
+      contactSupportAction
     } = options;
 
     let apiError: ApiError;
@@ -39,7 +47,7 @@ export const useApiErrorHandler = () => {
       if (response) {
         // Server responded with error status
         apiError = {
-          message: response.data?.message || response.data?.error || `Erro ${response.status}`,
+          message: response.data?.message || response.data?.error || t('errors.unexpected_error'),
           code: response.data?.code,
           status: response.status,
           details: response.data,
@@ -57,7 +65,7 @@ export const useApiErrorHandler = () => {
       } else if (request) {
         // Request was made but no response received
         apiError = {
-          message: 'Erro de conexão. Verifique sua internet.',
+          message: t('errors.connection_problem'),
           code: 'NETWORK_ERROR',
           details: { request },
         };
@@ -71,7 +79,7 @@ export const useApiErrorHandler = () => {
       } else {
         // Something else happened
         apiError = {
-          message: message || 'Erro desconhecido',
+          message: message || t('errors.unexpected_error'),
           code: 'UNKNOWN_ERROR',
         };
 
@@ -82,7 +90,7 @@ export const useApiErrorHandler = () => {
     } else {
       // Handle generic errors
       apiError = {
-        message: error.message || 'Erro desconhecido',
+        message: error.message || t('errors.unexpected_error'),
         code: 'GENERIC_ERROR',
       };
 
@@ -96,73 +104,36 @@ export const useApiErrorHandler = () => {
       onError(apiError);
     }
 
-    // Show toast notification
+    // Use the new error display system
     if (showToast) {
-      const toastMessage = customMessage || getErrorMessage(apiError);
-
-      switch (apiError.status) {
-        case 400:
-          toast.error(`Dados inválidos: ${toastMessage}`);
-          break;
-        case 401:
-          toast.error('Sessão expirada. Faça login novamente.');
-          // Could redirect to login here
-          break;
-        case 403:
-          toast.error('Acesso negado. Você não tem permissão para esta ação.');
-          break;
-        case 404:
-          toast.error('Recurso não encontrado.');
-          break;
-        case 429:
-          const rateLimitData = apiError.details;
-          if (rateLimitData) {
-            // Import and use the custom rate limit toast
-            import('../components/RateLimitToast').then(({ showRateLimitToast }) => {
-              showRateLimitToast({
-                type: rateLimitData.type || 'general',
-                retry_after: rateLimitData.retry_after || 60,
-                limit: rateLimitData.limit || 100,
-                remaining: rateLimitData.remaining || 0,
-              });
-            });
-          } else {
-            toast.warning('Muitas tentativas. Aguarde alguns segundos.');
-          }
-          break;
-        case 500:
-        case 502:
-        case 503:
-        case 504:
-          toast.error('Servidor temporariamente indisponível. Tente novamente.');
-          break;
-        default:
-          if (apiError.code === 'NETWORK_ERROR') {
-            toast.error('Problema de conexão. Verifique sua internet.');
-          } else {
-            toast.error(toastMessage);
-          }
-      }
+      displayError(error, {
+        showToast: true,
+        logError: false, // Already logged above
+        customMessage,
+        onError: onError ? () => onError(apiError) : undefined,
+        retryAction,
+        contactSupportAction
+      });
     }
 
     return apiError;
-  }, []);
+  }, [displayError, t]);
 
   const getErrorMessage = useCallback((error: ApiError): string => {
-    // Custom error message mapping
+    // Custom error message mapping with translations
     const errorMessages: Record<string, string> = {
-      'NETWORK_ERROR': 'Erro de conexão',
-      'TIMEOUT': 'Tempo limite excedido',
-      'CANCELLED': 'Operação cancelada',
-      'INVALID_CREDENTIALS': 'Credenciais inválidas',
-      'INSUFFICIENT_FUNDS': 'Saldo insuficiente',
-      'RATE_LIMIT_EXCEEDED': 'Limite de taxa excedido',
-      'SERVICE_UNAVAILABLE': 'Serviço temporariamente indisponível',
-      'MAINTENANCE_MODE': 'Sistema em manutenção',
+      'NETWORK_ERROR': t('errors.network_error'),
+      'TIMEOUT': t('errors.timeout'),
+      'CANCELLED': t('errors.cancelled'),
+      'INVALID_CREDENTIALS': t('errors.invalid_credentials'),
+      'INSUFFICIENT_FUNDS': t('errors.insufficient_funds'),
+      'RATE_LIMIT_EXCEEDED': t('errors.rate_limit_exceeded'),
+      'SERVICE_UNAVAILABLE': t('errors.service_unavailable'),
+      'MAINTENANCE_MODE': t('errors.maintenance_mode'),
     };
 
-    return errorMessages[error.code || ''] || error.message || 'Erro desconhecido';
-  }, []);
+    return errorMessages[error.code || ''] || error.message || t('errors.unexpected_error');
+  }, [t]);
 
   const isRetryableError = useCallback((error: ApiError): boolean => {
     const retryableStatuses = [408, 429, 500, 502, 503, 504];
@@ -186,6 +157,14 @@ export const useApiErrorHandler = () => {
     return error.status === 400;
   }, []);
 
+  const isRateLimitError = useCallback((error: ApiError): boolean => {
+    return error.status === 429 || error.code === 'RATE_LIMIT_EXCEEDED';
+  }, []);
+
+  const isNetworkError = useCallback((error: ApiError): boolean => {
+    return error.code === 'NETWORK_ERROR' || error.code === 'TIMEOUT';
+  }, []);
+
   return {
     handleApiError,
     getErrorMessage,
@@ -193,46 +172,32 @@ export const useApiErrorHandler = () => {
     isAuthError,
     isPermissionError,
     isValidationError,
+    isRateLimitError,
+    isNetworkError,
   };
 };
 
 // Hook específico para interceptar erros de API globalmente
-export const useGlobalApiErrorHandler = () => {
-  const { handleApiError } = useApiErrorHandler();
+export const useGlobalApiErrorHandlerV2 = () => {
+  const { handleApiError } = useApiErrorHandlerV2();
 
   const setupGlobalErrorHandler = useCallback(() => {
-    // Intercept Axios responses globally
-    const interceptor = (response: any) => {
-      // Log successful requests in debug mode
-      if (process.env.NODE_ENV === 'development') {
-        globalDebug.info('api', `Request successful: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-          status: response.status,
-          duration: response.duration || 'unknown',
-        });
-      }
-      return response;
-    };
-
-    const errorInterceptor = (error: AxiosError) => {
-      handleApiError(error, {
-        logError: true,
-        showToast: true,
+    // Interceptar erros globais do Axios
+    if (typeof window !== 'undefined') {
+      // Adicionar listener para erros não capturados
+      window.addEventListener('unhandledrejection', (event) => {
+        if (event.reason instanceof AxiosError) {
+          handleApiError(event.reason, {
+            showToast: true,
+            logError: true
+          });
+        }
       });
-
-      // Re-throw the error so calling code can handle it
-      throw error;
-    };
-
-    // This would be set up in the main App component or axios instance
-    return {
-      requestInterceptor: interceptor,
-      responseInterceptor: interceptor,
-      errorInterceptor,
-    };
+    }
   }, [handleApiError]);
 
   return {
     setupGlobalErrorHandler,
-    handleApiError,
+    handleApiError
   };
 };

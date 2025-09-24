@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertTriangle, Settings, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LNMarketsErrorProps {
   error: string;
@@ -14,12 +15,14 @@ export function LNMarketsError({
   onConfigure, 
   showConfigureButton = true 
 }: LNMarketsErrorProps) {
+  const { t } = useTranslation();
+  
   const getErrorInfo = (error: string) => {
     if (error.includes('MISSING_CREDENTIALS') || error.includes('credentials not configured')) {
       return {
-        title: 'Credenciais LN Markets Não Configuradas',
-        description: 'Para usar as funcionalidades de trading, você precisa configurar suas credenciais da LN Markets no seu perfil.',
-        action: 'Configurar Credenciais',
+        title: t('errors.ln_markets_credentials'),
+        description: t('errors.ln_markets_configure_description'),
+        action: t('settings.configure'),
         icon: Settings,
         variant: 'default' as const
       };
@@ -27,9 +30,9 @@ export function LNMarketsError({
     
     if (error.includes('INVALID_CREDENTIALS') || error.includes('Invalid API credentials')) {
       return {
-        title: 'Credenciais LN Markets Inválidas',
-        description: 'As credenciais da LN Markets configuradas estão incorretas. Verifique sua API Key, Secret e Passphrase.',
-        action: 'Verificar Credenciais',
+        title: t('errors.ln_markets_invalid'),
+        description: t('errors.ln_markets_invalid_description'),
+        action: t('errors.check_credentials'),
         icon: AlertTriangle,
         variant: 'destructive' as const
       };
@@ -37,9 +40,9 @@ export function LNMarketsError({
     
     if (error.includes('INSUFFICIENT_PERMISSIONS')) {
       return {
-        title: 'Permissões Insuficientes',
-        description: 'Suas credenciais da LN Markets não têm permissões suficientes para realizar esta operação.',
-        action: 'Verificar Permissões',
+        title: t('errors.ln_markets_permissions'),
+        description: t('errors.ln_markets_permissions_description'),
+        action: t('errors.check_permissions'),
         icon: AlertTriangle,
         variant: 'destructive' as const
       };
@@ -47,9 +50,9 @@ export function LNMarketsError({
     
     if (error.includes('RATE_LIMIT') || error.includes('rate limit')) {
       return {
-        title: 'Limite de Taxa Excedido',
-        description: 'Você excedeu o limite de requisições da API da LN Markets. Tente novamente em alguns minutos.',
-        action: 'Tentar Novamente',
+        title: t('errors.ln_markets_rate_limit'),
+        description: t('errors.ln_markets_rate_limit_description'),
+        action: t('common.try_again'),
         icon: AlertTriangle,
         variant: 'destructive' as const
       };
@@ -57,9 +60,9 @@ export function LNMarketsError({
     
     // Erro genérico
     return {
-      title: 'Erro na Integração LN Markets',
-      description: 'Ocorreu um erro ao conectar com a API da LN Markets. Verifique sua conexão e tente novamente.',
-      action: 'Tentar Novamente',
+      title: t('errors.ln_markets_error'),
+      description: t('errors.ln_markets_generic_description'),
+      action: t('common.try_again'),
       icon: AlertTriangle,
       variant: 'destructive' as const
     };
