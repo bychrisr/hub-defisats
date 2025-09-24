@@ -651,3 +651,25 @@ model TradingLog {
   @@index([tradeId])
   @@map("trading_logs")
 }
+
+model RateLimitConfig {
+  id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  environment       String    // 'development' | 'staging' | 'production' | 'global'
+  endpointType      String    // 'auth' | 'api' | 'trading' | 'notifications' | 'payments' | 'admin' | 'global'
+  maxRequests       Int       // Maximum requests allowed
+  windowMs          Int       // Time window in milliseconds
+  message           String?    @db.Text // Custom error message
+  skipSuccessfulRequests Boolean @default(false) // Skip counting successful requests
+  isActive          Boolean   @default(true) // Whether this config is active
+  createdAt         DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime  @default(now()) @db.Timestamp(6)
+  createdBy         String?   // Admin user who created this config
+  updatedBy         String?   // Admin user who last updated this config
+  metadata          Json?     // Additional configuration data
+
+  @@unique([environment, endpointType])
+  @@index([environment])
+  @@index([endpointType])
+  @@index([isActive])
+  @@map("rate_limit_configs")
+}

@@ -15,10 +15,11 @@ import {
   validateLoginInput,
 } from '../middleware/validation.middleware';
 import {
-  loginRateLimitMiddleware,
-  // registrationRateLimitMiddleware,
-  // passwordResetRateLimitMiddleware,
-} from '../middleware/user-rate-limit.middleware';
+  dynamicRateLimiters,
+} from '../middleware/dynamic-rate-limit.middleware';
+import {
+  getRateLimitInfo,
+} from '../middleware/development-rate-limit.middleware';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 // Interfaces for testing
@@ -318,7 +319,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/login',
     {
-      preHandler: [loginRateLimitMiddleware, validateLoginInput],
+      preHandler: [dynamicRateLimiters.auth, validateLoginInput],
       schema: {
         description: 'Login user with email and password',
         tags: ['Authentication'],
@@ -691,4 +692,13 @@ export async function authRoutes(fastify: FastifyInstance) {
     },
     authController.githubCallback.bind(authController)
   );
+
+  // Rate limit info endpoint (for development)
+  fastify.get('/rate-limit-info', async (request, reply) => {
+    const rateLimitInfo = getRateLimitInfo();
+    return reply.send({
+      success: true,
+      data: rateLimitInfo,
+    });
+  });
 }

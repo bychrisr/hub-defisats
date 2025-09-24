@@ -79,7 +79,7 @@ export class RateLimiter {
   private static getKey(request: FastifyRequest): string {
     const ip = this.getClientIP(request);
     const userId = (request as any).user?.id;
-    const endpoint = request.routerPath || request.url;
+    const endpoint = (request as any).routerPath || request.url;
 
     // Use user ID if authenticated, otherwise IP
     const identifier = userId ? `user:${userId}` : `ip:${ip}`;
