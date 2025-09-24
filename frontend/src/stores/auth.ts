@@ -132,16 +132,21 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         set({ isLoading: true });
 
         try {
-          await authAPI.logout();
-          console.log('✅ Logout: Backend logout successful');
-        } catch (error) {
-          console.log('⚠️ Logout: Backend logout failed, but continuing with local cleanup');
-        } finally {
-          // Clear tokens and state
-          console.log('🧹 Logout: Clearing localStorage and state...');
+          // Clear tokens first to prevent any API calls during logout
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
-
+          
+          // Try backend logout with timeout
+          await Promise.race([
+            authAPI.logout(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Logout timeout')), 5000))
+          ]);
+          console.log('✅ Logout: Backend logout successful');
+        } catch (error) {
+          console.log('⚠️ Logout: Backend logout failed, but continuing with local cleanup:', error);
+        } finally {
+          // Ensure state is cleared
+          console.log('🧹 Logout: Clearing state...');
           set({
             user: null,
             isAuthenticated: false,
@@ -244,10 +249,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             // Validate token with a timeout to prevent infinite loading
             Promise.race([
               state.get().getProfile(),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Token validation timeout')), 10000))
             ]).catch((error) => {
               console.log('❌ onRehydrateStorage: Token validation failed:', error.message);
               localStorage.removeItem('access_token');
+              localStorage.removeItem('refresh_token');
               state.set({ 
                 isAuthenticated: false, 
                 user: null, 

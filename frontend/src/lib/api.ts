@@ -69,12 +69,17 @@ api.interceptors.response.use(
     
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Evitar loop infinito - não tentar refresh se já tentou ou se é o próprio endpoint de refresh
+    if (error.response?.status === 401 && 
+        !originalRequest._retry && 
+        !originalRequest.url?.includes('/auth/refresh')) {
+      
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
+          console.log('🔄 AXIOS - Attempting token refresh...');
           const response = await axios.post(
             `${API_BASE_URL}/api/auth/refresh`,
             {
@@ -84,17 +89,30 @@ api.interceptors.response.use(
 
           const { token } = response.data;
           localStorage.setItem('access_token', token);
+          console.log('✅ AXIOS - Token refreshed successfully');
 
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
+        } else {
+          console.log('❌ AXIOS - No refresh token available, redirecting to login');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          window.location.href = '/login';
         }
       } catch (refreshError) {
+        console.log('❌ AXIOS - Token refresh failed, redirecting to login:', refreshError);
         // Refresh failed, redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login';
       }
+    } else if (error.response?.status === 401 && originalRequest.url?.includes('/auth/refresh')) {
+      // Se o próprio endpoint de refresh retornou 401, limpar tokens e redirecionar
+      console.log('❌ AXIOS - Refresh token is invalid, redirecting to login');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      window.location.href = '/login';
     }
 
     return Promise.reject(error);

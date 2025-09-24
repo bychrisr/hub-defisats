@@ -1984,7 +1984,98 @@ Implementar sistema de rate limiting dinâmico que permite configuração em tem
 
 ---
 
+## ADR-025: Sistema de Cache Redis Estratégico
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Necessidade de um sistema de cache Redis otimizado e estratégico para melhorar a performance da aplicação, reduzir carga no banco de dados e acelerar respostas da API.
+
+**Decisão**: Implementar um sistema de cache Redis estratégico com múltiplas estratégias de cache baseadas no tipo de dados.
+
+### Componentes Implementados
+
+1. **StrategicCacheService**
+   - Múltiplas estratégias de cache por tipo de dados
+   - TTL configurável por estratégia
+   - Serialização inteligente
+   - Fallback automático para banco de dados
+   - Métricas de performance completas
+
+2. **CacheManagerService**
+   - Gerenciamento específico de dados do sistema
+   - Cache de usuários, automações, planos, configurações
+   - Invalidação inteligente de cache
+   - Health checks e monitoramento
+
+3. **CacheMiddleware**
+   - Middleware automático para aplicação de cache
+   - Decorators para métodos específicos
+   - Headers de cache para debugging
+   - Skip automático para operações de escrita
+
+4. **CacheController**
+   - API administrativa para gerenciamento de cache
+   - Monitoramento de métricas e performance
+   - Invalidação manual de cache
+   - Health checks do Redis
+
+### Estratégias de Cache Implementadas
+
+1. **User Cache** (TTL: 30min)
+   - Dados de usuário com refresh automático
+   - Fallback para banco de dados
+   - Serialização completa
+
+2. **Market Cache** (TTL: 1min)
+   - Dados de mercado com alta frequência
+   - Sem fallback para banco
+   - Serialização completa
+
+3. **Positions Cache** (TTL: 5min)
+   - Posições de trading
+   - Fallback para banco de dados
+   - Refresh condicional
+
+4. **Config Cache** (TTL: 1h)
+   - Configurações do sistema
+   - Fallback para banco de dados
+   - Baixa frequência de atualização
+
+5. **Rate Limit Cache** (TTL: 1min)
+   - Contadores de rate limiting
+   - Sem serialização para performance
+   - Sem fallback
+
+6. **Session Cache** (TTL: 15min)
+   - Dados de sessão
+   - Fallback para banco de dados
+   - Refresh automático
+
+7. **Historical Cache** (TTL: 2h)
+   - Dados históricos de mercado
+   - Fallback para banco de dados
+   - Baixa frequência
+
+### Métricas e Monitoramento
+
+- **Hit Rate**: Taxa de acertos do cache
+- **Miss Rate**: Taxa de falhas do cache
+- **Performance**: Tempo de resposta
+- **Memory Usage**: Uso de memória Redis
+- **Error Tracking**: Rastreamento de erros
+
+**Consequências**:
+- ✅ Performance significativamente melhorada
+- ✅ Redução de carga no banco de dados
+- ✅ Respostas mais rápidas da API
+- ✅ Monitoramento completo de performance
+- ✅ Invalidação inteligente de cache
+- ✅ Fallback seguro para banco de dados
+- ✅ Configuração flexível por tipo de dados
+
+---
+
 **Documento**: Decisões Arquiteturais e Tecnológicas  
-**Versão**: 1.4.0  
+**Versão**: 1.5.0  
 **Última Atualização**: 2025-01-25  
 **Responsável**: Equipe de Desenvolvimento

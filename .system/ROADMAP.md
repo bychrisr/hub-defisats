@@ -491,7 +491,15 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
   - ✅ Detecção automática de ambiente
   - ✅ Cache de configurações com TTL
   - ✅ Middleware dinâmico para todas as rotas
-- [ ] Caching estratégico com Redis
+- [x] **Caching estratégico com Redis**
+  - ✅ StrategicCacheService com múltiplas estratégias de cache
+  - ✅ CacheManagerService para dados específicos do sistema
+  - ✅ CacheMiddleware com decorators automáticos
+  - ✅ Controller e rotas para gerenciamento via admin
+  - ✅ Suporte a fallback para banco de dados
+  - ✅ Métricas de performance e monitoramento
+  - ✅ TTL configurável por tipo de dados
+  - ✅ Serialização inteligente e refresh automático
 - [ ] Load balancing entre workers
 - [ ] Otimização de queries do banco
 

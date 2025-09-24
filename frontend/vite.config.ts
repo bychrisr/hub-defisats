@@ -20,6 +20,11 @@ export default defineConfig(({ mode }) => ({
         secure: false,
         ws: true,                      // ✅ Habilitar WebSocket proxy
       },
+      '/version': {
+        target: 'http://backend:3010', // ✅ Proxy para endpoint de versão
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   plugins: [react()],

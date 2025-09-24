@@ -6,7 +6,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
-### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas + Rate Limiting Dinâmico**
+### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas + Rate Limiting Dinâmico + Cache Redis Estratégico**
 - ✅ **TradingConfirmationService**: Sistema completo de confirmação de ordens
 - ✅ **TradingValidationService**: Validação avançada de saldo e margem
 - ✅ **TradingLoggerService**: Logs detalhados de execução real
@@ -19,6 +19,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **DevelopmentRateLimiter**: Sistema de rate limiting dinâmico por ambiente
 - ✅ **RateLimitConfigService**: Configuração via painel administrativo
 - ✅ **DynamicRateLimiter**: Middleware dinâmico para todas as rotas
+- ✅ **StrategicCacheService**: Sistema de cache Redis com múltiplas estratégias
+- ✅ **CacheManagerService**: Gerenciamento específico de dados do sistema
+- ✅ **CacheMiddleware**: Middleware com decorators automáticos
+- ✅ **CacheController**: API administrativa para monitoramento e controle
+- ✅ **Fallback Inteligente**: Cache miss com fallback automático para banco
+- ✅ **Métricas de Performance**: Tracking completo de hits, misses e performance
+- ✅ **TTL Configurável**: Tempos de vida específicos por tipo de dados
+- ✅ **Serialização Inteligente**: Otimização automática de dados
+- ✅ **Testes Completos**: 31 testes para todas as funcionalidades de cache
 
 ### 🔧 **Backend (Node.js + Fastify + TypeScript)**
 - ✅ **Serviços de Trading**: Implementação completa dos serviços de trading real
