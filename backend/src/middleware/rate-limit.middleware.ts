@@ -41,9 +41,14 @@ export class RateLimiter {
           reply.header('Retry-After', Math.ceil((resetTime - now) / 1000).toString());
 
           return reply.code(429).send({
-            error: 'TOO_MANY_REQUESTS',
+            error: 'RATE_LIMIT_EXCEEDED',
             message: config.message || 'Too many requests, please try again later',
             retry_after: Math.ceil((resetTime - now) / 1000),
+            limit: config.max,
+            remaining: 0,
+            reset_time: resetTime,
+            window_ms: config.windowMs,
+            type: this.getRateLimitType(config),
           });
         }
 
@@ -120,6 +125,32 @@ export class RateLimiter {
       console.error('Error getting reset time:', error);
     }
     return Date.now() + 60000;
+  }
+
+  /**
+   * Get rate limit type based on configuration
+   */
+  private static getRateLimitType(config: RateLimitConfig): string {
+    // Determine type based on window and max values
+    if (config.windowMs === 15 * 60 * 1000 && config.max === 5) {
+      return 'auth';
+    }
+    if (config.windowMs === 60 * 1000 && config.max === 200) {
+      return 'trading';
+    }
+    if (config.windowMs === 60 * 1000 && config.max === 50) {
+      return 'admin';
+    }
+    if (config.windowMs === 60 * 1000 && config.max === 30) {
+      return 'notifications';
+    }
+    if (config.windowMs === 60 * 1000 && config.max === 10) {
+      return 'payments';
+    }
+    if (config.windowMs === 60 * 1000 && config.max === 100) {
+      return 'api';
+    }
+    return 'general';
   }
 }
 

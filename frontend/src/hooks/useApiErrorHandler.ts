@@ -114,7 +114,20 @@ export const useApiErrorHandler = () => {
           toast.error('Recurso não encontrado.');
           break;
         case 429:
-          toast.warning('Muitas tentativas. Aguarde alguns segundos.');
+          const rateLimitData = apiError.details;
+          if (rateLimitData) {
+            // Import and use the custom rate limit toast
+            import('../components/RateLimitToast').then(({ showRateLimitToast }) => {
+              showRateLimitToast({
+                type: rateLimitData.type || 'general',
+                retry_after: rateLimitData.retry_after || 60,
+                limit: rateLimitData.limit || 100,
+                remaining: rateLimitData.remaining || 0,
+              });
+            });
+          } else {
+            toast.warning('Muitas tentativas. Aguarde alguns segundos.');
+          }
           break;
         case 500:
         case 502:

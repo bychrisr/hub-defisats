@@ -29,6 +29,7 @@ import { simulationRoutes } from './routes/simulation.routes';
 import { notificationRoutes } from './routes/notification.routes';
 import { backtestRoutes } from './routes/backtest.routes';
 import { paymentRoutes } from './routes/payment.routes';
+import { rateLimitTestRoutes } from './routes/rate-limit-test.routes';
 import { securityRoutes } from './routes/security.routes';
 import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
@@ -715,6 +716,12 @@ async function registerRoutes() {
   await fastify.register(routeRedirectRoutes, { prefix: '/api/redirects' });
   console.log('✅ Route redirects public routes registered');
 
+  // Rate limit test routes (development only)
+  if (config.isDevelopment) {
+    await fastify.register(rateLimitTestRoutes);
+    console.log('✅ Rate limit test routes registered');
+  }
+
   console.log('🛣️ Registering 404 handler...');
   // 404 handler
   fastify.setNotFoundHandler(function (request, reply) {
@@ -793,9 +800,16 @@ fastify.setErrorHandler((error, request, reply) => {
 
   // Rate limit errors
   if ((error as any).statusCode === 429) {
+    const rateLimitData = (error as any).data || {};
     return reply.status(429).send({
       error: 'RATE_LIMIT_EXCEEDED',
-      message: 'Too many requests',
+      message: rateLimitData.message || 'Too many requests, please try again later',
+      retry_after: rateLimitData.retry_after || 60,
+      limit: rateLimitData.limit || 100,
+      remaining: rateLimitData.remaining || 0,
+      reset_time: rateLimitData.reset_time,
+      window_ms: rateLimitData.window_ms,
+      type: rateLimitData.type || 'general',
     });
   }
 
