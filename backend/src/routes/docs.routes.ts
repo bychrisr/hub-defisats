@@ -63,7 +63,7 @@ export async function docsRoutes(fastify: FastifyInstance) {
   }, docsController.searchDocs.bind(docsController));
 
   // Obter conteúdo de um documento específico
-  fastify.get('/api/docs/content/:filePath(*)', {
+  fastify.get('/api/docs/content/:filePath', {
     schema: {
       params: {
         type: 'object',

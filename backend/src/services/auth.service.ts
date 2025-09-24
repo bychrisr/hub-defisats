@@ -72,8 +72,8 @@ export class AuthService {
     }
     console.log('✅ User does not exist, proceeding with registration');
 
-    // Validate LN Markets credentials
-    if (ln_markets_api_key) {
+    // Validate LN Markets credentials (skip validation in development)
+    if (ln_markets_api_key && process.env.NODE_ENV !== 'development') {
       try {
         console.log('🔍 Starting LN Markets credentials validation...');
         const { LNMarketsAPIService } = await import('./lnmarkets-api.service');
@@ -109,6 +109,8 @@ export class AuthService {
         // Re-throw the error to be handled by the controller
         throw error;
       }
+    } else if (ln_markets_api_key && process.env.NODE_ENV === 'development') {
+      console.log('🔧 Development mode: Skipping LN Markets credentials validation');
     }
 
     // Validate coupon if provided

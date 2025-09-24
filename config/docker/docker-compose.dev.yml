@@ -93,7 +93,7 @@ services:
   # Workers (opcionais para desenvolvimento)
   margin-monitor:
     build:
-      context: ./backend
+      context: ../../backend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-margin-monitor
     environment:
@@ -116,7 +116,7 @@ services:
 
   automation-executor:
     build:
-      context: ./backend
+      context: ../../backend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-automation-executor
     environment:
@@ -139,7 +139,7 @@ services:
 
   notification-worker:
     build:
-      context: ./backend
+      context: ../../backend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-notification-worker
     environment:
@@ -162,7 +162,7 @@ services:
 
   payment-validator:
     build:
-      context: ./backend
+      context: ../../backend
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-payment-validator
     environment:
