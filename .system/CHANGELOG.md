@@ -6,7 +6,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
-### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning**
+### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas**
 - ✅ **TradingConfirmationService**: Sistema completo de confirmação de ordens
 - ✅ **TradingValidationService**: Validação avançada de saldo e margem
 - ✅ **TradingLoggerService**: Logs detalhados de execução real
@@ -15,6 +15,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **BacktestingService**: Sistema completo de backtesting histórico
 - ✅ **MachineLearningService**: Algoritmos de predição de mercado com ML
 - ✅ **HistoricalDataService**: Integração com APIs reais (Binance/CoinGecko)
+- ✅ **RiskMetricsService**: Métricas de risco avançadas completas
 
 ### 🔧 **Backend (Node.js + Fastify + TypeScript)**
 - ✅ **Serviços de Trading**: Implementação completa dos serviços de trading real
@@ -29,6 +30,8 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **Análise de Sentiment**: Análise de sentiment do mercado
 - ✅ **Detecção de Padrões**: Detecção automática de padrões técnicos
 - ✅ **Recomendações Automáticas**: Sistema de recomendações baseado em ML
+- ✅ **Risk Metrics Avançadas**: VaR, Sharpe Ratio, Maximum Drawdown, Correlation Analysis
+- ✅ **Análise de Risco Completa**: Sistema de análise de risco com alertas e recomendações
 - ✅ **Testes Abrangentes**: Cobertura completa de testes unitários
 
 ### 🎯 **Funcionalidades**
@@ -46,6 +49,8 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **Análise de Sentiment**: Análise de sentiment do mercado
 - ✅ **Detecção de Padrões**: Detecção automática de padrões técnicos
 - ✅ **Recomendações Inteligentes**: Sistema de recomendações baseado em ML
+- ✅ **Risk Metrics Avançadas**: VaR, Sharpe Ratio, Maximum Drawdown, Correlation Analysis
+- ✅ **Análise de Risco Completa**: Sistema de análise de risco com alertas e recomendações
 
 ## [1.3.0] - 2025-09-22 - Sistema de Verificação de Versão 🔄 **VERSION CHECK**
 

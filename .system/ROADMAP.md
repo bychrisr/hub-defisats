@@ -476,11 +476,11 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
 - ✅ Detecção de padrões
 - ✅ Recomendações automáticas
 
-### Tarefa 11.3: Risk Metrics Avançadas
-- [ ] VaR (Value at Risk)
-- [ ] Sharpe Ratio
-- [ ] Maximum Drawdown
-- [ ] Correlation Analysis
+### Tarefa 11.3: Risk Metrics Avançadas ✅ COMPLETA
+- ✅ VaR (Value at Risk)
+- ✅ Sharpe Ratio
+- ✅ Maximum Drawdown
+- ✅ Correlation Analysis
 
 ## ETAPA 12: MELHORIAS TÉCNICAS (PLANEJADA)
 

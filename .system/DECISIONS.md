@@ -194,6 +194,68 @@ Este documento registra as decisões arquiteturais e tecnológicas importantes t
 - **Error Handling**: Tratamento robusto de erros de API
 - **Data Quality**: Validação de qualidade dos dados recebidos
 
+## ADR-023: Sistema de Risk Metrics Avançadas
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Implementação de sistema completo de métricas de risco avançadas para análise de portfólio
+
+### Problema
+- Necessidade de métricas de risco avançadas para análise de portfólio
+- Cálculo de VaR (Value at Risk) para quantificação de risco
+- Análise de Sharpe Ratio para avaliação de retorno ajustado ao risco
+- Cálculo de Maximum Drawdown para análise de perdas máximas
+- Análise de correlação para diversificação de portfólio
+- Sistema de alertas e recomendações baseado em métricas de risco
+
+### Decisão
+- **RiskMetricsService**: Sistema completo de métricas de risco avançadas
+- **Múltiplas Métricas**: VaR, Sharpe Ratio, Maximum Drawdown, Correlation Analysis
+- **Métricas Adicionais**: Beta, Tracking Error, Information Ratio, Calmar Ratio, Sortino Ratio
+- **Análise de Risco**: Sistema de análise de risco com níveis e alertas
+- **Recomendações**: Sistema de recomendações baseado em métricas
+
+### Implementação
+
+#### **📊 Métricas de Risco Principais**
+- **VaR (Value at Risk)**: Cálculo histórico e paramétrico com múltiplos níveis de confiança
+- **Sharpe Ratio**: Avaliação de retorno ajustado ao risco com taxa livre de risco
+- **Maximum Drawdown**: Análise de perdas máximas com identificação de picos e vales
+- **Correlation Analysis**: Análise de correlação entre ativos com matriz de correlação
+
+#### **📈 Métricas Adicionais**
+- **Beta**: Medição de sensibilidade em relação ao benchmark
+- **Tracking Error**: Desvio padrão dos retornos ativos
+- **Information Ratio**: Retorno ativo dividido pelo tracking error
+- **Calmar Ratio**: Retorno anual dividido pelo maximum drawdown
+- **Sortino Ratio**: Retorno ajustado ao risco de baixa
+
+#### **🔍 Análise de Risco**
+- **Níveis de Risco**: Classificação automática (low, medium, high, critical)
+- **Sistema de Alertas**: Alertas automáticos baseados em thresholds
+- **Recomendações**: Recomendações automáticas baseadas em métricas
+- **Análise Completa**: Análise abrangente com todas as métricas
+
+#### **⚙️ Funcionalidades Técnicas**
+- **Múltiplos Métodos**: Diferentes métodos de cálculo para cada métrica
+- **Validação de Dados**: Validação robusta de dados de entrada
+- **Tratamento de Erros**: Tratamento robusto de erros e casos extremos
+- **Performance**: Cálculos otimizados para performance
+
+### Benefícios
+- **Análise Completa**: Análise abrangente de risco de portfólio
+- **Métricas Padrão**: Implementação de métricas padrão da indústria
+- **Alertas Automáticos**: Sistema de alertas para riscos elevados
+- **Recomendações**: Recomendações automáticas para melhoria de portfólio
+- **Flexibilidade**: Suporte a múltiplos benchmarks e configurações
+
+### Consequências
+- **Complexidade**: Sistema complexo com múltiplas métricas
+- **Performance**: Cálculos intensivos para grandes portfólios
+- **Validação**: Necessidade de validação rigorosa de dados
+- **Manutenção**: Manutenção de múltiplas fórmulas e métodos
+- **Testes**: Necessidade de testes abrangentes para todas as métricas
+
 ## ADR-019: Arquitetura Reestruturada - Separação de Ambientes
 
 **Data**: 2025-01-20  
