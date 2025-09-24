@@ -6,13 +6,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
-### ✨ **Sistema de Trading Real Completo + Backtesting Histórico**
+### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning**
 - ✅ **TradingConfirmationService**: Sistema completo de confirmação de ordens
 - ✅ **TradingValidationService**: Validação avançada de saldo e margem
 - ✅ **TradingLoggerService**: Logs detalhados de execução real
 - ✅ **RiskManagementService**: Gerenciamento de risco avançado
 - ✅ **PortfolioTrackingService**: Acompanhamento completo de portfólio
 - ✅ **BacktestingService**: Sistema completo de backtesting histórico
+- ✅ **MachineLearningService**: Algoritmos de predição de mercado com ML
+- ✅ **HistoricalDataService**: Integração com APIs reais (Binance/CoinGecko)
 
 ### 🔧 **Backend (Node.js + Fastify + TypeScript)**
 - ✅ **Serviços de Trading**: Implementação completa dos serviços de trading real
@@ -22,6 +24,11 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **Backtesting Histórico**: Sistema completo de teste com dados históricos
 - ✅ **Otimização de Parâmetros**: Otimização automática de parâmetros de estratégias
 - ✅ **Comparação de Estratégias**: Comparação automática de múltiplas estratégias
+- ✅ **Machine Learning**: Algoritmos de predição de mercado com dados reais
+- ✅ **Integração de APIs**: Dados históricos reais da Binance e CoinGecko
+- ✅ **Análise de Sentiment**: Análise de sentiment do mercado
+- ✅ **Detecção de Padrões**: Detecção automática de padrões técnicos
+- ✅ **Recomendações Automáticas**: Sistema de recomendações baseado em ML
 - ✅ **Testes Abrangentes**: Cobertura completa de testes unitários
 
 ### 🎯 **Funcionalidades**
@@ -34,6 +41,11 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **Múltiplos Timeframes**: Análise em diferentes períodos de tempo
 - ✅ **Otimização Automática**: Otimização de parâmetros de estratégias
 - ✅ **Comparação de Estratégias**: Comparação automática de performance
+- ✅ **Machine Learning**: Predição de mercado com algoritmos avançados
+- ✅ **Dados Históricos Reais**: Integração com Binance e CoinGecko
+- ✅ **Análise de Sentiment**: Análise de sentiment do mercado
+- ✅ **Detecção de Padrões**: Detecção automática de padrões técnicos
+- ✅ **Recomendações Inteligentes**: Sistema de recomendações baseado em ML
 
 ## [1.3.0] - 2025-09-22 - Sistema de Verificação de Versão 🔄 **VERSION CHECK**
 

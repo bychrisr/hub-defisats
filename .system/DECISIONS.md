@@ -134,6 +134,66 @@ Este documento registra as decisões arquiteturais e tecnológicas importantes t
 - **Armazenamento**: Necessidade de armazenar resultados de backtest
 - **Manutenção**: Manutenção de estratégias e parâmetros
 
+## ADR-022: Sistema de Machine Learning com Dados Históricos Reais
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Implementação de sistema de machine learning com integração a APIs reais de dados históricos
+
+### Problema
+- Necessidade de algoritmos de predição de mercado usando dados reais
+- Integração com APIs externas para dados históricos (Binance, CoinGecko)
+- Análise de sentiment do mercado
+- Detecção automática de padrões técnicos
+- Sistema de recomendações baseado em machine learning
+
+### Decisão
+- **MachineLearningService**: Sistema completo de ML para predição de mercado
+- **HistoricalDataService**: Integração com APIs reais (Binance, CoinGecko)
+- **Fallback Automático**: Sistema de fallback entre APIs
+- **Cache Inteligente**: Cache de dados históricos para performance
+- **Indicadores Técnicos**: Cálculo completo de indicadores técnicos
+
+### Implementação
+
+#### **🤖 Sistema de Machine Learning**
+- **Predição de Mercado**: Algoritmos de predição com dados reais
+- **Treinamento de Modelos**: Sistema de treinamento de modelos ML
+- **Métricas de Performance**: Cálculo de métricas de precisão
+- **Validação Cruzada**: Validação de modelos treinados
+
+#### **📊 Integração de Dados Históricos**
+- **Binance API**: Dados históricos de alta qualidade
+- **CoinGecko API**: Fallback para dados históricos
+- **Mapeamento de Mercados**: Mapeamento automático de símbolos
+- **Múltiplos Timeframes**: Suporte a diferentes períodos
+
+#### **🔍 Análise Avançada**
+- **Análise de Sentiment**: Análise de sentiment do mercado
+- **Detecção de Padrões**: Detecção automática de padrões técnicos
+- **Indicadores Técnicos**: Cálculo completo de indicadores
+- **Condições de Mercado**: Análise de condições de mercado
+
+#### **💡 Sistema de Recomendações**
+- **Recomendações Automáticas**: Sistema baseado em ML
+- **Múltiplos Fatores**: Combinação de predição, padrões e sentiment
+- **Níveis de Risco**: Classificação de risco das recomendações
+- **Horizonte Temporal**: Recomendações com horizonte temporal
+
+### Benefícios
+- **Dados Reais**: Uso de dados históricos reais das principais exchanges
+- **Precisão**: Maior precisão nas predições com dados reais
+- **Confiabilidade**: Sistema de fallback robusto
+- **Performance**: Cache inteligente para melhor performance
+- **Flexibilidade**: Suporte a múltiplos mercados e timeframes
+
+### Consequências
+- **Dependência Externa**: Dependência de APIs externas
+- **Rate Limiting**: Necessidade de gerenciar rate limits
+- **Cache Management**: Gerenciamento de cache de dados
+- **Error Handling**: Tratamento robusto de erros de API
+- **Data Quality**: Validação de qualidade dos dados recebidos
+
 ## ADR-019: Arquitetura Reestruturada - Separação de Ambientes
 
 **Data**: 2025-01-20  
