@@ -205,24 +205,6 @@ export class LNMarketsService {
     }
   }
 
-  /**
-   * Get running trades
-   * Note: LN Markets API trades endpoint may not be available.
-   */
-  async getRunningTrades(): Promise<any[]> {
-    try {
-      // Try the documented endpoint first
-      const response = await this.client.get('/futures/trades', {
-        params: { type: 'running' },
-      });
-      return response.data || [];
-    } catch (error) {
-      console.error('Error fetching running trades:', error);
-      console.log('⚠️ LN Markets trades endpoint failed, returning empty array');
-      // Return empty array instead of throwing error to prevent dashboard crashes
-      return [];
-    }
-  }
 
   /**
    * Get account balance
@@ -378,28 +360,6 @@ export class LNMarketsService {
     }
   }
 
-  /**
-   * Create market order to reduce position size
-   */
-  async reducePosition(
-    market: string,
-    side: 'b' | 's',
-    size: number
-  ): Promise<any> {
-    try {
-      const response = await this.client.post('/futures/order', {
-        market,
-        side,
-        type: 'm', // market order
-        size,
-        reduce_only: true,
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error reducing position:', error);
-      throw new Error('Failed to reduce position');
-    }
-  }
 
   /**
    * Add margin to position

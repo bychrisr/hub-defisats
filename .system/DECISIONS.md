@@ -2,6 +2,79 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-020: Sistema de Trading Real Completo
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Implementação completa do sistema de trading real com gestão de risco avançada
+
+### Problema
+- Necessidade de execução real de trades via LN Markets API
+- Validação robusta de saldo e margem antes da execução
+- Sistema de confirmação de ordens para segurança
+- Logs detalhados de execução para auditoria
+- Gerenciamento de risco avançado para proteção do capital
+- Acompanhamento completo de portfólio e performance
+
+### Decisão
+- **TradingConfirmationService**: Sistema de confirmação de ordens com tokens únicos
+- **TradingValidationService**: Validação completa de parâmetros e limites
+- **TradingLoggerService**: Logs detalhados de todas as operações
+- **RiskManagementService**: Gerenciamento de risco com limites automáticos
+- **PortfolioTrackingService**: Acompanhamento completo de portfólio
+
+### Implementação
+
+#### **🔐 Sistema de Confirmação de Ordens**
+- **Confirmação por Token**: Cada ordem gera um token único de confirmação
+- **Expiração Automática**: Ordens expiram automaticamente após tempo limite
+- **Validação Prévia**: Validação completa antes da criação da confirmação
+- **Bulk Operations**: Suporte a confirmações em lote
+- **Retry Logic**: Sistema de retry automático para falhas temporárias
+
+#### **✅ Validação de Trading**
+- **Validação de Saldo**: Verificação de saldo suficiente antes da execução
+- **Validação de Margem**: Cálculo de margem necessária e disponível
+- **Validação de Parâmetros**: Verificação de todos os parâmetros do trade
+- **Validação de Mercado**: Verificação de condições de mercado
+- **Validação de Risco**: Análise de risco antes da execução
+
+#### **📊 Sistema de Logs Detalhados**
+- **Logs de Criação**: Log completo da criação de trades
+- **Logs de Atualização**: Log de todas as atualizações de posições
+- **Logs de Fechamento**: Log detalhado do fechamento de posições
+- **Logs de Risco**: Log de alertas e eventos de risco
+- **Logs de API**: Log de erros e falhas da API
+- **Logs de Autenticação**: Log de eventos de autenticação
+
+#### **⚠️ Gerenciamento de Risco Avançado**
+- **Limites de Exposição**: Controle automático de exposição máxima
+- **Limites de Perda**: Controle de perda máxima diária
+- **Limites de Posição**: Controle de tamanho máximo de posições
+- **Limites de Alavancagem**: Controle de alavancagem máxima
+- **Stop Loss Automático**: Execução automática de stop loss
+- **Redução de Exposição**: Redução automática quando necessário
+
+#### **📈 Acompanhamento de Portfólio**
+- **Posições Ativas**: Acompanhamento de todas as posições abertas
+- **Métricas de Portfólio**: Cálculo de métricas completas do portfólio
+- **Exposição por Mercado**: Análise de exposição por mercado
+- **Métricas de Performance**: Cálculo de métricas avançadas de performance
+- **Relatórios de Performance**: Geração de relatórios completos
+
+### Benefícios
+- **Segurança**: Sistema robusto de validação e confirmação
+- **Transparência**: Logs detalhados de todas as operações
+- **Proteção**: Gerenciamento de risco avançado
+- **Visibilidade**: Acompanhamento completo de portfólio
+- **Confiabilidade**: Sistema robusto e testado
+
+### Consequências
+- **Complexidade**: Sistema mais complexo mas mais seguro
+- **Performance**: Validações adicionais podem impactar performance
+- **Manutenção**: Mais serviços para manter e monitorar
+- **Testes**: Necessidade de testes abrangentes para todos os serviços
+
 ## ADR-019: Arquitetura Reestruturada - Separação de Ambientes
 
 **Data**: 2025-01-20  

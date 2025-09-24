@@ -41,6 +41,8 @@ model User {
   bio                        String?              @db.Text
   birthday                   DateTime?            @db.Date
   website                    String?              @db.VarChar(255)
+  risk_profile               String?              @default("moderate") @db.VarChar(50)
+  risk_limits                Json?
   admin_user                 AdminUser?
   automations                Automation[]
   backtest_reports           BacktestReport[]
@@ -48,6 +50,8 @@ model User {
   payments                   Payment[]
   trade_logs                 TradeLog[]
   user_coupons               UserCoupon[]         @relation("UserCouponRelation")
+  order_confirmations        OrderConfirmation[]
+  trading_logs               TradingLog[]
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
   simulations                Simulation[]
@@ -593,4 +597,57 @@ model RouteRedirect {
   @@index([redirect_type])
   @@index([created_at])
   @@map("route_redirects")
+}
+
+model OrderConfirmation {
+  id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId            String
+  orderType         String    // 'trade' | 'update_tp' | 'update_sl' | 'close_position'
+  status            String    @default("pending") // 'pending' | 'confirmed' | 'rejected' | 'expired' | 'cancelled'
+  tradeParams       String?   @db.Text
+  tradeId           String?
+  updateValue       Decimal?  @db.Decimal(65, 30)
+  confirmationToken String?
+  expiresAt         DateTime  @db.Timestamp(6)
+  createdAt         DateTime  @default(now()) @db.Timestamp(6)
+  confirmedAt       DateTime? @db.Timestamp(6)
+  rejectedAt        DateTime? @db.Timestamp(6)
+  rejectionReason   String?   @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("order_confirmations")
+}
+
+model TradingLog {
+  id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId      String
+  action      String    // 'trade_created' | 'trade_updated' | 'trade_closed' | 'margin_call' | 'risk_alert' | 'api_error' | 'auth_event'
+  tradeId     String?
+  market      String?
+  side        String?   // 'b' | 's'
+  quantity    Decimal?  @db.Decimal(65, 30)
+  price       Decimal?  @db.Decimal(65, 30)
+  leverage    Int?
+  stoploss    Decimal?  @db.Decimal(65, 30)
+  takeprofit  Decimal?  @db.Decimal(65, 30)
+  oldValue    Decimal?  @db.Decimal(65, 30)
+  newValue    Decimal?  @db.Decimal(65, 30)
+  reason      String?   @db.Text
+  metadata    Json?
+  timestamp   DateTime  @default(now()) @db.Timestamp(6)
+  ipAddress   String?
+  userAgent   String?   @db.Text
+  sessionId   String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([tradeId])
+  @@map("trading_logs")
 }
