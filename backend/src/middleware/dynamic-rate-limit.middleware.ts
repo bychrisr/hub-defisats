@@ -65,7 +65,7 @@ export class DynamicRateLimiter {
         const environment = DevelopmentRateLimiter.detectEnvironment();
         
         // Tentar obter configuração dinâmica
-        const dynamicConfig = await this.getDynamicConfig(environment, endpointType);
+        const dynamicConfig = await DynamicRateLimiter.getDynamicConfig(environment, endpointType);
         
         if (dynamicConfig) {
           // Usar configuração do banco de dados
@@ -102,7 +102,7 @@ export class DynamicRateLimiter {
    * Middleware para rate limiting de auth dinâmico
    */
   static async authMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const middleware = this.createDynamicMiddleware('auth');
+    const middleware = DynamicRateLimiter.createDynamicMiddleware('auth');
     await middleware(request, reply);
   }
 
@@ -110,7 +110,7 @@ export class DynamicRateLimiter {
    * Middleware para rate limiting de API dinâmico
    */
   static async apiMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const middleware = this.createDynamicMiddleware('api');
+    const middleware = DynamicRateLimiter.createDynamicMiddleware('api');
     await middleware(request, reply);
   }
 
@@ -118,7 +118,7 @@ export class DynamicRateLimiter {
    * Middleware para rate limiting de trading dinâmico
    */
   static async tradingMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const middleware = this.createDynamicMiddleware('trading');
+    const middleware = DynamicRateLimiter.createDynamicMiddleware('trading');
     await middleware(request, reply);
   }
 
@@ -126,7 +126,7 @@ export class DynamicRateLimiter {
    * Middleware para rate limiting de notifications dinâmico
    */
   static async notificationsMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const middleware = this.createDynamicMiddleware('notifications');
+    const middleware = DynamicRateLimiter.createDynamicMiddleware('notifications');
     await middleware(request, reply);
   }
 
@@ -134,7 +134,7 @@ export class DynamicRateLimiter {
    * Middleware para rate limiting de payments dinâmico
    */
   static async paymentsMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const middleware = this.createDynamicMiddleware('payments');
+    const middleware = DynamicRateLimiter.createDynamicMiddleware('payments');
     await middleware(request, reply);
   }
 
@@ -142,7 +142,7 @@ export class DynamicRateLimiter {
    * Middleware para rate limiting de admin dinâmico
    */
   static async adminMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const middleware = this.createDynamicMiddleware('admin');
+    const middleware = DynamicRateLimiter.createDynamicMiddleware('admin');
     await middleware(request, reply);
   }
 
@@ -150,7 +150,7 @@ export class DynamicRateLimiter {
    * Middleware para rate limiting global dinâmico
    */
   static async globalMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const middleware = this.createDynamicMiddleware('global');
+    const middleware = DynamicRateLimiter.createDynamicMiddleware('global');
     await middleware(request, reply);
   }
 
@@ -158,8 +158,8 @@ export class DynamicRateLimiter {
    * Limpa cache de configurações
    */
   static clearCache(): void {
-    this.configCache.clear();
-    this.lastCacheUpdate = 0;
+    DynamicRateLimiter.configCache.clear();
+    DynamicRateLimiter.lastCacheUpdate = 0;
     console.log('✅ DYNAMIC RATE LIMIT - Cache cleared');
   }
 
@@ -183,9 +183,9 @@ export class DynamicRateLimiter {
           isActive: config.isActive,
         })),
         cacheInfo: {
-          cachedConfigs: this.configCache.size,
-          lastUpdate: new Date(this.lastCacheUpdate),
-          cacheAge: Date.now() - this.lastCacheUpdate,
+          cachedConfigs: DynamicRateLimiter.configCache.size,
+          lastUpdate: new Date(DynamicRateLimiter.lastCacheUpdate),
+          cacheAge: Date.now() - DynamicRateLimiter.lastCacheUpdate,
         }
       };
     } catch (error) {
@@ -199,14 +199,14 @@ export class DynamicRateLimiter {
    */
   static async refreshCache(): Promise<void> {
     try {
-      this.clearCache();
+      DynamicRateLimiter.clearCache();
       
       // Pré-carregar configurações para o ambiente atual
       const environment = DevelopmentRateLimiter.detectEnvironment();
       const endpointTypes = ['auth', 'api', 'trading', 'notifications', 'payments', 'admin', 'global'];
       
       for (const endpointType of endpointTypes) {
-        await this.getDynamicConfig(environment, endpointType);
+        await DynamicRateLimiter.getDynamicConfig(environment, endpointType);
       }
       
       console.log('✅ DYNAMIC RATE LIMIT - Cache refreshed');

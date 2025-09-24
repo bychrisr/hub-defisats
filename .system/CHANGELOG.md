@@ -6,7 +6,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
-### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas**
+### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas + Rate Limiting Dinâmico**
 - ✅ **TradingConfirmationService**: Sistema completo de confirmação de ordens
 - ✅ **TradingValidationService**: Validação avançada de saldo e margem
 - ✅ **TradingLoggerService**: Logs detalhados de execução real
@@ -16,6 +16,9 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **MachineLearningService**: Algoritmos de predição de mercado com ML
 - ✅ **HistoricalDataService**: Integração com APIs reais (Binance/CoinGecko)
 - ✅ **RiskMetricsService**: Métricas de risco avançadas completas
+- ✅ **DevelopmentRateLimiter**: Sistema de rate limiting dinâmico por ambiente
+- ✅ **RateLimitConfigService**: Configuração via painel administrativo
+- ✅ **DynamicRateLimiter**: Middleware dinâmico para todas as rotas
 
 ### 🔧 **Backend (Node.js + Fastify + TypeScript)**
 - ✅ **Serviços de Trading**: Implementação completa dos serviços de trading real

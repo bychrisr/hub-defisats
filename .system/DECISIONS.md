@@ -1953,7 +1953,38 @@ app.get('/api/market/prices/latest', async (req, res) => {
 
 ---
 
+## ADR-024: Sistema de Rate Limiting Dinâmico
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Implementação de sistema de rate limiting configurável via painel administrativo
+
+### Decisão
+Implementar sistema de rate limiting dinâmico que permite configuração em tempo real através do painel administrativo, com detecção automática de ambiente e cache inteligente.
+
+### Implementação
+- **DevelopmentRateLimiter**: Sistema de detecção de ambiente robusto
+- **RateLimitConfigService**: Gerenciamento de configurações via banco de dados
+- **DynamicRateLimiter**: Middleware dinâmico para todas as rotas
+- **Configurações por Ambiente**:
+  - Development: 50 tentativas de auth por 5 minutos
+  - Staging: 20 tentativas de auth por 10 minutos  
+  - Production: 5 tentativas de auth por 15 minutos
+- **Painel Administrativo**: Interface completa para configuração
+- **Cache Inteligente**: TTL de 1 minuto para configurações
+- **Detecção de Ambiente**: Múltiplas variáveis (NODE_ENV, ENVIRONMENT, PORT, CORS_ORIGIN)
+
+### Consequências
+- ✅ Rate limiting maleável para desenvolvimento
+- ✅ Configuração em tempo real sem reinicialização
+- ✅ Detecção automática de ambiente
+- ✅ Cache otimizado para performance
+- ✅ Interface administrativa completa
+- ✅ Cobertura completa de testes (28 casos de teste)
+
+---
+
 **Documento**: Decisões Arquiteturais e Tecnológicas  
-**Versão**: 1.3.0  
-**Última Atualização**: 2025-01-15  
+**Versão**: 1.4.0  
+**Última Atualização**: 2025-01-25  
 **Responsável**: Equipe de Desenvolvimento

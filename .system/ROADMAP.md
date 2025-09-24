@@ -482,10 +482,15 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
 - ✅ Maximum Drawdown
 - ✅ Correlation Analysis
 
-## ETAPA 12: MELHORIAS TÉCNICAS (PLANEJADA)
+## ETAPA 12: MELHORIAS TÉCNICAS
 
 ### Tarefa 12.1: Performance e Escalabilidade
-- [ ] API Rate Limiting avançado
+- [x] **API Rate Limiting avançado**
+  - ✅ Rate limiting dinâmico por ambiente (development/staging/production)
+  - ✅ Configuração via painel administrativo
+  - ✅ Detecção automática de ambiente
+  - ✅ Cache de configurações com TTL
+  - ✅ Middleware dinâmico para todas as rotas
 - [ ] Caching estratégico com Redis
 - [ ] Load balancing entre workers
 - [ ] Otimização de queries do banco
