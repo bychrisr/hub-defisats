@@ -11,14 +11,67 @@ import {
   getSystemReports,
   getAuditLogs
 } from '../controllers/admin';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { adminAuthMiddleware } from '../middleware/auth.middleware';
 
 export async function adminRoutes(fastify: FastifyInstance) {
+  // Test route for debugging - no auth first
+  fastify.get('/test', async (request, reply) => {
+    return reply.send({ 
+      message: 'Admin test route working - no auth',
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Test route with manual auth check
+  fastify.get('/test-manual', async (request, reply) => {
+    const authHeader = request.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return reply.status(401).send({
+        error: 'UNAUTHORIZED',
+        message: 'No token provided'
+      });
+    }
+    
+    const token = authHeader.substring(7);
+    return reply.send({ 
+      message: 'Admin test route working with manual auth',
+      token: token.substring(0, 20) + '...',
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Test route with basic auth check
+  fastify.get('/test-basic', {
+    preHandler: [adminAuthMiddleware],
+    schema: {
+      tags: ['admin', 'test']
+    }
+  }, async (request, reply) => {
+    return reply.send({ 
+      message: 'Admin test route working with basic auth',
+      user: (request as any).user,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Test route with simple auth check
+  fastify.get('/test-simple', {
+    preHandler: [adminAuthMiddleware],
+    schema: {
+      tags: ['admin', 'test']
+    }
+  }, async (request, reply) => {
+    return reply.send({ 
+      message: 'Admin test route working with simple auth',
+      user: (request as any).user,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Dashboard Metrics
   fastify.get('/dashboard/metrics', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get general dashboard metrics',
       tags: ['admin', 'dashboard'],
       response: {
         200: {
@@ -38,9 +91,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Trading Analytics
   fastify.get('/trading/analytics', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get trading analytics with filtering and pagination',
       tags: ['admin', 'trading'],
       querystring: {
         type: 'object',
@@ -106,9 +158,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Trade Logs
   fastify.get('/trades/logs', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get trade logs with filtering and pagination',
       tags: ['admin', 'trades'],
       querystring: {
         type: 'object',
@@ -178,9 +229,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Payment Analytics
   fastify.get('/payments/analytics', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get payment analytics with filtering and pagination',
       tags: ['admin', 'payments'],
       querystring: {
         type: 'object',
@@ -250,9 +300,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Backtest Reports
   fastify.get('/backtests/reports', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get backtest reports with filtering and pagination',
       tags: ['admin', 'backtests'],
       querystring: {
         type: 'object',
@@ -317,9 +366,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Simulation Analytics
   fastify.get('/simulations/analytics', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get simulation analytics with filtering and pagination',
       tags: ['admin', 'simulations'],
       querystring: {
         type: 'object',
@@ -387,9 +435,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Automation Management
   fastify.get('/automations/management', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get automation management data with filtering and pagination',
       tags: ['admin', 'automations'],
       querystring: {
         type: 'object',
@@ -456,9 +503,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Notification Management
   fastify.get('/notifications/management', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get notification management data with filtering and pagination',
       tags: ['admin', 'notifications'],
       querystring: {
         type: 'object',
@@ -523,9 +569,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // System Reports
   fastify.get('/reports/system', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get system reports with filtering and pagination',
       tags: ['admin', 'reports'],
       querystring: {
         type: 'object',
@@ -590,9 +635,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // Audit Logs
   fastify.get('/audit/logs', {
-    preHandler: [adminMiddleware],
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get audit logs with filtering and pagination',
       tags: ['admin', 'audit'],
       querystring: {
         type: 'object',

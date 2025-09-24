@@ -50,7 +50,7 @@ Para cada **tarefa maior**, quebre em subtarefas lógicas.
 ## 🔄 AUTO-RECUPERAÇÃO (SE TRAVAR, PERDER CONTEXTO OU ESQUECER)
 
 ### 1. CHECKPOINT AUTOMÁTICO
-- A cada subtarefa concluída, salve um checkpoint em `.system/checkpoint.json`:
+- A cada subtarefa concluída, salve um novo checkpoint em `.system/checkpoint.json`:
   ```json
   {
     "last_task": "backend/src/workers/margin-monitor.ts",
