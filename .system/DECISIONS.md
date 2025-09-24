@@ -2,6 +2,396 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-019: Arquitetura Reestruturada - Separação de Ambientes
+
+**Data**: 2025-01-20  
+**Status**: Aceito  
+**Contexto**: Reestruturação da arquitetura para separar claramente os ambientes de desenvolvimento, staging e produção
+
+### Problema
+- Necessidade de separação clara entre ambientes de desenvolvimento, staging e produção
+- Diferentes tecnologias e configurações para cada ambiente
+- Facilidade de deploy e gerenciamento por ambiente
+- Performance otimizada para produção
+- Segurança aprimorada por ambiente
+
+### Decisão
+- **Desenvolvimento (Local)**: Docker Compose no PC do desenvolvedor
+- **Staging**: Servidor com Docker Compose para testes
+- **Produção**: Servidor nativo com PM2 para performance máxima
+- **Proxy Global**: Roteamento baseado em domínio
+- **Deploy Automático**: GitHub Actions para staging, manual para produção
+
+### Implementação
+
+#### **Estrutura de Ambientes**
+
+##### **🖥️ Desenvolvimento (Local)**
+- **Localização**: PC do desenvolvedor
+- **Tecnologia**: Docker Compose
+- **Portas**: 
+  - Frontend: `localhost:13000`
+  - Backend: `localhost:13010`
+  - PostgreSQL: `localhost:5432`
+  - Redis: `localhost:6379`
+
+##### **🧪 Staging**
+- **Localização**: Servidor `defisats.site`
+- **Tecnologia**: Docker Compose
+- **Domínio**: `staging.defisats.site`
+- **Portas**:
+  - Frontend: `localhost:13001`
+  - Backend: `localhost:13011`
+  - PostgreSQL: `localhost:5433`
+  - Redis: `localhost:6380`
+
+##### **🚀 Produção**
+- **Localização**: Servidor `defisats.site`
+- **Tecnologia**: Instalação Nativa (Node.js + PM2)
+- **Domínio**: `defisats.site`
+- **Portas**:
+  - Frontend: `localhost:3001`
+  - Backend: `localhost:3000`
+  - PostgreSQL: `localhost:5432`
+  - Redis: `localhost:6379`
+
+#### **Estrutura de Diretórios no Servidor**
+```
+/home/ubuntu/
+├── apps/
+│   ├── hub-defisats/                    # Desenvolvimento (Docker)
+│   ├── hub-defisats-staging/            # Staging (Docker)
+│   └── hub-defisats-production/         # Produção (Nativo)
+├── proxy/                               # Proxy Global
+│   ├── conf.d/
+│   │   ├── staging.conf                 # Configuração Staging
+│   │   └── production.conf              # Configuração Produção
+│   └── certs/                           # Certificados SSL
+└── /var/www/hub-defisats/               # Aplicação Produção (Nativo)
+    ├── backend/
+    ├── frontend/
+    └── ecosystem.config.js
+```
+
+#### **Configurações por Ambiente**
+
+##### **Staging (Docker)**
+```yaml
+# Docker Compose
+services:
+  postgres-staging:
+    ports: ["5433:5432"]
+  redis-staging:
+    ports: ["6380:6379"]
+  backend-staging:
+    ports: ["13011:13010"]
+  frontend-staging:
+    ports: ["13001:13000"]
+  nginx-staging:
+    ports: ["8080:80"]
+```
+
+##### **Produção (Nativo)**
+```javascript
+// PM2 Configuration
+apps: [
+  { name: 'hub-defisats-backend', script: './backend/dist/index.js' },
+  { name: 'hub-defisats-margin-monitor', script: './backend/dist/workers/margin-monitor.js' },
+  { name: 'hub-defisats-automation-executor', script: './backend/dist/workers/automation-executor.js' },
+  { name: 'hub-defisats-notification-worker', script: './backend/dist/workers/notification-worker.js' },
+  { name: 'hub-defisats-payment-validator', script: './backend/dist/workers/payment-validator.js' }
+]
+```
+
+#### **Proxy Global**
+```nginx
+# Staging
+upstream staging_backend {
+    server hub-defisats-nginx-staging:80;
+}
+
+# Produção
+upstream production_backend {
+    server 127.0.0.1:3000;
+}
+upstream production_frontend {
+    server 127.0.0.1:3001;
+}
+```
+
+#### **Fluxo de Deploy com GitHub Actions**
+
+##### **🚀 Deploy Automático (Staging)**
+- **Trigger**: Push para branch `develop`
+- **Workflow**: `.github/workflows/staging.yml`
+- **Processo**: Testes → Deploy → Health Check
+- **URL**: `https://staging.defisats.site`
+
+##### **🚀 Deploy Manual (Produção)**
+- **Trigger**: Push para branch `main` ou Workflow Dispatch
+- **Workflow**: `.github/workflows/production.yml`
+- **Processo**: Testes → Backup → Deploy → Health Check
+- **URL**: `https://defisats.site`
+
+##### **🧪 Validação de Pull Request**
+- **Trigger**: Pull Request para `main` ou `develop`
+- **Workflow**: `.github/workflows/pr-validation.yml`
+- **Processo**: Lint → Testes → Type Check → Security Audit → Build
+
+#### **Comandos de Gerenciamento**
+
+##### **Staging (Docker)**
+```bash
+# Iniciar
+docker compose -f docker-compose.staging.yml up -d
+
+# Parar
+docker compose -f docker-compose.staging.yml down
+
+# Logs
+docker compose -f docker-compose.staging.yml logs -f
+
+# Status
+docker compose -f docker-compose.staging.yml ps
+```
+
+##### **Produção (PM2)**
+```bash
+# Iniciar
+pm2 start ecosystem.config.js --env production
+
+# Parar
+pm2 stop all
+
+# Reiniciar
+pm2 reload all
+
+# Logs
+pm2 logs
+
+# Status
+pm2 status
+
+# Monitoramento
+pm2 monit
+```
+
+### Justificativa
+- **Separação Clara**: Desenvolvimento local, staging para testes, produção otimizada
+- **Performance**: Produção sem overhead do Docker, PM2 para gerenciamento
+- **Facilidade de Deploy**: Scripts automatizados e deploy independente
+- **Segurança**: Rate limiting e configurações específicas por ambiente
+- **Monitoramento**: Logs centralizados e health checks configurados
+
+### Consequências
+- **Positivas**: Performance otimizada, deploy facilitado, segurança aprimorada
+- **Neutras**: Requer configuração inicial de múltiplos ambientes
+- **Riscos**: Complexidade de gerenciamento de múltiplos ambientes
+
+### Fluxo de Desenvolvimento com Pull Requests
+
+#### **1. Criação de Feature Branch**
+```bash
+git checkout -b feature/nova-funcionalidade
+git add .
+git commit -m "feat: adiciona nova funcionalidade"
+git push origin feature/nova-funcionalidade
+```
+
+#### **2. Pull Request para Develop (Staging)**
+- Criar PR de `feature/nova-funcionalidade` → `develop`
+- GitHub Actions executa validações automaticamente
+- Merge automático após aprovação dos testes
+- Deploy automático para staging
+
+#### **3. Testes em Staging**
+- Acessar `https://staging.defisats.site`
+- Testes manuais e automatizados
+- Validação com stakeholders
+- Correções se necessário
+
+#### **4. Pull Request para Main (Produção)**
+- Criar PR de `develop` → `main`
+- Requer aprovação manual
+- Deploy manual para produção após merge
+- Backup automático antes do deploy
+
+### Configuração de Secrets no GitHub
+```bash
+# SSH Key para acesso ao servidor
+SERVER_SSH_KEY
+
+# Credenciais de email (opcional)
+EMAIL_USERNAME
+EMAIL_PASSWORD
+
+# Webhook do Slack/Discord (opcional)
+SLACK_WEBHOOK
+```
+
+### Próximos Passos
+1. **Configurar Secrets no GitHub**
+2. **Configurar Proteções de Branch**
+3. **Instalar ambiente de produção**
+4. **Configurar DNS**
+5. **Deploy inicial**
+6. **Monitoramento**
+
+## ADR-018: Deploy em Produção - Infraestrutura e Processo
+
+**Data**: 2025-01-22  
+**Status**: Aceito  
+**Contexto**: Documentação completa do processo de deploy em produção do Hub DeFiSats
+
+### Problema
+- Necessidade de documentação completa para deploy em produção
+- Processo de deploy seguro e confiável
+- Configuração de infraestrutura em produção
+- Monitoramento e troubleshooting pós-deploy
+- Plano de rollback em caso de falhas
+
+### Decisão
+- **Servidor de Produção**: AWS Ubuntu 24.04.3 LTS (IP: 3.143.248.70)
+- **Domínios**: Frontend `https://defisats.site`, API `https://api.defisats.site`
+- **Infraestrutura**: Docker Compose com serviços completos
+- **Deploy Seguro**: Script automatizado com backup e rollback
+- **Monitoramento**: Health checks e logs centralizados
+- **SSL**: Certificados Let's Encrypt com auto-renewal
+
+### Implementação
+
+#### **Arquivos de Configuração**
+```yaml
+# Docker Compose de Produção
+config/docker/docker-compose.prod.yml
+├── PostgreSQL (porta 5432)
+├── Redis (porta 6379)
+├── Backend (porta 3010)
+├── Frontend (porta 80)
+├── Nginx (reverse proxy)
+└── Workers (margin-monitor, automation-executor)
+```
+
+#### **Scripts de Deploy**
+```bash
+# Deploy Seguro
+./scripts/deploy/deploy-safe.sh
+├── Verifica saúde da produção atual
+├── Cria backup automático
+├── Testa ambiente de staging
+├── Testa localmente
+├── Para produção atual
+├── Inicia nova versão
+├── Verifica saúde da nova versão
+└── Rollback automático se falhar
+
+# Verificação
+./scripts/deploy/check-production.sh
+├── Health checks completos
+├── Verificação de containers
+├── Testes de conectividade
+└── Validação de funcionalidades
+```
+
+#### **Variáveis de Ambiente Obrigatórias**
+```bash
+# Database
+POSTGRES_DB=hubdefisats_prod
+POSTGRES_USER=hubdefisats_prod
+POSTGRES_PASSWORD=your_secure_database_password
+
+# Security
+JWT_SECRET=your_secure_jwt_secret_32_chars_minimum
+ENCRYPTION_KEY=your_secure_encryption_key_32_chars
+
+# URLs
+CORS_ORIGIN=https://defisats.site
+VITE_API_URL=https://api.defisats.site
+
+# LN Markets
+LN_MARKETS_API_URL=https://api.lnmarkets.com
+```
+
+#### **Estrutura Docker**
+| Container | Status | Função | Porta Interna |
+|-----------|--------|--------|---------------|
+| `hub-defisats-backend-prod` | ✅ Healthy | API Backend | 3010 |
+| `hub-defisats-frontend-prod` | ✅ Running | Frontend React | 80 |
+| `hub-defisats-nginx-prod` | ✅ Running | Nginx interno | 80 |
+| `hub-defisats-postgres-prod` | ✅ Healthy | Banco de dados | 5432 |
+| `hub-defisats-redis-prod` | ✅ Healthy | Cache Redis | 6379 |
+| `hub-defisats-margin-monitor-prod` | ⚠️ Restarting | Worker | - |
+| `hub-defisats-automation-executor-prod` | ⚠️ Restarting | Worker | - |
+
+#### **Health Checks**
+```bash
+# Frontend
+curl -I https://defisats.site
+
+# API
+curl -I https://api.defisats.site/health
+
+# Conectividade interna
+docker exec global-nginx-proxy curl -s http://hub-defisats-nginx-prod:80
+```
+
+#### **Plano de Rollback**
+```bash
+# Rollback Automático (via script)
+- ❌ Health check falhar
+- ❌ Frontend não responder
+- ❌ API não responder
+- ❌ Timeout de 10 minutos
+
+# Rollback Manual
+cd backups/YYYYMMDD_HHMMSS
+cp .env.production.backup ../../config/env/.env.production
+cp docker-compose.prod.yml.backup ../../docker-compose.prod.yml
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### Justificativa
+- **Confiabilidade**: Deploy seguro com backup automático e rollback
+- **Monitoramento**: Health checks e logs para diagnóstico rápido
+- **Escalabilidade**: Infraestrutura preparada para crescimento
+- **Segurança**: SSL/TLS e configurações de segurança adequadas
+- **Manutenibilidade**: Scripts automatizados e documentação completa
+
+### Consequências
+- **Positivas**: Deploy confiável, monitoramento completo, rollback automático
+- **Neutras**: Requer configuração inicial de certificados SSL
+- **Riscos**: Dependência de serviços externos (Let's Encrypt, AWS)
+
+### Checklist Pré-Deploy
+- [ ] ✅ Produção atual está funcionando
+- [ ] ✅ Backup foi criado
+- [ ] ✅ Staging foi testado
+- [ ] ✅ Variáveis de ambiente estão corretas
+- [ ] ✅ Docker images foram buildadas
+- [ ] ✅ Teste local passou
+- [ ] ✅ Tem acesso ao servidor
+- [ ] ✅ Tem plano de rollback
+
+### Troubleshooting Comum
+```bash
+# Frontend não carrega (502 Bad Gateway)
+docker logs hub-defisats-frontend-prod
+docker ps | grep frontend
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml up -d
+
+# API não responde
+docker logs hub-defisats-backend-prod
+curl https://api.defisats.site/health
+docker logs hub-defisats-postgres-prod
+
+# Workers não funcionam
+docker logs hub-defisats-margin-monitor
+docker logs hub-defisats-automation-executor
+docker logs hub-defisats-redis-prod
+```
+
 ## ADR-017: Ícones Flutuantes & Nova Seção Posições Ativas
 
 **Data**: 2025-01-19  
