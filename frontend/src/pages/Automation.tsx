@@ -62,14 +62,18 @@ export const Automation = () => {
       // Aguardar um pouco para o store ser atualizado
       await new Promise(resolve => setTimeout(resolve, 100));
 
+      // Obter dados atualizados do store após fetchAutomations
+      const currentAutomations = useAutomationStore.getState().automations;
+      console.log('🔍 AUTOMATION - Dados atualizados do store:', currentAutomations);
+
       // Agora, com o store atualizado, atualize o estado local
-      const marginGuardAutomation = automations.find((a) => a.type === 'margin_guard');
-      const tpslAutomation = automations.find((a) => a.type === 'tp_sl');
+      const marginGuardAutomation = currentAutomations.find((a) => a.type === 'margin_guard');
+      const tpslAutomation = currentAutomations.find((a) => a.type === 'tp_sl');
 
       console.log('🔍 AUTOMATION - Automações encontradas após fetchAutomations:', {
         marginGuardAutomation,
         tpslAutomation,
-        automationsCount: automations.length
+        automationsCount: currentAutomations.length
       });
 
       const newMarginGuard = {
@@ -77,6 +81,12 @@ export const Automation = () => {
         threshold: marginGuardAutomation?.config?.margin_threshold ?? 90,
         reduction: marginGuardAutomation?.config?.new_liquidation_distance ?? 20,
       };
+
+      console.log('🔍 AUTOMATION - Margin Guard state being set:', {
+        marginGuardAutomation,
+        is_active: marginGuardAutomation?.is_active,
+        enabled: newMarginGuard.enabled
+      });
 
       const newTpsl = {
         enabled: tpslAutomation?.is_active ?? false,

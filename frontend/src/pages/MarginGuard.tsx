@@ -92,7 +92,7 @@ export default function MarginGuard() {
         action: marginGuardAutomation.config.action,
         reduce_percentage: marginGuardAutomation.config.reduce_percentage,
         add_margin_amount: marginGuardAutomation.config.add_margin_amount,
-        enabled: marginGuardAutomation.config.enabled,
+        enabled: marginGuardAutomation.is_active,
       });
     }
   }, [marginGuardAutomation, reset]);
