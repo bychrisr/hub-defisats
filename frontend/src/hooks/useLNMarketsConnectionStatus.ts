@@ -20,6 +20,16 @@ export function useLNMarketsConnectionStatus() {
     user?.ln_markets_passphrase
   );
 
+  // Debug logging
+  console.log('🔍 CONNECTION STATUS DEBUG:', {
+    hasCredentials,
+    userBalance: centralizedData?.userBalance,
+    userPositions: centralizedData?.userPositions?.length,
+    centralizedError: centralizedData?.error,
+    hookError: error,
+    isLoading
+  });
+
   // More strict validation: check if we have valid data AND no errors
   const hasValidData = centralizedData?.userBalance !== null && 
                       centralizedData?.userBalance !== undefined &&
@@ -33,6 +43,12 @@ export function useLNMarketsConnectionStatus() {
                             centralizedData?.error?.includes('authentication');
 
   const isConnected = hasCredentials && hasValidData && !hasCredentialError;
+  
+  console.log('🔍 CONNECTION STATUS RESULT:', {
+    hasValidData,
+    hasCredentialError,
+    isConnected
+  });
   
   let connectionError = null;
   if (hasCredentials && !isConnected) {
