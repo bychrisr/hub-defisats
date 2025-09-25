@@ -21,6 +21,9 @@ export function useLNMarketsConnectionStatus() {
     isConnected: centralizedDataHook.isConnected
   });
   
+  // Simple test log
+  console.log('🔍 SIMPLE TEST LOG - Hook is running');
+  
   const { data: centralizedData, isLoading, error } = centralizedDataHook;
   
   // Check if user has credentials configured
