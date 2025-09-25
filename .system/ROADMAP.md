@@ -30,7 +30,7 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **NOVO**: Validação Real de Credenciais LN Markets
 - ✅ **NOVO**: Status de Conexão Consistente entre Componentes
 - ✅ **NOVO**: UI Atualizada com Status Correto (Connected/Invalid/Not Configured)
-- ⚠️ **PENDENTE**: Popup de Atualização de Versão - Detecta nova versão no console mas não exibe popup (possível regra de estado logout)
+- ✅ **CORRIGIDO**: Popup de Atualização de Versão - Corrigido uso de variáveis de ambiente Vite vs React
 
 ---
 

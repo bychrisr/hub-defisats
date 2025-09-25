@@ -264,17 +264,6 @@ export default function Dashboard() {
     return estimatedBalance.data.lost_trades || 0;
   };
 
-  const calculateActivePositions = () => {
-    console.log('🔍 DASHBOARD - calculateActivePositions called:', {
-      hasData: !!estimatedBalance.data,
-      activePositions: estimatedBalance.data?.active_positions,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.active_positions || 0;
-  };
 
   const calculateAveragePnL = () => {
     console.log('🔍 DASHBOARD - calculateAveragePnL called:', {
@@ -1391,124 +1380,7 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Success Rate */}
-            <div className="relative group">
-              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  calculateSuccessRate() >= 50 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
-                  calculateSuccessRate() >= 30 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
-                  'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30'
-                }`}>
-                  <Target className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    calculateSuccessRate() >= 50 ? 'text-green-300 group-hover:text-green-200' :
-                    calculateSuccessRate() >= 30 ? 'text-yellow-300 group-hover:text-yellow-200' :
-                    'text-red-300 group-hover:text-red-200'
-                  }`} />
-                </div>
-              </div>
-              
-              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                calculateSuccessRate() >= 50 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                calculateSuccessRate() >= 30 ? 'gradient-card-yellow border-yellow-500 hover:border-yellow-400 hover:shadow-yellow-500/30' :
-                'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
-              }`}>
-                <div className="card-content">
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2">
-                        <CardTitle 
-                          className="text-h3 text-vibrant"
-                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Success Rate') }}
-                        />
-                        <Tooltip 
-                          content="Percentual de trades vencedores em relação ao total de trades fechados."
-                          position="top"
-                          delay={200}
-                          className="z-50"
-                        >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
-                        </Tooltip>
-                      </div>
-                    </div>
-                    
-                    <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${
-                        calculateSuccessRate() >= 50 ? 'text-green-200' :
-                        calculateSuccessRate() >= 30 ? 'text-yellow-200' :
-                        'text-red-200'
-                      }`}>
-                        {calculateSuccessRate().toFixed(1)}%
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-label-sm px-2 py-1 ${
-                          calculateSuccessRate() >= 50 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
-                          calculateSuccessRate() >= 30 ? 'border-yellow-400/60 text-yellow-200 bg-yellow-600/20' :
-                          'border-red-400/60 text-red-200 bg-red-600/20'
-                        }`}
-                      >
-                        {calculateSuccessRate() >= 50 ? 'Good' : calculateSuccessRate() >= 30 ? 'Fair' : 'Poor'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
-              </Card>
-            </div>
 
-            {/* Active Positions */}
-            <div className="relative group">
-              <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  calculateActivePositions() > 0 ? 'bg-blue-600/20 border-blue-500/30 group-hover:shadow-blue-500/30' :
-                  'bg-gray-600/20 border-gray-500/30'
-                }`}>
-                  <Activity className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    calculateActivePositions() > 0 ? 'text-blue-300 group-hover:text-blue-200' :
-                    'text-gray-300 group-hover:text-gray-200'
-                  }`} />
-                </div>
-              </div>
-              
-              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                calculateActivePositions() > 0 ? 'gradient-card-blue border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30' :
-                'gradient-card-gray border-gray-500 hover:border-gray-400'
-              }`}>
-                <div className="card-content">
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2">
-                        <CardTitle 
-                          className="text-h3 text-vibrant"
-                          dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Active Positions') }}
-                        />
-                        <Tooltip 
-                          content="Número de posições que estão atualmente abertas e sendo negociadas."
-                          position="top"
-                          delay={200}
-                          className="z-50"
-                        >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
-                        </Tooltip>
-                      </div>
-                    </div>
-                    
-                    <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${
-                        calculateActivePositions() > 0 ? 'text-blue-200' :
-                        'text-gray-200'
-                      }`}>
-                        {calculateActivePositions()}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none z-20"></div>
-              </Card>
-            </div>
 
             {/* Average PnL */}
             <div className="relative group">
