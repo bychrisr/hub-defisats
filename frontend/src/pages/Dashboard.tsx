@@ -365,6 +365,40 @@ export default function Dashboard() {
     return estimatedBalance.data.trading_frequency || 0;
   };
 
+  // Função unificada para determinar cores dos ícones superiores dos cards
+  const getCardIconColors = (cardType: string, value?: number) => {
+    // Cards com cores fixas (não mudam baseado no valor)
+    const fixedColorCards = {
+      'active-trades': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' },
+      'total-margin': { bg: 'bg-purple-600/20', border: 'border-purple-500/30', shadow: 'group-hover:shadow-purple-500/30', icon: 'text-purple-300 group-hover:text-purple-200' },
+      'estimated-fees': { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' },
+      'total-invested': { bg: 'bg-blue-600/20', border: 'border-blue-500/30', shadow: 'group-hover:shadow-blue-500/30', icon: 'text-blue-300 group-hover:text-blue-200' },
+      'fees-paid': { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' }
+    };
+
+    // Se for um card com cor fixa, retorna as cores fixas
+    if (fixedColorCards[cardType as keyof typeof fixedColorCards]) {
+      return fixedColorCards[cardType as keyof typeof fixedColorCards];
+    }
+
+    // Cards dinâmicos - lógica específica para cada tipo
+    if (positionsLoading) {
+      return { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' };
+    }
+
+    // Lógica específica para cards dinâmicos
+    if (value === undefined) value = 0;
+    
+    // Para cards dinâmicos, o ícone superior deve seguir a mesma lógica do card
+    if (value > 0) {
+      return { bg: 'bg-green-600/20', border: 'border-green-500/30', shadow: 'group-hover:shadow-green-500/30', icon: 'text-green-300 group-hover:text-green-200' };
+    } else if (value < 0) {
+      return { bg: 'bg-red-600/20', border: 'border-red-500/30', shadow: 'group-hover:shadow-red-500/30', icon: 'text-red-300 group-hover:text-red-200' };
+    } else {
+      return { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' };
+    }
+  };
+
   // Função para calcular o tamanho global baseado no MAIOR valor entre todos os cards
   const getGlobalDynamicSize = () => {
     // Coletar todos os valores numéricos dos cards
@@ -494,19 +528,14 @@ export default function Dashboard() {
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
-                  getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
-                  getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30' :
-                  'bg-gray-600/20 border-gray-500/30'
-                }`}>
-                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
-                    getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-300 group-hover:text-green-200' :
-                    getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-300 group-hover:text-red-200' :
-                    'text-gray-300 group-hover:text-gray-200'
-                  }`} />
+                {(() => {
+                  const colors = getCardIconColors('total-pnl', positionsData.totalPL || 0);
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                 </div>
+                  );
+                })()}
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
@@ -580,17 +609,14 @@ export default function Dashboard() {
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
-                  getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
-                  'bg-gray-600/20 border-gray-500/30'
-                }`}>
-                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
-                    getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-300 group-hover:text-green-200' :
-                    'text-gray-300 group-hover:text-gray-200'
-                  }`} />
-                </div>
+                {(() => {
+                  const colors = getCardIconColors('estimated-profit', positionsData.estimatedProfit || 0);
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    </div>
+                  );
+                })()}
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
