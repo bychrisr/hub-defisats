@@ -212,6 +212,21 @@ export default function Dashboard() {
   };
   
   const calculateLostTrades = () => {
+    console.log('🔍 DASHBOARD - calculateLostTrades called:', {
+      hasEstimatedBalance: !!estimatedBalance.data,
+      estimatedBalanceLostTrades: estimatedBalance.data?.lost_trades,
+      hasHistoricalData: !!historicalData.data,
+      historicalMetrics: historicalMetrics,
+      historicalLostTrades: historicalMetrics?.lostTrades,
+      isLoading: estimatedBalance.isLoading,
+      error: estimatedBalance.error
+    });
+    
+    // Usar estimatedBalance como fonte primária
+    if (estimatedBalance.data?.lost_trades !== undefined) {
+      return estimatedBalance.data.lost_trades;
+    }
+    // Fallback para historicalMetrics
     return historicalMetrics?.lostTrades || 0;
   };
 
@@ -250,18 +265,6 @@ export default function Dashboard() {
     
     if (!estimatedBalance.data) return 0;
     return estimatedBalance.data.winning_trades || 0;
-  };
-
-  const calculateLostTradesNew = () => {
-    console.log('🔍 DASHBOARD - calculateLostTradesNew called:', {
-      hasData: !!estimatedBalance.data,
-      lostTrades: estimatedBalance.data?.lost_trades,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.lost_trades || 0;
   };
 
 
