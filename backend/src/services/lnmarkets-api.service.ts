@@ -746,9 +746,18 @@ export class LNMarketsAPIService {
         return true;
       }
       
-      await this.getUser();
-      console.log('✅ LN MARKETS VALIDATE - Credentials are valid');
-      return true;
+      // Try to get positions instead of user info (more reliable)
+      try {
+        await this.getPositions();
+        console.log('✅ LN MARKETS VALIDATE - Credentials are valid (positions endpoint)');
+        return true;
+      } catch (positionsError) {
+        console.log('⚠️ LN MARKETS VALIDATE - Positions endpoint failed, trying user endpoint');
+        // Fallback to user endpoint
+        await this.getUser();
+        console.log('✅ LN MARKETS VALIDATE - Credentials are valid (user endpoint)');
+        return true;
+      }
     } catch (error: any) {
       console.log('❌ LN MARKETS VALIDATE - Credentials validation failed:', {
         status: error?.response?.status,

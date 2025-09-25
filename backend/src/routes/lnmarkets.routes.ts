@@ -444,29 +444,67 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Create LN Markets service with user credentials
-      const credentials = {
+      // Try both testnet and production APIs
+      const testCredentials = {
         apiKey: user.ln_markets_api_key,
         apiSecret: user.ln_markets_api_secret,
         passphrase: user.ln_markets_passphrase,
-        isTestnet: process.env.NODE_ENV !== 'production'
+        isTestnet: true
       };
 
-      const lnmarketsService = new LNMarketsAPIService(credentials, {
-        info: () => {},
-        error: () => {},
-        warn: () => {},
-        debug: () => {}
-      } as any);
+      const prodCredentials = {
+        apiKey: user.ln_markets_api_key,
+        apiSecret: user.ln_markets_api_secret,
+        passphrase: user.ln_markets_passphrase,
+        isTestnet: false
+      };
 
-      // Validate credentials
-      const isValid = await lnmarketsService.validateCredentials();
+      // Try production first (since we know these credentials work)
+      let isValid = false;
+      let errorMessage = '';
+
+      try {
+        const prodService = new LNMarketsAPIService(prodCredentials, {
+          info: () => {},
+          error: () => {},
+          warn: () => {},
+          debug: () => {}
+        } as any);
+        
+        isValid = await prodService.validateCredentials();
+        if (isValid) {
+          console.log('✅ Credentials valid on production');
+        }
+      } catch (error: any) {
+        console.log('❌ Production validation failed:', error.message);
+        errorMessage = error.message;
+      }
+
+      // If production failed, try testnet
+      if (!isValid) {
+        try {
+          const testnetService = new LNMarketsAPIService(testCredentials, {
+            info: () => {},
+            error: () => {},
+            warn: () => {},
+            debug: () => {}
+          } as any);
+          
+          isValid = await testnetService.validateCredentials();
+          if (isValid) {
+            console.log('✅ Credentials valid on testnet');
+          }
+        } catch (error: any) {
+          console.log('❌ Testnet validation failed:', error.message);
+          errorMessage = error.message;
+        }
+      }
 
       return reply.send({
         success: true,
         data: {
           isValid,
-          message: isValid ? 'Credentials are valid' : 'Invalid credentials'
+          message: isValid ? 'Credentials are valid' : `Invalid credentials: ${errorMessage}`
         }
       });
 
