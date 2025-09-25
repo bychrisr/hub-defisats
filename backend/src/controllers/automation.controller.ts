@@ -301,67 +301,68 @@ export class AutomationController {
         limit?: string;
       };
 
-      // Temporarily use mock data to test frontend functionality
-      const history = [
-        {
-          id: 'mock-1',
-          action: 'automation_config_updated',
-          automation_id: 'dd4df374-3b85-4e9b-b973-cbacd0ac787d',
-          old_state: true,
-          new_state: true,
-          config_changes: {
-            old: { margin_threshold: 80, new_liquidation_distance: 15 },
-            new: { margin_threshold: 75, new_liquidation_distance: 10 }
+      // Get real data from database with proper error handling
+      try {
+        const rawLogs = await this.prisma.auditLog.findMany({
+          where: {
+            user_id: user?.id || '',
+            resource: 'automation',
+            action: {
+              in: ['automation_activated', 'automation_deactivated', 'automation_config_updated']
+            },
+            ...(automationId && { resource_id: automationId })
           },
-          automation_type: 'margin_guard',
-          change_type: 'config_update',
-          reason: 'User updated automation configuration',
-          timestamp: new Date().toISOString()
-        },
-        {
-          id: 'mock-2',
-          action: 'automation_activated',
-          automation_id: 'mock-tpsl',
-          old_state: false,
-          new_state: true,
-          config_changes: {
-            old: {},
-            new: {}
+          orderBy: {
+            created_at: 'desc'
           },
-          automation_type: 'tp_sl',
-          change_type: 'activation',
-          reason: 'User activated automation',
-          timestamp: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
-        },
-        {
-          id: 'mock-3',
-          action: 'automation_config_updated',
-          automation_id: 'mock-tpsl',
-          old_state: true,
-          new_state: true,
-          config_changes: {
-            old: { take_profit_percentage: 5, stop_loss_percentage: 3 },
-            new: { take_profit_percentage: 7, stop_loss_percentage: 4 }
-          },
-          automation_type: 'tp_sl',
-          change_type: 'config_update',
-          reason: 'User updated automation configuration',
-          timestamp: new Date(Date.now() - 1800000).toISOString() // 30 minutes ago
-        }
-      ];
+          take: parseInt(limit, 10)
+        });
+
+        console.log('🔍 DEBUG - Found logs:', rawLogs.length);
+
+        // Process the real data
+        const history = rawLogs.map(log => {
+          const oldConfig = log.old_values?.config || {};
+          const newConfig = log.new_values?.config || {};
+          
+          console.log('🔍 DEBUG - Processing log:', {
+            id: log.id,
+            oldConfig,
+            newConfig,
+            automationType: log.details?.automation_type
+          });
+          
+          return {
+            id: log.id,
+            action: log.action,
+            automation_id: log.resource_id,
+            old_state: log.old_values?.is_active,
+            new_state: log.new_values?.is_active,
+            config_changes: {
+              old: oldConfig,
+              new: newConfig
+            },
+            automation_type: log.details?.automation_type,
+            change_type: log.details?.change_type,
+            reason: log.details?.reason,
+            timestamp: log.created_at
+          };
+        });
+
+        console.log('🔍 DEBUG - Processed history:', history.length);
+      } catch (error) {
+        console.error('❌ Error fetching logs:', error);
+        return reply.status(500).send({
+          success: false,
+          error: 'INTERNAL_ERROR',
+          message: 'Failed to fetch automation logs'
+        });
+      }
 
       const stats = await this.automationLogger.getStateChangeStats(
         user?.id || '',
         automationId
       );
-
-      // Debug: Log the first item to see what's being returned
-      if (history.length > 0) {
-        console.log('🔍 DEBUG - First history item:', JSON.stringify(history[0], null, 2));
-        console.log('🔍 DEBUG - Config changes:', JSON.stringify(history[0].config_changes, null, 2));
-        console.log('🔍 DEBUG - Old config:', JSON.stringify(history[0].config_changes?.old, null, 2));
-        console.log('🔍 DEBUG - New config:', JSON.stringify(history[0].config_changes?.new, null, 2));
-      }
 
       // Force proper serialization
       const serializedHistory = JSON.parse(JSON.stringify(history));

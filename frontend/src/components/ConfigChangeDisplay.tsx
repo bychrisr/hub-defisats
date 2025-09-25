@@ -183,23 +183,21 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 {getChangeTypeBadge()}
-                {hasChanges && (
-                  <Button variant="ghost" size="sm" className="p-1">
-                    {isExpanded ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                )}
+                <Button variant="ghost" size="sm" className="p-1">
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         
-        {hasChanges && (
-          <CollapsibleContent>
-            <CardContent className="pt-0 pb-3">
+        <CollapsibleContent>
+          <CardContent className="pt-0 pb-3">
+            {hasChanges ? (
               <div className="space-y-2">
                 {changes.map((change, index) => {
                   const IconComponent = change.icon;
@@ -249,16 +247,34 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
                   );
                 })}
               </div>
-              
-              <div className="mt-2 pt-2 border-t border-border/30">
-                <div className="flex items-center gap-1 text-xs text-text-secondary">
-                  <Info className="h-3 w-3" />
-                  <span>Changed on {new Date(timestamp).toLocaleString()}</span>
+            ) : (
+              <div className="p-3 rounded-lg bg-background/20">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-blue-500" />
+                  <div>
+                    <div className="font-medium text-text-primary text-sm">
+                      {changeType === 'activation' ? 'Automation Activated' :
+                       changeType === 'deactivation' ? 'Automation Deactivated' :
+                       'Configuration Updated'}
+                    </div>
+                    <div className="text-xs text-text-secondary">
+                      {changeType === 'activation' ? 'Automation was turned on' :
+                       changeType === 'deactivation' ? 'Automation was turned off' :
+                       'Configuration parameters were modified'}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </CollapsibleContent>
-        )}
+            )}
+            
+            <div className="mt-2 pt-2 border-t border-border/30">
+              <div className="flex items-center gap-1 text-xs text-text-secondary">
+                <Info className="h-3 w-3" />
+                <span>Changed on {new Date(timestamp).toLocaleString()}</span>
+              </div>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
       </Collapsible>
     </Card>
   );
