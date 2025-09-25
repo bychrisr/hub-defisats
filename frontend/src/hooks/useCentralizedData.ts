@@ -249,6 +249,16 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
     }
   }, [isAuthenticated, user?.id, user?.ln_markets_api_key, user?.ln_markets_api_secret, user?.ln_markets_passphrase]); // Removido refreshData das dependências
 
+  // Debug the return object
+  console.log('🔍 CENTRALIZED DATA RETURN DEBUG:', {
+    data: data,
+    dataType: typeof data,
+    dataKeys: data ? Object.keys(data) : 'undefined',
+    isLoading: data?.isLoading,
+    lastUpdate: data?.lastUpdate,
+    error: data?.error
+  });
+
   return {
     ...data,
     refreshData,
