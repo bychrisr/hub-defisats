@@ -1,6 +1,8 @@
 import { DesktopHeader } from './DesktopNavigation';
-import { MobileNavigation } from './MobileNavigation';
+import { MobileNavigationSimple as MobileNavigation } from './MobileNavigationSimple';
 import LNMarketsHeader from './LNMarketsHeader';
+import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +40,12 @@ export const ResponsiveLayout = ({ children }: ResponsiveLayoutProps) => {
       <div className="md:hidden">
         <MobileNavigation />
       </div>
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
+      
+      {/* Offline Indicator */}
+      <OfflineIndicator />
     </div>
   );
 };

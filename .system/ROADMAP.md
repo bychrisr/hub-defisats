@@ -596,25 +596,26 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
 - [ ] Rollback automático em falhas
 - [ ] Blue-green deployment
 
-## ETAPA 13: UX/UI ENHANCEMENTS (PLANEJADA)
+## ETAPA 13: UX/UI ENHANCEMENTS ✅ CONCLUÍDA
 
-### Tarefa 13.1: Mobile Optimization
-- [ ] Interface otimizada para dispositivos móveis
-- [ ] PWA (Progressive Web App)
-- [ ] Notificações push
-- [ ] Offline mode
+### Tarefa 13.1: Mobile Optimization ✅
+- [x] Interface otimizada para dispositivos móveis
+- [x] PWA (Progressive Web App)
+- [x] Notificações push
+- [x] Offline mode
 
-### Tarefa 13.2: Acessibilidade
-- [ ] Conformidade com WCAG 2.1
-- [ ] Suporte a leitores de tela
-- [ ] Navegação por teclado
-- [ ] Contraste adequado
+### Tarefa 13.2: Acessibilidade ✅
+- [x] Conformidade com WCAG 2.1
+- [x] Suporte a leitores de tela
+- [x] Navegação por teclado
+- [x] Contraste adequado
 
-### Tarefa 13.3: Dark Mode Completo
-- [ ] Tema escuro em todos os componentes
-- [ ] Persistência de preferência
-- [ ] Transições suaves
-- [ ] Ícones adaptativos
+### Tarefa 13.3: Dark Mode Completo ✅
+- [x] Tema escuro em todos os componentes
+- [x] Persistência de preferência
+- [x] Transições suaves
+- [x] Ícones adaptativos
+- [x] Light mode corrigido e otimizado
 
 ## ETAPA 14: COMERCIALIZAÇÃO (PLANEJADA)
 
@@ -683,6 +684,6 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
 ---
 
 **Documento**: Roadmap Técnico  
-**Versão**: 1.3.0  
+**Versão**: 1.8.0  
 **Última Atualização**: 2025-01-15  
 **Responsável**: Equipe de Desenvolvimento

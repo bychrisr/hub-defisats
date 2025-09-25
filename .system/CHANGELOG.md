@@ -4,6 +4,81 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v1.8.0] - 2025-01-15
+
+### 🎨 **ETAPA 13: UX/UI ENHANCEMENTS FINALIZADA**
+
+#### ✨ **Melhorias no Light Mode**
+- ✅ **Revisão Completa**: Correção de todas as variáveis CSS do light mode
+- ✅ **Paleta de Cores**: Ajuste completo baseado na documentação UI
+- ✅ **Contraste e Legibilidade**: Otimização de font-weights e cores
+- ✅ **Componentes**: Verificação e correção de todos os componentes
+- ✅ **Gradientes**: Ajuste de opacidades para visual mais suave
+- ✅ **Botões**: Otimização de estilos e hover effects
+- ✅ **Tipografia**: Melhoria de contrastes em diferentes tamanhos
+- ✅ **Cards**: Ajuste de cores de texto e ícones específicos
+- ✅ **Status Indicators**: Melhoria de opacidades e bordas
+- ✅ **Tabelas e Inputs**: Correção de cores de fundo e texto
+- ✅ **Efeitos Neon**: Ajuste de sombras para visual mais suave
+
+#### 🔧 **Correções Técnicas**
+- ✅ **CSS Variables**: Correção de variáveis de cores para light mode
+- ✅ **Font Weights**: Aumento de pesos para melhor legibilidade
+- ✅ **Hover Effects**: Otimização de efeitos de hover
+- ✅ **Responsive Typography**: Ajuste de tipografia responsiva
+- ✅ **Icon Colors**: Correção de cores de ícones SatsIcon
+
+#### 📊 **Status da Implementação**
+- ✅ **Light Mode**: 100% funcional e otimizado
+- ✅ **Dark Mode**: Mantido funcionando perfeitamente
+- ✅ **Mobile**: Interface totalmente responsiva
+- ✅ **PWA**: Funcionalidades completas implementadas
+- ✅ **Acessibilidade**: Conformidade WCAG 2.1 mantida
+
+---
+
+## [v1.7.0] - 2024-12-19
+
+### 🎨 **ETAPA 13: UX/UI ENHANCEMENTS COMPLETA**
+
+#### ✨ **Novas Funcionalidades**
+- ✅ **Mobile Optimization**: Interface totalmente otimizada para dispositivos móveis
+- ✅ **PWA (Progressive Web App)**: Implementação completa com service worker e manifest
+- ✅ **Notificações Push**: Sistema completo de notificações com permissões e configurações
+- ✅ **Modo Offline**: Funcionalidades offline com sincronização automática
+- ✅ **Acessibilidade WCAG 2.1**: Conformidade total com padrões de acessibilidade
+- ✅ **Dark Mode Completo**: Tema escuro refinado e light mode corrigido
+
+#### 📱 **Mobile e PWA**
+- ✅ **Menu Mobile Corrigido**: Navegação expandida ocupando 100% do espaço
+- ✅ **Progressive Web App**: Manifest.json completo com ícones e configurações
+- ✅ **Service Worker**: Estratégias de cache inteligente para funcionalidades offline
+- ✅ **Instalação Mobile**: Suporte completo a instalação em dispositivos móveis
+
+#### 🔔 **Notificações e Offline**
+- ✅ **Sistema de Notificações Push**: Gerenciamento de permissões e configurações
+- ✅ **Modo Offline**: Funcionalidades offline com sincronização automática
+- ✅ **Cache Inteligente**: Estratégias diferenciadas para diferentes tipos de dados
+- ✅ **Sincronização Automática**: Recuperação automática quando voltar online
+
+#### ♿ **Acessibilidade**
+- ✅ **Conformidade WCAG 2.1**: Suporte completo a leitores de tela
+- ✅ **Navegação por Teclado**: Otimização completa para navegação por teclado
+- ✅ **Alto Contraste**: Suporte a modo de alto contraste
+- ✅ **Tamanhos de Fonte**: Ajuste de tamanhos de fonte para melhor legibilidade
+
+#### 🌙 **Temas e Interface**
+- ✅ **Dark Mode Refinado**: Tema escuro completo em todos os componentes
+- ✅ **Light Mode Corrigido**: Cores apropriadas para modo claro
+- ✅ **Transições Suaves**: Animações fluidas entre temas
+- ✅ **Persistência**: Salvar preferências do usuário
+
+#### 🔧 **Melhorias Técnicas**
+- ✅ **Hooks de Otimização**: `useMobileOptimization`, `useOfflineMode`, `useAccessibility`
+- ✅ **Componentes PWA**: `PWAInstallPrompt`, `PushNotificationManager`, `OfflineIndicator`
+- ✅ **Gerenciamento de Temas**: `ThemeManager` com temas personalizados
+- ✅ **Configurações de Acessibilidade**: Interface completa para configurações
+
 ## [v1.6.0] - 2025-01-21
 
 ### 🚀 **Sistema de Otimização Avançada e Segurança para Mercados Voláteis**

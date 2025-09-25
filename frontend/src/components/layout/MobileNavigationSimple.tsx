@@ -1,18 +1,51 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useMainMenu } from '@/hooks/useDynamicMenus';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
-import { MAIN_NAVIGATION, MOBILE_TEXT_CLASSES } from '@/constants/navigation';
+import { 
+  Home, 
+  Settings, 
+  BarChart3, 
+  Activity,
+  Shield
+} from 'lucide-react';
 
-// Fallback para quando a API não estiver disponível
-const fallbackNavigation = MAIN_NAVIGATION;
+// Navegação simplificada para mobile
+const SIMPLE_NAVIGATION = [
+  { 
+    name: 'Dashboard', 
+    href: '/dashboard', 
+    icon: Home,
+    mobileName: 'Home'
+  },
+  { 
+    name: 'Automations', 
+    href: '/automation', 
+    icon: Settings,
+    mobileName: 'Auto'
+  },
+  { 
+    name: 'Positions', 
+    href: '/positions', 
+    icon: BarChart3,
+    mobileName: 'Pos'
+  },
+  { 
+    name: 'Backtests', 
+    href: '/backtests', 
+    icon: Activity,
+    mobileName: 'Test'
+  },
+  { 
+    name: 'Reports', 
+    href: '/reports', 
+    icon: Shield,
+    mobileName: 'Rep'
+  },
+];
 
-export const MobileNavigation = () => {
+export const MobileNavigationSimple = () => {
   const location = useLocation();
   const { theme } = useTheme();
-  const { menuItems, isLoading, error } = useMainMenu();
-  const { canAccessRoute } = useUserPermissions();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -20,21 +53,6 @@ export const MobileNavigation = () => {
     }
     return location.pathname.startsWith(href);
   };
-
-  // Usar dados dinâmicos ou fallback
-  const rawNavigation = isLoading || error || !menuItems || menuItems.length === 0 ? fallbackNavigation : menuItems;
-  
-  // Filtrar navegação baseada em permissões (temporariamente desabilitado para debug)
-  const navigation = rawNavigation; // .filter(item => canAccessRoute(item.href));
-  
-  // Debug: log para verificar o que está sendo renderizado
-  console.log('MobileNavigation Debug:', {
-    isLoading,
-    error,
-    menuItems,
-    rawNavigation,
-    navigation
-  });
 
   return (
     <>
@@ -48,8 +66,8 @@ export const MobileNavigation = () => {
           WebkitBackdropFilter: 'blur(10px)'
         }}
       >
-        <div className="flex justify-around items-center h-15 px-2">
-          {navigation.map((item) => {
+        <div className="flex items-center h-15">
+          {SIMPLE_NAVIGATION.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
             const displayName = item.mobileName || item.name;
@@ -59,16 +77,15 @@ export const MobileNavigation = () => {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex flex-col items-center justify-center py-2 px-1 min-w-0 flex-1 transition-colors duration-200 rounded-lg',
+                  'flex flex-col items-center justify-center py-2 flex-1 transition-colors duration-200',
                   active
                     ? 'text-primary bg-primary/10'
                     : 'text-text-secondary hover:text-primary hover:bg-accent/50'
                 )}
               >
-                <Icon className={cn(MOBILE_TEXT_CLASSES.navIcon, 'mb-1', active && 'text-primary')} />
+                <Icon className={cn('w-5 h-5 mb-1', active && 'text-primary')} />
                 <span className={cn(
-                  MOBILE_TEXT_CLASSES.navLabel,
-                  'truncate text-xs',
+                  'text-xs truncate',
                   active ? 'text-primary' : 'text-text-secondary'
                 )}>
                   {displayName}
@@ -84,7 +101,6 @@ export const MobileNavigation = () => {
           })}
         </div>
       </nav>
-
 
       {/* Spacer for mobile navigation */}
       <div className="h-15 md:hidden" />

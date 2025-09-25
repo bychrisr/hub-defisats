@@ -111,95 +111,118 @@
   }
 
   .light {
-    /* ===== LIGHT MODE - Axisor Secondary ===== */
+    /* ===== LIGHT MODE - Axisor Light Theme ===== */
+    /* Baseado na documentação UI e sistema de cores dos cards */
     
-    /* Core Brand Colors */
-    --background: 0 0% 100%; /* #ffffff */
-    --foreground: 220 25% 7%; /* #0B0F1A */
+    /* Core Brand Colors - Light Mode */
+    --background: 0 0% 100%; /* #ffffff - Pure white background */
+    --foreground: 220 25% 7%; /* #0B0F1A - Dark text for contrast */
 
-    /* Primary - Axisor Blue */
-    --primary: 220 100% 60%; /* #3773F5 */
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 220 100% 55%;
-    --primary-light: 220 100% 65%;
+    /* Primary - Axisor Blue (Light Mode) */
+    --primary: 220 100% 60%; /* #3773F5 - Vibrant blue */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --primary-hover: 220 100% 55%; /* Slightly darker on hover */
+    --primary-light: 220 100% 65%; /* Lighter variant */
 
-    /* Secondary - Axisor Purple */
-    --secondary: 271 100% 50%; /* #8A2BE2 */
-    --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 271 100% 45%;
-    --secondary-light: 271 100% 55%;
+    /* Secondary - Axisor Purple (Light Mode) */
+    --secondary: 271 100% 50%; /* #8A2BE2 - Vibrant purple */
+    --secondary-foreground: 0 0% 100%; /* White text on secondary */
+    --secondary-hover: 271 100% 45%; /* Slightly darker on hover */
+    --secondary-light: 271 100% 55%; /* Lighter variant */
 
-    /* Accent - Axisor Cyan */
-    --accent: 180 100% 50%; /* #00FFDD */
-    --accent-foreground: 0 0% 0%;
-    --accent-hover: 180 100% 45%;
-    --accent-light: 180 100% 55%;
+    /* Accent - Axisor Cyan (Light Mode) */
+    --accent: 180 100% 50%; /* #00FFDD - Vibrant cyan */
+    --accent-foreground: 0 0% 0%; /* Black text on cyan for contrast */
+    --accent-hover: 180 100% 45%; /* Slightly darker on hover */
+    --accent-light: 180 100% 55%; /* Lighter variant */
 
-    /* Success - Axisor Green */
-    --success: 158 100% 40%; /* #0ECB81 */
-    --success-foreground: 0 0% 100%;
-    --success-hover: 158 100% 35%;
-    --success-light: 158 100% 45%;
+    /* Success - Axisor Green (Light Mode) */
+    --success: 158 100% 40%; /* #0ECB81 - Vibrant green */
+    --success-foreground: 0 0% 100%; /* White text on success */
+    --success-hover: 158 100% 35%; /* Slightly darker on hover */
+    --success-light: 158 100% 45%; /* Lighter variant */
 
-    /* Destructive - Axisor Red */
-    --destructive: 350 100% 60%; /* #F6465D */
-    --destructive-foreground: 0 0% 100%;
-    --destructive-hover: 350 100% 55%;
-    --destructive-light: 350 100% 65%;
+    /* Destructive - Axisor Red (Light Mode) */
+    --destructive: 350 100% 60%; /* #F6465D - Vibrant red */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
+    --destructive-hover: 350 100% 55%; /* Slightly darker on hover */
+    --destructive-light: 350 100% 65%; /* Lighter variant */
 
-    /* Warning - Axisor Yellow */
-    --warning: 45 100% 60%; /* #F5AC37 */
-    --warning-foreground: 0 0% 100%;
-    --warning-hover: 45 100% 55%;
-    --warning-light: 45 100% 65%;
+    /* Warning - Axisor Yellow (Light Mode) */
+    --warning: 45 100% 60%; /* #F5AC37 - Vibrant yellow */
+    --warning-foreground: 0 0% 0%; /* Black text on yellow for contrast */
+    --warning-hover: 45 100% 55%; /* Slightly darker on hover */
+    --warning-light: 45 100% 65%; /* Lighter variant */
 
-    /* Text Colors */
-    --text-primary: 220 25% 7%; /* #0B0F1A */
-    --text-secondary: 220 15% 35%; /* #4A5568 */
+    /* Text Colors - Light Mode (Refinado) */
+    --text-primary: 220 25% 7%; /* #0B0F1A - Dark text for high contrast */
+    --text-secondary: 220 15% 35%; /* #4A5568 - Medium gray text */
+    --text-tertiary: 220 8% 46%; /* #64748b - Light gray text */
 
-    /* Background Colors */
-    --bg-primary: 0 0% 100%; /* #ffffff */
-    --bg-card: 210 24% 6%; /* #0f1217 - Mais claro */
-    --bg-card-alt: 210 24% 8%; /* #14171c - Mais claro */
-    --bg-header: 210 24% 6%; /* #0f1217 - Mais claro */
+    /* Background Colors - Light Mode (Refinado) */
+    --bg-primary: 0 0% 100%; /* #ffffff - Pure white background */
+    --bg-card: 0 0% 100%; /* #ffffff - White cards */
+    --bg-card-alt: 220 13% 98%; /* #f8f9fa - Very light gray for card variants */
+    --bg-header: 220 13% 97%; /* #f1f3f4 - Light gray for headers */
+    --bg-sidebar: 220 13% 98%; /* #f8f9fa - Light gray sidebar */
 
-    /* Border Colors - Mais visíveis */
-    --border: 210 24% 15%; /* #2a2f36 - Mais claro */
-    --border-light: 210 24% 20%;
+    /* Border Colors - Light Mode (Refinado) */
+    --border: 220 13% 91%; /* #e2e8f0 - Light gray borders */
+    --border-light: 220 13% 95%; /* #f1f5f9 - Very light borders */
+    --border-strong: 220 13% 85%; /* #cbd5e1 - Stronger borders for contrast */
 
-    /* Neutral Grays - Mais vibrantes */
-    --muted: 210 8% 70%; /* #9ca3af - Mais claro */
-    --muted-foreground: 210 8% 50%;
-    --accent: 210 24% 6%;
-    --accent-foreground: 210 20% 96%;
+    /* Neutral Grays - Light Mode (Refinado) */
+    --muted: 220 13% 91%; /* #e2e8f0 - Light muted backgrounds */
+    --muted-foreground: 220 8% 46%; /* #64748b - Medium gray text */
+    --accent: 220 13% 91%; /* #e2e8f0 - Light accent backgrounds */
+    --accent-foreground: 220 25% 7%; /* #0B0F1A - Dark text on accent */
 
-    /* UI Elements */
-    --card: 210 24% 6%;
-    --card-foreground: 210 20% 96%;
-    --popover: 210 24% 6%;
-    --popover-foreground: 210 20% 96%;
-    --input: 210 24% 10%;
-    --ring: 220 100% 65%;
+    /* UI Elements - Light Mode (Refinado) */
+    --card: 0 0% 100%; /* #ffffff - White cards */
+    --card-foreground: 220 25% 7%; /* #0B0F1A - Dark text on cards */
+    --popover: 0 0% 100%; /* #ffffff - White popovers */
+    --popover-foreground: 220 25% 7%; /* #0B0F1A - Dark text on popovers */
+    --input: 0 0% 100%; /* #ffffff - White inputs */
+    --ring: 220 100% 60%; /* #3773F5 - Primary blue for focus rings */
 
-    /* Sidebar */
-    --sidebar-background: 210 24% 3%;
-    --sidebar-foreground: 210 20% 96%;
-    --sidebar-primary: 220 100% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 24% 6%;
-    --sidebar-accent-foreground: 210 20% 96%;
-    --sidebar-border: 210 24% 15%;
-    --sidebar-ring: 220 100% 65%;
+    /* Sidebar - Light Mode (Refinado) */
+    --sidebar-background: 220 13% 98%; /* #f8f9fa - Very light gray sidebar */
+    --sidebar-foreground: 220 25% 7%; /* #0B0F1A - Dark text on sidebar */
+    --sidebar-primary: 220 100% 60%; /* #3773F5 - Primary blue for sidebar */
+    --sidebar-primary-foreground: 0 0% 100%; /* #ffffff - White text on primary */
+    --sidebar-accent: 220 13% 91%; /* #e2e8f0 - Light accent for sidebar */
+    --sidebar-accent-foreground: 220 25% 7%; /* #0B0F1A - Dark text on accent */
+    --sidebar-border: 220 13% 91%; /* #e2e8f0 - Light borders for sidebar */
+    --sidebar-ring: 220 100% 60%; /* #3773F5 - Primary blue for sidebar focus */
 
-    /* SatsIcon colors - branco no dark theme para contraste */
-    --sats-icon-color: 0 0% 100%;
+    /* SatsIcon colors - Dark no light theme para contraste */
+    --sats-icon-color: 220 25% 7%; /* Dark color for light mode */
 
-    /* Novas cores para ícones e elementos especiais */
-    --icon-primary: 220 100% 70%; /* Azul vibrante para ícones */
-    --icon-secondary: 38 100% 70%; /* Laranja vibrante para ícones */
-    --icon-success: 158 100% 50%; /* Verde vibrante para ícones */
-    --icon-warning: 38 100% 70%; /* Laranja vibrante para ícones */
-    --icon-danger: 350 100% 70%; /* Vermelho vibrante para ícones */
+    /* Cores para ícones e elementos especiais - Light Mode */
+    --icon-primary: 220 100% 60%; /* Azul vibrante para ícones */
+    --icon-secondary: 38 100% 60%; /* Laranja vibrante para ícones */
+    --icon-success: 158 100% 40%; /* Verde vibrante para ícones */
+    --icon-warning: 45 100% 60%; /* Amarelo vibrante para ícones */
+    --icon-danger: 350 100% 60%; /* Vermelho vibrante para ícones */
+    --icon-muted: 220 8% 46%; /* Cinza para ícones neutros */
+
+    /* Cores específicas para cards - Light Mode */
+    --card-green: 158 100% 40%; /* Verde para cards de sucesso */
+    --card-red: 350 100% 60%; /* Vermelho para cards de erro */
+    --card-blue: 220 100% 60%; /* Azul para cards de informação */
+    --card-purple: 271 100% 50%; /* Roxo para cards especiais */
+    --card-orange: 38 100% 60%; /* Laranja para cards de aviso */
+    --card-yellow: 45 100% 60%; /* Amarelo para cards de atenção */
+    --card-gray: 220 8% 46%; /* Cinza para cards neutros */
+
+    /* Cores de texto para cards - Light Mode */
+    --card-text-green: 158 100% 30%; /* Verde escuro para texto em cards verdes */
+    --card-text-red: 350 100% 50%; /* Vermelho escuro para texto em cards vermelhos */
+    --card-text-blue: 220 100% 50%; /* Azul escuro para texto em cards azuis */
+    --card-text-purple: 271 100% 40%; /* Roxo escuro para texto em cards roxos */
+    --card-text-orange: 38 100% 50%; /* Laranja escuro para texto em cards laranja */
+    --card-text-yellow: 45 100% 50%; /* Amarelo escuro para texto em cards amarelos */
+    --card-text-gray: 220 8% 30%; /* Cinza escuro para texto em cards cinza */
   }
 }
 
@@ -414,6 +437,17 @@
     font-weight: 500;
   }
 
+  /* Light Mode - Texto vibrante otimizado */
+  .light .text-vibrant {
+    color: hsl(var(--text-primary));
+    font-weight: 700; /* Mais bold no light mode para contraste */
+  }
+
+  .light .text-vibrant-secondary {
+    color: hsl(var(--text-secondary));
+    font-weight: 600; /* Mais bold no light mode */
+  }
+
   /* Card improvements - Mais moderno */
   .card-modern {
     @apply bg-card border border-border rounded-xl p-6 shadow-coingecko-md hover:shadow-coingecko-lg transition-all duration-300;
@@ -445,6 +479,18 @@
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
     border-color: #3773F5;
+  }
+
+  /* Light Mode - Dashboard Cards otimizados */
+  .light .dashboard-card {
+    @apply bg-card border border-border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
+  }
+
+  .light .dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(55, 115, 245, 0.15), 0 10px 10px -5px rgba(55, 115, 245, 0.08);
+    border-color: hsl(var(--primary));
   }
 
   /* Container dos cards com grid responsivo */
@@ -519,6 +565,12 @@
     min-height: 2.4rem; /* Altura mínima para 2 linhas */
   }
 
+  /* Light Mode - Títulos dos cards otimizados */
+  .light .dashboard-card-title {
+    color: hsl(var(--text-primary)) !important;
+    font-weight: 900 !important;
+  }
+
   .dashboard-card-value {
     font-size: 1.875rem !important;
     font-weight: 700 !important;
@@ -528,12 +580,24 @@
     line-height: 1.2;
   }
 
+  /* Light Mode - Valores dos cards otimizados */
+  .light .dashboard-card-value {
+    color: hsl(var(--text-primary)) !important;
+    font-weight: 800 !important;
+  }
+
   .dashboard-card-subtitle {
     font-size: 0.875rem !important;
     color: #B8BCC8 !important;
     margin-top: 0.25rem !important;
     font-weight: 500 !important;
     line-height: 1.2;
+  }
+
+  /* Light Mode - Subtítulos dos cards otimizados */
+  .light .dashboard-card-subtitle {
+    color: hsl(var(--text-secondary)) !important;
+    font-weight: 600 !important;
   }
 
   .dashboard-card-icon {
@@ -550,6 +614,19 @@
     color: #E6E6E6;
   }
 
+  /* Light Mode - Ícones dos cards otimizados */
+  .light .dashboard-card-icon {
+    color: hsl(var(--icon-primary));
+  }
+
+  .light .dashboard-card-help-icon {
+    color: hsl(var(--text-tertiary));
+  }
+
+  .light .dashboard-card-help-icon:hover {
+    color: hsl(var(--text-primary));
+  }
+
 
   /* Responsive adjustments */
   @media (max-width: 768px) {
@@ -564,26 +641,56 @@
       padding-bottom: 16px !important;
       min-height: 2rem; /* Altura menor para mobile */
     }
+
+    /* Light Mode - Mobile otimizado */
+    .light .dashboard-card-title {
+      font-weight: 800 !important;
+    }
     
     .dashboard-card-value {
       font-size: 1.5rem !important;
+    }
+
+    /* Light Mode - Valores mobile otimizados */
+    .light .dashboard-card-value {
+      font-weight: 800 !important;
     }
     
     .dashboard-card-subtitle {
       font-size: 0.75rem !important;
     }
 
+    /* Light Mode - Subtítulos mobile otimizados */
+    .light .dashboard-card-subtitle {
+      font-weight: 600 !important;
+    }
+
     /* Ajustes para valores responsivos em mobile */
     .text-number-lg {
       font-size: 1.25rem !important; /* 20px */
+    }
+
+    /* Light Mode - Texto responsivo mobile otimizado */
+    .light .text-number-lg {
+      font-weight: 800 !important;
     }
     
     .text-number-md {
       font-size: 1.125rem !important; /* 18px */
     }
+
+    /* Light Mode - Texto médio mobile otimizado */
+    .light .text-number-md {
+      font-weight: 800 !important;
+    }
     
     .text-number-sm {
       font-size: 1rem !important; /* 16px */
+    }
+
+    /* Light Mode - Texto pequeno mobile otimizado */
+    .light .text-number-sm {
+      font-weight: 800 !important;
     }
 
     /* Ajustes para SatsIcon em mobile */
@@ -591,12 +698,22 @@
       width: 16px !important;
       height: 16px !important;
     }
+
+    /* Light Mode - SatsIcon mobile otimizado */
+    .light .sats-icon-mobile {
+      color: hsl(var(--sats-icon-color)) !important;
+    }
     
   }
 
   /* Button improvements - Mais vibrante */
   .btn-modern {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105;
+  }
+
+  /* Light Mode - Botões otimizados */
+  .light .btn-modern {
+    font-weight: 700;
   }
 
   .btn-modern-primary {
@@ -607,9 +724,23 @@
     @apply btn-modern bg-secondary text-secondary-foreground hover:bg-secondary-hover shadow-coingecko-md hover:shadow-glow;
   }
 
+  /* Light Mode - Botões específicos otimizados */
+  .light .btn-modern-primary {
+    font-weight: 700;
+  }
+
+  .light .btn-modern-secondary {
+    font-weight: 700;
+  }
+
   /* Header improvements */
   .header-modern {
     @apply bg-bg-header border-b border-border backdrop-blur-sm;
+    background: linear-gradient(135deg, hsl(var(--bg-header)), hsl(var(--bg-card)));
+  }
+
+  /* Light Mode - Header otimizado */
+  .light .header-modern {
     background: linear-gradient(135deg, hsl(var(--bg-header)), hsl(var(--bg-card)));
   }
 
@@ -619,24 +750,54 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Light Mode - Números otimizados */
+  .light .number {
+    font-weight: 700;
+  }
+
   .number-lg {
     @apply number text-3xl font-bold;
+  }
+
+  /* Light Mode - Números grandes otimizados */
+  .light .number-lg {
+    font-weight: 900;
   }
 
   .number-xl {
     @apply number text-4xl font-bold;
   }
 
+  /* Light Mode - Números extra grandes otimizados */
+  .light .number-xl {
+    font-weight: 900;
+  }
+
   .number-2xl {
     @apply number text-5xl font-bold;
+  }
+
+  /* Light Mode - Números 2xl otimizados */
+  .light .number-2xl {
+    font-weight: 900;
   }
 
   .number-sm {
     @apply number text-sm font-semibold;
   }
 
+  /* Light Mode - Números pequenos otimizados */
+  .light .number-sm {
+    font-weight: 700;
+  }
+
   .number-xs {
     @apply number text-xs font-medium;
+  }
+
+  /* Light Mode - Números extra pequenos otimizados */
+  .light .number-xs {
+    font-weight: 600;
   }
 
   /* Aplicar fonte mono automaticamente em elementos com números */
@@ -645,10 +806,20 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Light Mode - Fonte mono otimizada */
+  .light .font-mono-numbers * {
+    font-weight: 700;
+  }
+
   /* SatsIcon sizes - Proporcionais aos números */
   .sats-icon-sm {
     width: 16px;
     height: 16px;
+  }
+
+  /* Light Mode - SatsIcon otimizado */
+  .light .sats-icon-sm {
+    color: hsl(var(--sats-icon-color));
   }
 
   .sats-icon-md {
@@ -656,14 +827,29 @@
     height: 20px;
   }
 
+  /* Light Mode - SatsIcon médio otimizado */
+  .light .sats-icon-md {
+    color: hsl(var(--sats-icon-color));
+  }
+
   .sats-icon-lg {
     width: 28px;
     height: 28px;
   }
 
+  /* Light Mode - SatsIcon grande otimizado */
+  .light .sats-icon-lg {
+    color: hsl(var(--sats-icon-color));
+  }
+
   .sats-icon-xl {
     width: 32px;
     height: 32px;
+  }
+
+  /* Light Mode - SatsIcon extra grande otimizado */
+  .light .sats-icon-xl {
+    color: hsl(var(--sats-icon-color));
   }
 
   /* Ajuste automático do SatsIcon baseado no tamanho do texto */
@@ -673,10 +859,22 @@
     height: 28px;
   }
 
+  /* Light Mode - Ajuste automático do SatsIcon otimizado */
+  .light .number-lg + .sats-icon,
+  .light .number-lg .sats-icon {
+    color: hsl(var(--sats-icon-color));
+  }
+
   .number-xl + .sats-icon,
   .number-xl .sats-icon {
     width: 32px;
     height: 32px;
+  }
+
+  /* Light Mode - SatsIcon para números xl otimizado */
+  .light .number-xl + .sats-icon,
+  .light .number-xl .sats-icon {
+    color: hsl(var(--sats-icon-color));
   }
 
   .number-2xl + .sats-icon,
@@ -685,17 +883,38 @@
     height: 36px;
   }
 
+  /* Light Mode - SatsIcon para números 2xl otimizado */
+  .light .number-2xl + .sats-icon,
+  .light .number-2xl .sats-icon {
+    color: hsl(var(--sats-icon-color));
+  }
+
   /* Status indicators - CoinGecko inspired */
   .status-active {
     @apply bg-success/20 text-success border-success/30;
+  }
+
+  /* Light Mode - Status ativo otimizado */
+  .light .status-active {
+    @apply bg-success/30 text-success border-success/40;
   }
 
   .status-inactive {
     @apply bg-muted/20 text-muted-foreground border-muted/30;
   }
 
+  /* Light Mode - Status otimizado */
+  .light .status-inactive {
+    @apply bg-muted/30 text-muted-foreground border-muted/40;
+  }
+
   .status-error {
     @apply bg-destructive/20 text-destructive border-destructive/30;
+  }
+
+  /* Light Mode - Status de erro otimizado */
+  .light .status-error {
+    @apply bg-destructive/30 text-destructive border-destructive/40;
   }
 
   /* Table styles - CoinGecko inspired */
@@ -703,15 +922,35 @@
     @apply w-full border-collapse;
   }
 
+  /* Light Mode - Tabelas otimizadas */
+  .light .coingecko-table {
+    background: hsl(var(--bg-card));
+  }
+
   .coingecko-table th {
     @apply bg-bg-header text-text-secondary font-medium text-sm px-4 py-3 text-left border-b border-border;
+  }
+
+  /* Light Mode - Cabeçalho de tabela otimizado */
+  .light .coingecko-table th {
+    @apply bg-bg-header text-text-secondary font-semibold;
   }
 
   .coingecko-table td {
     @apply px-4 py-3 border-b border-border text-text-primary;
   }
 
+  /* Light Mode - Células de tabela otimizadas */
+  .light .coingecko-table td {
+    @apply text-text-primary font-medium;
+  }
+
   .coingecko-table tbody tr:hover {
+    @apply bg-bg-card-alt;
+  }
+
+  /* Light Mode - Hover de tabela otimizado */
+  .light .coingecko-table tbody tr:hover {
     @apply bg-bg-card-alt;
   }
 
@@ -720,13 +959,28 @@
     @apply w-full px-3 py-2 border border-border rounded-md bg-background text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
   }
 
+  /* Light Mode - Input otimizado */
+  .light .coingecko-input {
+    @apply bg-input text-foreground placeholder:text-text-secondary;
+  }
+
   /* Button styles - CoinGecko inspired */
   .coingecko-btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary-hover px-4 py-2 rounded-md font-medium transition-all;
   }
 
+  /* Light Mode - Botão primário otimizado */
+  .light .coingecko-btn-primary {
+    font-weight: 700;
+  }
+
   .coingecko-btn-secondary {
     @apply bg-secondary text-secondary-foreground hover:bg-secondary-hover px-4 py-2 rounded-md font-medium transition-all;
+  }
+
+  /* Light Mode - Botão secundário otimizado */
+  .light .coingecko-btn-secondary {
+    font-weight: 700;
   }
 
 
@@ -735,26 +989,87 @@
       font-size: 1.5rem !important; /* 24px - era 1.875rem */
     }
 
+    /* Light Mode - Números grandes mobile otimizados */
+    .light .number-lg {
+      font-weight: 900 !important;
+    }
+
     .number-xl {
       font-size: 1.75rem !important; /* 28px - era 2.25rem */
     }
 
+    /* Light Mode - Números xl mobile otimizados */
+    .light .number-xl {
+      font-weight: 900 !important;
+    }
+
     .number-2xl {
       font-size: 2rem !important; /* 32px - era 3rem */
+    }
+
+    /* Light Mode - Números 2xl mobile otimizados */
+    .light .number-2xl {
+      font-weight: 900 !important;
     }
   }
 
 /* ===== AXISOR DESIGN SYSTEM UTILITIES ===== */
 
 @layer utilities {
+  /* Light Mode - Utilitários otimizados */
+  .light .text-primary {
+    color: hsl(var(--text-primary));
+  }
+
+  .light .text-secondary {
+    color: hsl(var(--text-secondary));
+  }
+
+  .light .text-tertiary {
+    color: hsl(var(--text-tertiary));
+  }
+
+  .light .bg-primary {
+    background-color: hsl(var(--bg-primary));
+  }
+
+  .light .bg-card {
+    background-color: hsl(var(--bg-card));
+  }
+
+  .light .bg-card-alt {
+    background-color: hsl(var(--bg-card-alt));
+  }
+
+  .light .bg-header {
+    background-color: hsl(var(--bg-header));
+  }
+
+  .light .border-primary {
+    border-color: hsl(var(--border));
+  }
+
+  .light .border-strong {
+    border-color: hsl(var(--border-strong));
+  }
   /* Typography Classes */
   .font-heading {
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
     font-weight: 700;
   }
 
+  /* Light Mode - Tipografia otimizada */
+  .light .font-heading {
+    font-weight: 800;
+  }
+
   .font-mono {
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  /* Light Mode - Fonte mono otimizada */
+  .light .font-mono {
+    font-weight: 700;
   }
 
   /* Axisor Typography System */
@@ -763,9 +1078,19 @@
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Display otimizado */
+  .light .text-display-2xl {
+    font-weight: 900;
+  }
+
   .text-display-xl {
     @apply text-6xl font-bold leading-tight tracking-tight;
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - Display xl otimizado */
+  .light .text-display-xl {
+    font-weight: 900;
   }
 
   .text-display-lg {
@@ -773,9 +1098,19 @@
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Display lg otimizado */
+  .light .text-display-lg {
+    font-weight: 900;
+  }
+
   .text-display-md {
     @apply text-4xl font-bold leading-tight tracking-tight;
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - Display md otimizado */
+  .light .text-display-md {
+    font-weight: 900;
   }
 
   .text-display-sm {
@@ -783,9 +1118,19 @@
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Display sm otimizado */
+  .light .text-display-sm {
+    font-weight: 900;
+  }
+
   .text-display-xs {
     @apply text-2xl font-bold leading-tight tracking-tight;
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - Display xs otimizado */
+  .light .text-display-xs {
+    font-weight: 900;
   }
 
   /* Headings */
@@ -794,9 +1139,19 @@
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - H1 otimizado */
+  .light .text-h1 {
+    font-weight: 900;
+  }
+
   .text-h2 {
     @apply text-3xl font-bold leading-tight tracking-tight;
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - H2 otimizado */
+  .light .text-h2 {
+    font-weight: 900;
   }
 
   .text-h3 {
@@ -804,9 +1159,19 @@
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - H3 otimizado */
+  .light .text-h3 {
+    font-weight: 900;
+  }
+
   .text-h4 {
     @apply text-xl font-bold leading-tight tracking-tight;
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - H4 otimizado */
+  .light .text-h4 {
+    font-weight: 900;
   }
 
   .text-h5 {
@@ -814,9 +1179,19 @@
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - H5 otimizado */
+  .light .text-h5 {
+    font-weight: 900;
+  }
+
   .text-h6 {
     @apply text-base font-bold leading-tight tracking-tight;
     font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - H6 otimizado */
+  .light .text-h6 {
+    font-weight: 900;
   }
 
   /* Body Text */
@@ -825,9 +1200,19 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Texto do corpo otimizado */
+  .light .text-body-xl {
+    font-weight: 500;
+  }
+
   .text-body-lg {
     @apply text-lg font-normal leading-relaxed;
     font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - Texto do corpo lg otimizado */
+  .light .text-body-lg {
+    font-weight: 500;
   }
 
   .text-body-md {
@@ -835,14 +1220,29 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Texto do corpo md otimizado */
+  .light .text-body-md {
+    font-weight: 500;
+  }
+
   .text-body-sm {
     @apply text-sm font-normal leading-relaxed;
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Texto do corpo sm otimizado */
+  .light .text-body-sm {
+    font-weight: 500;
+  }
+
   .text-body-xs {
     @apply text-xs font-normal leading-relaxed;
     font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - Texto do corpo xs otimizado */
+  .light .text-body-xs {
+    font-weight: 500;
   }
 
   /* Labels and Captions */
@@ -851,9 +1251,19 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Labels otimizados */
+  .light .text-label-lg {
+    font-weight: 700;
+  }
+
   .text-label-md {
     @apply text-xs font-semibold leading-tight tracking-wide uppercase;
     font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - Labels md otimizados */
+  .light .text-label-md {
+    font-weight: 700;
   }
 
   .text-label-sm {
@@ -861,9 +1271,19 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Light Mode - Labels sm otimizados */
+  .light .text-label-sm {
+    font-weight: 600;
+  }
+
   .text-caption {
     @apply text-xs font-normal leading-tight text-text-secondary;
     font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Light Mode - Captions otimizados */
+  .light .text-caption {
+    font-weight: 500;
   }
 
   /* Code and Monospace */
@@ -872,9 +1292,19 @@
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
   }
 
+  /* Light Mode - Código otimizado */
+  .light .text-code-lg {
+    font-weight: 700;
+  }
+
   .text-code-md {
     @apply text-base font-mono leading-relaxed;
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  /* Light Mode - Código md otimizado */
+  .light .text-code-md {
+    font-weight: 700;
   }
 
   .text-code-sm {
@@ -882,9 +1312,19 @@
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
   }
 
+  /* Light Mode - Código sm otimizado */
+  .light .text-code-sm {
+    font-weight: 700;
+  }
+
   .text-code-xs {
     @apply text-xs font-mono leading-relaxed;
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  }
+
+  /* Light Mode - Código xs otimizado */
+  .light .text-code-xs {
+    font-weight: 700;
   }
 
   /* Numbers and Data */
@@ -894,10 +1334,20 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Light Mode - Números 2xl otimizados */
+  .light .text-number-2xl {
+    font-weight: 900;
+  }
+
   .text-number-xl {
     @apply text-4xl font-bold leading-none tracking-tight;
     font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', monospace;
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Light Mode - Números xl otimizados */
+  .light .text-number-xl {
+    font-weight: 900;
   }
 
   .text-number-lg {
@@ -906,10 +1356,20 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Light Mode - Números lg otimizados */
+  .light .text-number-lg {
+    font-weight: 900;
+  }
+
   .text-number-md {
     @apply text-2xl font-bold leading-none tracking-tight;
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Light Mode - Números md otimizados */
+  .light .text-number-md {
+    font-weight: 900;
   }
 
   .text-number-sm {
@@ -918,39 +1378,85 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Light Mode - Números sm otimizados */
+  .light .text-number-sm {
+    font-weight: 900;
+  }
+
   .text-number-xs {
     @apply text-lg font-bold leading-none tracking-tight;
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
     font-variant-numeric: tabular-nums;
   }
 
+  /* Light Mode - Números xs otimizados */
+  .light .text-number-xs {
+    font-weight: 900;
+  }
+
   /* Responsive Typography */
   @media (max-width: 768px) {
     .text-display-2xl { @apply text-5xl; }
     .text-display-xl { @apply text-4xl; }
+
+    /* Light Mode - Tipografia responsiva mobile otimizada */
+    .light .text-display-2xl { font-weight: 900; }
+    .light .text-display-xl { font-weight: 900; }
     .text-display-lg { @apply text-3xl; }
     .text-display-md { @apply text-2xl; }
     .text-display-sm { @apply text-xl; }
     .text-display-xs { @apply text-lg; }
+
+    /* Light Mode - Display responsivo mobile otimizado */
+    .light .text-display-lg { font-weight: 900; }
+    .light .text-display-md { font-weight: 900; }
+    .light .text-display-sm { font-weight: 900; }
+    .light .text-display-xs { font-weight: 900; }
     
     .text-h1 { @apply text-3xl; }
     .text-h2 { @apply text-2xl; }
     .text-h3 { @apply text-xl; }
     .text-h4 { @apply text-lg; }
+
+    /* Light Mode - Headings responsivos mobile otimizados */
+    .light .text-h1 { font-weight: 900; }
+    .light .text-h2 { font-weight: 900; }
+    .light .text-h3 { font-weight: 900; }
+    .light .text-h4 { font-weight: 900; }
     .text-h5 { @apply text-base; }
     .text-h6 { @apply text-sm; }
+
+    /* Light Mode - Headings h5 e h6 responsivos mobile otimizados */
+    .light .text-h5 { font-weight: 900; }
+    .light .text-h6 { font-weight: 900; }
     
     .text-body-xl { @apply text-lg; }
     .text-body-lg { @apply text-base; }
     .text-body-md { @apply text-sm; }
     .text-body-sm { @apply text-xs; }
+
+    /* Light Mode - Texto do corpo responsivo mobile otimizado */
+    .light .text-body-xl { font-weight: 500; }
+    .light .text-body-lg { font-weight: 500; }
+    .light .text-body-md { font-weight: 500; }
+    .light .text-body-sm { font-weight: 500; }
     
     .text-number-2xl { @apply text-4xl; }
     .text-number-xl { @apply text-3xl; }
     .text-number-lg { @apply text-2xl; }
     .text-number-md { @apply text-xl; }
+
+    /* Light Mode - Números responsivos mobile otimizados */
+    .light .text-number-2xl { font-weight: 900; }
+    .light .text-number-xl { font-weight: 900; }
+    .light .text-number-lg { font-weight: 900; }
+    .light .text-number-md { font-weight: 900; }
     .text-number-sm { @apply text-lg; }
     .text-number-xs { @apply text-base; }
+
+    /* Light Mode - Números sm e xs responsivos mobile otimizados */
+    .light .text-number-sm { font-weight: 900; }
+    .light .text-number-xs { font-weight: 900; }
   }
 
   /* Gradient Classes */
@@ -958,20 +1464,45 @@
     background: linear-gradient(135deg, #3773F5, #8A2BE2);
   }
 
+  /* Light Mode - Gradientes otimizados */
+  .light .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  }
+
   .bg-gradient-secondary {
     background: linear-gradient(135deg, #8A2BE2, #00FFDD);
+  }
+
+  /* Light Mode - Gradientes secundários otimizados */
+  .light .bg-gradient-secondary {
+    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
   }
 
   .bg-gradient-accent {
     background: linear-gradient(135deg, #00FFDD, #3773F5);
   }
 
+  /* Light Mode - Gradientes de destaque otimizados */
+  .light .bg-gradient-accent {
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
+  }
+
   .bg-gradient-hero {
     background: linear-gradient(135deg, #3773F5, #8A2BE2, #00FFDD);
   }
 
+  /* Light Mode - Gradientes hero otimizados */
+  .light .bg-gradient-hero {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
+  }
+
   .bg-gradient-card {
     background: linear-gradient(135deg, #1A1F2E, #242B3D);
+  }
+
+  /* Light Mode - Gradientes de card otimizados */
+  .light .bg-gradient-card {
+    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
   }
 
   /* Neon Effect Classes */
@@ -979,20 +1510,45 @@
     box-shadow: 0 0 20px rgba(55, 115, 245, 0.4), 0 0 40px rgba(55, 115, 245, 0.2);
   }
 
+  /* Light Mode - Efeitos neon otimizados */
+  .light .neon-primary {
+    box-shadow: 0 0 20px rgba(55, 115, 245, 0.2), 0 0 40px rgba(55, 115, 245, 0.1);
+  }
+
   .neon-secondary {
     box-shadow: 0 0 20px rgba(138, 43, 226, 0.4), 0 0 40px rgba(138, 43, 226, 0.2);
+  }
+
+  /* Light Mode - Neon secundário otimizado */
+  .light .neon-secondary {
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.2), 0 0 40px rgba(138, 43, 226, 0.1);
   }
 
   .neon-accent {
     box-shadow: 0 0 20px rgba(0, 255, 221, 0.4), 0 0 40px rgba(0, 255, 221, 0.2);
   }
 
+  /* Light Mode - Neon de destaque otimizado */
+  .light .neon-accent {
+    box-shadow: 0 0 20px rgba(0, 255, 221, 0.2), 0 0 40px rgba(0, 255, 221, 0.1);
+  }
+
   .neon-success {
     box-shadow: 0 0 20px rgba(14, 203, 129, 0.4), 0 0 40px rgba(14, 203, 129, 0.2);
   }
 
+  /* Light Mode - Neon de sucesso otimizado */
+  .light .neon-success {
+    box-shadow: 0 0 20px rgba(14, 203, 129, 0.2), 0 0 40px rgba(14, 203, 129, 0.1);
+  }
+
   .neon-glow {
     box-shadow: 0 0 30px rgba(55, 115, 245, 0.3);
+  }
+
+  /* Light Mode - Neon glow otimizado */
+  .light .neon-glow {
+    box-shadow: 0 0 30px rgba(55, 115, 245, 0.15);
   }
 
   /* Hover Effects */
@@ -1001,9 +1557,19 @@
     transform: translateY(-2px);
   }
 
+  /* Light Mode - Hover neon otimizado */
+  .light .hover-neon-primary:hover {
+    box-shadow: 0 0 20px rgba(55, 115, 245, 0.2), 0 0 40px rgba(55, 115, 245, 0.1);
+  }
+
   .hover-neon-secondary:hover {
     box-shadow: 0 0 20px rgba(138, 43, 226, 0.4), 0 0 40px rgba(138, 43, 226, 0.2);
     transform: translateY(-2px);
+  }
+
+  /* Light Mode - Hover neon secundário otimizado */
+  .light .hover-neon-secondary:hover {
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.2), 0 0 40px rgba(138, 43, 226, 0.1);
   }
 
   .hover-neon-accent:hover {
@@ -1011,12 +1577,27 @@
     transform: translateY(-2px);
   }
 
+  /* Light Mode - Hover neon de destaque otimizado */
+  .light .hover-neon-accent:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 221, 0.2), 0 0 40px rgba(0, 255, 221, 0.1);
+  }
+
   /* Button Variants - More Subtle Hover */
   .btn-axisor-primary {
     @apply bg-gradient-primary text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:neon-primary;
   }
 
+  /* Light Mode - Botões otimizados */
+  .light .btn-axisor-primary {
+    font-weight: 700;
+  }
+
   .btn-axisor-primary:hover {
+    transform: scale(1.02);
+  }
+
+  /* Light Mode - Hover de botões otimizado */
+  .light .btn-axisor-primary:hover {
     transform: scale(1.02);
   }
 
@@ -1024,7 +1605,17 @@
     @apply bg-gradient-secondary text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:neon-secondary;
   }
 
+  /* Light Mode - Botões secundários otimizados */
+  .light .btn-axisor-secondary {
+    font-weight: 700;
+  }
+
   .btn-axisor-secondary:hover {
+    transform: scale(1.02);
+  }
+
+  /* Light Mode - Hover de botões secundários otimizado */
+  .light .btn-axisor-secondary:hover {
     transform: scale(1.02);
   }
 
@@ -1032,7 +1623,17 @@
     @apply bg-gradient-accent text-black font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:neon-accent;
   }
 
+  /* Light Mode - Botões de destaque otimizados */
+  .light .btn-axisor-accent {
+    font-weight: 700;
+  }
+
   .btn-axisor-accent:hover {
+    transform: scale(1.02);
+  }
+
+  /* Light Mode - Hover de botões de destaque otimizado */
+  .light .btn-axisor-accent:hover {
     transform: scale(1.02);
   }
 
@@ -1041,12 +1642,27 @@
     @apply bg-[#3773F5] hover:bg-[#2B5CE6] text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#3773F5]/15;
   }
 
+  /* Light Mode - Botões sólidos otimizados */
+  .light .btn-axisor-primary-solid {
+    font-weight: 700;
+  }
+
   .btn-axisor-primary-solid:hover {
+    transform: scale(1.02);
+  }
+
+  /* Light Mode - Hover de botões sólidos otimizado */
+  .light .btn-axisor-primary-solid:hover {
     transform: scale(1.02);
   }
 
   .btn-axisor-secondary-solid {
     @apply bg-[#8A2BE2] hover:bg-[#7B1FA2] text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#8A2BE2]/15;
+  }
+
+  /* Light Mode - Botões secundários sólidos otimizados */
+  .light .btn-axisor-secondary-solid {
+    font-weight: 700;
   }
 
   .btn-axisor-secondary-solid:hover {
@@ -1057,12 +1673,22 @@
     @apply bg-[#00FFDD] hover:bg-[#00E6C7] text-black font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#00FFDD]/15;
   }
 
+  /* Light Mode - Botões de accent sólidos otimizados */
+  .light .btn-axisor-accent-solid {
+    font-weight: 700;
+  }
+
   .btn-axisor-accent-solid:hover {
     transform: scale(1.02);
   }
 
   .btn-axisor-success-solid {
     @apply bg-[#0ECB81] hover:bg-[#0DB870] text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#0ECB81]/15;
+  }
+
+  /* Light Mode - Botões de sucesso sólidos otimizados */
+  .light .btn-axisor-success-solid {
+    font-weight: 700;
   }
 
   .btn-axisor-success-solid:hover {
@@ -1169,9 +1795,96 @@
     background: linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(75, 85, 99, 0.25), rgba(55, 65, 81, 0.2));
   }
 
+  /* Light Mode - Gradientes mais suaves e apropriados */
+  .light .gradient-card-red::before {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1), rgba(185, 28, 28, 0.05));
+  }
+
+  .light .gradient-card-green::before {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1), rgba(21, 128, 61, 0.05));
+  }
+
+  .light .gradient-card-blue::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1), rgba(29, 78, 216, 0.05));
+  }
+
+  .light .gradient-card-purple::before {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(147, 51, 234, 0.1), rgba(126, 34, 206, 0.05));
+  }
+
+  .light .gradient-card-orange::before {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(234, 88, 12, 0.1), rgba(194, 65, 12, 0.05));
+  }
+
+  .light .gradient-card-yellow::before {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(202, 138, 4, 0.1), rgba(161, 98, 7, 0.05));
+  }
+
+  .light .gradient-card-gray::before {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.15), rgba(75, 85, 99, 0.1), rgba(55, 65, 81, 0.05));
+  }
+
   .gradient-card .card-content {
     position: relative;
     z-index: 10;
+  }
+
+  /* Light Mode - Cores de texto específicas para cards */
+  .light .gradient-card-green .text-green-200 {
+    color: hsl(var(--card-text-green));
+  }
+
+  .light .gradient-card-red .text-red-200 {
+    color: hsl(var(--card-text-red));
+  }
+
+  .light .gradient-card-blue .text-blue-200 {
+    color: hsl(var(--card-text-blue));
+  }
+
+  .light .gradient-card-purple .text-purple-200 {
+    color: hsl(var(--card-text-purple));
+  }
+
+  .light .gradient-card-orange .text-orange-200 {
+    color: hsl(var(--card-text-orange));
+  }
+
+  .light .gradient-card-yellow .text-yellow-200 {
+    color: hsl(var(--card-text-yellow));
+  }
+
+  .light .gradient-card-gray .text-gray-200 {
+    color: hsl(var(--card-text-gray));
+  }
+
+  /* Light Mode - Cores de ícones específicas para cards */
+  .light .gradient-card-green .text-green-300 {
+    color: hsl(var(--icon-success));
+  }
+
+  .light .gradient-card-red .text-red-300 {
+    color: hsl(var(--icon-danger));
+  }
+
+  .light .gradient-card-blue .text-blue-300 {
+    color: hsl(var(--icon-primary));
+  }
+
+  .light .gradient-card-purple .text-purple-300 {
+    color: hsl(var(--secondary));
+  }
+
+  .light .gradient-card-orange .text-orange-300 {
+    color: hsl(var(--icon-secondary));
+  }
+
+  .light .gradient-card-yellow .text-yellow-300 {
+    color: hsl(var(--icon-warning));
+  }
+
+  .light .gradient-card-gray .text-gray-300 {
+    color: hsl(var(--icon-muted));
   }
 
   /* Animação sutil para ícones dos cards */
@@ -1502,6 +2215,17 @@
     @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-[#3773F5] hover:neon-glow hover:shadow-2xl;
   }
 
+  /* Light Mode - Cards otimizados */
+  .light .card-axisor {
+    @apply bg-card border border-border rounded-xl p-6 transition-all duration-300 hover:border-primary hover:shadow-lg;
+    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
+  }
+
+  .light .card-axisor-elevated {
+    @apply bg-card border border-border rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-primary hover:shadow-2xl;
+    background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
+  }
+
   /* LN Markets Header - Specific class for straight corners */
   .card-lnmarkets-header {
     @apply bg-bg-header border border-border transition-all duration-300;
@@ -1816,6 +2540,75 @@
     height: 3.75rem; /* 60px */
   }
 
+  /* Mobile Navigation Improvements */
+  .mobile-nav {
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .mobile-nav .nav-item {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .mobile-nav .nav-item:hover {
+    transform: translateY(-1px);
+  }
+
+  .mobile-nav .nav-item.active {
+    transform: translateY(-2px);
+  }
+
+  /* Mobile Navigation - Expanded Layout */
+  .mobile-nav .flex {
+    width: 100%;
+  }
+
+  .mobile-nav a {
+    flex: 1;
+    width: 100%;
+    padding: 0.5rem 0;
+    border-right: 1px solid hsl(var(--border) / 0.3);
+  }
+
+  .mobile-nav a:last-child {
+    border-right: none;
+  }
+
+  .mobile-nav a svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .mobile-nav a span {
+    font-size: 0.75rem;
+    line-height: 1;
+    margin-top: 0.25rem;
+  }
+
+  /* Responsive adjustments for different screen sizes */
+  @media (max-width: 480px) {
+    .mobile-nav a span {
+      font-size: 0.625rem;
+    }
+    
+    .mobile-nav a svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 768px) {
+    .mobile-nav a span {
+      font-size: 0.75rem;
+    }
+    
+    .mobile-nav a svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
   /* Profile Tabs Glow Effect */
   .profile-tabs-glow {
     background: linear-gradient(135deg, 
@@ -1967,6 +2760,25 @@
       display: flex !important;
       visibility: visible !important;
       opacity: 1 !important;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 50 !important;
+    }
+    
+    /* Ensure mobile navigation is always visible */
+    .mobile-nav * {
+      pointer-events: auto !important;
+    }
+    
+    /* Mobile drawer improvements */
+    .mobile-drawer {
+      z-index: 60 !important;
+    }
+    
+    .mobile-drawer-backdrop {
+      z-index: 59 !important;
     }
   }
 
@@ -2146,5 +2958,130 @@
     .design-system-content {
       margin-left: 16rem; /* 256px */
     }
+  }
+
+  /* Accessibility Classes */
+  .reduced-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .high-contrast {
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 0 0% 0%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 0%;
+  }
+
+  .large-text {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .large-text h1 {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+
+  .large-text h2 {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+
+  .large-text h3 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .small-text {
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+  }
+
+  .small-text h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .small-text h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .small-text h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .keyboard-navigation button:focus,
+  .keyboard-navigation a:focus,
+  .keyboard-navigation input:focus,
+  .keyboard-navigation select:focus,
+  .keyboard-navigation textarea:focus,
+  .keyboard-navigation [tabindex]:focus {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  .focus-visible *:focus-visible {
+    outline: 3px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  /* Screen Reader Only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Skip Link */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+  }
+
+  .skip-link:focus {
+    top: 6px;
+  }
+
+  /* High contrast focus indicators */
+  .high-contrast .keyboard-navigation button:focus,
+  .high-contrast .keyboard-navigation a:focus,
+  .high-contrast .keyboard-navigation input:focus,
+  .high-contrast .keyboard-navigation select:focus,
+  .high-contrast .keyboard-navigation textarea:focus,
+  .high-contrast .keyboard-navigation [tabindex]:focus {
+    outline: 3px solid hsl(var(--primary));
+    outline-offset: 3px;
   }
 }
