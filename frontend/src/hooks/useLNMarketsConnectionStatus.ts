@@ -42,7 +42,7 @@ export function useLNMarketsConnectionStatus() {
   });
 
   // More flexible validation: check if we have any data from LN Markets
-  const hasValidData = centralizedData && (
+  const hasValidData = centralizedData && centralizedData.lastUpdate > 0 && (
     (centralizedData.userBalance !== null && 
      centralizedData.userBalance !== undefined) ||
     (centralizedData.userPositions && 
