@@ -12,6 +12,20 @@ Este documento registra tarefas que dependem de ações externas ao desenvolvime
 - [ ] **Configurar IPs permitidos** para API de produção
 - [ ] **Definir estratégia de backup** para dados da LN Markets
 
+## 🐛 Correções Críticas Implementadas
+
+### Prisma Race Condition
+- [x] **Problema identificado** - Workers usando Prisma antes da conexão ✅ RESOLVIDO
+- [x] **Lazy loading implementado** - getPrisma() garante conexão ✅ RESOLVIDO
+- [x] **Injeção de dependência** - Workers recebem instância conectada ✅ RESOLVIDO
+- [x] **Reorganização da inicialização** - Database conectado antes dos workers ✅ RESOLVIDO
+- [x] **Verificação de segurança** - Lógica de retry implementada ✅ RESOLVIDO
+
+### Login UX Issues
+- [x] **Redirecionamento automático** - Corrigido interceptor do Axios ✅ RESOLVIDO
+- [x] **Mensagens de erro** - Usuário agora vê erros claramente ✅ RESOLVIDO
+- [x] **Usuário de teste** - Criado com plano vitalício para testes ✅ RESOLVIDO
+
 ### Sistema de Tooltips Configurável
 - [x] **Backend implementado** com API REST completa ✅ RESOLVIDO
 - [x] **Banco de dados** com tabelas dashboard_cards e tooltip_configs ✅ RESOLVIDO

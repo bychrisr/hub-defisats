@@ -6,6 +6,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🔧 **Correções Críticas - Prisma Race Condition e Login Issues**
+- ✅ **Prisma Race Condition Resolvido**: Implementado lazy loading para garantir conexão antes do uso
+- ✅ **Inicialização Reorganizada**: Database conectado antes dos workers serem iniciados
+- ✅ **Injeção de Dependência**: Workers agora recebem instância conectada do Prisma
+- ✅ **Lógica de Retry**: Verificação de segurança com múltiplas tentativas
+- ✅ **Login Redirect Fix**: Corrigido redirecionamento automático que impedia visualização de erros
+- ✅ **Usuário de Teste**: Criado usuário com plano vitalício para testes
+- ✅ **Sentry Temporariamente Desabilitado**: Reduzido spam de logs durante debugging
+
 ### ✨ **Sistema de Trading Real Completo + Backtesting Histórico + Machine Learning + Risk Metrics Avançadas + Rate Limiting Dinâmico + Cache Redis Estratégico + Load Balancing**
 - ✅ **TradingConfirmationService**: Sistema completo de confirmação de ordens
 - ✅ **TradingValidationService**: Validação avançada de saldo e margem

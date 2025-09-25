@@ -2,6 +2,85 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-021: Correção de Race Condition do Prisma Client
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Resolução de problema crítico de race condition na inicialização do Prisma Client
+
+### Problema
+- Workers tentavam usar Prisma Client antes da conexão ser estabelecida
+- Erro `PrismaClientKnownRequestError: Table does not exist` mesmo com tabelas existindo
+- Race condition entre inicialização do Prisma e workers do BullMQ
+- Múltiplas instâncias do Prisma Client causando inconsistências
+
+### Decisão
+- **Lazy Loading**: Implementar função `getPrisma()` que garante conexão antes do uso
+- **Singleton Pattern**: Uma única instância conectada reutilizada em toda aplicação
+- **Injeção de Dependência**: Workers recebem instância conectada como parâmetro
+- **Reorganização da Inicialização**: Database conectado ANTES dos workers
+- **Verificação de Segurança**: Lógica de retry com múltiplas tentativas
+
+### Implementação
+```typescript
+// lib/prisma.ts - Lazy loading com garantia de conexão
+export const getPrisma = async (): Promise<PrismaClient> => {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient(getConnectionConfig());
+    await globalForPrisma.prisma.$connect();
+    await globalForPrisma.prisma.$queryRaw`SELECT 1`; // Verificação
+  }
+  return globalForPrisma.prisma;
+};
+
+// index.ts - Ordem correta de inicialização
+const prisma = await getPrisma(); // 1. Conectar database
+// ... outras inicializações
+startPeriodicMonitoring(prisma); // 2. Iniciar workers com instância conectada
+```
+
+### Consequências
+- ✅ Race condition eliminado
+- ✅ Workers funcionam corretamente
+- ✅ Uma única instância do Prisma Client
+- ✅ Conexão garantida antes do uso
+- ✅ Sistema estável e confiável
+
+## ADR-022: Correção de UX no Sistema de Login
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Melhoria da experiência do usuário durante falhas de login
+
+### Problema
+- Interceptor do Axios redirecionava automaticamente em qualquer erro 401
+- Usuário não conseguia ver mensagens de erro de login
+- Página recarregava antes do usuário ler a mensagem
+- UX ruim para debugging e correção de credenciais
+
+### Decisão
+- **Exclusão de Endpoints de Auth**: Interceptor não redireciona em `/auth/login` e `/auth/register`
+- **Preservação de Funcionalidade**: Mantém redirecionamento para outros endpoints protegidos
+- **Tratamento de Erro Local**: Componente de login trata erros localmente
+
+### Implementação
+```typescript
+// lib/api.ts - Interceptor modificado
+if (error.response?.status === 401 && 
+    !originalRequest._retry && 
+    !originalRequest.url?.includes('/auth/refresh') &&
+    !originalRequest.url?.includes('/auth/login') &&      // ← Exclusão
+    !originalRequest.url?.includes('/auth/register')) {   // ← Exclusão
+  // ... lógica de refresh token
+}
+```
+
+### Consequências
+- ✅ Usuário vê mensagens de erro claras
+- ✅ Não há redirecionamento automático em falhas de login
+- ✅ Melhor experiência de debugging
+- ✅ Funcionalidade de refresh token preservada
+
 ## ADR-020: Sistema de Trading Real Completo
 
 **Data**: 2025-01-25  
