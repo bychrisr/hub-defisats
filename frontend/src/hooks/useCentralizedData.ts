@@ -234,12 +234,14 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
     }
   }, [isAuthenticated, user?.id]);
 
-  // Carregar dados inicialmente
+  // Carregar dados inicialmente e quando credenciais mudarem
   useEffect(() => {
     if (isAuthenticated && user?.id) {
+      // Clear cache when credentials change to force fresh validation
+      globalCache = { data: null, timestamp: 0, ttl: 0 };
       refreshData();
     }
-  }, [isAuthenticated, user?.id]); // Removido refreshData das dependências
+  }, [isAuthenticated, user?.id, user?.ln_markets_api_key, user?.ln_markets_api_secret, user?.ln_markets_passphrase]); // Removido refreshData das dependências
 
   return {
     ...data,
