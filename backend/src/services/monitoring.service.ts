@@ -22,12 +22,23 @@ export class MonitoringService {
       return;
     }
 
-    if (config.monitoring.sentry.enabled && config.monitoring.sentry.dsn) {
+    // Temporariamente desabilitado para investigação do problema do Prisma
+    if (false && config.monitoring.sentry.enabled && config.monitoring.sentry.dsn) {
       Sentry.init({
         dsn: config.monitoring.sentry.dsn,
         environment: config.env.NODE_ENV,
         tracesSampleRate: config.env.NODE_ENV === 'production' ? 0.1 : 1.0,
         profilesSampleRate: config.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+        // Configurações de rate limit mais permissivas para desenvolvimento
+        maxBreadcrumbs: 1000,
+        maxEvents: 1000,
+        beforeSend(event, _hint) {
+          // Rate limit mais permissivo para desenvolvimento
+          if (config.env.NODE_ENV === 'development') {
+            return event;
+          }
+          return event;
+        },
         integrations: [
           new (Sentry as any).Integrations.Http({ tracing: true }),
           new (Sentry as any).Integrations.Express({ app: undefined }),

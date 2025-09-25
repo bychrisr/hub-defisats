@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { config } from './config/env';
-import { prisma } from './lib/prisma';
+import { getPrisma } from './lib/prisma';
 import { authRoutes } from './routes/auth.routes';
 import { automationRoutes } from './routes/automation.routes';
 import { tradeLogRoutes } from './routes/trade-log.routes';
@@ -78,13 +78,8 @@ import multipart from '@fastify/multipart';
 // Create Redis connection
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 
-// Initialize advanced services
-const advancedHealth = new AdvancedHealthService(prisma, redis, {
-  info: () => {},
-  error: () => {},
-  warn: () => {},
-  debug: () => {},
-} as any);
+// Initialize advanced services (will be updated after Prisma connection)
+let advancedHealth: AdvancedHealthService;
 
 const advancedAlerting = new AdvancedAlertingService({
   info: () => {},
@@ -785,6 +780,7 @@ async function gracefulShutdown(signal: string) {
   
   try {
     await fastify.close();
+    const prisma = await getPrisma();
     await prisma.$disconnect();
     fastify.log.info('Server closed successfully');
     process.exit(0);
@@ -802,11 +798,31 @@ async function start() {
     await registerPlugins();
     console.log('✅ Plugins registered successfully');
 
-    console.log('🔧 Step 2: Testing database connection...');
-    // Test database connection
-    await prisma.$connect();
+    console.log('🔧 Step 2: Connecting to database...');
+    // Connect to database using lazy loading
+    const prisma = await getPrisma();
+    
+    // Verify database schema is accessible
+    console.log('🔍 Verifying database schema...');
+    try {
+      await prisma.automation.count();
+      await prisma.rateLimitConfig.count();
+      console.log('✅ Database schema verified - all tables accessible');
+    } catch (error) {
+      console.error('❌ Database schema verification failed:', error);
+      throw error;
+    }
+    
     fastify.log.info('Database connected successfully');
     console.log('✅ Database connected successfully');
+
+    // Initialize advanced services with connected Prisma
+    advancedHealth = new AdvancedHealthService(prisma, redis, {
+      info: () => {},
+      error: () => {},
+      warn: () => {},
+      debug: () => {},
+    } as any);
 
     console.log('🔧 Step 3: Registering routes...');
     // Register routes
@@ -838,8 +854,11 @@ async function start() {
     
     // Start Margin Guard monitoring
     console.log('🛡️ Starting Margin Guard monitoring...');
+    
+    // Workers will use the already connected Prisma instance
+    console.log('🚀 Iniciando workers...');
     const { startPeriodicMonitoring } = await import('./workers/margin-monitor');
-    startPeriodicMonitoring();
+    startPeriodicMonitoring(prisma); // Passa a instância conectada do Prisma
     console.log('✅ Margin Guard monitoring started');
     
     console.log('✅ Advanced monitoring services started');

@@ -41,6 +41,29 @@ const getConnectionConfig = () => {
   };
 };
 
+// Lazy loading function to ensure connection before use
+export const getPrisma = async (): Promise<PrismaClient> => {
+  if (!globalForPrisma.prisma) {
+    console.log("🔍 Iniciando nova instância do Prisma Client...");
+    globalForPrisma.prisma = new PrismaClient(getConnectionConfig());
+    
+    try {
+      await globalForPrisma.prisma.$connect();
+      console.log("✅ Prisma Client conectado ao banco de dados.");
+      
+      // Verify connection with a test query
+      await globalForPrisma.prisma.$queryRaw`SELECT 1`;
+      console.log("✅ Conexão com banco de dados verificada.");
+      
+    } catch (error) {
+      console.error("❌ Erro ao conectar o Prisma Client:", error);
+      throw error; // Impede que a aplicação continue com Prisma desconectado
+    }
+  }
+  return globalForPrisma.prisma;
+};
+
+// Legacy export for backward compatibility (deprecated - use getPrisma() instead)
 export const prisma = globalForPrisma.prisma ?? new PrismaClient(getConnectionConfig());
 
 // Graceful shutdown

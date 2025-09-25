@@ -70,9 +70,12 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Evitar loop infinito - não tentar refresh se já tentou ou se é o próprio endpoint de refresh
+    // Não redirecionar automaticamente para endpoints de login/register
     if (error.response?.status === 401 && 
         !originalRequest._retry && 
-        !originalRequest.url?.includes('/auth/refresh')) {
+        !originalRequest.url?.includes('/auth/refresh') &&
+        !originalRequest.url?.includes('/auth/login') &&
+        !originalRequest.url?.includes('/auth/register')) {
       
       originalRequest._retry = true;
 

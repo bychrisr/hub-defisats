@@ -38,28 +38,28 @@ model User {
   ln_markets_passphrase      String?              @db.VarChar(255)
   plan_type                  PlanType             @default(free)
   preferences                Json?
-  bio                        String?              @db.Text
+  bio                        String?
   birthday                   DateTime?            @db.Date
   website                    String?              @db.VarChar(255)
-  risk_profile               String?              @default("moderate") @db.VarChar(50)
   risk_limits                Json?
+  risk_profile               String?              @default("moderate") @db.VarChar(50)
   admin_user                 AdminUser?
   automations                Automation[]
   backtest_reports           BacktestReport[]
   notifications              Notification[]
   payments                   Payment[]
+  refresh_tokens             RefreshToken[]
+  security_audit_logs        SecurityAuditLog[]
+  security_configs_updated   SecurityConfig[]     @relation("SecurityConfigUpdatedBy")
   trade_logs                 TradeLog[]
   user_coupons               UserCoupon[]         @relation("UserCouponRelation")
+  audit_logs                 AuditLog[]
+  notification_logs          NotificationLog[]
   order_confirmations        OrderConfirmation[]
+  simulations                Simulation[]
   trading_logs               TradingLog[]
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
-  simulations                Simulation[]
-  notification_logs          NotificationLog[]
-  security_audit_logs        SecurityAuditLog[]
-  refresh_tokens             RefreshToken[]
-  security_configs_updated   SecurityConfig[] @relation("SecurityConfigUpdatedBy")
-  audit_logs                 AuditLog[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -72,9 +72,9 @@ model Automation {
   type       String
   config     Json
   is_active  Boolean    @default(true)
-  status     String     @default("active") // active, paused, stopped, error
-  risk_level String?    // low, medium, high
-  plan_type  PlanType?  // User plan at time of creation
+  status     String     @default("active")
+  risk_level String?
+  plan_type  PlanType?
   created_at DateTime   @default(now()) @db.Timestamp(6)
   updated_at DateTime   @default(now()) @db.Timestamp(6)
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -94,11 +94,11 @@ model TradeLog {
   /// LN Markets trade ID
   trade_id      String
   status        String
-  action        String?     // buy, sell, hold
-  plan_type     PlanType?   // User plan at time of trade
-  pnl           Float?      // Profit/Loss
-  amount        Float?      // Trade amount
-  price         Float?      // Trade price
+  action        String?
+  plan_type     PlanType?
+  pnl           Float?
+  amount        Float?
+  price         Float?
   error_message String?
   executed_at   DateTime    @db.Timestamp(6)
   created_at    DateTime    @default(now()) @db.Timestamp(6)
@@ -114,14 +114,14 @@ model TradeLog {
 }
 
 model Notification {
-  id             String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  id             String            @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id        String
   type           String
-  is_enabled     Boolean  @default(true)
+  is_enabled     Boolean           @default(true)
   channel_config Json
-  created_at     DateTime @default(now()) @db.Timestamp(6)
-  updated_at     DateTime @default(now()) @db.Timestamp(6)
-  user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at     DateTime          @default(now()) @db.Timestamp(6)
+  updated_at     DateTime          @default(now()) @db.Timestamp(6)
+  user           User              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   logs           NotificationLog[]
 
   @@index([user_id], map: "idx_notification_user_id")
@@ -142,8 +142,8 @@ model Payment {
   payment_hash      String?
   preimage          String?
   expiry_seconds    Int?
-  payment_method    String?   // lightning, card, bank_transfer
-  amount            Float?    // Amount in fiat currency
+  payment_method    String?
+  amount            Float?
   user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_payment_user_id")
@@ -156,18 +156,18 @@ model Payment {
 }
 
 model BacktestReport {
-  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id    String
-  config     Json
-  result     Json
-  status     String   @default("pending") // pending, running, completed, failed
-  strategy   String?  // Strategy name
-  plan_type  PlanType? // User plan at time of creation
-  execution_time Int? // Execution time in seconds
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  updated_at DateTime @default(now()) @db.Timestamp(6)
-  completed_at DateTime? @db.Timestamp(6)
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id             String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id        String
+  config         Json
+  result         Json
+  status         String    @default("pending")
+  strategy       String?
+  plan_type      PlanType?
+  execution_time Int?
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime  @default(now()) @db.Timestamp(6)
+  completed_at   DateTime? @db.Timestamp(6)
+  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_backtestreport_user_id")
   @@index([status])
@@ -319,29 +319,20 @@ model UserUpgradeHistory {
   @@map("user_upgrade_history")
 }
 
-enum PlanType {
-  free
-  basic
-  advanced
-  pro
-  lifetime
-}
-
-// Sistema de Tooltips e Cards Configuráveis
 model DashboardCard {
-  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  key               String   @unique // Chave única para identificar o card (ex: "total_margin", "estimated_fees")
-  title             String   // Título do card
-  description       String?  // Descrição/tooltip do card
-  icon              String?  // Nome do ícone (ex: "Wallet", "DollarSign")
-  category          String?  // Categoria do card (ex: "positions", "history", "balance")
-  order_index       Int      @default(0) // Ordem de exibição
-  is_active         Boolean  @default(true) // Se o card está ativo
-  is_admin_only     Boolean  @default(false) // Se é visível apenas para admins
-  created_at        DateTime @default(now()) @db.Timestamp(6)
-  updated_at        DateTime @default(now()) @db.Timestamp(6)
-  created_by        String?  // ID do admin que criou
-  updated_by        String?  // ID do admin que atualizou
+  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  key           String   @unique
+  title         String
+  description   String?
+  icon          String?
+  category      String?
+  order_index   Int      @default(0)
+  is_active     Boolean  @default(true)
+  is_admin_only Boolean  @default(false)
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+  created_by    String?
+  updated_by    String?
 
   @@index([category])
   @@index([is_active])
@@ -350,40 +341,39 @@ model DashboardCard {
 }
 
 model TooltipConfig {
-  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  card_key          String   @unique // Chave do card associado
-  tooltip_text      String   // Texto do tooltip
-  tooltip_position  String   @default("top") // Posição do tooltip (top, bottom, left, right)
-  is_enabled        Boolean  @default(true) // Se o tooltip está habilitado
-  created_at        DateTime @default(now()) @db.Timestamp(6)
-  updated_at        DateTime @default(now()) @db.Timestamp(6)
-  created_by        String?  // ID do admin que criou
-  updated_by        String?  // ID do admin que atualizou
+  id               String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  card_key         String   @unique
+  tooltip_text     String
+  tooltip_position String   @default("top")
+  is_enabled       Boolean  @default(true)
+  created_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @default(now()) @db.Timestamp(6)
+  created_by       String?
+  updated_by       String?
 
   @@index([card_key])
   @@index([is_enabled])
   @@map("tooltip_configs")
 }
 
-// Tabela de Planos
 model Plan {
-  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  name          String   @unique
-  slug          String   @unique
-  description   String?
-  price_sats    Int      @default(0)
-  price_monthly Int?
-  price_yearly  Int?
-  features      Json?    // Array de features do plano
-  is_active     Boolean  @default(true)
-  order         Int      @default(0)
-  stripe_price_id String?
-  has_api_access Boolean @default(false)
-  has_advanced  Boolean  @default(false)
-  has_priority  Boolean  @default(false)
-  max_notifications Int  @default(0)
-  created_at    DateTime @default(now()) @db.Timestamp(6)
-  updated_at    DateTime @default(now()) @db.Timestamp(6)
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name              String   @unique
+  slug              String   @unique
+  description       String?
+  price_sats        Int      @default(0)
+  price_monthly     Int?
+  price_yearly      Int?
+  features          Json?
+  is_active         Boolean  @default(true)
+  order             Int      @default(0)
+  stripe_price_id   String?
+  has_api_access    Boolean  @default(false)
+  has_advanced      Boolean  @default(false)
+  has_priority      Boolean  @default(false)
+  max_notifications Int      @default(0)
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
 
   @@index([slug])
   @@index([is_active])
@@ -391,28 +381,26 @@ model Plan {
   @@map("plans")
 }
 
-// Tabela de Simulações
 model Simulation {
-  id              String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  id              String             @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id         String
   name            String
   description     String?
-  config          Json     // Configuração da simulação
-  status          String   @default("pending") // pending, running, completed, failed
-  simulation_type String?  // backtest, forward_test, paper_trading
+  config          Json
+  status          String             @default("pending")
+  simulation_type String?
   automation_type String?
   price_scenario  String?
   duration        Int?
   initial_price   Float?
-  progress        Float?   @default(0) // Progress percentage
-  started_at      DateTime? @db.Timestamp(6)
-  created_at      DateTime @default(now()) @db.Timestamp(6)
-  updated_at      DateTime @default(now()) @db.Timestamp(6)
-  completed_at    DateTime? @db.Timestamp(6)
-  plan_type       PlanType? // User plan at time of creation
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  results SimulationResult[]
+  progress        Float?             @default(0)
+  started_at      DateTime?          @db.Timestamp(6)
+  created_at      DateTime           @default(now()) @db.Timestamp(6)
+  updated_at      DateTime           @default(now()) @db.Timestamp(6)
+  completed_at    DateTime?          @db.Timestamp(6)
+  plan_type       PlanType?
+  results         SimulationResult[]
+  user            User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([status])
@@ -422,38 +410,34 @@ model Simulation {
   @@map("simulations")
 }
 
-// Tabela de Resultados de Simulação
 model SimulationResult {
-  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  simulation_id String
-  result_data   Json     // Dados do resultado
-  timestamp     DateTime @default(now()) @db.Timestamp(6)
-  action_type   String?
-  success_rate  Float?
-  pnl           Float?
+  id              String     @id @default(dbgenerated("(gen_random_uuid())::text"))
+  simulation_id   String
+  result_data     Json
+  timestamp       DateTime   @default(now()) @db.Timestamp(6)
+  action_type     String?
+  success_rate    Float?
+  pnl             Float?
   account_balance Float?
-  created_at    DateTime @default(now()) @db.Timestamp(6)
-
-  simulation Simulation @relation(fields: [simulation_id], references: [id], onDelete: Cascade)
+  created_at      DateTime   @default(now()) @db.Timestamp(6)
+  simulation      Simulation @relation(fields: [simulation_id], references: [id], onDelete: Cascade)
 
   @@index([simulation_id])
   @@index([timestamp])
   @@map("simulation_results")
 }
 
-// Tabela de Logs de Notificação
 model NotificationLog {
-  id             String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  id              String       @id @default(dbgenerated("(gen_random_uuid())::text"))
   notification_id String
-  user_id        String?
-  status         String   // sent, failed, pending
-  error_message  String?
-  channel        String?
-  sent_at        DateTime? @db.Timestamp(6)
-  created_at     DateTime @default(now()) @db.Timestamp(6)
-
-  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
-  user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  user_id         String?
+  status          String
+  error_message   String?
+  channel         String?
+  sent_at         DateTime?    @db.Timestamp(6)
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  notification    Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
+  user            User?        @relation(fields: [user_id], references: [id])
 
   @@index([notification_id])
   @@index([user_id])
@@ -462,17 +446,16 @@ model NotificationLog {
 }
 
 model SecurityConfig {
-  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  key         String   @unique
-  value       String
-  description String?
-  category    String   @default("authentication")
-  is_active   Boolean  @default(true)
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_by  String?
-
-  updated_by_user User? @relation("SecurityConfigUpdatedBy", fields: [updated_by], references: [id], onDelete: SetNull)
+  id              String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  key             String   @unique
+  value           String
+  description     String?
+  category        String   @default("authentication")
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_by      String?
+  updated_by_user User?    @relation("SecurityConfigUpdatedBy", fields: [updated_by], references: [id])
 
   @@map("SecurityConfig")
 }
@@ -487,8 +470,7 @@ model SecurityAuditLog {
   success    Boolean  @default(true)
   details    Json?
   created_at DateTime @default(now()) @db.Timestamp(6)
-
-  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  user       User?    @relation(fields: [user_id], references: [id])
 
   @@index([user_id])
   @@index([action])
@@ -506,8 +488,7 @@ model RefreshToken {
   user_agent   String?
   created_at   DateTime  @default(now()) @db.Timestamp(6)
   last_used_at DateTime? @db.Timestamp(6)
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([expires_at])
@@ -515,20 +496,18 @@ model RefreshToken {
   @@map("RefreshToken")
 }
 
-// Tabelas do Painel Administrativo
-
 model NotificationTemplate {
   id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
   name        String
   description String?
-  channel     String   // email, sms, push, webhook
-  category    String   // system, marketing, security, trading
-  template    String   // Template content
-  variables   Json?    // Available variables
+  channel     String
+  category    String
+  template    String
+  variables   Json?
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now()) @db.Timestamp(6)
   updated_at  DateTime @default(now()) @db.Timestamp(6)
-  created_by  String?  // Admin user ID
+  created_by  String?
 
   @@index([channel])
   @@index([category])
@@ -537,18 +516,18 @@ model NotificationTemplate {
 }
 
 model SystemReport {
-  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  type        String   // daily, weekly, monthly, custom
-  status      String   // pending, generating, completed, failed
-  title       String
-  description String?
-  config      Json?    // Report configuration
-  file_path   String?  // Path to generated file
-  file_size   Int?     // File size in bytes
+  id           String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  type         String
+  status       String
+  title        String
+  description  String?
+  config       Json?
+  file_path    String?
+  file_size    Int?
   generated_at DateTime? @db.Timestamp(6)
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-  created_by  String?  // Admin user ID
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime  @default(now()) @db.Timestamp(6)
+  created_by   String?
 
   @@index([type])
   @@index([status])
@@ -557,20 +536,19 @@ model SystemReport {
 }
 
 model AuditLog {
-  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id    String?
-  action     String   // create, update, delete, login, logout, etc.
-  resource   String?  // Table or resource name
-  resource_id String? // ID of the affected resource
-  old_values Json?    // Previous values
-  new_values Json?    // New values
-  ip_address String?
-  user_agent String?
-  severity   String   @default("info") // info, warning, error, critical
-  details    Json?    // Additional details
-  created_at DateTime @default(now()) @db.Timestamp(6)
-
-  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id     String?
+  action      String
+  resource    String?
+  resource_id String?
+  old_values  Json?
+  new_values  Json?
+  ip_address  String?
+  user_agent  String?
+  severity    String   @default("info")
+  details     Json?
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  user        User?    @relation(fields: [user_id], references: [id])
 
   @@index([user_id])
   @@index([action])
@@ -582,17 +560,16 @@ model AuditLog {
 
 model RouteRedirect {
   id            String    @id @default(dbgenerated("(gen_random_uuid())::text"))
-  from_path     String    @db.VarChar(500)
+  from_path     String    @unique @db.VarChar(500)
   to_path       String    @db.VarChar(500)
-  redirect_type String    @default("temporary") @db.VarChar(20) // temporary, permanent
+  redirect_type String    @default("temporary") @db.VarChar(20)
   is_active     Boolean   @default(true)
-  description   String?   @db.Text
-  created_by    String?   // Admin user ID
+  description   String?
+  created_by    String?
   created_at    DateTime  @default(now()) @db.Timestamp(6)
   updated_at    DateTime  @default(now()) @db.Timestamp(6)
-  expires_at    DateTime? @db.Timestamp(6) // Optional expiration
+  expires_at    DateTime? @db.Timestamp(6)
 
-  @@unique([from_path])
   @@index([is_active])
   @@index([redirect_type])
   @@index([created_at])
@@ -602,19 +579,18 @@ model RouteRedirect {
 model OrderConfirmation {
   id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
   userId            String
-  orderType         String    // 'trade' | 'update_tp' | 'update_sl' | 'close_position'
-  status            String    @default("pending") // 'pending' | 'confirmed' | 'rejected' | 'expired' | 'cancelled'
-  tradeParams       String?   @db.Text
+  orderType         String
+  status            String    @default("pending")
+  tradeParams       String?
   tradeId           String?
-  updateValue       Decimal?  @db.Decimal(65, 30)
+  updateValue       Decimal?
   confirmationToken String?
   expiresAt         DateTime  @db.Timestamp(6)
   createdAt         DateTime  @default(now()) @db.Timestamp(6)
   confirmedAt       DateTime? @db.Timestamp(6)
   rejectedAt        DateTime? @db.Timestamp(6)
-  rejectionReason   String?   @db.Text
-
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  rejectionReason   String?
+  user              User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([status])
@@ -623,27 +599,26 @@ model OrderConfirmation {
 }
 
 model TradingLog {
-  id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
-  userId      String
-  action      String    // 'trade_created' | 'trade_updated' | 'trade_closed' | 'margin_call' | 'risk_alert' | 'api_error' | 'auth_event'
-  tradeId     String?
-  market      String?
-  side        String?   // 'b' | 's'
-  quantity    Decimal?  @db.Decimal(65, 30)
-  price       Decimal?  @db.Decimal(65, 30)
-  leverage    Int?
-  stoploss    Decimal?  @db.Decimal(65, 30)
-  takeprofit  Decimal?  @db.Decimal(65, 30)
-  oldValue    Decimal?  @db.Decimal(65, 30)
-  newValue    Decimal?  @db.Decimal(65, 30)
-  reason      String?   @db.Text
-  metadata    Json?
-  timestamp   DateTime  @default(now()) @db.Timestamp(6)
-  ipAddress   String?
-  userAgent   String?   @db.Text
-  sessionId   String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId     String
+  action     String
+  tradeId    String?
+  market     String?
+  side       String?
+  quantity   Decimal?
+  price      Decimal?
+  leverage   Int?
+  stoploss   Decimal?
+  takeprofit Decimal?
+  oldValue   Decimal?
+  newValue   Decimal?
+  reason     String?
+  metadata   Json?
+  timestamp  DateTime @default(now()) @db.Timestamp(6)
+  ipAddress  String?
+  userAgent  String?
+  sessionId  String?
+  user       User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([action])
@@ -653,23 +628,31 @@ model TradingLog {
 }
 
 model RateLimitConfig {
-  id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
-  environment       String    // 'development' | 'staging' | 'production' | 'global'
-  endpointType      String    // 'auth' | 'api' | 'trading' | 'notifications' | 'payments' | 'admin' | 'global'
-  maxRequests       Int       // Maximum requests allowed
-  windowMs          Int       // Time window in milliseconds
-  message           String?    @db.Text // Custom error message
-  skipSuccessfulRequests Boolean @default(false) // Skip counting successful requests
-  isActive          Boolean   @default(true) // Whether this config is active
-  createdAt         DateTime  @default(now()) @db.Timestamp(6)
-  updatedAt         DateTime  @default(now()) @db.Timestamp(6)
-  createdBy         String?   // Admin user who created this config
-  updatedBy         String?   // Admin user who last updated this config
-  metadata          Json?     // Additional configuration data
+  id                     String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  environment            String
+  endpointType           String
+  maxRequests            Int
+  windowMs               Int
+  message                String?
+  skipSuccessfulRequests Boolean  @default(false)
+  isActive               Boolean  @default(true)
+  createdAt              DateTime @default(now()) @db.Timestamp(6)
+  updatedAt              DateTime @default(now()) @db.Timestamp(6)
+  createdBy              String?
+  updatedBy              String?
+  metadata               Json?
 
   @@unique([environment, endpointType])
   @@index([environment])
   @@index([endpointType])
   @@index([isActive])
   @@map("rate_limit_configs")
+}
+
+enum PlanType {
+  free
+  basic
+  advanced
+  pro
+  lifetime
 }

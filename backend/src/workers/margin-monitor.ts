@@ -6,7 +6,7 @@ import {
 } from '../services/lnmarkets.service';
 // Import notification queue
 import { notificationQueue } from '../queues/notification.queue';
-import { prisma } from '../lib/prisma';
+import { PrismaClient } from '@prisma/client';
 import { CredentialCacheService } from '../services/credential-cache.service';
 
 // Create Redis connection with BullMQ compatible options
@@ -18,6 +18,9 @@ const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379', {
 
 // Create credential cache service
 const credentialCache = new CredentialCacheService(redis);
+
+// Global Prisma instance - will be set by startPeriodicMonitoring
+let globalPrismaInstance: PrismaClient | null = null;
 
 // Notification queue is imported from shared module
 
@@ -233,6 +236,7 @@ async function executeMarginGuardAction(
 
 // Function to send margin alert notifications
 async function sendMarginAlert(
+  prismaInstance: PrismaClient,
   userId: string,
   alert: { tradeId: string; marginRatio: number; level: string; message: string }
 ) {
@@ -240,7 +244,7 @@ async function sendMarginAlert(
     console.log(`📱 Sending margin alert to user ${userId}: ${alert.message}`);
 
     // Get user notification preferences
-    const notifications = await prisma.notification.findMany({
+    const notifications = await globalPrismaInstance.notification.findMany({
       where: {
         user_id: userId,
         is_enabled: true,
@@ -287,9 +291,9 @@ async function sendMarginAlert(
 }
 
 // Function to get Margin Guard configuration from database
-async function getMarginGuardConfig(userId: string): Promise<MarginGuardConfig | null> {
+async function getMarginGuardConfig(prismaInstance: PrismaClient, userId: string): Promise<MarginGuardConfig | null> {
   try {
-    const automation = await prisma.automation.findFirst({
+    const automation = await globalPrismaInstance.automation.findFirst({
       where: {
         user_id: userId,
         type: 'margin_guard',
@@ -329,9 +333,26 @@ const worker = new Worker(
     console.log(`🔍 MARGIN GUARD - Monitoring margin for user ${userId}`);
     const startTime = Date.now();
 
+    // Check if Prisma instance is available with retry logic
+    let attempts = 0;
+    const maxAttempts = 5;
+    let delay = 500; // ms
+
+    while (!globalPrismaInstance && attempts < maxAttempts) {
+      console.warn(`⚠️ Worker: globalPrismaInstance não está definido (tentativa ${attempts + 1}). Aguardando...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      attempts++;
+    }
+
+    if (!globalPrismaInstance) {
+      console.error('❌ Worker: globalPrismaInstance não está definido após múltiplas tentativas!');
+      console.error('❌ MARGIN GUARD - Prisma instance not available in worker');
+      throw new Error("Prisma Client não está inicializado no worker após retry.");
+    }
+
     try {
       // Get Margin Guard configuration from database
-      const config = await getMarginGuardConfig(userId);
+      const config = await getMarginGuardConfig(globalPrismaInstance, userId);
       if (!config) {
         console.log(`ℹ️  MARGIN GUARD - No configuration found for user ${userId}`);
         return { status: 'skipped', reason: 'no_config' };
@@ -356,7 +377,7 @@ const worker = new Worker(
         console.log(`🔍 Credentials not in cache, fetching from database for user ${userId}`);
         
         // Get user credentials from database
-        const user = await prisma.user.findUnique({
+        const user = await globalPrismaInstance.user.findUnique({
           where: { id: userId },
           select: {
             ln_markets_api_key: true,
@@ -528,7 +549,7 @@ const worker = new Worker(
           console.log(`🚨 Margin ${level.toUpperCase()} detected for trade ${trade.id}: ${marginRatio.toFixed(4)} >= ${thresholdDecimal.toFixed(4)}`);
 
           // Send notification for all alerts (warning and critical)
-          await sendMarginAlert(userId, {
+          await sendMarginAlert(globalPrismaInstance, userId, {
             tradeId: trade.id,
             marginRatio,
             level,
@@ -636,8 +657,23 @@ export async function simulateMarginMonitoring(
     if (!credentials) {
       console.log(`🔍 Credentials not in cache, fetching from database for user ${userId}`);
       
-      // Get user credentials from database
-      const user = await prisma.user.findUnique({
+      // Get user credentials from database with retry logic
+      let attempts = 0;
+      const maxAttempts = 5;
+      let delay = 500; // ms
+
+      while (!globalPrismaInstance && attempts < maxAttempts) {
+        console.warn(`⚠️ SIMULATION: globalPrismaInstance não está definido (tentativa ${attempts + 1}). Aguardando...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        attempts++;
+      }
+
+      if (!globalPrismaInstance) {
+        console.error('❌ SIMULATION: globalPrismaInstance não está definido após múltiplas tentativas!');
+        console.error('❌ SIMULATION - Prisma instance not available');
+        throw new Error("Prisma Client não está inicializado no worker após retry.");
+      }
+      const user = await globalPrismaInstance.user.findUnique({
         where: { id: userId },
         select: {
           ln_markets_api_key: true,
@@ -695,20 +731,29 @@ export async function simulateMarginMonitoring(
 // Periodic monitoring scheduler
 let monitoringInterval: NodeJS.Timeout | null = null;
 
-export function startPeriodicMonitoring() {
+export function startPeriodicMonitoring(prismaInstance: PrismaClient) {
   if (monitoringInterval) {
     console.log('📅 Periodic monitoring already running');
     return;
   }
 
+  // Set global Prisma instance for worker use
+  globalPrismaInstance = prismaInstance;
+  console.log('🔍 Worker: Iniciando monitoramento periódico com a instância fornecida.');
   console.log('📅 MARGIN GUARD - Starting periodic monitoring every 20 seconds');
 
   monitoringInterval = setInterval(async () => {
+    // Check if Prisma instance is available with retry logic
+    if (!globalPrismaInstance) {
+      console.warn('⚠️ Periodic monitoring: globalPrismaInstance não está definido ainda. Aguardando...');
+      return;
+    }
+
     // Cleanup expired services first
     cleanupExpiredServices();
     try {
       // Get all users with active Margin Guard configurations
-      const usersWithMarginGuard = await prisma.automation.findMany({
+      const usersWithMarginGuard = await globalPrismaInstance.automation.findMany({
         where: {
           type: 'margin_guard',
           is_active: true,
@@ -745,7 +790,7 @@ export function startPeriodicMonitoring() {
         const batchPromises = batch.map(async ({ user_id: userId }) => {
           try {
             // Check if user has Margin Guard configured and enabled
-            const config = await getMarginGuardConfig(userId);
+            const config = await getMarginGuardConfig(prismaInstance, userId);
             if (config && config.enabled) {
               await marginCheckQueue.add(
                 'monitor-margin',
