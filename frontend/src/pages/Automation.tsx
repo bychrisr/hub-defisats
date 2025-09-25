@@ -121,15 +121,24 @@ export const Automation = () => {
     loadAutomationData();
   }, []); // <- Executa apenas na montagem
 
-  // Função para detectar mudanças
-  const hasChanges = () => {
-    if (!isDataLoaded || !originalMarginGuard || !originalTpsl) return false;
+  // Função para detectar mudanças individuais por automação
+  // ESCALÁVEL: Adicione novas automações aqui seguindo o mesmo padrão
+  const getChangedAutomations = () => {
+    if (!isDataLoaded || !originalMarginGuard || !originalTpsl) return [];
 
+    const changedAutomations = [];
+
+    // Verificar Margin Guard
     const mgChanged =
       marginGuard.enabled !== originalMarginGuard.enabled ||
       marginGuard.threshold !== originalMarginGuard.threshold ||
       marginGuard.reduction !== originalMarginGuard.reduction;
 
+    if (mgChanged) {
+      changedAutomations.push('margin_guard');
+    }
+
+    // Verificar TP/SL
     const tpslChanged =
       tpsl.enabled !== originalTpsl.enabled ||
       tpsl.takeProfitPercent !== originalTpsl.takeProfitPercent ||
@@ -137,60 +146,96 @@ export const Automation = () => {
       tpsl.trailingEnabled !== originalTpsl.trailingEnabled ||
       tpsl.trailingDistance !== originalTpsl.trailingDistance;
 
-    const result = mgChanged || tpslChanged;
-    console.log('🔍 AUTOMATION - Mudanças detectadas:', result, {
-      marginGuard: { current: marginGuard, original: originalMarginGuard },
-      tpsl: { current: tpsl, original: originalTpsl },
+    if (tpslChanged) {
+      changedAutomations.push('tp_sl');
+    }
+
+    // FUTURAS AUTOMAÇÕES: Adicione aqui seguindo o padrão:
+    // const novaAutomacaoChanged = novaAutomacao.prop !== originalNovaAutomacao.prop;
+    // if (novaAutomacaoChanged) {
+    //   changedAutomations.push('nova_automacao');
+    // }
+
+    console.log('🔍 AUTOMATION - Automações alteradas:', changedAutomations, {
+      marginGuard: { current: marginGuard, original: originalMarginGuard, changed: mgChanged },
+      tpsl: { current: tpsl, original: originalTpsl, changed: tpslChanged },
     });
-    return result;
+
+    return changedAutomations;
   };
 
-  // Função de salvamento
+  // Função para detectar se há mudanças (compatibilidade)
+  const hasChanges = () => {
+    return getChangedAutomations().length > 0;
+  };
+
+  // Função de salvamento seletivo - ESCALÁVEL para futuras automações
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // Salvar Margin Guard
-      const marginGuardAutomation = automations.find((a) => a.type === 'margin_guard');
-      const marginGuardConfig = {
-        margin_threshold: marginGuard.threshold,
-        action: 'add_margin',
-        new_liquidation_distance: marginGuard.reduction,
-        enabled: marginGuard.enabled,
-      };
+      const changedAutomations = getChangedAutomations();
+      console.log('🔍 AUTOMATION - Salvando apenas automações alteradas:', changedAutomations);
 
-      if (marginGuardAutomation) {
-        await updateAutomation(marginGuardAutomation.id, {
-          config: marginGuardConfig,
-          is_active: marginGuard.enabled,
-        });
-      } else {
-        await createAutomation({
-          type: 'margin_guard',
-          config: marginGuardConfig,
-        });
+      // Salvar apenas Margin Guard se foi alterado
+      if (changedAutomations.includes('margin_guard')) {
+        console.log('💾 AUTOMATION - Salvando Margin Guard...');
+        const marginGuardAutomation = automations.find((a) => a.type === 'margin_guard');
+        const marginGuardConfig = {
+          margin_threshold: marginGuard.threshold,
+          action: 'add_margin',
+          new_liquidation_distance: marginGuard.reduction,
+          enabled: marginGuard.enabled,
+        };
+
+        if (marginGuardAutomation) {
+          await updateAutomation(marginGuardAutomation.id, {
+            config: marginGuardConfig,
+            is_active: marginGuard.enabled,
+          });
+        } else {
+          await createAutomation({
+            type: 'margin_guard',
+            config: marginGuardConfig,
+          });
+        }
       }
 
-      // Salvar TP/SL
-      const tpslAutomation = automations.find((a) => a.type === 'tp_sl');
-      const tpslConfig = {
-        take_profit_percentage: tpsl.takeProfitPercent,
-        stop_loss_percentage: tpsl.stopLossPercent,
-        trailing_stop: tpsl.trailingEnabled,
-        trailing_distance: tpsl.trailingDistance,
-        enabled: tpsl.enabled,
-      };
+      // Salvar apenas TP/SL se foi alterado
+      if (changedAutomations.includes('tp_sl')) {
+        console.log('💾 AUTOMATION - Salvando TP/SL...');
+        const tpslAutomation = automations.find((a) => a.type === 'tp_sl');
+        const tpslConfig = {
+          take_profit_percentage: tpsl.takeProfitPercent,
+          stop_loss_percentage: tpsl.stopLossPercent,
+          trailing_stop: tpsl.trailingEnabled,
+          trailing_distance: tpsl.trailingDistance,
+          enabled: tpsl.enabled,
+        };
 
-      if (tpslAutomation) {
-        await updateAutomation(tpslAutomation.id, {
-          config: tpslConfig,
-          is_active: tpsl.enabled,
-        });
-      } else {
-        await createAutomation({
-          type: 'tp_sl',
-          config: tpslConfig,
-        });
+        if (tpslAutomation) {
+          await updateAutomation(tpslAutomation.id, {
+            config: tpslConfig,
+            is_active: tpsl.enabled,
+          });
+        } else {
+          await createAutomation({
+            type: 'tp_sl',
+            config: tpslConfig,
+          });
+        }
       }
+
+      // FUTURAS AUTOMAÇÕES: Adicione aqui seguindo o padrão:
+      // if (changedAutomations.includes('nova_automacao')) {
+      //   console.log('💾 AUTOMATION - Salvando Nova Automação...');
+      //   const novaAutomacaoAutomation = automations.find((a) => a.type === 'nova_automacao');
+      //   const novaAutomacaoConfig = { /* configurações */ };
+      //   if (novaAutomacaoAutomation) {
+      //     await updateAutomation(novaAutomacaoAutomation.id, { config: novaAutomacaoConfig, is_active: novaAutomacao.enabled });
+      //   } else {
+      //     await createAutomation({ type: 'nova_automacao', config: novaAutomacaoConfig });
+      //   }
+      // }
 
       // SALVAMENTO NO BANCO CONCLUÍDO COM SUCESSO
       console.log('✅ AUTOMATION - Salvamento no banco concluído com sucesso.');
@@ -198,9 +243,17 @@ export const Automation = () => {
       // ATUALIZAR ESTADO LOCAL COM DADOS DO BANCO (Mini Refresh)
       await loadAutomationData(); // <- CHAVE!
 
-      // Opcional: Mostrar toast de sucesso
+      // Mostrar toast de sucesso específico
+      const savedAutomations = changedAutomations.map(type => {
+        switch (type) {
+          case 'margin_guard': return 'Margin Guard';
+          case 'tp_sl': return 'Take Profit / Stop Loss';
+          default: return type;
+        }
+      }).join(', ');
+
       toast.success('Configurações salvas com sucesso!', {
-        description: 'Suas configurações de automação foram salvas e estão ativas.',
+        description: `Automações atualizadas: ${savedAutomations}`,
         duration: 4000,
       });
     } catch (error: any) {
