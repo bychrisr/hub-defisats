@@ -30,13 +30,16 @@ import { useForm } from 'react-hook-form';
 import { LanguageCurrencySelector } from '@/components/common/LanguageCurrencySelector';
 import { CurrencyConverter } from '@/components/common/CurrencyConverter';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useLNMarketsConnectionStatus } from '@/hooks/useLNMarketsConnectionStatus';
 
 export const Settings = () => {
   const { t } = useTranslation();
   const [showApiKey, setShowApiKey] = useState(false);
   const [showSecretKey, setShowSecretKey] = useState(false);
-  const [isConnected, setIsConnected] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // LN Markets connection status
+  const { isConnected, isLoading: isCheckingConnection, error: connectionError, hasCredentials } = useLNMarketsConnectionStatus();
 
   const { register, handleSubmit } = useForm();
 
@@ -163,12 +166,19 @@ export const Settings = () => {
                 </div>
                 <Badge
                   className={
-                    isConnected
+                    isCheckingConnection
+                      ? 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700'
+                      : isConnected
                       ? 'bg-success/20 text-success border-success/30'
                       : 'bg-destructive/20 text-destructive border-destructive/30'
                   }
                 >
-                  {isConnected ? (
+                  {isCheckingConnection ? (
+                    <>
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      Verificando...
+                    </>
+                  ) : isConnected ? (
                     <>
                       <CheckCircle className="mr-1 h-3 w-3" />
                       Conectado
@@ -176,7 +186,7 @@ export const Settings = () => {
                   ) : (
                     <>
                       <AlertTriangle className="mr-1 h-3 w-3" />
-                      Desconectado
+                      {hasCredentials ? 'Credenciais Inválidas' : 'Desconectado'}
                     </>
                   )}
                 </Badge>

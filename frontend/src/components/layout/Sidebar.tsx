@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useLNMarketsConnectionStatus } from '@/hooks/useLNMarketsConnectionStatus';
 import {
   Home,
   Settings,
@@ -72,6 +73,7 @@ const navigation = [
 
 export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const location = useLocation();
+  const { isConnected, isLoading: isCheckingConnection } = useLNMarketsConnectionStatus();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -134,11 +136,31 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
         {!collapsed && (
           <div className="border-t border-border p-4">
             <div className="flex items-center space-x-3">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <div className="text-xs text-muted-foreground">
-                <p className="font-medium">Connected</p>
-                <p>LN Markets API</p>
-              </div>
+              {isCheckingConnection ? (
+                <>
+                  <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-medium">Checking...</p>
+                    <p>LN Markets API</p>
+                  </div>
+                </>
+              ) : isConnected ? (
+                <>
+                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-medium">Connected</p>
+                    <p>LN Markets API</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="h-2 w-2 rounded-full bg-red-500" />
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-medium">Disconnected</p>
+                    <p>LN Markets API</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

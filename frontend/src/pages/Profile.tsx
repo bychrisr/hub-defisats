@@ -51,6 +51,7 @@ import {
 import { useAuthStore } from '@/stores/auth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
+import { useLNMarketsConnectionStatus } from '@/hooks/useLNMarketsConnectionStatus';
 import { api } from '@/lib/api';
 import ImageUpload from '@/components/ui/ImageUpload';
 
@@ -76,6 +77,9 @@ type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function Profile() {
   const [activeSection, setActiveSection] = useState('profile');
+  
+  // LN Markets connection status
+  const { isConnected, isLoading: isCheckingConnection, error: connectionError, hasCredentials } = useLNMarketsConnectionStatus();
 
   // Função para obter as cores do plano
   const getPlanColors = (planType: string) => {
@@ -567,14 +571,42 @@ export default function Profile() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                Connected
-              </span>
+              {isCheckingConnection ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                    Checking...
+                  </span>
+                </>
+              ) : isConnected ? (
+                <>
+                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                    Connected
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                  <span className="text-xs text-red-600 dark:text-red-400 font-medium">
+                    {hasCredentials ? 'Invalid Credentials' : 'Not Configured'}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </CardHeader>
         <CardContent>
+          {/* Connection Error Alert */}
+          {!isConnected && hasCredentials && connectionError && (
+            <Alert className="mb-4 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <AlertDescription className="text-red-800 dark:text-red-200">
+                {connectionError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* API Key Card */}
@@ -699,13 +731,6 @@ export default function Profile() {
                 <span>Your credentials are encrypted and stored securely</span>
               </div>
               <div className="flex gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                  className="border-gray-300 dark:border-gray-600"
-                >
-                  Test Connection
-                      </Button>
                 <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

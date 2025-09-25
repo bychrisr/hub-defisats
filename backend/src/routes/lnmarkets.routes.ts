@@ -375,5 +375,110 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       });
     }
   });
+
+  // POST /api/lnmarkets/validate-credentials - Validate LN Markets credentials
+  fastify.post('/validate-credentials', {
+    preHandler: [authMiddleware],
+    schema: {
+      description: 'Validate LN Markets API credentials',
+      tags: ['LN Markets'],
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                isValid: { type: 'boolean' },
+                message: { type: 'string' }
+              }
+            }
+          }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const userId = (request as any).user?.id;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: 'UNAUTHORIZED',
+          message: 'User not authenticated'
+        });
+      }
+
+      // Get user credentials
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          ln_markets_api_key: true,
+          ln_markets_api_secret: true,
+          ln_markets_passphrase: true,
+        }
+      });
+
+      if (!user || !user.ln_markets_api_key || !user.ln_markets_api_secret || !user.ln_markets_passphrase) {
+        return reply.status(400).send({
+          success: false,
+          error: 'MISSING_CREDENTIALS',
+          message: 'LN Markets credentials not configured'
+        });
+      }
+
+      // Create LN Markets service with user credentials
+      const credentials = {
+        apiKey: user.ln_markets_api_key,
+        apiSecret: user.ln_markets_api_secret,
+        passphrase: user.ln_markets_passphrase,
+        isTestnet: process.env.NODE_ENV !== 'production'
+      };
+
+      const lnmarketsService = new LNMarketsAPIService(credentials, {
+        info: () => {},
+        error: () => {},
+        warn: () => {},
+        debug: () => {}
+      } as any);
+
+      // Validate credentials
+      const isValid = await lnmarketsService.validateCredentials();
+
+      return reply.send({
+        success: true,
+        data: {
+          isValid,
+          message: isValid ? 'Credentials are valid' : 'Invalid credentials'
+        }
+      });
+
+    } catch (error: any) {
+      console.error('[LNMarkets] Error validating credentials:', error);
+      
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to validate credentials'
+      });
+    }
+  });
 }
 
