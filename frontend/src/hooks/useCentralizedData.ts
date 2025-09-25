@@ -114,19 +114,30 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
       let credentialError = null;
       if (balanceResponse.status === 'rejected') {
         const errorData = balanceResponse.reason?.response?.data;
+        const status = balanceResponse.reason?.response?.status;
         if (errorData?.message?.includes('credentials') || 
             errorData?.message?.includes('authentication') ||
-            errorData?.message?.includes('unauthorized')) {
+            errorData?.message?.includes('unauthorized') ||
+            status === 401) {
           credentialError = 'Invalid LN Markets credentials';
         }
       }
       if (positionsResponse.status === 'rejected') {
         const errorData = positionsResponse.reason?.response?.data;
+        const status = positionsResponse.reason?.response?.status;
         if (errorData?.message?.includes('credentials') || 
             errorData?.message?.includes('authentication') ||
-            errorData?.message?.includes('unauthorized')) {
+            errorData?.message?.includes('unauthorized') ||
+            status === 401) {
           credentialError = 'Invalid LN Markets credentials';
         }
+      }
+
+      // Also check if we got empty/null data when we should have data
+      // This indicates invalid credentials even if API doesn't return 401
+      if (!credentialError && hasCredentials && (!userBalance && !userPositions.length)) {
+        // If we have credentials but no data, likely invalid credentials
+        credentialError = 'Invalid LN Markets credentials';
       }
 
       const marketIndex = marketResponse.status === 'fulfilled' && marketResponse.value.data.success 
