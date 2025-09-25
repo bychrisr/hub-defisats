@@ -255,13 +255,13 @@ export class RateLimitConfigService {
     try {
       const defaultConfigs: RateLimitConfigData[] = [
         // Development
-        { environment: 'development', endpointType: 'auth', maxRequests: 50, windowMs: 5 * 60 * 1000, message: 'Too many authentication attempts in development. Please wait 5 minutes.' },
-        { environment: 'development', endpointType: 'api', maxRequests: 1000, windowMs: 60 * 1000, message: 'Too many requests in development. Please slow down.' },
-        { environment: 'development', endpointType: 'trading', maxRequests: 2000, windowMs: 60 * 1000, message: 'Too many trading requests in development. Please slow down.' },
-        { environment: 'development', endpointType: 'notifications', maxRequests: 300, windowMs: 60 * 1000, message: 'Too many notification requests in development. Please slow down.' },
-        { environment: 'development', endpointType: 'payments', maxRequests: 100, windowMs: 60 * 1000, message: 'Too many payment requests in development. Please slow down.' },
-        { environment: 'development', endpointType: 'admin', maxRequests: 500, windowMs: 60 * 1000, message: 'Too many admin requests in development. Please slow down.' },
-        { environment: 'development', endpointType: 'global', maxRequests: 2000, windowMs: 60 * 1000, message: 'Global rate limit exceeded in development.' },
+        { environment: 'development', endpointType: 'auth', maxRequests: 10000, windowMs: 1 * 60 * 1000, message: 'Too many authentication attempts in development. Please wait 1 minute.' },
+        { environment: 'development', endpointType: 'api', maxRequests: 100000, windowMs: 60 * 1000, message: 'Too many requests in development. Please slow down.' },
+        { environment: 'development', endpointType: 'trading', maxRequests: 100000, windowMs: 60 * 1000, message: 'Too many trading requests in development. Please slow down.' },
+        { environment: 'development', endpointType: 'notifications', maxRequests: 50000, windowMs: 60 * 1000, message: 'Too many notification requests in development. Please slow down.' },
+        { environment: 'development', endpointType: 'payments', maxRequests: 10000, windowMs: 60 * 1000, message: 'Too many payment requests in development. Please slow down.' },
+        { environment: 'development', endpointType: 'admin', maxRequests: 50000, windowMs: 60 * 1000, message: 'Too many admin requests in development. Please slow down.' },
+        { environment: 'development', endpointType: 'global', maxRequests: 200000, windowMs: 60 * 1000, message: 'Global rate limit exceeded in development.' },
 
         // Staging
         { environment: 'staging', endpointType: 'auth', maxRequests: 20, windowMs: 10 * 60 * 1000, message: 'Too many authentication attempts in staging. Please wait 10 minutes.' },

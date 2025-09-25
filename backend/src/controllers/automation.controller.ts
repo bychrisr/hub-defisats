@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { AutomationService } from '../services/automation.service';
+import { AutomationLoggerService } from '../services/automation-logger.service';
 import { PrismaClient } from '@prisma/client';
 import { AutomationType } from '../types/api-contracts';
 
@@ -27,9 +28,11 @@ const AutomationParamsSchema = z.object({
 
 export class AutomationController {
   private automationService: AutomationService;
+  private automationLogger: AutomationLoggerService;
 
   constructor(prisma: PrismaClient) {
     this.automationService = new AutomationService(prisma);
+    this.automationLogger = new AutomationLoggerService(prisma);
   }
 
   /**
@@ -174,6 +177,20 @@ export class AutomationController {
       console.log('🔍 AUTOMATION CONTROLLER - Parsed body:', JSON.stringify(body, null, 2));
       console.log('🔍 AUTOMATION CONTROLLER - Parsed config:', JSON.stringify(body.config, null, 2));
 
+      // Get current automation state for logging
+      const currentAutomation = await this.automationService.getAutomation({
+        automationId: params.id,
+        userId: user?.id || '',
+      });
+
+      if (!currentAutomation) {
+        return reply.status(404).send({
+          success: false,
+          error: 'NOT_FOUND',
+          message: 'Automation not found',
+        });
+      }
+
       // Build updates object only with defined values
       const updates: { config?: any; is_active?: boolean } = {};
       if (body.is_active !== undefined) {
@@ -195,6 +212,47 @@ export class AutomationController {
           error: 'NOT_FOUND',
           message: 'Automation not found',
         });
+      }
+
+      // Log state changes
+      try {
+        const hasStateChange = body.is_active !== undefined && body.is_active !== currentAutomation.is_active;
+        const hasConfigChange = body.config !== undefined && JSON.stringify(body.config) !== JSON.stringify(currentAutomation.config);
+
+        if (hasStateChange) {
+          await this.automationLogger.logStateChange({
+            userId: user?.id || '',
+            automationId: params.id,
+            automationType: currentAutomation.type,
+            oldState: currentAutomation.is_active,
+            newState: body.is_active!,
+            changeType: body.is_active ? 'activation' : 'deactivation',
+            ipAddress: request.ip,
+            userAgent: request.headers['user-agent'],
+            reason: 'User toggled automation state'
+          });
+        }
+
+        if (hasConfigChange) {
+          await this.automationLogger.logStateChange({
+            userId: user?.id || '',
+            automationId: params.id,
+            automationType: currentAutomation.type,
+            oldState: currentAutomation.is_active,
+            newState: automation.is_active,
+            changeType: 'config_update',
+            configChanges: {
+              old: currentAutomation.config,
+              new: body.config
+            },
+            ipAddress: request.ip,
+            userAgent: request.headers['user-agent'],
+            reason: 'User updated automation configuration'
+          });
+        }
+      } catch (logError) {
+        console.error('❌ AUTOMATION CONTROLLER - Failed to log state change:', logError);
+        // Don't fail the request if logging fails
       }
 
       // Fix: manually serialize config field for update response
@@ -228,6 +286,86 @@ export class AutomationController {
         success: false,
         error: 'INTERNAL_ERROR',
         message: 'Failed to update automation',
+      });
+    }
+  }
+
+  /**
+   * Get automation state change history
+   */
+  async getAutomationStateHistory(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const user = (request as any).user;
+      const { automationId, limit = '50' } = request.query as {
+        automationId?: string;
+        limit?: string;
+      };
+
+      const history = await this.automationLogger.getStateChangeHistory(
+        user?.id || '',
+        automationId,
+        parseInt(limit, 10)
+      );
+
+      const stats = await this.automationLogger.getStateChangeStats(
+        user?.id || '',
+        automationId
+      );
+
+      return reply.send({
+        success: true,
+        data: {
+          history,
+          statistics: stats
+        }
+      });
+
+    } catch (error) {
+      console.error('Get automation state history error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to get automation state history',
+      });
+    }
+  }
+
+  /**
+   * Get automation execution history
+   */
+  async getAutomationExecutionHistory(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const user = (request as any).user;
+      const { automationId, limit = '50' } = request.query as {
+        automationId?: string;
+        limit?: string;
+      };
+
+      const history = await this.automationLogger.getExecutionHistory(
+        user?.id || '',
+        automationId,
+        parseInt(limit, 10)
+      );
+
+      const stats = await this.automationLogger.getExecutionStats(
+        user?.id || '',
+        automationId
+      );
+
+      return reply.send({
+        success: true,
+        data: {
+          history,
+          statistics: stats
+        }
+      });
+
+    } catch (error) {
+      console.error('Get automation execution history error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to get automation execution history',
       });
     }
   }

@@ -11,53 +11,53 @@ export class DevelopmentRateLimiter {
    */
   static createDevelopmentConfig() {
     const config = {
-      // Auth endpoints - muito mais permissivo para desenvolvimento
+      // Auth endpoints - ABSURDAMENTE permissivo para desenvolvimento
       auth: {
-        windowMs: 5 * 60 * 1000, // 5 minutos (vs 15 minutos em produção)
-        max: 50, // 50 tentativas por 5 minutos (vs 5 tentativas por 15 minutos)
-        message: 'Too many authentication attempts in development. Please wait 5 minutes.',
+        windowMs: 1 * 60 * 1000, // 1 minuto
+        max: 10000, // 10000 tentativas por minuto (absurdo para desenvolvimento)
+        message: 'Too many authentication attempts in development. Please wait 1 minute.',
         skipSuccessfulRequests: true, // Não contar tentativas bem-sucedidas
       },
 
-      // API geral - mais permissivo
+      // API geral - ABSURDAMENTE permissivo
       api: {
         windowMs: 60 * 1000, // 1 minuto
-        max: 1000, // 1000 requests por minuto (vs 100 em produção)
+        max: 100000, // 100000 requests por minuto (absurdo para desenvolvimento)
         message: 'Too many requests in development. Please slow down.',
       },
 
-      // Trading endpoints - muito mais permissivo
+      // Trading endpoints - ABSURDAMENTE permissivo
       trading: {
         windowMs: 60 * 1000, // 1 minuto
-        max: 2000, // 2000 requests por minuto (vs 200 em produção)
+        max: 100000, // 100000 requests por minuto (absurdo para desenvolvimento)
         message: 'Too many trading requests in development. Please slow down.',
       },
 
-      // Notification endpoints
+      // Notification endpoints - ABSURDAMENTE permissivo
       notifications: {
         windowMs: 60 * 1000, // 1 minuto
-        max: 300, // 300 notifications por minuto (vs 30 em produção)
+        max: 50000, // 50000 notifications por minuto (absurdo para desenvolvimento)
         message: 'Too many notification requests in development. Please slow down.',
       },
 
-      // Payment endpoints - mais permissivo para testes
+      // Payment endpoints - ABSURDAMENTE permissivo para testes
       payments: {
         windowMs: 60 * 1000, // 1 minuto
-        max: 100, // 100 payment requests por minuto (vs 10 em produção)
+        max: 10000, // 10000 payment requests por minuto (absurdo para desenvolvimento)
         message: 'Too many payment requests in development. Please slow down.',
       },
 
-      // Admin endpoints
+      // Admin endpoints - ABSURDAMENTE permissivo
       admin: {
         windowMs: 60 * 1000, // 1 minuto
-        max: 500, // 500 admin requests por minuto (vs 50 em produção)
+        max: 50000, // 50000 admin requests por minuto (absurdo para desenvolvimento)
         message: 'Too many admin requests in development. Please slow down.',
       },
 
-      // Global rate limiter para desenvolvimento
+      // Global rate limiter para desenvolvimento - ABSURDAMENTE permissivo
       global: {
         windowMs: 60 * 1000, // 1 minuto
-        max: 2000, // 2000 requests por minuto (vs 1000 em produção)
+        max: 200000, // 200000 requests por minuto (absurdo para desenvolvimento)
         message: 'Global rate limit exceeded in development.',
       },
     };

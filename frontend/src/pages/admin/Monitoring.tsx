@@ -25,7 +25,8 @@ import {
   Loader2,
   Monitor,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -36,6 +37,22 @@ interface MetricAverages {
   average_24h: number;
   trend: 'improving' | 'stable' | 'degrading';
   status: 'good' | 'warning' | 'critical';
+}
+
+interface MarginGuardReport {
+  total_users: number;
+  active_automations: number;
+  recent_actions: Array<{
+    user_id: string;
+    action: string;
+    timestamp: string;
+    status: 'success' | 'error';
+    details: string;
+  }>;
+  error_count_24h: number;
+  success_rate: number;
+  last_execution: string;
+  worker_status: 'running' | 'stopped' | 'error';
 }
 
 interface MonitoringData {
@@ -65,6 +82,7 @@ interface MonitoringData {
     issues: string[];
     recommendations: string[];
   };
+  margin_guard_report?: MarginGuardReport;
 }
 
 export default function Monitoring() {
@@ -527,6 +545,124 @@ export default function Monitoring() {
                   </div>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/10 backdrop-blur-sm">
                     <Wifi className="h-8 w-8 text-green-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Margin Guard Reports */}
+          {monitoringData?.margin_guard_report && (
+            <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                    <Shield className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-text-primary">Margin Guard Reports</CardTitle>
+                    <CardDescription className="text-text-secondary">
+                      Monitoramento detalhado do sistema Margin Guard
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Status Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Users className="h-5 w-5 text-blue-500" />
+                      <span className="text-sm font-medium text-text-secondary">Total Users</span>
+                    </div>
+                    <p className="text-2xl font-bold text-text-primary">{monitoringData.margin_guard_report.total_users}</p>
+                  </div>
+                  
+                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Activity className="h-5 w-5 text-green-500" />
+                      <span className="text-sm font-medium text-text-secondary">Active Automations</span>
+                    </div>
+                    <p className="text-2xl font-bold text-text-primary">{monitoringData.margin_guard_report.active_automations}</p>
+                  </div>
+                  
+                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BarChart3 className="h-5 w-5 text-purple-500" />
+                      <span className="text-sm font-medium text-text-secondary">Success Rate</span>
+                    </div>
+                    <p className="text-2xl font-bold text-text-primary">{monitoringData.margin_guard_report.success_rate}%</p>
+                  </div>
+                  
+                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Clock className="h-5 w-5 text-orange-500" />
+                      <span className="text-sm font-medium text-text-secondary">Last Execution</span>
+                    </div>
+                    <p className="text-sm font-bold text-text-primary">
+                      {new Date(monitoringData.margin_guard_report.last_execution).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Worker Status */}
+                <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-text-primary">Worker Status</h4>
+                    <Badge 
+                      className={cn(
+                        "text-xs",
+                        monitoringData.margin_guard_report.worker_status === 'running' ? "bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25" :
+                        monitoringData.margin_guard_report.worker_status === 'error' ? "bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25" :
+                        "bg-yellow-500 text-white hover:bg-yellow-600 shadow-lg shadow-yellow-500/25"
+                      )}
+                    >
+                      {monitoringData.margin_guard_report.worker_status === 'running' ? 'Running' :
+                       monitoringData.margin_guard_report.worker_status === 'error' ? 'Error' : 'Stopped'}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-secondary">Errors (24h):</span>
+                      <span className="text-text-primary font-medium">{monitoringData.margin_guard_report.error_count_24h}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Actions */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-text-primary">Recent Actions</h4>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {monitoringData.margin_guard_report.recent_actions.map((action, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 rounded-lg backdrop-blur-sm bg-background/50 border-border/50">
+                        <div className="flex items-center gap-3">
+                          {action.status === 'success' ? (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-500" />
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-text-primary">{action.action}</p>
+                            <p className="text-xs text-text-secondary">User: {action.user_id}</p>
+                            <p className="text-xs text-text-secondary">{action.details}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-text-secondary">
+                            {new Date(action.timestamp).toLocaleString()}
+                          </p>
+                          <Badge 
+                            className={cn(
+                              "text-xs mt-1",
+                              action.status === 'success' ? "bg-green-500 text-white hover:bg-green-600" :
+                              "bg-red-500 text-white hover:bg-red-600"
+                            )}
+                          >
+                            {action.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>

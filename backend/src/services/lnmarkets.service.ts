@@ -367,8 +367,9 @@ export class LNMarketsService {
   async addMargin(positionId: string, amount: number): Promise<any> {
     try {
       const response = await this.client.post(
-        `/futures/position/${positionId}/add-margin`,
+        `/futures/add-margin`,
         {
+          id: positionId,
           amount: amount,
         }
       );

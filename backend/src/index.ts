@@ -3,6 +3,7 @@ import { config } from './config/env';
 import { getPrisma } from './lib/prisma';
 import { authRoutes } from './routes/auth.routes';
 import { automationRoutes } from './routes/automation.routes';
+import { automationReportsRoutes } from './routes/automation-reports.routes';
 import { tradeLogRoutes } from './routes/trade-log.routes';
 import { profileRoutes } from './routes/profile.routes';
 import { lnmarketsRoutes } from './routes/lnmarkets.routes';
@@ -151,9 +152,9 @@ async function registerPlugins() {
   console.log('✅ Helmet plugin registered');
 
   console.log('🔌 Registering rate limiting plugin...');
-  // Rate limiting - very permissive for development
+  // Rate limiting - ABSURDAMENTE permissive for development
   await fastify.register(rateLimit, {
-    max: config.isDevelopment ? 10000 : 1000, // 10000 requests per minute in dev, 1000 in prod
+    max: config.isDevelopment ? 1000000 : 1000, // 1000000 requests per minute in dev (absurdo), 1000 in prod
     timeWindow: '1 minute',
     errorResponseBuilder: (request, context) => ({
       code: 429,
@@ -505,6 +506,10 @@ async function registerRoutes() {
   
   await fastify.register(automationRoutes, { prefix: '/api' });
   console.log('✅ Automation routes registered');
+
+  // Automation Reports routes
+  await fastify.register(automationReportsRoutes, { prefix: '/api' });
+  console.log('✅ Automation Reports routes registered');
 
   // Trade log routes
   await fastify.register(tradeLogRoutes, { prefix: '/api' });

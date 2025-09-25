@@ -8,6 +8,7 @@ import {
 import { notificationQueue } from '../queues/notification.queue';
 import { PrismaClient } from '@prisma/client';
 import { CredentialCacheService } from '../services/credential-cache.service';
+import { AutomationLoggerService } from '../services/automation-logger.service';
 
 // Create Redis connection with BullMQ compatible options
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379', {
@@ -168,23 +169,133 @@ async function executeMarginGuardAction(
         break;
 
       case 'add_margin':
-        if (config.add_margin_amount) {
-          console.log(`💰 MARGIN GUARD - Adding ${config.add_margin_amount} sats margin to position ${trade.id} for user ${userId}`);
+        // Calculate amount to add based on percentage of current margin
+        const currentMargin = trade.margin || 0;
+        const marginIncreasePercentage = config.reduce_percentage || 20; // Use reduce_percentage as margin increase percentage
+        const amountToAdd = Math.floor(currentMargin * (marginIncreasePercentage / 100));
+        
+        // Get trigger data for logging
+        const entryPrice = trade.entry_price || 0;
+        const liquidationPrice = trade.liquidation_price || 0;
+        const distanceToLiquidation = Math.abs(entryPrice - liquidationPrice);
+        const activationDistance = distanceToLiquidation * (1 - config.margin_threshold / 100);
+        const triggerPrice = trade.side === 'b' 
+          ? liquidationPrice + activationDistance
+          : liquidationPrice - activationDistance;
+        
+        // Get current BTC price for logging
+        let currentPrice = 0;
+        try {
+          currentPrice = await lnMarkets.getMarketPrice('btcusd');
+        } catch (error) {
+          console.warn('⚠️ MARGIN GUARD - Failed to get current price for logging');
+        }
+        
+        if (amountToAdd > 0) {
+          console.log(`💰 MARGIN GUARD - Adding ${amountToAdd} sats (${marginIncreasePercentage}% of ${currentMargin} sats) to position ${trade.id} for user ${userId}`);
           try {
-            await lnMarkets.addMargin(trade.id, config.add_margin_amount);
-            console.log(`✅ MARGIN GUARD - Successfully added margin to position ${trade.id} for user ${userId}`);
+            const addMarginResponse = await lnMarkets.addMargin(trade.id, amountToAdd);
+            console.log(`✅ MARGIN GUARD - Successfully added ${amountToAdd} sats margin to position ${trade.id} for user ${userId}`);
+            
+            // Log execution details
+            if (globalPrismaInstance) {
+              try {
+                const automationLogger = new AutomationLoggerService(globalPrismaInstance);
+                await automationLogger.logExecution({
+                  userId,
+                  automationId: 'margin-guard-auto', // This should be the actual automation ID
+                  automationType: 'margin_guard',
+                  tradeId: trade.id,
+                  action: 'add_margin',
+                  status: 'success',
+                  triggerData: {
+                    currentPrice,
+                    triggerPrice,
+                    distanceToLiquidation,
+                    marginThreshold: config.margin_threshold,
+                    positionSide: trade.side,
+                    entryPrice,
+                    liquidationPrice,
+                    currentMargin
+                  },
+                  executionResult: {
+                    marginAdded: amountToAdd,
+                    newMarginAmount: currentMargin + amountToAdd,
+                    apiResponse: addMarginResponse
+                  },
+                  executionTime: Date.now() - actionStartTime
+                });
+              } catch (logError) {
+                console.error('❌ MARGIN GUARD - Failed to log execution:', logError);
+              }
+            }
+            
+            // Queue success notification
+            try {
+              await marginCheckQueue.add(
+                'automation-execution',
+                {
+                  userId,
+                  automationId: 'margin-guard-auto',
+                  action: 'margin_guard_add_margin',
+                  tradeId: trade.id,
+                  amountAdded: amountToAdd,
+                  marginIncreasePercentage: marginIncreasePercentage,
+                },
+                {
+                  priority: 10,
+                  removeOnComplete: 50,
+                  removeOnFail: 50,
+                }
+              );
+              console.log(`✅ MARGIN GUARD - Notification queued for margin addition to position ${trade.id}`);
+            } catch (error: any) {
+              console.error(`❌ MARGIN GUARD - Failed to queue notification for margin addition to position ${trade.id}:`, error);
+            }
           } catch (error: any) {
             console.error(`❌ MARGIN GUARD - Failed to add margin to position ${trade.id} for user ${userId}:`, {
               error: error.message,
               status: error.response?.status,
-              margin_amount: config.add_margin_amount,
-              trade_id: trade.id
+              margin_amount: amountToAdd,
+              trade_id: trade.id,
+              current_margin: currentMargin,
+              increase_percentage: marginIncreasePercentage
             });
+            
+            // Log execution error
+            if (globalPrismaInstance) {
+              try {
+                const automationLogger = new AutomationLoggerService(globalPrismaInstance);
+                await automationLogger.logExecution({
+                  userId,
+                  automationId: 'margin-guard-auto',
+                  automationType: 'margin_guard',
+                  tradeId: trade.id,
+                  action: 'add_margin',
+                  status: 'error',
+                  triggerData: {
+                    currentPrice,
+                    triggerPrice,
+                    distanceToLiquidation,
+                    marginThreshold: config.margin_threshold,
+                    positionSide: trade.side,
+                    entryPrice,
+                    liquidationPrice,
+                    currentMargin
+                  },
+                  errorMessage: error.message,
+                  executionTime: Date.now() - actionStartTime
+                });
+              } catch (logError) {
+                console.error('❌ MARGIN GUARD - Failed to log execution error:', logError);
+              }
+            }
+            
             throw error;
           }
         } else {
-          console.warn(`⚠️  MARGIN GUARD - Add margin amount not configured for user ${userId}`);
-          throw new Error('Add margin amount not configured');
+          console.warn(`⚠️  MARGIN GUARD - Calculated amount to add is 0 or negative for user ${userId} (current margin: ${currentMargin}, percentage: ${marginIncreasePercentage}%)`);
+          throw new Error('Calculated margin amount is invalid');
         }
         break;
 
@@ -393,7 +504,7 @@ const worker = new Worker(
 
         // Import auth service for decryption
         const { AuthService } = await import('../services/auth.service');
-        const authService = new AuthService(prisma, {} as any);
+        const authService = new AuthService(globalPrismaInstance, {} as any);
         
         // Decrypt credentials using AuthService with retry logic
         let decryptionRetries = 0;
@@ -495,71 +606,86 @@ const worker = new Worker(
         message: string;
       }> = [];
 
-      // Calculate margin ratio for each trade
-      console.log(`🔍 MARGIN GUARD - Calculating margin ratios for user ${userId}`);
+      // Get current BTC price for distance calculation
+      console.log(`🔍 MARGIN GUARD - Fetching current BTC price for user ${userId}`);
+      let currentPrice: number;
+      try {
+        currentPrice = await lnMarkets.getMarketPrice('btcusd');
+        console.log(`📊 MARGIN GUARD - Current BTC price: $${currentPrice}`);
+      } catch (error: any) {
+        console.error(`❌ MARGIN GUARD - Failed to get current price for user ${userId}:`, error);
+        return { status: 'error', reason: 'price_fetch_failed' };
+      }
+
+      // Calculate liquidation distance for each trade
+      console.log(`🔍 MARGIN GUARD - Calculating liquidation distances for user ${userId}`);
       for (const trade of runningTrades) {
-        const maintenanceMargin = trade.maintenance_margin || 0;
+        const entryPrice = trade.entry_price || 0;
+        const liquidationPrice = trade.liquidation_price || 0;
         const margin = trade.margin || 0;
-        const pl = trade.pl || 0;
 
         console.log(`📊 MARGIN GUARD - Trade ${trade.id} data:`, {
-          maintenance_margin: maintenanceMargin,
+          entry_price: entryPrice,
+          liquidation_price: liquidationPrice,
+          current_price: currentPrice,
           margin: margin,
-          pl: pl,
-          entry_price: trade.entry_price,
-          liquidation_price: trade.liquidation_price
+          side: trade.side
         });
 
-        if (maintenanceMargin === 0) {
-          console.warn(`⚠️  MARGIN GUARD - Trade ${trade.id} has zero maintenance margin`);
+        if (entryPrice === 0 || liquidationPrice === 0) {
+          console.warn(`⚠️  MARGIN GUARD - Trade ${trade.id} has invalid prices`);
           continue;
         }
 
-        const marginRatio = maintenanceMargin / (margin + pl);
-
-        // Use user's configured threshold (convert percentage to decimal)
-        const thresholdDecimal = config.margin_threshold / 100;
-        const warningThreshold = thresholdDecimal * 0.8; // Warning at 80% of critical threshold
-
-        console.log(`📊 MARGIN GUARD - Trade ${trade.id} thresholds:`, {
-          margin_ratio: marginRatio.toFixed(4),
-          warning_threshold: warningThreshold.toFixed(4),
-          critical_threshold: thresholdDecimal.toFixed(4),
-          user_threshold_percent: config.margin_threshold
-        });
-
-        let level: 'safe' | 'warning' | 'critical' = 'safe';
-        if (marginRatio >= thresholdDecimal) {
-          level = 'critical';
-        } else if (marginRatio >= warningThreshold) {
-          level = 'warning';
+        // Calculate total distance to liquidation
+        const distanceToLiquidation = Math.abs(entryPrice - liquidationPrice);
+        
+        // Calculate activation distance based on user's margin_threshold
+        const activationDistance = distanceToLiquidation * (1 - config.margin_threshold / 100);
+        
+        // Calculate trigger price based on position side
+        let triggerPrice: number;
+        if (trade.side === 'b') { // Long position
+          triggerPrice = liquidationPrice + activationDistance;
+        } else { // Short position
+          triggerPrice = liquidationPrice - activationDistance;
         }
 
-        console.log(`📈 MARGIN GUARD - Trade ${trade.id}: Margin Ratio ${marginRatio.toFixed(4)} (${level})`);
+        // Check if current price has crossed the trigger threshold
+        const shouldTrigger = trade.side === 'b'
+          ? currentPrice <= triggerPrice
+          : currentPrice >= triggerPrice;
 
-        if (level !== 'safe') {
-          const message = `⚠️ Margin ${level.toUpperCase()}: Trade ${trade.id} ratio ${marginRatio.toFixed(4)} (threshold: ${thresholdDecimal.toFixed(4)})`;
+        console.log(`📊 MARGIN GUARD - Trade ${trade.id} calculations:`, {
+          distance_to_liquidation: distanceToLiquidation.toFixed(2),
+          activation_distance: activationDistance.toFixed(2),
+          trigger_price: triggerPrice.toFixed(2),
+          current_price: currentPrice.toFixed(2),
+          should_trigger: shouldTrigger,
+          margin_threshold_percent: config.margin_threshold
+        });
+
+        if (shouldTrigger) {
+          const message = `🚨 Margin Guard triggered: Trade ${trade.id} - Price $${currentPrice.toFixed(2)} crossed trigger $${triggerPrice.toFixed(2)}`;
           alerts.push({
             tradeId: trade.id,
-            marginRatio,
-            level,
+            marginRatio: 0, // Not used in new logic
+            level: 'critical',
             message,
           });
 
-          console.log(`🚨 Margin ${level.toUpperCase()} detected for trade ${trade.id}: ${marginRatio.toFixed(4)} >= ${thresholdDecimal.toFixed(4)}`);
+          console.log(`🚨 MARGIN GUARD TRIGGERED for trade ${trade.id}: Price $${currentPrice.toFixed(2)} crossed trigger $${triggerPrice.toFixed(2)}`);
 
-          // Send notification for all alerts (warning and critical)
+          // Send notification
           await sendMarginAlert(globalPrismaInstance, userId, {
             tradeId: trade.id,
-            marginRatio,
-            level,
+            marginRatio: 0,
+            level: 'critical',
             message,
           });
 
-          // Execute action based on user's configuration and margin level
-          if (level === 'critical') {
+          // Execute Margin Guard action
             await executeMarginGuardAction(lnMarkets, trade, config, userId);
-          }
         }
       }
 
@@ -858,8 +984,9 @@ export function stopPeriodicMonitoring() {
 
 console.log('🚀 Margin monitor worker started');
 
-// Start periodic monitoring by default
-startPeriodicMonitoring();
+// Note: startPeriodicMonitoring requires a PrismaClient instance
+// It should be called from the main application with: startPeriodicMonitoring(prismaInstance)
+// startPeriodicMonitoring(); // Commented out - requires prismaInstance parameter
 
 process.on('SIGTERM', async () => {
   console.log('🛑 Shutting down margin monitor worker...');

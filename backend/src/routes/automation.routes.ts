@@ -378,4 +378,124 @@ export async function automationRoutes(fastify: FastifyInstance) {
     },
     automationController.getAutomationStats.bind(automationController)
   );
+
+  // Get automation state change history
+  fastify.get(
+    '/automations/state-history',
+    {
+      schema: {
+        description: 'Get automation state change history',
+        tags: ['automations', 'logs'],
+        querystring: {
+          type: 'object',
+          properties: {
+            automationId: { type: 'string', description: 'Filter by specific automation ID' },
+            limit: { type: 'string', default: '50', description: 'Number of records to return' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  history: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        action: { type: 'string' },
+                        automation_id: { type: 'string' },
+                        old_state: { type: 'boolean' },
+                        new_state: { type: 'boolean' },
+                        config_changes: { type: 'object' },
+                        automation_type: { type: 'string' },
+                        change_type: { type: 'string' },
+                        reason: { type: 'string' },
+                        timestamp: { type: 'string' },
+                      },
+                    },
+                  },
+                  statistics: {
+                    type: 'object',
+                    properties: {
+                      total_changes: { type: 'number' },
+                      activations: { type: 'number' },
+                      deactivations: { type: 'number' },
+                      config_updates: { type: 'number' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    automationController.getAutomationStateHistory.bind(automationController)
+  );
+
+  // Get automation execution history
+  fastify.get(
+    '/automations/execution-history',
+    {
+      schema: {
+        description: 'Get automation execution history (when automations are triggered)',
+        tags: ['automations', 'logs'],
+        querystring: {
+          type: 'object',
+          properties: {
+            automationId: { type: 'string', description: 'Filter by specific automation ID' },
+            limit: { type: 'string', default: '50', description: 'Number of records to return' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  history: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        action: { type: 'string' },
+                        automation_id: { type: 'string' },
+                        trade_id: { type: 'string' },
+                        status: { type: 'string' },
+                        automation_action: { type: 'string' },
+                        trigger_data: { type: 'object' },
+                        execution_result: { type: 'object' },
+                        error_message: { type: 'string' },
+                        execution_time_ms: { type: 'number' },
+                        automation_type: { type: 'string' },
+                        timestamp: { type: 'string' },
+                      },
+                    },
+                  },
+                  statistics: {
+                    type: 'object',
+                    properties: {
+                      total_executions: { type: 'number' },
+                      successful_executions: { type: 'number' },
+                      failed_executions: { type: 'number' },
+                      success_rate: { type: 'number' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    automationController.getAutomationExecutionHistory.bind(automationController)
+  );
 }

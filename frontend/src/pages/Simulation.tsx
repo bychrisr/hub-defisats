@@ -258,7 +258,7 @@ export default function Simulation() {
   const getAutomationDescription = (type: string) => {
     switch (type) {
       case 'margin_guard':
-        return 'Proteção contra perdas excessivas - Fecha posições quando margem fica baixa';
+        return 'Proteção inteligente - Adiciona margem automaticamente para afastar liquidação';
       case 'take_profit':
         return 'Captura lucros automaticamente - Executa quando preço sobe significativamente';
       case 'trailing_stop':

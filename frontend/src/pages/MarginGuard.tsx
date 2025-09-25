@@ -37,7 +37,7 @@ import { toast } from 'sonner';
 const marginGuardSchema = z.object({
   margin_threshold: z.number().min(0.1).max(100),
   action: z.enum(['close_position', 'reduce_position', 'add_margin']),
-  reduce_percentage: z.number().min(1).max(100).optional(),
+  reduce_percentage: z.number().min(1).max(100).optional(), // Now used as margin increase percentage
   add_margin_amount: z.number().min(0).optional(),
   enabled: z.boolean(),
 });
@@ -149,11 +149,11 @@ export default function MarginGuard() {
   const getActionDescription = (action: string) => {
     switch (action) {
       case 'close_position':
-        return 'Close the entire position when margin threshold is reached';
+        return 'Close the entire position when price reaches threshold';
       case 'reduce_position':
         return 'Reduce position size by specified percentage';
       case 'add_margin':
-        return 'Add additional margin to maintain position';
+        return 'Add percentage of current margin to increase liquidation distance (Recommended)';
       default:
         return '';
     }
@@ -294,7 +294,7 @@ export default function MarginGuard() {
                       </p>
                     )}
                     <p className="text-sm text-gray-600">
-                      Trigger action when margin falls below this percentage
+                      Trigger action when price reaches this percentage of distance to liquidation
                     </p>
                   </div>
 
@@ -315,7 +315,7 @@ export default function MarginGuard() {
                         <SelectItem value="reduce_position">
                           Reduce Position
                         </SelectItem>
-                        <SelectItem value="add_margin">Add Margin</SelectItem>
+                        <SelectItem value="add_margin">Add Margin (Recommended)</SelectItem>
                       </SelectContent>
                     </Select>
                     <p className="text-sm text-gray-600">
@@ -353,28 +353,32 @@ export default function MarginGuard() {
 
                   {selectedAction === 'add_margin' && (
                     <div className="space-y-2">
-                      <Label htmlFor="add_margin_amount">
-                        Additional Margin (sats)
+                      <Label htmlFor="reduce_percentage">
+                        Margin Increase Percentage (%)
                       </Label>
                       <Input
-                        id="add_margin_amount"
+                        id="reduce_percentage"
                         type="number"
                         step="1"
-                        min="0"
-                        placeholder="10000"
-                        {...register('add_margin_amount', {
+                        min="1"
+                        max="100"
+                        placeholder="20"
+                        {...register('reduce_percentage', {
                           valueAsNumber: true,
                         })}
                         className={
-                          errors.add_margin_amount ? 'border-red-500' : ''
+                          errors.reduce_percentage ? 'border-red-500' : ''
                         }
                         disabled={!isEditing}
                       />
-                      {errors.add_margin_amount && (
+                      {errors.reduce_percentage && (
                         <p className="text-sm text-red-500">
-                          {errors.add_margin_amount.message}
+                          {errors.reduce_percentage.message}
                         </p>
                       )}
+                      <p className="text-sm text-gray-600">
+                        Add this percentage of current margin to increase liquidation distance
+                      </p>
                     </div>
                   )}
 
