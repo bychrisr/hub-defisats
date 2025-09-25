@@ -371,7 +371,7 @@ export default function Dashboard() {
     const themedColorCards = {
       'estimated-fees': { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' },
       'total-invested': { bg: 'bg-blue-600/20', border: 'border-blue-500/30', shadow: 'group-hover:shadow-blue-500/30', icon: 'text-blue-300 group-hover:text-blue-200' },
-      'fees-paid': { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' }
+      'fees-paid': { bg: 'bg-purple-600/20', border: 'border-purple-500/30', shadow: 'group-hover:shadow-purple-500/30', icon: 'text-purple-300 group-hover:text-purple-200' }
     };
 
     // Cards quantitativos neutros (sempre cinza - números fixos, não valores monetários)
@@ -980,19 +980,14 @@ export default function Dashboard() {
             {/* Estimated Balance */}
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
-                  (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
-                  (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30' :
-                  'bg-gray-600/20 border-gray-500/30'
-                }`}>
-                  <Wallet className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
-                    (estimatedBalance.data?.estimated_balance || 0) > 0 ? 'text-green-300 group-hover:text-green-200' :
-                    (estimatedBalance.data?.estimated_balance || 0) < 0 ? 'text-red-300 group-hover:text-red-200' :
-                    'text-gray-300 group-hover:text-gray-200'
-                  }`} />
-                </div>
+                {(() => {
+                  const colors = getCardIconColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0);
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <Wallet className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    </div>
+                  );
+                })()}
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
@@ -1061,9 +1056,14 @@ export default function Dashboard() {
             {/* Total Invested */}
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className="w-12 h-12 bg-blue-600/20 backdrop-blur-sm border border-blue-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-blue-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
-                  <Target className="w-6 h-6 text-blue-300 stroke-2 group-hover:text-blue-200 transition-colors duration-500" />
-                </div>
+                {(() => {
+                  const colors = getCardIconColors('total-invested');
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <Target className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    </div>
+                  );
+                })()}
               </div>
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
@@ -1105,19 +1105,14 @@ export default function Dashboard() {
             {/* Net Profit */}
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
-                  (historicalMetrics?.totalProfit || 0) > 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
-                  (historicalMetrics?.totalProfit || 0) < 0 ? 'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30' :
-                  'bg-gray-600/20 border-gray-500/30'
-                }`}>
-                  <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
-                    (historicalMetrics?.totalProfit || 0) > 0 ? 'text-green-300 group-hover:text-green-200' :
-                    (historicalMetrics?.totalProfit || 0) < 0 ? 'text-red-300 group-hover:text-red-200' :
-                    'text-gray-300 group-hover:text-gray-200'
-                  }`} />
-                </div>
+                {(() => {
+                  const colors = getCardIconColors('net-profit', historicalMetrics?.totalProfit || 0);
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    </div>
+                  );
+                })()}
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
@@ -1186,9 +1181,14 @@ export default function Dashboard() {
             {/* Fees Paid */}
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className="w-12 h-12 bg-orange-600/20 backdrop-blur-sm border border-orange-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-orange-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
-                  <DollarSign className="w-6 h-6 text-orange-300 stroke-2 group-hover:text-orange-200 transition-colors duration-500" />
-                </div>
+                {(() => {
+                  const colors = getCardIconColors('fees-paid');
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <DollarSign className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    </div>
+                  );
+                })()}
               </div>
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
