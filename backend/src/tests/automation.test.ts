@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
 import { AutomationService } from './services/automation.service';
+import { AutomationLoggerService } from './services/automation-logger.service';
 
 describe('AutomationService', () => {
   let prisma: PrismaClient;
@@ -9,7 +10,8 @@ describe('AutomationService', () => {
 
   beforeEach(async () => {
     prisma = new PrismaClient();
-    automationService = new AutomationService(prisma);
+    const automationLogger = new AutomationLoggerService(prisma);
+    automationService = new AutomationService(prisma, automationLogger);
 
     // Create test user
     const testUser = await prisma.user.create({

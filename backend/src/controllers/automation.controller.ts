@@ -31,8 +31,8 @@ export class AutomationController {
   private automationLogger: AutomationLoggerService;
 
   constructor(prisma: PrismaClient) {
-    this.automationService = new AutomationService(prisma);
     this.automationLogger = new AutomationLoggerService(prisma);
+    this.automationService = new AutomationService(prisma, this.automationLogger);
   }
 
   /**

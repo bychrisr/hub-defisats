@@ -1,6 +1,7 @@
 import { PrismaClient, Automation } from '@prisma/client';
 import { z } from 'zod';
 import { AutomationType } from '../types/api-contracts';
+import { AutomationLoggerService } from './automation-logger.service';
 
 // Configuration schemas for each automation type
 const MarginGuardConfigSchema = z.object({
@@ -78,9 +79,11 @@ export interface ToggleAutomationData {
 
 export class AutomationService {
   private prisma: PrismaClient;
+  private automationLogger: AutomationLoggerService;
 
-  constructor(prisma: PrismaClient) {
+  constructor(prisma: PrismaClient, automationLogger: AutomationLoggerService) {
     this.prisma = prisma;
+    this.automationLogger = automationLogger;
   }
 
   /**
@@ -285,6 +288,17 @@ export class AutomationService {
         is_active: !existingAutomation.is_active,
         updated_at: new Date(),
       },
+    });
+
+    // Log state change
+    await this.automationLogger.logStateChange({
+      userId: data.userId,
+      automationId: data.automationId,
+      automationType: existingAutomation.type,
+      oldState: existingAutomation.is_active,
+      newState: automation.is_active,
+      changeType: automation.is_active ? 'activation' : 'deactivation',
+      reason: 'User toggled automation state'
     });
 
     return automation;

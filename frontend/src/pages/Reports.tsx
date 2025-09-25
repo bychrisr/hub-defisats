@@ -974,52 +974,78 @@ export default function Reports() {
 
             {/* State Changes History */}
             {stateChanges.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-purple-500" />
+              <Card className="bg-gradient-to-br from-card to-card/80 border-border/50 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
+                      <Settings className="h-5 w-5 text-primary" />
+                    </div>
                     Automation State Changes
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-muted-foreground">
                     History of automation activations, deactivations, and configuration changes
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {stateChanges.map((change) => (
-                      <div key={change.id} className="flex items-center justify-between p-3 rounded-lg border bg-card/50">
-                        <div className="flex items-center gap-3">
-                          {change.change_type === 'activation' ? (
-                            <Play className="h-4 w-4 text-green-500" />
-                          ) : change.change_type === 'deactivation' ? (
-                            <Pause className="h-4 w-4 text-red-500" />
-                          ) : (
-                            <Settings className="h-4 w-4 text-blue-500" />
-                          )}
-                          <div>
-                            <p className="font-medium">
-                              {change.change_type === 'activation' ? 'Activated' :
-                               change.change_type === 'deactivation' ? 'Deactivated' : 'Configuration Updated'}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {change.automation_type === 'margin_guard' ? 'Margin Guard' :
-                               change.automation_type === 'tp_sl' ? 'Take Profit / Stop Loss' :
-                               change.automation_type === 'auto_entry' ? 'Auto Entry' : change.automation_type}
-                            </p>
-                            {change.config_changes && (
-                              <p className="text-xs text-muted-foreground">
-                                Config values updated
+                      <div key={change.id} className="group relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-r from-card/80 to-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex-shrink-0">
+                              {change.change_type === 'activation' ? (
+                                <div className="p-2 rounded-lg bg-gradient-to-br from-success/20 to-success/10 border border-success/30">
+                                  <Play className="h-4 w-4 text-success" />
+                                </div>
+                              ) : change.change_type === 'deactivation' ? (
+                                <div className="p-2 rounded-lg bg-gradient-to-br from-destructive/20 to-destructive/10 border border-destructive/30">
+                                  <Pause className="h-4 w-4 text-destructive" />
+                                </div>
+                              ) : (
+                                <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30">
+                                  <Settings className="h-4 w-4 text-primary" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-semibold text-foreground">
+                                {change.change_type === 'activation' ? 'Activated' :
+                                 change.change_type === 'deactivation' ? 'Deactivated' : 'Configuration Updated'}
                               </p>
-                            )}
+                              <p className="text-sm text-muted-foreground">
+                                {change.automation_type === 'margin_guard' ? 'Margin Guard' :
+                                 change.automation_type === 'tp_sl' ? 'Take Profit / Stop Loss' :
+                                 change.automation_type === 'auto_entry' ? 'Auto Entry' : change.automation_type}
+                              </p>
+                              {change.config_changes && (
+                                <p className="text-xs text-muted-foreground">
+                                  Config values updated
+                                </p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm">
-                            {change.old_state ? 'Active' : 'Inactive'} → {change.new_state ? 'Active' : 'Inactive'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(change.timestamp)}
-                          </p>
+                          <div className="text-right space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                change.old_state 
+                                  ? 'bg-success/20 text-success border border-success/30' 
+                                  : 'bg-muted text-muted-foreground border border-border'
+                              }`}>
+                                {change.old_state ? 'Active' : 'Inactive'}
+                              </span>
+                              <span className="text-muted-foreground">→</span>
+                              <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                change.new_state 
+                                  ? 'bg-success/20 text-success border border-success/30' 
+                                  : 'bg-muted text-muted-foreground border border-border'
+                              }`}>
+                                {change.new_state ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground font-mono">
+                              {formatDate(change.timestamp)}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
