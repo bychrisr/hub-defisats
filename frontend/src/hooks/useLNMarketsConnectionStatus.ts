@@ -11,7 +11,17 @@ interface ConnectionStatus {
 
 export function useLNMarketsConnectionStatus() {
   const { user } = useAuthStore();
-  const { data: centralizedData, isLoading, error } = useCentralizedData();
+  const centralizedDataHook = useCentralizedData();
+  
+  // Debug the hook return
+  console.log('🔍 CENTRALIZED DATA HOOK DEBUG:', {
+    data: centralizedDataHook.data,
+    isLoading: centralizedDataHook.isLoading,
+    error: centralizedDataHook.error,
+    isConnected: centralizedDataHook.isConnected
+  });
+  
+  const { data: centralizedData, isLoading, error } = centralizedDataHook;
   
   // Check if user has credentials configured
   const hasCredentials = !!(
