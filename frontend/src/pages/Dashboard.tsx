@@ -734,12 +734,7 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-gray-200`}>
-                        {formatSats(calculateActiveTrades(), { 
-                          size: getGlobalDynamicSize().iconSize, 
-                          variant: 'neutral',
-                          forceColor: true,
-                          className: 'text-gray-300'
-                        })}
+                        {calculateActiveTrades()}
                       </div>
                     </div>
                     
@@ -822,12 +817,7 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
-                        {formatSats(calculateTotalMargin(), { 
-                          size: getGlobalDynamicSize().iconSize, 
-                          variant: 'neutral',
-                          forceColor: true,
-                          className: 'text-purple-300'
-                        })}
+                        {calculateTotalMargin()}
                       </div>
                     </div>
                     
