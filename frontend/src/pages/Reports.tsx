@@ -378,6 +378,58 @@ export default function Reports() {
     return new Date(dateString).toLocaleString();
   };
 
+  // Função para renderizar mudanças de configuração detalhadas
+  const renderConfigChanges = (configChanges: any, automationType: string) => {
+    if (!configChanges || (!configChanges.old && !configChanges.new)) {
+      return 'Config values updated';
+    }
+
+    const oldConfig = configChanges.old || {};
+    const newConfig = configChanges.new || {};
+    
+    const changes = [];
+
+    // Margin Guard changes
+    if (automationType === 'margin_guard') {
+      if (oldConfig.margin_threshold !== newConfig.margin_threshold) {
+        changes.push(`Threshold: ${oldConfig.margin_threshold || 'N/A'}% → ${newConfig.margin_threshold || 'N/A'}%`);
+      }
+      if (oldConfig.new_liquidation_distance !== newConfig.new_liquidation_distance) {
+        changes.push(`Liquidation Distance: ${oldConfig.new_liquidation_distance || 'N/A'}% → ${newConfig.new_liquidation_distance || 'N/A'}%`);
+      }
+      if (oldConfig.action !== newConfig.action) {
+        changes.push(`Action: ${oldConfig.action || 'N/A'} → ${newConfig.action || 'N/A'}`);
+      }
+    }
+
+    // TP/SL changes
+    if (automationType === 'tp_sl') {
+      if (oldConfig.take_profit_percentage !== newConfig.take_profit_percentage) {
+        changes.push(`Take Profit: ${oldConfig.take_profit_percentage || 'N/A'}% → ${newConfig.take_profit_percentage || 'N/A'}%`);
+      }
+      if (oldConfig.stop_loss_percentage !== newConfig.stop_loss_percentage) {
+        changes.push(`Stop Loss: ${oldConfig.stop_loss_percentage || 'N/A'}% → ${newConfig.stop_loss_percentage || 'N/A'}%`);
+      }
+      if (oldConfig.trailing_stop !== newConfig.trailing_stop) {
+        changes.push(`Trailing Stop: ${oldConfig.trailing_stop ? 'Enabled' : 'Disabled'} → ${newConfig.trailing_stop ? 'Enabled' : 'Disabled'}`);
+      }
+      if (oldConfig.trailing_distance !== newConfig.trailing_distance) {
+        changes.push(`Trailing Distance: ${oldConfig.trailing_distance || 'N/A'}% → ${newConfig.trailing_distance || 'N/A'}%`);
+      }
+    }
+
+    // Generic changes for any automation type
+    if (oldConfig.enabled !== newConfig.enabled) {
+      changes.push(`Enabled: ${oldConfig.enabled ? 'Yes' : 'No'} → ${newConfig.enabled ? 'Yes' : 'No'}`);
+    }
+
+    if (changes.length === 0) {
+      return 'Config values updated';
+    }
+
+    return changes.join(', ');
+  };
+
   const formatAutomationType = (type: string) => {
     return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
@@ -1047,7 +1099,7 @@ export default function Reports() {
                                   </div>
                                   {change.config_changes && (
                                     <div className="text-sm text-text-secondary">
-                                      Config values updated
+                                      {renderConfigChanges(change.config_changes, change.automation_type)}
                                     </div>
                                   )}
                                 </div>

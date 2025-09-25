@@ -141,10 +141,10 @@ export class AutomationLoggerService {
         automation_id: log.resource_id,
         old_state: log.old_values?.is_active,
         new_state: log.new_values?.is_active,
-        config_changes: log.old_values?.config && log.new_values?.config ? {
-          old: log.old_values.config,
-          new: log.new_values.config
-        } : null,
+        config_changes: {
+          old: log.old_values?.config || {},
+          new: log.new_values?.config || {}
+        },
         automation_type: log.details?.automation_type,
         change_type: log.details?.change_type,
         reason: log.details?.reason,
