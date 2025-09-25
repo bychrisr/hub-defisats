@@ -29,6 +29,11 @@ export class ProfileController {
           ln_markets_api_key: true,
           ln_markets_api_secret: true,
           ln_markets_passphrase: true,
+          admin_user: {
+            select: {
+              role: true
+            }
+          }
         },
       });
 
@@ -77,9 +82,16 @@ export class ProfileController {
         };
       }
 
+      // Add is_admin field based on admin_user relation
+      const isAdmin = !!profile.admin_user;
+      
       return reply.status(200).send({
         success: true,
-        data: decryptedProfile,
+        data: {
+          ...decryptedProfile,
+          is_admin: isAdmin,
+          admin_role: profile.admin_user?.role || null
+        },
       });
     } catch (error) {
       console.error('❌ PROFILE - Error fetching profile:', error);

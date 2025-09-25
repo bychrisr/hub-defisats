@@ -44,6 +44,7 @@ import { routeRedirectRoutes } from './routes/route-redirect.routes';
 import { rateLimitConfigRoutes } from './routes/admin/rate-limit-config.routes';
 import { cacheRoutes } from './routes/admin/cache.routes';
 import { loadBalancerRoutes } from './routes/admin/load-balancer.routes';
+import { monitoringRoutes } from './routes/monitoring.routes';
 import { authMiddleware } from './middleware/auth.middleware';
 import { monitoring } from './services/monitoring.service';
 import { metrics } from './utils/metrics';
@@ -264,133 +265,11 @@ fastify.decorate('authenticate', authMiddleware);
 
 // Register routes
 async function registerRoutes() {
-  console.log('🛣️ Registering health check route...');
-  // Health check
-  fastify.get('/health', {
-    schema: {
-      description: 'Health check endpoint',
-      tags: ['System'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            status: { type: 'string' },
-            timestamp: { type: 'string' },
-            uptime: { type: 'number' },
-            version: { type: 'string' },
-            environment: { type: 'string' },
-          },
-        },
-      },
-    },
-  }, async (_request, _reply) => {
-    return {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      version: '0.0.2',
-      environment: config.env.NODE_ENV,
-    };
-  });
-  console.log('✅ Health check route registered');
+  console.log('🛣️ Health check route will be registered via healthRoutes...');
 
-  // Version endpoint
-  fastify.get('/version', {
-    schema: {
-      description: 'Get application version information',
-      tags: ['System'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            version: { type: 'string' },
-            buildTime: { type: 'string' },
-            environment: { type: 'string' },
-            uptime: { type: 'number' },
-            features: { 
-              type: 'array',
-              items: { type: 'string' }
-            }
-          }
-        }
-      }
-    }
-  }, async (_request, _reply) => {
-    return {
-      version: '0.0.2',
-      buildTime: new Date().toISOString(),
-      environment: config.env.NODE_ENV,
-      uptime: process.uptime(),
-      features: [
-        'authentication',
-        'trading',
-        'automation',
-        'notifications',
-        'analytics',
-        'api'
-      ]
-    };
-  });
-  console.log('✅ Version route registered');
+  // Version endpoint is now handled by versionRoutes
 
-  // Advanced health check endpoint
-  fastify.get('/api/health/advanced', {
-    schema: {
-      description: 'Advanced health check endpoint with detailed metrics',
-      tags: ['System'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            overall: { type: 'string' },
-            timestamp: { type: 'string' },
-            uptime: { type: 'number' },
-            version: { type: 'string' },
-            environment: { type: 'string' },
-            checks: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  name: { type: 'string' },
-                  status: { type: 'string' },
-                  responseTime: { type: 'number' },
-                  details: { type: 'object' },
-                  error: { type: 'string' }
-                }
-              }
-            },
-            summary: {
-              type: 'object',
-              properties: {
-                total: { type: 'number' },
-                healthy: { type: 'number' },
-                unhealthy: { type: 'number' },
-                degraded: { type: 'number' }
-              }
-            }
-          }
-        }
-      }
-    }
-  }, async (_request, _reply) => {
-    try {
-      const healthStatus = await advancedHealth.getHealthStatus();
-      return healthStatus;
-    } catch (error) {
-      return {
-        overall: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        version: '0.0.2',
-        environment: config.env.NODE_ENV,
-        checks: [],
-        summary: { total: 0, healthy: 0, unhealthy: 1, degraded: 0 },
-        error: (error as Error).message
-      };
-    }
-  });
-  console.log('✅ Advanced health check route registered');
+  console.log('✅ Advanced health check route will be registered via healthRoutes...');
 
   // Prometheus metrics endpoint
   fastify.get('/metrics', {
@@ -731,7 +610,31 @@ async function registerRoutes() {
   await fastify.register(validationRoutes, { prefix: '/api' });
   console.log('✅ Validation routes registered');
 
-  // Health routes (without authentication)
+  // Simple health check route for compatibility - TEMPORARILY DISABLED
+  // fastify.get('/api/health', {
+  //   schema: {
+  //     description: 'Simple health check endpoint',
+  //     tags: ['System'],
+  //     response: {
+  //       200: {
+  //         type: 'object',
+  //         properties: {
+  //           status: { type: 'string' },
+  //           timestamp: { type: 'string' },
+  //           uptime: { type: 'number' },
+  //         },
+  //       },
+  //     },
+  //   },
+  // }, async (_request, _reply) => {
+  //   return {
+  //     status: 'healthy',
+  //     timestamp: new Date().toISOString(),
+  //     uptime: process.uptime(),
+  //   };
+  // });
+
+  // Health routes
   await fastify.register(healthRoutes, { prefix: '/api' });
   console.log('✅ Health routes registered');
 
@@ -769,6 +672,10 @@ async function registerRoutes() {
     await fastify.register(rateLimitTestRoutes);
     console.log('✅ Rate limit test routes registered');
   }
+
+  // Monitoring routes (admin only)
+  await fastify.register(monitoringRoutes, { prefix: '/api/admin' });
+  console.log('✅ Monitoring routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler

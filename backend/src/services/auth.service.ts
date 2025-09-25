@@ -292,13 +292,24 @@ export class AuthService {
       // Continue with default balance on error
     }
 
+    // Check if user is admin
+    console.log('🔍 AUTH SERVICE - Checking admin status for user:', user.id);
+    const adminUser = await this.prisma.adminUser.findUnique({
+      where: { user_id: user.id }
+    });
+    console.log('✅ AUTH SERVICE - Admin user found:', adminUser);
+    console.log('✅ AUTH SERVICE - Is admin:', !!adminUser);
+
     const response: any = {
       user_id: user.id,
       token,
       refresh_token: refreshToken,
       plan_type: user.plan_type as PlanType,
+      is_admin: !!adminUser,
       user_balance: userBalance,
     };
+    
+    console.log('📤 AUTH SERVICE - Login response:', response);
 
     return response;
   }

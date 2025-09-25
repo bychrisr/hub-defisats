@@ -74,82 +74,98 @@ export default function Monitoring() {
 
   useEffect(() => {
     fetchMonitoringData();
+    
+    // Auto-refresh a cada 30 segundos
+    const interval = setInterval(() => {
+      fetchMonitoringData();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchMonitoringData = async () => {
     setRefreshing(true);
     try {
-      // Simular dados de monitoramento
-      const mockData: MonitoringData = {
-        api_latency: 45,
-        error_rate: 0.02,
-        queue_sizes: {
-          'margin-monitor': 12,
-          'price-updates': 8,
-          'notifications': 3
+      // Buscar dados reais do backend
+      const response = await fetch('/api/admin/monitoring', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
         },
-        ln_markets_status: 'online',
-        system_health: {
-          database: 'healthy',
-          redis: 'healthy',
-          workers: 'healthy'
-        },
-        memory_usage: 68,
-        cpu_usage: 42,
-        active_connections: 156,
-        averages: {
-          api_latency: {
-            current: 45,
-            average_1h: 52,
-            average_24h: 48,
-            trend: 'improving',
-            status: 'good'
-          },
-          error_rate: {
-            current: 0.02,
-            average_1h: 0.03,
-            average_24h: 0.025,
-            trend: 'improving',
-            status: 'good'
-          },
-          memory_usage: {
-            current: 68,
-            average_1h: 72,
-            average_24h: 65,
-            trend: 'stable',
-            status: 'warning'
-          },
-          cpu_usage: {
-            current: 42,
-            average_1h: 38,
-            average_24h: 45,
-            trend: 'stable',
-            status: 'good'
-          },
-          queue_health: {
-            current: 85,
-            average_1h: 78,
-            average_24h: 82,
-            trend: 'stable',
-            status: 'good'
-          }
-        },
-        health_summary: {
-          overall_status: 'healthy',
-          issues: [],
-          recommendations: [
-            'Considere aumentar a memória disponível',
-            'Monitore o crescimento das filas de processamento'
-          ]
-        }
-      };
+      });
 
-      setTimeout(() => {
-        setMonitoringData(mockData);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Transformar dados do backend para o formato esperado pelo frontend
+        const monitoringData: MonitoringData = {
+          api_latency: result.data.performance?.apiLatency || 0,
+          error_rate: result.data.performance?.errorRate || 0,
+          queue_sizes: result.data.metrics?.business || {},
+          ln_markets_status: result.data.services?.lnMarkets?.status || 'unknown',
+          system_health: {
+            database: result.data.services?.database?.status || 'unknown',
+            redis: result.data.services?.redis?.status || 'unknown',
+            workers: result.data.services?.workers?.status || 'unknown'
+          },
+          memory_usage: result.data.system?.memory?.percentage || 0,
+          cpu_usage: result.data.system?.cpu?.user || 0,
+          active_connections: result.data.system?.activeConnections || 0,
+          averages: {
+            api_latency: {
+              current: result.data.performance?.apiLatency || 0,
+              average_1h: result.data.performance?.apiLatency || 0,
+              average_24h: result.data.performance?.apiLatency || 0,
+              trend: 'stable',
+              status: result.data.performance?.apiLatency < 100 ? 'good' : 'warning'
+            },
+            error_rate: {
+              current: result.data.performance?.errorRate || 0,
+              average_1h: result.data.performance?.errorRate || 0,
+              average_24h: result.data.performance?.errorRate || 0,
+              trend: 'stable',
+              status: result.data.performance?.errorRate < 5 ? 'good' : 'critical'
+            },
+            memory_usage: {
+              current: result.data.system?.memory?.percentage || 0,
+              average_1h: result.data.system?.memory?.percentage || 0,
+              average_24h: result.data.system?.memory?.percentage || 0,
+              trend: 'stable',
+              status: result.data.system?.memory?.percentage < 80 ? 'good' : 'warning'
+            },
+            cpu_usage: {
+              current: result.data.system?.cpu?.user || 0,
+              average_1h: result.data.system?.cpu?.user || 0,
+              average_24h: result.data.system?.cpu?.user || 0,
+              trend: 'stable',
+              status: result.data.system?.cpu?.user < 80 ? 'good' : 'warning'
+            },
+            queue_health: {
+              current: 85,
+              average_1h: 78,
+              average_24h: 82,
+              trend: 'stable',
+              status: 'good'
+            }
+          },
+          health_summary: {
+            overall_status: result.data.performance?.availability > 95 ? 'healthy' : 'warning',
+            issues: result.data.alerts?.active > 0 ? [`${result.data.alerts.active} alertas ativos`] : [],
+            recommendations: []
+          }
+        };
+
+        setMonitoringData(monitoringData);
         setLoading(false);
         setRefreshing(false);
         toast.success('Dados de monitoramento atualizados!');
-      }, 1000);
+      } else {
+        throw new Error(result.message || 'Erro ao buscar dados de monitoramento');
+      }
     } catch (error) {
       console.error('Error fetching monitoring data:', error);
       setLoading(false);

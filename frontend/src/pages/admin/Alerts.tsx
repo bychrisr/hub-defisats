@@ -88,78 +88,42 @@ export default function Alerts() {
   const fetchAlerts = async () => {
     setRefreshing(true);
     try {
-      // Simular dados de alertas
-      const mockAlerts: Alert[] = [
-        {
-          id: '1',
-          message: 'Sistema de autenticação com alta latência',
-          severity: 'warning',
-          is_global: true,
-          created_at: '2024-01-22T10:30:00Z',
-          updated_at: '2024-01-22T10:30:00Z',
-          is_active: true,
-          category: 'performance',
-          description: 'A latência do sistema de autenticação está acima do normal',
-          action_required: true
+      // Buscar alertas reais do backend
+      const response = await fetch('/api/admin/monitoring/alerts', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
         },
-        {
-          id: '2',
-          message: 'Falha na conexão com LN Markets',
-          severity: 'critical',
-          is_global: true,
-          created_at: '2024-01-22T09:15:00Z',
-          updated_at: '2024-01-22T09:15:00Z',
-          is_active: true,
-          category: 'api',
-          description: 'Não foi possível conectar com a API da LN Markets',
-          action_required: true
-        },
-        {
-          id: '3',
-          message: 'Novo usuário registrado',
-          severity: 'info',
-          is_global: false,
-          created_at: '2024-01-22T08:45:00Z',
-          updated_at: '2024-01-22T08:45:00Z',
-          is_active: true,
-          category: 'user',
-          description: 'Um novo usuário se registrou na plataforma',
-          action_required: false
-        },
-        {
-          id: '4',
-          message: 'Backup diário concluído com sucesso',
-          severity: 'info',
-          is_global: true,
-          created_at: '2024-01-22T02:00:00Z',
-          updated_at: '2024-01-22T02:00:00Z',
-          is_active: false,
-          category: 'system',
-          description: 'Backup automático do banco de dados concluído',
-          action_required: false,
-          resolved_at: '2024-01-22T02:05:00Z',
-          resolved_by: 'system'
-        },
-        {
-          id: '5',
-          message: 'Uso de memória acima de 80%',
-          severity: 'warning',
-          is_global: true,
-          created_at: '2024-01-22T07:20:00Z',
-          updated_at: '2024-01-22T07:20:00Z',
-          is_active: true,
-          category: 'system',
-          description: 'O uso de memória do servidor está acima de 80%',
-          action_required: true
-        }
-      ];
+      });
 
-      setTimeout(() => {
-        setAlerts(mockAlerts);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Transformar dados do backend para o formato esperado pelo frontend
+        const alerts: Alert[] = result.data.recent.map((alert: any) => ({
+          id: alert.id,
+          message: alert.message,
+          severity: alert.severity,
+          is_global: true,
+          created_at: alert.timestamp,
+          updated_at: alert.timestamp,
+          is_active: !alert.resolved,
+          category: 'system',
+          description: alert.message,
+          action_required: alert.severity === 'critical',
+          resolved_at: alert.resolved ? alert.timestamp : undefined,
+        }));
+
+        setAlerts(alerts);
         setLoading(false);
         setRefreshing(false);
-        toast.success('Alertas carregados com sucesso!');
-      }, 1000);
+      } else {
+        throw new Error(result.message || 'Erro ao buscar alertas');
+      }
     } catch (error) {
       console.error('Error fetching alerts:', error);
       setLoading(false);
@@ -206,11 +170,28 @@ export default function Alerts() {
 
   const handleResolveAlert = async (alert: Alert) => {
     try {
-      // Simular resolução
-      await new Promise(resolve => setTimeout(resolve, 500));
-      toast.success('Alerta resolvido com sucesso!');
-      fetchAlerts();
+      const response = await fetch(`/api/admin/monitoring/alerts/${alert.id}/resolve`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success('Alerta resolvido com sucesso!');
+        fetchAlerts();
+      } else {
+        throw new Error(result.message || 'Erro ao resolver alerta');
+      }
     } catch (error) {
+      console.error('Error resolving alert:', error);
       toast.error('Erro ao resolver alerta');
     }
   };

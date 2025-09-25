@@ -49,6 +49,7 @@ const AuthResponseZodSchema = z.object({
   user_id: z.string().uuid(),
   token: z.string(),
   plan_type: z.enum(['free', 'basic', 'advanced', 'pro', 'lifetime']),
+  is_admin: z.boolean().optional(),
   user_balance: z.any().optional(),
 });
 
@@ -182,8 +183,8 @@ export class AuthController {
 
       // Return response
       console.log('🔍 AUTH CONTROLLER - Login result:', result);
-      // Temporariamente removendo validação do schema para teste
-      return reply.status(200).send(result);
+      const response = AuthResponseZodSchema.parse(result);
+      return reply.status(200).send(response);
     } catch (error) {
       // Record failed login
       metrics.recordAuthAttempt('login', 'failure', (error as Error).message);

@@ -338,6 +338,8 @@ export async function authRoutes(fastify: FastifyInstance) {
               user_id: { type: 'string' },
               token: { type: 'string' },
               plan_type: { type: 'string' },
+              is_admin: { type: 'boolean' },
+              user_balance: { type: 'object' },
             },
           },
           400: {

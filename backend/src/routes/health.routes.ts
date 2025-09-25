@@ -19,7 +19,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
   });
 
   // Basic health check
-  fastify.get('/health', async (_request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/health-check', async (_request: FastifyRequest, reply: FastifyReply) => {
     const startTime = Date.now();
     
     try {
@@ -156,30 +156,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Metrics endpoint
-  fastify.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
-    const startTime = Date.now();
-    
-    try {
-      const prometheusMetrics = metrics.getMetricsAsPrometheus();
-      
-      const duration = Date.now() - startTime;
-      metrics.recordHttpRequest('GET', '/metrics', 200, duration);
-
-      return reply
-        .type('text/plain')
-        .status(200)
-        .send(prometheusMetrics);
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      metrics.recordHttpRequest('GET', '/metrics', 500, duration);
-      
-      return reply.status(500).send({
-        error: 'Failed to retrieve metrics',
-        message: (error as Error).message
-      });
-    }
-  });
+  // Metrics endpoint removed to avoid conflict with main metrics route
 
   // Metrics as JSON
   fastify.get('/metrics/json', async (_request: FastifyRequest, reply: FastifyReply) => {

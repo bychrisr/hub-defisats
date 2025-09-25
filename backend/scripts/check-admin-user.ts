@@ -1,79 +1,48 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-async function checkAndCreateAdmin() {
+async function checkAdminUser() {
   try {
-    console.log('🔍 Checking for existing admin users...');
+    console.log('🔍 Checking admin user...');
     
-    // Verificar se existe algum usuário admin
-    const existingAdmin = await prisma.adminUser.findFirst({
-      where: {
-        role: 'superadmin'
-      },
-      include: {
-        user: true
-      }
-    });
-
-    if (existingAdmin) {
-      console.log('✅ Admin user found:');
-      console.log(`   Email: ${existingAdmin.user.email}`);
-      console.log(`   Role: ${existingAdmin.role}`);
-      console.log(`   User ID: ${existingAdmin.user_id}`);
-      return;
-    }
-
-    console.log('❌ No admin user found. Creating one...');
-    
-    // Verificar se existe usuário com email admin
-    let adminUser = await prisma.user.findUnique({
+    // Find user by email
+    const user = await prisma.user.findUnique({
       where: { email: 'admin@defisats.com' }
     });
-
-    if (!adminUser) {
-      console.log('📝 Creating admin user...');
+    
+    if (!user) {
+      console.log('❌ User not found');
+      return;
+    }
+    
+    console.log('✅ User found:', user.email, 'ID:', user.id);
+    
+    // Check if admin user record exists
+    const adminUser = await prisma.adminUser.findUnique({
+      where: { user_id: user.id }
+    });
+    
+    if (adminUser) {
+      console.log('✅ Admin user record exists:', adminUser.role);
+    } else {
+      console.log('❌ Admin user record not found, creating...');
       
-      // Criar usuário admin
-      const hashedPassword = await bcrypt.hash('Admin123!', 10);
-      
-      adminUser = await prisma.user.create({
+      const newAdminUser = await prisma.adminUser.create({
         data: {
-          email: 'admin@defisats.com',
-          password_hash: hashedPassword,
-          username: 'admin',
-          plan_type: 'lifetime',
-          is_active: true,
-          email_verified: true,
-          created_at: new Date(),
-          updated_at: new Date()
+          user_id: user.id,
+          role: 'superadmin'
         }
       });
       
-      console.log('✅ Admin user created successfully');
+      console.log('✅ Admin user record created:', newAdminUser.role);
     }
-
-    // Criar registro de admin
-    const adminRecord = await prisma.adminUser.create({
-      data: {
-        user_id: adminUser.id,
-        role: 'superadmin',
-        created_at: new Date()
-      }
-    });
-
-    console.log('🎉 Admin setup completed!');
-    console.log('📧 Email: admin@defisats.com');
-    console.log('🔑 Password: Admin123!');
-    console.log('👑 Role: superadmin');
-    console.log('🆔 User ID:', adminUser.id);
-
+    
   } catch (error) {
-    console.error('❌ Error checking/creating admin:', error);
+    console.error('❌ Error:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-checkAndCreateAdmin();
+checkAdminUser();

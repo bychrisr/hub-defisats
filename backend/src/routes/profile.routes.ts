@@ -31,6 +31,8 @@ export async function profileRoutes(fastify: FastifyInstance) {
                 ln_markets_api_key: { type: 'string' },
                 ln_markets_api_secret: { type: 'string' },
                 ln_markets_passphrase: { type: 'string' },
+                is_admin: { type: 'boolean' },
+                admin_role: { type: 'string' },
               },
             },
           },
