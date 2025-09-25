@@ -365,18 +365,38 @@ export default function Dashboard() {
     return estimatedBalance.data.trading_frequency || 0;
   };
 
-  // Função unificada para determinar cores dos ícones superiores dos cards
-  const getCardIconColors = (cardType: string, value?: number) => {
+  // Função unificada para determinar TODAS as cores dos cards (pai, ícone, tipografia)
+  const getCardColors = (cardType: string, value?: number) => {
     // Cards com cores temáticas específicas (não mudam baseado no valor)
     const themedColorCards = {
-      'estimated-fees': { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' },
-      'total-invested': { bg: 'bg-blue-600/20', border: 'border-blue-500/30', shadow: 'group-hover:shadow-blue-500/30', icon: 'text-blue-300 group-hover:text-blue-200' },
-      'fees-paid': { bg: 'bg-purple-600/20', border: 'border-purple-500/30', shadow: 'group-hover:shadow-purple-500/30', icon: 'text-purple-300 group-hover:text-purple-200' }
+      'estimated-fees': { 
+        card: 'gradient-card-orange border-orange-500 hover:border-orange-400 hover:shadow-orange-500/30',
+        icon: { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' },
+        text: 'text-orange-200',
+        satsIcon: 'text-orange-300'
+      },
+      'total-invested': { 
+        card: 'gradient-card-gray border-gray-500 hover:border-gray-400',
+        icon: { bg: 'bg-blue-600/20', border: 'border-blue-500/30', shadow: 'group-hover:shadow-blue-500/30', icon: 'text-blue-300 group-hover:text-blue-200' },
+        text: 'text-blue-200',
+        satsIcon: 'text-blue-300'
+      },
+      'fees-paid': { 
+        card: 'gradient-card-gray border-gray-500 hover:border-gray-400',
+        icon: { bg: 'bg-purple-600/20', border: 'border-purple-500/30', shadow: 'group-hover:shadow-purple-500/30', icon: 'text-purple-300 group-hover:text-purple-200' },
+        text: 'text-purple-200',
+        satsIcon: 'text-purple-300'
+      }
     };
 
     // Cards quantitativos neutros (sempre cinza - números fixos, não valores monetários)
     const neutralQuantitativeCards = {
-      'active-trades': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' }
+      'active-trades': { 
+        card: 'gradient-card-gray border-gray-500 hover:border-gray-400',
+        icon: { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' },
+        text: 'text-gray-200',
+        satsIcon: 'text-gray-300'
+      }
     };
 
     // Se for um card com cor temática, retorna as cores temáticas
@@ -391,20 +411,45 @@ export default function Dashboard() {
 
     // Cards monetários dinâmicos (valores em sats - mudam baseado no valor)
     if (positionsLoading) {
-      return { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' };
+      return {
+        card: 'gradient-card-gray border-gray-500 hover:border-gray-400',
+        icon: { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' },
+        text: 'text-gray-200',
+        satsIcon: 'text-gray-300'
+      };
     }
 
     // Lógica para cards monetários dinâmicos (valores em sats)
     if (value === undefined) value = 0;
-    
+
     // Para cards monetários, o ícone superior deve seguir a mesma lógica do valor
     if (value > 0) {
-      return { bg: 'bg-green-600/20', border: 'border-green-500/30', shadow: 'group-hover:shadow-green-500/30', icon: 'text-green-300 group-hover:text-green-200' };
+      return {
+        card: 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30',
+        icon: { bg: 'bg-green-600/20', border: 'border-green-500/30', shadow: 'group-hover:shadow-green-500/30', icon: 'text-green-300 group-hover:text-green-200' },
+        text: 'text-green-200',
+        satsIcon: 'text-green-300'
+      };
     } else if (value < 0) {
-      return { bg: 'bg-red-600/20', border: 'border-red-500/30', shadow: 'group-hover:shadow-red-500/30', icon: 'text-red-300 group-hover:text-red-200' };
+      return {
+        card: 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30',
+        icon: { bg: 'bg-red-600/20', border: 'border-red-500/30', shadow: 'group-hover:shadow-red-500/30', icon: 'text-red-300 group-hover:text-red-200' },
+        text: 'text-red-200',
+        satsIcon: 'text-red-300'
+      };
     } else {
-      return { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' };
+      return {
+        card: 'gradient-card-gray border-gray-500 hover:border-gray-400',
+        icon: { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' },
+        text: 'text-gray-200',
+        satsIcon: 'text-gray-300'
+      };
     }
+  };
+
+  // Função unificada para determinar cores dos ícones superiores dos cards (mantida para compatibilidade)
+  const getCardIconColors = (cardType: string, value?: number) => {
+    return getCardColors(cardType, value).icon;
   };
 
   // Função para calcular o tamanho global baseado no MAIOR valor entre todos os cards
@@ -848,7 +893,7 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                'gradient-card-orange border-orange-500 hover:border-orange-400 hover:shadow-orange-500/30'
+                getCardColors('estimated-fees').card
               }`}>
                 <div className="card-content">
                   <div className="p-6">
@@ -872,12 +917,12 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-fees').text}`}>
                         {formatSats(positionsData.estimatedFees || 0, { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'neutral',
                           forceColor: true,
-                          className: 'text-orange-300'
+                          className: getCardColors('estimated-fees').satsIcon
                         })}
                       </div>
                     </div>
@@ -920,8 +965,7 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                calculateAvailableMargin() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                'gradient-card-gray border-gray-500 hover:border-gray-400'
+                getCardColors('available-margin', calculateAvailableMargin()).card
               }`}>
                 <div className="card-content">
                   <div className="p-6">
@@ -943,18 +987,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${
-                        positionsLoading ? 'text-gray-200' :
-                        calculateAvailableMargin() > 0 ? 'text-green-200' :
-                        'text-gray-200'
-                      }`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('available-margin', calculateAvailableMargin()).text}`}>
                         {formatSats(calculateAvailableMargin(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: positionsLoading ? 'text-gray-300' :
-                            calculateAvailableMargin() > 0 ? 'text-green-300' :
-                            'text-gray-300'
+                          className: getCardColors('available-margin', calculateAvailableMargin()).satsIcon
                         })}
                       </div>
                     </div>
@@ -992,9 +1030,7 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                calculateEstimatedBalance() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                calculateEstimatedBalance() < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
-                'gradient-card-gray border-gray-500 hover:border-gray-400'
+                getCardColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0).card
               }`}>
                 <div className="card-content">
                   <div className="p-6">
@@ -1016,20 +1052,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${
-                        positionsLoading ? 'text-gray-200' :
-                        calculateEstimatedBalance() > 0 ? 'text-green-200' :
-                        calculateEstimatedBalance() < 0 ? 'text-red-200' :
-                        'text-gray-200'
-                      }`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0).text}`}>
                         {formatSats(calculateEstimatedBalance(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: positionsLoading ? 'text-gray-300' :
-                            calculateEstimatedBalance() > 0 ? 'text-green-300' :
-                            calculateEstimatedBalance() < 0 ? 'text-red-300' :
-                            'text-gray-300'
+                          className: getCardColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0).satsIcon
                         })}
                       </div>
                     </div>
@@ -1066,7 +1094,7 @@ export default function Dashboard() {
                 })()}
               </div>
               
-              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${getCardColors('total-invested').card}`}>
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
@@ -1087,12 +1115,12 @@ export default function Dashboard() {
           </div>
 
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} text-blue-200`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('total-invested').text}`}>
                         {formatSats(calculateTotalInvested(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'neutral',
                           forceColor: true,
-                          className: 'text-blue-300'
+                          className: getCardColors('total-invested').satsIcon
                         })}
                       </div>
                     </div>
@@ -1117,9 +1145,7 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                calculateNetProfit() > 0 ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                calculateNetProfit() < 0 ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
-                'gradient-card-gray border-gray-500 hover:border-gray-400'
+                getCardColors('net-profit', historicalMetrics?.totalProfit || 0).card
               }`}>
                 <div className="card-content">
                   <div className="p-6">
@@ -1141,20 +1167,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${
-                        positionsLoading ? 'text-gray-200' :
-                        calculateNetProfit() > 0 ? 'text-green-200' :
-                        calculateNetProfit() < 0 ? 'text-red-200' :
-                        'text-gray-200'
-                      }`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('net-profit', historicalMetrics?.totalProfit || 0).text}`}>
                         {formatSats(calculateNetProfit(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: positionsLoading ? 'text-gray-300' :
-                            calculateNetProfit() > 0 ? 'text-green-300' :
-                            calculateNetProfit() < 0 ? 'text-red-300' :
-                            'text-gray-300'
+                          className: getCardColors('net-profit', historicalMetrics?.totalProfit || 0).satsIcon
                         })}
                       </div>
                     </div>
@@ -1191,7 +1209,7 @@ export default function Dashboard() {
                 })()}
               </div>
               
-              <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
+              <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${getCardColors('fees-paid').card}`}>
                 <div className="card-content">
                   <div className="p-6">
                     <div className="mb-4">
@@ -1212,12 +1230,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('fees-paid').text}`}>
                         {formatSats(calculateFeesPaid(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'neutral',
                           forceColor: true,
-                          className: 'text-orange-300'
+                          className: getCardColors('fees-paid').satsIcon
                         })}
                       </div>
                     </div>
