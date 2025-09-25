@@ -49,9 +49,9 @@ export const getTradeLogs = async (
       created_at: { gte: startDate }
     };
     
-    if (status) whereClause.status = status;
-    if (action) whereClause.action = action;
-    if (planType) whereClause.user = { plan_type: planType };
+    if (status && status !== 'all') whereClause.status = status;
+    if (action && action !== 'all') whereClause.action = action;
+    if (planType && planType !== 'all') whereClause.user = { plan_type: planType };
     if (search) {
       whereClause.OR = [
         { user: { email: { contains: search, mode: 'insensitive' } } },

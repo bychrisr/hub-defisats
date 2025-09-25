@@ -153,7 +153,7 @@ export default function Profile() {
         const response = await fetch('/api/upload/avatar', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           },
           body: formData
         });

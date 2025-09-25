@@ -74,7 +74,7 @@ export default function CouponDashboard() {
       setRefreshing(true);
       const response = await fetch('/api/admin/coupons/dashboard', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
       });
 

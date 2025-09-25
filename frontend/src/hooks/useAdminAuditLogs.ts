@@ -85,7 +85,7 @@ export function useAdminAuditLogs(filters: AuditLogsFilters = {}) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
       });
 

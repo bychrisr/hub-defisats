@@ -89,7 +89,7 @@ export default function Monitoring() {
       // Buscar dados reais do backend
       const response = await fetch('/api/admin/monitoring', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json',
         },
       });

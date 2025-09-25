@@ -35,6 +35,7 @@ import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
 import { planRoutes } from './routes/plan.routes';
 import { healthRoutes } from './routes/health.routes';
+import { swCacheRoutes } from './routes/sw-cache.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
 import { versionRoutes } from './routes/version.routes';
@@ -632,6 +633,10 @@ async function registerRoutes() {
   // Health routes
   await fastify.register(healthRoutes, { prefix: '/api' });
   console.log('✅ Health routes registered');
+
+  // Service Worker cache routes
+  await fastify.register(swCacheRoutes);
+  console.log('✅ Service Worker cache routes registered');
 
   // Tooltip and Dashboard Card management (public routes - register last to avoid hook leakage)
   await fastify.register(tooltipRoutes, { prefix: '/api' });

@@ -91,7 +91,7 @@ export default function Alerts() {
       // Buscar alertas reais do backend
       const response = await fetch('/api/admin/monitoring/alerts', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json',
         },
       });
@@ -173,7 +173,7 @@ export default function Alerts() {
       const response = await fetch(`/api/admin/monitoring/alerts/${alert.id}/resolve`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json',
         },
       });

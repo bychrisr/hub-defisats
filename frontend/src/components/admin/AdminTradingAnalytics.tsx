@@ -11,7 +11,7 @@ import { RefreshCw, Search, Filter, Download } from 'lucide-react';
 export function AdminTradingAnalytics() {
   const [filters, setFilters] = useState({
     search: '',
-    planType: '',
+    planType: 'all',
     sortBy: 'totalTrades' as const,
     sortOrder: 'desc' as const,
     page: 1,
@@ -21,7 +21,9 @@ export function AdminTradingAnalytics() {
   const { data, metrics, pagination, loading, error, refresh } = useAdminTradingAnalytics(filters);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+    // Tratar "all" como valor vazio para planType
+    const filterValue = key === 'planType' && value === 'all' ? '' : value;
+    setFilters(prev => ({ ...prev, [key]: filterValue, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
@@ -40,7 +42,7 @@ export function AdminTradingAnalytics() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
+          <p className="text-red-500 mb-4">{typeof error === 'string' ? error : JSON.stringify(error)}</p>
           <Button onClick={refresh} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Tentar Novamente
@@ -91,7 +93,7 @@ export function AdminTradingAnalytics() {
                 <SelectValue placeholder="Tipo de Plano" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os Planos</SelectItem>
+                <SelectItem value="all">Todos os Planos</SelectItem>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="basic">Basic</SelectItem>
                 <SelectItem value="advanced">Advanced</SelectItem>

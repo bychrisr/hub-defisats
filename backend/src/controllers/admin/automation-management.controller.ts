@@ -35,10 +35,10 @@ export const getAutomationManagement = async (
     // Construir filtros
     const whereClause: any = {};
     
-    if (status) whereClause.status = status;
-    if (type) whereClause.type = type;
-    if (riskLevel) whereClause.risk_level = riskLevel;
-    if (planType) whereClause.user = { plan_type: planType };
+    if (status && status !== 'all') whereClause.status = status;
+    if (type && type !== 'all') whereClause.type = type;
+    if (riskLevel && riskLevel !== 'all') whereClause.risk_level = riskLevel;
+    if (planType && planType !== 'all') whereClause.user = { plan_type: planType };
     if (search) {
       whereClause.OR = [
         { name: { contains: search, mode: 'insensitive' } },

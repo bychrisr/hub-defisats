@@ -11,9 +11,9 @@ import { RefreshCw, Search, Filter, Download } from 'lucide-react';
 export function AdminTradeLogs() {
   const [filters, setFilters] = useState({
     search: '',
-    status: '',
-    action: '',
-    planType: '',
+    status: 'all',
+    action: 'all',
+    planType: 'all',
     sortBy: 'executedAt' as const,
     sortOrder: 'desc' as const,
     page: 1,
@@ -23,7 +23,9 @@ export function AdminTradeLogs() {
   const { data, metrics, pagination, loading, error, refresh } = useAdminTradeLogs(filters);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+    // Tratar "all" como valor vazio para filtros
+    const filterValue = value === 'all' ? '' : value;
+    setFilters(prev => ({ ...prev, [key]: filterValue, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
@@ -128,7 +130,7 @@ export function AdminTradeLogs() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os Status</SelectItem>
+                <SelectItem value="all">Todos os Status</SelectItem>
                 <SelectItem value="success">Success</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
@@ -141,7 +143,7 @@ export function AdminTradeLogs() {
                 <SelectValue placeholder="Ação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas as Ações</SelectItem>
+                <SelectItem value="all">Todas as Ações</SelectItem>
                 <SelectItem value="buy">Buy</SelectItem>
                 <SelectItem value="sell">Sell</SelectItem>
                 <SelectItem value="hold">Hold</SelectItem>
@@ -153,7 +155,7 @@ export function AdminTradeLogs() {
                 <SelectValue placeholder="Tipo de Plano" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os Planos</SelectItem>
+                <SelectItem value="all">Todos os Planos</SelectItem>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="basic">Basic</SelectItem>
                 <SelectItem value="advanced">Advanced</SelectItem>

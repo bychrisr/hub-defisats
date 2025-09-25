@@ -11,9 +11,9 @@ import { RefreshCw, Search, Filter, Download, DollarSign } from 'lucide-react';
 export function AdminPaymentAnalytics() {
   const [filters, setFilters] = useState({
     search: '',
-    status: '',
-    paymentMethod: '',
-    planType: '',
+    status: 'all',
+    paymentMethod: 'all',
+    planType: 'all',
     sortBy: 'createdAt' as const,
     sortOrder: 'desc' as const,
     page: 1,
@@ -23,7 +23,9 @@ export function AdminPaymentAnalytics() {
   const { data, metrics, pagination, loading, error, refresh } = useAdminPaymentAnalytics(filters);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+    // Tratar "all" como valor vazio para filtros
+    const filterValue = value === 'all' ? '' : value;
+    setFilters(prev => ({ ...prev, [key]: filterValue, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
@@ -128,7 +130,7 @@ export function AdminPaymentAnalytics() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os Status</SelectItem>
+                <SelectItem value="all">Todos os Status</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
@@ -141,7 +143,7 @@ export function AdminPaymentAnalytics() {
                 <SelectValue placeholder="Método de Pagamento" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os Métodos</SelectItem>
+                <SelectItem value="all">Todos os Métodos</SelectItem>
                 <SelectItem value="lightning">Lightning</SelectItem>
                 <SelectItem value="card">Card</SelectItem>
                 <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
@@ -153,7 +155,7 @@ export function AdminPaymentAnalytics() {
                 <SelectValue placeholder="Tipo de Plano" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os Planos</SelectItem>
+                <SelectItem value="all">Todos os Planos</SelectItem>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="basic">Basic</SelectItem>
                 <SelectItem value="advanced">Advanced</SelectItem>

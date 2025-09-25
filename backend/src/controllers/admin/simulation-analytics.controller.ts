@@ -49,9 +49,9 @@ export const getSimulationAnalytics = async (
       created_at: { gte: startDate }
     };
     
-    if (status) whereClause.status = status;
-    if (simulationType) whereClause.simulation_type = simulationType;
-    if (planType) whereClause.user = { plan_type: planType };
+    if (status && status !== 'all') whereClause.status = status;
+    if (simulationType && simulationType !== 'all') whereClause.simulation_type = simulationType;
+    if (planType && planType !== 'all') whereClause.user = { plan_type: planType };
     if (search) {
       whereClause.OR = [
         { user: { email: { contains: search, mode: 'insensitive' } } }

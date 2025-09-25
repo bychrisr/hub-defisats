@@ -3,12 +3,16 @@ import { useAdminDashboard } from '../../hooks/useAdminDashboard';
 import { MetricCard } from '../dashboard/MetricCard';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
+import { SWCacheManager } from '../SWCacheManager';
 import { RefreshCw, Users, Activity, DollarSign, TrendingUp, Clock } from 'lucide-react';
 
 export function AdminDashboard() {
   const { metrics, loading, error, refresh } = useAdminDashboard();
 
+  console.log('🔍 ADMIN DASHBOARD - Render state:', { metrics, loading, error });
+
   if (loading) {
+    console.log('⏳ ADMIN DASHBOARD - Loading state');
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -132,6 +136,15 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Gerenciamento de Cache</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SWCacheManager />
+        </CardContent>
+      </Card>
     </div>
   );
 }

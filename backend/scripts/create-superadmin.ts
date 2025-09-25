@@ -25,7 +25,7 @@ async function createSuperAdmin() {
         email: 'admin@defisats.com',
         username: 'superadmin',
         password_hash: hashedPassword,
-        plan_type: 'LIFETIME',
+        plan_type: 'lifetime',
         is_active: true,
         email_verified: true,
       }

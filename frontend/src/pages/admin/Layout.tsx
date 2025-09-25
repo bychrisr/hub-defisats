@@ -109,8 +109,8 @@ export default function AdminLayout() {
           className="fixed inset-0 bg-black bg-opacity-50" 
           onClick={() => setSidebarOpen(false)} 
         />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
-          <div className="flex h-16 items-center justify-between px-4">
+        <div className="fixed inset-y-0 left-0 flex w-64 flex-col h-full backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+          <div className="flex h-16 items-center justify-between px-4 flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
                 <Shield className="h-5 w-5 text-primary" />
@@ -127,7 +127,7 @@ export default function AdminLayout() {
               <X className="h-6 w-6" />
             </Button>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4">
+          <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto min-h-0">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -150,7 +150,7 @@ export default function AdminLayout() {
             })}
           </nav>
           <div 
-            className="p-4"
+            className="p-4 flex-shrink-0"
             style={{ borderTop: '1px solid hsl(var(--border))' }}
           >
             <div className="space-y-2">
@@ -181,8 +181,8 @@ export default function AdminLayout() {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
-          <div className="flex h-16 items-center px-4">
+        <div className="flex flex-col h-full backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+          <div className="flex h-16 items-center px-4 flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
                 <Shield className="h-5 w-5 text-primary" />
@@ -192,7 +192,7 @@ export default function AdminLayout() {
               </h1>
             </div>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4">
+          <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto min-h-0">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -212,7 +212,7 @@ export default function AdminLayout() {
             })}
           </nav>
           <div 
-            className="p-4"
+            className="p-4 flex-shrink-0"
             style={{ borderTop: '1px solid hsl(var(--border))' }}
           >
             <div className="space-y-2">

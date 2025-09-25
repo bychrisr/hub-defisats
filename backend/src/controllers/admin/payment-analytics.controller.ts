@@ -49,9 +49,10 @@ export const getPaymentAnalytics = async (
       created_at: { gte: startDate }
     };
     
-    if (status) whereClause.status = status;
-    if (paymentMethod) whereClause.payment_method = paymentMethod;
-    if (planType) whereClause.user = { plan_type: planType };
+    // Tratar "all" como todos os valores
+    if (status && status !== 'all') whereClause.status = status;
+    if (paymentMethod && paymentMethod !== 'all') whereClause.payment_method = paymentMethod;
+    if (planType && planType !== 'all') whereClause.user = { plan_type: planType };
     if (search) {
       whereClause.OR = [
         { user: { email: { contains: search, mode: 'insensitive' } } },

@@ -49,9 +49,9 @@ export const getBacktestReports = async (
       created_at: { gte: startDate }
     };
     
-    if (status) whereClause.status = status;
-    if (strategy) whereClause.strategy_name = { contains: strategy, mode: 'insensitive' };
-    if (planType) whereClause.user = { plan_type: planType };
+    if (status && status !== 'all') whereClause.status = status;
+    if (strategy && strategy !== 'all') whereClause.strategy_name = { contains: strategy, mode: 'insensitive' };
+    if (planType && planType !== 'all') whereClause.user = { plan_type: planType };
     if (search) {
       whereClause.OR = [
         { strategy_name: { contains: search, mode: 'insensitive' } },

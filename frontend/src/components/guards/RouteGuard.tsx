@@ -43,6 +43,16 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
     hasPlanLevel,
   } = useUserPermissions();
 
+  console.log('🔍 ROUTE GUARD - State check:', {
+    location: location.pathname,
+    isAuthenticated,
+    isAdmin,
+    userPlan,
+    requireAdmin,
+    requiredPlan,
+    isLoading
+  });
+
   // Mostrar loading enquanto verifica autenticação
   if (isLoading) {
     return (
@@ -58,6 +68,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
 
   // Se não está autenticado, mostrar tela de acesso negado com loading
   if (!isAuthenticated) {
+    console.log('❌ ROUTE GUARD - Not authenticated, showing access denied');
     return (
       <LoadingGuard 
         isLoading={false}
@@ -71,11 +82,13 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
 
   // Verificar se é admin quando necessário
   if (requireAdmin && !isAdmin) {
+    console.log('❌ ROUTE GUARD - Not admin, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
   // Verificar se pode acessar a rota
   if (!canAccessRoute(location.pathname)) {
+    console.log('❌ ROUTE GUARD - Cannot access route:', location.pathname);
     // Se tem rota de fallback específica, usar ela
     if (fallbackRoute) {
       return <Navigate to={fallbackRoute} replace />;
@@ -131,6 +144,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
   }
 
   // Se passou em todas as verificações, renderizar o conteúdo
+  console.log('✅ ROUTE GUARD - All checks passed, rendering children');
   return <>{children}</>;
 };
 

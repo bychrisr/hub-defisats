@@ -45,12 +45,13 @@ export const getTradingAnalytics = async (
       created_at: { gte: startDate }
     };
     
-    if (planType) whereClause.user = { plan_type: planType };
+    // Tratar "all" como todos os planos
+    if (planType && planType !== 'all') whereClause.user = { plan_type: planType };
     if (userId) whereClause.user_id = userId;
     
     // Buscar dados de trading
     const [trades, users] = await Promise.all([
-      prisma.trade.findMany({
+      prisma.tradeLog.findMany({
         where: whereClause,
         include: { 
           user: { 
@@ -60,7 +61,7 @@ export const getTradingAnalytics = async (
         orderBy: { created_at: 'desc' }
       }),
       prisma.user.findMany({
-        where: planType ? { plan_type: planType } : {},
+        where: planType && planType !== 'all' ? { plan_type: planType } : {},
         select: { id: true, email: true, plan_type: true, created_at: true }
       })
     ]);
