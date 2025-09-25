@@ -82,6 +82,11 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
       setData(globalCache.data);
       return;
     }
+    
+    // Don't set data to null if cache is empty, keep current state
+    if (!globalCache.data) {
+      console.log('🔄 CENTRALIZED DATA - No cached data, fetching fresh data...');
+    }
 
     setData(prev => ({ ...prev, isLoading: true, error: null }));
 
