@@ -367,29 +367,38 @@ export default function Dashboard() {
 
   // Função unificada para determinar cores dos ícones superiores dos cards
   const getCardIconColors = (cardType: string, value?: number) => {
-    // Cards com cores fixas (não mudam baseado no valor)
-    const fixedColorCards = {
-      'active-trades': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' },
-      'total-margin': { bg: 'bg-purple-600/20', border: 'border-purple-500/30', shadow: 'group-hover:shadow-purple-500/30', icon: 'text-purple-300 group-hover:text-purple-200' },
+    // Cards com cores temáticas específicas (não mudam baseado no valor)
+    const themedColorCards = {
       'estimated-fees': { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' },
       'total-invested': { bg: 'bg-blue-600/20', border: 'border-blue-500/30', shadow: 'group-hover:shadow-blue-500/30', icon: 'text-blue-300 group-hover:text-blue-200' },
       'fees-paid': { bg: 'bg-orange-600/20', border: 'border-orange-500/30', shadow: 'group-hover:shadow-orange-500/30', icon: 'text-orange-300 group-hover:text-orange-200' }
     };
 
-    // Se for um card com cor fixa, retorna as cores fixas
-    if (fixedColorCards[cardType as keyof typeof fixedColorCards]) {
-      return fixedColorCards[cardType as keyof typeof fixedColorCards];
+    // Cards quantitativos neutros (sempre cinza - números fixos, não valores monetários)
+    const neutralQuantitativeCards = {
+      'active-trades': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' },
+      'total-margin': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' }
+    };
+
+    // Se for um card com cor temática, retorna as cores temáticas
+    if (themedColorCards[cardType as keyof typeof themedColorCards]) {
+      return themedColorCards[cardType as keyof typeof themedColorCards];
     }
 
-    // Cards dinâmicos - lógica específica para cada tipo
+    // Se for um card quantitativo neutro, retorna cinza
+    if (neutralQuantitativeCards[cardType as keyof typeof neutralQuantitativeCards]) {
+      return neutralQuantitativeCards[cardType as keyof typeof neutralQuantitativeCards];
+    }
+
+    // Cards monetários dinâmicos (valores em sats - mudam baseado no valor)
     if (positionsLoading) {
       return { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' };
     }
 
-    // Lógica específica para cards dinâmicos
+    // Lógica para cards monetários dinâmicos (valores em sats)
     if (value === undefined) value = 0;
     
-    // Para cards dinâmicos, o ícone superior deve seguir a mesma lógica do card
+    // Para cards monetários, o ícone superior deve seguir a mesma lógica do valor
     if (value > 0) {
       return { bg: 'bg-green-600/20', border: 'border-green-500/30', shadow: 'group-hover:shadow-green-500/30', icon: 'text-green-300 group-hover:text-green-200' };
     } else if (value < 0) {
@@ -691,9 +700,14 @@ export default function Dashboard() {
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className="w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out bg-gray-600/20 border-gray-500/30 group-hover:shadow-gray-500/30">
-                  <Activity className="w-6 h-6 stroke-2 group-hover:transition-colors duration-500 text-gray-300 group-hover:text-gray-200" />
-                </div>
+                {(() => {
+                  const colors = getCardIconColors('active-trades');
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <Activity className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    </div>
+                  );
+                })()}
               </div>
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
@@ -774,9 +788,14 @@ export default function Dashboard() {
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className="w-12 h-12 bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-purple-500/30 group-hover:scale-105 transition-all duration-500 ease-out">
-                  <PieChart className="w-6 h-6 text-purple-300 stroke-2 group-hover:text-purple-200 transition-colors duration-500" />
-                </div>
+                {(() => {
+                  const colors = getCardIconColors('total-margin');
+                  return (
+                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <PieChart className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    </div>
+                  );
+                })()}
               </div>
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
