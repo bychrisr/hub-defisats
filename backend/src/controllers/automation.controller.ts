@@ -301,34 +301,81 @@ export class AutomationController {
         limit?: string;
       };
 
-      // Create real data based on what we know is in the database
-      const history = [
-        {
-          id: 'real-1',
-          action: 'automation_config_updated',
-          automation_id: 'dd4df374-3b85-4e9b-b973-cbacd0ac787d',
-          old_state: true,
-          new_state: true,
-          config_changes: {
-            old: { 
-              margin_threshold: 75, 
-              new_liquidation_distance: 10,
-              action: 'add_margin',
-              enabled: true
-            },
-            new: { 
-              margin_threshold: 70, 
-              new_liquidation_distance: 8,
-              action: 'add_margin',
-              enabled: true
-            }
-          },
-          automation_type: 'margin_guard',
-          change_type: 'config_update',
-          reason: 'User updated automation configuration',
-          timestamp: new Date().toISOString()
+      // Get real data from database using raw SQL
+      const rawLogs = await this.prisma.$queryRaw`
+        SELECT 
+          id,
+          action,
+          resource_id,
+          old_values,
+          new_values,
+          details,
+          created_at
+        FROM audit_logs 
+        WHERE user_id = ${user?.id || ''}
+          AND resource = 'automation'
+          AND action IN ('automation_activated', 'automation_deactivated', 'automation_config_updated')
+        ORDER BY created_at DESC
+        LIMIT ${parseInt(limit, 10)}
+      `;
+
+      console.log('🔍 DEBUG - Raw SQL logs found:', rawLogs.length);
+
+      // Process the real data with proper JSON handling
+      const history = rawLogs.map((log: any) => {
+        // Parse the JSONB fields properly
+        let oldConfig = {};
+        let newConfig = {};
+        let automationType = 'margin_guard'; // Default for now
+        let changeType = '';
+        let reason = '';
+        
+        try {
+          // Parse old_values and new_values JSONB fields
+          const oldValues = log.old_values ? JSON.parse(log.old_values) : {};
+          const newValues = log.new_values ? JSON.parse(log.new_values) : {};
+          const details = log.details ? JSON.parse(log.details) : {};
+          
+          oldConfig = oldValues.config || {};
+          newConfig = newValues.config || {};
+          automationType = details.automation_type || 'margin_guard';
+          changeType = details.change_type || (log.action === 'automation_activated' ? 'activation' : 
+                                               log.action === 'automation_deactivated' ? 'deactivation' : 
+                                               'config_update');
+          reason = details.reason || 'User updated automation configuration';
+          
+          console.log('🔍 DEBUG - Processing log:', {
+            id: log.id,
+            action: log.action,
+            oldConfig,
+            newConfig,
+            automationType
+          });
+        } catch (error) {
+          console.error('❌ Error parsing log data:', error);
         }
-      ];
+        
+        return {
+          id: log.id,
+          action: log.action,
+          automation_id: log.resource_id,
+          old_state: log.old_values ? JSON.parse(log.old_values).is_active : null,
+          new_state: log.new_values ? JSON.parse(log.new_values).is_active : null,
+          config_changes: {
+            old: oldConfig,
+            new: newConfig
+          },
+          automation_type: automationType,
+          change_type: changeType,
+          reason: reason,
+          timestamp: log.created_at
+        };
+      });
+
+      console.log('🔍 DEBUG - Processed history:', history.length);
+      if (history.length > 0) {
+        console.log('🔍 DEBUG - First item config_changes:', JSON.stringify(history[0].config_changes, null, 2));
+      }
 
       const stats = await this.automationLogger.getStateChangeStats(
         user?.id || '',
@@ -340,11 +387,13 @@ export class AutomationController {
       
       // Debug: Log the serialized data
       console.log('🔍 DEBUG - Serialized history:', JSON.stringify(serializedHistory, null, 2));
+      console.log('🔍 DEBUG - First item config_changes:', JSON.stringify(serializedHistory[0]?.config_changes, null, 2));
 
+      // Return real data from database
       return reply.send({
         success: true,
         data: {
-          history: serializedHistory,
+          history: history,
           statistics: stats
         }
       });
