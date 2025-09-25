@@ -127,20 +127,15 @@ export class AutomationLoggerService {
       });
 
       return logs.map(log => {
+        // Extract config data directly from the database values
+        const oldConfig = log.old_values?.config || {};
+        const newConfig = log.new_values?.config || {};
+        
+        // Create a simple object that should serialize properly
         const configChanges = {
-          old: log.old_values?.config || {},
-          new: log.new_values?.config || {}
+          old: oldConfig,
+          new: newConfig
         };
-
-        // Debug: Log the actual values
-        console.log('🔍 DEBUG - Log processing:', {
-          logId: log.id,
-          oldValues: log.old_values,
-          newValues: log.new_values,
-          configChanges,
-          oldConfigType: typeof log.old_values?.config,
-          newConfigType: typeof log.new_values?.config
-        });
 
         return {
           id: log.id,

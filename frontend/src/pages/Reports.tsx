@@ -6,6 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { ConfigChangeDisplay } from '@/components/ConfigChangeDisplay';
+import { AutomationChangeGroup } from '@/components/AutomationChangeGroup';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -433,6 +435,24 @@ export default function Reports() {
 
   const formatAutomationType = (type: string) => {
     return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // Função para agrupar mudanças por data
+  const groupChangesByDate = (changes: any[]) => {
+    const groups: { [key: string]: any[] } = {};
+    
+    changes.forEach(change => {
+      const date = new Date(change.timestamp).toDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(change);
+    });
+    
+    // Ordenar por data (mais recente primeiro)
+    return Object.entries(groups)
+      .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+      .map(([date, changes]) => ({ date, changes }));
   };
 
   if (isLoading && tradeLogs.length === 0) {
@@ -1029,129 +1049,34 @@ export default function Reports() {
             )}
 
             {/* State Changes History */}
-            {stateChanges.length > 0 && (
-              <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                      <Settings className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl font-semibold">Automation State Changes</CardTitle>
-                      <CardDescription className="text-text-secondary">
-                        History of automation activations, deactivations, and configuration changes
-                      </CardDescription>
-                    </div>
+        {stateChanges.length > 0 && (
+          <div className="space-y-6">
+            <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                    <Settings className="h-5 w-5 text-primary" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto rounded-lg border border-border/50">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
-                          <TableHead className="font-semibold text-text-primary">
-                            <div className="flex items-center gap-2">
-                              <Activity className="h-4 w-4" />
-                              Action
-                            </div>
-                          </TableHead>
-                          <TableHead className="font-semibold text-text-primary">
-                            <div className="flex items-center gap-2">
-                              <Bot className="h-4 w-4" />
-                              Automation
-                            </div>
-                          </TableHead>
-                          <TableHead className="font-semibold text-text-primary">
-                            <div className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4" />
-                              Status Change
-                            </div>
-                          </TableHead>
-                          <TableHead className="font-semibold text-text-primary">
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              Timestamp
-                            </div>
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {stateChanges.map((change, index) => (
-                          <TableRow 
-                            key={change.id}
-                            className={cn(
-                              "hover:bg-background/50 transition-colors duration-200",
-                              index % 2 === 0 ? "bg-background/20" : "bg-background/10"
-                            )}
-                          >
-                            <TableCell className="font-medium text-text-primary">
-                              <div className="flex items-center gap-3">
-                                {change.change_type === 'activation' ? (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                ) : change.change_type === 'deactivation' ? (
-                                  <XCircle className="h-4 w-4 text-red-500" />
-                                ) : (
-                                  <Settings className="h-4 w-4 text-blue-500" />
-                                )}
-                                <div>
-                                  <div className="font-medium">
-                                    {change.change_type === 'activation' ? 'Activated' :
-                                     change.change_type === 'deactivation' ? 'Deactivated' : 'Configuration Updated'}
-                                  </div>
-                                  {change.config_changes && (
-                                    <div className="text-sm text-text-secondary">
-                                      {renderConfigChanges(change.config_changes, change.automation_type)}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                {change.automation_type === 'margin_guard' ? (
-                                  <Shield className="h-4 w-4 text-blue-500" />
-                                ) : change.automation_type === 'tp_sl' ? (
-                                  <Target className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <Bot className="h-4 w-4 text-gray-500" />
-                                )}
-                                <Badge variant="outline" className="font-semibold">
-                                  {change.automation_type === 'margin_guard' ? 'Margin Guard' :
-                                   change.automation_type === 'tp_sl' ? 'Take Profit / Stop Loss' :
-                                   change.automation_type === 'auto_entry' ? 'Auto Entry' : change.automation_type}
-                                </Badge>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Badge className={cn(
-                                  "text-white",
-                                  change.old_state ? "bg-green-500" : "bg-gray-500"
-                                )}>
-                                  {change.old_state ? 'Active' : 'Inactive'}
-                                </Badge>
-                                <ArrowRight className="h-4 w-4 text-text-secondary" />
-                                <Badge className={cn(
-                                  "text-white",
-                                  change.new_state ? "bg-green-500" : "bg-gray-500"
-                                )}>
-                                  {change.new_state ? 'Active' : 'Inactive'}
-                                </Badge>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="text-sm font-medium text-text-primary">
-                                {formatDate(change.timestamp)}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                  <div>
+                    <CardTitle className="text-xl font-semibold">Automation State Changes</CardTitle>
+                    <CardDescription className="text-text-secondary">
+                      Detailed history of automation activations, deactivations, and configuration changes
+                    </CardDescription>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </CardHeader>
+            </Card>
+            
+            {/* Agrupar mudanças por data */}
+            {groupChangesByDate(stateChanges).map(({ date, changes }) => (
+              <AutomationChangeGroup
+                key={date}
+                date={date}
+                changes={changes}
+              />
+            ))}
+          </div>
+        )}
           </TabsContent>
         </Tabs>
       </div>
