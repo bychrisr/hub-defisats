@@ -312,6 +312,11 @@ export class AutomationController {
         automationId
       );
 
+      // Debug: Log the first item to see what's being returned
+      if (history.length > 0) {
+        console.log('🔍 DEBUG - First history item:', JSON.stringify(history[0], null, 2));
+      }
+
       return reply.send({
         success: true,
         data: {

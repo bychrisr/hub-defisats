@@ -380,7 +380,8 @@ export default function Reports() {
 
   // Função para renderizar mudanças de configuração detalhadas
   const renderConfigChanges = (configChanges: any, automationType: string) => {
-    if (!configChanges || (!configChanges.old && !configChanges.new)) {
+    // Se não há dados de mudança ou estão vazios, mostrar mensagem genérica
+    if (!configChanges || (Object.keys(configChanges.old || {}).length === 0 && Object.keys(configChanges.new || {}).length === 0)) {
       return 'Config values updated';
     }
 

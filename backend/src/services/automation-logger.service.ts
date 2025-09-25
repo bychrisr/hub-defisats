@@ -124,32 +124,37 @@ export class AutomationLoggerService {
           created_at: 'desc'
         },
         take: limit,
-        select: {
-          id: true,
-          action: true,
-          resource_id: true,
-          old_values: true,
-          new_values: true,
-          details: true,
-          created_at: true
-        }
       });
 
-      return logs.map(log => ({
-        id: log.id,
-        action: log.action,
-        automation_id: log.resource_id,
-        old_state: log.old_values?.is_active,
-        new_state: log.new_values?.is_active,
-        config_changes: {
+      return logs.map(log => {
+        const configChanges = {
           old: log.old_values?.config || {},
           new: log.new_values?.config || {}
-        },
-        automation_type: log.details?.automation_type,
-        change_type: log.details?.change_type,
-        reason: log.details?.reason,
-        timestamp: log.created_at
-      }));
+        };
+
+        // Debug: Log the actual values
+        console.log('🔍 DEBUG - Log processing:', {
+          logId: log.id,
+          oldValues: log.old_values,
+          newValues: log.new_values,
+          configChanges,
+          oldConfigType: typeof log.old_values?.config,
+          newConfigType: typeof log.new_values?.config
+        });
+
+        return {
+          id: log.id,
+          action: log.action,
+          automation_id: log.resource_id,
+          old_state: log.old_values?.is_active,
+          new_state: log.new_values?.is_active,
+          config_changes: configChanges,
+          automation_type: log.details?.automation_type,
+          change_type: log.details?.change_type,
+          reason: log.details?.reason,
+          timestamp: log.created_at
+        };
+      });
 
     } catch (error) {
       console.error('❌ AUTOMATION LOGGER - Failed to get state change history:', error);
@@ -234,15 +239,6 @@ export class AutomationLoggerService {
           created_at: 'desc'
         },
         take: limit,
-        select: {
-          id: true,
-          action: true,
-          resource_id: true,
-          old_values: true,
-          new_values: true,
-          details: true,
-          created_at: true
-        }
       });
 
       return logs.map(log => ({
