@@ -1033,10 +1033,6 @@
     background-color: hsl(var(--bg-primary));
   }
 
-  .light .bg-card {
-    background-color: hsl(var(--bg-card));
-  }
-
   .light .bg-card-alt {
     background-color: hsl(var(--bg-card-alt));
   }
