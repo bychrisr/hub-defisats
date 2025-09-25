@@ -81,8 +81,8 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
 
         // Fazer todas as chamadas em paralelo
         const [balanceResponse, positionsResponse, marketResponse, menuResponse] = await Promise.allSettled([
-          api.get('/api/lnmarkets/balance'),
-          api.get('/api/lnmarkets/positions'),
+          api.get('/api/lnmarkets/user/balance'),
+          api.get('/api/lnmarkets/user/positions'),
           api.get('/api/market/index/public'),
           isAdmin ? api.get('/api/admin/menu') : Promise.resolve({ data: { success: true, data: null } })
         ]);
