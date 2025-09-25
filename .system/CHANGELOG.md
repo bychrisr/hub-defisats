@@ -4,6 +4,111 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v1.10.5] - 2025-01-25
+
+### 🎨 **DESIGN SYSTEM ALIGNMENT: AUTOMATION STATE CHANGES**
+
+#### ✨ **Design Padronizado**
+- ✅ **Problema Resolvido**: Automation State Changes estava fora do padrão da plataforma
+- ✅ **Solução**: Redesenhado seguindo exatamente o padrão do admin panel
+- ✅ **Layout**: Substituído cards customizados por Table component padrão
+- ✅ **Classes**: Aplicado `backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow`
+- ✅ **Estrutura**: TableHeader com gradiente e TableBody com linhas alternadas
+- ✅ **Ícones**: CheckCircle, XCircle, Settings, Shield, Target, Bot consistentes
+- ✅ **Badges**: Status com cores padrão (bg-green-500, bg-gray-500)
+- ✅ **Tipografia**: text-text-primary e text-text-secondary padronizados
+- ✅ **Resultado**: Design 100% alinhado com plataforma
+
+#### 🔧 **Melhorias Técnicas**
+- ✅ **Componentes**: Uso de Table, TableHeader, TableBody padrão
+- ✅ **Hover Effects**: Transições suaves e consistentes
+- ✅ **Responsividade**: Layout adaptável mantido
+- ✅ **Performance**: Otimizado com componentes padrão
+
+---
+
+## [v1.10.4] - 2025-01-25
+
+### 🔧 **DATA PERSISTENCE: AUTOMATION STATE CHANGES**
+
+#### ✨ **Logging System Completo**
+- ✅ **Problema Resolvido**: AutomationService não estava criando logs de toggle
+- ✅ **Solução**: Injetado AutomationLoggerService no AutomationService
+- ✅ **Toggle Logging**: Adicionado log automático em toggleAutomation()
+- ✅ **Controller Update**: Atualizado AutomationController para usar nova estrutura
+- ✅ **Tests Update**: Corrigidos testes para nova estrutura de dependências
+- ✅ **Resultado**: Logs sendo criados e retornados corretamente
+
+#### 🔧 **Melhorias Técnicas**
+- ✅ **Dependency Injection**: AutomationLoggerService injetado corretamente
+- ✅ **Error Handling**: Logs não quebram fluxo principal
+- ✅ **Data Structure**: Logs com timestamp, change_type, automation_type
+- ✅ **User Filtering**: Filtros por user_id funcionando corretamente
+
+---
+
+## [v1.10.3] - 2025-01-25
+
+### 🔧 **STATE PERSISTENCE: MARGIN GUARD TOGGLE**
+
+#### ✨ **Persistência de Estado**
+- ✅ **Problema Resolvido**: Margin Guard voltando para inativo após refresh
+- ✅ **Causa Raiz**: Timing issue no loadAutomationData e campo incorreto
+- ✅ **Solução**: Usar getState() para dados frescos e is_active correto
+- ✅ **Timing Fix**: Aguardar atualização do store antes de usar dados
+- ✅ **Field Fix**: MarginGuard.tsx usando is_active em vez de config.enabled
+- ✅ **Resultado**: Estado persistindo corretamente após refresh
+
+#### 🔧 **Melhorias Técnicas**
+- ✅ **Store Access**: useAutomationStore.getState() para dados atualizados
+- ✅ **Debug Logging**: Logs detalhados para rastrear inicialização
+- ✅ **State Management**: Estado local sincronizado com store
+- ✅ **Error Prevention**: Eliminação de race conditions
+
+---
+
+## [v1.10.2] - 2025-01-25
+
+### 🔧 **TOGGLE FUNCTIONALITY: MARGIN GUARD AUTO-DEACTIVATION**
+
+#### ✨ **Correção de Toggle**
+- ✅ **Problema Resolvido**: Margin Guard sendo desativado automaticamente
+- ✅ **Causa Raiz**: Múltiplos problemas no frontend causando conflitos
+- ✅ **Solução**: Correções em Axios, chamadas duplicadas e toast messages
+- ✅ **Axios Fix**: Adicionado body {} para satisfazer validação Fastify
+- ✅ **Duplicate Calls**: Removidas chamadas duplicadas de updateAutomation
+- ✅ **Toast Fix**: Mensagem usando estado atualizado da automação
+- ✅ **Resultado**: Toggle funcionando corretamente
+
+#### 🔧 **Melhorias Técnicas**
+- ✅ **API Calls**: PATCH requests com body correto
+- ✅ **State Management**: Eliminação de chamadas duplicadas
+- ✅ **User Feedback**: Toast messages com estado correto
+- ✅ **Error Prevention**: Prevenção de conflitos de toggle
+
+---
+
+## [v1.10.1] - 2025-01-25
+
+### 🔧 **CRITICAL FIX: AUTOMATION REPORTS ERROR**
+
+#### ✨ **Correção de Endpoints**
+- ✅ **Problema Resolvido**: "Failed to fetch automation reports" na página /reports
+- ✅ **Causa Raiz**: Endpoints frontend sem prefixo /api correto
+- ✅ **Solução**: Corrigidos todos os endpoints para usar prefixo /api
+- ✅ **Endpoints Fix**: /automation-reports, /automations/state-history, /automations/execution-history
+- ✅ **Proxy Validation**: Vite proxy funcionando corretamente
+- ✅ **Authentication**: Sistema JWT funcionando perfeitamente
+- ✅ **Resultado**: Sistema de relatórios 100% funcional
+
+#### 🔧 **Melhorias Técnicas**
+- ✅ **API Integration**: Endpoints frontend corrigidos
+- ✅ **Proxy Configuration**: Vite proxy /api → backend funcionando
+- ✅ **Error Handling**: Tratamento correto de erros de autenticação
+- ✅ **Data Validation**: Verificação de dados no banco
+
+---
+
 ## [v1.10.0] - 2025-01-25
 
 ### 🔧 **CORREÇÃO CRÍTICA: PROBLEMA "FAILED TO FETCH AUTOMATION REPORTS" RESOLVIDO**
