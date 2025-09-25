@@ -158,13 +158,6 @@ export const Automation = () => {
           type: 'margin_guard',
           config: marginGuardConfig,
         });
-        // Atualizar o status após criação
-        const createdAutomation = automations.find((a) => a.type === 'margin_guard');
-        if (createdAutomation) {
-          await updateAutomation(createdAutomation.id, {
-            is_active: marginGuard.enabled,
-          });
-        }
       }
 
       // Salvar TP/SL
@@ -187,13 +180,6 @@ export const Automation = () => {
           type: 'tp_sl',
           config: tpslConfig,
         });
-        // Atualizar o status após criação
-        const createdAutomation = automations.find((a) => a.type === 'tp_sl');
-        if (createdAutomation) {
-          await updateAutomation(createdAutomation.id, {
-            is_active: tpsl.enabled,
-          });
-        }
       }
 
       // SALVAMENTO NO BANCO CONCLUÍDO COM SUCESSO

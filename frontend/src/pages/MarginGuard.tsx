@@ -120,11 +120,11 @@ export default function MarginGuard() {
   const handleToggle = async () => {
     if (marginGuardAutomation) {
       try {
-        await toggleAutomation(marginGuardAutomation.id);
+        const toggledAutomation = await toggleAutomation(marginGuardAutomation.id);
         toast.success(
-          marginGuardAutomation.is_active
-            ? 'Margin Guard deactivated'
-            : 'Margin Guard activated'
+          toggledAutomation.is_active
+            ? 'Margin Guard activated'
+            : 'Margin Guard deactivated'
         );
       } catch (error: any) {
         toast.error(error.message || 'Failed to toggle Margin Guard');

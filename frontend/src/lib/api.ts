@@ -160,7 +160,7 @@ export const automationAPI = {
 
   delete: (id: string) => api.delete(`/api/automations/${id}`),
 
-  toggle: (id: string) => api.patch(`/api/automations/${id}/toggle`),
+  toggle: (id: string) => api.patch(`/api/automations/${id}/toggle`, {}),
 
   getStats: () => api.get('/api/automations/stats'),
 };
