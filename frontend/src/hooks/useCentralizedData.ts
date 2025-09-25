@@ -101,7 +101,7 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
         api.get('/api/menu')
       ]);
 
-      // Processar respostas
+      // Processar respostas e detectar erros de credenciais
       const userBalance = balanceResponse.status === 'fulfilled' && balanceResponse.value.data.success 
         ? balanceResponse.value.data.data 
         : null;
@@ -109,6 +109,25 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
       const userPositions = positionsResponse.status === 'fulfilled' && positionsResponse.value.data.success 
         ? positionsResponse.value.data.data || []
         : [];
+
+      // Check for credential errors in responses
+      let credentialError = null;
+      if (balanceResponse.status === 'rejected') {
+        const errorData = balanceResponse.reason?.response?.data;
+        if (errorData?.message?.includes('credentials') || 
+            errorData?.message?.includes('authentication') ||
+            errorData?.message?.includes('unauthorized')) {
+          credentialError = 'Invalid LN Markets credentials';
+        }
+      }
+      if (positionsResponse.status === 'rejected') {
+        const errorData = positionsResponse.reason?.response?.data;
+        if (errorData?.message?.includes('credentials') || 
+            errorData?.message?.includes('authentication') ||
+            errorData?.message?.includes('unauthorized')) {
+          credentialError = 'Invalid LN Markets credentials';
+        }
+      }
 
       const marketIndex = marketResponse.status === 'fulfilled' && marketResponse.value.data.success 
         ? {
@@ -129,17 +148,31 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
 
       // Verificar se houve erros críticos (market data é obrigatório)
       const criticalErrors = [];
+      if (credentialError) {
+        criticalErrors.push(credentialError);
+      }
       if (marketResponse.status === 'rejected' || !marketIndex) {
         criticalErrors.push('Market data indisponível - dados podem estar desatualizados');
       }
-      if (balanceResponse.status === 'rejected') {
+      if (balanceResponse.status === 'rejected' && !credentialError) {
         criticalErrors.push('Balance');
       }
-      if (positionsResponse.status === 'rejected') {
+      if (positionsResponse.status === 'rejected' && !credentialError) {
         criticalErrors.push('Positions');
       }
       if (menuResponse.status === 'rejected') {
         criticalErrors.push('Menu');
+      }
+
+      // Se houver erro de credenciais, não atualizar cache e mostrar erro específico
+      if (credentialError) {
+        console.log('❌ CENTRALIZED DATA - Credential error detected, not updating cache');
+        setData(prev => ({
+          ...prev,
+          isLoading: false,
+          error: credentialError
+        }));
+        return;
       }
 
       // Se market data não estiver disponível, não atualizar cache e mostrar erro

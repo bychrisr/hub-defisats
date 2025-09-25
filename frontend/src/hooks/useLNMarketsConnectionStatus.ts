@@ -20,9 +20,32 @@ export function useLNMarketsConnectionStatus() {
     user?.ln_markets_passphrase
   );
 
-  // Determine connection status based on centralized data
-  const isConnected = hasCredentials && !error && centralizedData?.userBalance !== null;
-  const connectionError = error || (hasCredentials && !isConnected ? 'Unable to connect to LN Markets' : null);
+  // More strict validation: check if we have valid data AND no errors
+  const hasValidData = centralizedData?.userBalance !== null && 
+                      centralizedData?.userBalance !== undefined &&
+                      !centralizedData?.error;
+  
+  // Check for specific credential errors in the error message
+  const hasCredentialError = error?.includes('credentials') || 
+                            error?.includes('authentication') ||
+                            error?.includes('unauthorized') ||
+                            centralizedData?.error?.includes('credentials') ||
+                            centralizedData?.error?.includes('authentication');
+
+  const isConnected = hasCredentials && hasValidData && !hasCredentialError;
+  
+  let connectionError = null;
+  if (hasCredentials && !isConnected) {
+    if (hasCredentialError) {
+      connectionError = 'Invalid credentials';
+    } else if (centralizedData?.error) {
+      connectionError = centralizedData.error;
+    } else if (error) {
+      connectionError = error;
+    } else {
+      connectionError = 'Unable to connect to LN Markets';
+    }
+  }
 
   return {
     isConnected,
