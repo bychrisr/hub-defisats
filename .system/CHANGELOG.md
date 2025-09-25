@@ -4,6 +4,61 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v1.6.0] - 2025-01-21
+
+### 🚀 **Sistema de Otimização Avançada e Segurança para Mercados Voláteis**
+
+#### ✨ **Novas Funcionalidades**
+- ✅ **AdvancedQueryOptimizerService**: Otimização inteligente de queries com métricas detalhadas
+- ✅ **SecureQueryOptimizerService**: Cache seguro com TTL diferenciado por tipo de dados
+- ✅ **DatabaseIndexOptimizerService**: Otimização automática de índices com recomendações
+- ✅ **VolatileMarketDataService**: Dados de mercado com cache máximo de 30 segundos
+- ✅ **IntelligentCacheService**: Estratégias de cache inteligentes e eviction automático
+- ✅ **UnifiedAdminOptimizationService**: Interface unificada para gerenciamento administrativo
+- ✅ **useOptimizedMarketData**: Hook frontend otimizado para dados de mercado seguros
+
+#### 🛡️ **Segurança Crítica para Mercados Voláteis**
+- ✅ **Zero Tolerância a Dados Antigos**: Nenhum fallback com dados simulados ou antigos
+- ✅ **Cache Máximo 30 Segundos**: Dados de mercado nunca cacheados por mais de 30s
+- ✅ **Validação Rigorosa de Timestamps**: Rejeição automática de dados antigos
+- ✅ **Erro Transparente**: Usuário sempre informado quando dados não estão disponíveis
+- ✅ **Interface Educativa**: Explicação clara sobre riscos de dados desatualizados
+
+#### 🔧 **Correções Críticas**
+- ✅ **useLatestPrices Hook**: Removido fallback perigoso com dados simulados
+- ✅ **Hooks Frontend**: Implementada segurança rigorosa em todos os hooks de dados
+- ✅ **Validação de Dados**: Validação obrigatória de timestamps e estrutura
+- ✅ **Tratamento de Erros**: Erro claro quando dados de mercado indisponíveis
+
+#### 📊 **Monitoramento e Administração**
+- ✅ **Endpoints Administrativos**: `/api/admin/optimization/*` para gerenciamento unificado
+- ✅ **Métricas Unificadas**: Performance de queries, cache, banco e dados de mercado
+- ✅ **Recomendações Automáticas**: Sugestões inteligentes de otimização
+- ✅ **Relatórios Detalhados**: Análise completa de performance e saúde do sistema
+- ✅ **Integração Existente**: Compatibilidade com recursos administrativos existentes
+
+#### 🎯 **Performance e Escalabilidade**
+- ✅ **Otimização de Queries**: Redução significativa no tempo de execução
+- ✅ **Cache Inteligente**: Estratégias diferenciadas por tipo de dados
+- ✅ **Índices Automáticos**: Criação e remoção automática de índices
+- ✅ **Monitoramento Proativo**: Detecção automática de problemas de performance
+
+#### 📚 **Documentação e Testes**
+- ✅ **Documentação Completa**: Guias detalhados de implementação e segurança
+- ✅ **Testes de Segurança**: Validação rigorosa dos princípios de segurança
+- ✅ **Resumo de Integração**: Documentação completa das integrações realizadas
+- ✅ **Checklist de Implementação**: Guia passo-a-passo para deploy
+
+### 🔄 **Breaking Changes**
+- **useLatestPrices Hook**: Removido fallback perigoso - agora retorna erro transparente
+- **Market Data Cache**: TTL reduzido para máximo 30 segundos
+- **Error Handling**: Mudança no comportamento de erro para dados indisponíveis
+
+### 🛡️ **Security**
+- **Volatile Market Data**: Implementada segurança rigorosa para dados de mercado
+- **Data Validation**: Validação obrigatória de timestamps e estrutura
+- **No Fallbacks**: Eliminação completa de dados simulados ou antigos
+
 ## [v1.5.0] - 2025-01-09
 
 ### 🎯 **Sistema de Validação de Credenciais Completo**
