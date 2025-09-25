@@ -135,6 +135,7 @@ export const useCentralizedData = (): UseCentralizedDataReturn => {
 
       // Also check if we got empty/null data when we should have data
       // This indicates invalid credentials even if API doesn't return 401
+      const hasCredentials = !!(user?.ln_markets_api_key && user?.ln_markets_api_secret && user?.ln_markets_passphrase);
       if (!credentialError && hasCredentials && (!userBalance && !userPositions.length)) {
         // If we have credentials but no data, likely invalid credentials
         credentialError = 'Invalid LN Markets credentials';
