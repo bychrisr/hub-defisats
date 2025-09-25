@@ -376,8 +376,7 @@ export default function Dashboard() {
 
     // Cards quantitativos neutros (sempre cinza - números fixos, não valores monetários)
     const neutralQuantitativeCards = {
-      'active-trades': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' },
-      'total-margin': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' }
+      'active-trades': { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: 'group-hover:shadow-gray-500/30', icon: 'text-gray-300 group-hover:text-gray-200' }
     };
 
     // Se for um card com cor temática, retorna as cores temáticas
@@ -817,7 +816,12 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
-                        {calculateTotalMargin()}
+                        {formatSats(calculateTotalMargin(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-purple-300'
+                        })}
                       </div>
                     </div>
                     
