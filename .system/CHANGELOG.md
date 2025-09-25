@@ -4,6 +4,16 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v1.5.0] - 2025-01-09
+
+### 🎯 **Sistema de Validação de Credenciais Completo**
+- ✅ **Store Global Zustand**: Implementado store centralizado para dados da LN Markets
+- ✅ **Rotas API Corrigidas**: Corrigidas rotas para `/api/lnmarkets/user/balance` e `/api/lnmarkets/user/positions`
+- ✅ **Consistência de Status**: Todos os componentes agora mostram o mesmo status de conexão
+- ✅ **Validação Real**: Status baseado em dados reais da API, não apenas formato das credenciais
+- ✅ **UI Atualizada**: Perfil, Sidebar e Settings mostram status correto (Connected/Invalid/Not Configured)
+- ✅ **Dashboard Funcional**: Continua funcionando com dados em tempo real
+
 ## [Unreleased]
 
 ### 🔧 **Correções Críticas - Prisma Race Condition e Login Issues**

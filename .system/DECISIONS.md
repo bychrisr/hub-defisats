@@ -2227,3 +2227,32 @@ Implementar sistema de rate limiting dinâmico que permite configuração em tem
 **Versão**: 1.6.0  
 **Última Atualização**: 2025-01-25  
 **Responsável**: Equipe de Desenvolvimento
+
+
+## ADR-023: Implementação de Store Global Zustand para Dados Centralizados
+
+**Data**: 2025-01-09  
+**Status**: Implementado  
+**Contexto**: Problema de inconsistência de status entre componentes devido a múltiplas instâncias de `useCentralizedData`.
+
+**Decisão**: Implementar store global Zustand para centralizar dados da LN Markets e garantir consistência entre componentes.
+
+**Consequências**:
+- ✅ Estado único e consistente entre todos os componentes
+- ✅ Melhor performance (evita múltiplas chamadas de API)
+- ✅ Reatividade automática quando dados mudam
+- ✅ Facilita debugging e manutenção
+
+## ADR-024: Correção de Rotas API para Validação de Credenciais
+
+**Data**: 2025-01-09  
+**Status**: Implementado  
+**Contexto**: Store estava chamando rotas incorretas da API, causando erros 404/500 e detecção falsa de credenciais inválidas.
+
+**Decisão**: Corrigir rotas para usar endpoints corretos (`/api/lnmarkets/user/balance` e `/api/lnmarkets/user/positions`).
+
+**Consequências**:
+- ✅ APIs funcionam corretamente
+- ✅ Validação de credenciais baseada em dados reais
+- ✅ Status de conexão preciso e confiável
+- ✅ Melhor experiência do usuário
