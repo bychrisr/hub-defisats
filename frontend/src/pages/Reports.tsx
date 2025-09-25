@@ -1050,16 +1050,16 @@ export default function Reports() {
 
             {/* State Changes History */}
         {stateChanges.length > 0 && (
-          <div className="space-y-6">
+          <div className="space-y-3">
             <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
-              <CardHeader>
+              <CardHeader className="py-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                    <Settings className="h-5 w-5 text-primary" />
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                    <Settings className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl font-semibold">Automation State Changes</CardTitle>
-                    <CardDescription className="text-text-secondary">
+                    <CardTitle className="text-lg font-semibold">Automation State Changes</CardTitle>
+                    <CardDescription className="text-text-secondary text-sm">
                       Detailed history of automation activations, deactivations, and configuration changes
                     </CardDescription>
                   </div>

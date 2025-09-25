@@ -166,12 +166,12 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
     <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-lg">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-background/20 transition-colors">
+          <CardHeader className="cursor-pointer hover:bg-background/20 transition-colors py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {getAutomationIcon()}
                 <div>
-                  <CardTitle className="text-lg font-semibold">
+                  <CardTitle className="text-base font-semibold">
                     {automationType === 'margin_guard' ? 'Margin Guard' :
                      automationType === 'tp_sl' ? 'Take Profit / Stop Loss' :
                      automationType}
@@ -184,7 +184,7 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
               <div className="flex items-center gap-2">
                 {getChangeTypeBadge()}
                 {hasChanges && (
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="p-1">
                     {isExpanded ? (
                       <ChevronDown className="h-4 w-4" />
                     ) : (
@@ -199,18 +199,18 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
         
         {hasChanges && (
           <CollapsibleContent>
-            <CardContent className="pt-0">
-              <div className="space-y-3">
+            <CardContent className="pt-0 pb-3">
+              <div className="space-y-2">
                 {changes.map((change, index) => {
                   const IconComponent = change.icon;
                   const isIncrease = change.type === 'numeric' && change.new > change.old;
                   const isDecrease = change.type === 'numeric' && change.new < change.old;
                   
                   return (
-                    <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-background/20">
-                      <div className="p-2 rounded-lg bg-background/30">
+                    <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-background/20">
+                      <div className="p-1.5 rounded-lg bg-background/30">
                         <IconComponent className={cn(
-                          "h-4 w-4",
+                          "h-3 w-3",
                           isIncrease ? "text-green-500" : 
                           isDecrease ? "text-red-500" : 
                           "text-blue-500"
@@ -218,15 +218,15 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
                       </div>
                       
                       <div className="flex-1">
-                        <div className="font-medium text-text-primary">
+                        <div className="font-medium text-text-primary text-sm">
                           {change.field}
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                        <div className="flex items-center gap-1 text-xs">
+                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-xs px-1.5 py-0.5">
                             {change.old}{change.unit}
                           </Badge>
-                          <ArrowRight className="h-3 w-3 text-text-secondary" />
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <ArrowRight className="h-2 w-2 text-text-secondary" />
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs px-1.5 py-0.5">
                             {change.new}{change.unit}
                           </Badge>
                         </div>
@@ -235,16 +235,13 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
                       {change.type === 'numeric' && (
                         <div className="text-right">
                           <div className={cn(
-                            "text-sm font-medium",
+                            "text-xs font-medium",
                             isIncrease ? "text-green-600" : 
                             isDecrease ? "text-red-600" : 
                             "text-text-secondary"
                           )}>
                             {isIncrease ? '+' : isDecrease ? '-' : ''}
                             {Math.abs(change.new - change.old)}{change.unit}
-                          </div>
-                          <div className="text-xs text-text-secondary">
-                            {isIncrease ? 'increase' : isDecrease ? 'decrease' : 'no change'}
                           </div>
                         </div>
                       )}
@@ -253,8 +250,8 @@ export const ConfigChangeDisplay: React.FC<ConfigChangeDisplayProps> = ({
                 })}
               </div>
               
-              <div className="mt-4 pt-3 border-t border-border/30">
-                <div className="flex items-center gap-2 text-xs text-text-secondary">
+              <div className="mt-2 pt-2 border-t border-border/30">
+                <div className="flex items-center gap-1 text-xs text-text-secondary">
                   <Info className="h-3 w-3" />
                   <span>Changed on {new Date(timestamp).toLocaleString()}</span>
                 </div>

@@ -38,7 +38,7 @@ export const AutomationChangeGroup: React.FC<AutomationChangeGroupProps> = ({
   date,
   changes
 }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Estatísticas do grupo
   const getGroupStats = () => {
@@ -93,14 +93,14 @@ export const AutomationChangeGroup: React.FC<AutomationChangeGroupProps> = ({
     <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-lg">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-background/20 transition-colors">
+          <CardHeader className="cursor-pointer hover:bg-background/20 transition-colors py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                  <Calendar className="h-5 w-5 text-primary" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                  <Calendar className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-semibold">
+                  <CardTitle className="text-lg font-semibold">
                     {formatDate(date)}
                   </CardTitle>
                   <p className="text-sm text-text-secondary">
@@ -109,26 +109,26 @@ export const AutomationChangeGroup: React.FC<AutomationChangeGroupProps> = ({
                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
-                <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
                   {stats.activations > 0 && (
-                    <Badge className="bg-green-500 text-white">
+                    <Badge className="bg-green-500 text-white text-xs px-2 py-1">
                       {stats.activations} activated
                     </Badge>
                   )}
                   {stats.deactivations > 0 && (
-                    <Badge className="bg-red-500 text-white">
+                    <Badge className="bg-red-500 text-white text-xs px-2 py-1">
                       {stats.deactivations} deactivated
                     </Badge>
                   )}
                   {stats.configUpdates > 0 && (
-                    <Badge className="bg-blue-500 text-white">
+                    <Badge className="bg-blue-500 text-white text-xs px-2 py-1">
                       {stats.configUpdates} updated
                     </Badge>
                   )}
                 </div>
                 
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="p-1">
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4" />
                   ) : (
@@ -141,8 +141,8 @@ export const AutomationChangeGroup: React.FC<AutomationChangeGroupProps> = ({
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="pt-0">
-            <div className="space-y-4">
+          <CardContent className="pt-0 pb-3">
+            <div className="space-y-2">
               {changes.map((change) => (
                 <ConfigChangeDisplay
                   key={change.id}
