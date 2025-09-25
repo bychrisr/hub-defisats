@@ -43,6 +43,20 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 **Prioridade**: Média  
 **Impacto**: UX - usuário não é notificado sobre atualizações disponíveis
 
+### Sistema CRUD para Gerenciamento de Cards
+**Status**: 📋 **PLANEJADO**  
+**Descrição**: Interface administrativa para gerenciar cards do dashboard  
+**Funcionalidades**:
+- ✅ **Create**: Adicionar novos cards
+- ✅ **Read**: Visualizar cards existentes
+- ✅ **Update**: Editar configurações de cards
+- ✅ **Delete**: Remover cards
+- ✅ **Tipos de Dados**: Monetário (sats), Quantitativo (contagem), Percentual, Temático
+- ✅ **Configurações**: Cores, ícones, lógica de exibição, SatsIcon (sim/não)
+- ✅ **Validação**: Regras de negócio para cada tipo de card
+**Prioridade**: Média  
+**Impacto**: Manutenibilidade - facilitar gerenciamento de cards sem código
+
 ---
 
 ## ✅ ETAPA 0: SETUP INICIAL & CONTRATOS DE API (COMPLETA)
