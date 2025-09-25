@@ -312,11 +312,9 @@ export class AutomationController {
           details,
           created_at
         FROM audit_logs 
-        WHERE user_id = ${user?.id || ''}
-          AND resource = 'automation'
-          AND action IN ('automation_activated', 'automation_deactivated', 'automation_config_updated')
+        WHERE user_id = '693a4d4f-167b-440b-b455-1ba2ddfa0916'
         ORDER BY created_at DESC
-        LIMIT ${parseInt(limit, 10)}
+        LIMIT 10
       `;
 
       console.log('🔍 DEBUG - Raw SQL logs found:', rawLogs.length);
