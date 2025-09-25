@@ -5,6 +5,8 @@ interface FormatSatsOptions {
   size?: number;
   showIcon?: boolean;
   variant?: 'auto' | 'positive' | 'negative' | 'neutral' | 'default';
+  forceColor?: boolean; // Força a cor do className a sobrescrever a variante
+  className?: string; // Classe CSS customizada para o ícone
 }
 
 export const useFormatSats = () => {
@@ -15,7 +17,9 @@ export const useFormatSats = () => {
     const { 
       size = 28, 
       showIcon = true, 
-      variant = 'auto' 
+      variant = 'auto',
+      forceColor = false,
+      className = ''
     } = options;
 
     // Determinar variante automaticamente se 'auto'
@@ -54,7 +58,12 @@ export const useFormatSats = () => {
     return (
       <span className="flex items-center gap-1">
         {formattedNumber}
-        <SatsIcon size={size} variant={iconVariant} />
+        <SatsIcon 
+          size={size} 
+          variant={iconVariant} 
+          forceColor={forceColor}
+          className={className}
+        />
       </span>
     );
   };

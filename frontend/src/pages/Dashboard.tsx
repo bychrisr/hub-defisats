@@ -365,7 +365,7 @@ export default function Dashboard() {
     return estimatedBalance.data.trading_frequency || 0;
   };
 
-  // Função para calcular o tamanho global baseado no menor valor entre todos os cards
+  // Função para calcular o tamanho global baseado no MAIOR valor entre todos os cards
   const getGlobalDynamicSize = () => {
     // Coletar todos os valores numéricos dos cards
     const allValues = [
@@ -380,20 +380,20 @@ export default function Dashboard() {
       calculateFeesPaid()
     ];
 
-    // Encontrar o menor valor absoluto (excluindo zeros)
+    // Encontrar o MAIOR valor absoluto (excluindo zeros)
     const nonZeroValues = allValues.filter(value => value !== 0);
     if (nonZeroValues.length === 0) {
       return { textSize: 'text-number-lg', iconSize: 24 }; // Padrão se todos forem zero
     }
 
-    const minValue = Math.min(...nonZeroValues.map(Math.abs));
+    const maxValue = Math.max(...nonZeroValues.map(Math.abs));
     
-    // Se o menor valor for zero, usar tamanho padrão
-    if (minValue === 0) {
+    // Se o maior valor for zero, usar tamanho padrão
+    if (maxValue === 0) {
       return { textSize: 'text-number-lg', iconSize: 24 };
     }
     
-    const digits = Math.floor(Math.log10(minValue)) + 1;
+    const digits = Math.floor(Math.log10(maxValue)) + 1;
     
     let result;
     if (digits <= 3) {
@@ -409,7 +409,7 @@ export default function Dashboard() {
     console.log('🔍 Global Dynamic Size Debug:', {
       allValues,
       nonZeroValues,
-      minValue,
+      maxValue,
       digits,
       result
     });
@@ -543,7 +543,15 @@ export default function Dashboard() {
                         getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(positionsData.totalPL || 0, { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(positionsData.totalPL || 0, { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'auto',
+                          forceColor: true,
+                          className: positionsLoading ? 'text-gray-300' :
+                            getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-300' :
+                            getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-300' :
+                            'text-gray-300'
+                        })}
                       </div>
                     </div>
                     
@@ -617,7 +625,14 @@ export default function Dashboard() {
                         getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(positionsData.estimatedProfit || 0, { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(positionsData.estimatedProfit || 0, { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'auto',
+                          forceColor: true,
+                          className: positionsLoading ? 'text-gray-300' :
+                            getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-300' :
+                            'text-gray-300'
+                        })}
                       </div>
                     </div>
                     
@@ -646,20 +661,12 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Card Active Trades com cores dinâmicas */}
+            {/* Card Active Trades - SEMPRE CINZA (neutro permanente) */}
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
-                <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  positionsLoading ? 'bg-gray-600/20 border-gray-500/30' :
-                  getTradesColor(positionsData.positionCount || 0) === 'positive' ? 'bg-blue-600/20 border-blue-500/30 group-hover:shadow-blue-500/30' :
-                  'bg-gray-600/20 border-gray-500/30'
-                }`}>
-                  <Activity className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    positionsLoading ? 'text-gray-300 group-hover:text-gray-200' :
-                    getTradesColor(positionsData.positionCount || 0) === 'positive' ? 'text-blue-300 group-hover:text-blue-200' :
-                    'text-gray-300 group-hover:text-gray-200'
-                  }`} />
+                <div className="w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out bg-gray-600/20 border-gray-500/30 group-hover:shadow-gray-500/30">
+                  <Activity className="w-6 h-6 stroke-2 group-hover:transition-colors duration-500 text-gray-300 group-hover:text-gray-200" />
                 </div>
               </div>
               
@@ -686,12 +693,13 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${
-                        positionsLoading ? 'text-gray-200' :
-                        getTradesColor(calculateActiveTrades()) === 'positive' ? 'text-blue-200' :
-                        'text-gray-200'
-                      }`}>
-                        {formatSats(calculateActiveTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                      <div className={`${getGlobalDynamicSize().textSize} text-gray-200`}>
+                        {formatSats(calculateActiveTrades(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-gray-300'
+                        })}
                       </div>
                     </div>
                     
@@ -769,7 +777,12 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
-                        {formatSats(calculateTotalMargin(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateTotalMargin(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-purple-300'
+                        })}
                       </div>
                     </div>
                     
@@ -816,7 +829,12 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
-                        {formatSats(positionsData.estimatedFees || 0, { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(positionsData.estimatedFees || 0, { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-orange-300'
+                        })}
                       </div>
                     </div>
                     
@@ -889,7 +907,14 @@ export default function Dashboard() {
                         calculateAvailableMargin() > 0 ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateAvailableMargin(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateAvailableMargin(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'auto',
+                          forceColor: true,
+                          className: positionsLoading ? 'text-gray-300' :
+                            calculateAvailableMargin() > 0 ? 'text-green-300' :
+                            'text-gray-300'
+                        })}
                       </div>
                     </div>
                     
@@ -961,7 +986,15 @@ export default function Dashboard() {
                         calculateEstimatedBalance() < 0 ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateEstimatedBalance(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateEstimatedBalance(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'auto',
+                          forceColor: true,
+                          className: positionsLoading ? 'text-gray-300' :
+                            calculateEstimatedBalance() > 0 ? 'text-green-300' :
+                            calculateEstimatedBalance() < 0 ? 'text-red-300' :
+                            'text-gray-300'
+                        })}
                       </div>
                     </div>
                     
@@ -1014,7 +1047,12 @@ export default function Dashboard() {
 
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-blue-200`}>
-                        {formatSats(calculateTotalInvested(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateTotalInvested(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-blue-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1073,7 +1111,15 @@ export default function Dashboard() {
                         calculateNetProfit() < 0 ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateNetProfit(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateNetProfit(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'auto',
+                          forceColor: true,
+                          className: positionsLoading ? 'text-gray-300' :
+                            calculateNetProfit() > 0 ? 'text-green-300' :
+                            calculateNetProfit() < 0 ? 'text-red-300' :
+                            'text-gray-300'
+                        })}
                       </div>
                     </div>
                     
@@ -1126,7 +1172,12 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
-                        {formatSats(calculateFeesPaid(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateFeesPaid(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-orange-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1296,7 +1347,12 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
-                        {formatSats(calculateTotalTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateTotalTrades(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-purple-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1335,7 +1391,12 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-green-200`}>
-                        {formatSats(calculateWinningTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateWinningTrades(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-green-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1374,7 +1435,12 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-red-200`}>
-                        {formatSats(calculateLostTrades(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateLostTrades(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-red-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1431,7 +1497,15 @@ export default function Dashboard() {
                         calculateAveragePnL() < 0 ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateAveragePnL(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateAveragePnL(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'auto',
+                          forceColor: true,
+                          className: positionsLoading ? 'text-gray-300' :
+                            calculateAveragePnL() > 0 ? 'text-green-300' :
+                            calculateAveragePnL() < 0 ? 'text-red-300' :
+                            'text-gray-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1470,7 +1544,12 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-orange-200`}>
-                        {formatSats(calculateMaxDrawdown(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateMaxDrawdown(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-red-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1577,7 +1656,12 @@ export default function Dashboard() {
                     
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} text-purple-200`}>
-                        {formatSats(calculateVolatility(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateVolatility(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-blue-300'
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1691,7 +1775,12 @@ export default function Dashboard() {
                         calculateBestTrade() > 0 ? 'text-yellow-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(calculateBestTrade(), { size: getGlobalDynamicSize().iconSize, variant: 'auto' })}
+                        {formatSats(calculateBestTrade(), { 
+                          size: getGlobalDynamicSize().iconSize, 
+                          variant: 'neutral',
+                          forceColor: true,
+                          className: 'text-green-300'
+                        })}
                       </div>
                     </div>
                     
