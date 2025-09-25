@@ -23,6 +23,7 @@ export function useLNMarketsConnectionStatus() {
   // Debug logging
   console.log('🔍 CONNECTION STATUS DEBUG:', {
     hasCredentials,
+    centralizedData: centralizedData,
     userBalance: centralizedData?.userBalance,
     userPositions: centralizedData?.userPositions?.length,
     centralizedError: centralizedData?.error,
