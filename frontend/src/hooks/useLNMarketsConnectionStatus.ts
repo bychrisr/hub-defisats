@@ -30,10 +30,12 @@ export function useLNMarketsConnectionStatus() {
     isLoading
   });
 
-  // More strict validation: check if we have valid data AND no errors
-  const hasValidData = centralizedData?.userBalance !== null && 
-                      centralizedData?.userBalance !== undefined &&
-                      !centralizedData?.error;
+  // More flexible validation: check if we have any data from LN Markets
+  const hasValidData = (centralizedData?.userBalance !== null && 
+                       centralizedData?.userBalance !== undefined) ||
+                      (centralizedData?.userPositions && 
+                       centralizedData?.userPositions.length > 0) ||
+                      (centralizedData?.lastUpdate && centralizedData.lastUpdate > 0);
   
   // Check for specific credential errors in the error message
   const hasCredentialError = error?.includes('credentials') || 
