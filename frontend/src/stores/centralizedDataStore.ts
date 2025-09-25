@@ -98,9 +98,25 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
 
         // Check for credential errors in responses
         let credentialError = null;
+        
+        // Debug balance response
+        console.log('🔍 BALANCE RESPONSE DEBUG:', {
+          status: balanceResponse.status,
+          data: balanceResponse.status === 'fulfilled' ? balanceResponse.value.data : null,
+          error: balanceResponse.status === 'rejected' ? balanceResponse.reason : null
+        });
+        
+        // Debug positions response
+        console.log('🔍 POSITIONS RESPONSE DEBUG:', {
+          status: positionsResponse.status,
+          data: positionsResponse.status === 'fulfilled' ? positionsResponse.value.data : null,
+          error: positionsResponse.status === 'rejected' ? positionsResponse.reason : null
+        });
+        
         if (balanceResponse.status === 'rejected') {
           const errorData = balanceResponse.reason?.response?.data;
           const status = balanceResponse.reason?.response?.status;
+          console.log('🔍 BALANCE ERROR DEBUG:', { errorData, status });
           if (errorData?.message?.includes('credentials') || 
               errorData?.message?.includes('authentication') ||
               errorData?.message?.includes('unauthorized') ||
@@ -111,6 +127,7 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
         if (positionsResponse.status === 'rejected') {
           const errorData = positionsResponse.reason?.response?.data;
           const status = positionsResponse.reason?.response?.status;
+          console.log('🔍 POSITIONS ERROR DEBUG:', { errorData, status });
           if (errorData?.message?.includes('credentials') || 
               errorData?.message?.includes('authentication') ||
               errorData?.message?.includes('unauthorized') ||
