@@ -1,50 +1,102 @@
 # 📊 Dashboard Cards - Status Report
 
-## 🎯 Status Atual (22 de Setembro de 2025)
+## 🎯 Status Atual (9 de Janeiro de 2025)
 
-### ✅ Cards Funcionando
+### ✅ Cards Funcionando (24 cards total)
 
-#### Cards Básicos
-1. **Total Invested** - ✅ Funcionando
-   - **Valor**: 156,341 sats
-   - **Fonte**: `estimatedBalance.data.total_invested`
-   - **Backend**: Soma de `entry_margin` de posições fechadas
-
-2. **Fees Paid** - ✅ Funcionando
-   - **Valor**: 3,306 sats
-   - **Fonte**: `estimatedBalance.data.total_fees`
-   - **Backend**: Soma de todas as taxas pagas
-
-3. **Estimated Balance** - ✅ Funcionando
-   - **Valor**: 24,214 sats
-   - **Fonte**: `estimatedBalance.data.estimated_balance`
-   - **Backend**: Cálculo baseado em margem + PnL - fees
-
-4. **PnL (Profit/Loss)** - ✅ Funcionando
-   - **Valor**: -11,300 sats
+#### Key Metrics (5 cards)
+1. **Total PnL** - ✅ Funcionando
    - **Fonte**: `positionsData.totalPL`
-   - **Backend**: PnL das posições atuais
+   - **Cores**: Dinâmicas (verde/vermelho/cinza)
 
-#### Cards Avançados (v2.0)
-5. **Win Streak** - ✅ Funcionando
-   - **Valor**: 0 (sequência de vitórias)
-   - **Fonte**: `estimatedBalance.data.win_streak`
-   - **Backend**: Cálculo de vitórias consecutivas
+2. **Estimated Profit** - ✅ Funcionando
+   - **Fonte**: `positionsData.estimatedProfit`
+   - **Cores**: Dinâmicas (verde/cinza)
 
-6. **Best Trade** - ✅ Funcionando
-   - **Valor**: 801 sats
-   - **Fonte**: `estimatedBalance.data.best_trade`
-   - **Backend**: Maior lucro em trade único
+3. **Active Trades** - ✅ Funcionando
+   - **Fonte**: `positionsData.positions.filter(pos => pos.status === 'running')`
+   - **Cores**: Neutro permanente (cinza) com ícone azul
 
-7. **Risk/Reward Ratio** - ✅ Funcionando
-   - **Valor**: 0.086
-   - **Fonte**: `estimatedBalance.data.risk_reward_ratio`
-   - **Backend**: Relação ganho médio/perda média
+4. **Total Margin** - ✅ Funcionando
+   - **Fonte**: `positionsData.totalMargin`
+   - **Cores**: Neutro permanente (cinza) com ícone roxo
 
-8. **Trading Frequency** - ✅ Funcionando
-   - **Valor**: 0 trades/dia
-   - **Fonte**: `estimatedBalance.data.trading_frequency`
-   - **Backend**: Trades por dia (últimos 30 dias)
+5. **Estimated Fees** - ✅ Funcionando
+   - **Fonte**: `positionsData.estimatedFees`
+   - **Cores**: Dinâmicas (laranja/cinza)
+
+#### History (19 cards)
+6. **Available Margin** - ✅ Funcionando
+   - **Fonte**: `balanceData.total_balance`
+   - **Cores**: Dinâmicas (verde/cinza)
+
+7. **Estimated Balance** - ✅ Funcionando
+   - **Fonte**: `estimatedBalance.data.estimated_balance`
+   - **Cores**: Dinâmicas (verde/vermelho/cinza)
+
+8. **Total Invested** - ✅ Funcionando
+   - **Fonte**: `estimatedBalance.data.total_invested`
+   - **Cores**: Azul fixo
+
+9. **Net Profit** - ✅ Funcionando
+   - **Fonte**: `historicalMetrics.totalProfit`
+   - **Cores**: Dinâmicas (verde/vermelho/cinza)
+
+10. **Fees Paid** - ✅ Funcionando
+    - **Fonte**: `historicalMetrics.totalFees`
+    - **Cores**: Laranja fixo
+
+11. **Success Rate** - ✅ Funcionando
+    - **Fonte**: `historicalMetrics.successRate`
+    - **Cores**: Dinâmicas (verde/amarelo/vermelho)
+
+12. **Total Profitability** - ✅ Funcionando
+    - **Fonte**: Cálculo de percentual
+    - **Cores**: Dinâmicas (verde/vermelho)
+
+13. **Total Trades** - ✅ Funcionando
+    - **Fonte**: `historicalMetrics.totalTrades`
+    - **Cores**: Roxo fixo
+
+14. **Winning Trades** - ✅ Funcionando
+    - **Fonte**: `historicalMetrics.winningTrades`
+    - **Cores**: Verde fixo
+
+15. **Lost Trades** - ✅ Funcionando
+    - **Fonte**: `historicalMetrics.lostTrades`
+    - **Cores**: Vermelho fixo
+
+16. **Average PnL** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.average_pnl`
+    - **Cores**: Dinâmicas (verde/vermelho/cinza)
+
+17. **Max Drawdown** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.max_drawdown`
+    - **Cores**: Vermelho fixo
+
+18. **Sharpe Ratio** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.sharpe_ratio`
+    - **Cores**: Dinâmicas (verde/amarelo/vermelho)
+
+19. **Volatility** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.volatility`
+    - **Cores**: Dinâmicas (verde/amarelo/vermelho)
+
+20. **Win Streak** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.win_streak`
+    - **Cores**: Verde fixo
+
+21. **Best Trade** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.best_trade`
+    - **Cores**: Verde fixo
+
+22. **Risk/Reward** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.risk_reward_ratio`
+    - **Cores**: Dinâmicas (verde/amarelo/vermelho)
+
+23. **Trading Frequency** - ✅ Funcionando
+    - **Fonte**: `estimatedBalance.data.trading_frequency`
+    - **Cores**: Azul fixo
 
 ### 🔧 Configuração Atual
 

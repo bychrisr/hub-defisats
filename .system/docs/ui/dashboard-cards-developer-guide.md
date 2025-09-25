@@ -53,9 +53,98 @@ docker compose -f config/docker/docker-compose.dev.yml logs -f backend
 - **Senha**: password
 - **Token JWT**: Gerado automaticamente no login
 
-## 📊 Lógica dos Cards
+## 📊 Lógica dos Cards (24 cards implementados)
 
-### 1. Total Invested (✅ Funcionando)
+### Key Metrics (5 cards)
+
+#### 1. Total PnL (✅ Funcionando)
+**Fonte de Dados**: `usePositionsMetrics` → `positionsData.totalPL`
+
+**Lógica**:
+```typescript
+const calculatePnL = () => {
+  return positionsData.totalPL || 0;
+};
+```
+
+**Backend**: PnL das posições atuais
+
+#### 2. Estimated Profit (✅ Funcionando)
+**Fonte de Dados**: `usePositionsMetrics` → `positionsData.estimatedProfit`
+
+**Lógica**:
+```typescript
+const calculateEstimatedProfit = () => {
+  return positionsData.estimatedProfit || 0;
+};
+```
+
+**Backend**: Lucro estimado se fechar todas as posições agora
+
+#### 3. Active Trades (✅ Funcionando)
+**Fonte de Dados**: `usePositionsMetrics` → `positionsData.positions.filter(pos => pos.status === 'running')`
+
+**Lógica**:
+```typescript
+const calculateActiveTrades = () => {
+  if (!positionsData.positions) return 0;
+  return positionsData.positions.filter(pos => pos.status === 'running').length;
+};
+```
+
+**Backend**: Contagem de posições com status 'running'
+
+#### 4. Total Margin (✅ Funcionando)
+**Fonte de Dados**: `usePositionsMetrics` → `positionsData.totalMargin`
+
+**Lógica**:
+```typescript
+const calculateTotalMargin = () => {
+  return positionsData.totalMargin || 0;
+};
+```
+
+**Backend**: Soma de todas as margens alocadas
+
+#### 5. Estimated Fees (✅ Funcionando)
+**Fonte de Dados**: `usePositionsMetrics` → `positionsData.estimatedFees`
+
+**Lógica**:
+```typescript
+const calculateEstimatedFees = () => {
+  return positionsData.estimatedFees || 0;
+};
+```
+
+**Backend**: Taxas estimadas para fechar posições + funding
+
+### History (19 cards)
+
+#### 6. Available Margin (✅ Funcionando)
+**Fonte de Dados**: `useCentralizedData` → `balanceData.total_balance`
+
+**Lógica**:
+```typescript
+const calculateAvailableMargin = () => {
+  return balanceData?.total_balance || 0;
+};
+```
+
+**Backend**: Saldo disponível da carteira
+
+#### 7. Estimated Balance (✅ Funcionando)
+**Fonte de Dados**: `useEstimatedBalance` → `estimatedBalance.data.estimated_balance`
+
+**Lógica**:
+```typescript
+const calculateEstimatedBalance = () => {
+  return estimatedBalance.data?.estimated_balance || 0;
+};
+```
+
+**Backend**: Cálculo baseado em margem + PnL - fees
+
+#### 8. Total Invested (✅ Funcionando)
 **Fonte de Dados**: `useEstimatedBalance` → `estimatedBalance.data.total_invested`
 
 **Lógica**:
@@ -66,49 +155,49 @@ const calculateTotalInvested = () => {
 };
 ```
 
-**Backend**: Soma de `entry_margin` de todas as posições fechadas (status !== 'running')
+**Backend**: Soma de `entry_margin` de todas as posições fechadas
 
-### 2. Fees Paid (✅ Funcionando)
+#### 9. Net Profit (✅ Funcionando)
+**Fonte de Dados**: `useHistoricalData` → `historicalMetrics.totalProfit`
+
+**Lógica**:
+```typescript
+const calculateNetProfit = () => {
+  return historicalMetrics?.totalProfit || 0;
+};
+```
+
+**Backend**: Lucro líquido total de todos os trades
+
+#### 10. Fees Paid (✅ Funcionando)
 **Fonte de Dados**: `useEstimatedBalance` → `estimatedBalance.data.total_fees`
 
 **Lógica**:
 ```typescript
 const calculateFeesPaid = () => {
-  // Usar dados do estimated-balance como fonte primária
   if (estimatedBalance.data?.total_fees !== undefined) {
     return estimatedBalance.data.total_fees;
   }
-  // Fallback para dados históricos se disponível
   return historicalMetrics?.totalFees || 0;
 };
 ```
 
-**Backend**: Soma de todas as taxas pagas (opening_fee + closing_fee + sum_carry_fees)
+**Backend**: Soma de todas as taxas pagas
 
-### 3. Estimated Balance (✅ Funcionando)
-**Fonte de Dados**: `useEstimatedBalance` → `estimatedBalance.data.estimated_balance`
-
-**Lógica**:
-```typescript
-const calculateEstimatedBalance = () => {
-  const availableMargin = calculateAvailableMargin();
-  const totalMargin = calculateTotalMargin();
-  const estimatedProfit = positionsData.estimatedProfit || 0;
-  const estimatedFees = positionsData.estimatedFees || 0;
-  
-  return availableMargin + totalMargin + estimatedProfit - estimatedFees;
-};
-```
-
-### 4. PnL (Profit/Loss) (✅ Funcionando)
-**Fonte de Dados**: `usePositionsMetrics` → `positionsData.totalPL`
-
-**Lógica**:
-```typescript
-const calculatePnL = () => {
-  return positionsData.totalPL || 0;
-};
-```
+#### 11-23. Cards Avançados (✅ Funcionando)
+- **Success Rate**: `historicalMetrics.successRate`
+- **Total Profitability**: Cálculo de percentual
+- **Total Trades**: `historicalMetrics.totalTrades`
+- **Winning Trades**: `historicalMetrics.winningTrades`
+- **Lost Trades**: `historicalMetrics.lostTrades`
+- **Average PnL**: `estimatedBalance.data.average_pnl`
+- **Max Drawdown**: `estimatedBalance.data.max_drawdown`
+- **Sharpe Ratio**: `estimatedBalance.data.sharpe_ratio`
+- **Volatility**: `estimatedBalance.data.volatility`
+- **Win Streak**: `estimatedBalance.data.win_streak`
+- **Best Trade**: `estimatedBalance.data.best_trade`
+- **Risk/Reward**: `estimatedBalance.data.risk_reward_ratio`
+- **Trading Frequency**: `estimatedBalance.data.trading_frequency`
 
 ## 🔧 Hooks Principais
 

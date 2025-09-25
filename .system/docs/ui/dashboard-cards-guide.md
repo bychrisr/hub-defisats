@@ -78,9 +78,9 @@ className={`gradient-card border-2 ${
 }`}
 ```
 
-## 📋 Cards Implementados
+## 📋 Cards Implementados (24 cards total)
 
-### 1. Key Metrics (Métricas Principais)
+### 1. Key Metrics (5 cards)
 
 #### Total PnL
 - **Fonte de Dados**: `positionsData.totalPL`
@@ -106,17 +106,17 @@ className={`gradient-card border-2 ${
 #### Total Margin
 - **Fonte de Dados**: `positionsData.totalMargin`
 - **Cores**: Neutro permanente (cinza) com ícone roxo
-- **Ícone**: BarChart3
+- **Ícone**: PieChart
 - **Implementação**: Card customizado sem badges
 
 #### Estimated Fees
 - **Fonte de Dados**: `positionsData.estimatedFees`
 - **Cores**: Dinâmicas (laranja/cinza)
-- **Ícone**: Clock
+- **Ícone**: TrendingDown
 - **Badge**: Taxa de 0.1%
 - **Implementação**: Card customizado com formatação sem decimais
 
-### 2. History (Histórico)
+### 2. History (19 cards)
 
 #### Available Margin
 - **Fonte de Dados**: `balanceData.total_balance`
@@ -181,6 +181,58 @@ className={`gradient-card border-2 ${
 - **Fonte de Dados**: `historicalMetrics.lostTrades`
 - **Cores**: Vermelho fixo
 - **Ícone**: TrendingDown
+- **Implementação**: Card customizado sem badges
+
+#### Average PnL
+- **Fonte de Dados**: `estimatedBalance.data.average_pnl`
+- **Cores**: Dinâmicas (verde/vermelho/cinza)
+- **Ícone**: TrendingUp
+- **Badge**: "Positive"/"Negative"/"Neutral"
+- **Implementação**: Card customizado com cores dinâmicas
+
+#### Max Drawdown
+- **Fonte de Dados**: `estimatedBalance.data.max_drawdown`
+- **Cores**: Vermelho fixo
+- **Ícone**: TrendingDown
+- **Implementação**: Card customizado sem badges
+
+#### Sharpe Ratio
+- **Fonte de Dados**: `estimatedBalance.data.sharpe_ratio`
+- **Cores**: Dinâmicas (verde/amarelo/vermelho)
+- **Ícone**: BarChart3
+- **Badge**: "Good"/"Fair"/"Poor"
+- **Implementação**: Card customizado com cores baseadas em valor
+
+#### Volatility
+- **Fonte de Dados**: `estimatedBalance.data.volatility`
+- **Cores**: Dinâmicas (verde/amarelo/vermelho)
+- **Ícone**: Activity
+- **Badge**: "Low"/"Medium"/"High"
+- **Implementação**: Card customizado com cores baseadas em percentual
+
+#### Win Streak
+- **Fonte de Dados**: `estimatedBalance.data.win_streak`
+- **Cores**: Verde fixo
+- **Ícone**: Target
+- **Implementação**: Card customizado sem badges
+
+#### Best Trade
+- **Fonte de Dados**: `estimatedBalance.data.best_trade`
+- **Cores**: Verde fixo
+- **Ícone**: TrendingUp
+- **Implementação**: Card customizado sem badges
+
+#### Risk/Reward
+- **Fonte de Dados**: `estimatedBalance.data.risk_reward_ratio`
+- **Cores**: Dinâmicas (verde/amarelo/vermelho)
+- **Ícone**: PieChart
+- **Badge**: "Good"/"Fair"/"Poor"
+- **Implementação**: Card customizado com cores baseadas em valor
+
+#### Trading Frequency
+- **Fonte de Dados**: `estimatedBalance.data.trading_frequency`
+- **Cores**: Azul fixo
+- **Ícone**: Clock
 - **Implementação**: Card customizado sem badges
 
 ## 🔧 Como Adicionar um Novo Card
