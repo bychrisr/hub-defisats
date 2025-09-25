@@ -40,6 +40,9 @@ import {
   Play,
   Pause,
   Settings,
+  TrendingUp,
+  Target,
+  ArrowRight,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -974,81 +977,124 @@ export default function Reports() {
 
             {/* State Changes History */}
             {stateChanges.length > 0 && (
-              <Card className="bg-gradient-to-br from-card to-card/80 border-border/50 shadow-lg">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-xl font-semibold">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
+              <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
                       <Settings className="h-5 w-5 text-primary" />
                     </div>
-                    Automation State Changes
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    History of automation activations, deactivations, and configuration changes
-                  </CardDescription>
+                    <div>
+                      <CardTitle className="text-xl font-semibold">Automation State Changes</CardTitle>
+                      <CardDescription className="text-text-secondary">
+                        History of automation activations, deactivations, and configuration changes
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {stateChanges.map((change) => (
-                      <div key={change.id} className="group relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-r from-card/80 to-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0">
-                              {change.change_type === 'activation' ? (
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-success/20 to-success/10 border border-success/30">
-                                  <Play className="h-4 w-4 text-success" />
-                                </div>
-                              ) : change.change_type === 'deactivation' ? (
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-destructive/20 to-destructive/10 border border-destructive/30">
-                                  <Pause className="h-4 w-4 text-destructive" />
-                                </div>
-                              ) : (
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30">
-                                  <Settings className="h-4 w-4 text-primary" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="space-y-1">
-                              <p className="font-semibold text-foreground">
-                                {change.change_type === 'activation' ? 'Activated' :
-                                 change.change_type === 'deactivation' ? 'Deactivated' : 'Configuration Updated'}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {change.automation_type === 'margin_guard' ? 'Margin Guard' :
-                                 change.automation_type === 'tp_sl' ? 'Take Profit / Stop Loss' :
-                                 change.automation_type === 'auto_entry' ? 'Auto Entry' : change.automation_type}
-                              </p>
-                              {change.config_changes && (
-                                <p className="text-xs text-muted-foreground">
-                                  Config values updated
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-right space-y-1">
+                  <div className="overflow-x-auto rounded-lg border border-border/50">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
+                          <TableHead className="font-semibold text-text-primary">
                             <div className="flex items-center gap-2">
-                              <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                                change.old_state 
-                                  ? 'bg-success/20 text-success border border-success/30' 
-                                  : 'bg-muted text-muted-foreground border border-border'
-                              }`}>
-                                {change.old_state ? 'Active' : 'Inactive'}
-                              </span>
-                              <span className="text-muted-foreground">→</span>
-                              <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                                change.new_state 
-                                  ? 'bg-success/20 text-success border border-success/30' 
-                                  : 'bg-muted text-muted-foreground border border-border'
-                              }`}>
-                                {change.new_state ? 'Active' : 'Inactive'}
-                              </span>
+                              <Activity className="h-4 w-4" />
+                              Action
                             </div>
-                            <p className="text-xs text-muted-foreground font-mono">
-                              {formatDate(change.timestamp)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Bot className="h-4 w-4" />
+                              Automation
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="h-4 w-4" />
+                              Status Change
+                            </div>
+                          </TableHead>
+                          <TableHead className="font-semibold text-text-primary">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              Timestamp
+                            </div>
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {stateChanges.map((change, index) => (
+                          <TableRow 
+                            key={change.id}
+                            className={cn(
+                              "hover:bg-background/50 transition-colors duration-200",
+                              index % 2 === 0 ? "bg-background/20" : "bg-background/10"
+                            )}
+                          >
+                            <TableCell className="font-medium text-text-primary">
+                              <div className="flex items-center gap-3">
+                                {change.change_type === 'activation' ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : change.change_type === 'deactivation' ? (
+                                  <XCircle className="h-4 w-4 text-red-500" />
+                                ) : (
+                                  <Settings className="h-4 w-4 text-blue-500" />
+                                )}
+                                <div>
+                                  <div className="font-medium">
+                                    {change.change_type === 'activation' ? 'Activated' :
+                                     change.change_type === 'deactivation' ? 'Deactivated' : 'Configuration Updated'}
+                                  </div>
+                                  {change.config_changes && (
+                                    <div className="text-sm text-text-secondary">
+                                      Config values updated
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {change.automation_type === 'margin_guard' ? (
+                                  <Shield className="h-4 w-4 text-blue-500" />
+                                ) : change.automation_type === 'tp_sl' ? (
+                                  <Target className="h-4 w-4 text-green-500" />
+                                ) : (
+                                  <Bot className="h-4 w-4 text-gray-500" />
+                                )}
+                                <Badge variant="outline" className="font-semibold">
+                                  {change.automation_type === 'margin_guard' ? 'Margin Guard' :
+                                   change.automation_type === 'tp_sl' ? 'Take Profit / Stop Loss' :
+                                   change.automation_type === 'auto_entry' ? 'Auto Entry' : change.automation_type}
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Badge className={cn(
+                                  "text-white",
+                                  change.old_state ? "bg-green-500" : "bg-gray-500"
+                                )}>
+                                  {change.old_state ? 'Active' : 'Inactive'}
+                                </Badge>
+                                <ArrowRight className="h-4 w-4 text-text-secondary" />
+                                <Badge className={cn(
+                                  "text-white",
+                                  change.new_state ? "bg-green-500" : "bg-gray-500"
+                                )}>
+                                  {change.new_state ? 'Active' : 'Inactive'}
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm font-medium text-text-primary">
+                                {formatDate(change.timestamp)}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </CardContent>
               </Card>
