@@ -32,11 +32,13 @@ export function useLNMarketsConnectionStatus() {
   });
 
   // More flexible validation: check if we have any data from LN Markets
-  const hasValidData = (centralizedData?.userBalance !== null && 
-                       centralizedData?.userBalance !== undefined) ||
-                      (centralizedData?.userPositions && 
-                       centralizedData?.userPositions.length > 0) ||
-                      (centralizedData?.lastUpdate && centralizedData.lastUpdate > 0);
+  const hasValidData = centralizedData && (
+    (centralizedData.userBalance !== null && 
+     centralizedData.userBalance !== undefined) ||
+    (centralizedData.userPositions && 
+     centralizedData.userPositions.length > 0) ||
+    (centralizedData.lastUpdate && centralizedData.lastUpdate > 0)
+  );
   
   // Check for specific credential errors in the error message
   const hasCredentialError = error?.includes('credentials') || 
