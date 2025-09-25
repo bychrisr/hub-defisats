@@ -28,7 +28,7 @@ class VersionService {
     // Tenta obter a versão atual do package.json ou define uma versão padrão
     try {
       // Em produção, isso seria injetado pelo build process
-      this.currentVersion = process.env.REACT_APP_VERSION || '1.0.0';
+      this.currentVersion = import.meta.env.VITE_APP_VERSION || '1.0.0';
     } catch (error) {
       this.currentVersion = '1.0.0';
     }

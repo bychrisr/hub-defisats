@@ -126,6 +126,15 @@ export const useUpdateNotification = () => {
   const shouldShowNotification = hasUpdate && versionInfo && 
     !versionService.hasBeenNotified(versionInfo.latestVersion);
 
+  // Debug logging
+  console.log('🔍 UPDATE NOTIFICATION DEBUG:', {
+    hasUpdate,
+    versionInfo,
+    shouldShowNotification,
+    hasBeenNotified: versionInfo ? versionService.hasBeenNotified(versionInfo.latestVersion) : 'no version info',
+    currentVersion: versionService.getCurrentVersion()
+  });
+
   const handleNotificationShown = () => {
     markAsNotified();
   };
