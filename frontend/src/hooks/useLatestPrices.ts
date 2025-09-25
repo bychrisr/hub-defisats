@@ -59,14 +59,10 @@ export function useLatestPrices(options: UseLatestPricesOptions = {}): UseLatest
       console.error('Error fetching latest prices:', err);
       setError(err.response?.data?.message || err.message || 'Failed to fetch prices');
 
-      // Fallback data in case of error
-      setPrices({
-        bitcoin: {
-          usd: 115000,
-          usd_24h_change: 2.5,
-          last_updated_at: Math.floor(Date.now() / 1000)
-        }
-      });
+      // ⚠️ CRÍTICO: NUNCA usar dados simulados em mercados voláteis
+      // Dados antigos podem causar perdas financeiras reais
+      setPrices({});
+      setLastUpdated(null);
     } finally {
       setLoading(false);
     }
