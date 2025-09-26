@@ -77,7 +77,8 @@ export default function Documentation() {
   // Carregar dados iniciais
   useEffect(() => {
     loadInitialData();
-    connectWebSocket();
+    // Temporariamente desabilitar WebSocket para debug
+    // connectWebSocket();
     
     return () => {
       if (wsRef.current) {
@@ -223,8 +224,10 @@ export default function Documentation() {
   const connectWebSocket = () => {
     try {
       const token = localStorage.getItem('access_token');
-      const wsUrl = `${import.meta.env.VITE_API_URL?.replace('http', 'ws')}/api/docs/watch?token=${token}`;
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:13000';
+      const wsUrl = `${baseUrl.replace('http', 'ws')}/api/docs/watch?token=${token}`;
       
+      console.log('🔍 DOCUMENTATION - WebSocket URL:', wsUrl);
       wsRef.current = new WebSocket(wsUrl);
       
       wsRef.current.onmessage = (event) => {
@@ -459,10 +462,9 @@ export default function Documentation() {
             <CardContent>
               <ScrollArea className="h-96">
                 <div className="space-y-2">
-                  {console.log('🔍 DOCUMENTATION - Rendering files:', files.length, 'selectedCategory:', selectedCategory)}
-                  {files.map((file) => (
+                  {files.map((file, index) => (
                     <div
-                      key={`${file.path}-${file.modified}`}
+                      key={`${file.path}-${file.modified}-${index}`}
                       className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                         selectedFile?.path === file.path
                           ? 'bg-primary text-primary-foreground'
