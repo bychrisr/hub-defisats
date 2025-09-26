@@ -77,7 +77,7 @@ export default function Documentation() {
   // Carregar dados iniciais
   useEffect(() => {
     loadInitialData();
-    // connectWebSocket(); // Temporariamente desabilitado
+    connectWebSocket();
     
     return () => {
       if (wsRef.current) {
@@ -205,7 +205,7 @@ export default function Documentation() {
   const connectWebSocket = () => {
     try {
       const token = localStorage.getItem('access_token');
-      const wsUrl = `${import.meta.env.VITE_API_URL?.replace('http', 'ws')}/docs/watch?token=${token}`;
+      const wsUrl = `${import.meta.env.VITE_API_URL?.replace('http', 'ws')}/api/docs/watch?token=${token}`;
       
       wsRef.current = new WebSocket(wsUrl);
       
