@@ -219,6 +219,16 @@ const Monitoring: React.FC = () => {
     durationMinutes: number;
   }>({ isRunning: false, durationMinutes: 5 });
 
+  // Protection state
+  const [protectionData, setProtectionData] = useState<any>(null);
+  const [protectionLoading, setProtectionLoading] = useState(false);
+  const [cacheConfig, setCacheConfig] = useState<any>(null);
+  const [protectionRules, setProtectionRules] = useState<any>(null);
+  const [providerStatus, setProviderStatus] = useState<any[]>([]);
+  const [protectionMetrics, setProtectionMetrics] = useState<any>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [configType, setConfigType] = useState<'cache' | 'rules'>('cache');
+
   const handleResetCircuitBreaker = async () => {
     try {
       const response = await cachedApi.post('/api/admin/market-data/providers/reset-circuit-breaker');
@@ -327,19 +337,111 @@ const Monitoring: React.FC = () => {
 
   const handleTestProtection = async () => {
     try {
-      const response = await cachedApi.post('/api/admin/market-data/protection/check', {
+      setProtectionLoading(true);
+      const response = await cachedApi.post('/api/admin/market-data/protection/test', {
         userId: 'test-user',
         automationId: 'test-automation'
       });
       if (response.data.success) {
+        setProtectionData(response.data.data);
         toast.success('Teste de proteção executado com sucesso!');
-        console.log('Protection test results:', response.data.data);
       } else {
         toast.error('Erro ao testar proteção');
       }
     } catch (error: any) {
       console.error('Failed to test protection:', error);
       toast.error('Erro ao testar proteção');
+    } finally {
+      setProtectionLoading(false);
+    }
+  };
+
+  const loadProtectionData = async () => {
+    try {
+      setProtectionLoading(true);
+      
+      // Load protection status
+      const statusResponse = await cachedApi.get('/api/admin/market-data/protection/status');
+      if (statusResponse.data.success) {
+        setProtectionData(statusResponse.data.data);
+      }
+
+      // Load cache configuration
+      const cacheResponse = await cachedApi.get('/api/admin/market-data/protection/cache/config');
+      if (cacheResponse.data.success) {
+        setCacheConfig(cacheResponse.data.data);
+      }
+
+      // Load protection rules
+      const rulesResponse = await cachedApi.get('/api/admin/market-data/protection/rules');
+      if (rulesResponse.data.success) {
+        setProtectionRules(rulesResponse.data.data);
+      }
+
+      // Load provider status
+      const providersResponse = await cachedApi.get('/api/admin/market-data/protection/providers');
+      if (providersResponse.data.success) {
+        setProviderStatus(providersResponse.data.data);
+      }
+
+      // Load protection metrics
+      const metricsResponse = await cachedApi.get('/api/admin/market-data/protection/metrics');
+      if (metricsResponse.data.success) {
+        setProtectionMetrics(metricsResponse.data.data);
+      }
+
+    } catch (error: any) {
+      console.error('Failed to load protection data:', error);
+      toast.error('Erro ao carregar dados de proteção');
+    } finally {
+      setProtectionLoading(false);
+    }
+  };
+
+  const handleUpdateCacheConfig = async (newConfig: any) => {
+    try {
+      const response = await cachedApi.post('/api/admin/market-data/protection/cache/config', newConfig);
+      if (response.data.success) {
+        setCacheConfig(newConfig);
+        toast.success('Configuração de cache atualizada!');
+        setShowConfigModal(false);
+      } else {
+        toast.error('Erro ao atualizar configuração de cache');
+      }
+    } catch (error: any) {
+      console.error('Failed to update cache config:', error);
+      toast.error('Erro ao atualizar configuração de cache');
+    }
+  };
+
+  const handleUpdateProtectionRules = async (newRules: any) => {
+    try {
+      const response = await cachedApi.post('/api/admin/market-data/protection/rules', newRules);
+      if (response.data.success) {
+        setProtectionRules(newRules);
+        toast.success('Regras de proteção atualizadas!');
+        setShowConfigModal(false);
+      } else {
+        toast.error('Erro ao atualizar regras de proteção');
+      }
+    } catch (error: any) {
+      console.error('Failed to update protection rules:', error);
+      toast.error('Erro ao atualizar regras de proteção');
+    }
+  };
+
+  const handleResetCircuitBreaker = async () => {
+    try {
+      const response = await cachedApi.post('/api/admin/market-data/protection/circuit-breaker/reset');
+      if (response.data.success) {
+        toast.success('Circuit breaker resetado com sucesso!');
+        loadProtectionData(); // Reload data
+      } else {
+        toast.error('Erro ao resetar circuit breaker');
+      }
+    } catch (error: any) {
+      console.error('Failed to reset circuit breaker:', error);
+      toast.error('Erro ao resetar circuit breaker');
     }
   };
 
@@ -455,12 +557,16 @@ const Monitoring: React.FC = () => {
 
   useEffect(() => {
     fetchHealthData();
+    loadProtectionData();
   }, []);
 
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(fetchHealthData, 30000); // Refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchHealthData();
+      loadProtectionData();
+    }, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, [autoRefresh]);
 
@@ -1520,6 +1626,36 @@ const Monitoring: React.FC = () => {
             <p className="text-text-secondary">Automation protection and data validation system</p>
           </div>
 
+          {/* Protection Status Overview */}
+          {protectionData && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-bg-card border border-border rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-green-400 mb-1">
+                  {protectionData.status === 'active' ? 'Active' : 'Inactive'}
+                </div>
+                <div className="text-sm text-text-secondary">Protection Status</div>
+              </div>
+              <div className="bg-bg-card border border-border rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-blue-400 mb-1">
+                  {protectionData.providers?.active || 0}
+                </div>
+                <div className="text-sm text-text-secondary">Active Providers</div>
+              </div>
+              <div className="bg-bg-card border border-border rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-purple-400 mb-1">
+                  {protectionData.uptime?.percentage || 0}%
+                </div>
+                <div className="text-sm text-text-secondary">System Uptime</div>
+              </div>
+              <div className="bg-bg-card border border-border rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-orange-400 mb-1">
+                  {protectionData.cache?.hitRate || 0}%
+                </div>
+                <div className="text-sm text-text-secondary">Cache Hit Rate</div>
+              </div>
+            </div>
+          )}
+
           {/* Protection Actions */}
           <div className="bg-bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
@@ -1530,23 +1666,71 @@ const Monitoring: React.FC = () => {
               <div className="flex space-x-2">
                 <Button
                   onClick={handleTestProtection}
-                  disabled={loading}
+                  disabled={protectionLoading}
                   className="profile-tabs-glow"
                 >
                   <Shield className="w-4 h-4 mr-2" />
-                  Test Protection
+                  {protectionLoading ? 'Testing...' : 'Test Protection'}
                 </Button>
                 <Button
-                  onClick={() => toast.info('Protection configuration coming soon')}
-                  disabled={loading}
+                  onClick={() => {
+                    setConfigType('cache');
+                    setShowConfigModal(true);
+                  }}
+                  disabled={protectionLoading}
+                  variant="outline"
+                  className="profile-tabs-glow"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Configure Cache
+                </Button>
+                <Button
+                  onClick={() => {
+                    setConfigType('rules');
+                    setShowConfigModal(true);
+                  }}
+                  disabled={protectionLoading}
                   variant="outline"
                   className="profile-tabs-glow"
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   Configure Rules
                 </Button>
+                <Button
+                  onClick={handleResetCircuitBreaker}
+                  disabled={protectionLoading}
+                  variant="outline"
+                  className="profile-tabs-glow"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Reset Circuit Breaker
+                </Button>
               </div>
             </div>
+
+            {/* Test Results */}
+            {protectionData?.results && (
+              <div className="mb-6">
+                <h4 className="font-medium text-text-primary mb-3">Last Test Results</h4>
+                <div className="space-y-2">
+                  {protectionData.results.tests.map((test: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        {test.status === 'passed' ? (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-500" />
+                        )}
+                        <span className="text-text-primary">{test.name}</span>
+                      </div>
+                      <div className="text-sm text-text-secondary">
+                        {test.latency}ms
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -1554,15 +1738,19 @@ const Monitoring: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Max Cache Age:</span>
-                    <span className="text-sm text-text-primary">30 seconds</span>
+                    <span className="text-sm text-text-primary">{cacheConfig?.maxAge || 30} seconds</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Retry Attempts:</span>
-                    <span className="text-sm text-text-primary">3</span>
+                    <span className="text-sm text-text-primary">{cacheConfig?.retryAttempts || 3}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Fallback Timeout:</span>
-                    <span className="text-sm text-text-primary">5 seconds</span>
+                    <span className="text-sm text-text-primary">{cacheConfig?.fallbackTimeout || 5} seconds</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Cache Size:</span>
+                    <span className="text-sm text-text-primary">{cacheConfig?.size || '45.2MB'}</span>
                   </div>
                 </div>
               </div>
@@ -1572,44 +1760,206 @@ const Monitoring: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Data Age Limit:</span>
-                    <span className="text-sm text-text-primary">30 seconds</span>
+                    <span className="text-sm text-text-primary">{protectionRules?.dataAgeLimit || 30} seconds</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Failure Threshold:</span>
-                    <span className="text-sm text-text-primary">5 consecutive</span>
+                    <span className="text-sm text-text-primary">{protectionRules?.failureThreshold || 5} consecutive</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Emergency Providers:</span>
-                    <span className="text-sm text-text-primary">CoinGecko, Binance</span>
+                    <span className="text-sm text-text-primary">{protectionRules?.emergencyProviders?.join(', ') || 'CoinGecko, Binance'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Circuit Breaker:</span>
+                    <span className="text-sm text-text-primary">{protectionRules?.enableCircuitBreaker ? 'Enabled' : 'Disabled'}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* System Information */}
-          <div className="bg-bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <Database className="w-6 h-6 text-purple-400 mr-3" />
-              <h3 className="text-lg font-semibold text-text-primary">System Information</h3>
+          {/* Provider Status */}
+          {providerStatus.length > 0 && (
+            <div className="bg-bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center mb-4">
+                <Globe className="w-6 h-6 text-green-400 mr-3" />
+                <h3 className="text-lg font-semibold text-text-primary">Provider Status</h3>
+              </div>
+              <div className="space-y-3">
+                {providerStatus.map((provider: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        provider.status === 'active' ? 'bg-green-500' : 
+                        provider.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`} />
+                      <div>
+                        <div className="font-medium text-text-primary">{provider.name}</div>
+                        <div className="text-sm text-text-secondary">
+                          Priority: {provider.priority} • Errors: {provider.errors}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-text-primary">
+                        {provider.latency}ms
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        {provider.successRate}% success
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-text-secondary mb-4">Fallback system configuration and status</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-background/50 rounded-lg">
-                <div className="text-lg font-bold text-green-400">Active</div>
-                <div className="text-sm text-text-secondary">Protection Status</div>
+          )}
+
+          {/* Protection Metrics */}
+          {protectionMetrics && (
+            <div className="bg-bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center mb-4">
+                <BarChart3 className="w-6 h-6 text-purple-400 mr-3" />
+                <h3 className="text-lg font-semibold text-text-primary">Protection Metrics</h3>
               </div>
-              <div className="text-center p-4 bg-background/50 rounded-lg">
-                <div className="text-lg font-bold text-text-primary">3</div>
-                <div className="text-sm text-text-secondary">Active Providers</div>
-              </div>
-              <div className="text-center p-4 bg-background/50 rounded-lg">
-                <div className="text-lg font-bold text-text-primary">99.9%</div>
-                <div className="text-sm text-text-secondary">Uptime</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-background/50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-400 mb-1">
+                    {protectionMetrics.totalRequests?.toLocaleString() || 0}
+                  </div>
+                  <div className="text-sm text-text-secondary">Total Requests</div>
+                </div>
+                <div className="text-center p-4 bg-background/50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-400 mb-1">
+                    {protectionMetrics.cacheHits?.toLocaleString() || 0}
+                  </div>
+                  <div className="text-sm text-text-secondary">Cache Hits</div>
+                </div>
+                <div className="text-center p-4 bg-background/50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-400 mb-1">
+                    {protectionMetrics.averageLatency || 0}ms
+                  </div>
+                  <div className="text-sm text-text-secondary">Avg Latency</div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Configuration Modal */}
+          {showConfigModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-bg-card border border-border rounded-lg p-6 w-full max-w-md mx-4">
+                <h3 className="text-lg font-semibold text-text-primary mb-4">
+                  Configure {configType === 'cache' ? 'Cache' : 'Protection Rules'}
+                </h3>
+                
+                {configType === 'cache' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-text-secondary mb-2">Max Cache Age (seconds)</label>
+                      <input
+                        type="number"
+                        min="5"
+                        max="300"
+                        defaultValue={cacheConfig?.maxAge || 30}
+                        className="w-full px-3 py-2 border border-border rounded bg-bg-card text-text-primary"
+                        id="maxAge"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-secondary mb-2">Retry Attempts</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        defaultValue={cacheConfig?.retryAttempts || 3}
+                        className="w-full px-3 py-2 border border-border rounded bg-bg-card text-text-primary"
+                        id="retryAttempts"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-secondary mb-2">Fallback Timeout (seconds)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        defaultValue={cacheConfig?.fallbackTimeout || 5}
+                        className="w-full px-3 py-2 border border-border rounded bg-bg-card text-text-primary"
+                        id="fallbackTimeout"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-text-secondary mb-2">Data Age Limit (seconds)</label>
+                      <input
+                        type="number"
+                        min="5"
+                        max="300"
+                        defaultValue={protectionRules?.dataAgeLimit || 30}
+                        className="w-full px-3 py-2 border border-border rounded bg-bg-card text-text-primary"
+                        id="dataAgeLimit"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-secondary mb-2">Failure Threshold</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        defaultValue={protectionRules?.failureThreshold || 5}
+                        className="w-full px-3 py-2 border border-border rounded bg-bg-card text-text-primary"
+                        id="failureThreshold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-secondary mb-2">Emergency Providers</label>
+                      <input
+                        type="text"
+                        defaultValue={protectionRules?.emergencyProviders?.join(', ') || 'CoinGecko, Binance'}
+                        className="w-full px-3 py-2 border border-border rounded bg-bg-card text-text-primary"
+                        id="emergencyProviders"
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex space-x-2 mt-6">
+                  <Button
+                    onClick={() => {
+                      const formData = new FormData(document.querySelector('form') || new HTMLFormElement());
+                      const data = Object.fromEntries(formData.entries());
+                      
+                      if (configType === 'cache') {
+                        handleUpdateCacheConfig({
+                          maxAge: parseInt(data.maxAge as string) || 30,
+                          retryAttempts: parseInt(data.retryAttempts as string) || 3,
+                          fallbackTimeout: parseInt(data.fallbackTimeout as string) || 5
+                        });
+                      } else {
+                        handleUpdateProtectionRules({
+                          dataAgeLimit: parseInt(data.dataAgeLimit as string) || 30,
+                          failureThreshold: parseInt(data.failureThreshold as string) || 5,
+                          emergencyProviders: (data.emergencyProviders as string).split(',').map(p => p.trim())
+                        });
+                      }
+                    }}
+                    className="profile-tabs-glow"
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    onClick={() => setShowConfigModal(false)}
+                    variant="outline"
+                    className="profile-tabs-glow"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -34,6 +34,7 @@ import { rateLimitTestRoutes } from './routes/rate-limit-test.routes';
 import { healthRoutes as adminHealthRoutes } from './routes/admin/health.routes';
 import { lnMarketsDiagnosticRoutes } from './routes/admin/lnmarkets-diagnostic.routes';
 import { marketDataFallbackRoutes } from './routes/admin/market-data-fallback.routes';
+import { marketDataProtectionRoutes } from './routes/admin/market-data-protection.routes';
 import { lnMarketsAnalysisRoutes } from './routes/admin/ln-markets-analysis.routes';
 import { lnMarketsGuerrillaTestRoutes } from './routes/ln-markets-guerilla-test.routes';
 import { lnMarketsDiscoveryRoutes } from './routes/admin/ln-markets-discovery.routes';
@@ -680,6 +681,7 @@ async function registerRoutes() {
   await fastify.register(adminHealthRoutes, { prefix: '/api/admin/health' });
   await fastify.register(lnMarketsDiagnosticRoutes, { prefix: '/api/admin/lnmarkets' });
   await fastify.register(marketDataFallbackRoutes, { prefix: '/api/admin/market-data' });
+  await fastify.register(marketDataProtectionRoutes, { prefix: '/api/admin/market-data' });
   await fastify.register(lnMarketsAnalysisRoutes, { prefix: '/api/admin/lnmarkets-analysis' });
   await fastify.register(lnMarketsGuerrillaTestRoutes, { prefix: '/api/ln-markets-test' });
   await fastify.register(lnMarketsDiscoveryRoutes, { prefix: '/api/admin/lnmarkets-discovery' });
