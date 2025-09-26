@@ -1,7 +1,7 @@
 /**
- * Admin Settings Page
+ * Admin Settings Page - Simplified Version
  * 
- * Página de configurações do sistema para administradores
+ * Reutiliza a funcionalidade existente do perfil do usuário
  */
 
 import React, { useState, useEffect } from 'react';
@@ -23,63 +23,43 @@ import {
 import { toast } from 'sonner';
 
 interface LNMarketsSettings {
-  apiKey: string;
-  apiSecret: string;
-  passphrase: string;
-  testnet: boolean;
-  baseUrl: string;
-}
-
-interface SystemSettings {
-  lnMarkets: LNMarketsSettings;
-  system: {
-    environment: string;
-    version: string;
-    debug: boolean;
-  };
-  database: {
-    url: string;
-    maxConnections: string;
-  };
+  ln_markets_api_key: string;
+  ln_markets_api_secret: string;
+  ln_markets_passphrase: string;
 }
 
 const SettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
-  const [lnMarketsForm, setLnMarketsForm] = useState({
-    apiKey: '',
-    apiSecret: '',
-    passphrase: '',
-    testnet: false
+  const [lnMarketsForm, setLnMarketsForm] = useState<LNMarketsSettings>({
+    ln_markets_api_key: '',
+    ln_markets_api_secret: '',
+    ln_markets_passphrase: ''
   });
   const [testResult, setTestResult] = useState<any>(null);
 
   useEffect(() => {
-    fetchSettings();
+    fetchProfile();
   }, []);
 
-  const fetchSettings = async () => {
+  const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/admin/settings/settings');
+      const response = await api.get('/api/profile');
       
       if (response.data.success) {
-        setSettings(response.data.data);
-        
-        // Pre-fill form with masked values
+        const profile = response.data.data;
         setLnMarketsForm({
-          apiKey: response.data.data.lnMarkets.apiKey,
-          apiSecret: response.data.data.lnMarkets.apiSecret,
-          passphrase: response.data.data.lnMarkets.passphrase,
-          testnet: response.data.data.lnMarkets.testnet
+          ln_markets_api_key: profile.ln_markets_api_key || '',
+          ln_markets_api_secret: profile.ln_markets_api_secret || '',
+          ln_markets_passphrase: profile.ln_markets_passphrase || ''
         });
       }
     } catch (error: any) {
-      console.error('Failed to fetch settings:', error);
-      toast.error('Erro ao carregar configurações');
+      console.error('Failed to fetch profile:', error);
+      toast.error('Erro ao carregar perfil');
     } finally {
       setLoading(false);
     }
@@ -89,11 +69,11 @@ const SettingsPage: React.FC = () => {
     try {
       setSaving(true);
       
-      const response = await api.put('/api/admin/settings/lnmarkets', lnMarketsForm);
+      const response = await api.put('/api/profile', lnMarketsForm);
       
       if (response.data.success) {
         toast.success('Configurações do LN Markets atualizadas com sucesso!');
-        await fetchSettings(); // Refresh settings
+        await fetchProfile(); // Refresh profile
       }
     } catch (error: any) {
       console.error('Failed to update LN Markets settings:', error);
@@ -108,7 +88,8 @@ const SettingsPage: React.FC = () => {
       setTesting(true);
       setTestResult(null);
       
-      const response = await api.post('/api/admin/settings/lnmarkets/test', lnMarketsForm);
+      // Test connection using existing LN Markets test endpoint
+      const response = await api.get('/api/lnmarkets/test-connection');
       
       if (response.data.success) {
         setTestResult({
@@ -141,10 +122,10 @@ const SettingsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-text-primary mb-2">Configurações do Sistema</h1>
-        <p className="text-text-secondary">Gerencie as configurações e credenciais do sistema</p>
+        <p className="text-text-secondary">Gerencie as credenciais do LN Markets para o sistema</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="max-w-2xl mx-auto">
         {/* LN Markets Settings */}
         <div className="bg-bg-card border border-border rounded-lg p-6">
           <div className="flex items-center mb-6">
@@ -160,8 +141,8 @@ const SettingsPage: React.FC = () => {
               <div className="relative">
                 <input
                   type={showCredentials ? 'text' : 'password'}
-                  value={lnMarketsForm.apiKey}
-                  onChange={(e) => setLnMarketsForm(prev => ({ ...prev, apiKey: e.target.value }))}
+                  value={lnMarketsForm.ln_markets_api_key}
+                  onChange={(e) => setLnMarketsForm(prev => ({ ...prev, ln_markets_api_key: e.target.value }))}
                   className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                   placeholder="Digite sua API Key do LN Markets"
                 />
@@ -181,8 +162,8 @@ const SettingsPage: React.FC = () => {
               </label>
               <input
                 type={showCredentials ? 'text' : 'password'}
-                value={lnMarketsForm.apiSecret}
-                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, apiSecret: e.target.value }))}
+                value={lnMarketsForm.ln_markets_api_secret}
+                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, ln_markets_api_secret: e.target.value }))}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Digite sua API Secret do LN Markets"
               />
@@ -194,24 +175,11 @@ const SettingsPage: React.FC = () => {
               </label>
               <input
                 type={showCredentials ? 'text' : 'password'}
-                value={lnMarketsForm.passphrase}
-                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, passphrase: e.target.value }))}
+                value={lnMarketsForm.ln_markets_passphrase}
+                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, ln_markets_passphrase: e.target.value }))}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Digite sua Passphrase do LN Markets"
               />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="testnet"
-                checked={lnMarketsForm.testnet}
-                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, testnet: e.target.checked }))}
-                className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary/50"
-              />
-              <label htmlFor="testnet" className="text-sm text-text-secondary">
-                Usar Testnet
-              </label>
             </div>
 
             <div className="flex space-x-3">
@@ -263,9 +231,8 @@ const SettingsPage: React.FC = () => {
                 </div>
                 {testResult.success && testResult.data && (
                   <div className="text-sm text-text-secondary">
-                    <p>Preço atual: ${testResult.data.marketData.price}</p>
-                    <p>Mudança 24h: {testResult.data.marketData.change24h}%</p>
-                    <p>Testnet: {testResult.data.testnet ? 'Sim' : 'Não'}</p>
+                    <p>Status: {testResult.data.status}</p>
+                    <p>Timestamp: {new Date(testResult.data.timestamp).toLocaleString()}</p>
                   </div>
                 )}
                 {!testResult.success && (
@@ -274,63 +241,6 @@ const SettingsPage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
-
-        {/* System Information */}
-        <div className="bg-bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center mb-6">
-            <Server className="w-6 h-6 text-blue-400 mr-3" />
-            <h2 className="text-xl font-semibold text-text-primary">Informações do Sistema</h2>
-          </div>
-
-          {settings && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Ambiente
-                </label>
-                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
-                  {settings.system.environment}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Versão
-                </label>
-                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
-                  {settings.system.version}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Debug Mode
-                </label>
-                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
-                  {settings.system.debug ? 'Ativado' : 'Desativado'}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Database URL
-                </label>
-                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary font-mono text-sm">
-                  {settings.database.url}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Max Connections
-                </label>
-                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
-                  {settings.database.maxConnections}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

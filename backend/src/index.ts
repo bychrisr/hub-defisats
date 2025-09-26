@@ -38,7 +38,7 @@ import { lnMarketsAnalysisRoutes } from './routes/admin/ln-markets-analysis.rout
 import { lnMarketsGuerrillaTestRoutes } from './routes/ln-markets-guerilla-test.routes';
 import { lnMarketsDiscoveryRoutes } from './routes/admin/ln-markets-discovery.routes';
 import { lnMarketsAdminRoutes } from './routes/admin/lnmarkets-admin.routes';
-import { settingsRoutes } from './routes/admin/settings.routes';
+// import { settingsRoutes } from './routes/admin/settings.routes';
 import { hardwareMonitorRoutes } from './routes/admin/hardware-monitor.routes';
 import { securityRoutes } from './routes/security.routes';
 import { securityConfigRoutes } from './routes/security-config.routes';
@@ -685,7 +685,7 @@ async function registerRoutes() {
   await fastify.register(lnMarketsGuerrillaTestRoutes, { prefix: '/api/ln-markets-test' });
   await fastify.register(lnMarketsDiscoveryRoutes, { prefix: '/api/admin/lnmarkets-discovery' });
   await fastify.register(lnMarketsAdminRoutes, { prefix: '/api/admin/lnmarkets' });
-  await fastify.register(settingsRoutes, { prefix: '/api/admin/settings' });
+  // await fastify.register(settingsRoutes, { prefix: '/api/admin/settings' });
   // await fastify.register(lnMarketsFallbackTestRoutes, { prefix: '/api/lnmarkets-fallback' });
   await fastify.register(hardwareMonitorRoutes, { prefix: '/api/admin/hardware' });
   await fastify.register(cacheRoutes, { prefix: '/api/admin/cache' });
