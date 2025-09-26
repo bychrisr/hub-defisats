@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -285,13 +284,27 @@ export default function RateLimiting() {
         </div>
       )}
 
-      <Tabs defaultValue="configs" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="configs">Configurations</TabsTrigger>
-          <TabsTrigger value="create">Create/Edit</TabsTrigger>
-        </TabsList>
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <Button 
+            variant={showCreateForm ? "outline" : "default"}
+            onClick={() => setShowCreateForm(false)}
+          >
+            Configurations
+          </Button>
+          <Button 
+            variant={showCreateForm ? "default" : "outline"}
+            onClick={() => {
+              console.log('➕ Create/Edit tab clicked');
+              setShowCreateForm(true);
+            }}
+          >
+            Create/Edit
+          </Button>
+        </div>
 
-        <TabsContent value="configs" className="space-y-4">
+        {!showCreateForm && (
+          <div className="space-y-4">
           {/* Environment Filter */}
           <div className="flex items-center gap-4">
             <Label>Filter by Environment:</Label>
@@ -381,10 +394,10 @@ export default function RateLimiting() {
               </Card>
             ))}
           </div>
-        </TabsContent>
+          </div>
+        )}
 
-        <TabsContent value="create" className="space-y-4">
-          {(showCreateForm || editingConfig) && (
+        {showCreateForm && (
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -509,8 +522,7 @@ export default function RateLimiting() {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 }
