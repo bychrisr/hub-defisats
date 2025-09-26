@@ -31,6 +31,7 @@ import { notificationRoutes } from './routes/notification.routes';
 import { backtestRoutes } from './routes/backtest.routes';
 import { paymentRoutes } from './routes/payment.routes';
 import { rateLimitTestRoutes } from './routes/rate-limit-test.routes';
+import { healthRoutes as adminHealthRoutes } from './routes/admin/health.routes';
 import { securityRoutes } from './routes/security.routes';
 import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
@@ -669,6 +670,7 @@ async function registerRoutes() {
 
   // Rate limit config admin routes
   await fastify.register(rateLimitConfigRoutes, { prefix: '/api/admin/rate-limit-config' });
+  await fastify.register(adminHealthRoutes, { prefix: '/api/admin/health' });
   await fastify.register(cacheRoutes, { prefix: '/api/admin/cache' });
   await fastify.register(loadBalancerRoutes, { prefix: '/api/admin/load-balancer' });
   console.log('✅ Admin routes registered');
@@ -871,6 +873,12 @@ async function start() {
     const { startPeriodicMonitoring } = await import('./workers/margin-monitor');
     startPeriodicMonitoring(prisma); // Passa a instância conectada do Prisma
     console.log('✅ Margin Guard monitoring started');
+    
+    // Start Health Checker service
+    console.log('🏥 Starting Health Checker service...');
+    const { healthCheckerService } = await import('./services/health-checker.service');
+    healthCheckerService.start();
+    console.log('✅ Health Checker service started');
     
     console.log('✅ Advanced monitoring services started');
   } catch (error) {

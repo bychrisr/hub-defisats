@@ -32,7 +32,7 @@ export async function adminMiddleware(
 
     // Check if user has admin privileges
     const prisma = await getPrisma();
-    const adminUser = await prisma.adminUser.findUnique({
+    const adminUser = await prisma.AdminUser.findUnique({
       where: {
         user_id: request.user.id
       },
