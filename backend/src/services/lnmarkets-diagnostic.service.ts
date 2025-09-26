@@ -42,7 +42,7 @@ interface APIAnalysis {
 
 export class LNMarketsDiagnosticService {
   private client: AxiosInstance;
-  private baseURL = 'https://api.lnmarkets.com';
+  private baseURL = 'https://api.lnmarkets.com/v2';
   private prisma: PrismaClient;
   private credentials: {
     apiKey: string;
