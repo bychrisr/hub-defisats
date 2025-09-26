@@ -198,8 +198,7 @@ export class LNMarketsDiagnosticService {
     
     const endpoints = hasCredentials ? [
       { path: '/futures/ticker', method: 'GET', auth: false },
-      { path: '/user', method: 'GET', auth: true },
-      { path: '/positions', method: 'GET', auth: true }
+      { path: '/user', method: 'GET', auth: true }
     ] : [
       { path: '/futures/ticker', method: 'GET', auth: false }
     ];
