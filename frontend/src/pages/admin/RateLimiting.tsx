@@ -100,8 +100,22 @@ export default function RateLimiting() {
       console.log('🔑 Token exists:', !!token);
       console.log('🔑 Token preview:', token ? `${token.substring(0, 20)}...` : 'null');
       
+      // Teste direto com fetch para comparar
+      console.log('🧪 Testing with direct fetch...');
+      const fetchResponse = await fetch('/api/admin/rate-limit-config/', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const fetchData = await fetchResponse.json();
+      console.log('🧪 Fetch response:', fetchData);
+      
+      // Teste com axios
+      console.log('🧪 Testing with axios...');
       const response = await api.get('/admin/rate-limit-config/');
-      console.log('📊 API Response:', response.data);
+      console.log('📊 Axios Response:', response.data);
+      
       if (response.data.success) {
         setConfigs(response.data.data);
         console.log('✅ Configurations loaded:', response.data.data.length);
