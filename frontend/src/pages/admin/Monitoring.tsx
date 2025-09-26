@@ -201,7 +201,7 @@ const Monitoring: React.FC = () => {
   const [hardwareMetrics, setHardwareMetrics] = useState<HardwareMetrics | null>(null);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
   const [lnMarketsData, setLnMarketsData] = useState<LNMarketsData | null>(null);
-  const [providerStatus, setProviderStatus] = useState<any[]>([]);
+  const [providerStatus, setProviderStatus] = useState<any>(null);
   const [externalAPIs, setExternalAPIs] = useState<ExternalAPIStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1768,37 +1768,66 @@ const Monitoring: React.FC = () => {
           </div>
 
           {/* Provider Status */}
-          {(Array.isArray(providerStatus) ? providerStatus.length > 0 : Object.keys(providerStatus).length > 0) && (
+          {providerStatus && (
             <div className="bg-bg-card border border-border rounded-lg p-6">
               <div className="flex items-center mb-4">
                 <Globe className="w-6 h-6 text-green-400 mr-3" />
                 <h3 className="text-lg font-semibold text-text-primary">Provider Status</h3>
               </div>
               <div className="space-y-3">
-                {providerStatus.map((provider: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        provider.status === 'active' ? 'bg-green-500' : 
-                        provider.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
-                      }`} />
-                      <div>
-                        <div className="font-medium text-text-primary">{provider.name}</div>
-                        <div className="text-sm text-text-secondary">
-                          Priority: {provider.priority} • Errors: {provider.errors}
+                {Array.isArray(providerStatus) ? (
+                  // Array format (from protection routes)
+                  providerStatus.map((provider: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          provider.status === 'active' ? 'bg-green-500' : 
+                          provider.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`} />
+                        <div>
+                          <div className="font-medium text-text-primary">{provider.name}</div>
+                          <div className="text-sm text-text-secondary">
+                            Priority: {provider.priority} • Errors: {provider.errors}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-text-primary">
+                          {provider.latency}ms
+                        </div>
+                        <div className="text-xs text-text-secondary">
+                          {provider.successRate}% success
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-text-primary">
-                        {provider.latency}ms
+                  ))
+                ) : (
+                  // Object format (from fallback routes)
+                  Object.entries(providerStatus).map(([name, status]: [string, any]) => (
+                    <div key={name} className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          status.status === 'healthy' ? 'bg-green-500' : 
+                          status.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`} />
+                        <div>
+                          <div className="font-medium text-text-primary">{name}</div>
+                          <div className="text-sm text-text-secondary">
+                            Last check: {new Date(status.lastCheck).toLocaleString()}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-text-secondary">
-                        {provider.successRate}% success
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-text-primary">
+                          {status.failureCount} failures
+                        </div>
+                        <div className="text-xs text-text-secondary">
+                          {status.status}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
