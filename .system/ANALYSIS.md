@@ -216,7 +216,54 @@ GET    /api/cards-with-tooltips    # Buscar cards com tooltips
 POST   /api/initialize-defaults    # Inicializar dados padrão
 ```
 
-## 4. Sistema de Proteção de Dados de Mercado (v1.10.7)
+## 4. Sistema de Documentação com Acordeão (v1.10.8)
+
+### 4.1 Arquitetura do Sistema de Documentação
+- **Frontend**: Interface React com sistema de acordeão expansível
+- **Backend**: API RESTful para busca e carregamento de documentos
+- **WebSocket**: Conexão em tempo real para atualizações de estatísticas
+- **Cache Inteligente**: Carregamento sob demanda por categoria
+- **Container**: Pasta `.system` mapeada para acesso aos documentos
+
+### 4.2 Funcionalidades Principais
+- **Sistema de Acordeão**: Categorias expansíveis com ícones dinâmicos
+- **Carregamento Dinâmico**: Arquivos carregados apenas quando necessário
+- **Seleção Direta**: Clique direto no documento para visualização
+- **Cache de Arquivos**: Armazenamento eficiente por categoria
+- **Interface Responsiva**: Adaptável a diferentes tamanhos de tela
+- **WebSocket Estável**: Atualizações em tempo real sem erros
+
+### 4.3 Componentes Técnicos
+- **Documentation.tsx**: Componente principal com sistema de acordeão
+- **useDocumentation.ts**: Hook para gerenciamento de estado e WebSocket
+- **docs.controller.ts**: Backend para busca e carregamento de documentos
+- **docs.routes.ts**: Rotas API para documentação
+- **Estado de Expansão**: Controle de quais categorias estão abertas
+- **Cache de Arquivos**: Armazenamento de arquivos por categoria
+
+### 4.4 Melhorias de Performance
+- **Carregamento Sob Demanda**: Arquivos carregados apenas ao expandir categoria
+- **Cache Inteligente**: Evita recarregamento desnecessário
+- **Deduplicação de Requisições**: Sistema de cache centralizado
+- **WebSocket Otimizado**: Conexão estável com fallback de URL
+- **Renderização Eficiente**: Chaves únicas e otimização de re-renders
+
+### 4.5 Correções Técnicas Implementadas
+- **URL WebSocket**: Corrigido problema de undefined na URL
+- **Chaves React**: Eliminadas chaves duplicadas que causavam warnings
+- **Console.log**: Removido log que interferia na renderização
+- **Estado de Expansão**: Controle eficiente de categorias abertas
+- **Cache de Arquivos**: Armazenamento otimizado por categoria
+
+### 4.6 Benefícios Alcançados
+- **Interface Intuitiva**: Navegação mais clara e direta
+- **Performance Melhorada**: Carregamento sob demanda
+- **Experiência do Usuário**: Mais fácil de usar e navegar
+- **Problema Resolvido**: Seleção de documentos funcionando 100%
+- **Código Limpo**: Interface simplificada e organizada
+- **Manutenibilidade**: Código mais fácil de manter e expandir
+
+## 5. Sistema de Proteção de Dados de Mercado (v1.10.7)
 
 ### 4.1 Arquitetura do Sistema
 - **Backend Routes**: Rotas dedicadas para proteção de dados (`/api/admin/market-data/protection/*`)
