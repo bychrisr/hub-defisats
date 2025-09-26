@@ -358,6 +358,27 @@ export class MarketDataFallbackService {
   }
 
   /**
+   * Obter status de todos os provedores
+   */
+  getProvidersStatus(): Record<string, {
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    lastCheck: number;
+    failureCount: number;
+  }> {
+    const status: Record<string, any> = {};
+
+    for (const [name, provider] of this.providers) {
+      status[name] = {
+        status: provider.circuitBreaker.getState(),
+        lastCheck: Date.now(),
+        failureCount: provider.circuitBreaker.getFailureCount()
+      };
+    }
+
+    return status;
+  }
+
+  /**
    * Resetar circuit breakers de todos os provedores
    */
   resetCircuitBreakers(): Record<string, any> {

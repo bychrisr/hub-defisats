@@ -10,7 +10,7 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
   fastify.addHook('preHandler', adminAuthMiddleware);
   
   const prisma = new PrismaClient();
-  const authService = new AuthService(prisma, {} as any);
+  const authService = new AuthService(prisma, fastify);
   fastify.get('/market-data', async (request, reply) => {
     try {
       logger.info('Admin requesting LN Markets market data');
@@ -24,23 +24,11 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       
       if (!adminUser || !adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
         logger.warn('Admin user does not have LN Markets credentials configured');
-        // Return mock data if no credentials configured
-        const marketData = {
-          symbol: 'BTCUSD',
-          price: 115479,
-          change24h: 2.34,
-          changePercent24h: 2.34,
-          volume24h: 1234567,
-          high24h: 116000,
-          low24h: 114500,
-          timestamp: Date.now()
-        };
-        
-        return {
-          success: true,
-          data: marketData,
-          source: 'mock'
-        };
+        return reply.status(400).send({
+          success: false,
+          message: 'LN Markets credentials not configured',
+          error: 'CREDENTIALS_NOT_CONFIGURED'
+        });
       }
       
       // Decrypt credentials
@@ -92,15 +80,11 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       
       if (!adminUser || !adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
         logger.warn('Admin user does not have LN Markets credentials configured');
-        // Return mock status if no credentials configured
-        return {
-          success: true,
-          data: {
-            status: 'not_configured',
-            message: 'LN Markets credentials not configured',
-            timestamp: Date.now()
-          }
-        };
+        return reply.status(400).send({
+          success: false,
+          message: 'LN Markets credentials not configured',
+          error: 'CREDENTIALS_NOT_CONFIGURED'
+        });
       }
       
       // Decrypt credentials
