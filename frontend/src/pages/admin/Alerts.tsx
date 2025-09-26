@@ -176,17 +176,17 @@ const Alerts: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-bg-primary min-h-screen p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">System Alerts</h1>
-          <p className="text-gray-600">Monitor and manage system health alerts</p>
+          <h1 className="text-2xl font-bold text-text-primary">System Alerts</h1>
+          <p className="text-text-secondary">Monitor and manage system health alerts</p>
         </div>
         <button
           onClick={fetchAlerts}
           disabled={loading}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors profile-tabs-glow"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -195,51 +195,51 @@ const Alerts: React.FC = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border p-4">
+        <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <AlertTriangle className="w-8 h-8 text-orange-500 mr-3" />
             <div>
-              <div className="text-2xl font-bold">{alerts.length}</div>
-              <div className="text-sm text-gray-600">Total Alerts</div>
+              <div className="text-2xl font-bold text-text-primary">{alerts.length}</div>
+              <div className="text-sm text-text-secondary">Total Alerts</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg border p-4">
+        <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <XCircle className="w-8 h-8 text-red-500 mr-3" />
             <div>
-              <div className="text-2xl font-bold">{activeAlerts.length}</div>
-              <div className="text-sm text-gray-600">Active</div>
+              <div className="text-2xl font-bold text-text-primary">{activeAlerts.length}</div>
+              <div className="text-sm text-text-secondary">Active</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg border p-4">
+        <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <CheckCircle className="w-8 h-8 text-green-500 mr-3" />
             <div>
-              <div className="text-2xl font-bold">{resolvedAlerts.length}</div>
-              <div className="text-sm text-gray-600">Resolved</div>
+              <div className="text-2xl font-bold text-text-primary">{resolvedAlerts.length}</div>
+              <div className="text-sm text-text-secondary">Resolved</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg border p-4">
+        <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <Clock className="w-8 h-8 text-blue-500 mr-3" />
             <div>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-text-primary">
                 {alerts.filter(a => a.severity === 'critical').length}
               </div>
-              <div className="text-sm text-gray-600">Critical</div>
+              <div className="text-sm text-text-secondary">Critical</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border p-4">
+      <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center space-x-2">
             <Filter className="w-4 h-4 text-gray-500" />
@@ -294,9 +294,9 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Alerts List */}
-      <div className="bg-white rounded-lg border">
-        <div className="px-6 py-4 border-b">
-          <h3 className="text-lg font-semibold">
+      <div className="bg-bg-card rounded-lg border border-border profile-tabs-glow">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-semibold text-text-primary">
             Alerts ({filteredAlerts.length})
             {lastUpdate && (
               <span className="text-sm text-gray-500 ml-2">
