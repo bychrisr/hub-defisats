@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { RateLimitConfigController } from '../../controllers/admin/rate-limit-config.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
-import { adminMiddleware } from '../../middleware/admin.middleware';
+import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { dynamicRateLimiters } from '../../middleware/dynamic-rate-limit.middleware';
 
 export async function rateLimitConfigRoutes(fastify: FastifyInstance) {
@@ -9,7 +9,7 @@ export async function rateLimitConfigRoutes(fastify: FastifyInstance) {
 
   // Middleware de autenticação e admin para todas as rotas
   fastify.addHook('preHandler', authMiddleware);
-  fastify.addHook('preHandler', adminMiddleware);
+  fastify.addHook('preHandler', adminAuthMiddleware);
 
   // Obtém todas as configurações
   fastify.get(

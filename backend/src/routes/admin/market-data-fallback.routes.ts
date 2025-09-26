@@ -7,14 +7,12 @@
 import { FastifyInstance } from 'fastify';
 import { marketDataFallbackService } from '../../services/market-data-fallback.service';
 import { userProtectionService } from '../../services/user-protection.service';
-import { adminMiddleware } from '../../middleware/admin.middleware';
+import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { logger } from '../../utils/logger';
 
 export async function marketDataFallbackRoutes(fastify: FastifyInstance) {
   // Apply admin authentication to all routes
-  fastify.addHook('preHandler', async (request, reply) => {
-    await adminMiddleware(request, reply);
-  });
+  fastify.addHook('preHandler', adminAuthMiddleware);
 
   /**
    * Obter dados de mercado com fallback

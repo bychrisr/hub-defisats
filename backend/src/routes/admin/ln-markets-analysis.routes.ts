@@ -6,14 +6,12 @@
 
 import { FastifyInstance } from 'fastify';
 import { lnMarketsConnectionAnalyzerService } from '../../services/ln-markets-connection-analyzer.service';
-import { adminMiddleware } from '../../middleware/admin.middleware';
+import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { logger } from '../../utils/logger';
 
 export async function lnMarketsAnalysisRoutes(fastify: FastifyInstance) {
   // Apply admin authentication to all routes
-  fastify.addHook('preHandler', async (request, reply) => {
-    await adminMiddleware(request, reply);
-  });
+  fastify.addHook('preHandler', adminAuthMiddleware);
 
   /**
    * Executar análise completa de conexão
