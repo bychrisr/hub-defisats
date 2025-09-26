@@ -177,6 +177,8 @@ interface ExternalAPIStatus {
   description?: string;
   provider?: 'lnmarkets' | 'coingecko' | 'binance' | 'tradingview';
   category?: 'trading' | 'market_data' | 'charts' | 'analytics';
+  enabled?: boolean;
+  priority?: number;
 }
 
 const Monitoring: React.FC = () => {
@@ -221,31 +223,9 @@ const Monitoring: React.FC = () => {
               endpoint: 'https://api.lnmarkets.com',
               description: 'Lightning Network trading platform',
               provider: 'lnmarkets',
-              category: 'trading'
-            },
-            {
-              name: 'CoinGecko',
-              status: apiMetrics.coinGecko?.status || 'unknown',
-              latency: apiMetrics.coinGecko?.latency || 0,
-              successRate: apiMetrics.coinGecko?.successRate || 0,
-              lastCheck: apiMetrics.coinGecko?.lastCheck || 0,
-              errorCount: apiMetrics.coinGecko?.errorCount || 0,
-              endpoint: 'https://api.coingecko.com',
-              description: 'Cryptocurrency market data provider',
-              provider: 'coingecko',
-              category: 'market_data'
-            },
-            {
-              name: 'Binance',
-              status: 'healthy', // TODO: Implement actual Binance health check
-              latency: 150,
-              successRate: 99.5,
-              lastCheck: Date.now(),
-              errorCount: 0,
-              endpoint: 'https://api.binance.com',
-              description: 'Cryptocurrency exchange API',
-              provider: 'binance',
-              category: 'trading'
+              category: 'trading',
+              enabled: true,
+              priority: 1
             },
             {
               name: 'TradingView',
@@ -257,7 +237,37 @@ const Monitoring: React.FC = () => {
               endpoint: 'https://www.tradingview.com',
               description: 'Financial charts and analytics platform',
               provider: 'tradingview',
-              category: 'charts'
+              category: 'charts',
+              enabled: true,
+              priority: 2
+            },
+            {
+              name: 'Binance',
+              status: 'healthy', // TODO: Implement actual Binance health check
+              latency: 150,
+              successRate: 99.5,
+              lastCheck: Date.now(),
+              errorCount: 0,
+              endpoint: 'https://api.binance.com',
+              description: 'Cryptocurrency exchange API',
+              provider: 'binance',
+              category: 'trading',
+              enabled: true,
+              priority: 3
+            },
+            {
+              name: 'CoinGecko',
+              status: apiMetrics.coinGecko?.status || 'unknown',
+              latency: apiMetrics.coinGecko?.latency || 0,
+              successRate: apiMetrics.coinGecko?.successRate || 0,
+              lastCheck: apiMetrics.coinGecko?.lastCheck || 0,
+              errorCount: apiMetrics.coinGecko?.errorCount || 0,
+              endpoint: 'https://api.coingecko.com',
+              description: 'Cryptocurrency market data provider',
+              provider: 'coingecko',
+              category: 'market_data',
+              enabled: false, // Temporarily disabled
+              priority: 4
             }
           ];
           setExternalAPIs(externalAPIsData);
@@ -337,7 +347,11 @@ const Monitoring: React.FC = () => {
     }
   };
 
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = (category: string, enabled: boolean = true) => {
+    if (!enabled) {
+      return 'text-gray-400 bg-gray-500/10 border-gray-500/20';
+    }
+    
     switch (category) {
       case 'trading':
         return 'text-orange-400 bg-orange-500/10 border-orange-500/20';
@@ -847,26 +861,39 @@ const Monitoring: React.FC = () => {
           {externalAPIs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {externalAPIs.map((api) => (
-                <div key={api.name} className="bg-bg-card border border-border rounded-lg p-6">
+                <div key={api.name} className={`bg-bg-card border border-border rounded-lg p-6 ${!api.enabled ? 'opacity-60' : ''}`}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       {getAPIProviderIcon(api.provider || 'default')}
                       <div>
-                        <h3 className="text-lg font-semibold text-text-primary">{api.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-text-primary">{api.name}</h3>
+                          {api.priority && (
+                            <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                              #{api.priority}
+                            </span>
+                          )}
+                          {!api.enabled && (
+                            <span className="px-2 py-1 text-xs font-medium bg-gray-500/20 text-gray-400 rounded-full">
+                              Disabled
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-text-secondary">{api.description}</p>
                         {api.category && (
-                          <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full border ${getCategoryColor(api.category)}`}>
+                          <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full border ${getCategoryColor(api.category, api.enabled)}`}>
                             {api.category.replace('_', ' ')}
                           </span>
                         )}
                       </div>
                     </div>
                     <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      !api.enabled ? 'bg-gray-500/20 text-gray-400' :
                       api.status === 'healthy' ? 'bg-green-500/20 text-green-400' :
                       api.status === 'degraded' ? 'bg-yellow-500/20 text-yellow-400' :
                       'bg-red-500/20 text-red-400'
                     }`}>
-                      {api.status}
+                      {!api.enabled ? 'disabled' : api.status}
                     </div>
                   </div>
 
