@@ -7,13 +7,13 @@ export async function rateLimitTestRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/simple-test',
     {
-      schema: {
+    schema: {
         description: 'Simple test without rate limiting',
         tags: ['Rate Limiting Test'],
         response: {
           200: {
-            type: 'object',
-            properties: {
+        type: 'object',
+        properties: {
               success: { type: 'boolean' },
               message: { type: 'string' },
               timestamp: { type: 'string' }
@@ -61,8 +61,8 @@ export async function rateLimitTestRoutes(fastify: FastifyInstance) {
       }
     },
     async (request, reply) => {
-      return reply.send({
-        success: true,
+    return reply.send({
+      success: true,
         message: 'Static rate limiting is working',
         timestamp: new Date().toISOString(),
         headers: {
@@ -79,7 +79,7 @@ export async function rateLimitTestRoutes(fastify: FastifyInstance) {
     '/dynamic-test',
     {
       preHandler: [dynamicRateLimiters.api],
-      schema: {
+    schema: {
         description: 'Test dynamic rate limiting',
         tags: ['Rate Limiting Test'],
         response: {
@@ -93,8 +93,8 @@ export async function rateLimitTestRoutes(fastify: FastifyInstance) {
             }
           },
           429: {
-            type: 'object',
-            properties: {
+        type: 'object',
+        properties: {
               error: { type: 'string' },
               message: { type: 'string' },
               retry_after: { type: 'number' }

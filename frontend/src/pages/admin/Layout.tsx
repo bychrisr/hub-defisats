@@ -54,7 +54,7 @@ const navigation = [
   { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
   { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor },
-  { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield },
+  { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield, badge: { text: 'done', color: 'green' } },
   { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
   { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
@@ -145,7 +145,18 @@ export default function AdminLayout() {
                   }}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <span className="flex-1 text-left">{item.name}</span>
+                  {item.badge && (
+                    <Badge 
+                      variant="secondary" 
+                      className={cn(
+                        "ml-2 text-xs",
+                        item.badge.color === 'green' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      )}
+                    >
+                      {item.badge.text}
+                    </Badge>
+                  )}
                 </Button>
               );
             })}
@@ -207,7 +218,18 @@ export default function AdminLayout() {
                   onClick={() => navigate(item.href)}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <span className="flex-1 text-left">{item.name}</span>
+                  {item.badge && (
+                    <Badge 
+                      variant="secondary" 
+                      className={cn(
+                        "ml-2 text-xs",
+                        item.badge.color === 'green' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      )}
+                    >
+                      {item.badge.text}
+                    </Badge>
+                  )}
                 </Button>
               );
             })}
