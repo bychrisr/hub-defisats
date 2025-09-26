@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService } from '../services/auth.service';
-import { PrismaClient } from '@prisma/client';
+import { getPrisma } from '../lib/prisma'; // Import getPrisma singleton
 // import { config } from '../config/env';
 
 // Interface for authenticated requests
@@ -36,8 +36,8 @@ export async function authMiddleware(
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     console.log('🔍 AUTH MIDDLEWARE - Token extracted:', token.substring(0, 20) + '...');
 
-    // Initialize auth service
-    const prisma = new PrismaClient();
+    // Initialize auth service with singleton Prisma instance
+    const prisma = await getPrisma(); // Use singleton getPrisma()
     const authService = new AuthService(prisma, request.server);
 
     // Validate token and get user
@@ -48,8 +48,7 @@ export async function authMiddleware(
     // Attach user to request
     (request as any).user = user;
 
-    // Close Prisma connection
-    await prisma.$disconnect();
+    // Note: No need to disconnect - using singleton instance
     
     console.log('✅ AUTH MIDDLEWARE - Authentication successful');
   } catch (error) {
@@ -77,8 +76,8 @@ export async function optionalAuthMiddleware(
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-    // Initialize auth service
-    const prisma = new PrismaClient();
+    // Initialize auth service with singleton Prisma instance
+    const prisma = await getPrisma(); // Use singleton getPrisma()
     const authService = new AuthService(prisma, request.server);
 
     // Validate token and get user
@@ -87,8 +86,7 @@ export async function optionalAuthMiddleware(
     // Attach user to request
     (request as any).user = user;
 
-    // Close Prisma connection
-    await prisma.$disconnect();
+    // Note: No need to disconnect - using singleton instance
   } catch (error) {
     // Invalid token, but continue without authentication
     // This is optional auth, so we don't return an error
@@ -120,13 +118,13 @@ export async function adminAuthMiddleware(
       });
     }
 
-    // Check if user has admin role
-    const prisma = new PrismaClient();
+    // Check if user has admin role using singleton Prisma instance
+    const prisma = await getPrisma(); // Use singleton getPrisma()
     const adminUser = await prisma.adminUser.findUnique({
       where: { user_id: user.id },
     });
 
-    await prisma.$disconnect();
+    // Note: No need to disconnect - using singleton instance
 
     console.log('🔍 ADMIN AUTH MIDDLEWARE - Admin user found:', adminUser);
 
@@ -173,13 +171,13 @@ export async function superAdminAuthMiddleware(
       });
     }
 
-    // Check if user has superadmin role
-    const prisma = new PrismaClient();
+    // Check if user has superadmin role using singleton Prisma instance
+    const prisma = await getPrisma(); // Use singleton getPrisma()
     const adminUser = await prisma.adminUser.findUnique({
       where: { user_id: user.id },
     });
 
-    await prisma.$disconnect();
+    // Note: No need to disconnect - using singleton instance
 
     if (!adminUser || adminUser.role !== 'superadmin') {
       return reply.status(403).send({
@@ -280,8 +278,8 @@ export async function authenticateAdmin(
       });
     }
 
-    // Get user from database
-    const prisma = new PrismaClient();
+    // Get user from database using singleton Prisma instance
+    const prisma = await getPrisma(); // Use singleton getPrisma()
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: {
@@ -314,7 +312,7 @@ export async function authenticateAdmin(
     // Add user to request object
     (request as any).user = user;
 
-    await prisma.$disconnect();
+    // Note: No need to disconnect - using singleton instance
   } catch (error) {
     return reply.status(401).send({
       error: 'UNAUTHORIZED',
