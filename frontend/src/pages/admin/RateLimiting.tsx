@@ -157,7 +157,7 @@ export default function RateLimiting() {
       const directResponse = await axiosDirect.get('/api/admin/rate-limit-config/');
       console.log('🧪 Direct axios response:', directResponse.data);
       
-      const response = await api.get('/admin/rate-limit-config/');
+      const response = await api.get('/api/admin/rate-limit-config/');
       console.log('📊 Axios Response:', response.data);
       console.log('📊 Axios Status:', response.status);
       console.log('📊 Axios Headers:', response.headers);
@@ -180,7 +180,7 @@ export default function RateLimiting() {
 
   const loadStats = async () => {
     try {
-      const response = await api.get('/admin/rate-limit-config/stats');
+      const response = await api.get('/api/admin/rate-limit-config/stats');
       if (response.data.success) {
         setStats(response.data.data);
       }
@@ -195,14 +195,14 @@ export default function RateLimiting() {
       if (editingConfig) {
         // Update existing config
         console.log('📝 Updating existing config:', editingConfig.id);
-        await api.post('/admin/rate-limit-config/', {
+        await api.post('/api/admin/rate-limit-config/', {
           ...formData,
           id: editingConfig.id
         });
       } else {
         // Create new config
         console.log('➕ Creating new config');
-        await api.post('/admin/rate-limit-config/', formData);
+        await api.post('/api/admin/rate-limit-config/', formData);
       }
       
       console.log('✅ Configuration saved, reloading...');
@@ -218,7 +218,7 @@ export default function RateLimiting() {
 
   const handleToggle = async (id: string, isActive: boolean) => {
     try {
-      await api.patch(`/admin/rate-limit-config/${id}/toggle`, { isActive });
+      await api.patch(`/api/admin/rate-limit-config/${id}/toggle`, { isActive });
       await loadConfigs();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to toggle configuration');
@@ -229,7 +229,7 @@ export default function RateLimiting() {
     if (!confirm('Are you sure you want to delete this configuration?')) return;
     
     try {
-      await api.delete(`/admin/rate-limit-config/${id}`);
+      await api.delete(`/api/admin/rate-limit-config/${id}`);
       await loadConfigs();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to delete configuration');
