@@ -22,7 +22,10 @@ import {
   Cpu,
   HardDrive,
   MemoryStick,
-  Network
+  Network,
+  Shield,
+  BarChart3,
+  DollarSign
 } from 'lucide-react';
 
 interface ComponentHealth {
@@ -148,32 +151,99 @@ const formatTimestamp = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString();
 };
 
+interface MarketData {
+  index: number;
+  change24h: number;
+  timestamp: number;
+  provider: string;
+  source: 'primary' | 'fallback' | 'emergency' | 'cache';
+  age: number;
+}
+
+interface ProviderStatus {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  lastCheck: number;
+  failureCount: number;
+}
+
+interface ExternalAPIStatus {
+  name: string;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  latency: number;
+  successRate: number;
+  lastCheck: number;
+  errorCount: number;
+  endpoint?: string;
+  description?: string;
+}
+
 const Monitoring: React.FC = () => {
   const [healthData, setHealthData] = useState<HealthReport | null>(null);
   const [hardwareMetrics, setHardwareMetrics] = useState<HardwareMetrics | null>(null);
+  const [marketData, setMarketData] = useState<MarketData | null>(null);
+  const [providerStatus, setProviderStatus] = useState<Record<string, ProviderStatus>>({});
+  const [externalAPIs, setExternalAPIs] = useState<ExternalAPIStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [activeTab, setActiveTab] = useState<'api' | 'hardware'>('api');
+  const [activeTab, setActiveTab] = useState<'api' | 'hardware' | 'external' | 'market'>('api');
 
   const fetchHealthData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch health data and hardware metrics in parallel
-      const [healthResponse, hardwareResponse] = await Promise.all([
+      // Fetch all data in parallel
+      const [healthResponse, hardwareResponse, marketResponse, providerResponse] = await Promise.all([
         api.get('/api/admin/health/health'),
-        api.get('/api/admin/hardware/metrics').catch(() => null) // Don't fail if hardware metrics are not available
+        api.get('/api/admin/hardware/metrics').catch(() => null), // Don't fail if hardware metrics are not available
+        api.get('/api/admin/market-data/market-data').catch(() => null), // Don't fail if market data is not available
+        api.get('/api/admin/market-data/providers/status').catch(() => null) // Don't fail if provider status is not available
       ]);
 
       if (healthResponse.data.success) {
         setHealthData(healthResponse.data.data);
+        
+        // Extract external API data from health response
+        const apiMetrics = healthResponse.data.data.metrics?.apiMetrics;
+        if (apiMetrics) {
+          const externalAPIsData: ExternalAPIStatus[] = [
+            {
+              name: 'LN Markets',
+              status: apiMetrics.lnMarkets?.status || 'unknown',
+              latency: apiMetrics.lnMarkets?.latency || 0,
+              successRate: apiMetrics.lnMarkets?.successRate || 0,
+              lastCheck: apiMetrics.lnMarkets?.lastCheck || 0,
+              errorCount: apiMetrics.lnMarkets?.errorCount || 0,
+              endpoint: 'https://api.lnmarkets.com',
+              description: 'Lightning Network trading platform'
+            },
+            {
+              name: 'CoinGecko',
+              status: apiMetrics.coinGecko?.status || 'unknown',
+              latency: apiMetrics.coinGecko?.latency || 0,
+              successRate: apiMetrics.coinGecko?.successRate || 0,
+              lastCheck: apiMetrics.coinGecko?.lastCheck || 0,
+              errorCount: apiMetrics.coinGecko?.errorCount || 0,
+              endpoint: 'https://api.coingecko.com',
+              description: 'Cryptocurrency market data provider'
+            }
+          ];
+          setExternalAPIs(externalAPIsData);
+        }
       }
 
       if (hardwareResponse && hardwareResponse.data.success) {
         setHardwareMetrics(hardwareResponse.data.data);
+      }
+
+      if (marketResponse && marketResponse.data.success) {
+        setMarketData(marketResponse.data.data);
+      }
+
+      if (providerResponse && providerResponse.data.success) {
+        setProviderStatus(providerResponse.data.data);
       }
 
       setLastUpdate(new Date());
@@ -334,6 +404,32 @@ const Monitoring: React.FC = () => {
             <div className="flex items-center">
               <Server className="w-4 h-4 mr-2" />
               Hardware Metrics
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('external')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'external'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center">
+              <Globe className="w-4 h-4 mr-2" />
+              External APIs
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('market')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'market'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Market Data
             </div>
           </button>
         </nav>
@@ -675,6 +771,169 @@ const Monitoring: React.FC = () => {
               <Server className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Hardware Data Available</h3>
               <p className="text-gray-600">Unable to load hardware metrics information.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* External APIs Tab */}
+      {activeTab === 'external' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-text-primary mb-2">External APIs Status</h2>
+            <p className="text-text-secondary">Detailed monitoring of external API connections</p>
+          </div>
+
+          {externalAPIs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {externalAPIs.map((api) => (
+                <div key={api.name} className="bg-card border border-border rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <Globe className="w-6 h-6 text-blue-400 mr-3" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-text-primary">{api.name}</h3>
+                        <p className="text-sm text-text-secondary">{api.description}</p>
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      api.status === 'healthy' ? 'bg-green-500/20 text-green-400' :
+                      api.status === 'degraded' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {api.status}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Endpoint:</span>
+                      <span className="text-text-primary text-sm">{api.endpoint}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Latency:</span>
+                      <span className="text-text-primary">{api.latency}ms</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Success Rate:</span>
+                      <span className="text-text-primary">{api.successRate}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Error Count:</span>
+                      <span className="text-text-primary">{api.errorCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Last Check:</span>
+                      <span className="text-text-primary">{formatTimestamp(api.lastCheck)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-text-primary mb-2">No External API Data Available</h3>
+              <p className="text-text-secondary">Unable to load external API information.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Market Data Tab */}
+      {activeTab === 'market' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-text-primary mb-2">Market Data Status</h2>
+            <p className="text-text-secondary">Real-time market data and provider status</p>
+          </div>
+
+          {marketData ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Market Data Card */}
+              <div className="bg-card border border-border rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <TrendingUp className="w-6 h-6 text-green-400 mr-3" />
+                  <h3 className="text-lg font-semibold text-text-primary">Current Market Data</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Index:</span>
+                    <span className="text-text-primary font-semibold">{marketData.index}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">24h Change:</span>
+                    <span className={`font-semibold ${
+                      marketData.change24h > 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {marketData.change24h > 0 ? '+' : ''}{marketData.change24h}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Provider:</span>
+                    <span className="text-text-primary">{marketData.provider}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Source:</span>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      marketData.source === 'primary' ? 'bg-green-500/20 text-green-400' :
+                      marketData.source === 'fallback' ? 'bg-yellow-500/20 text-yellow-400' :
+                      marketData.source === 'emergency' ? 'bg-red-500/20 text-red-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    }`}>
+                      {marketData.source}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Age:</span>
+                    <span className="text-text-primary">{marketData.age}s</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Timestamp:</span>
+                    <span className="text-text-primary">{formatTimestamp(marketData.timestamp)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Provider Status Card */}
+              <div className="bg-card border border-border rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <Shield className="w-6 h-6 text-blue-400 mr-3" />
+                  <h3 className="text-lg font-semibold text-text-primary">Provider Status</h3>
+                </div>
+                <div className="space-y-3">
+                  {Object.entries(providerStatus).map(([provider, status]) => (
+                    <div key={provider} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                      <div>
+                        <span className="text-text-primary font-medium">{provider}</span>
+                        <div className="text-sm text-text-secondary">
+                          Last check: {formatTimestamp(status.lastCheck)}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className={`px-2 py-1 rounded text-xs font-medium ${
+                          status.status === 'healthy' ? 'bg-green-500/20 text-green-400' :
+                          status.status === 'degraded' ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          {status.status}
+                        </div>
+                        {status.failureCount > 0 && (
+                          <div className="text-xs text-red-400">
+                            {status.failureCount} failures
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-text-primary mb-2">No Market Data Available</h3>
+              <p className="text-text-secondary">Unable to load market data information.</p>
             </div>
           )}
         </div>
