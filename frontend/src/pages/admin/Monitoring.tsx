@@ -14,7 +14,7 @@ import {
   Globe, 
   AlertTriangle, 
   CheckCircle, 
-  XCircle,
+  XCircle, 
   RefreshCw,
   TrendingUp,
   Clock,
@@ -111,28 +111,28 @@ const Monitoring: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'text-green-400 bg-green-900/20 border-green-500/30';
       case 'degraded':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
       case 'unhealthy':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'text-red-400 bg-red-900/20 border-red-500/30';
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return 'text-text-secondary bg-bg-card border-border';
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'text-red-400 bg-red-900/20 border-red-500/30';
       case 'high':
-        return 'text-orange-600 bg-orange-50 border-orange-200';
+        return 'text-orange-400 bg-orange-900/20 border-orange-500/30';
       case 'medium':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
       case 'low':
-        return 'text-blue-600 bg-blue-50 border-blue-200';
+        return 'text-blue-400 bg-blue-900/20 border-blue-500/30';
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return 'text-text-secondary bg-bg-card border-border';
     }
   };
 
@@ -169,7 +169,7 @@ const Monitoring: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
         <span className="ml-2 text-gray-600">Loading health data...</span>
-      </div>
+                </div>
     );
   }
 
@@ -203,13 +203,13 @@ const Monitoring: React.FC = () => {
 
   return (
     <div className="space-y-6 bg-bg-primary min-h-screen p-6">
-      {/* Header */}
+          {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+                      <div>
           <h1 className="text-2xl font-bold text-text-primary">System Monitoring</h1>
           <p className="text-text-secondary">Real-time health monitoring and system status</p>
-        </div>
-        <div className="flex items-center space-x-4">
+                  </div>
+                  <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <label className="flex items-center">
               <input
@@ -218,7 +218,7 @@ const Monitoring: React.FC = () => {
                 onChange={(e) => setAutoRefresh(e.target.checked)}
                 className="mr-2"
               />
-              <span className="text-sm text-gray-600">Auto-refresh</span>
+              <span className="text-sm text-text-secondary">Auto-refresh</span>
             </label>
           </div>
           <button
@@ -227,10 +227,10 @@ const Monitoring: React.FC = () => {
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors profile-tabs-glow"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+                      Refresh
           </button>
-        </div>
-      </div>
+                  </div>
+                </div>
 
       {/* Overall Status */}
       <div className={`rounded-lg border-2 p-6 bg-bg-card border-border profile-tabs-glow ${getStatusColor(healthData.overallStatus)}`}>
@@ -249,60 +249,60 @@ const Monitoring: React.FC = () => {
           <div className="text-right">
             <div className="text-2xl font-bold">
               {healthData.metrics.uptimePercentage.toFixed(1)}%
-            </div>
-            <div className="text-sm opacity-75">Uptime</div>
-          </div>
-        </div>
-      </div>
+                  </div>
+            <div className="text-sm text-text-secondary">Uptime</div>
+                  </div>
+                </div>
+                  </div>
 
       {/* Metrics Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <TrendingUp className="w-8 h-8 text-blue-500 mr-3" />
-            <div>
+                  <div>
               <div className="text-2xl font-bold text-text-primary">{healthData.metrics.totalChecks}</div>
               <div className="text-sm text-text-secondary">Total Checks</div>
-            </div>
-          </div>
-        </div>
+                    </div>
+                  </div>
+                </div>
         
         <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <CheckCircle className="w-8 h-8 text-green-500 mr-3" />
-            <div>
+                  <div>
               <div className="text-2xl font-bold text-text-primary">{healthData.metrics.successfulChecks}</div>
               <div className="text-sm text-text-secondary">Successful</div>
-            </div>
-          </div>
-        </div>
+                    </div>
+                  </div>
+                </div>
         
         <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <XCircle className="w-8 h-8 text-red-500 mr-3" />
-            <div>
+                  <div>
               <div className="text-2xl font-bold text-text-primary">{healthData.metrics.failedChecks}</div>
               <div className="text-sm text-text-secondary">Failed</div>
-            </div>
-          </div>
-        </div>
+                  </div>
+                </div>
+                </div>
         
         <div className="bg-bg-card rounded-lg border border-border p-4 profile-tabs-glow">
           <div className="flex items-center">
             <Zap className="w-8 h-8 text-purple-500 mr-3" />
-            <div>
+                  <div>
               <div className="text-2xl font-bold text-text-primary">{healthData.metrics.averageLatency.toFixed(0)}ms</div>
               <div className="text-sm text-text-secondary">Avg Latency</div>
-            </div>
-          </div>
-        </div>
-      </div>
+                    </div>
+                  </div>
+                  </div>
+                </div>
 
       {/* Components Status */}
       <div className="bg-bg-card rounded-lg border border-border profile-tabs-glow">
         <div className="px-6 py-4 border-b border-border">
           <h3 className="text-lg font-semibold text-text-primary">Component Status</h3>
-        </div>
+                </div>
         <div className="divide-y">
           {healthData.components.map((component) => (
             <div key={component.name} className="p-6">
@@ -332,11 +332,11 @@ const Monitoring: React.FC = () => {
               {component.details && Object.keys(component.details).length > 0 && (
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(component.details).map(([key, value]) => (
-                    <div key={key} className="bg-gray-50 rounded p-3">
-                      <div className="text-sm font-medium text-gray-700 capitalize">
+                    <div key={key} className="bg-bg-card border border-border rounded p-3 profile-tabs-glow">
+                      <div className="text-sm font-medium text-text-primary capitalize">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-text-secondary">
                         {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                       </div>
                     </div>
@@ -345,23 +345,23 @@ const Monitoring: React.FC = () => {
               )}
               
               {component.error && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
-                  <div className="text-sm text-red-800">
+                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded">
+                  <div className="text-sm text-red-400">
                     <strong>Error:</strong> {component.error}
                   </div>
                 </div>
               )}
-            </div>
+                    </div>
           ))}
-        </div>
-      </div>
-
+                    </div>
+                  </div>
+                  
       {/* Active Alerts */}
       {healthData.alerts.length > 0 && (
         <div className="bg-bg-card rounded-lg border border-border profile-tabs-glow">
           <div className="px-6 py-4 border-b border-border">
             <h3 className="text-lg font-semibold text-text-primary">Active Alerts</h3>
-          </div>
+                    </div>
           <div className="divide-y">
             {healthData.alerts.filter(alert => !alert.resolved).map((alert) => (
               <div key={alert.id} className="p-6">
@@ -378,11 +378,11 @@ const Monitoring: React.FC = () => {
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${getSeverityColor(alert.severity)}`}>
                     {alert.severity.toUpperCase()}
                   </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
       )}
 
       {/* System Info */}
