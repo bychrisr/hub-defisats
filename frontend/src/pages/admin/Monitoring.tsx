@@ -222,6 +222,9 @@ const Monitoring: React.FC = () => {
   // Protection state
   const [protectionData, setProtectionData] = useState<any>(null);
   const [protectionLoading, setProtectionLoading] = useState(false);
+  const [cacheConfig, setCacheConfig] = useState<any>(null);
+  const [protectionRules, setProtectionRules] = useState<any>(null);
+  const [protectionMetrics, setProtectionMetrics] = useState<any>(null);
 
   const handleResetCircuitBreaker = async () => {
     try {
@@ -421,21 +424,6 @@ const Monitoring: React.FC = () => {
     } catch (error: any) {
       console.error('Failed to update protection rules:', error);
       toast.error('Erro ao atualizar regras de proteção');
-    }
-  };
-
-  const handleResetCircuitBreaker = async () => {
-    try {
-      const response = await cachedApi.post('/api/admin/market-data/protection/circuit-breaker/reset');
-      if (response.data.success) {
-        toast.success('Circuit breaker resetado com sucesso!');
-        loadProtectionData(); // Reload data
-      } else {
-        toast.error('Erro ao resetar circuit breaker');
-      }
-    } catch (error: any) {
-      console.error('Failed to reset circuit breaker:', error);
-      toast.error('Erro ao resetar circuit breaker');
     }
   };
 
