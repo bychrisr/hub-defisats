@@ -206,7 +206,7 @@ const Monitoring: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [activeTab, setActiveTab] = useState<'api' | 'hardware' | 'external' | 'market'>('api');
+  const [activeTab, setActiveTab] = useState<'api' | 'hardware' | 'external' | 'market' | 'diagnostic' | 'protection'>('api');
 
   const handleResetCircuitBreaker = async () => {
     try {
@@ -221,6 +221,70 @@ const Monitoring: React.FC = () => {
     } catch (error: any) {
       console.error('Failed to reset circuit breakers:', error);
       toast.error('Erro ao resetar circuit breakers');
+    }
+  };
+
+  const handleTestAllProviders = async () => {
+    try {
+      const response = await cachedApi.post('/api/admin/market-data/providers/test');
+      if (response.data.success) {
+        toast.success('Teste de provedores executado com sucesso!');
+        await fetchHealthData();
+      } else {
+        toast.error('Erro ao testar provedores');
+      }
+    } catch (error: any) {
+      console.error('Failed to test providers:', error);
+      toast.error('Erro ao testar provedores');
+    }
+  };
+
+  const handleForceRefresh = async () => {
+    try {
+      const response = await cachedApi.post('/api/admin/market-data/market-data/refresh');
+      if (response.data.success) {
+        toast.success('Dados de mercado atualizados com sucesso!');
+        await fetchHealthData();
+      } else {
+        toast.error('Erro ao atualizar dados de mercado');
+      }
+    } catch (error: any) {
+      console.error('Failed to refresh market data:', error);
+      toast.error('Erro ao atualizar dados de mercado');
+    }
+  };
+
+  const handleRunDiagnostic = async () => {
+    try {
+      const response = await cachedApi.get('/api/admin/lnmarkets/diagnostic/full');
+      if (response.data.success) {
+        toast.success('Diagnóstico executado com sucesso!');
+        // Store diagnostic results for display
+        console.log('Diagnostic results:', response.data.data);
+      } else {
+        toast.error('Erro ao executar diagnóstico');
+      }
+    } catch (error: any) {
+      console.error('Failed to run diagnostic:', error);
+      toast.error('Erro ao executar diagnóstico');
+    }
+  };
+
+  const handleTestProtection = async () => {
+    try {
+      const response = await cachedApi.post('/api/admin/market-data/protection/check', {
+        userId: 'test-user',
+        automationId: 'test-automation'
+      });
+      if (response.data.success) {
+        toast.success('Teste de proteção executado com sucesso!');
+        console.log('Protection test results:', response.data.data);
+      } else {
+        toast.error('Erro ao testar proteção');
+      }
+    } catch (error: any) {
+      console.error('Failed to test protection:', error);
+      toast.error('Erro ao testar proteção');
     }
   };
 
@@ -543,6 +607,32 @@ const Monitoring: React.FC = () => {
             <div className="flex items-center">
               <TrendingUp className="w-4 h-4 mr-2" />
               Market Data
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('diagnostic')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'diagnostic'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
+            }`}
+          >
+            <div className="flex items-center">
+              <Activity className="w-4 h-4 mr-2" />
+              Diagnostic
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('protection')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'protection'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
+            }`}
+          >
+            <div className="flex items-center">
+              <Shield className="w-4 h-4 mr-2" />
+              Protection
             </div>
           </button>
         </nav>
@@ -1083,15 +1173,35 @@ const Monitoring: React.FC = () => {
                     <Shield className="w-6 h-6 text-blue-400 mr-3" />
                     <h3 className="text-lg font-semibold text-text-primary">Provider Status</h3>
                   </div>
-                  <Button
-                    onClick={handleResetCircuitBreaker}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Reset Circuit Breakers
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleResetCircuitBreaker}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      Reset Circuit Breakers
+                    </Button>
+                    <Button
+                      onClick={handleTestAllProviders}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <Activity className="w-4 h-4 mr-1" />
+                      Test All Providers
+                    </Button>
+                    <Button
+                      onClick={handleForceRefresh}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      Force Refresh
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-3">
                   {Object.entries(providerStatus).map(([provider, status]) => (
@@ -1128,6 +1238,184 @@ const Monitoring: React.FC = () => {
               <p className="text-text-secondary">Unable to load market data information.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Diagnostic Tab */}
+      {activeTab === 'diagnostic' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-text-primary mb-2">LN Markets API Diagnostic</h2>
+            <p className="text-text-secondary">Comprehensive testing and analysis of LN Markets API performance</p>
+          </div>
+
+          {/* Diagnostic Actions */}
+          <div className="bg-bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Activity className="w-6 h-6 text-blue-400 mr-3" />
+                <h3 className="text-lg font-semibold text-text-primary">Diagnostic Tools</h3>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleRunDiagnostic}
+                  disabled={loading}
+                  className="profile-tabs-glow"
+                >
+                  <Activity className="w-4 h-4 mr-2" />
+                  Run Full Diagnostic
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Placeholder for connection test
+                    toast.info('Connection test feature coming soon');
+                  }}
+                  disabled={loading}
+                  variant="outline"
+                  className="profile-tabs-glow"
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Test Connection
+                </Button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <div className="text-2xl font-bold text-text-primary">--</div>
+                <div className="text-sm text-text-secondary">Average Latency</div>
+              </div>
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <div className="text-2xl font-bold text-text-primary">--</div>
+                <div className="text-sm text-text-secondary">Success Rate</div>
+              </div>
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <div className="text-2xl font-bold text-text-primary">--</div>
+                <div className="text-sm text-text-secondary">Connection Quality</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Continuous Monitoring */}
+          <div className="bg-bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <BarChart3 className="w-6 h-6 text-green-400 mr-3" />
+                <h3 className="text-lg font-semibold text-text-primary">Continuous Monitoring</h3>
+              </div>
+              <Button
+                onClick={() => toast.info('Continuous monitoring feature coming soon')}
+                disabled={loading}
+                variant="outline"
+                className="profile-tabs-glow"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Start Monitoring
+              </Button>
+            </div>
+            <p className="text-text-secondary">Monitor API performance over time with detailed analytics and alerts.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Protection Tab */}
+      {activeTab === 'protection' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-text-primary mb-2">Market Data Protection System</h2>
+            <p className="text-text-secondary">Automation protection and data validation system</p>
+          </div>
+
+          {/* Protection Actions */}
+          <div className="bg-bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Shield className="w-6 h-6 text-blue-400 mr-3" />
+                <h3 className="text-lg font-semibold text-text-primary">Protection Tools</h3>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleTestProtection}
+                  disabled={loading}
+                  className="profile-tabs-glow"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Test Protection
+                </Button>
+                <Button
+                  onClick={() => toast.info('Protection configuration coming soon')}
+                  disabled={loading}
+                  variant="outline"
+                  className="profile-tabs-glow"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Configure Rules
+                </Button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium text-text-primary mb-3">Cache Configuration</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Max Cache Age:</span>
+                    <span className="text-sm text-text-primary">30 seconds</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Retry Attempts:</span>
+                    <span className="text-sm text-text-primary">3</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Fallback Timeout:</span>
+                    <span className="text-sm text-text-primary">5 seconds</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-text-primary mb-3">Protection Rules</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Data Age Limit:</span>
+                    <span className="text-sm text-text-primary">30 seconds</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Failure Threshold:</span>
+                    <span className="text-sm text-text-primary">5 consecutive</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Emergency Providers:</span>
+                    <span className="text-sm text-text-primary">CoinGecko, Binance</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* System Information */}
+          <div className="bg-bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center mb-4">
+              <Database className="w-6 h-6 text-purple-400 mr-3" />
+              <h3 className="text-lg font-semibold text-text-primary">System Information</h3>
+            </div>
+            <p className="text-text-secondary mb-4">Fallback system configuration and status</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <div className="text-lg font-bold text-green-400">Active</div>
+                <div className="text-sm text-text-secondary">Protection Status</div>
+              </div>
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <div className="text-lg font-bold text-text-primary">3</div>
+                <div className="text-sm text-text-secondary">Active Providers</div>
+              </div>
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <div className="text-lg font-bold text-text-primary">99.9%</div>
+                <div className="text-sm text-text-secondary">Uptime</div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

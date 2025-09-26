@@ -55,8 +55,6 @@ const navigation = [
   { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor, badge: { text: 'done', color: 'green' } },
   { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle, badge: { text: 'done', color: 'green' } },
-  { name: 'LN Markets Diagnostic', href: '/admin/lnmarkets-diagnostic', icon: Activity, badge: { text: 'new', color: 'blue' } },
-  { name: 'Market Data Fallback', href: '/admin/market-data-fallback', icon: Shield, badge: { text: 'critical', color: 'red' } },
   { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield, badge: { text: 'done', color: 'green' } },
   { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
