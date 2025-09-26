@@ -94,11 +94,18 @@ export default function RateLimiting() {
   const loadConfigs = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Loading rate limit configurations...');
       const response = await api.get('/admin/rate-limit-config/');
+      console.log('📊 API Response:', response.data);
       if (response.data.success) {
         setConfigs(response.data.data);
+        console.log('✅ Configurations loaded:', response.data.data.length);
+      } else {
+        console.log('❌ API returned success: false');
+        setError('API returned success: false');
       }
     } catch (err: any) {
+      console.error('❌ Error loading configurations:', err);
       setError(err.response?.data?.message || 'Failed to load rate limit configurations');
     } finally {
       setLoading(false);
@@ -118,22 +125,27 @@ export default function RateLimiting() {
 
   const handleSave = async () => {
     try {
+      console.log('💾 Saving configuration...', formData);
       if (editingConfig) {
         // Update existing config
+        console.log('📝 Updating existing config:', editingConfig.id);
         await api.post('/admin/rate-limit-config/', {
           ...formData,
           id: editingConfig.id
         });
       } else {
         // Create new config
+        console.log('➕ Creating new config');
         await api.post('/admin/rate-limit-config/', formData);
       }
       
+      console.log('✅ Configuration saved, reloading...');
       await loadConfigs();
       setEditingConfig(null);
       setShowCreateForm(false);
       resetForm();
     } catch (err: any) {
+      console.error('❌ Error saving configuration:', err);
       setError(err.response?.data?.message || 'Failed to save configuration');
     }
   };
@@ -214,7 +226,10 @@ export default function RateLimiting() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button onClick={() => setShowCreateForm(true)}>
+          <Button onClick={() => {
+            console.log('➕ New Configuration button clicked');
+            setShowCreateForm(true);
+          }}>
             <Plus className="h-4 w-4 mr-2" />
             New Configuration
           </Button>
