@@ -318,13 +318,13 @@ const Monitoring: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-4">
                   {component.latency && (
-                    <div className="text-sm text-text-secondary">
-                      {component.latency}ms
+                    <div className="flex items-center space-x-1">
+                      <Zap className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm font-medium text-text-primary">{component.latency}ms</span>
                     </div>
                   )}
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(component.status)}`}>
-                    {getStatusIcon(component.status)}
-                    <span className="ml-1 capitalize">{component.status}</span>
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(component.status)} flex items-center`}>
+                    <span className="capitalize">{component.status}</span>
                   </div>
                 </div>
               </div>
@@ -337,7 +337,30 @@ const Monitoring: React.FC = () => {
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </div>
                       <div className="text-sm text-text-secondary">
-                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                        {typeof value === 'object' ? (
+                          <div className="space-y-1">
+                            {Object.entries(value).map(([subKey, subValue]) => (
+                              <div key={subKey} className="flex justify-between items-center">
+                                <span className="capitalize text-text-secondary">{subKey.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                                <span className={`font-mono text-sm ${
+                                  subKey.toLowerCase().includes('latency') || subKey.toLowerCase().includes('time') 
+                                    ? 'text-blue-400 font-semibold' 
+                                    : 'text-text-primary'
+                                }`}>
+                                  {subValue}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className={`font-mono ${
+                            key.toLowerCase().includes('latency') || key.toLowerCase().includes('time')
+                              ? 'text-blue-400 font-semibold'
+                              : 'text-text-primary'
+                          }`}>
+                            {String(value)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}
