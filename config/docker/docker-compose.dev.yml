@@ -42,7 +42,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: hub-defisats-backend
     env_file:
-      - ../../.env
+      - ../env/.env.development
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public

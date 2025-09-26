@@ -9,14 +9,14 @@ import { healthCheckerService } from '../../services/health-checker.service';
 import { databaseHealthService } from '../../services/database-health.service';
 import { redisHealthService } from '../../services/redis-health.service';
 import { websocketMetricsService } from '../../services/websocket-metrics.service';
-import { adminMiddleware } from '../../middleware/admin.middleware';
+import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { logger } from '../../utils/logger';
 
 export async function healthRoutes(fastify: FastifyInstance) {
   // Apply admin authentication to all routes
-  // fastify.addHook('preHandler', async (request, reply) => {
-  //   await adminMiddleware(request, reply);
-  // });
+  fastify.addHook('preHandler', async (request, reply) => {
+    await adminAuthMiddleware(request, reply);
+  });
 
   /**
    * Get overall health status

@@ -18,7 +18,11 @@ import {
   RefreshCw,
   TrendingUp,
   Clock,
-  Zap
+  Zap,
+  Cpu,
+  HardDrive,
+  MemoryStick,
+  Network
 } from 'lucide-react';
 
 interface ComponentHealth {
@@ -38,6 +42,59 @@ interface HealthAlert {
   timestamp: number;
   resolved: boolean;
   resolvedAt?: number;
+}
+
+interface HardwareMetrics {
+  cpu: {
+    usage: string;
+    cores: number;
+    temperature?: string;
+    loadAverage?: string[];
+  };
+  memory: {
+    total: string;
+    used: string;
+    free: string;
+    usagePercent: string;
+    swap: {
+      total: string;
+      used: string;
+      free: string;
+    };
+  };
+  disk: {
+    total: string;
+    used: string;
+    free: string;
+    usagePercent: string;
+    readSpeed: string;
+    writeSpeed: string;
+  };
+  system: {
+    uptime: string;
+    platform: string;
+    arch: string;
+    hostname: string;
+    loadAverage?: string[];
+  };
+  network: {
+    interfaces: Array<{
+      name: string;
+      bytesReceived: string;
+      bytesSent: string;
+      packetsReceived: string;
+      packetsSent: string;
+    }>;
+  };
+  lastUpdate: string;
+  alerts: Array<{
+    type: string;
+    severity: string;
+    message: string;
+    value: number;
+    threshold: number;
+    timestamp: number;
+  }>;
 }
 
 interface HealthReport {
@@ -75,6 +132,7 @@ interface HealthReport {
 
 const Monitoring: React.FC = () => {
   const [healthData, setHealthData] = useState<HealthReport | null>(null);
+  const [hardwareMetrics, setHardwareMetrics] = useState<HardwareMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -83,15 +141,25 @@ const Monitoring: React.FC = () => {
   const fetchHealthData = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/admin/health/health');
-      
-      if (response.data.success) {
-        setHealthData(response.data.data);
+      setError(null);
+
+      // Fetch health data and hardware metrics in parallel
+      const [healthResponse, hardwareResponse] = await Promise.all([
+        api.get('/api/admin/health/health'),
+        api.get('/api/admin/hardware/metrics').catch(() => null) // Don't fail if hardware metrics are not available
+      ]);
+
+      if (healthResponse.data.success) {
+        setHealthData(healthResponse.data.data);
         setLastUpdate(new Date());
-        setError(null);
       } else {
         setError('Failed to fetch health data');
       }
+
+      if (hardwareResponse?.data.success) {
+        setHardwareMetrics(hardwareResponse.data.data);
+      }
+
     } catch (err: any) {
       console.error('Error fetching health data:', err);
       setError(err.response?.data?.message || 'Failed to fetch health data');
@@ -495,6 +563,174 @@ const Monitoring: React.FC = () => {
           ))}
                     </div>
                   </div>
+                  
+      {/* Hardware Metrics */}
+      {hardwareMetrics && (
+        <div className="bg-bg-card rounded-lg border border-border profile-tabs-glow">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-lg font-semibold text-text-primary">Hardware Metrics</h3>
+            <p className="text-sm text-text-secondary">
+              Last update: {new Date(hardwareMetrics.lastUpdate).toLocaleString()}
+            </p>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* CPU */}
+              <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <Cpu className="w-5 h-5 text-blue-400 mr-2" />
+                    <h4 className="font-medium text-text-primary">CPU</h4>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${
+                    parseInt(hardwareMetrics.cpu.usage) > 90 ? 'bg-red-500/20 text-red-400' :
+                    parseInt(hardwareMetrics.cpu.usage) > 70 ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {hardwareMetrics.cpu.usage}
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Cores:</span>
+                    <span className="text-text-primary">{hardwareMetrics.cpu.cores}</span>
+                  </div>
+                  {hardwareMetrics.cpu.temperature && (
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Temperature:</span>
+                      <span className="text-text-primary">{hardwareMetrics.cpu.temperature}°C</span>
+                    </div>
+                  )}
+                  {hardwareMetrics.cpu.loadAverage && (
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Load Avg:</span>
+                      <span className="text-text-primary">{hardwareMetrics.cpu.loadAverage.join(', ')}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Memory */}
+              <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <MemoryStick className="w-5 h-5 text-green-400 mr-2" />
+                    <h4 className="font-medium text-text-primary">Memory</h4>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${
+                    parseInt(hardwareMetrics.memory.usagePercent) > 95 ? 'bg-red-500/20 text-red-400' :
+                    parseInt(hardwareMetrics.memory.usagePercent) > 80 ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {hardwareMetrics.memory.usagePercent}
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Total:</span>
+                    <span className="text-text-primary">{hardwareMetrics.memory.total}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Used:</span>
+                    <span className="text-text-primary">{hardwareMetrics.memory.used}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Free:</span>
+                    <span className="text-text-primary">{hardwareMetrics.memory.free}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Disk */}
+              {hardwareMetrics.disk && (
+                <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <HardDrive className="w-5 h-5 text-purple-400 mr-2" />
+                      <h4 className="font-medium text-text-primary">Disk</h4>
+                    </div>
+                    <div className={`px-2 py-1 rounded text-xs font-medium ${
+                      parseInt(hardwareMetrics.disk.usagePercent) > 95 ? 'bg-red-500/20 text-red-400' :
+                      parseInt(hardwareMetrics.disk.usagePercent) > 85 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-green-500/20 text-green-400'
+                    }`}>
+                      {hardwareMetrics.disk.usagePercent}
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Total:</span>
+                      <span className="text-text-primary">{hardwareMetrics.disk.total}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Used:</span>
+                      <span className="text-text-primary">{hardwareMetrics.disk.used}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Free:</span>
+                      <span className="text-text-primary">{hardwareMetrics.disk.free}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* System */}
+              <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <Server className="w-5 h-5 text-orange-400 mr-2" />
+                    <h4 className="font-medium text-text-primary">System</h4>
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Uptime:</span>
+                    <span className="text-text-primary">{hardwareMetrics.system.uptime}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Platform:</span>
+                    <span className="text-text-primary">{hardwareMetrics.system.platform}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Hostname:</span>
+                    <span className="text-text-primary">{hardwareMetrics.system.hostname}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Hardware Alerts */}
+            {hardwareMetrics.alerts && hardwareMetrics.alerts.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-md font-medium text-text-primary mb-3">Hardware Alerts</h4>
+                <div className="space-y-2">
+                  {hardwareMetrics.alerts.slice(-5).map((alert, index) => (
+                    <div key={index} className={`p-3 rounded-lg border ${
+                      alert.severity === 'critical' ? 'border-red-500/50 bg-red-500/10' :
+                      alert.severity === 'medium' ? 'border-yellow-500/50 bg-yellow-500/10' :
+                      'border-blue-500/50 bg-blue-500/10'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <AlertTriangle className={`w-4 h-4 mr-2 ${
+                            alert.severity === 'critical' ? 'text-red-400' :
+                            alert.severity === 'medium' ? 'text-yellow-400' :
+                            'text-blue-400'
+                          }`} />
+                          <span className="text-sm font-medium text-text-primary">{alert.message}</span>
+                        </div>
+                        <span className="text-xs text-text-secondary">
+                          {new Date(alert.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
                   
       {/* Active Alerts */}
       {healthData.alerts.length > 0 && (

@@ -9,6 +9,7 @@ import { EventEmitter } from 'events';
 import { getPrisma } from '../lib/prisma';
 import { websocketMetricsService } from './websocket-metrics.service';
 import { externalAPIMonitorService } from './external-api-monitor.service';
+import { simpleHardwareMonitorService, HardwareAlert } from './simple-hardware-monitor.service';
 import { logger } from '../utils/logger';
 
 export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
@@ -435,18 +436,38 @@ export class HealthCheckerService extends EventEmitter {
   }
 
   /**
-   * Check system resources
+   * Check system resources (hardware monitoring)
    */
   private async checkSystemResources(): Promise<ComponentHealth> {
     try {
-      const memoryUsage = process.memoryUsage();
-      const cpuUsage = process.cpuUsage();
+      const hardwareMetrics = simpleHardwareMonitorService.getMetrics();
+      const hardwareStatus = simpleHardwareMonitorService.getHealthStatus();
+      const hardwareAlerts = simpleHardwareMonitorService.getAlerts();
       
-      const memoryUsagePercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+      if (!hardwareMetrics) {
+        return {
+          name: 'systemResources',
+          status: 'unhealthy',
+          lastCheck: Date.now(),
+          error: 'Hardware metrics not available',
+          details: {}
+        };
+      }
+
+      // Get formatted metrics for display
+      const formattedMetrics = simpleHardwareMonitorService.getFormattedMetrics();
       
-      let status: HealthStatus = 'healthy';
-      if (memoryUsagePercent > this.config.alertThresholds.memoryUsage) {
-        status = 'degraded';
+      // Determine overall status
+      let status: HealthStatus = hardwareStatus;
+      
+      // Check for critical alerts
+      const criticalAlerts = hardwareAlerts.filter(alert => 
+        alert.severity === 'critical' && 
+        alert.timestamp > Date.now() - (5 * 60 * 1000) // Last 5 minutes
+      );
+      
+      if (criticalAlerts.length > 0) {
+        status = 'unhealthy';
       }
 
       return {
@@ -454,10 +475,10 @@ export class HealthCheckerService extends EventEmitter {
         status,
         lastCheck: Date.now(),
         details: {
-          memoryUsage: `${memoryUsagePercent.toFixed(2)}%`,
-          heapUsed: `${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)}MB`,
-          heapTotal: `${(memoryUsage.heapTotal / 1024 / 1024).toFixed(2)}MB`,
-          uptime: `${(process.uptime() / 3600).toFixed(2)}h`
+          ...formattedMetrics,
+          alerts: hardwareAlerts.slice(-5), // Last 5 alerts
+          criticalAlerts: criticalAlerts.length,
+          totalAlerts: hardwareAlerts.length
         }
       };
 

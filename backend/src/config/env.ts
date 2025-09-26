@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 
 // Load environment variables from .env file (only in development)
 if (process.env['NODE_ENV'] !== 'production') {
@@ -12,7 +12,7 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test', 'staging'])
     .default('development'),
-  PORT: z.string().transform(Number).default('3000'),
+  PORT: z.string().transform(Number).default(() => 13000),
 
   // Database
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
@@ -52,7 +52,7 @@ const envSchema = z.object({
   SMTP_PORT: z.string().transform(Number).optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  EVOLUTION_API_URL: z.string().url().optional(),
+  EVOLUTION_API_URL: z.string().url().optional().or(z.literal('')),
   EVOLUTION_API_KEY: z.string().optional(),
 
   // Lightning Network
@@ -64,11 +64,11 @@ const envSchema = z.object({
 
   // Monitoring
   SENTRY_DSN: z.string().optional().or(z.literal('')),
-  PROMETHEUS_PORT: z.string().transform(Number).default('9090'),
+  PROMETHEUS_PORT: z.string().transform(Number).default(() => 9090),
 
   // Rate Limiting
-  RATE_LIMIT_MAX: z.string().transform(Number).default('100'),
-  RATE_LIMIT_TIME_WINDOW: z.string().transform(Number).default('60000'),
+  RATE_LIMIT_MAX: z.string().transform(Number).default(() => 100),
+  RATE_LIMIT_TIME_WINDOW: z.string().transform(Number).default(() => 60000),
 
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:13000'),
@@ -84,11 +84,11 @@ const parseEnv = () => {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors
+      const missingVars = error.issues
         .filter(err => err.code === 'too_small' && err.minimum === 1)
         .map(err => err.path.join('.'));
 
-      const invalidVars = error.errors
+      const invalidVars = error.issues
         .filter(err => err.code !== 'too_small' || err.minimum !== 1)
         .map(err => `${err.path.join('.')}: ${err.message}`);
 
