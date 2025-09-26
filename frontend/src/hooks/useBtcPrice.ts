@@ -24,7 +24,7 @@ export const useBtcPrice = (): UseBtcPriceReturn => {
       setLoading(true);
       setError(null);
 
-      // Usar endpoint do backend em vez de CoinGecko diretamente (evita CORS)
+      // Usar endpoint do backend em vez de CoinGecko diretamente (evita CORS) - fetch direto para evitar conflitos
       const response = await fetch('/api/market/index/public');
 
       if (!response.ok) {

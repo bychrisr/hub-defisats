@@ -1,3 +1,9 @@
+/**
+ * LN Markets Admin Routes - Robust Implementation
+ * 
+ * Complete implementation with real LN Markets integration
+ */
+
 import { FastifyInstance } from 'fastify';
 import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { PrismaClient } from '@prisma/client';
@@ -11,6 +17,10 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
   
   const prisma = new PrismaClient();
   const authService = new AuthService(prisma, fastify);
+
+  /**
+   * Get LN Markets market data for admin
+   */
   fastify.get('/market-data', async (request, reply) => {
     try {
       logger.info('Admin requesting LN Markets market data');
@@ -22,19 +32,51 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
         where: { id: user.id }
       });
       
-      if (!adminUser || !adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
-        logger.warn('Admin user does not have LN Markets credentials configured');
+      if (!adminUser) {
+        logger.error('Admin user not found', { userId: user.id });
+        return reply.status(404).send({
+          success: false,
+          message: 'Admin user not found',
+          error: 'USER_NOT_FOUND'
+        });
+      }
+      
+      if (!adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
+        logger.warn('Admin user does not have LN Markets credentials configured', { userId: user.id });
         return reply.status(400).send({
           success: false,
-          message: 'LN Markets credentials not configured',
-          error: 'CREDENTIALS_NOT_CONFIGURED'
+          message: 'LN Markets credentials not configured. Please configure them in Settings.',
+          error: 'CREDENTIALS_NOT_CONFIGURED',
+          details: {
+            missingFields: {
+              apiKey: !adminUser.ln_markets_api_key,
+              apiSecret: !adminUser.ln_markets_api_secret,
+              passphrase: !adminUser.ln_markets_passphrase
+            }
+          }
         });
       }
       
       // Decrypt credentials
-      const apiKey = authService.decryptData(adminUser.ln_markets_api_key);
-      const apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
-      const passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
+      let apiKey: string;
+      let apiSecret: string;
+      let passphrase: string;
+      
+      try {
+        apiKey = authService.decryptData(adminUser.ln_markets_api_key);
+        apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
+        passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
+      } catch (decryptError: any) {
+        logger.error('Failed to decrypt LN Markets credentials', { 
+          userId: user.id, 
+          error: decryptError.message 
+        });
+        return reply.status(500).send({
+          success: false,
+          message: 'Failed to decrypt LN Markets credentials',
+          error: 'DECRYPTION_FAILED'
+        });
+      }
       
       // Create LN Markets service
       const lnMarketsService = new LNMarketsAPIService({
@@ -42,31 +84,50 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
         apiSecret,
         passphrase,
         isTestnet: false
-      }, logger);
+      }, logger as any);
       
       // Get real market data
       const marketData = await lnMarketsService.getMarketData();
       
       logger.info('LN Markets market data retrieved successfully for admin', {
+        userId: user.id,
         price: marketData.price,
-        change24h: marketData.change24h
+        change24h: marketData.change24h,
+        symbol: marketData.symbol
       });
       
       return {
         success: true,
         data: marketData,
-        source: 'real'
+        source: 'real',
+        timestamp: Date.now(),
+        user: {
+          id: user.id,
+          email: adminUser.email
+        }
       };
     } catch (error: any) {
-      logger.error('Error fetching LN Markets admin market data:', error);
+      logger.error('Error fetching LN Markets admin market data:', {
+        error: error.message,
+        stack: error.stack,
+        userId: (request as any).user?.id
+      });
+      
       return reply.status(500).send({
         success: false,
-        message: 'Failed to fetch LN Markets admin market data',
-        error: error.message
+        message: 'Failed to fetch LN Markets market data',
+        error: error.message,
+        details: {
+          type: error.name || 'UnknownError',
+          timestamp: Date.now()
+        }
       });
     }
   });
 
+  /**
+   * Get LN Markets connection status for admin
+   */
   fastify.get('/status', async (request, reply) => {
     try {
       logger.info('Admin checking LN Markets status');
@@ -78,19 +139,51 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
         where: { id: user.id }
       });
       
-      if (!adminUser || !adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
-        logger.warn('Admin user does not have LN Markets credentials configured');
+      if (!adminUser) {
+        logger.error('Admin user not found', { userId: user.id });
+        return reply.status(404).send({
+          success: false,
+          message: 'Admin user not found',
+          error: 'USER_NOT_FOUND'
+        });
+      }
+      
+      if (!adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
+        logger.warn('Admin user does not have LN Markets credentials configured', { userId: user.id });
         return reply.status(400).send({
           success: false,
-          message: 'LN Markets credentials not configured',
-          error: 'CREDENTIALS_NOT_CONFIGURED'
+          message: 'LN Markets credentials not configured. Please configure them in Settings.',
+          error: 'CREDENTIALS_NOT_CONFIGURED',
+          details: {
+            missingFields: {
+              apiKey: !adminUser.ln_markets_api_key,
+              apiSecret: !adminUser.ln_markets_api_secret,
+              passphrase: !adminUser.ln_markets_passphrase
+            }
+          }
         });
       }
       
       // Decrypt credentials
-      const apiKey = authService.decryptData(adminUser.ln_markets_api_key);
-      const apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
-      const passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
+      let apiKey: string;
+      let apiSecret: string;
+      let passphrase: string;
+      
+      try {
+        apiKey = authService.decryptData(adminUser.ln_markets_api_key);
+        apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
+        passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
+      } catch (decryptError: any) {
+        logger.error('Failed to decrypt LN Markets credentials', { 
+          userId: user.id, 
+          error: decryptError.message 
+        });
+        return reply.status(500).send({
+          success: false,
+          message: 'Failed to decrypt LN Markets credentials',
+          error: 'DECRYPTION_FAILED'
+        });
+      }
       
       // Create LN Markets service
       const lnMarketsService = new LNMarketsAPIService({
@@ -98,13 +191,15 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
         apiSecret,
         passphrase,
         isTestnet: false
-      }, logger);
+      }, logger as any);
       
       // Test connection
       const status = await lnMarketsService.testConnection();
       
       logger.info('LN Markets status check completed for admin', {
-        status: status.success ? 'connected' : 'failed'
+        userId: user.id,
+        status: status.success ? 'connected' : 'failed',
+        message: status.message
       });
       
       return {
@@ -113,15 +208,130 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
           status: status.success ? 'connected' : 'failed',
           message: status.success ? 'LN Markets connection successful' : 'LN Markets connection failed',
           timestamp: Date.now(),
-          details: status
+          details: status,
+          user: {
+            id: user.id,
+            email: adminUser.email
+          }
         }
       };
     } catch (error: any) {
-      logger.error('Error checking LN Markets status:', error);
+      logger.error('Error checking LN Markets status:', {
+        error: error.message,
+        stack: error.stack,
+        userId: (request as any).user?.id
+      });
+      
       return reply.status(500).send({
         success: false,
         message: 'Failed to check LN Markets status',
-        error: error.message
+        error: error.message,
+        details: {
+          type: error.name || 'UnknownError',
+          timestamp: Date.now()
+        }
+      });
+    }
+  });
+
+  /**
+   * Test LN Markets connection with current credentials
+   */
+  fastify.post('/test-connection', async (request, reply) => {
+    try {
+      logger.info('Admin testing LN Markets connection');
+      
+      const user = (request as any).user;
+      
+      // Get admin user credentials
+      const adminUser = await prisma.user.findUnique({
+        where: { id: user.id }
+      });
+      
+      if (!adminUser) {
+        logger.error('Admin user not found', { userId: user.id });
+        return reply.status(404).send({
+          success: false,
+          message: 'Admin user not found',
+          error: 'USER_NOT_FOUND'
+        });
+      }
+      
+      if (!adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
+        logger.warn('Admin user does not have LN Markets credentials configured', { userId: user.id });
+        return reply.status(400).send({
+          success: false,
+          message: 'LN Markets credentials not configured. Please configure them in Settings.',
+          error: 'CREDENTIALS_NOT_CONFIGURED'
+        });
+      }
+      
+      // Decrypt credentials
+      let apiKey: string;
+      let apiSecret: string;
+      let passphrase: string;
+      
+      try {
+        apiKey = authService.decryptData(adminUser.ln_markets_api_key);
+        apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
+        passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
+      } catch (decryptError: any) {
+        logger.error('Failed to decrypt LN Markets credentials', { 
+          userId: user.id, 
+          error: decryptError.message 
+        });
+        return reply.status(500).send({
+          success: false,
+          message: 'Failed to decrypt LN Markets credentials',
+          error: 'DECRYPTION_FAILED'
+        });
+      }
+      
+      // Create LN Markets service
+      const lnMarketsService = new LNMarketsAPIService({
+        apiKey,
+        apiSecret,
+        passphrase,
+        isTestnet: false
+      }, logger as any);
+      
+      // Test connection
+      const testResult = await lnMarketsService.testConnection();
+      
+      logger.info('LN Markets connection test completed for admin', {
+        userId: user.id,
+        success: testResult.success,
+        message: testResult.message
+      });
+      
+      return {
+        success: true,
+        data: {
+          connected: testResult.success,
+          message: testResult.message,
+          timestamp: Date.now(),
+          details: testResult,
+          user: {
+            id: user.id,
+            email: adminUser.email
+          }
+        }
+      };
+    } catch (error: any) {
+      logger.error('Error testing LN Markets connection:', {
+        error: error.message,
+        stack: error.stack,
+        userId: (request as any).user?.id
+      });
+      
+      return reply.status(500).send({
+        success: false,
+        message: 'Failed to test LN Markets connection',
+        error: error.message,
+        details: {
+          type: error.name || 'UnknownError',
+          timestamp: Date.now()
+        }
       });
     }
   });

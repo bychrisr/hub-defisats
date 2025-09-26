@@ -67,6 +67,7 @@ class VersionService {
     try {
       console.log('🔍 VERSION SERVICE - Checking for updates...');
       
+      // Usar fetch direto para evitar problemas com Axios interceptors
       const response = await fetch('/api/version', {
         method: 'GET',
         headers: {

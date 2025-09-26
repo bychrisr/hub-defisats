@@ -676,11 +676,40 @@ export class LNMarketsAPIService {
   }
 
   // Market Data API Methods
+  // Get current market data
   async getMarketData() {
-    return this.makeRequest({
-      method: 'GET',
-      path: '/futures/info'
-    });
+    try {
+      console.log('🔍 LN MARKETS MARKET DATA - Trying /futures/ticker endpoint');
+      const tickerData = await this.makeRequest({
+        method: 'GET',
+        path: '/futures/ticker'
+      });
+      
+      // Transform ticker data to market data format
+      const marketData = {
+        symbol: 'BTCUSD',
+        price: tickerData.lastPrice || tickerData.index,
+        change24h: 0, // LN Markets doesn't provide 24h change in ticker
+        changePercent24h: 0, // LN Markets doesn't provide 24h change % in ticker
+        volume24h: 0, // LN Markets doesn't provide volume in ticker
+        high24h: tickerData.lastPrice || tickerData.index,
+        low24h: tickerData.lastPrice || tickerData.index,
+        timestamp: Date.now(),
+        source: 'lnmarkets',
+        rawData: tickerData
+      };
+      
+      console.log('✅ LN MARKETS MARKET DATA - Successfully retrieved:', {
+        price: marketData.price,
+        symbol: marketData.symbol,
+        timestamp: marketData.timestamp
+      });
+      
+      return marketData;
+    } catch (error: any) {
+      console.log('❌ LN MARKETS MARKET DATA - Error:', error.message);
+      throw error;
+    }
   }
 
   // Get current market index data

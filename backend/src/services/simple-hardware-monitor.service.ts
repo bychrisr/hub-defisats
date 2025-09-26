@@ -149,6 +149,79 @@ export class SimpleHardwareMonitorService {
   }
 
   /**
+   * Get health status based on current metrics
+   */
+  getHealthStatus(): 'healthy' | 'degraded' | 'unhealthy' {
+    if (!this.metrics) {
+      return 'unhealthy';
+    }
+
+    const { cpu, memory } = this.metrics;
+    
+    // Check for critical conditions
+    if (cpu.usage >= this.thresholds.cpu.critical || 
+        memory.usagePercent >= this.thresholds.memory.critical) {
+      return 'unhealthy';
+    }
+    
+    // Check for warning conditions
+    if (cpu.usage >= this.thresholds.cpu.warning || 
+        memory.usagePercent >= this.thresholds.memory.warning) {
+      return 'degraded';
+    }
+    
+    return 'healthy';
+  }
+
+  /**
+   * Get formatted metrics for display
+   */
+  getFormattedMetrics() {
+    if (!this.metrics) {
+      return {
+        cpu: { usage: 0, cores: 0, status: 'unknown' },
+        memory: { used: 0, total: 0, free: 0, usagePercent: 0, status: 'unknown' },
+        system: { uptime: 0, platform: 'unknown', arch: 'unknown', hostname: 'unknown' },
+        lastUpdate: 0
+      };
+    }
+
+    const { cpu, memory, system } = this.metrics;
+    
+    return {
+      cpu: {
+        usage: cpu.usage,
+        cores: cpu.cores,
+        status: cpu.usage >= this.thresholds.cpu.critical ? 'critical' :
+                cpu.usage >= this.thresholds.cpu.warning ? 'warning' : 'healthy'
+      },
+      memory: {
+        used: Math.round(memory.used / 1024 / 1024), // MB
+        total: Math.round(memory.total / 1024 / 1024), // MB
+        free: Math.round(memory.free / 1024 / 1024), // MB
+        usagePercent: memory.usagePercent,
+        status: memory.usagePercent >= this.thresholds.memory.critical ? 'critical' :
+                memory.usagePercent >= this.thresholds.memory.warning ? 'warning' : 'healthy'
+      },
+      system: {
+        uptime: system.uptime,
+        platform: system.platform,
+        arch: system.arch,
+        hostname: system.hostname,
+        uptimeFormatted: this.formatUptime(system.uptime)
+      },
+      lastUpdate: this.metrics.lastUpdate
+    };
+  }
+
+  /**
+   * Get current alerts
+   */
+  getAlerts(): HardwareAlert[] {
+    return [...this.alerts].sort((a, b) => b.timestamp - a.timestamp);
+  }
+
+  /**
    * Check for hardware alerts
    */
   private checkAlerts(): void {

@@ -9,12 +9,14 @@
 - **Cache e Filas**: Redis 7+ com BullMQ
 - **Containerização**: Docker + Docker Compose
 - **Autenticação**: JWT + Refresh Tokens
+- **API Cache**: Sistema centralizado de cache com deduplicação (v1.10.6)
 
 ### 1.2 Padrão Arquitetural
 - **Microserviços**: Separação clara entre responsabilidades
 - **API Gateway**: Fastify como ponto de entrada
 - **Workers Assíncronos**: Processamento em background
 - **Event-Driven**: Comunicação via filas Redis
+- **Cache Inteligente**: Deduplicação de requisições simultâneas
 
 ## 2. Entidades e Modelos de Dados
 
@@ -214,9 +216,59 @@ GET    /api/cards-with-tooltips    # Buscar cards com tooltips
 POST   /api/initialize-defaults    # Inicializar dados padrão
 ```
 
-## 4. Workers e Processamento Assíncrono
+## 4. Sistema de Cache de API (v1.10.6)
 
-### 4.1 Margin Monitor Worker
+### 4.1 Arquitetura do Cache
+- **Serviço Centralizado**: `api-cache.service.ts` - Gerencia cache e deduplicação
+- **Wrapper Inteligente**: `cached-api.service.ts` - Encapsula chamadas com cache automático
+- **Promise Sharing**: Compartilhamento de promises em andamento para evitar requisições duplicadas
+- **TTL Específico**: Tempo de vida diferenciado por rota
+
+### 4.2 Configuração de TTL - SEGURANÇA EM MERCADOS VOLÁTEIS
+```typescript
+const ROUTE_TTL: Record<string, number> = {
+  '/api/version': 5 * 60 * 1000,           // 5 minutos - dados não-críticos
+  '/api/market/index/public': 15 * 1000,  // 15 segundos - MÁXIMO para dados de mercado
+  '/api/admin/health/health': 30 * 1000,  // 30 segundos - dados de sistema
+  '/api/admin/hardware/metrics': 30 * 1000, // 30 segundos - dados de sistema
+  '/api/admin/market-data/market-data': 15 * 1000, // 15 segundos - dados de mercado críticos
+  '/api/admin/market-data/providers/status': 30 * 1000, // 30 segundos - status de sistema
+  '/api/admin/lnmarkets/market-data': 15 * 1000, // 15 segundos - dados de mercado críticos
+};
+```
+
+### 4.3 Validações de Segurança Implementadas
+- **Validação de Timestamp**: Todos os dados de mercado devem ter timestamp válido
+- **Validação de Idade**: Dados de mercado rejeitados se > 15 segundos
+- **Validação de Estrutura**: Verificação rigorosa da estrutura de dados de mercado
+- **Erro Transparente**: Mensagens claras quando dados indisponíveis
+- **Nenhum Fallback**: Nunca usa dados antigos em caso de erro
+
+### 4.4 Funcionalidades Principais
+- **Deduplicação**: Evita múltiplas chamadas simultâneas para a mesma URL
+- **Cache Inteligente**: Armazena resultados com timestamp e TTL
+- **Auto Cleanup**: Remove entradas expiradas automaticamente
+- **Invalidação**: Limpa cache relacionado após operações de escrita
+- **Estatísticas**: Monitoramento de uso do cache
+
+### 4.5 Integração com Serviços
+- **Monitoring.tsx**: Usa cached API para todas as chamadas admin
+- **centralizedDataStore.ts**: Cache para market data
+- **version.service.ts**: Fetch direto otimizado
+- **currency.service.ts**: Fetch direto otimizado
+- **useBtcPrice.ts**: Fetch direto otimizado
+- **PositionsContext.tsx**: Fetch direto otimizado
+
+### 4.6 Benefícios Implementados
+- **Eliminação de Erros 500**: Resolve conflitos de requisições simultâneas
+- **Performance**: Reduz latência e carga no backend
+- **Robustez**: Elimina race conditions
+- **Escalabilidade**: Fácil adição de novas rotas ao cache
+- **Monitoramento**: Estatísticas de cache disponíveis
+
+## 5. Workers e Processamento Assíncrono
+
+### 5.1 Margin Monitor Worker
 - **Frequência**: A cada 5 segundos
 - **Fila**: `margin-check` (prioridade alta)
 - **Função**: Monitorar margem de todos os usuários ativos

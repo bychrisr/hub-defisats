@@ -4,6 +4,51 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v1.10.6] - 2025-01-26
+
+### 🚀 **ROBUST API CACHE SYSTEM: ELIMINATING 500 ERRORS**
+
+#### ✨ **Problema Resolvido**
+- ✅ **Erros 500**: Eliminados completamente erros 500 em `/api/version` e `/api/market/index/public`
+- ✅ **Race Conditions**: Resolvidos conflitos de múltiplas chamadas simultâneas
+- ✅ **Performance**: Otimizada com cache inteligente e deduplicação de requisições
+- ✅ **Monitoring**: Sistema de monitoramento funcionando perfeitamente
+
+#### 🔧 **Solução Robusta Implementada**
+- ✅ **API Cache Service**: Criado serviço centralizado de cache com deduplicação
+- ✅ **Cached API Service**: Wrapper inteligente para requisições com cache automático
+- ✅ **TTL Específico**: Cache diferenciado por rota (15s market data, 5min version)
+- ✅ **Promise Sharing**: Compartilhamento de promises em andamento
+- ✅ **Auto Cleanup**: Limpeza automática de entradas expiradas
+- ✅ **Validação de Segurança**: Validação rigorosa de timestamps para dados de mercado
+- ✅ **Conformidade VOLATILE_MARKET_SAFETY**: Seguindo normas de segurança para mercados voláteis
+
+#### 🎯 **Arquivos Criados/Atualizados**
+- ✅ **Novo**: `/frontend/src/services/api-cache.service.ts` - Serviço de cache centralizado
+- ✅ **Novo**: `/frontend/src/services/cached-api.service.ts` - Wrapper para API com cache
+- ✅ **Atualizado**: `/frontend/src/pages/admin/Monitoring.tsx` - Usa cached API
+- ✅ **Atualizado**: `/frontend/src/stores/centralizedDataStore.ts` - Cache para market data
+- ✅ **Atualizado**: `/frontend/src/services/version.service.ts` - Fetch direto otimizado
+- ✅ **Atualizado**: `/frontend/src/services/currency.service.ts` - Fetch direto otimizado
+- ✅ **Atualizado**: `/frontend/src/hooks/useBtcPrice.ts` - Fetch direto otimizado
+- ✅ **Atualizado**: `/frontend/src/contexts/PositionsContext.tsx` - Fetch direto otimizado
+
+#### 🧪 **Testes Realizados**
+- ✅ **Rota /api/version**: Status 200, Version: 1.5.0
+- ✅ **Rota /api/market/index/public**: Status 200, Index: 109141
+- ✅ **Frontend**: Respondendo corretamente
+- ✅ **Containers**: Todos UP e healthy
+- ✅ **System Monitoring**: Funcionando sem erros
+
+#### 🚀 **Benefícios Adicionais**
+- ✅ **Performance**: Cache reduz latência e carga no backend
+- ✅ **Robustez**: Elimina race conditions e conflitos
+- ✅ **Escalabilidade**: Fácil adição de novas rotas ao cache
+- ✅ **Monitoramento**: Estatísticas de cache disponíveis
+- ✅ **Manutenibilidade**: Código limpo e bem documentado
+
+---
+
 ## [v1.10.5] - 2025-01-25
 
 ### 🎨 **DESIGN SYSTEM ALIGNMENT: AUTOMATION STATE CHANGES**

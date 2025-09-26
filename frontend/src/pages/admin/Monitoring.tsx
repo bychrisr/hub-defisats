@@ -6,6 +6,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { cachedApi } from '@/services/cached-api.service';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { 
   Activity, 
   Database, 
@@ -207,7 +210,7 @@ const Monitoring: React.FC = () => {
 
   const handleResetCircuitBreaker = async () => {
     try {
-      const response = await api.post('/api/admin/market-data/providers/reset-circuit-breaker');
+      const response = await cachedApi.post('/api/admin/market-data/providers/reset-circuit-breaker');
       if (response.data.success) {
         toast.success('Circuit breakers resetados com sucesso!');
         // Refresh data after reset
@@ -226,14 +229,14 @@ const Monitoring: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch all data in parallel
+      // Fetch all data in parallel using cached API
       const [healthResponse, hardwareResponse, marketResponse, providerResponse, lnMarketsResponse] = await Promise.all([
-        api.get('/api/admin/health/health'),
-        api.get('/api/admin/hardware/metrics').catch(() => null), // Don't fail if hardware metrics are not available
-        api.get('/api/admin/market-data/market-data').catch(() => null), // Don't fail if market data is not available
-        api.get('/api/admin/market-data/providers/status').catch(() => null), // Don't fail if provider status is not available
-        api.get('/api/admin/lnmarkets/market-data').catch((error) => {
-          console.warn('LN Markets data not available:', error.message);
+        cachedApi.get('/api/admin/health/health'),
+        cachedApi.get('/api/admin/hardware/metrics').catch(() => null), // Don't fail if hardware metrics are not available
+        cachedApi.get('/api/admin/market-data/market-data').catch(() => null), // Don't fail if market data is not available
+        cachedApi.get('/api/admin/market-data/providers/status').catch(() => null), // Don't fail if provider status is not available
+        cachedApi.get('/api/admin/lnmarkets/market-data').catch((error) => {
+          console.warn('LN Markets data not available:', error.response?.data?.message || error.message);
           return null;
         })
       ]);

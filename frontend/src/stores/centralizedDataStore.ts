@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { api } from '@/lib/api';
+import { cachedApi } from '@/services/cached-api.service';
 import { useAuthStore } from './auth';
 
 interface CentralizedData {
@@ -79,11 +80,11 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
       try {
         console.log('🔄 CENTRALIZED DATA - Fetching all data in single request...');
 
-        // Fazer todas as chamadas em paralelo
+        // Fazer todas as chamadas em paralelo usando cached API para market data
         const [balanceResponse, positionsResponse, marketResponse, menuResponse] = await Promise.allSettled([
           api.get('/api/lnmarkets/user/balance'),
           api.get('/api/lnmarkets/user/positions'),
-          api.get('/api/market/index/public'),
+          cachedApi.get('/api/market/index/public'), // Usar cached API para market data
           isAdmin ? api.get('/api/admin/menu') : Promise.resolve({ data: { success: true, data: null } })
         ]);
 
@@ -208,6 +209,20 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
               ...prev.data,
               isLoading: false,
               error: `Dados de mercado indisponíveis: ${criticalErrors.join(', ')}`
+            } : null
+          }));
+          return;
+        }
+
+        // Validação adicional de segurança para dados de mercado
+        const marketDataAge = Date.now() - marketIndex.timestamp;
+        if (marketDataAge > 15000) { // 15 segundos máximo
+          console.log('❌ CENTRALIZED DATA - Market data too old, not updating cache');
+          set(prev => ({
+            data: prev.data ? {
+              ...prev.data,
+              isLoading: false,
+              error: 'Dados de mercado muito antigos - por segurança, não exibimos dados desatualizados'
             } : null
           }));
           return;
