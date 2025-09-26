@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { api } from '@/lib/api';
 import { 
   Play, 
   RefreshCw, 
@@ -67,13 +68,12 @@ const LNMarketsDiagnostic: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/admin/lnmarkets/diagnostic/full');
-      const result = await response.json();
+      const response = await api.get('/api/admin/lnmarkets/diagnostic/full');
       
-      if (result.success) {
-        setDiagnosticData(result.data);
+      if (response.data.success) {
+        setDiagnosticData(response.data.data);
       } else {
-        setError(result.message || 'Diagnostic failed');
+        setError(response.data.message || 'Diagnostic failed');
       }
     } catch (err: any) {
       setError(err.message);
@@ -87,10 +87,9 @@ const LNMarketsDiagnostic: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/admin/lnmarkets/diagnostic/connection-test');
-      const result = await response.json();
+      const response = await api.get('/api/admin/lnmarkets/diagnostic/connection-test');
       
-      if (result.success) {
+      if (response.data.success) {
         // Update diagnostic data with connection test results
         setDiagnosticData(prev => prev ? {
           ...prev,
@@ -98,12 +97,12 @@ const LNMarketsDiagnostic: React.FC = () => {
             dnsResolution: 0,
             tcpConnection: 0,
             tlsHandshake: 0,
-            firstByte: result.data.averageLatency,
-            totalTime: result.data.averageLatency
+            firstByte: response.data.data.averageLatency,
+            totalTime: response.data.data.averageLatency
           }
         } : null);
       } else {
-        setError(result.message || 'Connection test failed');
+        setError(response.data.message || 'Connection test failed');
       }
     } catch (err: any) {
       setError(err.message);
