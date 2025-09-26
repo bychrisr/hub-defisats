@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { prisma } from '../lib/prisma';
+import { getPrisma } from '../lib/prisma';
 
 export interface AdminUser {
   id: string;
@@ -31,6 +31,7 @@ export async function adminMiddleware(
     }
 
     // Check if user has admin privileges
+    const prisma = await getPrisma();
     const adminUser = await prisma.adminUser.findUnique({
       where: {
         user_id: request.user.id
