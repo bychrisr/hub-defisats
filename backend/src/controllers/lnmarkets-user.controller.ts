@@ -960,11 +960,12 @@ export class LNMarketsUserController {
         console.error(`[UserController] Error with LN Markets service for user ${userId}:`, lnmarketsError);
         
         // Check if it's a decryption error
-        if (lnmarketsError.message?.includes('bad decrypt')) {
+        if (lnmarketsError.message?.includes('bad decrypt') || lnmarketsError.message?.includes('Invalid encrypted data format')) {
           return reply.send({
             success: true,
             data: [],
-            message: 'LN Markets credentials are corrupted or encrypted with a different key. Please reconfigure your API credentials in settings.'
+            message: 'LN Markets credentials are corrupted or encrypted with a different key. Please reconfigure your API credentials in settings.',
+            error: 'INVALID_CREDENTIALS'
           });
         }
         

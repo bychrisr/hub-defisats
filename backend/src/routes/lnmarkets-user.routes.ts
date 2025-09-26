@@ -20,9 +20,11 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/lnmarkets/user',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get LN Markets user data',
         tags: ['LN Markets - User'],
+        security: [{ bearerAuth: [] }],
         response: {
           200: {
             type: 'object',
@@ -41,9 +43,11 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/lnmarkets/user/balance',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get LN Markets user balance',
         tags: ['LN Markets - User'],
+        security: [{ bearerAuth: [] }],
         response: {
           200: {
             type: 'object',
@@ -79,9 +83,11 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/lnmarkets/user/estimated-balance',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get estimated balance calculation',
         tags: ['LN Markets - User'],
+        security: [{ bearerAuth: [] }],
         response: {
           200: {
             type: 'object',
@@ -113,9 +119,11 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/lnmarkets/user/history',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get LN Markets user history',
         tags: ['LN Markets - User'],
+        security: [{ bearerAuth: [] }],
         querystring: {
           type: 'object',
           properties: {
@@ -142,9 +150,11 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/lnmarkets/user/trades',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get LN Markets user trades',
         tags: ['LN Markets - User'],
+        security: [{ bearerAuth: [] }],
         querystring: {
           type: 'object',
           properties: {
@@ -171,6 +181,23 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   // Get user positions
   fastify.get(
     '/lnmarkets/user/positions',
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        description: 'Get LN Markets user positions',
+        tags: ['LN Markets - User'],
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: { type: 'array', items: { type: 'object' } }
+            }
+          }
+        }
+      }
+    },
     userController.getUserPositions.bind(userController)
   );
 
@@ -178,9 +205,11 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/lnmarkets/user/orders',
     {
+      preHandler: [authMiddleware],
       schema: {
         description: 'Get LN Markets user orders',
         tags: ['LN Markets - User'],
+        security: [{ bearerAuth: [] }],
         response: {
           200: {
             type: 'object',
