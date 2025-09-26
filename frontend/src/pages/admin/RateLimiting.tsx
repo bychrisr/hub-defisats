@@ -22,6 +22,7 @@ import {
   Settings
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import axios from 'axios';
 
 interface RateLimitConfig {
   id: string;
@@ -142,6 +143,19 @@ export default function RateLimiting() {
       console.log('🧪 Axios headers:', api.defaults.headers);
       console.log('🧪 Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
       console.log('🧪 Full URL will be:', `${api.defaults.baseURL}/admin/rate-limit-config/`);
+      
+      // Teste sem interceptor
+      console.log('🧪 Testing without interceptor...');
+      const axiosDirect = axios.create({
+        baseURL: '',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`
+        }
+      });
+      
+      const directResponse = await axiosDirect.get('/api/admin/rate-limit-config/');
+      console.log('🧪 Direct axios response:', directResponse.data);
       
       const response = await api.get('/admin/rate-limit-config/');
       console.log('📊 Axios Response:', response.data);
