@@ -1016,6 +1016,177 @@ Gera relatório de performance.
 
 ---
 
+## 🚀 LN Markets API v2 & Fallback
+
+### GET /api/lnmarkets-fallback/test-fallback
+Testa o sistema completo de fallback com LN Markets como primário e CoinGecko/Binance como backup.
+
+**Headers:**
+- `Authorization: Bearer <token>` (required)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "uuid",
+    "timestamp": "2025-01-26T10:00:00Z",
+    "results": {
+      "marketData": {
+        "symbol": "BTCUSD",
+        "price": 109402.93,
+        "source": "binance",
+        "warning": null
+      },
+      "positions": [],
+      "marginInfo": {
+        "marginLevel": 1000,
+        "marginUsed": 0,
+        "marginAvailable": 1000,
+        "unrealizedPnl": 0
+      },
+      "healthStatus": {
+        "status": "degraded",
+        "primary": "unavailable",
+        "circuitBreaker": {
+          "isOpen": false,
+          "failureCount": 0,
+          "lastFailureTime": 0,
+          "nextRetryTime": 30000
+        },
+        "fallbackProviders": 2
+      },
+      "circuitBreakerStatus": {
+        "isOpen": false,
+        "failureCount": 0,
+        "lastFailureTime": 0,
+        "nextRetryTime": 30000
+      }
+    },
+    "fallbackProviders": ["CoinGecko", "Binance"]
+  }
+}
+```
+
+### GET /api/lnmarkets-fallback/health-status
+Retorna o status de saúde do sistema de fallback.
+
+**Headers:**
+- `Authorization: Bearer <token>` (required)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "uuid",
+    "timestamp": "2025-01-26T10:00:00Z",
+    "healthStatus": {
+      "status": "degraded",
+      "primary": "unavailable",
+      "circuitBreaker": {
+        "isOpen": false,
+        "failureCount": 0,
+        "lastFailureTime": 0,
+        "nextRetryTime": 30000
+      },
+      "fallbackProviders": 2,
+      "error": "Health check timeout",
+      "timestamp": "2025-01-26T10:00:00Z"
+    },
+    "circuitBreakerStatus": {
+      "isOpen": false,
+      "failureCount": 0,
+      "lastFailureTime": 0,
+      "nextRetryTime": 30000
+    },
+    "fallbackProviders": ["CoinGecko", "Binance"]
+  }
+}
+```
+
+### GET /api/lnmarkets-fallback/test-providers
+Testa provedores de fallback individuais (público).
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "timestamp": "2025-01-26T10:00:00Z",
+    "providers": [
+      {
+        "name": "CoinGecko",
+        "healthy": true,
+        "marketData": {
+          "symbol": "BTCUSD",
+          "price": 109402.93,
+          "source": "coingecko"
+        }
+      },
+      {
+        "name": "Binance",
+        "healthy": true,
+        "marketData": {
+          "symbol": "BTCUSD",
+          "price": 109323.07,
+          "source": "binance"
+        }
+      }
+    ]
+  }
+}
+```
+
+### POST /api/ln-markets-test/guerrilla-test/full
+Executa testes de guerrilha completos contra a LN Markets API v2.
+
+**Headers:**
+- `Authorization: Bearer <token>` (required)
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "uuid",
+    "tests": [
+      {
+        "testName": "Basic Connectivity",
+        "success": true,
+        "latency": 196,
+        "error": null
+      },
+      {
+        "testName": "Authentication",
+        "success": true,
+        "latency": 217,
+        "error": null
+      },
+      {
+        "testName": "Market Data",
+        "success": true,
+        "latency": 196,
+        "error": null
+      }
+    ],
+    "overallSuccess": true,
+    "averageLatency": 244.4,
+    "recommendations": []
+  }
+}
+```
+
+---
+
 ## 🔧 Health Check
 
 ### GET /api/health
