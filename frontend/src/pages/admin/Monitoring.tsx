@@ -201,7 +201,7 @@ const Monitoring: React.FC = () => {
   const [hardwareMetrics, setHardwareMetrics] = useState<HardwareMetrics | null>(null);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
   const [lnMarketsData, setLnMarketsData] = useState<LNMarketsData | null>(null);
-  const [providerStatus, setProviderStatus] = useState<any>({});
+  const [providerStatus, setProviderStatus] = useState<any[]>([]);
   const [externalAPIs, setExternalAPIs] = useState<ExternalAPIStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
