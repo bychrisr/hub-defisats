@@ -68,7 +68,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
   /**
    * Get health alerts
    */
-  fastify.get('/health/alerts', async (request, reply) => {
+  fastify.get('/alerts', async (request, reply) => {
     try {
       const alerts = healthCheckerService.getAlerts();
       
@@ -89,7 +89,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
   /**
    * Resolve health alert
    */
-  fastify.post('/health/alerts/:alertId/resolve', async (request, reply) => {
+  fastify.post('/alerts/:alertId/resolve', async (request, reply) => {
     try {
       const { alertId } = request.params as { alertId: string };
       
