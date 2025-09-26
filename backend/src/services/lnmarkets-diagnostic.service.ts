@@ -90,9 +90,18 @@ export class LNMarketsDiagnosticService {
           apiSecret: user.ln_markets_api_secret,
           passphrase: user.ln_markets_passphrase
         };
-        logger.info('LN Markets credentials loaded from database');
+        logger.info('LN Markets credentials loaded from database', {
+          hasApiKey: !!this.credentials.apiKey,
+          hasApiSecret: !!this.credentials.apiSecret,
+          hasPassphrase: !!this.credentials.passphrase
+        });
       } else {
-        logger.warn('LN Markets credentials not found in database, using public endpoints only');
+        logger.warn('LN Markets credentials not found in database, using public endpoints only', {
+          userFound: !!user,
+          hasApiKey: !!(user?.ln_markets_api_key),
+          hasApiSecret: !!(user?.ln_markets_api_secret),
+          hasPassphrase: !!(user?.ln_markets_passphrase)
+        });
       }
     } catch (error) {
       logger.error('Failed to load LN Markets credentials from database', { error: error.message });
@@ -189,13 +198,10 @@ export class LNMarketsDiagnosticService {
     
     const endpoints = hasCredentials ? [
       { path: '/futures/ticker', method: 'GET', auth: false },
-      { path: '/futures/info', method: 'GET', auth: false },
       { path: '/user', method: 'GET', auth: true },
-      { path: '/positions', method: 'GET', auth: true },
-      { path: '/funding', method: 'GET', auth: false }
+      { path: '/positions', method: 'GET', auth: true }
     ] : [
-      { path: '/futures/ticker', method: 'GET', auth: false },
-      { path: '/futures/info', method: 'GET', auth: false }
+      { path: '/futures/ticker', method: 'GET', auth: false }
     ];
 
     logger.info(`Testing ${endpoints.length} endpoints (${hasCredentials ? 'with' : 'without'} credentials)`);
