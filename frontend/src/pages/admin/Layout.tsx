@@ -54,6 +54,7 @@ const navigation = [
   { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
   { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor },
+  { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield },
   { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
   { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Settings', href: '/admin/settings', icon: Settings },

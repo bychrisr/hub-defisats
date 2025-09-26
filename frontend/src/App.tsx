@@ -59,6 +59,7 @@ import RouteRedirects from '@/pages/admin/RouteRedirects';
 import TestPermissions from '@/pages/TestPermissions';
 import DesignSystem from '@/pages/DesignSystem';
 import Documentation from '@/pages/admin/Documentation';
+import RateLimiting from '@/pages/admin/RateLimiting';
 
 const queryClient = new QueryClient();
 
@@ -431,6 +432,7 @@ const App = () => {
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />
               <Route path="monitoring" element={<AdminMonitoring />} />
+              <Route path="rate-limiting" element={<RateLimiting />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="plans" element={<Plans />} />
               <Route path="coupons" element={<AdminCoupons />} />
