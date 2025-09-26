@@ -1382,8 +1382,13 @@ const Monitoring: React.FC = () => {
                             </div>
                           )}
                         </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-text-secondary">No provider data available</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>
