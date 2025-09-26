@@ -9,8 +9,28 @@ export class DocsController {
 
   constructor() {
     // Caminhos para os diretórios de documentação
-    this.docsPath = path.join(process.cwd(), '.system', 'docs');
-    this.systemPath = path.join(process.cwd(), '.system');
+    // Tentar diferentes caminhos possíveis
+    const possiblePaths = [
+      path.join(process.cwd(), '.system', 'docs'),
+      path.join(process.cwd(), '..', '.system', 'docs'),
+      path.join(process.cwd(), '..', '..', '.system', 'docs'),
+      '/app/.system/docs',
+      '/app/../.system/docs'
+    ];
+    
+    this.docsPath = possiblePaths.find(p => {
+      try {
+        return require('fs').existsSync(p);
+      } catch {
+        return false;
+      }
+    }) || path.join(process.cwd(), '.system', 'docs');
+    
+    this.systemPath = path.dirname(this.docsPath);
+    
+    console.log('📁 DOCS CONTROLLER - Final paths:');
+    console.log('📁 DOCS CONTROLLER - docsPath:', this.docsPath);
+    console.log('📁 DOCS CONTROLLER - systemPath:', this.systemPath);
   }
 
   /**
@@ -283,11 +303,18 @@ export class DocsController {
   private async getAllMarkdownFiles(): Promise<any[]> {
     const files: any[] = [];
     
+    console.log('📁 DOCS CONTROLLER - Scanning directories...');
+    console.log('📁 DOCS CONTROLLER - docsPath:', this.docsPath);
+    console.log('📁 DOCS CONTROLLER - systemPath:', this.systemPath);
+    
     // Buscar arquivos no diretório docs
     await this.scanDirectory(this.docsPath, files, 'docs');
     
     // Buscar arquivos no diretório system (raiz)
     await this.scanDirectory(this.systemPath, files, 'system');
+    
+    console.log('📁 DOCS CONTROLLER - Found files:', files.length);
+    console.log('📁 DOCS CONTROLLER - Files:', files.map(f => f.path));
     
     return files;
   }

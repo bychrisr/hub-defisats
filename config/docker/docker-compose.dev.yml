@@ -52,6 +52,7 @@ services:
       - "13010:3010"
     volumes:
       - ../../backend:/app
+      - ../../.system:/app/.system
       - /app/node_modules
     depends_on:
       postgres:
