@@ -28,7 +28,8 @@ import {
   Network,
   Shield,
   BarChart3,
-  DollarSign
+  DollarSign,
+  Settings
 } from 'lucide-react';
 
 interface ComponentHealth {
