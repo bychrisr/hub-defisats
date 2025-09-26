@@ -212,13 +212,13 @@ const Monitoring: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
-        return 'border-green-200 bg-green-50';
+        return 'border-green-500/50 bg-green-500/10';
       case 'degraded':
-        return 'border-yellow-200 bg-yellow-50';
+        return 'border-yellow-500/50 bg-yellow-500/10';
       case 'unhealthy':
-        return 'border-red-200 bg-red-50';
+        return 'border-red-500/50 bg-red-500/10';
       default:
-        return 'border-gray-200 bg-gray-50';
+        return 'border-border bg-card';
     }
   };
 
@@ -440,56 +440,56 @@ const Monitoring: React.FC = () => {
           )}
 
           {/* Performance Metrics */}
-          <div className="bg-white rounded-lg border">
+          <div className="bg-card rounded-lg border border-border">
             <div className="px-6 py-4 border-b">
               <h3 className="text-lg font-semibold">Performance Metrics</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Total Checks</h4>
-                  <p className="text-gray-600">{healthData.metrics.totalChecks}</p>
+                  <h4 className="font-medium text-text-primary mb-2">Total Checks</h4>
+                  <p className="text-text-secondary">{healthData.metrics.totalChecks}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Success Rate</h4>
-                  <p className="text-gray-600">
+                  <h4 className="font-medium text-text-primary mb-2">Success Rate</h4>
+                  <p className="text-text-secondary">
                     {((healthData.metrics.successfulChecks / healthData.metrics.totalChecks) * 100).toFixed(1)}%
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Average Latency</h4>
-                  <p className="text-gray-600">{healthData.metrics.averageLatency.toFixed(1)}ms</p>
+                  <h4 className="font-medium text-text-primary mb-2">Average Latency</h4>
+                  <p className="text-text-secondary">{healthData.metrics.averageLatency.toFixed(1)}ms</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Uptime</h4>
-                  <p className="text-gray-600">{healthData.metrics.uptimePercentage.toFixed(2)}%</p>
+                  <h4 className="font-medium text-text-primary mb-2">Uptime</h4>
+                  <p className="text-text-secondary">{healthData.metrics.uptimePercentage.toFixed(2)}%</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* System Information */}
-          <div className="bg-white rounded-lg border">
+          <div className="bg-card rounded-lg border border-border">
             <div className="px-6 py-4 border-b">
               <h3 className="text-lg font-semibold">System Information</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Uptime</h4>
-                  <p className="text-gray-600">{formatUptime(healthData.uptime)}</p>
+                  <h4 className="font-medium text-text-primary mb-2">Uptime</h4>
+                  <p className="text-text-secondary">{formatUptime(healthData.uptime)}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Consecutive Failures</h4>
-                  <p className="text-gray-600">{healthData.metrics.consecutiveFailures}</p>
+                  <h4 className="font-medium text-text-primary mb-2">Consecutive Failures</h4>
+                  <p className="text-text-secondary">{healthData.metrics.consecutiveFailures}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Last Healthy Time</h4>
-                  <p className="text-gray-600">{formatTimestamp(healthData.metrics.lastHealthyTime)}</p>
+                  <h4 className="font-medium text-text-primary mb-2">Last Healthy Time</h4>
+                  <p className="text-text-secondary">{formatTimestamp(healthData.metrics.lastHealthyTime)}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Total Alerts</h4>
-                  <p className="text-gray-600">{healthData.alerts.length}</p>
+                  <h4 className="font-medium text-text-primary mb-2">Total Alerts</h4>
+                  <p className="text-text-secondary">{healthData.alerts.length}</p>
                 </div>
               </div>
             </div>
