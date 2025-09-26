@@ -94,6 +94,27 @@ export async function marketDataFallbackRoutes(fastify: FastifyInstance) {
   });
 
   /**
+   * Obter status dos provedores
+   */
+  fastify.get('/providers/status', async (request, reply) => {
+    try {
+      const status = marketDataFallbackService.getProvidersStatus();
+      
+      return {
+        success: true,
+        data: status
+      };
+    } catch (error: any) {
+      logger.error('Failed to get providers status', { error: error.message });
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to get providers status'
+      });
+    }
+  });
+
+  /**
    * Resetar circuit breaker de todos os provedores
    */
   fastify.post('/providers/reset-circuit-breaker', async (request, reply) => {
