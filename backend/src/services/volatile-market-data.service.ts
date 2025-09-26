@@ -144,8 +144,8 @@ export class VolatileMarketDataService {
   private async fetchFreshMarketData(): Promise<MarketData | null> {
     const sources = [
       { name: 'lnmarkets', priority: 1 },
-      { name: 'binance', priority: 2 },
-      { name: 'coingecko', priority: 3 }
+      { name: 'binance', priority: 2 }
+      // { name: 'coingecko', priority: 3 } // Temporariamente desativado
     ];
 
     for (const source of sources) {

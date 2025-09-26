@@ -370,32 +370,32 @@ async function registerRoutes() {
 
       console.log('🔍 PUBLIC MARKET PRICES - Getting latest prices for:', symbolList);
 
-      // Try CoinGecko API first
+      // Try Binance API first
       try {
-        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${symbolList.join(',')}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`);
+        const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT"]`);
 
         if (response.ok) {
           const data = await response.json();
 
-          // Transform CoinGecko response to our format
+          // Transform Binance response to our format
           const transformedData: any = {};
-          for (const [symbol, priceData] of Object.entries(data)) {
-            const priceInfo = priceData as any;
-            transformedData[symbol.toLowerCase()] = {
-              usd: priceInfo.usd || 0,
-              usd_24h_change: priceInfo.usd_24h_change || 0,
+          for (const ticker of data) {
+            const symbol = ticker.symbol.replace('USDT', '').toLowerCase();
+            transformedData[symbol] = {
+              usd: parseFloat(ticker.lastPrice) || 0,
+              usd_24h_change: parseFloat(ticker.priceChangePercent) || 0,
               last_updated_at: Math.floor(Date.now() / 1000)
             };
           }
 
-          console.log('✅ PUBLIC MARKET PRICES - CoinGecko data retrieved successfully');
+          console.log('✅ PUBLIC MARKET PRICES - Binance data retrieved successfully');
           return reply.send({
             success: true,
             data: transformedData
           });
         }
-      } catch (coingeckoError) {
-        console.log('⚠️ PUBLIC MARKET PRICES - CoinGecko API failed, using fallback');
+      } catch (binanceError) {
+        console.log('⚠️ PUBLIC MARKET PRICES - Binance API failed, using fallback');
       }
 
       // Fallback to simulated data

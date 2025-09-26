@@ -58,7 +58,7 @@ export class MarketDataFallbackService {
       maxCacheAge: 30 * 1000, // 30 segundos - conforme VOLATILE_MARKET_SAFETY.md
       retryAttempts: 3,
       fallbackTimeout: 5000, // 5 segundos para fallback
-      emergencyProviders: ['coinGecko', 'binance']
+      emergencyProviders: ['binance'] // CoinGecko removido temporariamente
     };
 
     this.initializeProviders();
@@ -88,28 +88,10 @@ export class MarketDataFallbackService {
       })
     });
 
-    // 2. CoinGecko (Fallback)
-    this.addProvider({
-      name: 'coinGecko',
-      priority: 2,
-      baseURL: 'https://api.coingecko.com',
-      endpoints: {
-        marketData: '/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
-        health: '/api/v3/ping'
-      },
-      timeout: 5000,
-      requiresAuth: false,
-      circuitBreaker: new CircuitBreaker({
-        failureThreshold: 3,
-        recoveryTimeout: 30000,
-        monitoringPeriod: 30000
-      })
-    });
-
-    // 3. Binance (Emergency)
+    // 2. Binance (Fallback) - Prioridade aumentada
     this.addProvider({
       name: 'binance',
-      priority: 3,
+      priority: 2,
       baseURL: 'https://api.binance.com',
       endpoints: {
         marketData: '/api/v3/ticker/24hr?symbol=BTCUSDT',
@@ -123,6 +105,27 @@ export class MarketDataFallbackService {
         monitoringPeriod: 30000
       })
     });
+
+    // 3. CoinGecko (Temporariamente desativado)
+    // TODO: Reativar quando necessário
+    /*
+    this.addProvider({
+      name: 'coinGecko',
+      priority: 3,
+      baseURL: 'https://api.coingecko.com',
+      endpoints: {
+        marketData: '/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
+        health: '/api/v3/ping'
+      },
+      timeout: 5000,
+      requiresAuth: false,
+      circuitBreaker: new CircuitBreaker({
+        failureThreshold: 3,
+        recoveryTimeout: 30000,
+        monitoringPeriod: 30000
+      })
+    });
+    */
   }
 
   private addProvider(config: Omit<MarketDataProvider, 'circuitBreaker' | 'client'>) {

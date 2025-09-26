@@ -171,12 +171,12 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
         console.log('🔄 MARKET DATA - No symbol provided, returning basic market index');
 
         try {
-          // Try to get current BTC price from CoinGecko as fallback
-          const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+          // Try to get current BTC price from Binance as fallback
+          const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
           if (response.ok) {
             const data = await response.json();
-            const btcPrice = data.bitcoin?.usd || 65000;
-            const btcChange = data.bitcoin?.usd_24h_change || 0;
+            const btcPrice = parseFloat(data.lastPrice) || 65000;
+            const btcChange = parseFloat(data.priceChangePercent) || 0;
 
             return reply.status(200).send({
               success: true,
@@ -190,8 +190,8 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
               }
             });
           }
-        } catch (coingeckoError) {
-          console.log('⚠️ MARKET DATA - CoinGecko failed, using fallback data');
+        } catch (binanceError) {
+          console.log('⚠️ MARKET DATA - Binance failed, using fallback data');
         }
 
         // Fallback data
@@ -361,17 +361,17 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
         marketIndexData = await lnMarketsService.getMarketIndex();
         console.log('✅ MARKET INDEX - LN Markets index data retrieved:', marketIndexData);
       } catch (lnMarketsError: any) {
-        console.log('⚠️ MARKET INDEX - LN Markets API failed, using CoinGecko as fallback:', lnMarketsError?.message || lnMarketsError);
+        console.log('⚠️ MARKET INDEX - LN Markets API failed, using Binance as fallback:', lnMarketsError?.message || lnMarketsError);
         
-        // Fallback to CoinGecko for real BTC price
-        const coingeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
-        const coingeckoData = await coingeckoResponse.json() as any;
+        // Fallback to Binance for real BTC price
+        const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+        const binanceData = await binanceResponse.json() as any;
         
-        if (coingeckoData && coingeckoData.bitcoin && coingeckoData.bitcoin.usd) {
+        if (binanceData && binanceData.lastPrice) {
           marketIndexData = {
-            price: coingeckoData.bitcoin.usd,
-            change24h: coingeckoData.bitcoin.usd_24h_change || 0,
-            changePercent24h: coingeckoData.bitcoin.usd_24h_change || 0
+            price: parseFloat(binanceData.lastPrice),
+            change24h: parseFloat(binanceData.priceChange) || 0,
+            changePercent24h: parseFloat(binanceData.priceChangePercent) || 0
           };
         } else {
           // Fallback final com dados simulados
@@ -382,7 +382,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           };
         }
         
-        console.log('✅ MARKET INDEX - Using CoinGecko fallback data:', marketIndexData);
+        console.log('✅ MARKET INDEX - Using Binance fallback data:', marketIndexData);
       }
 
       // Calculate Next Funding (LN Markets funding every 8h: 00:00, 08:00, 16:00 UTC)
