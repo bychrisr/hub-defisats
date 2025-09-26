@@ -7,10 +7,16 @@
 import { FastifyInstance } from 'fastify';
 import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { logger } from '../../utils/logger';
+import { PrismaClient } from '@prisma/client';
+import { AuthService } from '../../services/auth.service';
+import { LNMarketsAPIService } from '../../services/lnmarkets-api.service';
 
 export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
   // Apply admin authentication to all routes
   fastify.addHook('preHandler', adminAuthMiddleware);
+  
+  const prisma = new PrismaClient();
+  const authService = new AuthService(prisma, {} as any);
 
   /**
    * Obter dados de mercado do LN Markets para admin
@@ -18,18 +24,48 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
   fastify.get('/market-data', async (request, reply) => {
     try {
       logger.info('Admin requesting LN Markets market data');
-
-      // For now, return mock data until credentials are configured
-      const marketData = {
-        symbol: 'BTCUSD',
-        price: 115479,
-        change24h: 2.34,
-        changePercent24h: 2.34,
-        volume24h: 1234567,
-        high24h: 116000,
-        low24h: 114500,
-        timestamp: Date.now()
-      };
+      
+      const user = (request as any).user;
+      
+      // Get admin user credentials
+      const adminUser = await prisma.user.findUnique({
+        where: { id: user.id }
+      });
+      
+      if (!adminUser || !adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
+        // Return mock data if no credentials configured
+        const marketData = {
+          symbol: 'BTCUSD',
+          price: 115479,
+          change24h: 2.34,
+          changePercent24h: 2.34,
+          volume24h: 1234567,
+          high24h: 116000,
+          low24h: 114500,
+          timestamp: Date.now()
+        };
+        
+        return {
+          success: true,
+          data: marketData
+        };
+      }
+      
+      // Decrypt credentials
+      const apiKey = authService.decryptData(adminUser.ln_markets_api_key);
+      const apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
+      const passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
+      
+      // Create LN Markets service
+      const lnMarketsService = new LNMarketsAPIService({
+        apiKey,
+        apiSecret,
+        passphrase,
+        isTestnet: false
+      }, console as any);
+      
+      // Get real market data
+      const marketData = await lnMarketsService.getMarketData();
       
       logger.info('LN Markets market data retrieved successfully for admin', {
         price: marketData.price,
@@ -67,9 +103,40 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
   fastify.get('/status', async (request, reply) => {
     try {
       logger.info('Admin checking LN Markets status');
-
-      // For now, return mock status
-      const status = { connected: true };
+      
+      const user = (request as any).user;
+      
+      // Get admin user credentials
+      const adminUser = await prisma.user.findUnique({
+        where: { id: user.id }
+      });
+      
+      if (!adminUser || !adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
+        // Return mock status if no credentials configured
+        return {
+          success: true,
+          data: {
+            status: 'not_configured',
+            message: 'LN Markets credentials not configured'
+          }
+        };
+      }
+      
+      // Decrypt credentials
+      const apiKey = authService.decryptData(adminUser.ln_markets_api_key);
+      const apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
+      const passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
+      
+      // Create LN Markets service
+      const lnMarketsService = new LNMarketsAPIService({
+        apiKey,
+        apiSecret,
+        passphrase,
+        isTestnet: false
+      }, console as any);
+      
+      // Test connection
+      const status = await lnMarketsService.testConnection();
       
       return {
         success: true,

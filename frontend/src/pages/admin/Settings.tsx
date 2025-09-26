@@ -12,7 +12,7 @@ import {
   Database, 
   Server, 
   TestTube,
-  Save,
+  Save, 
   Eye,
   EyeOff,
   CheckCircle,
@@ -123,7 +123,7 @@ const SettingsPage: React.FC = () => {
       <div className="text-center">
         <h1 className="text-3xl font-bold text-text-primary mb-2">Configurações do Sistema</h1>
         <p className="text-text-secondary">Gerencie as credenciais do LN Markets para o sistema</p>
-      </div>
+                      </div>
 
       <div className="max-w-2xl mx-auto">
         {/* LN Markets Settings */}
@@ -133,8 +133,8 @@ const SettingsPage: React.FC = () => {
             <h2 className="text-xl font-semibold text-text-primary">LN Markets</h2>
           </div>
 
-          <div className="space-y-4">
-            <div>
+                          <div className="space-y-4">
+                            <div>
               <label className="block text-sm font-medium text-text-secondary mb-2">
                 API Key
               </label>
@@ -153,10 +153,10 @@ const SettingsPage: React.FC = () => {
                 >
                   {showCredentials ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
-              </div>
-            </div>
+                            </div>
+                          </div>
 
-            <div>
+                          <div>
               <label className="block text-sm font-medium text-text-secondary mb-2">
                 API Secret
               </label>
@@ -166,10 +166,10 @@ const SettingsPage: React.FC = () => {
                 onChange={(e) => setLnMarketsForm(prev => ({ ...prev, ln_markets_api_secret: e.target.value }))}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Digite sua API Secret do LN Markets"
-              />
-            </div>
+                            />
+                          </div>
 
-            <div>
+                          <div>
               <label className="block text-sm font-medium text-text-secondary mb-2">
                 Passphrase
               </label>
@@ -179,8 +179,8 @@ const SettingsPage: React.FC = () => {
                 onChange={(e) => setLnMarketsForm(prev => ({ ...prev, ln_markets_passphrase: e.target.value }))}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Digite sua Passphrase do LN Markets"
-              />
-            </div>
+                            />
+                          </div>
 
             <div className="flex space-x-3">
               <button
@@ -206,9 +206,9 @@ const SettingsPage: React.FC = () => {
                 ) : (
                   <TestTube className="w-4 h-4 mr-2" />
                 )}
-                Testar Conexão
+                          Testar Conexão
               </button>
-            </div>
+                      </div>
 
             {/* Test Result */}
             {testResult && (
@@ -228,19 +228,19 @@ const SettingsPage: React.FC = () => {
                   }`}>
                     {testResult.success ? 'Conexão Bem-sucedida' : 'Falha na Conexão'}
                   </span>
-                </div>
+                        </div>
                 {testResult.success && testResult.data && (
                   <div className="text-sm text-text-secondary">
-                    <p>Status: {testResult.data.status}</p>
-                    <p>Timestamp: {new Date(testResult.data.timestamp).toLocaleString()}</p>
+                    <p>Status: {testResult.data.status || 'Connected'}</p>
+                    <p>Timestamp: {testResult.data.timestamp ? new Date(testResult.data.timestamp).toLocaleString() : new Date().toLocaleString()}</p>
                   </div>
                 )}
                 {!testResult.success && (
                   <p className="text-sm text-red-400">{testResult.error}</p>
                 )}
-              </div>
+                        </div>
             )}
-          </div>
+                      </div>
         </div>
       </div>
     </div>
