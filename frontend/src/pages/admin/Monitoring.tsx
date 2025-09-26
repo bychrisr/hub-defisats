@@ -536,7 +536,7 @@ const Monitoring: React.FC = () => {
           )}
 
           {/* Performance Metrics */}
-          <div className="bg-card rounded-lg border border-border">
+          <div className="bg-bg-card rounded-lg border border-border">
             <div className="px-6 py-4 border-b">
               <h3 className="text-lg font-semibold">Performance Metrics</h3>
             </div>
@@ -565,7 +565,7 @@ const Monitoring: React.FC = () => {
           </div>
 
           {/* System Information */}
-          <div className="bg-card rounded-lg border border-border">
+          <div className="bg-bg-card rounded-lg border border-border">
             <div className="px-6 py-4 border-b">
               <h3 className="text-lg font-semibold">System Information</h3>
             </div>
@@ -787,7 +787,7 @@ const Monitoring: React.FC = () => {
           {externalAPIs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {externalAPIs.map((api) => (
-                <div key={api.name} className="bg-card border border-border rounded-lg p-6">
+                <div key={api.name} className="bg-bg-card border border-border rounded-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <Globe className="w-6 h-6 text-blue-400 mr-3" />
@@ -851,7 +851,7 @@ const Monitoring: React.FC = () => {
           {marketData ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Market Data Card */}
-              <div className="bg-card border border-border rounded-lg p-6">
+              <div className="bg-bg-card border border-border rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <TrendingUp className="w-6 h-6 text-green-400 mr-3" />
                   <h3 className="text-lg font-semibold text-text-primary">Current Market Data</h3>
@@ -896,7 +896,7 @@ const Monitoring: React.FC = () => {
               </div>
 
               {/* Provider Status Card */}
-              <div className="bg-card border border-border rounded-lg p-6">
+              <div className="bg-bg-card border border-border rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <Shield className="w-6 h-6 text-blue-400 mr-3" />
                   <h3 className="text-lg font-semibold text-text-primary">Provider Status</h3>
