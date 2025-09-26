@@ -216,7 +216,47 @@ GET    /api/cards-with-tooltips    # Buscar cards com tooltips
 POST   /api/initialize-defaults    # Inicializar dados padrão
 ```
 
-## 4. Sistema de Cache de API (v1.10.6)
+## 4. Sistema de Proteção de Dados de Mercado (v1.10.7)
+
+### 4.1 Arquitetura do Sistema
+- **Backend Routes**: Rotas dedicadas para proteção de dados (`/api/admin/market-data/protection/*`)
+- **Frontend Integration**: Dashboard completo integrado no System Monitoring
+- **Real-time Monitoring**: Métricas e status atualizados automaticamente
+- **Dynamic Configuration**: Configuração sem necessidade de reinicialização
+
+### 4.2 Funcionalidades Principais
+- **Status de Proteção**: Dashboard com métricas em tempo real (uptime, cache hits, circuit breaker)
+- **Teste de Proteção**: Testes completos com resultados detalhados e recomendações
+- **Configuração de Cache**: TTL, tamanho máximo, intervalo de limpeza, compressão
+- **Regras de Proteção**: Limites de idade de dados, thresholds de falha, provedores de emergência
+- **Status dos Provedores**: Monitoramento de LN Markets, CoinGecko, Binance com métricas
+- **Métricas de Performance**: Hits, misses, latência média, erros, timeouts, ativações de fallback
+
+### 4.3 Sistema de Proteção
+- **Circuit Breaker**: Proteção contra falhas em cascata com reset automático
+- **Fallback System**: Provedores de emergência automáticos quando primários falham
+- **Cache Management**: Configuração dinâmica de cache com validação de dados
+- **Alert System**: Alertas integrados para falhas e degradação de performance
+
+### 4.4 Interface de Usuário
+- **Dashboard Responsivo**: Interface moderna e intuitiva com tabs organizadas
+- **Modal de Configuração**: Configuração dinâmica de regras e cache
+- **Real-time Updates**: Atualizações automáticas de dados a cada 30 segundos
+- **Status Indicators**: Indicadores visuais de status (verde, amarelo, vermelho)
+
+### 4.5 Backend Implementation
+- **RESTful API**: Rotas completas para todas as funcionalidades de proteção
+- **Mock Data**: Dados simulados realistas para desenvolvimento e testes
+- **Error Handling**: Tratamento robusto de erros com logs detalhados
+- **Admin Middleware**: Proteção de rotas com autenticação de administrador
+
+### 4.6 Benefícios Alcançados
+- **Proteção Robusta**: Sistema anti-falhas em cascata com circuit breakers
+- **Monitoramento Completo**: Visibilidade total do sistema de proteção
+- **Configuração Flexível**: Ajustes dinâmicos sem reinicialização
+- **Interface Intuitiva**: Fácil de usar e configurar para administradores
+
+## 5. Sistema de Cache de API (v1.10.6)
 
 ### 4.1 Arquitetura do Cache
 - **Serviço Centralizado**: `api-cache.service.ts` - Gerencia cache e deduplicação
