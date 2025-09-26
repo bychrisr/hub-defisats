@@ -1,179 +1,156 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { rateLimiters } from '../middleware/rate-limit.middleware';
-
-interface RateLimitTestRequest extends FastifyRequest {
-  body: {
-    type: 'api' | 'auth' | 'trading' | 'admin' | 'general';
-  };
-}
+import { dynamicRateLimiters } from '../middleware/dynamic-rate-limit.middleware';
 
 export async function rateLimitTestRoutes(fastify: FastifyInstance) {
-  // Endpoint para testar rate limiting
-  fastify.post('/api/test-rate-limit', {
-    schema: {
-      body: {
-        type: 'object',
-        required: ['type'],
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['api', 'auth', 'trading', 'admin', 'general']
+  // Teste simples sem rate limiting
+  fastify.get(
+    '/simple-test',
+    {
+      schema: {
+        description: 'Simple test without rate limiting',
+        tags: ['Rate Limiting Test'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              timestamp: { type: 'string' }
+            }
           }
         }
       }
     },
-    preHandler: [
-      async (request: RateLimitTestRequest, reply: FastifyReply) => {
-        const { type } = request.body;
-        
-        // Aplicar rate limiter baseado no tipo
-        switch (type) {
-          case 'auth':
-            await rateLimiters.auth(request, reply);
-            break;
-          case 'trading':
-            await rateLimiters.trading(request, reply);
-            break;
-          case 'admin':
-            await rateLimiters.admin(request, reply);
-            break;
-          case 'api':
-            await rateLimiters.api(request, reply);
-            break;
-          default:
-            await rateLimiters.api(request, reply);
-        }
-      }
-    ]
-  }, async (request: RateLimitTestRequest, reply: FastifyReply) => {
-    const { type } = request.body;
-    
-    // Simular processamento
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    return reply.send({
-      success: true,
-      message: `Rate limit test for ${type} completed successfully`,
-      type,
-      timestamp: new Date().toISOString()
-    });
-  });
+    async (request, reply) => {
+      return reply.send({
+        success: true,
+        message: 'Simple test is working',
+        timestamp: new Date().toISOString()
+      });
+    }
+  );
 
-  // Endpoint para simular rate limit excedido (para desenvolvimento)
-  fastify.post('/api/simulate-rate-limit', {
-    schema: {
-      body: {
-        type: 'object',
-        required: ['type'],
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['api', 'auth', 'trading', 'admin', 'general']
+  // Teste com rate limiter estático
+  fastify.get(
+    '/static-test',
+    {
+      preHandler: [rateLimiters.api],
+      schema: {
+        description: 'Test static rate limiting',
+        tags: ['Rate Limiting Test'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              timestamp: { type: 'string' },
+              headers: { type: 'object' }
+            }
+          },
+          429: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              retry_after: { type: 'number' }
+            }
           }
         }
       }
-    }
-  }, async (request: RateLimitTestRequest, reply: FastifyReply) => {
-    const { type } = request.body;
-    
-    // Simular diferentes tipos de rate limit
-    const rateLimitConfigs = {
-      auth: {
-        retry_after: 900, // 15 minutes
-        limit: 5,
-        remaining: 0,
-        reset_time: Date.now() + 900000,
-        window_ms: 900000,
-        type: 'auth',
-        message: 'Too many authentication attempts. Please wait 15 minutes before trying again.'
-      },
-      trading: {
-        retry_after: 60, // 1 minute
-        limit: 200,
-        remaining: 0,
-        reset_time: Date.now() + 60000,
-        window_ms: 60000,
-        type: 'trading',
-        message: 'Too many trading requests. Please slow down.'
-      },
-      admin: {
-        retry_after: 60, // 1 minute
-        limit: 50,
-        remaining: 0,
-        reset_time: Date.now() + 60000,
-        window_ms: 60000,
-        type: 'admin',
-        message: 'Too many admin requests. Please slow down.'
-      },
-      api: {
-        retry_after: 60, // 1 minute
-        limit: 100,
-        remaining: 0,
-        reset_time: Date.now() + 60000,
-        window_ms: 60000,
-        type: 'api',
-        message: 'Too many requests. Please slow down.'
-      },
-      general: {
-        retry_after: 30, // 30 seconds
-        limit: 1000,
-        remaining: 0,
-        reset_time: Date.now() + 30000,
-        window_ms: 60000,
-        type: 'general',
-        message: 'Service temporarily unavailable due to high traffic.'
-      }
-    };
-
-    const config = rateLimitConfigs[type] || rateLimitConfigs.general;
-
-    return reply.status(429).send({
-      error: 'RATE_LIMIT_EXCEEDED',
-      ...config
-    });
-  });
-
-  // Endpoint para obter informações sobre rate limits
-  fastify.get('/api/rate-limit-info', async (request, reply) => {
-    return reply.send({
-      rate_limits: {
-        auth: {
-          window_ms: 15 * 60 * 1000, // 15 minutes
-          max: 5,
-          description: 'Authentication attempts'
-        },
-        trading: {
-          window_ms: 60 * 1000, // 1 minute
-          max: 200,
-          description: 'Trading operations'
-        },
-        admin: {
-          window_ms: 60 * 1000, // 1 minute
-          max: 50,
-          description: 'Administrative operations'
-        },
-        api: {
-          window_ms: 60 * 1000, // 1 minute
-          max: 100,
-          description: 'General API requests'
-        },
-        notifications: {
-          window_ms: 60 * 1000, // 1 minute
-          max: 30,
-          description: 'Notification requests'
-        },
-        payments: {
-          window_ms: 60 * 1000, // 1 minute
-          max: 10,
-          description: 'Payment requests'
+    },
+    async (request, reply) => {
+      return reply.send({
+        success: true,
+        message: 'Static rate limiting is working',
+        timestamp: new Date().toISOString(),
+        headers: {
+          'X-RateLimit-Limit': reply.getHeader('X-RateLimit-Limit'),
+          'X-RateLimit-Remaining': reply.getHeader('X-RateLimit-Remaining'),
+          'X-RateLimit-Reset': reply.getHeader('X-RateLimit-Reset')
         }
-      },
-      headers: {
-        'X-RateLimit-Limit': 'Total requests allowed in window',
-        'X-RateLimit-Remaining': 'Requests remaining in current window',
-        'X-RateLimit-Reset': 'Timestamp when the rate limit resets',
-        'Retry-After': 'Seconds to wait before retrying'
+      });
+    }
+  );
+
+  // Teste com rate limiter dinâmico
+  fastify.get(
+    '/dynamic-test',
+    {
+      preHandler: [dynamicRateLimiters.api],
+      schema: {
+        description: 'Test dynamic rate limiting',
+        tags: ['Rate Limiting Test'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              timestamp: { type: 'string' },
+              headers: { type: 'object' }
+            }
+          },
+          429: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              retry_after: { type: 'number' }
+            }
+          }
+        }
       }
-    });
-  });
+    },
+    async (request, reply) => {
+      return reply.send({
+        success: true,
+        message: 'Dynamic rate limiting is working',
+        timestamp: new Date().toISOString(),
+        headers: {
+          'X-RateLimit-Limit': reply.getHeader('X-RateLimit-Limit'),
+          'X-RateLimit-Remaining': reply.getHeader('X-RateLimit-Remaining'),
+          'X-RateLimit-Reset': reply.getHeader('X-RateLimit-Reset')
+        }
+      });
+    }
+  );
+
+  // Teste de stress para verificar rate limiting
+  fastify.get(
+    '/stress-test',
+    {
+      preHandler: [rateLimiters.api],
+      schema: {
+        description: 'Stress test for rate limiting (will hit limit quickly)',
+        tags: ['Rate Limiting Test'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              requestCount: { type: 'number' }
+            }
+          },
+          429: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              retry_after: { type: 'number' }
+            }
+          }
+        }
+      }
+    },
+    async (request, reply) => {
+      return reply.send({
+        success: true,
+        message: 'Stress test request successful',
+        requestCount: Math.floor(Math.random() * 1000) + 1
+      });
+    }
+  );
 }

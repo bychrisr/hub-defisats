@@ -44,6 +44,7 @@ import { docsRoutes } from './routes/docs.routes';
 import { routeRedirectsRoutes } from './routes/route-redirects.routes';
 import { routeRedirectRoutes } from './routes/route-redirect.routes';
 import { rateLimitConfigRoutes } from './routes/admin/rate-limit-config.routes';
+import { rateLimitTestRoutes } from './routes/rate-limit-test.routes';
 import { cacheRoutes } from './routes/admin/cache.routes';
 import { loadBalancerRoutes } from './routes/admin/load-balancer.routes';
 import { monitoringRoutes } from './routes/monitoring.routes';
@@ -674,7 +675,7 @@ async function registerRoutes() {
 
   // Rate limit test routes (development only)
   if (config.isDevelopment) {
-    await fastify.register(rateLimitTestRoutes);
+    await fastify.register(rateLimitTestRoutes, { prefix: '/api/rate-limit-test' });
     console.log('✅ Rate limit test routes registered');
   }
 
