@@ -5,13 +5,18 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { lnMarketsDiagnosticService } from '../../services/lnmarkets-diagnostic.service';
+import { LNMarketsDiagnosticService } from '../../services/lnmarkets-diagnostic.service';
 import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { logger } from '../../utils/logger';
+import { PrismaClient } from '@prisma/client';
 
 export async function lnMarketsDiagnosticRoutes(fastify: FastifyInstance) {
   // Apply admin authentication to all routes
   fastify.addHook('preHandler', adminAuthMiddleware);
+
+  // Get Prisma instance from Fastify
+  const prisma = (fastify as any).prisma as PrismaClient;
+  const diagnosticService = new LNMarketsDiagnosticService(prisma);
 
   /**
    * Run comprehensive diagnostic test
@@ -20,7 +25,7 @@ export async function lnMarketsDiagnosticRoutes(fastify: FastifyInstance) {
     try {
       logger.info('Starting full LN Markets diagnostic');
       
-      const result = await lnMarketsDiagnosticService.runFullDiagnostic();
+      const result = await diagnosticService.runFullDiagnostic();
       
       logger.info('LN Markets diagnostic completed', {
         connectionQuality: result.analysis.connectionQuality,
@@ -63,7 +68,7 @@ export async function lnMarketsDiagnosticRoutes(fastify: FastifyInstance) {
       
       logger.info('Testing specific endpoint', { path, method, requiresAuth });
       
-      const result = await lnMarketsDiagnosticService.testSpecificEndpoint(path, method, requiresAuth);
+      const result = await diagnosticService.testSpecificEndpoint(path, method, requiresAuth);
       
       return {
         success: true,
@@ -98,7 +103,7 @@ export async function lnMarketsDiagnosticRoutes(fastify: FastifyInstance) {
       logger.info('Starting continuous monitoring', { durationMinutes });
       
       // Run monitoring in background
-      const monitoringPromise = lnMarketsDiagnosticService.runContinuousMonitoring(durationMinutes);
+      const monitoringPromise = diagnosticService.runContinuousMonitoring(durationMinutes);
       
       // Return immediately with monitoring ID
       const monitoringId = `monitoring_${Date.now()}`;
@@ -194,21 +199,30 @@ export async function lnMarketsDiagnosticRoutes(fastify: FastifyInstance) {
       // Run multiple quick tests
       const tests = [];
       for (let i = 0; i < 5; i++) {
-        tests.push(lnMarketsDiagnosticService.testSpecificEndpoint('/v1/status', 'GET', false));
+        tests.push(diagnosticService.testSpecificEndpoint('/v1/status', 'GET', false));
         await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second between tests
       }
       
       const results = await Promise.all(tests);
       
+      const successfulResults = results.filter(r => r.status === 'success');
+      const averageLatency = successfulResults.length > 0 
+        ? successfulResults.reduce((sum, r) => sum + r.latency, 0) / successfulResults.length 
+        : 0;
+      
       const analysis = {
         totalTests: results.length,
-        successfulTests: results.filter(r => r.status === 'success').length,
-        averageLatency: results
-          .filter(r => r.status === 'success')
-          .reduce((sum, r) => sum + r.latency, 0) / results.filter(r => r.status === 'success').length,
+        successfulTests: successfulResults.length,
+        averageLatency: averageLatency,
         latencies: results.map(r => r.latency),
         errors: results.filter(r => r.status === 'error').map(r => r.error)
       };
+      
+      logger.info('Connection test completed', {
+        totalTests: analysis.totalTests,
+        successfulTests: analysis.successfulTests,
+        averageLatency: analysis.averageLatency
+      });
       
       return {
         success: true,
@@ -230,7 +244,7 @@ export async function lnMarketsDiagnosticRoutes(fastify: FastifyInstance) {
   fastify.get('/diagnostic/recommendations', async (request, reply) => {
     try {
       // Run quick diagnostic to get current recommendations
-      const diagnostic = await lnMarketsDiagnosticService.runFullDiagnostic();
+      const diagnostic = await diagnosticService.runFullDiagnostic();
       
       const recommendations = {
         currentStatus: diagnostic.analysis.connectionQuality,

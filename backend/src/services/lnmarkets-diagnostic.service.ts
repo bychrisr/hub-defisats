@@ -8,6 +8,7 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { createHmac } from 'crypto';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';
+import { PrismaClient } from '@prisma/client';
 
 interface DiagnosticResult {
   endpoint: string;
@@ -42,17 +43,19 @@ interface APIAnalysis {
 export class LNMarketsDiagnosticService {
   private client: AxiosInstance;
   private baseURL = 'https://api.lnmarkets.com';
+  private prisma: PrismaClient;
   private credentials: {
     apiKey: string;
     apiSecret: string;
     passphrase: string;
   };
 
-  constructor() {
+  constructor(prisma?: PrismaClient) {
+    this.prisma = prisma || new PrismaClient();
     this.credentials = {
-      apiKey: config.LN_MARKETS_API_KEY || '',
-      apiSecret: config.LN_MARKETS_API_SECRET || '',
-      passphrase: config.LN_MARKETS_PASSPHRASE || ''
+      apiKey: '',
+      apiSecret: '',
+      passphrase: ''
     };
 
     this.client = axios.create({
@@ -63,6 +66,37 @@ export class LNMarketsDiagnosticService {
         'User-Agent': 'Hub-DefiSats-Diagnostic/1.0'
       }
     });
+  }
+
+  /**
+   * Load credentials from database
+   */
+  private async loadCredentials(): Promise<void> {
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          email: 'admin@hub-defisats.com'
+        },
+        select: {
+          ln_markets_api_key: true,
+          ln_markets_api_secret: true,
+          ln_markets_passphrase: true
+        }
+      });
+
+      if (user && user.ln_markets_api_key && user.ln_markets_api_secret && user.ln_markets_passphrase) {
+        this.credentials = {
+          apiKey: user.ln_markets_api_key,
+          apiSecret: user.ln_markets_api_secret,
+          passphrase: user.ln_markets_passphrase
+        };
+        logger.info('LN Markets credentials loaded from database');
+      } else {
+        logger.warn('LN Markets credentials not found in database, using public endpoints only');
+      }
+    } catch (error) {
+      logger.error('Failed to load LN Markets credentials from database', { error: error.message });
+    }
   }
 
   /**
@@ -77,6 +111,9 @@ export class LNMarketsDiagnosticService {
     logger.info('Starting LN Markets API comprehensive diagnostic');
 
     const startTime = Date.now();
+    
+    // 0. Load credentials from database
+    await this.loadCredentials();
     
     // 1. Test basic connectivity
     const connectionTest = await this.testConnection();
@@ -147,13 +184,21 @@ export class LNMarketsDiagnosticService {
    * Test all critical endpoints
    */
   private async testAllEndpoints(): Promise<DiagnosticResult[]> {
-    const endpoints = [
+    // Test only public endpoints if credentials are not configured
+    const hasCredentials = this.credentials.apiKey && this.credentials.apiSecret && this.credentials.passphrase;
+    
+    const endpoints = hasCredentials ? [
       { path: '/v1/status', method: 'GET', auth: false },
       { path: '/v1/user', method: 'GET', auth: true },
       { path: '/v1/positions', method: 'GET', auth: true },
       { path: '/v1/market', method: 'GET', auth: false },
       { path: '/v1/funding', method: 'GET', auth: false }
+    ] : [
+      { path: '/v1/status', method: 'GET', auth: false },
+      { path: '/v1/market', method: 'GET', auth: false }
     ];
+
+    logger.info(`Testing ${endpoints.length} endpoints (${hasCredentials ? 'with' : 'without'} credentials)`);
 
     const results: DiagnosticResult[] = [];
 
@@ -360,4 +405,3 @@ export class LNMarketsDiagnosticService {
   }
 }
 
-export const lnMarketsDiagnosticService = new LNMarketsDiagnosticService();
