@@ -53,8 +53,7 @@ import { docsRoutes } from './routes/docs.routes';
 import { routeRedirectsRoutes } from './routes/route-redirects.routes';
 import { routeRedirectRoutes } from './routes/route-redirect.routes';
 import { rateLimitConfigRoutes } from './routes/admin/rate-limit-config.routes';
-import { rateLimitTestRoutes } from './routes/rate-limit-test.routes';
-import { cacheRoutes } from './routes/admin/cache.routes';
+import { cacheRoutes as adminCacheRoutes } from './routes/admin/cache.routes';
 import { loadBalancerRoutes } from './routes/admin/load-balancer.routes';
 import { monitoringRoutes } from './routes/monitoring.routes';
 import { authMiddleware } from './middleware/auth.middleware';
@@ -688,7 +687,7 @@ async function registerRoutes() {
   // await fastify.register(settingsRoutes, { prefix: '/api/admin/settings' });
   // await fastify.register(lnMarketsFallbackTestRoutes, { prefix: '/api/lnmarkets-fallback' });
   await fastify.register(hardwareMonitorRoutes, { prefix: '/api/admin/hardware' });
-  await fastify.register(cacheRoutes, { prefix: '/api/admin/cache' });
+  await fastify.register(adminCacheRoutes, { prefix: '/api/admin/cache' });
   await fastify.register(loadBalancerRoutes, { prefix: '/api/admin/load-balancer' });
   console.log('✅ Admin routes registered');
 
@@ -815,7 +814,7 @@ async function gracefulShutdown(signal: string) {
     fastify.log.info('Server closed successfully');
     process.exit(0);
   } catch (error) {
-    fastify.log.error('Error during shutdown:', error as Error);
+    fastify.log.error('Error during shutdown:', error instanceof Error ? error : new Error(String(error)));
     process.exit(1);
   }
 }
@@ -899,7 +898,7 @@ async function start() {
     
     console.log('✅ Advanced monitoring services started');
   } catch (error) {
-    fastify.log.error('Error starting server:', error as Error);
+    fastify.log.error('Error starting server:', error instanceof Error ? error : new Error(String(error)));
     console.error('❌ Full error details:', error);
     console.error('❌ Error stack:', (error as Error).stack);
     process.exit(1);
