@@ -1,651 +1,340 @@
+/**
+ * Admin Settings Page
+ * 
+ * Página de configurações do sistema para administradores
+ */
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { api } from '@/lib/api';
 import { 
-  Save, 
-  TestTube, 
-  Mail, 
-  MessageSquare, 
-  Shield, 
-  Zap, 
-  Settings as SettingsIcon,
-  Loader2,
-  RefreshCw,
+  Settings, 
+  Key, 
+  Database, 
+  Server, 
+  TestTube,
+  Save,
+  Eye,
+  EyeOff,
   CheckCircle,
+  XCircle,
   AlertTriangle,
-  Database,
-  Globe,
-  Lock,
-  Bell,
-  Webhook,
-  Key,
-  Server,
-  Activity,
-  BarChart3
+  RefreshCw
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-interface Settings {
-  rate_limiting: {
-    max_attempts: number;
-    window_minutes: number;
+interface LNMarketsSettings {
+  apiKey: string;
+  apiSecret: string;
+  passphrase: string;
+  testnet: boolean;
+  baseUrl: string;
+}
+
+interface SystemSettings {
+  lnMarkets: LNMarketsSettings;
+  system: {
+    environment: string;
+    version: string;
+    debug: boolean;
   };
-  captcha: {
-    enabled: boolean;
-    site_key: string;
-    secret_key: string;
-  };
-  smtp: {
-    host: string;
-    port: number;
-    user: string;
-    pass: string;
-    enabled: boolean;
-  };
-  webhooks: {
-    slack: {
-      url: string;
-      channel: string;
-      enabled: boolean;
-    };
-    telegram: {
-      bot_token: string;
-      chat_id: string;
-      enabled: boolean;
-    };
+  database: {
+    url: string;
+    maxConnections: string;
   };
 }
 
-export default function Settings() {
-  const [settings, setSettings] = useState<Settings>({
-    rate_limiting: {
-      max_attempts: 100,
-      window_minutes: 60
-    },
-    captcha: {
-      enabled: false,
-      site_key: '',
-      secret_key: ''
-    },
-    smtp: {
-      host: '',
-      port: 587,
-      user: '',
-      pass: '',
-      enabled: false
-    },
-    webhooks: {
-      slack: {
-        url: '',
-        channel: '',
-        enabled: false
-      },
-      telegram: {
-        bot_token: '',
-        chat_id: '',
-        enabled: false
-      }
-    }
-  });
-
-  const [loading, setLoading] = useState(false);
+const SettingsPage: React.FC = () => {
+  const [settings, setSettings] = useState<SystemSettings | null>(null);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [lnMarketsForm, setLnMarketsForm] = useState({
+    apiKey: '',
+    apiSecret: '',
+    passphrase: '',
+    testnet: false
+  });
+  const [testResult, setTestResult] = useState<any>(null);
 
   useEffect(() => {
     fetchSettings();
   }, []);
 
   const fetchSettings = async () => {
-    setLoading(true);
     try {
-      // Simular carregamento das configurações
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Configurações carregadas com sucesso!');
-    } catch (error) {
-      console.error('Error fetching settings:', error);
+      setLoading(true);
+      const response = await api.get('/api/admin/settings/settings');
+      
+      if (response.data.success) {
+        setSettings(response.data.data);
+        
+        // Pre-fill form with masked values
+        setLnMarketsForm({
+          apiKey: response.data.data.lnMarkets.apiKey,
+          apiSecret: response.data.data.lnMarkets.apiSecret,
+          passphrase: response.data.data.lnMarkets.passphrase,
+          testnet: response.data.data.lnMarkets.testnet
+        });
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch settings:', error);
       toast.error('Erro ao carregar configurações');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    setSaving(true);
+  const handleLNMarketsUpdate = async () => {
     try {
-      // Simular salvamento
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('Configurações salvas com sucesso!');
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast.error('Erro ao salvar configurações');
+      setSaving(true);
+      
+      const response = await api.put('/api/admin/settings/lnmarkets', lnMarketsForm);
+      
+      if (response.data.success) {
+        toast.success('Configurações do LN Markets atualizadas com sucesso!');
+        await fetchSettings(); // Refresh settings
+      }
+    } catch (error: any) {
+      console.error('Failed to update LN Markets settings:', error);
+      toast.error(error.response?.data?.message || 'Erro ao atualizar configurações');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleTestConnection = async (type: string) => {
+  const handleTestConnection = async () => {
     try {
-      // Simular teste de conexão
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success(`Teste de conexão ${type} executado com sucesso!`);
-    } catch (error) {
-      toast.error(`Erro no teste de conexão ${type}`);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await fetchSettings();
+      setTesting(true);
+      setTestResult(null);
+      
+      const response = await api.post('/api/admin/settings/lnmarkets/test', lnMarketsForm);
+      
+      if (response.data.success) {
+        setTestResult({
+          success: true,
+          data: response.data.data
+        });
+        toast.success('Conexão com LN Markets testada com sucesso!');
+      }
+    } catch (error: any) {
+      console.error('Failed to test LN Markets connection:', error);
+      setTestResult({
+        success: false,
+        error: error.response?.data?.message || 'Erro ao testar conexão'
+      });
+      toast.error('Falha ao testar conexão com LN Markets');
     } finally {
-      setRefreshing(false);
+      setTesting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
-        <div className="container mx-auto py-8 px-4">
-          <div className="max-w-7xl mx-auto">
-            <Card className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow">
-              <CardContent className="p-12">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                  <h3 className="text-xl font-semibold text-text-primary">Carregando Configurações</h3>
-                  <p className="text-text-secondary">Aguarde enquanto carregamos as configurações do sistema...</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <RefreshCw className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
-            <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                        <SettingsIcon className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
-                          Configurações do Sistema
-                        </h1>
-                        <p className="text-text-secondary">Gerencie as configurações globais da aplicação</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <Button
-                      onClick={handleRefresh}
-                      disabled={refreshing}
-                      className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
-                      size="sm"
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </Button>
-                    <Button
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="backdrop-blur-sm bg-green-600/90 hover:bg-green-600 text-white shadow-lg shadow-green-600/25"
-                    >
-                      {saving ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4 mr-2" />
-                      )}
-                      Salvar Configurações
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-text-primary mb-2">Configurações do Sistema</h1>
+        <p className="text-text-secondary">Gerencie as configurações e credenciais do sistema</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* LN Markets Settings */}
+        <div className="bg-bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center mb-6">
+            <Key className="w-6 h-6 text-orange-400 mr-3" />
+            <h2 className="text-xl font-semibold text-text-primary">LN Markets</h2>
           </div>
 
-          {/* Settings Tabs */}
-          <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-            <CardContent className="p-6">
-              <Tabs defaultValue="security" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4 profile-sidebar-glow backdrop-blur-sm bg-background/50 border-border/50">
-                  <TabsTrigger 
-                    value="security" 
-                    className="profile-sidebar-item data-[state=active]:active data-[state=active]:text-white"
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Segurança
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="email" 
-                    className="profile-sidebar-item data-[state=active]:active data-[state=active]:text-white"
-                  >
-                    <Mail className="h-4 w-4 mr-2" />
-                    Email
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="webhooks" 
-                    className="profile-sidebar-item data-[state=active]:active data-[state=active]:text-white"
-                  >
-                    <Webhook className="h-4 w-4 mr-2" />
-                    Webhooks
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="system" 
-                    className="profile-sidebar-item data-[state=active]:active data-[state=active]:text-white"
-                  >
-                    <Server className="h-4 w-4 mr-2" />
-                    Sistema
-                  </TabsTrigger>
-                </TabsList>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                API Key
+              </label>
+              <div className="relative">
+                <input
+                  type={showCredentials ? 'text' : 'password'}
+                  value={lnMarketsForm.apiKey}
+                  onChange={(e) => setLnMarketsForm(prev => ({ ...prev, apiKey: e.target.value }))}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Digite sua API Key do LN Markets"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCredentials(!showCredentials)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary"
+                >
+                  {showCredentials ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
 
-                {/* Security Tab */}
-                <TabsContent value="security" className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Rate Limiting */}
-                    <Card className="backdrop-blur-sm bg-background/50 border-border/50">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Lock className="h-5 w-5 text-blue-500" />
-                          Rate Limiting
-                        </CardTitle>
-                        <CardDescription>
-                          Configure limites de requisições para prevenir abuso
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="max_attempts">Máximo de Tentativas</Label>
-                            <Input
-                              id="max_attempts"
-                              type="number"
-                              value={settings.rate_limiting.max_attempts}
-                              onChange={(e) => setSettings({
-                                ...settings,
-                                rate_limiting: {
-                                  ...settings.rate_limiting,
-                                  max_attempts: parseInt(e.target.value)
-                                }
-                              })}
-                              className="backdrop-blur-sm bg-background/50 border-border/50"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="window_minutes">Janela (minutos)</Label>
-                            <Input
-                              id="window_minutes"
-                              type="number"
-                              value={settings.rate_limiting.window_minutes}
-                              onChange={(e) => setSettings({
-                                ...settings,
-                                rate_limiting: {
-                                  ...settings.rate_limiting,
-                                  window_minutes: parseInt(e.target.value)
-                                }
-                              })}
-                              className="backdrop-blur-sm bg-background/50 border-border/50"
-                            />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                API Secret
+              </label>
+              <input
+                type={showCredentials ? 'text' : 'password'}
+                value={lnMarketsForm.apiSecret}
+                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, apiSecret: e.target.value }))}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Digite sua API Secret do LN Markets"
+              />
+            </div>
 
-                    {/* CAPTCHA */}
-                    <Card className="backdrop-blur-sm bg-background/50 border-border/50">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Shield className="h-5 w-5 text-green-500" />
-                          CAPTCHA
-                        </CardTitle>
-                        <CardDescription>
-                          Configure proteção contra bots
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="captcha_enabled">Habilitar CAPTCHA</Label>
-                          <Switch
-                            id="captcha_enabled"
-                            checked={settings.captcha.enabled}
-                            onCheckedChange={(checked) => setSettings({
-                              ...settings,
-                              captcha: { ...settings.captcha, enabled: checked }
-                            })}
-                            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted-foreground"
-                          />
-                        </div>
-                        {settings.captcha.enabled && (
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="site_key">Site Key</Label>
-                              <Input
-                                id="site_key"
-                                value={settings.captcha.site_key}
-                                onChange={(e) => setSettings({
-                                  ...settings,
-                                  captcha: { ...settings.captcha, site_key: e.target.value }
-                                })}
-                                className="backdrop-blur-sm bg-background/50 border-border/50"
-                                placeholder="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="secret_key">Secret Key</Label>
-                              <Input
-                                id="secret_key"
-                                type="password"
-                                value={settings.captcha.secret_key}
-                                onChange={(e) => setSettings({
-                                  ...settings,
-                                  captcha: { ...settings.captcha, secret_key: e.target.value }
-                                })}
-                                className="backdrop-blur-sm bg-background/50 border-border/50"
-                                placeholder="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                Passphrase
+              </label>
+              <input
+                type={showCredentials ? 'text' : 'password'}
+                value={lnMarketsForm.passphrase}
+                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, passphrase: e.target.value }))}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Digite sua Passphrase do LN Markets"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="testnet"
+                checked={lnMarketsForm.testnet}
+                onChange={(e) => setLnMarketsForm(prev => ({ ...prev, testnet: e.target.checked }))}
+                className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary/50"
+              />
+              <label htmlFor="testnet" className="text-sm text-text-secondary">
+                Usar Testnet
+              </label>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={handleLNMarketsUpdate}
+                disabled={saving}
+                className="flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+              >
+                {saving ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Salvar
+              </button>
+
+              <button
+                onClick={handleTestConnection}
+                disabled={testing}
+                className="flex items-center px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50"
+              >
+                {testing ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <TestTube className="w-4 h-4 mr-2" />
+                )}
+                Testar Conexão
+              </button>
+            </div>
+
+            {/* Test Result */}
+            {testResult && (
+              <div className={`p-4 rounded-lg border ${
+                testResult.success 
+                  ? 'bg-green-500/10 border-green-500/20' 
+                  : 'bg-red-500/10 border-red-500/20'
+              }`}>
+                <div className="flex items-center mb-2">
+                  {testResult.success ? (
+                    <CheckCircle className="w-5 h-5 text-green-400 mr-2" />
+                  ) : (
+                    <XCircle className="w-5 h-5 text-red-400 mr-2" />
+                  )}
+                  <span className={`font-medium ${
+                    testResult.success ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {testResult.success ? 'Conexão Bem-sucedida' : 'Falha na Conexão'}
+                  </span>
+                </div>
+                {testResult.success && testResult.data && (
+                  <div className="text-sm text-text-secondary">
+                    <p>Preço atual: ${testResult.data.marketData.price}</p>
+                    <p>Mudança 24h: {testResult.data.marketData.change24h}%</p>
+                    <p>Testnet: {testResult.data.testnet ? 'Sim' : 'Não'}</p>
                   </div>
-                </TabsContent>
+                )}
+                {!testResult.success && (
+                  <p className="text-sm text-red-400">{testResult.error}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
-                {/* Email Tab */}
-                <TabsContent value="email" className="space-y-6">
-                  <Card className="backdrop-blur-sm bg-background/50 border-border/50">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Mail className="h-5 w-5 text-blue-500" />
-                        Configurações SMTP
-                      </CardTitle>
-                      <CardDescription>
-                        Configure o servidor de email para notificações
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="smtp_enabled">Habilitar SMTP</Label>
-                        <Switch
-                          id="smtp_enabled"
-                          checked={settings.smtp.enabled}
-                          onCheckedChange={(checked) => setSettings({
-                            ...settings,
-                            smtp: { ...settings.smtp, enabled: checked }
-                          })}
-                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted-foreground"
-                        />
-                      </div>
-                      {settings.smtp.enabled && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="smtp_host">Host SMTP</Label>
-                            <Input
-                              id="smtp_host"
-                              value={settings.smtp.host}
-                              onChange={(e) => setSettings({
-                                ...settings,
-                                smtp: { ...settings.smtp, host: e.target.value }
-                              })}
-                              className="backdrop-blur-sm bg-background/50 border-border/50"
-                              placeholder="smtp.gmail.com"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="smtp_port">Porta</Label>
-                            <Input
-                              id="smtp_port"
-                              type="number"
-                              value={settings.smtp.port}
-                              onChange={(e) => setSettings({
-                                ...settings,
-                                smtp: { ...settings.smtp, port: parseInt(e.target.value) }
-                              })}
-                              className="backdrop-blur-sm bg-background/50 border-border/50"
-                              placeholder="587"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="smtp_user">Usuário</Label>
-                            <Input
-                              id="smtp_user"
-                              value={settings.smtp.user}
-                              onChange={(e) => setSettings({
-                                ...settings,
-                                smtp: { ...settings.smtp, user: e.target.value }
-                              })}
-                              className="backdrop-blur-sm bg-background/50 border-border/50"
-                              placeholder="seu-email@gmail.com"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="smtp_pass">Senha</Label>
-                            <Input
-                              id="smtp_pass"
-                              type="password"
-                              value={settings.smtp.pass}
-                              onChange={(e) => setSettings({
-                                ...settings,
-                                smtp: { ...settings.smtp, pass: e.target.value }
-                              })}
-                              className="backdrop-blur-sm bg-background/50 border-border/50"
-                              placeholder="sua-senha"
-                            />
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex justify-end">
-                        <Button
-                          onClick={() => handleTestConnection('SMTP')}
-                          variant="outline"
-                          className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/70"
-                        >
-                          <TestTube className="h-4 w-4 mr-2" />
-                          Testar Conexão
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+        {/* System Information */}
+        <div className="bg-bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center mb-6">
+            <Server className="w-6 h-6 text-blue-400 mr-3" />
+            <h2 className="text-xl font-semibold text-text-primary">Informações do Sistema</h2>
+          </div>
 
-                {/* Webhooks Tab */}
-                <TabsContent value="webhooks" className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Slack */}
-                    <Card className="backdrop-blur-sm bg-background/50 border-border/50">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <MessageSquare className="h-5 w-5 text-purple-500" />
-                          Slack
-                        </CardTitle>
-                        <CardDescription>
-                          Configure notificações para Slack
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="slack_enabled">Habilitar Slack</Label>
-                          <Switch
-                            id="slack_enabled"
-                            checked={settings.webhooks.slack.enabled}
-                            onCheckedChange={(checked) => setSettings({
-                              ...settings,
-                              webhooks: {
-                                ...settings.webhooks,
-                                slack: { ...settings.webhooks.slack, enabled: checked }
-                              }
-                            })}
-                            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted-foreground"
-                          />
-                        </div>
-                        {settings.webhooks.slack.enabled && (
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="slack_url">Webhook URL</Label>
-                              <Input
-                                id="slack_url"
-                                value={settings.webhooks.slack.url}
-                                onChange={(e) => setSettings({
-                                  ...settings,
-                                  webhooks: {
-                                    ...settings.webhooks,
-                                    slack: { ...settings.webhooks.slack, url: e.target.value }
-                                  }
-                                })}
-                                className="backdrop-blur-sm bg-background/50 border-border/50"
-                                placeholder="https://hooks.slack.com/services/..."
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="slack_channel">Canal</Label>
-                              <Input
-                                id="slack_channel"
-                                value={settings.webhooks.slack.channel}
-                                onChange={(e) => setSettings({
-                                  ...settings,
-                                  webhooks: {
-                                    ...settings.webhooks,
-                                    slack: { ...settings.webhooks.slack, channel: e.target.value }
-                                  }
-                                })}
-                                className="backdrop-blur-sm bg-background/50 border-border/50"
-                                placeholder="#notifications"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+          {settings && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Ambiente
+                </label>
+                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
+                  {settings.system.environment}
+                </div>
+              </div>
 
-                    {/* Telegram */}
-                    <Card className="backdrop-blur-sm bg-background/50 border-border/50">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Zap className="h-5 w-5 text-blue-500" />
-                          Telegram
-                        </CardTitle>
-                        <CardDescription>
-                          Configure notificações para Telegram
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="telegram_enabled">Habilitar Telegram</Label>
-                          <Switch
-                            id="telegram_enabled"
-                            checked={settings.webhooks.telegram.enabled}
-                            onCheckedChange={(checked) => setSettings({
-                              ...settings,
-                              webhooks: {
-                                ...settings.webhooks,
-                                telegram: { ...settings.webhooks.telegram, enabled: checked }
-                              }
-                            })}
-                            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted-foreground"
-                          />
-                        </div>
-                        {settings.webhooks.telegram.enabled && (
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="telegram_bot_token">Bot Token</Label>
-                              <Input
-                                id="telegram_bot_token"
-                                value={settings.webhooks.telegram.bot_token}
-                                onChange={(e) => setSettings({
-                                  ...settings,
-                                  webhooks: {
-                                    ...settings.webhooks,
-                                    telegram: { ...settings.webhooks.telegram, bot_token: e.target.value }
-                                  }
-                                })}
-                                className="backdrop-blur-sm bg-background/50 border-border/50"
-                                placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="telegram_chat_id">Chat ID</Label>
-                              <Input
-                                id="telegram_chat_id"
-                                value={settings.webhooks.telegram.chat_id}
-                                onChange={(e) => setSettings({
-                                  ...settings,
-                                  webhooks: {
-                                    ...settings.webhooks,
-                                    telegram: { ...settings.webhooks.telegram, chat_id: e.target.value }
-                                  }
-                                })}
-                                className="backdrop-blur-sm bg-background/50 border-border/50"
-                                placeholder="-1001234567890"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Versão
+                </label>
+                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
+                  {settings.system.version}
+                </div>
+              </div>
 
-                {/* System Tab */}
-                <TabsContent value="system" className="space-y-6">
-                  <Card className="backdrop-blur-sm bg-background/50 border-border/50">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Server className="h-5 w-5 text-orange-500" />
-                        Configurações do Sistema
-                      </CardTitle>
-                      <CardDescription>
-                        Configurações gerais da aplicação
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Alert className="backdrop-blur-sm bg-blue-50/50 border-blue-200/50">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                          As configurações do sistema são aplicadas globalmente e afetam todos os usuários.
-                        </AlertDescription>
-                      </Alert>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Status do Sistema</Label>
-                          <Badge className="bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Online
-                          </Badge>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Versão da Aplicação</Label>
-                          <Badge variant="outline" className="backdrop-blur-sm bg-background/50 border-border/50">
-                            v1.0.0
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Debug Mode
+                </label>
+                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
+                  {settings.system.debug ? 'Ativado' : 'Desativado'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Database URL
+                </label>
+                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary font-mono text-sm">
+                  {settings.database.url}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Max Connections
+                </label>
+                <div className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary">
+                  {settings.database.maxConnections}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default SettingsPage;

@@ -216,7 +216,7 @@ const Monitoring: React.FC = () => {
         api.get('/api/admin/hardware/metrics').catch(() => null), // Don't fail if hardware metrics are not available
         api.get('/api/admin/market-data/market-data').catch(() => null), // Don't fail if market data is not available
         api.get('/api/admin/market-data/providers/status').catch(() => null), // Don't fail if provider status is not available
-        api.get('/api/market/data?symbol=BTCUSD').catch(() => null) // LN Markets data
+        api.get('/api/admin/lnmarkets/market-data').catch(() => null) // Fetch LN Markets data from admin route
       ]);
 
       if (healthResponse.data.success) {
