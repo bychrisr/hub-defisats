@@ -138,8 +138,15 @@ export default function RateLimiting() {
       
       // Teste com axios
       console.log('🧪 Testing with axios...');
+      console.log('🧪 Axios baseURL:', api.defaults.baseURL);
+      console.log('🧪 Axios headers:', api.defaults.headers);
+      console.log('🧪 Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+      console.log('🧪 Full URL will be:', `${api.defaults.baseURL}/admin/rate-limit-config/`);
+      
       const response = await api.get('/admin/rate-limit-config/');
       console.log('📊 Axios Response:', response.data);
+      console.log('📊 Axios Status:', response.status);
+      console.log('📊 Axios Headers:', response.headers);
       
       if (response.data.success) {
         setConfigs(response.data.data);
