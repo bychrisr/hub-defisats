@@ -26,12 +26,12 @@ api.interceptors.request.use(
     
     const token = localStorage.getItem('access_token');
     console.log('🔑 Token from localStorage:', token ? 'EXISTS' : 'MISSING');
-    console.log('🔑 Token value:', token ? `${token.substring(0, 20)}...` : 'null');
+    console.log('🔑 Token value:', token ? '[REDACTED]' : 'null');
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔑 Authorization header set:', `Bearer ${token.substring(0, 20)}...`);
-      console.log('🔑 Final headers:', config.headers);
+      console.log('🔑 Authorization header set:', '[REDACTED]');
+      console.log('🔑 Final headers:', { ...config.headers, Authorization: '[REDACTED]' });
     } else {
       console.log('❌ No token found in localStorage');
     }

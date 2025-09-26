@@ -34,7 +34,7 @@ export async function authMiddleware(
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    console.log('🔍 AUTH MIDDLEWARE - Token extracted:', token.substring(0, 20) + '...');
+    console.log('🔍 AUTH MIDDLEWARE - Token extracted:', '[REDACTED]');
 
     // Initialize auth service with singleton Prisma instance
     const prisma = await getPrisma(); // Use singleton getPrisma()

@@ -61,10 +61,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const { user_id, token, refresh_token, plan_type } = response.data;
 
           // Store tokens
-          console.log('💾 Storing token in localStorage:', token.substring(0, 20) + '...');
+          console.log('💾 Storing token in localStorage:', '[REDACTED]');
           localStorage.setItem('access_token', token);
           if (refresh_token) {
-            console.log('💾 Storing refresh token in localStorage:', refresh_token.substring(0, 20) + '...');
+            console.log('💾 Storing refresh token in localStorage:', '[REDACTED]');
             localStorage.setItem('refresh_token', refresh_token);
           }
           console.log('✅ Tokens stored successfully');
@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const { user_id, token, plan_type } = response.data;
 
           // Store token
-          console.log('💾 Storing token in localStorage:', token.substring(0, 20) + '...');
+          console.log('💾 Storing token in localStorage:', '[REDACTED]');
           localStorage.setItem('access_token', token);
           console.log('✅ Token stored successfully');
 

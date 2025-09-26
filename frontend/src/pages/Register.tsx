@@ -215,12 +215,12 @@ export default function Register() {
     console.log('🔍 Form validation check:');
     console.log('  - Email:', data.email, '(valid:', !!data.email, ')');
     console.log('  - Username:', data.username, '(valid:', !!data.username, ')');
-    console.log('  - Password:', data.password ? '***' : 'MISSING', '(valid:', !!data.password, ')');
-    console.log('  - Confirm Password:', data.confirmPassword ? '***' : 'MISSING', '(valid:', !!data.confirmPassword, ')');
+    console.log('  - Password:', data.password ? '[REDACTED]' : 'MISSING', '(valid:', !!data.password, ')');
+    console.log('  - Confirm Password:', data.confirmPassword ? '[REDACTED]' : 'MISSING', '(valid:', !!data.confirmPassword, ')');
     console.log('  - Passwords match:', data.password === data.confirmPassword);
-    console.log('  - API Key:', data.ln_markets_api_key, '(valid:', !!data.ln_markets_api_key, ')');
-    console.log('  - API Secret:', data.ln_markets_api_secret, '(valid:', !!data.ln_markets_api_secret, ')');
-    console.log('  - Passphrase:', data.ln_markets_passphrase, '(valid:', !!data.ln_markets_passphrase, ')');
+    console.log('  - API Key:', data.ln_markets_api_key ? '[REDACTED]' : 'MISSING', '(valid:', !!data.ln_markets_api_key, ')');
+    console.log('  - API Secret:', data.ln_markets_api_secret ? '[REDACTED]' : 'MISSING', '(valid:', !!data.ln_markets_api_secret, ')');
+    console.log('  - Passphrase:', data.ln_markets_passphrase ? '[REDACTED]' : 'MISSING', '(valid:', !!data.ln_markets_passphrase, ')');
 
     setIsSubmitting(true);
     try {

@@ -99,7 +99,7 @@ export default function RateLimiting() {
       // Verificar token
       const token = localStorage.getItem('access_token');
       console.log('🔑 Token exists:', !!token);
-      console.log('🔑 Token preview:', token ? `${token.substring(0, 20)}...` : 'null');
+      console.log('🔑 Token preview:', token ? '[REDACTED]' : 'null');
       
       // Se não há token, tentar fazer login
       if (!token) {
@@ -107,7 +107,7 @@ export default function RateLimiting() {
         try {
           const loginResponse = await api.post('/auth/login', {
             email: 'admin@hub-defisats.com',
-            password: 'Admin123!@#'
+            password: process.env.VITE_ADMIN_PASSWORD || 'Admin123!@#'
           });
           
           if (loginResponse.data.token) {

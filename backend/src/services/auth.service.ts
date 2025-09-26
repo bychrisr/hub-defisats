@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { PrismaClient, User } from '@prisma/client';
 import { config } from '../config/env';
 import { FastifyInstance } from 'fastify';
+import { authLogger } from '../utils/logger';
 import {
   RegisterRequest,
   LoginRequest,
@@ -125,7 +126,7 @@ export class AuthService {
       console.log('ℹ️ No coupon code provided, using default plan: free');
     }
 
-    console.log('🔐 Hashing password...');
+    authLogger.debug('Hashing password for user registration');
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
     console.log('✅ Password hashed successfully');
@@ -172,11 +173,11 @@ export class AuthService {
       console.log('✅ Coupon usage updated');
     }
 
-    console.log('🎫 Generating JWT tokens...');
+    authLogger.debug('Generating JWT tokens for new user', { userId: user.id });
     // Generate tokens
     const token = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
-    console.log('✅ JWT tokens generated successfully');
+    authLogger.info('JWT tokens generated successfully', { userId: user.id });
 
     console.log('💾 Storing refresh token in database...');
     // Store refresh token in database
@@ -374,9 +375,9 @@ export class AuthService {
    */
   async validateSession(token: string): Promise<User> {
     try {
-      console.log('🔍 VALIDATE SESSION - Token:', token.substring(0, 20) + '...');
+      console.log('🔍 VALIDATE SESSION - Token:', '[REDACTED]');
       const decoded = this.fastify.jwt.verify(token) as any;
-      console.log('🔍 VALIDATE SESSION - Decoded:', decoded);
+      console.log('🔍 VALIDATE SESSION - Decoded:', { ...decoded, token: '[REDACTED]' });
 
       const user = await this.prisma.user.findUnique({
         where: { id: decoded.userId },

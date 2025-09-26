@@ -114,7 +114,7 @@ export default function UserUpgradeModal({ user, isOpen, onClose, onSuccess }: U
       });
 
       const token = localStorage.getItem('access_token');
-      console.log('🔑 USER UPGRADE - Token:', token ? `${token.substring(0, 20)}...` : 'MISSING');
+      console.log('🔑 USER UPGRADE - Token:', token ? '[REDACTED]' : 'MISSING');
 
       const response = await apiPut(`/api/admin/users/${user.id}/upgrade`, payload);
 
