@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 import { 
   RefreshCw, 
   AlertTriangle, 
@@ -49,14 +50,13 @@ const MarketDataFallback: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/admin/market-data/market-data');
-      const result = await response.json();
+      const response = await api.get('/api/admin/market-data/market-data');
       
-      if (result.success) {
-        setMarketData(result.data);
+      if (response.data.success) {
+        setMarketData(response.data.data);
         setLastUpdate(new Date());
       } else {
-        setError(result.message || 'Failed to fetch market data');
+        setError(response.data.message || 'Failed to fetch market data');
       }
     } catch (err: any) {
       setError(err.message);
@@ -67,11 +67,10 @@ const MarketDataFallback: React.FC = () => {
 
   const fetchProviderStatus = async () => {
     try {
-      const response = await fetch('/api/admin/market-data/providers/status');
-      const result = await response.json();
+      const response = await api.get('/api/admin/market-data/providers/status');
       
-      if (result.success) {
-        setProviderStatus(result.data);
+      if (response.data.success) {
+        setProviderStatus(response.data.data);
       }
     } catch (err: any) {
       console.error('Failed to fetch provider status:', err);
@@ -80,19 +79,13 @@ const MarketDataFallback: React.FC = () => {
 
   const testProtection = async () => {
     try {
-      const response = await fetch('/api/admin/market-data/protection/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 'test-user',
-          automationId: 'test-automation'
-        })
+      const response = await api.post('/api/admin/market-data/protection/check', {
+        userId: 'test-user',
+        automationId: 'test-automation'
       });
       
-      const result = await response.json();
-      
-      if (result.success) {
-        setProtectionResult(result.data);
+      if (response.data.success) {
+        setProtectionResult(response.data.data);
       }
     } catch (err: any) {
       console.error('Failed to test protection:', err);
@@ -103,14 +96,10 @@ const MarketDataFallback: React.FC = () => {
     setLoading(true);
     
     try {
-      const response = await fetch('/api/admin/market-data/providers/test', {
-        method: 'POST'
-      });
+      const response = await api.post('/api/admin/market-data/providers/test');
       
-      const result = await response.json();
-      
-      if (result.success) {
-        console.log('Provider test results:', result.data);
+      if (response.data.success) {
+        console.log('Provider test results:', response.data.data);
         // Atualizar status dos provedores
         await fetchProviderStatus();
       }
@@ -125,17 +114,13 @@ const MarketDataFallback: React.FC = () => {
     setLoading(true);
     
     try {
-      const response = await fetch('/api/admin/market-data/market-data/refresh', {
-        method: 'POST'
-      });
+      const response = await api.post('/api/admin/market-data/market-data/refresh');
       
-      const result = await response.json();
-      
-      if (result.success) {
-        setMarketData(result.data);
+      if (response.data.success) {
+        setMarketData(response.data.data);
         setLastUpdate(new Date());
       } else {
-        setError(result.message || 'Failed to refresh market data');
+        setError(response.data.message || 'Failed to refresh market data');
       }
     } catch (err: any) {
       setError(err.message);
