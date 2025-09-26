@@ -219,7 +219,6 @@ export class HealthCheckerService extends EventEmitter {
       // Update API metrics from external monitor
       // Get external API metrics directly
       const lnMarketsStatus = await this.checkLNMarketsAPI();
-      const coinGeckoStatus = await this.checkCoinGeckoAPI();
       
       // Update API metrics with direct measurements
       this.metrics.apiMetrics.lnMarkets = {
@@ -229,12 +228,14 @@ export class HealthCheckerService extends EventEmitter {
         successRate: lnMarketsStatus === 'healthy' ? 100 : lnMarketsStatus === 'degraded' ? 50 : 0,
         errorCount: lnMarketsStatus === 'unhealthy' ? 1 : 0
       };
+      
+      // CoinGecko is temporarily disabled
       this.metrics.apiMetrics.coinGecko = {
-        latency: coinGeckoStatus === 'healthy' ? 300 : coinGeckoStatus === 'degraded' ? 800 : 0,
-        status: coinGeckoStatus,
+        latency: 0,
+        status: 'disabled' as any,
         lastCheck: Date.now(),
-        successRate: coinGeckoStatus === 'healthy' ? 100 : coinGeckoStatus === 'degraded' ? 50 : 0,
-        errorCount: coinGeckoStatus === 'unhealthy' ? 1 : 0
+        successRate: 0,
+        errorCount: 0
       };
 
       const report: HealthReport = {
@@ -397,15 +398,14 @@ export class HealthCheckerService extends EventEmitter {
     const startTime = Date.now();
     
     try {
-      // Check LN Markets API
+      // Check LN Markets API (Primary)
       const lnMarketsHealth = await this.checkLNMarketsAPI();
       
-      // Check CoinGecko API
-      const coinGeckoHealth = await this.checkCoinGeckoAPI();
-
+      // CoinGecko is temporarily disabled, so we only check LN Markets
+      // TODO: Re-enable CoinGecko check when it's reactivated
       const latency = Date.now() - startTime;
-      const healthyAPIs = [lnMarketsHealth, coinGeckoHealth].filter(h => h === 'healthy').length;
-      const totalAPIs = 2;
+      const healthyAPIs = lnMarketsHealth === 'healthy' ? 1 : 0;
+      const totalAPIs = 1; // Only LN Markets is active
       
       let status: HealthStatus = 'healthy';
       if (healthyAPIs < totalAPIs) status = 'degraded';
@@ -418,9 +418,10 @@ export class HealthCheckerService extends EventEmitter {
         lastCheck: Date.now(),
         details: {
           lnMarkets: lnMarketsHealth,
-          coinGecko: coinGeckoHealth,
+          coinGecko: 'disabled', // CoinGecko is temporarily disabled
           healthyAPIs: `${healthyAPIs}/${totalAPIs}`,
-          latency: `${latency}ms`
+          latency: `${latency}ms`,
+          note: 'CoinGecko temporarily disabled'
         }
       };
 
