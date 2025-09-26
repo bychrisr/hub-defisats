@@ -188,14 +188,14 @@ export class LNMarketsDiagnosticService {
     const hasCredentials = this.credentials.apiKey && this.credentials.apiSecret && this.credentials.passphrase;
     
     const endpoints = hasCredentials ? [
-      { path: '/v1/status', method: 'GET', auth: false },
-      { path: '/v1/user', method: 'GET', auth: true },
-      { path: '/v1/positions', method: 'GET', auth: true },
-      { path: '/v1/market', method: 'GET', auth: false },
-      { path: '/v1/funding', method: 'GET', auth: false }
+      { path: '/futures/ticker', method: 'GET', auth: false },
+      { path: '/futures/info', method: 'GET', auth: false },
+      { path: '/user', method: 'GET', auth: true },
+      { path: '/positions', method: 'GET', auth: true },
+      { path: '/funding', method: 'GET', auth: false }
     ] : [
-      { path: '/v1/status', method: 'GET', auth: false },
-      { path: '/v1/market', method: 'GET', auth: false }
+      { path: '/futures/ticker', method: 'GET', auth: false },
+      { path: '/futures/info', method: 'GET', auth: false }
     ];
 
     logger.info(`Testing ${endpoints.length} endpoints (${hasCredentials ? 'with' : 'without'} credentials)`);

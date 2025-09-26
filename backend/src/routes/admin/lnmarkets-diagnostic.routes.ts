@@ -199,7 +199,7 @@ export async function lnMarketsDiagnosticRoutes(fastify: FastifyInstance) {
       // Run multiple quick tests
       const tests = [];
       for (let i = 0; i < 5; i++) {
-        tests.push(diagnosticService.testSpecificEndpoint('/v1/status', 'GET', false));
+        tests.push(diagnosticService.testSpecificEndpoint('/futures/ticker', 'GET', false));
         await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second between tests
       }
       
