@@ -225,6 +225,8 @@ const Monitoring: React.FC = () => {
   const [cacheConfig, setCacheConfig] = useState<any>(null);
   const [protectionRules, setProtectionRules] = useState<any>(null);
   const [protectionMetrics, setProtectionMetrics] = useState<any>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [configType, setConfigType] = useState<'cache' | 'rules'>('cache');
 
   const handleResetCircuitBreaker = async () => {
     try {
