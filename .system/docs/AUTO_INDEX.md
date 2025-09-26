@@ -345,6 +345,13 @@ Este índice é gerado automaticamente e lista todos os documentos disponíveis 
 - **📅 Modificado**: /home/bychrisr/projects/hub-defisats/.system/docs/features/version-check-summary.md c67a54df077736d1 255 ef53 4096 4096 9062300 6146481 5678091 2321984 2084288
 2025-09-22
 
+### 📄 [🛡️ Sistema de Proteção de Dados de Mercado](features/protection-system.md)
+> Sistema robusto e completo para garantir a confiabilidade e integridade dos dados de mercado, com monitoramento em tempo real, configuração dinâmica e proteção contra falhas em cascata.
+
+- **📊 Linhas**: 200+
+- **💾 Tamanho**: 15K
+- **📅 Modificado**: 2025-01-26
+
 ### 📄 [Sistema de Verificação de Versão](features/version-check-system.md)
 > O Sistema de Verificação de Versão é uma funcionalidade que notifica automaticamente os usuários quando uma nova versão da aplicação está disponível, permitindo que eles atualizem a página para receber as melhorias e correções mais recentes.
 

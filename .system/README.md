@@ -26,6 +26,11 @@ Esta pasta contém toda a documentação técnica e de produto do Hub-defisats, 
     │   ├── i18n.md              # Sistema de internacionalização
     │   ├── charts.md            # Gráficos e visualizações
     │   └── coupons.md           # Sistema de cupons avançado
+    ├── features/                # Documentação de funcionalidades
+    │   ├── protection-system.md # Sistema de Proteção de Dados de Mercado
+    │   ├── margin-guard-*.md    # Sistema Margin Guard
+    │   ├── image-upload-*.md    # Sistema de Upload de Imagens
+    │   └── version-check-*.md   # Sistema de Verificação de Versão
     └── security/                # Documentação de segurança
         └── overview.md          # Visão geral de segurança
 ```
@@ -210,6 +215,21 @@ Esta pasta contém toda a documentação técnica e de produto do Hub-defisats, 
 - docs/security/incident-response.md - Plano de resposta a incidentes
 - docs/deployment/kubernetes.md - Deploy em Kubernetes
 - docs/development/setup.md - Setup de desenvolvimento
+
+## 🛡️ Sistema de Proteção de Dados de Mercado (v1.10.7)
+
+### Funcionalidades Principais
+- **Dashboard de Monitoramento**: Interface completa no System Monitoring
+- **Status em Tempo Real**: Métricas de uptime, cache hits, circuit breaker
+- **Configuração Dinâmica**: Cache e regras configuráveis via interface
+- **Proteção Robusta**: Circuit breakers e sistema de fallback
+- **Compatibilidade Total**: Suporte a múltiplos formatos de dados
+
+### Documentação Técnica
+- **docs/features/protection-system.md**: Documentação completa do sistema
+- **Correções Implementadas**: Conflito de tipos, referências, sintaxe
+- **Arquitetura Detalhada**: Backend, frontend e integração
+- **Rotas de API**: Documentação completa de todos os endpoints
 
 ## 🚀 Melhorias Recentes (v1.3.2)
 
