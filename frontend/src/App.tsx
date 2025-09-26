@@ -42,6 +42,8 @@ import DynamicPagesConfig from '@/pages/admin/DynamicPagesConfig';
 import AdminMonitoring from '@/pages/admin/Monitoring';
 import Monitoring from '@/pages/admin/Monitoring';
 import Alerts from '@/pages/admin/Alerts';
+import LNMarketsDiagnostic from '@/pages/admin/LNMarketsDiagnostic';
+import MarketDataFallback from '@/pages/admin/MarketDataFallback';
 import AdminUsers from '@/pages/admin/Users';
 import AdminCoupons from '@/pages/admin/Coupons';
 import AdminAlerts from '@/pages/admin/Alerts';
@@ -433,8 +435,10 @@ const App = () => {
               <Route path="menus" element={<AdminMenuManagement />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />
-              <Route path="monitoring" element={<Monitoring />} />
-              <Route path="alerts" element={<Alerts />} />
+        <Route path="monitoring" element={<Monitoring />} />
+        <Route path="alerts" element={<Alerts />} />
+        <Route path="lnmarkets-diagnostic" element={<LNMarketsDiagnostic />} />
+        <Route path="market-data-fallback" element={<MarketDataFallback />} />
               <Route path="rate-limiting" element={<RateLimiting />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="plans" element={<Plans />} />

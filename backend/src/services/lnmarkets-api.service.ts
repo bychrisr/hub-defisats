@@ -874,4 +874,129 @@ export class LNMarketsAPIService {
       baseURL: this.baseURL
     };
   }
+
+  /**
+   * Close a specific position/trade
+   */
+  async closePosition(tradeId: string): Promise<any> {
+    console.log('🔍 LN MARKETS - Closing position:', tradeId);
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'POST',
+        path: `/futures/trades/${tradeId}/close`
+      });
+      
+      console.log('✅ LN MARKETS - Position closed successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ LN MARKETS - Error closing position:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get running trades (active positions)
+   */
+  async getRunningTrades(): Promise<any[]> {
+    console.log('🔍 LN MARKETS - Getting running trades');
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'GET',
+        path: '/futures/trades',
+        params: { status: 'open' }
+      });
+      
+      console.log('✅ LN MARKETS - Running trades retrieved:', result);
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('❌ LN MARKETS - Error getting running trades:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Reduce position size
+   */
+  async reducePosition(tradeId: string, quantity: number): Promise<any> {
+    console.log('🔍 LN MARKETS - Reducing position:', tradeId, 'by', quantity);
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'POST',
+        path: `/futures/trades/${tradeId}/reduce`,
+        data: { quantity }
+      });
+      
+      console.log('✅ LN MARKETS - Position reduced successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ LN MARKETS - Error reducing position:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get current market price
+   */
+  async getMarketPrice(): Promise<number> {
+    console.log('🔍 LN MARKETS - Getting market price');
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'GET',
+        path: '/futures/ticker'
+      });
+      
+      const price = result?.last_price || result?.price || 50000; // Fallback price
+      console.log('✅ LN MARKETS - Market price retrieved:', price);
+      return price;
+    } catch (error) {
+      console.error('❌ LN MARKETS - Error getting market price:', error);
+      return 50000; // Fallback price
+    }
+  }
+
+  /**
+   * Update take profit for a trade
+   */
+  async updateTakeProfit(tradeId: string, takeProfit: number): Promise<any> {
+    console.log('🔍 LN MARKETS - Updating take profit:', tradeId, 'to', takeProfit);
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'PUT',
+        path: `/futures/trades/${tradeId}`,
+        data: { takeprofit: takeProfit }
+      });
+      
+      console.log('✅ LN MARKETS - Take profit updated successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ LN MARKETS - Error updating take profit:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update stop loss for a trade
+   */
+  async updateStopLoss(tradeId: string, stopLoss: number): Promise<any> {
+    console.log('🔍 LN MARKETS - Updating stop loss:', tradeId, 'to', stopLoss);
+    
+    try {
+      const result = await this.makeRequest({
+        method: 'PUT',
+        path: `/futures/trades/${tradeId}`,
+        data: { stoploss: stopLoss }
+      });
+      
+      console.log('✅ LN MARKETS - Stop loss updated successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ LN MARKETS - Error updating stop loss:', error);
+      throw error;
+    }
+  }
 }

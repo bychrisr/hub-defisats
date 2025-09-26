@@ -1,9 +1,6 @@
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
-import {
-  createLNMarketsService,
-  LNMarketsService,
-} from '../services/lnmarkets.service';
+import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets-api.service';
 import { SecureCredentials } from '../services/secure-storage.service';
 import { prisma } from '../lib/prisma';
 import { CredentialCacheService } from '../services/credential-cache.service';
@@ -73,7 +70,7 @@ async function getAutomationConfig(automationId: string) {
 
 // Function to execute Margin Guard action
 async function executeMarginGuardAction(
-  lnMarkets: LNMarketsService,
+  lnMarkets: LNMarketsAPIService,
   automationConfig: any,
   userId: string,
   tradeId?: string
@@ -119,7 +116,7 @@ async function executeMarginGuardAction(
         const reduceAmount = (trade.quantity * automationConfig.reduce_percentage) / 100;
         console.log(`📉 Reducing position ${tradeId} by ${automationConfig.reduce_percentage}% (${reduceAmount} contracts) for user ${userId}`);
 
-        await lnMarkets.reducePosition(trade.market || 'btcusd', trade.side, reduceAmount);
+        await lnMarkets.reducePosition(tradeId, reduceAmount);
         console.log(`✅ Successfully reduced position ${tradeId}`);
 
         // Log the action
@@ -179,7 +176,7 @@ async function executeMarginGuardAction(
 
 // Function to execute Auto Entry automation
 async function executeAutoEntryAction(
-  lnMarkets: LNMarketsService,
+  lnMarkets: LNMarketsAPIService,
   automationConfig: any,
   userId: string
 ) {
@@ -204,7 +201,7 @@ async function executeAutoEntryAction(
 
     // Check if we should trigger based on price (if trigger_price is set)
     if (trigger_price) {
-      const currentPrice = await lnMarkets.getMarketPrice(market);
+      const currentPrice = await lnMarkets.getMarketPrice();
       const shouldTrigger = side === 'b'
         ? currentPrice <= trigger_price
         : currentPrice >= trigger_price;
@@ -224,9 +221,7 @@ async function executeAutoEntryAction(
 
     // Create the trade
     const tradeResult = await lnMarkets.createTrade({
-      type: 'm', // market order
       side,
-      market,
       leverage,
       quantity,
       stoploss,
@@ -276,7 +271,7 @@ async function executeAutoEntryAction(
 
 // Function to execute Take Profit/Stop Loss automation
 async function executeTpSlAction(
-  lnMarkets: LNMarketsService,
+  lnMarkets: LNMarketsAPIService,
   automationConfig: any,
   userId: string,
   tradeId?: string
@@ -403,7 +398,7 @@ const worker = new Worker(
       }
 
       // Create LN Markets service instance
-      const lnMarkets = createLNMarketsService(credentials);
+      const lnMarkets = new LNMarketsAPIService(credentials, console as any);
 
       // Execute based on automation type
       switch (automation.type) {

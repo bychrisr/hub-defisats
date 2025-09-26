@@ -32,6 +32,12 @@ import { backtestRoutes } from './routes/backtest.routes';
 import { paymentRoutes } from './routes/payment.routes';
 import { rateLimitTestRoutes } from './routes/rate-limit-test.routes';
 import { healthRoutes as adminHealthRoutes } from './routes/admin/health.routes';
+import { lnMarketsDiagnosticRoutes } from './routes/admin/lnmarkets-diagnostic.routes';
+import { marketDataFallbackRoutes } from './routes/admin/market-data-fallback.routes';
+import { lnMarketsAnalysisRoutes } from './routes/admin/ln-markets-analysis.routes';
+import { lnMarketsGuerrillaTestRoutes } from './routes/ln-markets-guerilla-test.routes';
+import { lnMarketsDiscoveryRoutes } from './routes/admin/ln-markets-discovery.routes';
+import { lnMarketsFallbackTestRoutes } from './routes/lnmarkets-fallback-test.routes';
 import { securityRoutes } from './routes/security.routes';
 import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
@@ -671,6 +677,12 @@ async function registerRoutes() {
   // Rate limit config admin routes
   await fastify.register(rateLimitConfigRoutes, { prefix: '/api/admin/rate-limit-config' });
   await fastify.register(adminHealthRoutes, { prefix: '/api/admin/health' });
+  await fastify.register(lnMarketsDiagnosticRoutes, { prefix: '/api/admin/lnmarkets' });
+  await fastify.register(marketDataFallbackRoutes, { prefix: '/api/admin/market-data' });
+  await fastify.register(lnMarketsAnalysisRoutes, { prefix: '/api/admin/lnmarkets-analysis' });
+  await fastify.register(lnMarketsGuerrillaTestRoutes, { prefix: '/api/ln-markets-test' });
+  await fastify.register(lnMarketsDiscoveryRoutes, { prefix: '/api/admin/lnmarkets-discovery' });
+  await fastify.register(lnMarketsFallbackTestRoutes, { prefix: '/api/lnmarkets-fallback' });
   await fastify.register(cacheRoutes, { prefix: '/api/admin/cache' });
   await fastify.register(loadBalancerRoutes, { prefix: '/api/admin/load-balancer' });
   console.log('✅ Admin routes registered');

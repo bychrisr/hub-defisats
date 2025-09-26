@@ -1,9 +1,6 @@
 import { Worker, Queue } from 'bullmq';
 import { Redis } from 'ioredis';
-import {
-  createLNMarketsService,
-  LNMarketsService,
-} from '../services/lnmarkets.service';
+import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets-api.service';
 // Import notification queue
 import { notificationQueue } from '../queues/notification.queue';
 import { PrismaClient } from '@prisma/client';
@@ -38,12 +35,12 @@ const marginCheckQueue = new Queue('margin-check', {
 // Note: Credentials are now fetched from database and decrypted on-demand
 
 // Store LN Markets service instances with connection pooling
-const lnMarketsServices: { [userId: string]: LNMarketsService } = {};
+const lnMarketsServices: { [userId: string]: LNMarketsAPIService } = {};
 const serviceCreationTimes: { [userId: string]: number } = {};
 const SERVICE_TTL = 10 * 60 * 1000; // 10 minutes TTL for services
 
 // Function to create or get LN Markets service with connection pooling
-function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarketsService {
+function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarketsAPIService {
   const now = Date.now();
   const serviceCreationTime = serviceCreationTimes[userId];
   
@@ -55,7 +52,7 @@ function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarket
   
   // Create new service
   console.log(`🆕 MARGIN GUARD - Creating new LN Markets service for user ${userId}`);
-  const service = createLNMarketsService(credentials);
+  const service = new LNMarketsAPIService(credentials, console as any);
   lnMarketsServices[userId] = service;
   serviceCreationTimes[userId] = now;
   
@@ -832,7 +829,7 @@ export async function simulateMarginMonitoring(
     }
 
     // Create LN Markets service
-    const lnMarkets = createLNMarketsService(credentials);
+    const lnMarkets = new LNMarketsAPIService(credentials, console as any);
 
     // Simulate margin monitoring
     const marginInfo = await lnMarkets.getMarginInfo();

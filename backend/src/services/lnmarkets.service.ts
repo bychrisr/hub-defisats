@@ -404,9 +404,7 @@ export class LNMarketsService {
     try {
       // Use circuit breaker to protect against API failures
       const response = await this.circuitBreaker.execute(async () => {
-        return await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {
-          timeout: 10000
-        });
+        return await this.client.get('/futures/ticker');
       });
       return {
         price: response.data.lastPrice || response.data.index || 0,
@@ -657,10 +655,10 @@ export async function testSandboxCredentials(): Promise<void> {
   console.log('🧪 Testing LN Markets sandbox credentials...');
 
   const sandboxCredentials = {
-    apiKey: 'hC8B4VoDm1X6i2L3qLrdUopNggl3yaJh6S3Zz1tPCoE=',
+    apiKey: 'q4dbbRpWE2ZpfPV3GBqAFNLfQhXrcab2quz8FsxGZ7U=',
     apiSecret:
-      'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
-    passphrase: 'a6c1bh56jc33',
+      'bq9WimSkASMQo0eJ4IzVv6P7hC+OEY4GLnB+ztVrcfkA3XbL7826/fkUgHe8+2TZL6+J8NM2/RnTn3D/6gyE4A==',
+    passphrase: '#PassCursor',
   };
 
   console.log('📋 Sandbox credentials:', {

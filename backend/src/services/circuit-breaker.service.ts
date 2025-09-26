@@ -100,6 +100,41 @@ export class CircuitBreaker {
   }
 
   /**
+   * Check if circuit breaker is open
+   */
+  isOpen(): boolean {
+    return this.state === 'OPEN';
+  }
+
+  /**
+   * Record a success
+   */
+  recordSuccess(): void {
+    this.onSuccess();
+  }
+
+  /**
+   * Record a failure
+   */
+  recordFailure(): void {
+    this.onFailure();
+  }
+
+  /**
+   * Get last failure time
+   */
+  getLastFailureTime(): number {
+    return this.lastFailureTime;
+  }
+
+  /**
+   * Get next retry time
+   */
+  getNextRetryTime(): number {
+    return this.lastFailureTime + this.options.recoveryTimeout;
+  }
+
+  /**
    * Get statistics
    */
   getStats(): {

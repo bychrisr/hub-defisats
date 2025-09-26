@@ -54,6 +54,22 @@ interface HealthReport {
     uptimePercentage: number;
     lastHealthyTime: number;
     consecutiveFailures: number;
+    apiMetrics: {
+      lnMarkets: {
+        latency: number;
+        status: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+        lastCheck: number;
+        successRate: number;
+        errorCount: number;
+      };
+      coinGecko: {
+        latency: number;
+        status: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+        lastCheck: number;
+        successRate: number;
+        errorCount: number;
+      };
+    };
   };
 }
 
@@ -298,6 +314,107 @@ const Monitoring: React.FC = () => {
                   </div>
                 </div>
 
+      {/* Individual API Metrics */}
+      <div className="bg-bg-card rounded-lg border border-border profile-tabs-glow">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-semibold text-text-primary">Individual API Performance</h3>
+          <p className="text-sm text-text-secondary">Detailed metrics for each external API</p>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* LN Markets API */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-text-primary">LN Markets API</h3>
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  healthData.metrics.apiMetrics.lnMarkets.status === 'healthy' ? 'text-green-400 bg-green-900/20 border-green-500/30' :
+                  healthData.metrics.apiMetrics.lnMarkets.status === 'degraded' ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' :
+                  healthData.metrics.apiMetrics.lnMarkets.status === 'unhealthy' ? 'text-red-400 bg-red-900/20 border-red-500/30' :
+                  'text-text-secondary bg-bg-card border-border'
+                }`}>
+                  {healthData.metrics.apiMetrics.lnMarkets.status}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.lnMarkets.latency.toFixed(0)}ms
+                  </div>
+                  <div className="text-sm text-text-secondary">Latency</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.lnMarkets.successRate.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-text-secondary">Success Rate</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.lnMarkets.errorCount}
+                  </div>
+                  <div className="text-sm text-text-secondary">Errors</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.lnMarkets.lastCheck ? 
+                      new Date(healthData.metrics.apiMetrics.lnMarkets.lastCheck).toLocaleTimeString() : 
+                      'Never'
+                    }
+                  </div>
+                  <div className="text-sm text-text-secondary">Last Check</div>
+                </div>
+              </div>
+            </div>
+
+            {/* CoinGecko API */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-text-primary">CoinGecko API</h3>
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  healthData.metrics.apiMetrics.coinGecko.status === 'healthy' ? 'text-green-400 bg-green-900/20 border-green-500/30' :
+                  healthData.metrics.apiMetrics.coinGecko.status === 'degraded' ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' :
+                  healthData.metrics.apiMetrics.coinGecko.status === 'unhealthy' ? 'text-red-400 bg-red-900/20 border-red-500/30' :
+                  'text-text-secondary bg-bg-card border-border'
+                }`}>
+                  {healthData.metrics.apiMetrics.coinGecko.status}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.coinGecko.latency.toFixed(0)}ms
+                  </div>
+                  <div className="text-sm text-text-secondary">Latency</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.coinGecko.successRate.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-text-secondary">Success Rate</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.coinGecko.errorCount}
+                  </div>
+                  <div className="text-sm text-text-secondary">Errors</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {healthData.metrics.apiMetrics.coinGecko.lastCheck ? 
+                      new Date(healthData.metrics.apiMetrics.coinGecko.lastCheck).toLocaleTimeString() : 
+                      'Never'
+                    }
+                  </div>
+                  <div className="text-sm text-text-secondary">Last Check</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Components Status */}
       <div className="bg-bg-card rounded-lg border border-border profile-tabs-glow">
         <div className="px-6 py-4 border-b border-border">
@@ -347,7 +464,7 @@ const Monitoring: React.FC = () => {
                                     ? 'text-blue-400 font-semibold' 
                                     : 'text-text-primary'
                                 }`}>
-                                  {subValue}
+                                  {String(subValue)}
                                 </span>
                               </div>
                             ))}
