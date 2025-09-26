@@ -196,10 +196,7 @@ export class LNMarketsDiagnosticService {
     // Test only public endpoints if credentials are not configured
     const hasCredentials = this.credentials.apiKey && this.credentials.apiSecret && this.credentials.passphrase;
     
-    const endpoints = hasCredentials ? [
-      { path: '/futures/ticker', method: 'GET', auth: false },
-      { path: '/user', method: 'GET', auth: true }
-    ] : [
+    const endpoints = [
       { path: '/futures/ticker', method: 'GET', auth: false }
     ];
 
