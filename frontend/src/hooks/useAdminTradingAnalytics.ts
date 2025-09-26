@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useApiErrorHandler } from './useApiErrorHandler';
+import { api } from '@/lib/api';
 
 export interface TradingAnalyticsUser {
   userId: string;
@@ -76,25 +77,13 @@ export function useAdminTradingAnalytics(filters: TradingAnalyticsFilters = {}) 
       if (filters.page) queryParams.append('page', filters.page.toString());
       if (filters.limit) queryParams.append('limit', filters.limit.toString());
 
-      const response = await fetch(`/api/admin/trading/analytics?${queryParams.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await api.get(`/api/admin/trading/analytics?${queryParams.toString()}`);
 
       setState(prev => ({
         ...prev,
-        data: data.data || [],
-        metrics: data.metrics || null,
-        pagination: data.pagination || null,
+        data: response.data.data || [],
+        metrics: response.data.metrics || null,
+        pagination: response.data.pagination || null,
         loading: false,
         error: null,
         lastUpdated: new Date()

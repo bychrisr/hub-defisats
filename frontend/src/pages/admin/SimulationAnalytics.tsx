@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { api } from '@/lib/api';
 import { 
   BarChart3,
   TrendingUp,
@@ -164,8 +165,36 @@ export default function SimulationAnalytics() {
   const fetchSimulations = async () => {
     setRefreshing(true);
     try {
-      // Simular dados de simulações
-      const mockSimulations: Simulation[] = [
+      const queryParams = new URLSearchParams();
+      
+      if (filters.search) queryParams.append('search', filters.search);
+      if (filters.type) queryParams.append('simulationType', filters.type);
+      if (filters.status) queryParams.append('status', filters.status);
+      if (filters.planType) queryParams.append('planType', filters.planType);
+      if (filters.dateRange) queryParams.append('dateRange', filters.dateRange);
+      if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+      if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
+      if (filters.page) queryParams.append('page', filters.page.toString());
+      if (filters.limit) queryParams.append('limit', filters.limit.toString());
+
+      const response = await api.get(`/api/admin/simulations/analytics?${queryParams.toString()}`);
+
+      if (response.data.success) {
+        setSimulations(response.data.data);
+        setMetrics(response.data.metrics);
+        setLoading(false);
+        setRefreshing(false);
+        toast.success('Dados de simulações carregados com sucesso!');
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch simulations');
+      }
+    } catch (error: any) {
+      console.error('Error fetching simulations:', error);
+      setLoading(false);
+      setRefreshing(false);
+      toast.error('Erro ao carregar dados de simulações');
+    }
+  };
         {
           id: '1',
           name: 'Monte Carlo Portfolio Analysis',

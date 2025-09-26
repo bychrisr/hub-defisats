@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { api } from '@/lib/api';
 import { 
   CreditCard,
   TrendingUp,
@@ -164,189 +165,32 @@ export default function PaymentAnalytics() {
   const fetchPaymentData = async () => {
     setRefreshing(true);
     try {
-      // Simular dados de payment analytics
-      const mockMetrics: PaymentMetrics = {
-        totalRevenue: 125000000,
-        monthlyRevenue: 8500000,
-        dailyRevenue: 280000,
-        totalTransactions: 15420,
-        successfulTransactions: 14850,
-        failedTransactions: 570,
-        averageTransactionValue: 8105,
-        lightningPayments: 12300,
-        fiatPayments: 3120,
-        conversionRate: 96.3,
-        refundRate: 2.1,
-        chargebackRate: 0.8,
-        revenueGrowth: 15.2,
-        transactionGrowth: 8.7,
-        topPlanRevenue: 'Pro',
-        averageRevenuePerUser: 12500
-      };
+      const queryParams = new URLSearchParams();
+      
+      if (filters.search) queryParams.append('search', filters.search);
+      if (filters.status) queryParams.append('status', filters.status);
+      if (filters.paymentMethod) queryParams.append('paymentMethod', filters.paymentMethod);
+      if (filters.planType) queryParams.append('planType', filters.planType);
+      if (filters.dateRange) queryParams.append('dateRange', filters.dateRange);
+      if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+      if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
+      if (filters.page) queryParams.append('page', filters.page.toString());
+      if (filters.limit) queryParams.append('limit', filters.limit.toString());
 
-      const mockTransactions: PaymentTransaction[] = [
-        {
-          id: '1',
-          userId: '1',
-          userEmail: 'user1@example.com',
-          planType: 'pro',
-          timestamp: '2024-01-22T10:30:00Z',
-          amount: 25000,
-          currency: 'sats',
-          paymentMethod: 'lightning',
-          status: 'SUCCESS',
-          description: 'Pro Plan - Monthly',
-          invoiceId: 'ln_123456789',
-          fee: 125,
-          netAmount: 24875,
-          planName: 'Pro Plan',
-          duration: 30,
-          isRecurring: true,
-          nextBillingDate: '2024-02-22T10:30:00Z'
-        },
-        {
-          id: '2',
-          userId: '2',
-          userEmail: 'user2@example.com',
-          planType: 'advanced',
-          timestamp: '2024-01-22T10:25:00Z',
-          amount: 15000,
-          currency: 'sats',
-          paymentMethod: 'lightning',
-          status: 'SUCCESS',
-          description: 'Advanced Plan - Monthly',
-          invoiceId: 'ln_987654321',
-          fee: 75,
-          netAmount: 14925,
-          planName: 'Advanced Plan',
-          duration: 30,
-          isRecurring: true,
-          nextBillingDate: '2024-02-22T10:25:00Z'
-        },
-        {
-          id: '3',
-          userId: '3',
-          userEmail: 'user3@example.com',
-          planType: 'lifetime',
-          timestamp: '2024-01-22T10:20:00Z',
-          amount: 500000,
-          currency: 'sats',
-          paymentMethod: 'lightning',
-          status: 'SUCCESS',
-          description: 'Lifetime Plan - One-time',
-          invoiceId: 'ln_456789123',
-          fee: 2500,
-          netAmount: 497500,
-          planName: 'Lifetime Plan',
-          duration: 365,
-          isRecurring: false
-        },
-        {
-          id: '4',
-          userId: '4',
-          userEmail: 'user4@example.com',
-          planType: 'basic',
-          timestamp: '2024-01-22T10:15:00Z',
-          amount: 5000,
-          currency: 'sats',
-          paymentMethod: 'lightning',
-          status: 'FAILED',
-          description: 'Basic Plan - Monthly',
-          fee: 25,
-          netAmount: 0,
-          planName: 'Basic Plan',
-          duration: 30,
-          isRecurring: true
-        },
-        {
-          id: '5',
-          userId: '5',
-          userEmail: 'user5@example.com',
-          planType: 'pro',
-          timestamp: '2024-01-22T10:10:00Z',
-          amount: 50,
-          currency: 'USD',
-          paymentMethod: 'fiat',
-          status: 'SUCCESS',
-          description: 'Pro Plan - Monthly (USD)',
-          txHash: '0x1234567890abcdef',
-          fee: 2.5,
-          netAmount: 47.5,
-          planName: 'Pro Plan',
-          duration: 30,
-          isRecurring: true,
-          nextBillingDate: '2024-02-22T10:10:00Z'
-        }
-      ];
+      const response = await api.get(`/api/admin/payments/analytics?${queryParams.toString()}`);
 
-      const mockRevenueByPlan: RevenueByPlan[] = [
-        {
-          planType: 'pro',
-          planName: 'Pro Plan',
-          revenue: 45000000,
-          transactions: 1800,
-          users: 1800,
-          averageRevenue: 25000,
-          growth: 18.5
-        },
-        {
-          planType: 'advanced',
-          planName: 'Advanced Plan',
-          revenue: 30000000,
-          transactions: 2000,
-          users: 2000,
-          averageRevenue: 15000,
-          growth: 12.3
-        },
-        {
-          planType: 'lifetime',
-          planName: 'Lifetime Plan',
-          revenue: 25000000,
-          transactions: 50,
-          users: 50,
-          averageRevenue: 500000,
-          growth: 25.7
-        },
-        {
-          planType: 'basic',
-          planName: 'Basic Plan',
-          revenue: 15000000,
-          transactions: 3000,
-          users: 3000,
-          averageRevenue: 5000,
-          growth: 8.9
-        },
-        {
-          planType: 'free',
-          planName: 'Free Plan',
-          revenue: 0,
-          transactions: 0,
-          users: 5000,
-          averageRevenue: 0,
-          growth: 0
-        }
-      ];
-
-      const mockTrends: PaymentTrend[] = [
-        { date: '2024-01-15', revenue: 280000, transactions: 450, lightningPayments: 360, fiatPayments: 90, successRate: 96.2 },
-        { date: '2024-01-16', revenue: 320000, transactions: 520, lightningPayments: 416, fiatPayments: 104, successRate: 97.1 },
-        { date: '2024-01-17', revenue: 290000, transactions: 480, lightningPayments: 384, fiatPayments: 96, successRate: 95.8 },
-        { date: '2024-01-18', revenue: 350000, transactions: 580, lightningPayments: 464, fiatPayments: 116, successRate: 97.5 },
-        { date: '2024-01-19', revenue: 310000, transactions: 510, lightningPayments: 408, fiatPayments: 102, successRate: 96.8 },
-        { date: '2024-01-20', revenue: 330000, transactions: 540, lightningPayments: 432, fiatPayments: 108, successRate: 97.2 },
-        { date: '2024-01-21', revenue: 340000, transactions: 560, lightningPayments: 448, fiatPayments: 112, successRate: 96.9 },
-        { date: '2024-01-22', revenue: 280000, transactions: 450, lightningPayments: 360, fiatPayments: 90, successRate: 96.3 }
-      ];
-
-      setTimeout(() => {
-        setMetrics(mockMetrics);
-        setTransactions(mockTransactions);
-        setRevenueByPlan(mockRevenueByPlan);
-        setTrends(mockTrends);
+      if (response.data.success) {
+        setMetrics(response.data.metrics);
+        setTransactions(response.data.data);
+        setRevenueByPlan(response.data.revenueByPlan || []);
+        setTrends(response.data.trends || []);
         setLoading(false);
         setRefreshing(false);
         toast.success('Dados de pagamentos carregados com sucesso!');
-      }, 1000);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch payment data');
+      }
+
     } catch (error) {
       console.error('Error fetching payment data:', error);
       setLoading(false);
