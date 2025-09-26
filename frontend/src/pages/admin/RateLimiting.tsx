@@ -100,11 +100,36 @@ export default function RateLimiting() {
       console.log('🔑 Token exists:', !!token);
       console.log('🔑 Token preview:', token ? `${token.substring(0, 20)}...` : 'null');
       
+      // Se não há token, tentar fazer login
+      if (!token) {
+        console.log('🔐 No token found, attempting login...');
+        try {
+          const loginResponse = await api.post('/auth/login', {
+            email: 'admin@hub-defisats.com',
+            password: 'Admin123!@#'
+          });
+          
+          if (loginResponse.data.token) {
+            localStorage.setItem('access_token', loginResponse.data.token);
+            console.log('✅ Login successful, token stored');
+          } else {
+            console.log('❌ Login failed, no token received');
+            setError('Login failed');
+            return;
+          }
+        } catch (loginErr: any) {
+          console.error('❌ Login error:', loginErr);
+          setError('Login failed: ' + (loginErr.response?.data?.message || loginErr.message));
+          return;
+        }
+      }
+      
       // Teste direto com fetch para comparar
       console.log('🧪 Testing with direct fetch...');
+      const currentToken = localStorage.getItem('access_token');
       const fetchResponse = await fetch('/api/admin/rate-limit-config/', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${currentToken}`,
           'Content-Type': 'application/json'
         }
       });
