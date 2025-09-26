@@ -75,7 +75,7 @@ export function useDocumentation() {
       if (params.limit) searchParams.append('limit', params.limit.toString());
       if (params.offset) searchParams.append('offset', params.offset.toString());
 
-      const response = await api.get(`/docs/search?${searchParams}`);
+      const response = await api.get(`/api/docs/search?${searchParams}`);
       
       if (response.data.success) {
         return response.data.data;
@@ -97,7 +97,7 @@ export function useDocumentation() {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get(`/docs/content/${encodeURIComponent(filePath)}`);
+      const response = await api.get(`/api/docs/content/${encodeURIComponent(filePath)}`);
       
       if (response.data.success) {
         return response.data.data;
@@ -119,7 +119,7 @@ export function useDocumentation() {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get('/docs/categories');
+      const response = await api.get('/api/docs/categories');
       
       if (response.data.success) {
         return response.data.data;
@@ -141,7 +141,7 @@ export function useDocumentation() {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get('/docs/stats');
+      const response = await api.get('/api/docs/stats');
       
       if (response.data.success) {
         return response.data.data;
@@ -163,7 +163,7 @@ export function useDocumentation() {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get('/docs/index');
+      const response = await api.get('/api/docs/index');
       
       if (response.data.success) {
         return response.data.data;

@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { docsController } from '../controllers/docs.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+import { adminAuthMiddleware } from '../middleware/auth.middleware';
 
 export async function docsRoutes(fastify: FastifyInstance) {
-  // Aplicar autenticação para todas as rotas
-  fastify.addHook('preHandler', authMiddleware);
+  // Aplicar autenticação de admin para todas as rotas
+  fastify.addHook('preHandler', adminAuthMiddleware);
 
   // Buscar documentos
   fastify.get('/api/docs/search', {

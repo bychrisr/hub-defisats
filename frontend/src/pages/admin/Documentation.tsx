@@ -77,7 +77,7 @@ export default function Documentation() {
   // Carregar dados iniciais
   useEffect(() => {
     loadInitialData();
-    connectWebSocket();
+    // connectWebSocket(); // Temporariamente desabilitado
     
     return () => {
       if (wsRef.current) {
@@ -108,8 +108,8 @@ export default function Documentation() {
       setIsLoading(true);
       
       const [categoriesRes, statsRes] = await Promise.all([
-        api.get('/docs/categories'),
-        api.get('/docs/stats')
+        api.get('/api/docs/categories'),
+        api.get('/api/docs/stats')
       ]);
 
       if (categoriesRes.data.success) {
@@ -153,7 +153,7 @@ export default function Documentation() {
         params.append('category', selectedCategory);
       }
 
-      const response = await api.get(`/docs/search?${params}`);
+      const response = await api.get(`/api/docs/search?${params}`);
       
       if (response.data.success) {
         const data = response.data.data;
@@ -184,7 +184,7 @@ export default function Documentation() {
       setIsLoadingContent(true);
       setSelectedFile(file);
       
-      const response = await api.get(`/docs/content/${encodeURIComponent(file.path)}`);
+      const response = await api.get(`/api/docs/content/${encodeURIComponent(file.path)}`);
       
       if (response.data.success) {
         setFileContent(response.data.data.content);
