@@ -145,6 +145,12 @@ export default function Documentation() {
     try {
       setIsLoading(true);
       
+      console.log('🔍 DOCUMENTATION - Searching with:', {
+        searchTerm,
+        selectedCategory,
+        offset
+      });
+      
       const params = new URLSearchParams({
         limit: '20',
         offset: offset.toString()
@@ -160,11 +166,18 @@ export default function Documentation() {
 
       const response = await api.get(`/api/docs/search?${params}`);
       
+      console.log('🔍 DOCUMENTATION - API Response:', {
+        success: response.data.success,
+        filesCount: response.data.data?.files?.length || 0,
+        category: selectedCategory
+      });
+      
       if (response.data.success) {
         const data = response.data.data;
         
         if (offset === 0) {
           setFiles(data.files);
+          console.log('🔍 DOCUMENTATION - Files set:', data.files.length);
         } else {
           setFiles(prev => [...prev, ...data.files]);
         }
@@ -417,7 +430,10 @@ export default function Documentation() {
                       key={category.name}
                       variant={selectedCategory === category.name ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setSelectedCategory(category.name)}
+                      onClick={() => {
+                        console.log('🔍 DOCUMENTATION - Category clicked:', category.name);
+                        setSelectedCategory(category.name);
+                      }}
                       className="w-full justify-start"
                     >
                       {getCategoryIcon(category.name)}
