@@ -40,6 +40,8 @@ import AdminDashboard from '@/pages/admin/Dashboard';
 import AdminMenuManagement from '@/pages/admin/MenuManagement';
 import DynamicPagesConfig from '@/pages/admin/DynamicPagesConfig';
 import AdminMonitoring from '@/pages/admin/Monitoring';
+import Monitoring from '@/pages/admin/Monitoring';
+import Alerts from '@/pages/admin/Alerts';
 import AdminUsers from '@/pages/admin/Users';
 import AdminCoupons from '@/pages/admin/Coupons';
 import AdminAlerts from '@/pages/admin/Alerts';
@@ -431,12 +433,12 @@ const App = () => {
               <Route path="menus" element={<AdminMenuManagement />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />
-              <Route path="monitoring" element={<AdminMonitoring />} />
+              <Route path="monitoring" element={<Monitoring />} />
+              <Route path="alerts" element={<Alerts />} />
               <Route path="rate-limiting" element={<RateLimiting />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="plans" element={<Plans />} />
               <Route path="coupons" element={<AdminCoupons />} />
-              <Route path="alerts" element={<AdminAlerts />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="documentation" element={<Documentation />} />
             </Route>

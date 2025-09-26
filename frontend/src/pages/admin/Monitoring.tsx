@@ -1,675 +1,418 @@
+/**
+ * Admin Monitoring Page
+ * 
+ * Dashboard de monitoramento de saúde do sistema
+ */
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { api } from '@/lib/api';
 import { 
-  RefreshCw, 
   Activity, 
+  Database, 
+  Server, 
+  Wifi, 
+  Globe, 
   AlertTriangle, 
   CheckCircle, 
-  XCircle, 
-  Clock,
-  Server,
-  Database,
-  Zap,
-  Globe,
-  Cpu,
-  HardDrive,
-  Wifi,
-  BarChart3,
+  XCircle,
+  RefreshCw,
   TrendingUp,
-  TrendingDown,
-  Minus,
-  Loader2,
-  Monitor,
-  Shield,
-  AlertCircle,
-  Users
+  Clock,
+  Zap
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
-interface MetricAverages {
-  current: number;
-  average_1h: number;
-  average_24h: number;
-  trend: 'improving' | 'stable' | 'degrading';
-  status: 'good' | 'warning' | 'critical';
+interface ComponentHealth {
+  name: string;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  latency?: number;
+  details: Record<string, any>;
+  lastCheck: number;
+  error?: string;
 }
 
-interface MarginGuardReport {
-  total_users: number;
-  active_automations: number;
-  recent_actions: Array<{
-    user_id: string;
-    action: string;
-    timestamp: string;
-    status: 'success' | 'error';
-    details: string;
-  }>;
-  error_count_24h: number;
-  success_rate: number;
-  last_execution: string;
-  worker_status: 'running' | 'stopped' | 'error';
+interface HealthAlert {
+  id: string;
+  component: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  timestamp: number;
+  resolved: boolean;
+  resolvedAt?: number;
 }
 
-interface MonitoringData {
-  api_latency: number;
-  error_rate: number;
-  queue_sizes: {
-    [key: string]: number;
+interface HealthReport {
+  overallStatus: 'healthy' | 'degraded' | 'unhealthy';
+  timestamp: number;
+  uptime: number;
+  components: ComponentHealth[];
+  alerts: HealthAlert[];
+  metrics: {
+    totalChecks: number;
+    successfulChecks: number;
+    failedChecks: number;
+    averageLatency: number;
+    uptimePercentage: number;
+    lastHealthyTime: number;
+    consecutiveFailures: number;
   };
-  ln_markets_status: string;
-  system_health: {
-    database: string;
-    redis: string;
-    workers: string;
-  };
-  memory_usage?: number;
-  cpu_usage?: number;
-  active_connections?: number;
-  averages?: {
-    api_latency: MetricAverages;
-    error_rate: MetricAverages;
-    memory_usage: MetricAverages;
-    cpu_usage: MetricAverages;
-    queue_health: MetricAverages;
-  };
-  health_summary?: {
-    overall_status: 'healthy' | 'warning' | 'critical';
-    issues: string[];
-    recommendations: string[];
-  };
-  margin_guard_report?: MarginGuardReport;
 }
 
-export default function Monitoring() {
-  const [monitoringData, setMonitoringData] = useState<MonitoringData | null>(null);
+const Monitoring: React.FC = () => {
+  const [healthData, setHealthData] = useState<HealthReport | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
-  useEffect(() => {
-    fetchMonitoringData();
-    
-    // Auto-refresh a cada 30 segundos
-    const interval = setInterval(() => {
-      fetchMonitoringData();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchMonitoringData = async () => {
-    setRefreshing(true);
+  const fetchHealthData = async () => {
     try {
-      // Buscar dados reais do backend
-      const response = await fetch('/api/admin/monitoring', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      setLoading(true);
+      const response = await api.get('/api/admin/health/health');
       
-      if (result.success) {
-        // Transformar dados do backend para o formato esperado pelo frontend
-        const monitoringData: MonitoringData = {
-          api_latency: result.data.performance?.apiLatency || 0,
-          error_rate: result.data.performance?.errorRate || 0,
-          queue_sizes: result.data.metrics?.business || {},
-          ln_markets_status: result.data.services?.lnMarkets?.status || 'unknown',
-          system_health: {
-            database: result.data.services?.database?.status || 'unknown',
-            redis: result.data.services?.redis?.status || 'unknown',
-            workers: result.data.services?.workers?.status || 'unknown'
-          },
-          memory_usage: result.data.system?.memory?.percentage || 0,
-          cpu_usage: result.data.system?.cpu?.user || 0,
-          active_connections: result.data.system?.activeConnections || 0,
-          averages: {
-            api_latency: {
-              current: result.data.performance?.apiLatency || 0,
-              average_1h: result.data.performance?.apiLatency || 0,
-              average_24h: result.data.performance?.apiLatency || 0,
-              trend: 'stable',
-              status: result.data.performance?.apiLatency < 100 ? 'good' : 'warning'
-            },
-            error_rate: {
-              current: result.data.performance?.errorRate || 0,
-              average_1h: result.data.performance?.errorRate || 0,
-              average_24h: result.data.performance?.errorRate || 0,
-              trend: 'stable',
-              status: result.data.performance?.errorRate < 5 ? 'good' : 'critical'
-            },
-            memory_usage: {
-              current: result.data.system?.memory?.percentage || 0,
-              average_1h: result.data.system?.memory?.percentage || 0,
-              average_24h: result.data.system?.memory?.percentage || 0,
-              trend: 'stable',
-              status: result.data.system?.memory?.percentage < 80 ? 'good' : 'warning'
-            },
-            cpu_usage: {
-              current: result.data.system?.cpu?.user || 0,
-              average_1h: result.data.system?.cpu?.user || 0,
-              average_24h: result.data.system?.cpu?.user || 0,
-              trend: 'stable',
-              status: result.data.system?.cpu?.user < 80 ? 'good' : 'warning'
-            },
-            queue_health: {
-              current: 85,
-              average_1h: 78,
-              average_24h: 82,
-              trend: 'stable',
-              status: 'good'
-            }
-          },
-          health_summary: {
-            overall_status: result.data.performance?.availability > 95 ? 'healthy' : 'warning',
-            issues: result.data.alerts?.active > 0 ? [`${result.data.alerts.active} alertas ativos`] : [],
-            recommendations: []
-          }
-        };
-
-        setMonitoringData(monitoringData);
-        setLoading(false);
-        setRefreshing(false);
-        toast.success('Dados de monitoramento atualizados!');
+      if (response.data.success) {
+        setHealthData(response.data.data);
+        setLastUpdate(new Date());
+        setError(null);
       } else {
-        throw new Error(result.message || 'Erro ao buscar dados de monitoramento');
+        setError('Failed to fetch health data');
       }
-    } catch (error) {
-      console.error('Error fetching monitoring data:', error);
+    } catch (err: any) {
+      console.error('Error fetching health data:', err);
+      setError(err.response?.data?.message || 'Failed to fetch health data');
+    } finally {
       setLoading(false);
-      setRefreshing(false);
-      toast.error('Erro ao carregar dados de monitoramento');
     }
   };
+
+  useEffect(() => {
+    fetchHealthData();
+  }, []);
+
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(fetchHealthData, 30000); // 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy':
-      case 'online':
-      case 'good':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'critical':
-      case 'offline':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case 'degraded':
+        return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+      case 'unhealthy':
+        return <XCircle className="w-5 h-5 text-red-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Activity className="w-5 h-5 text-gray-500" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
-      case 'online':
-      case 'good':
-        return 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25';
-      case 'warning':
-        return 'bg-yellow-500 text-white hover:bg-yellow-600 shadow-lg shadow-yellow-500/25';
+        return 'text-green-600 bg-green-50 border-green-200';
+      case 'degraded':
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'unhealthy':
+        return 'text-red-600 bg-red-50 border-red-200';
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
       case 'critical':
-      case 'offline':
-        return 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25';
+        return 'text-red-600 bg-red-50 border-red-200';
+      case 'high':
+        return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'low':
+        return 'text-blue-600 bg-blue-50 border-blue-200';
       default:
-        return 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25';
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'improving':
-        return <TrendingUp className="h-4 w-4 text-green-500" />;
-      case 'degrading':
-        return <TrendingDown className="h-4 w-4 text-red-500" />;
+  const getComponentIcon = (name: string) => {
+    switch (name) {
+      case 'database':
+        return <Database className="w-6 h-6" />;
+      case 'redis':
+        return <Server className="w-6 h-6" />;
+      case 'websocket':
+        return <Wifi className="w-6 h-6" />;
+      case 'externalAPIs':
+        return <Globe className="w-6 h-6" />;
+      case 'systemResources':
+        return <Activity className="w-6 h-6" />;
       default:
-        return <Minus className="h-4 w-4 text-gray-500" />;
+        return <Activity className="w-6 h-6" />;
     }
   };
 
-  if (loading) {
+  const formatUptime = (uptime: number) => {
+    const hours = Math.floor(uptime / 3600000);
+    const minutes = Math.floor((uptime % 3600000) / 60000);
+    const seconds = Math.floor((uptime % 60000) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString();
+  };
+
+  if (loading && !healthData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
-        <div className="container mx-auto py-8 px-4">
-          <div className="max-w-7xl mx-auto">
-            <Card className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow">
-              <CardContent className="p-12">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                  <h3 className="text-xl font-semibold text-text-primary">Carregando Monitoramento</h3>
-                  <p className="text-text-secondary">Aguarde enquanto carregamos os dados do sistema...</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+        <span className="ml-2 text-gray-600">Loading health data...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+        <div className="flex items-center">
+          <XCircle className="w-6 h-6 text-red-500 mr-2" />
+          <h3 className="text-lg font-medium text-red-800">Error Loading Health Data</h3>
         </div>
+        <p className="mt-2 text-red-600">{error}</p>
+        <button
+          onClick={fetchHealthData}
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!healthData) {
+    return (
+      <div className="text-center py-12">
+        <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data Available</h3>
+        <p className="text-gray-600">Unable to load system health information.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
-            <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                        <Monitor className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
-                          Monitoramento do Sistema
-                        </h1>
-                        <p className="text-text-secondary">Acompanhe a saúde e performance da aplicação</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <Button
-                      onClick={fetchMonitoringData}
-                      disabled={refreshing}
-                      className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
-                      size="sm"
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">System Monitoring</h1>
+          <p className="text-gray-600">Real-time health monitoring and system status</p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+                className="mr-2"
+              />
+              <span className="text-sm text-gray-600">Auto-refresh</span>
+            </label>
           </div>
+          <button
+            onClick={fetchHealthData}
+            disabled={loading}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+      </div>
 
-          {/* Health Summary */}
-          {monitoringData?.health_summary && (
-            <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                    <Shield className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-text-primary">Resumo da Saúde do Sistema</h3>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon(monitoringData.health_summary.overall_status)}
-                    <span className="text-lg font-medium text-text-primary">
-                      Status: {monitoringData.health_summary.overall_status.toUpperCase()}
-                    </span>
-                  </div>
-                  <Badge className={getStatusColor(monitoringData.health_summary.overall_status)}>
-                    {monitoringData.health_summary.overall_status === 'healthy' ? 'Saudável' : 
-                     monitoringData.health_summary.overall_status === 'warning' ? 'Atenção' : 'Crítico'}
-                  </Badge>
-                </div>
-                {monitoringData.health_summary.recommendations.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium text-text-secondary mb-2">Recomendações:</h4>
-                    <ul className="space-y-1">
-                      {monitoringData.health_summary.recommendations.map((rec, index) => (
-                        <li key={index} className="text-sm text-text-secondary flex items-center gap-2">
-                          <AlertCircle className="h-3 w-3 text-yellow-500" />
-                          {rec}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* System Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* API Latency */}
-            <Card className="gradient-card-blue profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-text-secondary">Latência da API</p>
-                    <p className="text-2xl font-bold text-text-primary">{monitoringData?.api_latency}ms</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {monitoringData?.averages?.api_latency && getTrendIcon(monitoringData.averages.api_latency.trend)}
-                      <span className="text-xs text-text-secondary">
-                        {monitoringData?.averages?.api_latency?.average_1h}ms (1h)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 backdrop-blur-sm">
-                    <Activity className="h-6 w-6 text-blue-500" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Error Rate */}
-            <Card className="gradient-card-green profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-text-secondary">Taxa de Erro</p>
-                    <p className="text-2xl font-bold text-text-primary">{(monitoringData?.error_rate || 0) * 100}%</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {monitoringData?.averages?.error_rate && getTrendIcon(monitoringData.averages.error_rate.trend)}
-                      <span className="text-xs text-text-secondary">
-                        {((monitoringData?.averages?.error_rate?.average_1h || 0) * 100).toFixed(2)}% (1h)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/10 backdrop-blur-sm">
-                    <AlertTriangle className="h-6 w-6 text-green-500" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Memory Usage */}
-            <Card className="gradient-card-yellow profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-text-secondary">Uso de Memória</p>
-                    <p className="text-2xl font-bold text-text-primary">{monitoringData?.memory_usage}%</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {monitoringData?.averages?.memory_usage && getTrendIcon(monitoringData.averages.memory_usage.trend)}
-                      <span className="text-xs text-text-secondary">
-                        {monitoringData?.averages?.memory_usage?.average_1h}% (1h)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-500/10 backdrop-blur-sm">
-                    <HardDrive className="h-6 w-6 text-yellow-500" />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Progress value={monitoringData?.memory_usage || 0} className="h-2" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* CPU Usage */}
-            <Card className="gradient-card-purple profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-text-secondary">Uso de CPU</p>
-                    <p className="text-2xl font-bold text-text-primary">{monitoringData?.cpu_usage}%</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {monitoringData?.averages?.cpu_usage && getTrendIcon(monitoringData.averages.cpu_usage.trend)}
-                      <span className="text-xs text-text-secondary">
-                        {monitoringData?.averages?.cpu_usage?.average_1h}% (1h)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-500/10 backdrop-blur-sm">
-                    <Cpu className="h-6 w-6 text-purple-500" />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Progress value={monitoringData?.cpu_usage || 0} className="h-2" />
-                </div>
-              </CardContent>
-            </Card>
+      {/* Overall Status */}
+      <div className={`rounded-lg border-2 p-6 ${getStatusColor(healthData.overallStatus)}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            {getStatusIcon(healthData.overallStatus)}
+            <div className="ml-3">
+              <h2 className="text-xl font-semibold capitalize">
+                System Status: {healthData.overallStatus}
+              </h2>
+              <p className="text-sm opacity-75">
+                Last updated: {lastUpdate ? formatTimestamp(lastUpdate.getTime()) : 'Never'}
+              </p>
+            </div>
           </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold">
+              {healthData.metrics.uptimePercentage.toFixed(1)}%
+            </div>
+            <div className="text-sm opacity-75">Uptime</div>
+          </div>
+        </div>
+      </div>
 
-          {/* System Health */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Services Status */}
-            <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                    <Server className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-text-primary">Status dos Serviços</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3">
-                      <Database className="h-5 w-5 text-blue-500" />
-                      <span className="font-medium text-text-primary">Database</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(monitoringData?.system_health?.database || 'unknown')}
-                      <Badge className={getStatusColor(monitoringData?.system_health?.database || 'unknown')}>
-                        {monitoringData?.system_health?.database || 'Unknown'}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3">
-                      <Zap className="h-5 w-5 text-yellow-500" />
-                      <span className="font-medium text-text-primary">Redis</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(monitoringData?.system_health?.redis || 'unknown')}
-                      <Badge className={getStatusColor(monitoringData?.system_health?.redis || 'unknown')}>
-                        {monitoringData?.system_health?.redis || 'Unknown'}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3">
-                      <Activity className="h-5 w-5 text-green-500" />
-                      <span className="font-medium text-text-primary">Workers</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(monitoringData?.system_health?.workers || 'unknown')}
-                      <Badge className={getStatusColor(monitoringData?.system_health?.workers || 'unknown')}>
-                        {monitoringData?.system_health?.workers || 'Unknown'}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3">
-                      <Globe className="h-5 w-5 text-purple-500" />
-                      <span className="font-medium text-text-primary">LN Markets</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(monitoringData?.ln_markets_status || 'unknown')}
-                      <Badge className={getStatusColor(monitoringData?.ln_markets_status || 'unknown')}>
-                        {monitoringData?.ln_markets_status || 'Unknown'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Metrics Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg border p-4">
+          <div className="flex items-center">
+            <TrendingUp className="w-8 h-8 text-blue-500 mr-3" />
+            <div>
+              <div className="text-2xl font-bold">{healthData.metrics.totalChecks}</div>
+              <div className="text-sm text-gray-600">Total Checks</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border p-4">
+          <div className="flex items-center">
+            <CheckCircle className="w-8 h-8 text-green-500 mr-3" />
+            <div>
+              <div className="text-2xl font-bold">{healthData.metrics.successfulChecks}</div>
+              <div className="text-sm text-gray-600">Successful</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border p-4">
+          <div className="flex items-center">
+            <XCircle className="w-8 h-8 text-red-500 mr-3" />
+            <div>
+              <div className="text-2xl font-bold">{healthData.metrics.failedChecks}</div>
+              <div className="text-sm text-gray-600">Failed</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border p-4">
+          <div className="flex items-center">
+            <Zap className="w-8 h-8 text-purple-500 mr-3" />
+            <div>
+              <div className="text-2xl font-bold">{healthData.metrics.averageLatency.toFixed(0)}ms</div>
+              <div className="text-sm text-gray-600">Avg Latency</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Queue Status */}
-            <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                    <BarChart3 className="h-5 w-5 text-primary" />
+      {/* Components Status */}
+      <div className="bg-white rounded-lg border">
+        <div className="px-6 py-4 border-b">
+          <h3 className="text-lg font-semibold">Component Status</h3>
+        </div>
+        <div className="divide-y">
+          {healthData.components.map((component) => (
+            <div key={component.name} className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  {getComponentIcon(component.name)}
+                  <div className="ml-3">
+                    <h4 className="font-medium capitalize">{component.name}</h4>
+                    <p className="text-sm text-gray-600">
+                      Last check: {formatTimestamp(component.lastCheck)}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold text-text-primary">Status das Filas</h3>
                 </div>
-                <div className="space-y-4">
-                  {monitoringData?.queue_sizes && Object.entries(monitoringData.queue_sizes).map(([queue, size]) => (
-                    <div key={queue} className="flex items-center justify-between p-3 rounded-lg backdrop-blur-sm bg-background/50 border-border/50">
-                      <div className="flex items-center gap-3">
-                        <Wifi className="h-5 w-5 text-blue-500" />
-                        <span className="font-medium text-text-primary capitalize">
-                          {queue.replace('-', ' ')}
-                        </span>
+                <div className="flex items-center space-x-4">
+                  {component.latency && (
+                    <div className="text-sm text-gray-600">
+                      {component.latency}ms
+                    </div>
+                  )}
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(component.status)}`}>
+                    {getStatusIcon(component.status)}
+                    <span className="ml-1 capitalize">{component.status}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {component.details && Object.keys(component.details).length > 0 && (
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(component.details).map(([key, value]) => (
+                    <div key={key} className="bg-gray-50 rounded p-3">
+                      <div className="text-sm font-medium text-gray-700 capitalize">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-text-secondary">{size} itens</span>
-                        <Badge 
-                          className={cn(
-                            "text-xs",
-                            size > 50 ? "bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25" :
-                            size > 20 ? "bg-yellow-500 text-white hover:bg-yellow-600 shadow-lg shadow-yellow-500/25" :
-                            "bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25"
-                          )}
-                        >
-                          {size > 50 ? 'Alto' : size > 20 ? 'Médio' : 'Baixo'}
-                        </Badge>
+                      <div className="text-sm text-gray-600">
+                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              )}
+              
+              {component.error && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+                  <div className="text-sm text-red-800">
+                    <strong>Error:</strong> {component.error}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Active Alerts */}
+      {healthData.alerts.length > 0 && (
+        <div className="bg-white rounded-lg border">
+          <div className="px-6 py-4 border-b">
+            <h3 className="text-lg font-semibold">Active Alerts</h3>
           </div>
-
-          {/* Active Connections */}
-          {monitoringData?.active_connections && (
-            <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                    <Wifi className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-text-primary">Conexões Ativas</h3>
-                </div>
+          <div className="divide-y">
+            {healthData.alerts.filter(alert => !alert.resolved).map((alert) => (
+              <div key={alert.id} className="p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-3xl font-bold text-text-primary">{monitoringData.active_connections}</p>
-                    <p className="text-sm text-text-secondary">Conexões simultâneas</p>
+                  <div className="flex items-center">
+                    <AlertTriangle className="w-5 h-5 text-orange-500 mr-3" />
+                    <div>
+                      <h4 className="font-medium">{alert.message}</h4>
+                      <p className="text-sm text-gray-600">
+                        Component: {alert.component} • {formatTimestamp(alert.timestamp)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/10 backdrop-blur-sm">
-                    <Wifi className="h-8 w-8 text-green-500" />
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getSeverityColor(alert.severity)}`}>
+                    {alert.severity.toUpperCase()}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-          {/* Margin Guard Reports */}
-          {monitoringData?.margin_guard_report && (
-            <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                    <Shield className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl text-text-primary">Margin Guard Reports</CardTitle>
-                    <CardDescription className="text-text-secondary">
-                      Monitoramento detalhado do sistema Margin Guard
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Status Overview */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Users className="h-5 w-5 text-blue-500" />
-                      <span className="text-sm font-medium text-text-secondary">Total Users</span>
-                    </div>
-                    <p className="text-2xl font-bold text-text-primary">{monitoringData.margin_guard_report.total_users}</p>
-                  </div>
-                  
-                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Activity className="h-5 w-5 text-green-500" />
-                      <span className="text-sm font-medium text-text-secondary">Active Automations</span>
-                    </div>
-                    <p className="text-2xl font-bold text-text-primary">{monitoringData.margin_guard_report.active_automations}</p>
-                  </div>
-                  
-                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3 mb-2">
-                      <BarChart3 className="h-5 w-5 text-purple-500" />
-                      <span className="text-sm font-medium text-text-secondary">Success Rate</span>
-                    </div>
-                    <p className="text-2xl font-bold text-text-primary">{monitoringData.margin_guard_report.success_rate}%</p>
-                  </div>
-                  
-                  <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Clock className="h-5 w-5 text-orange-500" />
-                      <span className="text-sm font-medium text-text-secondary">Last Execution</span>
-                    </div>
-                    <p className="text-sm font-bold text-text-primary">
-                      {new Date(monitoringData.margin_guard_report.last_execution).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Worker Status */}
-                <div className="p-4 rounded-xl backdrop-blur-sm bg-background/50 border-border/50">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-text-primary">Worker Status</h4>
-                    <Badge 
-                      className={cn(
-                        "text-xs",
-                        monitoringData.margin_guard_report.worker_status === 'running' ? "bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25" :
-                        monitoringData.margin_guard_report.worker_status === 'error' ? "bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25" :
-                        "bg-yellow-500 text-white hover:bg-yellow-600 shadow-lg shadow-yellow-500/25"
-                      )}
-                    >
-                      {monitoringData.margin_guard_report.worker_status === 'running' ? 'Running' :
-                       monitoringData.margin_guard_report.worker_status === 'error' ? 'Error' : 'Stopped'}
-                    </Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-text-secondary">Errors (24h):</span>
-                      <span className="text-text-primary font-medium">{monitoringData.margin_guard_report.error_count_24h}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recent Actions */}
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-text-primary">Recent Actions</h4>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {monitoringData.margin_guard_report.recent_actions.map((action, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 rounded-lg backdrop-blur-sm bg-background/50 border-border/50">
-                        <div className="flex items-center gap-3">
-                          {action.status === 'success' ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <XCircle className="h-4 w-4 text-red-500" />
-                          )}
-                          <div>
-                            <p className="text-sm font-medium text-text-primary">{action.action}</p>
-                            <p className="text-xs text-text-secondary">User: {action.user_id}</p>
-                            <p className="text-xs text-text-secondary">{action.details}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-text-secondary">
-                            {new Date(action.timestamp).toLocaleString()}
-                          </p>
-                          <Badge 
-                            className={cn(
-                              "text-xs mt-1",
-                              action.status === 'success' ? "bg-green-500 text-white hover:bg-green-600" :
-                              "bg-red-500 text-white hover:bg-red-600"
-                            )}
-                          >
-                            {action.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      {/* System Info */}
+      <div className="bg-white rounded-lg border">
+        <div className="px-6 py-4 border-b">
+          <h3 className="text-lg font-semibold">System Information</h3>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Uptime</h4>
+              <p className="text-gray-600">{formatUptime(healthData.uptime)}</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Consecutive Failures</h4>
+              <p className="text-gray-600">{healthData.metrics.consecutiveFailures}</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Last Healthy Time</h4>
+              <p className="text-gray-600">{formatTimestamp(healthData.metrics.lastHealthyTime)}</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Total Alerts</h4>
+              <p className="text-gray-600">{healthData.alerts.length}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Monitoring;
