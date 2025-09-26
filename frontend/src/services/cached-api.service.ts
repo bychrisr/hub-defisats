@@ -17,31 +17,31 @@ class CachedAPIService {
    * Valida se a resposta contém dados de mercado válidos
    */
   private validateMarketResponse(response: any, url: string): boolean {
-    // Verificar se é uma rota de dados de mercado
-    const isMarketDataRoute = url.includes('market') || url.includes('lnmarkets');
+    // Verificar se é uma rota de dados de mercado CRÍTICOS (não admin)
+    const isCriticalMarketRoute = url.includes('/api/market/index/public') || url.includes('/api/lnmarkets/user/');
     
-    if (!isMarketDataRoute) {
+    if (!isCriticalMarketRoute) {
       return true; // Dados não-críticos não precisam de validação rigorosa
     }
 
-    // Para dados de mercado, validar estrutura e timestamp
+    // Para dados de mercado críticos, validar estrutura e timestamp
     if (!response?.data?.success) {
-      console.warn(`⚠️ CACHED API - Market data request failed for ${url}`);
+      console.warn(`⚠️ CACHED API - Critical market data request failed for ${url}`);
       return false;
     }
 
     const marketData = response.data.data;
     if (!marketData || !marketData.timestamp) {
-      console.warn(`⚠️ CACHED API - Market data missing timestamp for ${url}`);
+      console.warn(`⚠️ CACHED API - Critical market data missing timestamp for ${url}`);
       return false;
     }
 
-    // Validar idade dos dados
+    // Validar idade dos dados críticos
     const dataAge = Date.now() - new Date(marketData.timestamp).getTime();
     const maxAge = 15 * 1000; // 15 segundos máximo
 
     if (dataAge > maxAge) {
-      console.warn(`⚠️ CACHED API - Market data too old (${dataAge}ms) for ${url}`);
+      console.warn(`⚠️ CACHED API - Critical market data too old (${dataAge}ms) for ${url}`);
       return false;
     }
 

@@ -214,18 +214,23 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
           return;
         }
 
-        // Validação adicional de segurança para dados de mercado
-        const marketDataAge = Date.now() - marketIndex.timestamp;
-        if (marketDataAge > 15000) { // 15 segundos máximo
-          console.log('❌ CENTRALIZED DATA - Market data too old, not updating cache');
-          set(prev => ({
-            data: prev.data ? {
-              ...prev.data,
-              isLoading: false,
-              error: 'Dados de mercado muito antigos - por segurança, não exibimos dados desatualizados'
-            } : null
-          }));
-          return;
+        // Validação adicional de segurança para dados de mercado CRÍTICOS
+        const isCriticalMarketData = marketResponse.status === 'fulfilled' && 
+          marketResponse.value.config?.url?.includes('/api/market/index/public');
+        
+        if (isCriticalMarketData && marketIndex) {
+          const marketDataAge = Date.now() - marketIndex.timestamp;
+          if (marketDataAge > 15000) { // 15 segundos máximo para dados críticos
+            console.log('❌ CENTRALIZED DATA - Critical market data too old, not updating cache');
+            set(prev => ({
+              data: prev.data ? {
+                ...prev.data,
+                isLoading: false,
+                error: 'Dados de mercado muito antigos - por segurança, não exibimos dados desatualizados'
+              } : null
+            }));
+            return;
+          }
         }
 
         const newData: CentralizedData = {

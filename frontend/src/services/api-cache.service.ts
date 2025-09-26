@@ -36,24 +36,24 @@ class APICacheService {
    * Valida se os dados são recentes e seguros para uso
    */
   private validateMarketData(data: any, url: string): boolean {
-    // Verificar se é uma rota de dados de mercado
-    const isMarketDataRoute = url.includes('market') || url.includes('lnmarkets');
+    // Verificar se é uma rota de dados de mercado CRÍTICOS (não admin)
+    const isCriticalMarketRoute = url.includes('/api/market/index/public') || url.includes('/api/lnmarkets/user/');
     
-    if (!isMarketDataRoute) {
+    if (!isCriticalMarketRoute) {
       return true; // Dados não-críticos não precisam de validação rigorosa
     }
 
-    // Para dados de mercado, validar timestamp rigorosamente
+    // Para dados de mercado críticos, validar timestamp rigorosamente
     if (!data || !data.timestamp) {
-      console.warn(`⚠️ API CACHE - Market data without timestamp for ${url}`);
+      console.warn(`⚠️ API CACHE - Critical market data without timestamp for ${url}`);
       return false;
     }
 
     const dataAge = Date.now() - new Date(data.timestamp).getTime();
-    const maxAge = 15 * 1000; // 15 segundos máximo para dados de mercado
+    const maxAge = 15 * 1000; // 15 segundos máximo para dados de mercado críticos
 
     if (dataAge > maxAge) {
-      console.warn(`⚠️ API CACHE - Market data too old (${dataAge}ms) for ${url}`);
+      console.warn(`⚠️ API CACHE - Critical market data too old (${dataAge}ms) for ${url}`);
       return false;
     }
 
