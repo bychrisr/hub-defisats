@@ -94,22 +94,25 @@ export async function marketDataFallbackRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * Obter status dos provedores
+   * Resetar circuit breaker de todos os provedores
    */
-  fastify.get('/providers/status', async (request, reply) => {
+  fastify.post('/providers/reset-circuit-breaker', async (request, reply) => {
     try {
-      const status = marketDataFallbackService.getProvidersStatus();
+      logger.info('Resetting circuit breaker for all providers');
+      
+      const result = marketDataFallbackService.resetCircuitBreakers();
       
       return {
         success: true,
-        data: status
+        message: 'Circuit breakers reset successfully',
+        data: result
       };
     } catch (error: any) {
-      logger.error('Failed to get providers status', { error: error.message });
+      logger.error('Failed to reset circuit breakers', { error: error.message });
       return reply.status(500).send({
         success: false,
         error: 'INTERNAL_ERROR',
-        message: 'Failed to get providers status'
+        message: 'Failed to reset circuit breakers'
       });
     }
   });

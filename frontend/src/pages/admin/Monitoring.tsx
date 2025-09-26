@@ -205,6 +205,22 @@ const Monitoring: React.FC = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [activeTab, setActiveTab] = useState<'api' | 'hardware' | 'external' | 'market'>('api');
 
+  const handleResetCircuitBreaker = async () => {
+    try {
+      const response = await api.post('/api/admin/market-data/providers/reset-circuit-breaker');
+      if (response.data.success) {
+        toast.success('Circuit breakers resetados com sucesso!');
+        // Refresh data after reset
+        await fetchHealthData();
+      } else {
+        toast.error('Erro ao resetar circuit breakers');
+      }
+    } catch (error: any) {
+      console.error('Failed to reset circuit breakers:', error);
+      toast.error('Erro ao resetar circuit breakers');
+    }
+  };
+
   const fetchHealthData = async () => {
     try {
       setLoading(true);
@@ -1059,9 +1075,20 @@ const Monitoring: React.FC = () => {
 
               {/* Provider Status Card */}
               <div className="bg-bg-card border border-border rounded-lg p-6">
-                <div className="flex items-center mb-4">
-                  <Shield className="w-6 h-6 text-blue-400 mr-3" />
-                  <h3 className="text-lg font-semibold text-text-primary">Provider Status</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <Shield className="w-6 h-6 text-blue-400 mr-3" />
+                    <h3 className="text-lg font-semibold text-text-primary">Provider Status</h3>
+                  </div>
+                  <Button
+                    onClick={handleResetCircuitBreaker}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Reset Circuit Breakers
+                  </Button>
                 </div>
                 <div className="space-y-3">
                   {Object.entries(providerStatus).map(([provider, status]) => (

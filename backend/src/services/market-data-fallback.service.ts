@@ -358,24 +358,35 @@ export class MarketDataFallbackService {
   }
 
   /**
-   * Obter status de todos os provedores
+   * Resetar circuit breakers de todos os provedores
    */
-  getProvidersStatus(): Record<string, {
-    status: 'healthy' | 'degraded' | 'unhealthy';
-    lastCheck: number;
-    failureCount: number;
-  }> {
-    const status: Record<string, any> = {};
+  resetCircuitBreakers(): Record<string, any> {
+    const results: Record<string, any> = {};
 
     for (const [name, provider] of this.providers) {
-      status[name] = {
-        status: provider.circuitBreaker.getState(),
-        lastCheck: Date.now(),
-        failureCount: provider.circuitBreaker.getFailureCount()
-      };
+      try {
+        const previousState = provider.circuitBreaker.getState();
+        const previousFailures = provider.circuitBreaker.getFailureCount();
+        
+        // Reset circuit breaker
+        provider.circuitBreaker.reset();
+        
+        results[name] = {
+          success: true,
+          previousState,
+          previousFailures,
+          newState: provider.circuitBreaker.getState(),
+          newFailures: provider.circuitBreaker.getFailureCount()
+        };
+      } catch (error: any) {
+        results[name] = {
+          success: false,
+          error: error.message
+        };
+      }
     }
 
-    return status;
+    return results;
   }
 
   /**
