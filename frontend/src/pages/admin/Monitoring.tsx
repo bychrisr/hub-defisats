@@ -201,7 +201,7 @@ const Monitoring: React.FC = () => {
   const [hardwareMetrics, setHardwareMetrics] = useState<HardwareMetrics | null>(null);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
   const [lnMarketsData, setLnMarketsData] = useState<LNMarketsData | null>(null);
-  const [providerStatus, setProviderStatus] = useState<Record<string, ProviderStatus>>({});
+  const [providerStatus, setProviderStatus] = useState<any>({});
   const [externalAPIs, setExternalAPIs] = useState<ExternalAPIStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -224,7 +224,6 @@ const Monitoring: React.FC = () => {
   const [protectionLoading, setProtectionLoading] = useState(false);
   const [cacheConfig, setCacheConfig] = useState<any>(null);
   const [protectionRules, setProtectionRules] = useState<any>(null);
-  const [providerStatus, setProviderStatus] = useState<any[]>([]);
   const [protectionMetrics, setProtectionMetrics] = useState<any>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configType, setConfigType] = useState<'cache' | 'rules'>('cache');
@@ -1365,28 +1364,29 @@ const Monitoring: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {Object.entries(providerStatus).map(([provider, status]) => (
-                    <div key={provider} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                      <div>
-                        <span className="text-text-primary font-medium">{provider}</span>
-                        <div className="text-sm text-text-secondary">
-                          Last check: {formatTimestamp(status.lastCheck)}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className={`px-2 py-1 rounded text-xs font-medium ${
-                          status.status === 'healthy' ? 'bg-green-500/20 text-green-400' :
-                          status.status === 'degraded' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'
-                        }`}>
-                          {status.status}
-                        </div>
-                        {status.failureCount > 0 && (
-                          <div className="text-xs text-red-400">
-                            {status.failureCount} failures
+                  {Array.isArray(providerStatus) ? (
+                    providerStatus.map((provider: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                        <div>
+                          <span className="text-text-primary font-medium">{provider.name}</span>
+                          <div className="text-sm text-text-secondary">
+                            Last check: {formatTimestamp(provider.lastCheck)}
                           </div>
-                        )}
-                      </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className={`px-2 py-1 rounded text-xs font-medium ${
+                            provider.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                            provider.status === 'degraded' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-red-500/20 text-red-400'
+                          }`}>
+                            {provider.status}
+                          </div>
+                          {provider.errors > 0 && (
+                            <div className="text-xs text-red-400">
+                              {provider.errors} errors
+                            </div>
+                          )}
+                        </div>
                     </div>
                   ))}
                 </div>
@@ -1780,7 +1780,7 @@ const Monitoring: React.FC = () => {
           </div>
 
           {/* Provider Status */}
-          {providerStatus.length > 0 && (
+          {(Array.isArray(providerStatus) ? providerStatus.length > 0 : Object.keys(providerStatus).length > 0) && (
             <div className="bg-bg-card border border-border rounded-lg p-6">
               <div className="flex items-center mb-4">
                 <Globe className="w-6 h-6 text-green-400 mr-3" />
