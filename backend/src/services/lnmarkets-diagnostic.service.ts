@@ -295,19 +295,19 @@ export class LNMarketsDiagnosticService {
    * Generate authentication headers
    */
   private generateAuthHeaders(method: string, path: string): any {
-    const timestamp = Date.now().toString();
+    const timestamp = Math.floor(Date.now() / 1000).toString();
     const body = '';
     const message = timestamp + method.toUpperCase() + path + body;
     
     const signature = createHmac('sha256', this.credentials.apiSecret)
-      .update(message)
+      .update(message, 'utf8')
       .digest('base64');
 
     return {
-      'LN-ACCESS-KEY': this.credentials.apiKey,
-      'LN-ACCESS-SIGNATURE': signature,
-      'LN-ACCESS-TIMESTAMP': timestamp,
-      'LN-ACCESS-PASSPHRASE': this.credentials.passphrase
+      'LNM-ACCESS-KEY': this.credentials.apiKey,
+      'LNM-ACCESS-SIGNATURE': signature,
+      'LNM-ACCESS-TIMESTAMP': timestamp,
+      'LNM-ACCESS-PASSPHRASE': this.credentials.passphrase
     };
   }
 
