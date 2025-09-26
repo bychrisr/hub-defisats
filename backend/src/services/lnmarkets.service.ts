@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { createHmac } from 'crypto';
+import { CircuitBreaker } from './circuit-breaker.service';
 
 export interface LNMarketsCredentials {
   apiKey: string;
@@ -29,6 +30,7 @@ export interface Position {
 export class LNMarketsService {
   private client: AxiosInstance;
   private credentials: LNMarketsCredentials;
+  private circuitBreaker: CircuitBreaker;
 
   constructor(credentials: LNMarketsCredentials) {
     this.credentials = credentials;
@@ -39,6 +41,13 @@ export class LNMarketsService {
         'Content-Type': 'application/json',
       },
       timeout: 15000, // Increased timeout
+    });
+
+    // Initialize circuit breaker with conservative settings for LN Markets
+    this.circuitBreaker = new CircuitBreaker({
+      failureThreshold: 3, // Open after 3 failures
+      recoveryTimeout: 30000, // Wait 30s before retry
+      monitoringPeriod: 60000, // Monitor for 1 minute
     });
 
     // Add request interceptor for authentication
@@ -178,8 +187,10 @@ export class LNMarketsService {
    */
   async getMarginInfo(): Promise<MarginInfo> {
     try {
-      // Use the correct endpoint for user information
-      const response = await this.client.get('/user');
+      // Use circuit breaker to protect against API failures
+      const response = await this.circuitBreaker.execute(async () => {
+        return await this.client.get('/user');
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching margin info:', error);
@@ -350,9 +361,12 @@ export class LNMarketsService {
    */
   async closePosition(positionId: string): Promise<any> {
     try {
-      const response = await this.client.post(
-        `/futures/position/${positionId}/close`
-      );
+      // Use circuit breaker to protect against API failures
+      const response = await this.circuitBreaker.execute(async () => {
+        return await this.client.post(
+          `/futures/position/${positionId}/close`
+        );
+      });
       return response.data;
     } catch (error) {
       console.error('Error closing position:', error);
@@ -366,13 +380,16 @@ export class LNMarketsService {
    */
   async addMargin(positionId: string, amount: number): Promise<any> {
     try {
-      const response = await this.client.post(
-        `/futures/add-margin`,
-        {
-          id: positionId,
-          amount: amount,
-        }
-      );
+      // Use circuit breaker to protect against API failures
+      const response = await this.circuitBreaker.execute(async () => {
+        return await this.client.post(
+          `/futures/add-margin`,
+          {
+            id: positionId,
+            amount: amount,
+          }
+        );
+      });
       return response.data;
     } catch (error) {
       console.error('Error adding margin:', error);
@@ -385,9 +402,11 @@ export class LNMarketsService {
    */
   async getMarketData(_market: string = 'btc'): Promise<any> {
     try {
-      // Use the working ticker endpoint instead of the failing market endpoint
-      const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {
-        timeout: 10000
+      // Use circuit breaker to protect against API failures
+      const response = await this.circuitBreaker.execute(async () => {
+        return await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {
+          timeout: 10000
+        });
       });
       return {
         price: response.data.lastPrice || response.data.index || 0,
