@@ -178,7 +178,8 @@ export default function Documentation() {
         
         if (offset === 0) {
           setFiles(data.files);
-          console.log('🔍 DOCUMENTATION - Files set:', data.files.length);
+          console.log('🔍 DOCUMENTATION - Files set:', data.files.length, 'Category:', selectedCategory);
+          console.log('🔍 DOCUMENTATION - Files data:', data.files.map(f => ({ name: f.name, category: f.category })));
         } else {
           setFiles(prev => [...prev, ...data.files]);
         }
