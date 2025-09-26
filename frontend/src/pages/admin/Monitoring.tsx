@@ -160,6 +160,17 @@ interface MarketData {
   age: number;
 }
 
+interface LNMarketsData {
+  symbol: string;
+  price: number;
+  change24h: number;
+  changePercent24h: number;
+  volume24h: number;
+  high24h: number;
+  low24h: number;
+  timestamp: number;
+}
+
 interface ProviderStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
   lastCheck: number;
@@ -185,6 +196,7 @@ const Monitoring: React.FC = () => {
   const [healthData, setHealthData] = useState<HealthReport | null>(null);
   const [hardwareMetrics, setHardwareMetrics] = useState<HardwareMetrics | null>(null);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
+  const [lnMarketsData, setLnMarketsData] = useState<LNMarketsData | null>(null);
   const [providerStatus, setProviderStatus] = useState<Record<string, ProviderStatus>>({});
   const [externalAPIs, setExternalAPIs] = useState<ExternalAPIStatus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,11 +211,12 @@ const Monitoring: React.FC = () => {
       setError(null);
 
       // Fetch all data in parallel
-      const [healthResponse, hardwareResponse, marketResponse, providerResponse] = await Promise.all([
+      const [healthResponse, hardwareResponse, marketResponse, providerResponse, lnMarketsResponse] = await Promise.all([
         api.get('/api/admin/health/health'),
         api.get('/api/admin/hardware/metrics').catch(() => null), // Don't fail if hardware metrics are not available
         api.get('/api/admin/market-data/market-data').catch(() => null), // Don't fail if market data is not available
-        api.get('/api/admin/market-data/providers/status').catch(() => null) // Don't fail if provider status is not available
+        api.get('/api/admin/market-data/providers/status').catch(() => null), // Don't fail if provider status is not available
+        api.get('/api/market/data?symbol=BTCUSD').catch(() => null) // LN Markets data
       ]);
 
       if (healthResponse.data.success) {
@@ -284,6 +297,10 @@ const Monitoring: React.FC = () => {
 
       if (providerResponse && providerResponse.data.success) {
         setProviderStatus(providerResponse.data.data);
+      }
+
+      if (lnMarketsResponse && lnMarketsResponse.data.success) {
+        setLnMarketsData(lnMarketsResponse.data.data);
       }
 
       setLastUpdate(new Date());
@@ -940,52 +957,102 @@ const Monitoring: React.FC = () => {
             <p className="text-text-secondary">Real-time market data and provider status</p>
           </div>
 
-          {marketData ? (
+          {(marketData || lnMarketsData) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Market Data Card */}
-              <div className="bg-bg-card border border-border rounded-lg p-6">
-                <div className="flex items-center mb-4">
-                  <TrendingUp className="w-6 h-6 text-green-400 mr-3" />
-                  <h3 className="text-lg font-semibold text-text-primary">Current Market Data</h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Index:</span>
-                    <span className="text-text-primary font-semibold">{marketData.index}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">24h Change:</span>
-                    <span className={`font-semibold ${
-                      marketData.change24h > 0 ? 'text-green-400' : 'text-red-400'
-                    }`}>
-                      {marketData.change24h > 0 ? '+' : ''}{marketData.change24h}%
+              {/* LN Markets Data Card */}
+              {lnMarketsData && (
+                <div className="bg-bg-card border border-border rounded-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <Zap className="w-6 h-6 text-orange-400 mr-3" />
+                    <h3 className="text-lg font-semibold text-text-primary">LN Markets Data</h3>
+                    <span className="ml-2 px-2 py-1 text-xs font-medium bg-orange-500/10 text-orange-400 rounded-full">
+                      Primary
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Provider:</span>
-                    <span className="text-text-primary">{marketData.provider}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Source:</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      marketData.source === 'primary' ? 'bg-green-500/20 text-green-400' :
-                      marketData.source === 'fallback' ? 'bg-yellow-500/20 text-yellow-400' :
-                      marketData.source === 'emergency' ? 'bg-red-500/20 text-red-400' :
-                      'bg-blue-500/20 text-blue-400'
-                    }`}>
-                      {marketData.source}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Age:</span>
-                    <span className="text-text-primary">{marketData.age}s</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Timestamp:</span>
-                    <span className="text-text-primary">{formatTimestamp(marketData.timestamp)}</span>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Symbol:</span>
+                      <span className="text-text-primary font-mono">{lnMarketsData.symbol}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Price:</span>
+                      <span className="text-text-primary font-mono">${lnMarketsData.price.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">24h Change:</span>
+                      <span className={`font-mono ${lnMarketsData.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {lnMarketsData.change24h >= 0 ? '+' : ''}{lnMarketsData.change24h.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Volume 24h:</span>
+                      <span className="text-text-primary font-mono">{lnMarketsData.volume24h.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">High 24h:</span>
+                      <span className="text-text-primary font-mono">${lnMarketsData.high24h.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Low 24h:</span>
+                      <span className="text-text-primary font-mono">${lnMarketsData.low24h.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Timestamp:</span>
+                      <span className="text-text-primary">{formatTimestamp(lnMarketsData.timestamp)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Fallback Market Data Card */}
+              {marketData && (
+                <div className="bg-bg-card border border-border rounded-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <DollarSign className="w-6 h-6 text-yellow-400 mr-3" />
+                    <h3 className="text-lg font-semibold text-text-primary">Fallback Market Data</h3>
+                    <span className="ml-2 px-2 py-1 text-xs font-medium bg-yellow-500/10 text-yellow-400 rounded-full">
+                      {marketData.provider}
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Index:</span>
+                      <span className="text-text-primary font-semibold">{marketData.index}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">24h Change:</span>
+                      <span className={`font-semibold ${
+                        marketData.change24h > 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {marketData.change24h > 0 ? '+' : ''}{marketData.change24h}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Provider:</span>
+                      <span className="text-text-primary">{marketData.provider}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Source:</span>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        marketData.source === 'primary' ? 'bg-green-500/20 text-green-400' :
+                        marketData.source === 'fallback' ? 'bg-yellow-500/20 text-yellow-400' :
+                        marketData.source === 'emergency' ? 'bg-red-500/20 text-red-400' :
+                        'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {marketData.source}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Age:</span>
+                      <span className="text-text-primary">{marketData.age}s</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Timestamp:</span>
+                      <span className="text-text-primary">{formatTimestamp(marketData.timestamp)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Provider Status Card */}
               <div className="bg-bg-card border border-border rounded-lg p-6">
