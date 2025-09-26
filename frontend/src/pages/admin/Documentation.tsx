@@ -459,6 +459,7 @@ export default function Documentation() {
             <CardContent>
               <ScrollArea className="h-96">
                 <div className="space-y-2">
+                  {console.log('🔍 DOCUMENTATION - Rendering files:', files.length, 'selectedCategory:', selectedCategory)}
                   {files.map((file) => (
                     <div
                       key={`${file.path}-${file.modified}`}
