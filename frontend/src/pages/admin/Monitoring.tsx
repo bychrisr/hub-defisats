@@ -275,7 +275,7 @@ const Monitoring: React.FC = () => {
       case 'unhealthy':
         return <XCircle className="w-5 h-5 text-red-500" />;
       default:
-        return <AlertTriangle className="w-5 h-5 text-gray-500" />;
+        return <AlertTriangle className="w-5 h-5 text-text-secondary" />;
     }
   };
 
@@ -305,7 +305,7 @@ const Monitoring: React.FC = () => {
       case 'systemresources':
         return <Activity className="w-5 h-5 text-green-500" />;
       default:
-        return <Server className="w-5 h-5 text-gray-500" />;
+        return <Server className="w-5 h-5 text-text-secondary" />;
     }
   };
 
@@ -313,22 +313,22 @@ const Monitoring: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
-        <span className="ml-2 text-gray-600">Loading health data...</span>
+        <span className="ml-2 text-text-secondary">Loading health data...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
         <div className="flex items-center">
-          <XCircle className="w-6 h-6 text-red-500 mr-2" />
-          <h3 className="text-lg font-medium text-red-800">Error Loading Health Data</h3>
+          <XCircle className="w-6 h-6 text-destructive mr-2" />
+          <h3 className="text-lg font-medium text-destructive">Error Loading Health Data</h3>
         </div>
-        <p className="mt-2 text-red-600">{error}</p>
+        <p className="mt-2 text-destructive">{error}</p>
         <button
           onClick={fetchHealthData}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive-hover transition-colors"
         >
           Retry
         </button>
@@ -339,9 +339,9 @@ const Monitoring: React.FC = () => {
   if (!healthData) {
     return (
       <div className="text-center py-12">
-        <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data Available</h3>
-        <p className="text-gray-600">Unable to load system health information.</p>
+        <Activity className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-text-primary mb-2">No Health Data Available</h3>
+        <p className="text-text-secondary">Unable to load system health information.</p>
       </div>
     );
   }
@@ -369,7 +369,7 @@ const Monitoring: React.FC = () => {
           <button
             onClick={fetchHealthData}
             disabled={loading}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors profile-tabs-glow"
+            className="flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover disabled:opacity-50 transition-colors profile-tabs-glow"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -385,7 +385,7 @@ const Monitoring: React.FC = () => {
             className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'api'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             <div className="flex items-center">
@@ -398,7 +398,7 @@ const Monitoring: React.FC = () => {
             className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'hardware'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             <div className="flex items-center">
@@ -411,7 +411,7 @@ const Monitoring: React.FC = () => {
             className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'external'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             <div className="flex items-center">
@@ -424,7 +424,7 @@ const Monitoring: React.FC = () => {
             className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'market'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             <div className="flex items-center">
@@ -502,29 +502,29 @@ const Monitoring: React.FC = () => {
               <div className="flex items-center mb-4">
                 <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2" />
                 <h3 className="text-lg font-semibold text-text-primary">Active Alerts</h3>
-                <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                <span className="ml-2 px-2 py-1 bg-destructive/20 text-destructive text-xs font-medium rounded-full">
                   {healthData.alerts.filter(alert => !alert.resolved).length}
                 </span>
               </div>
               <div className="space-y-3">
                 {healthData.alerts.filter(alert => !alert.resolved).map((alert) => (
                   <div key={alert.id} className={`p-3 rounded-lg border ${
-                    alert.severity === 'critical' ? 'bg-red-50 border-red-200' :
-                    alert.severity === 'high' ? 'bg-orange-50 border-orange-200' :
-                    alert.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
-                    'bg-blue-50 border-blue-200'
+                    alert.severity === 'critical' ? 'bg-destructive/10 border-destructive/20' :
+                    alert.severity === 'high' ? 'bg-warning/10 border-warning/20' :
+                    alert.severity === 'medium' ? 'bg-warning/10 border-warning/20' :
+                    'bg-primary/10 border-primary/20'
                   }`}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">{alert.message}</p>
-                        <p className="text-sm text-gray-600">Component: {alert.component}</p>
-                        <p className="text-sm text-gray-600">{formatTimestamp(alert.timestamp)}</p>
+                        <p className="font-medium text-text-primary">{alert.message}</p>
+                        <p className="text-sm text-text-secondary">Component: {alert.component}</p>
+                        <p className="text-sm text-text-secondary">{formatTimestamp(alert.timestamp)}</p>
                       </div>
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                        alert.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                        alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
+                        alert.severity === 'critical' ? 'bg-destructive/20 text-destructive' :
+                        alert.severity === 'high' ? 'bg-warning/20 text-warning' :
+                        alert.severity === 'medium' ? 'bg-warning/20 text-warning' :
+                        'bg-primary/20 text-primary'
                       }`}>
                         {alert.severity}
                       </span>
@@ -734,23 +734,23 @@ const Monitoring: React.FC = () => {
                   <div className="space-y-3">
                     {hardwareMetrics.alerts.map((alert, index) => (
                       <div key={index} className={`p-3 rounded-lg border ${
-                        alert.severity === 'critical' ? 'bg-red-50 border-red-200' :
-                        alert.severity === 'high' ? 'bg-orange-50 border-orange-200' :
-                        alert.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
-                        'bg-blue-50 border-blue-200'
+                        alert.severity === 'critical' ? 'bg-destructive/10 border-destructive/20' :
+                        alert.severity === 'high' ? 'bg-warning/10 border-warning/20' :
+                        alert.severity === 'medium' ? 'bg-warning/10 border-warning/20' :
+                        'bg-primary/10 border-primary/20'
                       }`}>
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-gray-900">{alert.message}</p>
-                            <p className="text-sm text-gray-600">
+                            <p className="font-medium text-text-primary">{alert.message}</p>
+                            <p className="text-sm text-text-secondary">
                               {new Date(alert.timestamp).toLocaleString()}
                             </p>
                           </div>
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                            alert.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                            alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-blue-100 text-blue-800'
+                            alert.severity === 'critical' ? 'bg-destructive/20 text-destructive' :
+                            alert.severity === 'high' ? 'bg-warning/20 text-warning' :
+                            alert.severity === 'medium' ? 'bg-warning/20 text-warning' :
+                            'bg-primary/20 text-primary'
                           }`}>
                             {alert.severity}
                           </span>
@@ -768,9 +768,9 @@ const Monitoring: React.FC = () => {
             </>
           ) : (
             <div className="text-center py-12">
-              <Server className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Hardware Data Available</h3>
-              <p className="text-gray-600">Unable to load hardware metrics information.</p>
+              <Server className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-text-primary mb-2">No Hardware Data Available</h3>
+              <p className="text-text-secondary">Unable to load hardware metrics information.</p>
             </div>
           )}
         </div>
@@ -832,7 +832,7 @@ const Monitoring: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <Globe className="w-12 h-12 text-text-secondary mx-auto mb-4" />
               <h3 className="text-lg font-medium text-text-primary mb-2">No External API Data Available</h3>
               <p className="text-text-secondary">Unable to load external API information.</p>
             </div>
@@ -931,7 +931,7 @@ const Monitoring: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <TrendingUp className="w-12 h-12 text-text-secondary mx-auto mb-4" />
               <h3 className="text-lg font-medium text-text-primary mb-2">No Market Data Available</h3>
               <p className="text-text-secondary">Unable to load market data information.</p>
             </div>
