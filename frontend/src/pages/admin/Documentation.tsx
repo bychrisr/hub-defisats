@@ -9,6 +9,7 @@ import {
   Search, 
   FileText, 
   Folder, 
+  FolderOpen,
   Calendar, 
   Clock, 
   RefreshCw,
@@ -19,7 +20,9 @@ import {
   BookOpen,
   TrendingUp,
   Users,
-  Database
+  Database,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
@@ -69,6 +72,8 @@ export default function Documentation() {
   const [showStats, setShowStats] = useState(true);
   const [realtimeStats, setRealtimeStats] = useState<DocStats | null>(null);
   const [showTest, setShowTest] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [categoryFiles, setCategoryFiles] = useState<Record<string, DocFile[]>>({});
   
   const { toast } = useToast();
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
@@ -220,6 +225,50 @@ export default function Documentation() {
     } finally {
       setIsLoadingContent(false);
     }
+  };
+
+  const loadCategoryFiles = async (categoryName: string) => {
+    try {
+      console.log('🔍 DOCUMENTATION - Loading files for category:', categoryName);
+      
+      const params = new URLSearchParams({
+        limit: '100', // Carregar mais arquivos por categoria
+        category: categoryName
+      });
+
+      const response = await api.get(`/api/docs/search?${params}`);
+      
+      if (response.data.success) {
+        const data = response.data.data;
+        setCategoryFiles(prev => ({
+          ...prev,
+          [categoryName]: data.files
+        }));
+        console.log('🔍 DOCUMENTATION - Files loaded for category:', categoryName, data.files.length);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao carregar arquivos da categoria:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os arquivos da categoria',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const toggleCategory = (categoryName: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryName)) {
+      newExpanded.delete(categoryName);
+    } else {
+      newExpanded.add(categoryName);
+      // Carregar arquivos da categoria se ainda não foram carregados
+      if (!categoryFiles[categoryName]) {
+        loadCategoryFiles(categoryName);
+      }
+    }
+    setExpandedCategories(newExpanded);
   };
 
   const connectWebSocket = () => {
@@ -415,112 +464,84 @@ export default function Documentation() {
                 />
               </div>
               
-              {/* Filtro por categoria */}
+              {/* Sistema de Acordeão por Categoria */}
               <div>
-                <label className="text-sm font-medium mb-2 block">Categoria</label>
-                <div className="space-y-2">
-                  <Button
-                    variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedCategory('all')}
-                    className="w-full justify-start"
-                  >
-                    <Filter className="h-4 w-4 mr-2" />
-                    Todas ({stats?.totalFiles || 0})
-                  </Button>
-                  
-                  {categories.map((category) => (
-                    <Button
-                      key={category.name}
-                      variant={selectedCategory === category.name ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => {
-                        console.log('🔍 DOCUMENTATION - Category clicked:', category.name);
-                        setSelectedCategory(category.name);
-                      }}
-                      className="w-full justify-start"
-                    >
-                      {getCategoryIcon(category.name)}
-                      <span className="ml-2">{category.displayName}</span>
-                      <Badge variant="secondary" className="ml-auto">
-                        {category.count}
-                      </Badge>
-                    </Button>
-                  ))}
+                <label className="text-sm font-medium mb-2 block">Categorias</label>
+                <div className="space-y-1">
+                  {categories.map((category) => {
+                    const isExpanded = expandedCategories.has(category.name);
+                    const categoryFilesList = categoryFiles[category.name] || [];
+                    
+                    return (
+                      <div key={category.name} className="border rounded-lg">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleCategory(category.name)}
+                          className="w-full justify-between p-3 h-auto"
+                        >
+                          <div className="flex items-center space-x-2">
+                            {isExpanded ? <FolderOpen className="h-4 w-4" /> : <Folder className="h-4 w-4" />}
+                            <span className="font-medium">{category.displayName}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              {category.count}
+                            </Badge>
+                          </div>
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                        
+                        {isExpanded && (
+                          <div className="border-t bg-muted/30">
+                            <ScrollArea className="h-64">
+                              <div className="p-2 space-y-1">
+                                {categoryFilesList.map((file, index) => (
+                                  <div
+                                    key={`${file.path}-${index}`}
+                                    className={`p-2 rounded cursor-pointer transition-colors text-sm ${
+                                      selectedFile?.path === file.path
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'hover:bg-muted'
+                                    }`}
+                                    onClick={() => loadFileContent(file)}
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <FileText className="h-3 w-3 flex-shrink-0" />
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium truncate">
+                                          {file.title || file.name}
+                                        </p>
+                                        {file.description && (
+                                          <p className="text-xs opacity-70 truncate">
+                                            {file.description}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                
+                                {categoryFilesList.length === 0 && (
+                                  <div className="text-center py-4 text-muted-foreground text-sm">
+                                    <FileText className="h-6 w-6 mx-auto mb-2" />
+                                    <p>Carregando arquivos...</p>
+                                  </div>
+                                )}
+                              </div>
+                            </ScrollArea>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Lista de Arquivos */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Resultados</span>
-                {isLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-96">
-                <div className="space-y-2">
-                  {files.map((file, index) => (
-                    <div
-                      key={`${file.path}-${file.modified}-${index}`}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedFile?.path === file.path
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted'
-                      }`}
-                      onClick={() => loadFileContent(file)}
-                    >
-                      <div className="flex items-start space-x-2">
-                        {getCategoryIcon(file.category)}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">
-                            {file.title || file.name}
-                          </p>
-                          {file.description && (
-                            <p className="text-sm opacity-70 truncate">
-                              {file.description}
-                            </p>
-                          )}
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {file.category}
-                            </Badge>
-                            <span className="text-xs opacity-70">
-                              {formatFileSize(file.size)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {files.length === 0 && !isLoading && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <FileText className="h-8 w-8 mx-auto mb-2" />
-                      <p>Nenhum documento encontrado</p>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-              
-              {pagination.hasMore && (
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => searchDocs(pagination.offset + pagination.limit)}
-                    disabled={isLoading}
-                    className="w-full"
-                  >
-                    Carregar Mais ({pagination.total - pagination.offset - pagination.limit} restantes)
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
 
         {/* Visualizador de Conteúdo */}
