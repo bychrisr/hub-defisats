@@ -52,16 +52,9 @@ class CachedAPIService {
    * GET request com cache
    */
   async get(url: string, config?: any): Promise<any> {
-    return apiCacheService.request(url, async () => {
-      const response = await api.get(url, config);
-      
-      // Validação adicional para dados de mercado
-      if (!this.validateMarketResponse(response, url)) {
-        throw new Error(`Invalid market data for ${url} - data too old or missing timestamp`);
-      }
-      
-      return response;
-    });
+    // Temporariamente desabilitar cache para debug
+    console.log(`🌐 CACHED API DISABLED - ${url}`);
+    return api.get(url, config);
   }
 
   /**

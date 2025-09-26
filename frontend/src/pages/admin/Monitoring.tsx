@@ -551,7 +551,7 @@ const Monitoring: React.FC = () => {
       fetchHealthData();
       loadProtectionData();
     }, 30000); // Refresh every 30 seconds
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
   }, [autoRefresh]);
 
   const getStatusIcon = (status: string) => {
@@ -636,7 +636,7 @@ const Monitoring: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
         <span className="ml-2 text-text-secondary">Loading health data...</span>
-      </div>
+                </div>
     );
   }
 
@@ -670,13 +670,13 @@ const Monitoring: React.FC = () => {
 
   return (
     <div className="space-y-6 bg-bg-primary min-h-screen p-6">
-      {/* Header */}
+          {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+                      <div>
           <h1 className="text-2xl font-bold text-text-primary">System Monitoring</h1>
           <p className="text-text-secondary">Real-time health monitoring and system status</p>
-        </div>
-        <div className="flex items-center space-x-4">
+                  </div>
+                  <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <label className="flex items-center">
               <input
@@ -694,10 +694,10 @@ const Monitoring: React.FC = () => {
             className="flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover disabled:opacity-50 transition-colors profile-tabs-glow"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+                      Refresh
           </button>
-        </div>
-      </div>
+                  </div>
+                </div>
 
       {/* Tabs Navigation */}
       <div className="border-b border-border">
@@ -786,38 +786,38 @@ const Monitoring: React.FC = () => {
       {/* Tab Content */}
       {activeTab === 'api' && (
         <div className="space-y-6">
-          {/* Overall Status */}
-          <div className={`rounded-lg border-2 p-6 bg-bg-card border-border profile-tabs-glow ${getStatusColor(healthData.overallStatus)}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                {getStatusIcon(healthData.overallStatus)}
-                <div className="ml-3">
-                  <h2 className="text-xl font-semibold capitalize text-text-primary">
-                    System Status: {healthData.overallStatus}
-                  </h2>
-                  <p className="text-sm text-text-secondary">
+      {/* Overall Status */}
+      <div className={`rounded-lg border-2 p-6 bg-bg-card border-border profile-tabs-glow ${getStatusColor(healthData.overallStatus)}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            {getStatusIcon(healthData.overallStatus)}
+            <div className="ml-3">
+              <h2 className="text-xl font-semibold capitalize text-text-primary">
+                System Status: {healthData.overallStatus}
+              </h2>
+              <p className="text-sm text-text-secondary">
                     Last updated: {lastUpdate ? lastUpdate.toLocaleString() : 'Never'}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-text-secondary">Uptime</p>
-                <p className="text-lg font-semibold text-text-primary">{formatUptime(healthData.uptime)}</p>
-              </div>
+              </p>
             </div>
           </div>
+          <div className="text-right">
+                <p className="text-sm text-text-secondary">Uptime</p>
+                <p className="text-lg font-semibold text-text-primary">{formatUptime(healthData.uptime)}</p>
+                  </div>
+                </div>
+                  </div>
 
           {/* Components Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {healthData.components.map((component) => (
               <div key={component.name} className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center">
+          <div className="flex items-center">
                     {getComponentIcon(component.name)}
                     <h4 className="ml-2 font-medium text-text-primary capitalize">{component.name}</h4>
-                  </div>
+                    </div>
                   {getStatusIcon(component.status)}
-                </div>
+                  </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Status:</span>
@@ -828,7 +828,7 @@ const Monitoring: React.FC = () => {
                     }`}>
                       {component.status}
                     </span>
-                  </div>
+                </div>
                   {component.latency && (
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Latency:</span>
@@ -840,10 +840,10 @@ const Monitoring: React.FC = () => {
                     <span className="text-text-primary">{formatTimestamp(component.lastCheck)}</span>
                   </div>
                 </div>
-              </div>
+                  </div>
             ))}
-          </div>
-
+                </div>
+        
           {/* Alerts */}
           {healthData.alerts.length > 0 && (
             <div className="bg-bg-card border border-border rounded-lg p-6 profile-tabs-glow">
@@ -853,7 +853,7 @@ const Monitoring: React.FC = () => {
                 <span className="ml-2 px-2 py-1 bg-destructive/20 text-destructive text-xs font-medium rounded-full">
                   {healthData.alerts.filter(alert => !alert.resolved).length}
                 </span>
-              </div>
+                    </div>
               <div className="space-y-3">
                 {healthData.alerts.filter(alert => !alert.resolved).map((alert) => (
                   <div key={alert.id} className={`p-3 rounded-lg border ${
@@ -862,7 +862,7 @@ const Monitoring: React.FC = () => {
                     alert.severity === 'medium' ? 'bg-warning/10 border-warning/20' :
                     'bg-primary/10 border-primary/20'
                   }`}>
-                    <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-text-primary">{alert.message}</p>
                         <p className="text-sm text-text-secondary">Component: {alert.component}</p>
@@ -876,30 +876,30 @@ const Monitoring: React.FC = () => {
                       }`}>
                         {alert.severity}
                       </span>
-                    </div>
-                  </div>
-                ))}
+                </div>
               </div>
-            </div>
+                ))}
+                  </div>
+                </div>
           )}
 
           {/* Performance Metrics */}
           <div className="bg-bg-card rounded-lg border border-border">
             <div className="px-6 py-4 border-b">
               <h3 className="text-lg font-semibold">Performance Metrics</h3>
-            </div>
+                </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Total Checks</h4>
                   <p className="text-text-secondary">{healthData.metrics.totalChecks}</p>
-                </div>
+              </div>
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Success Rate</h4>
                   <p className="text-text-secondary">
                     {((healthData.metrics.successfulChecks / healthData.metrics.totalChecks) * 100).toFixed(1)}%
                   </p>
-                </div>
+                  </div>
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Average Latency</h4>
                   <p className="text-text-secondary">{healthData.metrics.averageLatency.toFixed(1)}ms</p>
@@ -907,22 +907,22 @@ const Monitoring: React.FC = () => {
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Uptime</h4>
                   <p className="text-text-secondary">{healthData.metrics.uptimePercentage.toFixed(2)}%</p>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
+        </div>
+      </div>
 
           {/* System Information */}
           <div className="bg-bg-card rounded-lg border border-border">
             <div className="px-6 py-4 border-b">
               <h3 className="text-lg font-semibold">System Information</h3>
-            </div>
+                </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Uptime</h4>
                   <p className="text-text-secondary">{formatUptime(healthData.uptime)}</p>
-                </div>
+                  </div>
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Consecutive Failures</h4>
                   <p className="text-text-secondary">{healthData.metrics.consecutiveFailures}</p>
@@ -930,150 +930,150 @@ const Monitoring: React.FC = () => {
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Last Healthy Time</h4>
                   <p className="text-text-secondary">{formatTimestamp(healthData.metrics.lastHealthyTime)}</p>
-                </div>
+                    </div>
                 <div>
                   <h4 className="font-medium text-text-primary mb-2">Total Alerts</h4>
                   <p className="text-text-secondary">{healthData.alerts.length}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
+                      </div>
+                </div>
+              )}
+              
       {/* Hardware Metrics Tab */}
       {activeTab === 'hardware' && (
         <div className="space-y-6">
           {hardwareMetrics ? (
             <>
               {/* Hardware Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* CPU */}
-                <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <Cpu className="w-5 h-5 text-blue-400 mr-2" />
-                      <h4 className="font-medium text-text-primary">CPU</h4>
-                    </div>
-                    <div className={`px-2 py-1 rounded text-xs font-medium ${
-                      parseInt(hardwareMetrics.cpu.usage) > 90 ? 'bg-red-500/20 text-red-400' :
-                      parseInt(hardwareMetrics.cpu.usage) > 70 ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-green-500/20 text-green-400'
-                    }`}>
-                      {hardwareMetrics.cpu.usage}
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* CPU */}
+              <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <Cpu className="w-5 h-5 text-blue-400 mr-2" />
+                    <h4 className="font-medium text-text-primary">CPU</h4>
                   </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Cores:</span>
-                      <span className="text-text-primary">{hardwareMetrics.cpu.cores}</span>
-                    </div>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${
+                    parseInt(hardwareMetrics.cpu.usage) > 90 ? 'bg-red-500/20 text-red-400' :
+                    parseInt(hardwareMetrics.cpu.usage) > 70 ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {hardwareMetrics.cpu.usage}
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Cores:</span>
+                    <span className="text-text-primary">{hardwareMetrics.cpu.cores}</span>
+                  </div>
                     {hardwareMetrics.cpu.temperature && (
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">Temperature:</span>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Temperature:</span>
                         <span className="text-text-primary">{hardwareMetrics.cpu.temperature}°C</span>
-                      </div>
+                  </div>
                     )}
                     {hardwareMetrics.cpu.loadAverage && (
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">Load Avg:</span>
-                        <span className="text-text-primary">{hardwareMetrics.cpu.loadAverage.join(', ')}</span>
-                      </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Load Avg:</span>
+                    <span className="text-text-primary">{hardwareMetrics.cpu.loadAverage.join(', ')}</span>
+                  </div>
                     )}
+                </div>
+              </div>
+
+              {/* Memory */}
+              <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <MemoryStick className="w-5 h-5 text-green-400 mr-2" />
+                    <h4 className="font-medium text-text-primary">Memory</h4>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${
+                    parseInt(hardwareMetrics.memory.usagePercent) > 95 ? 'bg-red-500/20 text-red-400' :
+                    parseInt(hardwareMetrics.memory.usagePercent) > 80 ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {hardwareMetrics.memory.usagePercent}
                   </div>
                 </div>
-
-                {/* Memory */}
-                <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <MemoryStick className="w-5 h-5 text-green-400 mr-2" />
-                      <h4 className="font-medium text-text-primary">Memory</h4>
-                    </div>
-                    <div className={`px-2 py-1 rounded text-xs font-medium ${
-                      parseInt(hardwareMetrics.memory.usagePercent) > 95 ? 'bg-red-500/20 text-red-400' :
-                      parseInt(hardwareMetrics.memory.usagePercent) > 80 ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-green-500/20 text-green-400'
-                    }`}>
-                      {hardwareMetrics.memory.usagePercent}
-                    </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Total:</span>
+                    <span className="text-text-primary">{hardwareMetrics.memory.total}</span>
                   </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Total:</span>
-                      <span className="text-text-primary">{hardwareMetrics.memory.total}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Used:</span>
-                      <span className="text-text-primary">{hardwareMetrics.memory.used}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Free:</span>
-                      <span className="text-text-primary">{hardwareMetrics.memory.free}</span>
-                    </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Used:</span>
+                    <span className="text-text-primary">{hardwareMetrics.memory.used}</span>
                   </div>
-                </div>
-
-                {/* Disk */}
-                {hardwareMetrics.disk && (
-                  <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center">
-                        <HardDrive className="w-5 h-5 text-purple-400 mr-2" />
-                        <h4 className="font-medium text-text-primary">Disk</h4>
-                      </div>
-                      <div className={`px-2 py-1 rounded text-xs font-medium ${
-                        parseInt(hardwareMetrics.disk.usagePercent) > 95 ? 'bg-red-500/20 text-red-400' :
-                        parseInt(hardwareMetrics.disk.usagePercent) > 85 ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-green-500/20 text-green-400'
-                      }`}>
-                        {hardwareMetrics.disk.usagePercent}
-                      </div>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">Total:</span>
-                        <span className="text-text-primary">{hardwareMetrics.disk.total}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">Used:</span>
-                        <span className="text-text-primary">{hardwareMetrics.disk.used}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">Free:</span>
-                        <span className="text-text-primary">{hardwareMetrics.disk.free}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* System */}
-                <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <Server className="w-5 h-5 text-orange-400 mr-2" />
-                      <h4 className="font-medium text-text-primary">System</h4>
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Uptime:</span>
-                      <span className="text-text-primary">{hardwareMetrics.system.uptime}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Platform:</span>
-                      <span className="text-text-primary">{hardwareMetrics.system.platform}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Hostname:</span>
-                      <span className="text-text-primary">{hardwareMetrics.system.hostname}</span>
-                    </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Free:</span>
+                    <span className="text-text-primary">{hardwareMetrics.memory.free}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Hardware Alerts */}
-              {hardwareMetrics.alerts && hardwareMetrics.alerts.length > 0 && (
+              {/* Disk */}
+                {hardwareMetrics.disk && (
+              <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <HardDrive className="w-5 h-5 text-purple-400 mr-2" />
+                    <h4 className="font-medium text-text-primary">Disk</h4>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${
+                    parseInt(hardwareMetrics.disk.usagePercent) > 95 ? 'bg-red-500/20 text-red-400' :
+                    parseInt(hardwareMetrics.disk.usagePercent) > 85 ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {hardwareMetrics.disk.usagePercent}
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Total:</span>
+                    <span className="text-text-primary">{hardwareMetrics.disk.total}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Used:</span>
+                    <span className="text-text-primary">{hardwareMetrics.disk.used}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Free:</span>
+                    <span className="text-text-primary">{hardwareMetrics.disk.free}</span>
+                  </div>
+                </div>
+              </div>
+                )}
+
+              {/* System */}
+              <div className="bg-bg-card border border-border rounded-lg p-4 profile-tabs-glow">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <Server className="w-5 h-5 text-orange-400 mr-2" />
+                    <h4 className="font-medium text-text-primary">System</h4>
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Uptime:</span>
+                    <span className="text-text-primary">{hardwareMetrics.system.uptime}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Platform:</span>
+                    <span className="text-text-primary">{hardwareMetrics.system.platform}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Hostname:</span>
+                    <span className="text-text-primary">{hardwareMetrics.system.hostname}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Hardware Alerts */}
+            {hardwareMetrics.alerts && hardwareMetrics.alerts.length > 0 && (
                 <div className="bg-bg-card border border-border rounded-lg p-6 profile-tabs-glow">
                   <div className="flex items-center mb-4">
                     <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2" />
@@ -1081,13 +1081,13 @@ const Monitoring: React.FC = () => {
                   </div>
                   <div className="space-y-3">
                     {hardwareMetrics.alerts.map((alert, index) => (
-                      <div key={index} className={`p-3 rounded-lg border ${
+                    <div key={index} className={`p-3 rounded-lg border ${
                         alert.severity === 'critical' ? 'bg-destructive/10 border-destructive/20' :
                         alert.severity === 'high' ? 'bg-warning/10 border-warning/20' :
                         alert.severity === 'medium' ? 'bg-warning/10 border-warning/20' :
                         'bg-primary/10 border-primary/20'
-                      }`}>
-                        <div className="flex items-center justify-between">
+                    }`}>
+                      <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium text-text-primary">{alert.message}</p>
                             <p className="text-sm text-text-secondary">
@@ -1137,7 +1137,7 @@ const Monitoring: React.FC = () => {
               {externalAPIs.map((api) => (
                 <div key={api.name} className={`bg-bg-card border border-border rounded-lg p-6 ${!api.enabled ? 'opacity-60' : ''}`}>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
+                        <div className="flex items-center">
                       {getAPIProviderIcon(api.provider || 'default')}
                       <div>
                         <div className="flex items-center gap-2">
@@ -1157,7 +1157,7 @@ const Monitoring: React.FC = () => {
                         {api.category && (
                           <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full border ${getCategoryColor(api.category, api.enabled)}`}>
                             {api.category.replace('_', ' ')}
-                          </span>
+                        </span>
                         )}
                       </div>
                     </div>
@@ -1192,17 +1192,17 @@ const Monitoring: React.FC = () => {
                       <span className="text-text-secondary">Last Check:</span>
                       <span className="text-text-primary">{formatTimestamp(api.lastCheck)}</span>
                     </div>
-                  </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
           ) : (
             <div className="text-center py-12">
               <Globe className="w-12 h-12 text-text-secondary mx-auto mb-4" />
               <h3 className="text-lg font-medium text-text-primary mb-2">No External API Data Available</h3>
               <p className="text-text-secondary">Unable to load external API information.</p>
-            </div>
-          )}
+              </div>
+            )}
         </div>
       )}
 
@@ -1257,10 +1257,10 @@ const Monitoring: React.FC = () => {
                       <span className="text-text-secondary">Timestamp:</span>
                       <span className="text-text-primary">{formatTimestamp(lnMarketsData.timestamp)}</span>
                     </div>
-                  </div>
-                </div>
-              )}
-
+          </div>
+        </div>
+      )}
+                  
               {/* Fallback Market Data Card */}
               {marketData && (
                 <div className="bg-bg-card border border-border rounded-lg p-6">
@@ -1270,7 +1270,7 @@ const Monitoring: React.FC = () => {
                     <span className="ml-2 px-2 py-1 text-xs font-medium bg-yellow-500/10 text-yellow-400 rounded-full">
                       {marketData.provider}
                     </span>
-                  </div>
+                    </div>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Index:</span>
@@ -1352,12 +1352,12 @@ const Monitoring: React.FC = () => {
                   {Array.isArray(providerStatus) ? (
                     providerStatus.map((provider: any, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                        <div>
+                    <div>
                           <span className="text-text-primary font-medium">{provider.name}</span>
                           <div className="text-sm text-text-secondary">
                             Last check: {formatTimestamp(provider.lastCheck)}
-                          </div>
-                        </div>
+                    </div>
+                  </div>
                         <div className="flex items-center space-x-2">
                           <div className={`px-2 py-1 rounded text-xs font-medium ${
                             provider.status === 'active' ? 'bg-green-500/20 text-green-400' :
@@ -1365,7 +1365,7 @@ const Monitoring: React.FC = () => {
                             'bg-red-500/20 text-red-400'
                           }`}>
                             {provider.status}
-                          </div>
+                  </div>
                           {provider.errors > 0 && (
                             <div className="text-xs text-red-400">
                               {provider.errors} errors
@@ -1532,12 +1532,12 @@ const Monitoring: React.FC = () => {
                             {test.retryAttempts} retries
                           </div>
                         )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+      )}
 
             {/* Recommendations */}
             {diagnosticData?.analysis?.recommendations && diagnosticData.analysis.recommendations.length > 0 && (
@@ -1548,7 +1548,7 @@ const Monitoring: React.FC = () => {
                     <div key={index} className="flex items-start space-x-2">
                       <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
                       <span className="text-text-secondary">{recommendation}</span>
-                    </div>
+        </div>
                   ))}
                 </div>
               </div>
@@ -1722,14 +1722,14 @@ const Monitoring: React.FC = () => {
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
                 <h4 className="font-medium text-text-primary mb-3">Cache Configuration</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Max Cache Age:</span>
                     <span className="text-sm text-text-primary">{cacheConfig?.maxAge || 30} seconds</span>
-                  </div>
+            </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Retry Attempts:</span>
                     <span className="text-sm text-text-primary">{cacheConfig?.retryAttempts || 3}</span>
@@ -1745,13 +1745,13 @@ const Monitoring: React.FC = () => {
                 </div>
               </div>
               
-              <div>
+            <div>
                 <h4 className="font-medium text-text-primary mb-3">Protection Rules</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Data Age Limit:</span>
                     <span className="text-sm text-text-primary">{protectionRules?.dataAgeLimit || 30} seconds</span>
-                  </div>
+            </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Failure Threshold:</span>
                     <span className="text-sm text-text-primary">{protectionRules?.failureThreshold || 5} consecutive</span>
@@ -1786,11 +1786,11 @@ const Monitoring: React.FC = () => {
                           provider.status === 'active' ? 'bg-green-500' : 
                           provider.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
                         }`} />
-                        <div>
+            <div>
                           <div className="font-medium text-text-primary">{provider.name}</div>
                           <div className="text-sm text-text-secondary">
                             Priority: {provider.priority} • Errors: {provider.errors}
-                          </div>
+            </div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -1812,17 +1812,17 @@ const Monitoring: React.FC = () => {
                           status.status === 'healthy' ? 'bg-green-500' : 
                           status.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
                         }`} />
-                        <div>
+            <div>
                           <div className="font-medium text-text-primary">{name}</div>
                           <div className="text-sm text-text-secondary">
                             Last check: {new Date(status.lastCheck).toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
+            </div>
+          </div>
+        </div>
                       <div className="text-right">
                         <div className="text-sm font-medium text-text-primary">
                           {status.failureCount} failures
-                        </div>
+      </div>
                         <div className="text-xs text-text-secondary">
                           {status.status}
                         </div>
