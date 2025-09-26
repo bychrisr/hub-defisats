@@ -107,6 +107,11 @@ export default function Documentation() {
     try {
       setIsLoading(true);
       
+      // Debug: Verificar token
+      const token = localStorage.getItem('access_token');
+      console.log('🔍 DOCUMENTATION - Token exists:', !!token);
+      console.log('🔍 DOCUMENTATION - Token preview:', token ? '[REDACTED]' : 'null');
+      
       const [categoriesRes, statsRes] = await Promise.all([
         api.get('/api/docs/categories'),
         api.get('/api/docs/stats')

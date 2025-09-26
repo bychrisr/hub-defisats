@@ -665,7 +665,7 @@ async function registerRoutes() {
   console.log('✅ Version routes registered');
 
   // Documentation routes (admin only)
-  await fastify.register(docsRoutes, { prefix: '/api' });
+  await fastify.register(docsRoutes);
   console.log('✅ Documentation routes registered');
 
   // Route redirects admin routes
