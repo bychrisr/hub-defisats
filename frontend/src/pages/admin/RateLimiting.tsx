@@ -94,6 +94,12 @@ export default function RateLimiting() {
     try {
       setLoading(true);
       console.log('🔄 Loading rate limit configurations...');
+      
+      // Verificar token
+      const token = localStorage.getItem('access_token');
+      console.log('🔑 Token exists:', !!token);
+      console.log('🔑 Token preview:', token ? `${token.substring(0, 20)}...` : 'null');
+      
       const response = await api.get('/admin/rate-limit-config/');
       console.log('📊 API Response:', response.data);
       if (response.data.success) {
@@ -105,6 +111,7 @@ export default function RateLimiting() {
       }
     } catch (err: any) {
       console.error('❌ Error loading configurations:', err);
+      console.error('❌ Error response:', err.response?.data);
       setError(err.response?.data?.message || 'Failed to load rate limit configurations');
     } finally {
       setLoading(false);
