@@ -203,8 +203,10 @@ export function useDocumentationWebSocket() {
     const connect = () => {
       try {
         const token = localStorage.getItem('access_token');
-        const wsUrl = `${import.meta.env.VITE_API_URL?.replace('http', 'ws')}/api/docs/watch?token=${token}`;
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:13000';
+        const wsUrl = `${baseUrl.replace('http', 'ws')}/api/docs/watch?token=${token}`;
         
+        console.log('🔍 DOCUMENTATION WEBSOCKET - URL:', wsUrl);
         ws = new WebSocket(wsUrl);
         
         ws.onopen = () => {
