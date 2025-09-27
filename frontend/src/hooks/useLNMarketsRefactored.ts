@@ -119,7 +119,7 @@ export const useLNMarketsRefactoredDashboard = (): UseLNMarketsRefactoredDashboa
       const startTime = Date.now();
 
       // Chamada para o endpoint refatorado
-      const response = await api.get('/api/lnmarkets/v2/user/dashboard');
+      const response = await api.get('/api/lnmarkets-robust/dashboard');
       const dashboardData = response.data;
 
       const endTime = Date.now();

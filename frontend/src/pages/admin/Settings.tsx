@@ -89,7 +89,7 @@ const SettingsPage: React.FC = () => {
       setTestResult(null);
       
       // Test connection using existing LN Markets test endpoint
-      const response = await api.get('/api/lnmarkets/test-connection');
+      const response = await api.get('/api/lnmarkets-robust/test-connection');
       
       if (response.data.success) {
         setTestResult({

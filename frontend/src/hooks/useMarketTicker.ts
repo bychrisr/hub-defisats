@@ -33,7 +33,7 @@ export const useMarketTicker = () => {
 
       console.log('🔍 MARKET TICKER HOOK - Fetching market ticker...');
 
-      const response = await api.get('/api/lnmarkets/market/ticker');
+      const response = await api.get('/api/lnmarkets-robust/dashboard');
       const tickerData = response.data;
 
       if (tickerData.success && tickerData.data) {
