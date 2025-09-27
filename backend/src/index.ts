@@ -11,6 +11,7 @@ import { lnmarketsFuturesRoutes } from './routes/lnmarkets-futures.routes';
 import { lnmarketsOptionsRoutes } from './routes/lnmarkets-options.routes';
 import { lnmarketsUserRoutes } from './routes/lnmarkets-user.routes';
 import { lnmarketsMarketRoutes } from './routes/lnmarkets-market.routes';
+import { dashboardOptimizedRoutes } from './routes/dashboard-optimized.routes';
 import { marketDataRoutes } from './routes/market-data.routes';
 import { couponAdminRoutes } from './routes/coupon-admin.routes';
 import { metricsRoutes } from './routes/metrics.routes';
@@ -549,6 +550,10 @@ async function registerRoutes() {
   await fastify.register(lnmarketsMarketRoutes, { prefix: '/api' });
   console.log('✅ LN Markets Market Data routes registered');
 
+  // Dashboard Optimized routes (unified endpoint)
+  await fastify.register(dashboardOptimizedRoutes, { prefix: '/api' });
+  console.log('✅ Dashboard Optimized routes registered');
+
   // Market Data routes
   await fastify.register(marketDataRoutes, { prefix: '/api' });
   console.log('✅ Market Data routes registered');
@@ -816,7 +821,7 @@ async function gracefulShutdown(signal: string) {
     fastify.log.info('Server closed successfully');
     process.exit(0);
   } catch (error) {
-    fastify.log.error('Error during shutdown:', error instanceof Error ? error : new Error(String(error)));
+    console.error('Error during shutdown:', error);
     process.exit(1);
   }
 }
@@ -899,10 +904,10 @@ async function start() {
     console.log('✅ Health Checker service started');
     
     console.log('✅ Advanced monitoring services started');
-  } catch (error) {
-    fastify.log.error('Error starting server:', error instanceof Error ? error : new Error(String(error)));
+  } catch (error: any) {
+    console.error('Error starting server:', error);
     console.error('❌ Full error details:', error);
-    console.error('❌ Error stack:', (error as Error).stack);
+    console.error('❌ Error stack:', error?.stack);
     process.exit(1);
   }
 }

@@ -475,11 +475,11 @@ export class LNMarketsAPIService {
       // Tentar primeiro o endpoint específico para trades
       let result;
       try {
-        console.log('🔍 LN MARKETS TRADES - Trying /futures/trades endpoint...');
+        console.log('🔍 LN MARKETS TRADES - Trying /futures endpoint for trades...');
         result = await this.makeRequest({
           method: 'GET',
-          path: '/futures/trades',
-          params
+          path: '/futures',
+          params: { type: 'running' }
         });
         console.log('✅ LN MARKETS TRADES - /futures/trades success:', Array.isArray(result) ? result.length : 'unknown', 'trades');
       } catch (tradesError: any) {
@@ -605,22 +605,23 @@ export class LNMarketsAPIService {
     }
   }
 
-  async getUserPositions() {
-    console.log('🔍 LN MARKETS POSITIONS - Starting getUserPositions');
+  async getUserPositions(type: 'running' | 'open' | 'closed' = 'running') {
+    console.log('🔍 LN MARKETS POSITIONS - Starting getUserPositions (API v2)');
     console.log('🔍 LN MARKETS POSITIONS - Service credentials:', {
       apiKey: this.credentials.apiKey ? `${this.credentials.apiKey.substring(0, 10)}...` : 'MISSING',
       apiSecret: this.credentials.apiSecret ? `${this.credentials.apiSecret.substring(0, 10)}...` : 'MISSING',
       passphrase: this.credentials.passphrase ? `${this.credentials.passphrase.substring(0, 5)}...` : 'MISSING',
       isTestnet: this.credentials.isTestnet,
-      baseURL: this.baseURL
+      baseURL: this.baseURL,
+      type
     });
     
     try {
-      console.log('🔍 LN MARKETS POSITIONS - Attempting to get user positions from /futures');
+      console.log('🔍 LN MARKETS POSITIONS - Attempting to get user positions from /futures (API v2)');
       const result = await this.makeRequest({
         method: 'GET',
         path: '/futures',
-        params: { type: 'running' }
+        params: { type }
       });
       console.log('✅ LN MARKETS POSITIONS - User positions retrieved successfully:', result);
       console.log('🔍 LN MARKETS POSITIONS - Result type:', typeof result);
@@ -712,7 +713,113 @@ export class LNMarketsAPIService {
     }
   }
 
-  // Get current market index data
+  // New LN Markets API v2 Methods (maintaining optimizations)
+  async getTicker() {
+    console.log('📈 LN MARKETS TICKER - Getting ticker data (API v2)');
+    return this.makeRequest({
+      method: 'GET',
+      path: '/futures/btc_usd/ticker'
+    });
+  }
+
+  async getMarketIndexHistory(from: number, to: number, limit: number = 100) {
+    console.log('📊 LN MARKETS MARKET INDEX - Getting market index history (API v2):', { from, to, limit });
+    return this.makeRequest({
+      method: 'GET',
+      path: '/futures/btc_usd/index',
+      params: { from, to, limit }
+    });
+  }
+
+  async getMarketPriceHistory(from: number, to: number, limit: number = 100) {
+    console.log('💰 LN MARKETS MARKET PRICE - Getting market price history (API v2):', { from, to, limit });
+    return this.makeRequest({
+      method: 'GET',
+      path: '/futures/btc_usd/price',
+      params: { from, to, limit }
+    });
+  }
+
+  async getMarketDetails() {
+    console.log('🏪 LN MARKETS MARKET DETAILS - Getting market details (API v2)');
+    return this.makeRequest({
+      method: 'GET',
+      path: '/futures/market'
+    });
+  }
+
+  async getCarryFees(from: number, to: number, limit: number = 100) {
+    console.log('💸 LN MARKETS CARRY FEES - Getting carry fees (API v2):', { from, to, limit });
+    return this.makeRequest({
+      method: 'GET',
+      path: '/futures/carry-fees',
+      params: { from, to, limit }
+    });
+  }
+
+  // Deposits and Withdrawals API Methods (LN Markets API v2)
+  async getDeposits(types?: string) {
+    console.log('💳 LN MARKETS DEPOSITS - Getting deposits (API v2):', { types });
+    return this.makeRequest({
+      method: 'GET',
+      path: '/user/deposits',
+      params: types ? { types } : {}
+    });
+  }
+
+  async getDepositById(id: string) {
+    console.log('💳 LN MARKETS DEPOSIT - Getting deposit by ID (API v2):', id);
+    return this.makeRequest({
+      method: 'GET',
+      path: `/user/deposits/${id}`
+    });
+  }
+
+  async createBitcoinDeposit(format: 'p2wpkh' | 'p2tr' = 'p2wpkh') {
+    console.log('💳 LN MARKETS DEPOSIT - Creating Bitcoin deposit (API v2):', { format });
+    return this.makeRequest({
+      method: 'POST',
+      path: '/user/deposits/bitcoin',
+      data: { format }
+    });
+  }
+
+  async createLightningDeposit(amount: number) {
+    console.log('⚡ LN MARKETS DEPOSIT - Creating Lightning deposit (API v2):', { amount });
+    return this.makeRequest({
+      method: 'POST',
+      path: '/user/deposits/lightning',
+      data: { amount }
+    });
+  }
+
+  async getWithdrawals(types?: string) {
+    console.log('💸 LN MARKETS WITHDRAWALS - Getting withdrawals (API v2):', { types });
+    return this.makeRequest({
+      method: 'GET',
+      path: '/user/withdrawals',
+      params: types ? { types } : {}
+    });
+  }
+
+  async getWithdrawalById(id: string) {
+    console.log('💸 LN MARKETS WITHDRAWAL - Getting withdrawal by ID (API v2):', id);
+    return this.makeRequest({
+      method: 'GET',
+      path: `/user/withdrawals/${id}`
+    });
+  }
+
+  async createWithdrawal(invoice: string) {
+    console.log('💸 LN MARKETS WITHDRAWAL - Creating withdrawal (API v2):', { invoice: invoice.substring(0, 50) + '...' });
+    return this.makeRequest({
+      method: 'POST',
+      path: '/user/withdrawals',
+      data: { invoice }
+    });
+  }
+
+  // Legacy method for backward compatibility
   async getMarketIndex() {
     try {
       console.log('🔍 LN MARKETS MARKET INDEX - Trying /futures/ticker endpoint');
@@ -933,8 +1040,8 @@ export class LNMarketsAPIService {
     try {
       const result = await this.makeRequest({
         method: 'GET',
-        path: '/futures/trades',
-        params: { status: 'open' }
+        path: '/futures',
+        params: { type: 'running' }
       });
       
       console.log('✅ LN MARKETS - Running trades retrieved:', result);

@@ -1,0 +1,192 @@
+import { FastifyInstance } from 'fastify';
+import { PrismaClient } from '@prisma/client';
+import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+import { authMiddleware } from '../middleware/auth.middleware';
+
+const prisma = new PrismaClient();
+
+export async function dashboardOptimizedRoutes(fastify: FastifyInstance) {
+  // Endpoint unificado para dados da dashboard
+  fastify.get(
+    '/lnmarkets/user/dashboard-optimized',
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        description: 'Get optimized dashboard data for LN Markets user',
+        tags: ['LN Markets - Dashboard'],
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  user: { type: 'object' },
+                  balance: { type: 'object' },
+                  positions: { type: 'array', items: { type: 'object' } },
+                  estimatedBalance: { type: 'object' },
+                  marketIndex: { type: 'object' },
+                  deposits: { type: 'array', items: { type: 'object' } },
+                  withdrawals: { type: 'array', items: { type: 'object' } },
+                  lastUpdate: { type: 'number' }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    async (request, reply) => {
+      try {
+        const user = (request as any).user;
+        const startTime = Date.now();
+        
+        console.log(`🚀 DASHBOARD OPTIMIZED - Starting unified data fetch for user: ${user.id}`);
+        
+        // Buscar credenciais do usuário
+        const userProfile = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { 
+            ln_markets_api_key: true, 
+            ln_markets_api_secret: true, 
+            ln_markets_passphrase: true 
+          }
+        });
+
+        if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+          return reply.status(400).send({
+            success: false,
+            error: 'MISSING_CREDENTIALS',
+            message: 'LN Markets credentials not configured'
+          });
+        }
+
+        // Descriptografar credenciais
+        const { AuthService } = await import('../services/auth.service');
+        const authService = new AuthService(prisma, {} as any);
+        
+        const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
+        const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
+        const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
+
+        // Criar instância do serviço LN Markets
+        const lnMarketsService = new LNMarketsAPIService({
+          apiKey,
+          apiSecret,
+          passphrase,
+          isTestnet: false
+        }, console);
+
+        console.log(`🔄 DASHBOARD OPTIMIZED - Fetching all data in parallel...`);
+        
+        // Buscar dados essenciais em paralelo (otimização principal) - LN Markets API v2
+        const [
+          userData,
+          balanceData,
+          positionsData,
+          marketData
+        ] = await Promise.allSettled([
+          lnMarketsService.getUser(),
+          lnMarketsService.getUserBalance(),
+          lnMarketsService.getUserPositions('running'),
+          lnMarketsService.getTicker()
+        ]);
+
+        // Buscar dados opcionais separadamente (podem falhar)
+        const [depositsData, withdrawalsData] = await Promise.allSettled([
+          lnMarketsService.getDeposits().catch(() => []),
+          lnMarketsService.getWithdrawals().catch(() => [])
+        ]);
+
+        // Processar respostas
+        console.log('🔍 DASHBOARD OPTIMIZED - Processing responses (API v2):', {
+          userData: userData.status,
+          balanceData: balanceData.status,
+          positionsData: positionsData.status,
+          marketData: marketData.status,
+          depositsData: depositsData.status,
+          withdrawalsData: withdrawalsData.status
+        });
+
+        const processedData = {
+          user: userData.status === 'fulfilled' ? userData.value : null,
+          balance: balanceData.status === 'fulfilled' ? balanceData.value : null,
+          positions: positionsData.status === 'fulfilled' ? positionsData.value || [] : [],
+          estimatedBalance: balanceData.status === 'fulfilled' ? balanceData.value : null, // Same as balance in API v2
+          trades: [], // LN Markets API v2 doesn't have separate trades endpoint
+          orders: [], // LN Markets API v2 doesn't have separate orders endpoint
+          history: [], // LN Markets API v2 doesn't have separate history endpoint
+          marketIndex: marketData.status === 'fulfilled' ? marketData.value : null,
+          deposits: depositsData.status === 'fulfilled' ? depositsData.value || [] : [],
+          withdrawals: withdrawalsData.status === 'fulfilled' ? withdrawalsData.value || [] : [],
+          lastUpdate: Date.now()
+        };
+
+        console.log('🔍 DASHBOARD OPTIMIZED - Raw balanceData:', balanceData);
+        console.log('🔍 DASHBOARD OPTIMIZED - Final balance:', processedData.balance);
+
+        console.log('🔍 DASHBOARD OPTIMIZED - Processed data (API v2):', {
+          user: processedData.user ? 'present' : 'null',
+          balance: processedData.balance ? 'present' : 'null',
+          positions: Array.isArray(processedData.positions) ? processedData.positions.length : 'not array',
+          estimatedBalance: processedData.estimatedBalance ? 'present' : 'null',
+          marketIndex: processedData.marketIndex ? 'present' : 'null',
+          deposits: Array.isArray(processedData.deposits) ? processedData.deposits.length : 'not array',
+          withdrawals: Array.isArray(processedData.withdrawals) ? processedData.withdrawals.length : 'not array'
+        });
+
+        console.log('🔍 DASHBOARD OPTIMIZED - Balance data details:', {
+          balanceData: balanceData.status,
+          balanceValue: balanceData.status === 'fulfilled' ? balanceData.value : 'rejected',
+          balanceType: typeof balanceData.status === 'fulfilled' ? balanceData.value : 'unknown'
+        });
+
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+        
+        console.log(`✅ DASHBOARD OPTIMIZED - Data fetched successfully in ${duration}ms for user: ${user.id}`);
+        console.log(`📊 DASHBOARD OPTIMIZED - Stats (API v2):`, {
+          positions: processedData.positions.length,
+          deposits: processedData.deposits.length,
+          withdrawals: processedData.withdrawals.length,
+          marketIndex: processedData.marketIndex ? 'present' : 'null',
+          duration: `${duration}ms`
+        });
+
+        return reply.send({
+          success: true,
+          data: processedData
+        });
+
+      } catch (error: any) {
+        const user = (request as any).user;
+        console.error(`❌ DASHBOARD OPTIMIZED - Error for user ${user.id}:`, error);
+        
+        // Tratamento de erro baseado no roadmap (Circuit Breaker)
+        if (error.message?.includes('credentials not configured')) {
+          return reply.status(400).send({
+            success: false,
+            error: 'MISSING_CREDENTIALS',
+            message: 'LN Markets credentials not configured'
+          });
+        }
+        
+        if (error.message?.includes('Invalid encrypted data format')) {
+          return reply.status(400).send({
+            success: false,
+            error: 'INVALID_CREDENTIALS',
+            message: 'LN Markets credentials are corrupted or encrypted with a different key. Please reconfigure your API credentials in settings.'
+          });
+        }
+
+        return reply.status(500).send({
+          success: false,
+          error: 'INTERNAL_ERROR',
+          message: 'Failed to fetch dashboard data'
+        });
+      }
+    }
+  );
+}
