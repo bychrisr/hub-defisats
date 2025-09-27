@@ -48,6 +48,10 @@ services:
       DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
       REDIS_URL: redis://redis:6379
       PORT: 3010
+      # LN Markets API - CORRIGIDO
+      LN_MARKETS_API_BASE_URL: "https://api.lnmarkets.com/v2"
+      LN_MARKETS_API_BASE_URL_TESTNET: "https://api.testnet4.lnmarkets.com/v2"
+      LN_MARKETS_API_BASE_URL_CURRENT: "https://api.lnmarkets.com/v2"
     ports:
       - "13010:3010"
     volumes:

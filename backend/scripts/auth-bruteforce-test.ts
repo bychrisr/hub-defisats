@@ -1,360 +1,320 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env npx tsx
 
 /**
- * TESTE DE GUERRILHA - AUTENTICAÇÃO LN MARKETS
+ * 🔥 SCRIPT DE TESTE DE AUTENTICAÇÃO BRUTEFORCE - LN MARKETS API v2
  * 
- * Testa TODAS as combinações possíveis de:
- * - Ordem da string de assinatura
- * - Codificação HMAC SHA256
+ * Este script testa TODAS as combinações possíveis de:
+ * 1. Ordem da string de assinatura
+ * 2. Codificação HMAC SHA256
  * 
- * Objetivo: Identificar a ÚNICA combinação que resulta em 200 OK
+ * Objetivo: Encontrar a combinação que resulta em 200 OK com a API da LN Markets
  */
 
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import axios from 'axios';
 
-// Configuração do banco
+// Configuração do banco de dados
 const prisma = new PrismaClient();
 
-// Credenciais válidas para teste direto (fallback)
-const FALLBACK_CREDENTIALS = {
-  apiKey: 'q4dbbRpWE2ZpfPV3GBqAFNLfQhXrcab2quz8FsxGZ7U=',
-  secret: 'bq9WimSkASMQo0eJ4IzVv6P7hC+OEY4GLnB+ztVrcfkA3XbL7826/fkUgHe8+2TZL6+J8NM2/RnTn3D/6gyE4A==',
-  passphrase: '#PassCursor'
+// Configuração de criptografia (mesma do AuthService)
+const config = {
+  security: {
+    encryption: {
+      key: process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production'
+    }
+  }
 };
 
-class AuthBruteforceTester {
-  private credentials: typeof FALLBACK_CREDENTIALS;
-  private testEndpoint = 'https://api.lnmarkets.com/v2/futures?type=running';
-  private testMethod = 'GET';
-  private testPath = '/v2/futures?type=running';
+/**
+ * Descriptografa dados usando a mesma lógica do AuthService
+ */
+function decryptData(encryptedData: string): string {
+  const algorithm = 'aes-256-cbc';
+  const key = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
 
-  constructor(credentials: typeof FALLBACK_CREDENTIALS) {
-    this.credentials = credentials;
+  const parts = encryptedData.split(':');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    throw new Error('Invalid encrypted data format');
   }
 
-  /**
-   * Carrega credenciais do banco de dados
-   */
-  async loadCredentialsFromDatabase(): Promise<boolean> {
-    try {
-      console.log('🔍 CARREGANDO CREDENCIAIS DO BANCO...');
-      
-      const user = await prisma.user.findFirst({
-        where: {
-          email: 'brainoschris@gmail.com'
-        },
-        select: {
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true
-        }
-      });
+  const iv = Buffer.from(parts[0] as string, 'hex');
+  const encrypted = parts[1] as string;
 
-      if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-        console.log('❌ CREDENCIAIS NÃO ENCONTRADAS NO BANCO, USANDO FALLBACK');
-        return false;
-      }
+  const decipher = crypto.createDecipheriv(algorithm, key, iv);
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
 
-      // Descriptografar credenciais
-      const { AuthService } = await import('../src/services/auth.service');
-      const authService = new AuthService(prisma, {} as any);
-      
-      this.credentials = {
-        apiKey: authService.decryptData(user.ln_markets_api_key),
-        secret: authService.decryptData(user.ln_markets_api_secret),
-        passphrase: authService.decryptData(user.ln_markets_passphrase)
-      };
+  return decrypted;
+}
 
-      console.log('✅ CREDENCIAIS CARREGADAS DO BANCO COM SUCESSO');
-      return true;
-    } catch (error: any) {
-      console.log('❌ ERRO AO CARREGAR CREDENCIAIS DO BANCO:', error.message);
-      return false;
-    }
+/**
+ * Gera assinatura HMAC SHA256 com diferentes codificações
+ */
+function generateSignature(message: string, secret: string, encoding: 'base64' | 'hex'): string {
+  return crypto
+    .createHmac('sha256', secret)
+    .update(message, 'utf8')
+    .digest(encoding);
+}
+
+/**
+ * Constrói mensagem de assinatura com diferentes ordens
+ */
+function buildMessage(
+  timestamp: string,
+  method: string,
+  path: string,
+  params: string,
+  order: string
+): string {
+  switch (order) {
+    case 'timestamp_method_path_params':
+      return timestamp + method + path + params;
+    case 'method_path_timestamp_params':
+      return method + path + timestamp + params;
+    case 'timestamp_method_v2_path_params':
+      return timestamp + method + '/v2' + path + params;
+    case 'method_v2_path_timestamp_params':
+      return method + '/v2' + path + timestamp + params;
+    case 'timestamp_method_path':
+      return timestamp + method + path;
+    case 'method_path_params_timestamp':
+      return method + path + params + timestamp;
+    case 'timestamp_method_path_params_empty':
+      return timestamp + method + path + (params || '');
+    case 'method_path_timestamp':
+      return method + path + timestamp;
+    case 'timestamp_path_method_params':
+      return timestamp + path + method + params;
+    case 'path_method_timestamp_params':
+      return path + method + timestamp + params;
+    default:
+      return timestamp + method + path + params;
   }
+}
 
-  /**
-   * Define todas as possíveis ordens da string de assinatura
-   */
-  getSignatureOrders(): Array<{
-    name: string;
-    buildMessage: (timestamp: string, method: string, path: string, params: string) => string;
-  }> {
-    return [
-      {
-        name: 'timestamp + method + path + params',
-        buildMessage: (t, m, p, params) => `${t}${m}${p}${params}`
-      },
-      {
-        name: 'method + path + timestamp + params',
-        buildMessage: (t, m, p, params) => `${m}${p}${t}${params}`
-      },
-      {
-        name: 'method + /v2 + path + timestamp + params',
-        buildMessage: (t, m, p, params) => `${m}/v2${p}${t}${params}`
-      },
-      {
-        name: 'timestamp + method + /v2 + path + params',
-        buildMessage: (t, m, p, params) => `${t}${m}/v2${p}${params}`
-      },
-      {
-        name: 'method + path + params + timestamp',
-        buildMessage: (t, m, p, params) => `${m}${p}${params}${t}`
-      },
-      {
-        name: 'timestamp + method + path (sem params)',
-        buildMessage: (t, m, p, params) => `${t}${m}${p}`
-      },
-      {
-        name: 'method + path + timestamp (sem params)',
-        buildMessage: (t, m, p, params) => `${m}${p}${t}`
-      },
-      {
-        name: 'timestamp + method + /v2 + path (sem params)',
-        buildMessage: (t, m, p, params) => `${t}${m}/v2${p}`
-      },
-      {
-        name: 'method + /v2 + path + timestamp (sem params)',
-        buildMessage: (t, m, p, params) => `${m}/v2${p}${t}`
-      },
-      {
-        name: 'timestamp + method + path + params + \\n',
-        buildMessage: (t, m, p, params) => `${t}${m}${p}${params}\n`
-      },
-      {
-        name: 'method + path + timestamp + params + \\n',
-        buildMessage: (t, m, p, params) => `${m}${p}${t}${params}\n`
-      },
-      {
-        name: 'timestamp + method + path + \\n + params',
-        buildMessage: (t, m, p, params) => `${t}${m}${p}\n${params}`
-      },
-      {
-        name: 'method + \\n + path + timestamp + params',
-        buildMessage: (t, m, p, params) => `${m}\n${p}${t}${params}`
-      },
-      {
-        name: 'timestamp + \\n + method + path + params',
-        buildMessage: (t, m, p, params) => `${t}\n${m}${p}${params}`
-      },
-      {
-        name: 'method + path + \\n + timestamp + params',
-        buildMessage: (t, m, p, params) => `${m}${p}\n${t}${params}`
-      }
-    ];
-  }
+/**
+ * Testa uma combinação específica de ordem e codificação
+ */
+async function testCombination(
+  apiKey: string,
+  apiSecret: string,
+  passphrase: string,
+  order: string,
+  encoding: 'base64' | 'hex',
+  testEndpoint: string = '/user'
+): Promise<{ success: boolean; status: number; response: any; error?: string }> {
+  try {
+    const timestamp = Date.now().toString();
+    const method = 'GET';
+    const path = testEndpoint;
+    const params = ''; // GET request sem parâmetros
 
-  /**
-   * Define todas as possíveis codificações HMAC
-   */
-  getHmacEncodings(): Array<{
-    name: string;
-    digest: (hmac: crypto.Hmac) => string;
-  }> {
-    return [
-      {
-        name: 'base64',
-        digest: (hmac) => hmac.digest('base64')
-      },
-      {
-        name: 'hex',
-        digest: (hmac) => hmac.digest('hex')
-      },
-      {
-        name: 'base64url',
-        digest: (hmac) => hmac.digest('base64url')
-      },
-      {
-        name: 'latin1',
-        digest: (hmac) => hmac.digest('latin1')
-      }
-    ];
-  }
-
-  /**
-   * Testa uma combinação específica
-   */
-  async testCombination(
-    orderName: string,
-    encodingName: string,
-    orderBuilder: (t: string, m: string, p: string, params: string) => string,
-    encodingDigest: (hmac: crypto.Hmac) => string
-  ): Promise<{
-    success: boolean;
-    status?: number;
-    message?: string;
-    response?: any;
-  }> {
-    try {
-      const timestamp = Date.now().toString();
-      const method = this.testMethod;
-      const path = this.testPath;
-      const params = 'type=running'; // Parâmetros da query string
-
-      // Construir mensagem usando a ordem específica
-      const message = orderBuilder(timestamp, method, path, params);
-      
-      console.log(`\n🧪 TESTANDO: ${orderName} + ${encodingName}`);
-      console.log(`📝 Mensagem: "${message}"`);
-
-      // Gerar assinatura usando a codificação específica
-      const hmac = crypto.createHmac('sha256', this.credentials.secret);
-      hmac.update(message, 'utf8');
-      const signature = encodingDigest(hmac);
-
-      console.log(`🔐 Assinatura: ${signature.substring(0, 20)}...`);
-
-      // Fazer requisição para LN Markets
-      const response = await axios.get(this.testEndpoint, {
-        headers: {
-          'LNM-ACCESS-KEY': this.credentials.apiKey,
-          'LNM-ACCESS-SIGNATURE': signature,
-          'LNM-ACCESS-PASSPHRASE': this.credentials.passphrase,
-          'LNM-ACCESS-TIMESTAMP': timestamp,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        timeout: 10000
-      });
-
-      console.log(`✅ SUCESSO! Status: ${response.status}`);
-      console.log(`📊 Dados:`, JSON.stringify(response.data, null, 2));
-
-      return {
-        success: true,
-        status: response.status,
-        message: 'SUCCESS',
-        response: response.data
-      };
-
-    } catch (error: any) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message || error.message;
-      
-      console.log(`❌ FALHOU! Status: ${status}, Mensagem: ${message}`);
-
-      return {
-        success: false,
-        status,
-        message
-      };
-    }
-  }
-
-  /**
-   * Executa o teste de guerrilha completo
-   */
-  async runBruteforceTest(): Promise<void> {
-    console.log('🚀 INICIANDO TESTE DE GUERRILHA - AUTENTICAÇÃO LN MARKETS');
-    console.log('================================================================');
+    // Construir mensagem de acordo com a ordem
+    const message = buildMessage(timestamp, method, path, params, order);
     
-    // Carregar credenciais
-    const credentialsLoaded = await this.loadCredentialsFromDatabase();
-    if (!credentialsLoaded) {
-      console.log('⚠️ USANDO CREDENCIAIS FALLBACK');
-    }
+    // Gerar assinatura com a codificação específica
+    const signature = generateSignature(message, apiSecret, encoding);
 
-    console.log(`\n🔑 CREDENCIAIS DE TESTE:`);
-    console.log(`   API Key: ${this.credentials.apiKey.substring(0, 20)}...`);
-    console.log(`   Secret: ${this.credentials.secret.substring(0, 20)}...`);
-    console.log(`   Passphrase: ${this.credentials.passphrase}`);
-
-    const orders = this.getSignatureOrders();
-    const encodings = this.getHmacEncodings();
-    
-    console.log(`\n📊 COMBINAÇÕES A TESTAR: ${orders.length} ordens × ${encodings.length} codificações = ${orders.length * encodings.length} total`);
-
-    let winnerFound = false;
-    let testCount = 0;
-    const totalTests = orders.length * encodings.length;
-
-    for (const order of orders) {
-      if (winnerFound) break;
-      
-      for (const encoding of encodings) {
-        testCount++;
-        console.log(`\n🔄 TESTE ${testCount}/${totalTests}`);
-        
-        const result = await this.testCombination(
-          order.name,
-          encoding.name,
-          order.buildMessage,
-          encoding.digest
-        );
-
-        if (result.success) {
-          console.log('\n🎉🎉🎉 COMBINAÇÃO VENCEDORA ENCONTRADA! 🎉🎉🎉');
-          console.log('================================================================');
-          console.log(`✅ ORDEM: ${order.name}`);
-          console.log(`✅ CODIFICAÇÃO: ${encoding.name}`);
-          console.log(`✅ STATUS: ${result.status}`);
-          console.log(`✅ MENSAGEM: ${result.message}`);
-          console.log('================================================================');
-          
-          // Salvar combinação vencedora
-          await this.saveWinningCombination(order.name, encoding.name, result);
-          
-          winnerFound = true;
-          break;
-        }
-
-        // Pequena pausa entre testes para não sobrecarregar a API
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-
-    if (!winnerFound) {
-      console.log('\n❌❌❌ NENHUMA COMBINAÇÃO FUNCIONOU! ❌❌❌');
-      console.log('================================================================');
-      console.log('Todas as combinações testadas falharam.');
-      console.log('Possíveis causas:');
-      console.log('- Credenciais inválidas');
-      console.log('- API da LN Markets offline');
-      console.log('- Formato de autenticação mudou');
-      console.log('- Endpoint de teste incorreto');
-      console.log('================================================================');
-    }
-
-    console.log('\n✅ TESTE DE GUERRILHA CONCLUÍDO');
-  }
-
-  /**
-   * Salva a combinação vencedora em arquivo
-   */
-  async saveWinningCombination(order: string, encoding: string, result: any): Promise<void> {
-    const winningData = {
-      timestamp: new Date().toISOString(),
-      order,
-      encoding,
-      status: result.status,
-      message: result.message,
-      credentials: {
-        apiKey: this.credentials.apiKey.substring(0, 20) + '...',
-        secret: this.credentials.secret.substring(0, 20) + '...',
-        passphrase: this.credentials.passphrase
-      },
-      testEndpoint: this.testEndpoint,
-      testMethod: this.testMethod,
-      testPath: this.testPath
+    // Headers de autenticação
+    const headers = {
+      'LNM-ACCESS-KEY': apiKey,
+      'LNM-ACCESS-SIGNATURE': signature,
+      'LNM-ACCESS-PASSPHRASE': passphrase,
+      'LNM-ACCESS-TIMESTAMP': timestamp,
+      'Content-Type': 'application/json'
     };
 
-    const fs = await import('fs');
-    const path = await import('path');
-    
-    const filePath = path.join(__dirname, 'winning-auth-combination.json');
-    fs.writeFileSync(filePath, JSON.stringify(winningData, null, 2));
-    
-    console.log(`💾 COMBINAÇÃO VENCEDORA SALVA EM: ${filePath}`);
+    // Fazer requisição para a API da LN Markets
+    const response = await axios.get(`https://api.lnmarkets.com/v2${testEndpoint}`, {
+      headers,
+      timeout: 10000
+    });
+
+    return {
+      success: true,
+      status: response.status,
+      response: response.data
+    };
+
+  } catch (error: any) {
+    return {
+      success: false,
+      status: error.response?.status || 0,
+      response: error.response?.data || null,
+      error: error.message
+    };
   }
 }
 
-// Executar teste
+/**
+ * Função principal do script
+ */
 async function main() {
-  const tester = new AuthBruteforceTester(FALLBACK_CREDENTIALS);
-  await tester.runBruteforceTest();
-  await prisma.$disconnect();
+  console.log('🔥 INICIANDO TESTE DE AUTENTICAÇÃO BRUTEFORCE - LN MARKETS API v2');
+  console.log('=' .repeat(80));
+
+  try {
+    // 1. Conectar ao banco de dados
+    console.log('📊 Conectando ao banco de dados...');
+    await prisma.$connect();
+    console.log('✅ Conectado ao banco de dados');
+
+    // 2. Buscar credenciais do usuário brainoschris@gmail.com
+    console.log('🔍 Buscando credenciais do usuário brainoschris@gmail.com...');
+    const user = await prisma.user.findUnique({
+      where: { email: 'brainoschris@gmail.com' },
+      select: {
+        id: true,
+        email: true,
+        ln_markets_api_key: true,
+        ln_markets_api_secret: true,
+        ln_markets_passphrase: true
+      }
+    });
+
+    if (!user) {
+      throw new Error('Usuário brainoschris@gmail.com não encontrado');
+    }
+
+    if (!user.ln_markets_api_key || !user.ln_markets_api_secret || !user.ln_markets_passphrase) {
+      throw new Error('Credenciais LN Markets não encontradas para o usuário');
+    }
+
+    console.log('✅ Usuário encontrado:', user.email);
+
+    // 3. Descriptografar credenciais
+    console.log('🔐 Descriptografando credenciais...');
+    let apiKey: string, apiSecret: string, passphrase: string;
+
+    try {
+      apiKey = decryptData(user.ln_markets_api_key);
+      apiSecret = decryptData(user.ln_markets_api_secret);
+      passphrase = decryptData(user.ln_markets_passphrase);
+      console.log('✅ Credenciais descriptografadas com sucesso');
+    } catch (error) {
+      console.log('⚠️ Erro na descriptografia, usando credenciais em texto plano');
+      apiKey = user.ln_markets_api_key;
+      apiSecret = user.ln_markets_api_secret;
+      passphrase = user.ln_markets_passphrase;
+    }
+
+    console.log('🔑 Credenciais obtidas:', {
+      apiKey: apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING',
+      apiSecret: apiSecret ? `${apiSecret.substring(0, 10)}...` : 'MISSING',
+      passphrase: passphrase ? `${passphrase.substring(0, 5)}...` : 'MISSING'
+    });
+
+    // 4. Definir todas as combinações possíveis
+    const signatureOrders = [
+      'timestamp_method_path_params',
+      'method_path_timestamp_params',
+      'timestamp_method_v2_path_params',
+      'method_v2_path_timestamp_params',
+      'timestamp_method_path',
+      'method_path_params_timestamp',
+      'timestamp_method_path_params_empty',
+      'method_path_timestamp',
+      'timestamp_path_method_params',
+      'path_method_timestamp_params'
+    ];
+
+    const encodings: ('base64' | 'hex')[] = ['base64', 'hex'];
+
+    console.log('🎯 Testando', signatureOrders.length * encodings.length, 'combinações...');
+    console.log('📋 Ordens de assinatura:', signatureOrders);
+    console.log('🔤 Codificações:', encodings);
+    console.log('=' .repeat(80));
+
+    // 5. Testar todas as combinações
+    let successFound = false;
+    const results: Array<{
+      order: string;
+      encoding: string;
+      success: boolean;
+      status: number;
+      response: any;
+      error?: string;
+    }> = [];
+
+    for (const order of signatureOrders) {
+      for (const encoding of encodings) {
+        console.log(`🧪 Testando: ${order} + ${encoding}`);
+        
+        const result = await testCombination(apiKey, apiSecret, passphrase, order, encoding);
+        
+        results.push({
+          order,
+          encoding,
+          success: result.success,
+          status: result.status,
+          response: result.response,
+          error: result.error
+        });
+
+        if (result.success && result.status === 200) {
+          console.log('🎉 SUCESSO ENCONTRADO!');
+          console.log('✅ Combinação vencedora:', { order, encoding });
+          console.log('📊 Status:', result.status);
+          console.log('📄 Resposta:', JSON.stringify(result.response, null, 2));
+          successFound = true;
+          break;
+        } else {
+          console.log(`❌ Falhou: ${result.status} - ${result.error || 'Unknown error'}`);
+        }
+      }
+      
+      if (successFound) break;
+    }
+
+    // 6. Relatório final
+    console.log('=' .repeat(80));
+    console.log('📊 RELATÓRIO FINAL DO TESTE BRUTEFORCE');
+    console.log('=' .repeat(80));
+
+    if (successFound) {
+      const winningResult = results.find(r => r.success && r.status === 200);
+      console.log('🎉 COMBINAÇÃO VENCEDORA ENCONTRADA:');
+      console.log('📋 Ordem:', winningResult?.order);
+      console.log('🔤 Codificação:', winningResult?.encoding);
+      console.log('📊 Status:', winningResult?.status);
+      console.log('📄 Resposta:', JSON.stringify(winningResult?.response, null, 2));
+    } else {
+      console.log('❌ NENHUMA COMBINAÇÃO FUNCIONOU');
+      console.log('📊 Resumo dos resultados:');
+      
+      const statusCounts: { [key: number]: number } = {};
+      results.forEach(r => {
+        statusCounts[r.status] = (statusCounts[r.status] || 0) + 1;
+      });
+      
+      Object.entries(statusCounts).forEach(([status, count]) => {
+        console.log(`   Status ${status}: ${count} tentativas`);
+      });
+      
+      console.log('🔍 Primeiros 5 resultados detalhados:');
+      results.slice(0, 5).forEach((result, index) => {
+        console.log(`   ${index + 1}. ${result.order} + ${result.encoding}: ${result.status} - ${result.error || 'OK'}`);
+      });
+    }
+
+    console.log('=' .repeat(80));
+    console.log('🏁 TESTE BRUTEFORCE CONCLUÍDO');
+
+  } catch (error) {
+    console.error('❌ ERRO CRÍTICO:', error);
+    process.exit(1);
+  } finally {
+    // Fechar conexão com o banco
+    await prisma.$disconnect();
+    console.log('🔌 Conexão com banco de dados fechada');
+  }
 }
 
-main().catch(console.error);
+// Executar o script
+if (require.main === module) {
+  main().catch(console.error);
+}
+
+export { main };

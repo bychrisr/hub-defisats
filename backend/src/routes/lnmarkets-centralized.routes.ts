@@ -247,60 +247,94 @@ export async function lnmarketsCentralizedRoutes(fastify: FastifyInstance) {
         console.log(`🔍 [${requestId}] authService.decryptData:`, typeof authService.decryptData);
         
         let credentials;
-        try {
-          console.log(`🔍 [${requestId}] About to decrypt credentials...`);
-          console.log(`🔍 [${requestId}] Encrypted API Key length:`, userProfile.ln_markets_api_key?.length);
-          console.log(`🔍 [${requestId}] Encrypted API Secret length:`, userProfile.ln_markets_api_secret?.length);
-          console.log(`🔍 [${requestId}] Encrypted Passphrase length:`, userProfile.ln_markets_passphrase?.length);
-          
-          console.log(`🔍 [${requestId}] Decrypting API Key...`);
-          const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
-          console.log(`✅ [${requestId}] API Key decrypted successfully`);
-          console.log(`🔍 [${requestId}] Decrypted API Key length:`, apiKey?.length);
-          
-          console.log(`🔍 [${requestId}] Decrypting API Secret...`);
-          const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
-          console.log(`✅ [${requestId}] API Secret decrypted successfully`);
-          console.log(`🔍 [${requestId}] Decrypted API Secret length:`, apiSecret?.length);
-          
-          console.log(`🔍 [${requestId}] Decrypting Passphrase...`);
-          const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
-          console.log(`✅ [${requestId}] Passphrase decrypted successfully`);
-          console.log(`🔍 [${requestId}] Decrypted Passphrase length:`, passphrase?.length);
+        
+        // 🔍 DEBUG AVANÇADO - Verificar formato das credenciais
+        console.log(`🔍 DEBUG AVANÇADO - API Key format:`, {
+          value: userProfile.ln_markets_api_key,
+          startsWithColon: userProfile.ln_markets_api_key?.includes(':'),
+          hasHexFormat: /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || ''),
+          length: userProfile.ln_markets_api_key?.length
+        });
+        console.log(`🔍 DEBUG AVANÇADO - API Secret format:`, {
+          value: userProfile.ln_markets_api_secret,
+          startsWithColon: userProfile.ln_markets_api_secret?.includes(':'),
+          hasHexFormat: /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_secret || ''),
+          length: userProfile.ln_markets_api_secret?.length
+        });
+        console.log(`🔍 DEBUG AVANÇADO - Passphrase format:`, {
+          value: userProfile.ln_markets_passphrase,
+          startsWithColon: userProfile.ln_markets_passphrase?.includes(':'),
+          hasHexFormat: /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_passphrase || ''),
+          length: userProfile.ln_markets_passphrase?.length
+        });
+        
+        // 🔧 SOLUÇÃO INTELIGENTE: Detectar se credenciais estão criptografadas ou não
+        const isEncrypted = userProfile.ln_markets_api_key?.includes(':') && 
+                           /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || '');
+        
+        console.log(`🔍 [${requestId}] Credentials encryption status:`, {
+          isEncrypted,
+          reason: isEncrypted ? 'Contains colon and hex format' : 'Plain text format'
+        });
+        
+        if (isEncrypted) {
+          // 🔐 CREDENCIAIS CRIPTOGRAFADAS - Tentar descriptografar
+          console.log(`🔍 [${requestId}] Credentials are encrypted, attempting decryption...`);
+          try {
+            console.log(`🔍 [${requestId}] Decrypting API Key...`);
+            const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
+            console.log(`✅ [${requestId}] API Key decrypted successfully`);
+            
+            console.log(`🔍 [${requestId}] Decrypting API Secret...`);
+            const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
+            console.log(`✅ [${requestId}] API Secret decrypted successfully`);
+            
+            console.log(`🔍 [${requestId}] Decrypting Passphrase...`);
+            const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
+            console.log(`✅ [${requestId}] Passphrase decrypted successfully`);
+            
+            credentials = {
+              apiKey,
+              apiSecret,
+              passphrase,
+            };
+            
+            console.log(`\n✅✅✅ [${requestId}] ===== DESCRIPTOGRAFIA OK =====`);
+            console.log(`✅ [${requestId}] All credentials decrypted successfully`);
+            console.log(`✅ [${requestId}] Decryption duration: ${Date.now() - decryptStartTime}ms`);
+            
+          } catch (decryptError: any) {
+            console.log(`\n❌❌❌ [${requestId}] ===== ERRO NA DESCRIPTOGRAFIA =====`);
+            console.error(`❌ [${requestId}] Decryption failed!`);
+            console.error(`❌ [${requestId}] Error message:`, decryptError.message);
+            
+            // FALLBACK: Usar credenciais de teste se descriptografia falhar
+            console.log(`\n🔄🔄🔄 [${requestId}] ===== USANDO FALLBACK =====`);
+            console.log(`🔄 [${requestId}] Using fallback test credentials`);
+            credentials = {
+              apiKey: 'test-api-key',
+              apiSecret: 'test-api-secret', 
+              passphrase: 'test-passphrase',
+            };
+            console.log(`🔄 [${requestId}] Fallback credentials set`);
+          }
+        } else {
+          // 🔓 CREDENCIAIS EM TEXTO PLANO - Usar diretamente
+          console.log(`\n✅✅✅ [${requestId}] ===== CREDENCIAIS EM TEXTO PLANO =====`);
+          console.log(`✅ [${requestId}] Using credentials directly (not encrypted)`);
           
           credentials = {
-            apiKey,
-            apiSecret,
-            passphrase,
+            apiKey: userProfile.ln_markets_api_key,
+            apiSecret: userProfile.ln_markets_api_secret,
+            passphrase: userProfile.ln_markets_passphrase,
           };
           
-          console.log(`\n✅✅✅ [${requestId}] ===== DESCRIPTOGRAFIA OK =====`);
-          console.log(`✅ [${requestId}] All credentials decrypted successfully`);
-          console.log(`✅ [${requestId}] Decryption duration: ${Date.now() - decryptStartTime}ms`);
+          console.log(`✅ [${requestId}] Direct credentials set successfully`);
           console.log(`📊 [${requestId}] Credentials summary:`, {
             apiKeyLength: credentials.apiKey?.length,
             apiSecretLength: credentials.apiSecret?.length,
             passphraseLength: credentials.passphrase?.length
           });
-          
-        } catch (decryptError: any) {
-          console.log(`\n❌❌❌ [${requestId}] ===== ERRO NA DESCRIPTOGRAFIA =====`);
-          console.error(`❌ [${requestId}] Decryption failed!`);
-          console.error(`❌ [${requestId}] Error message:`, decryptError.message);
-          console.error(`❌ [${requestId}] Error type:`, typeof decryptError);
-          console.error(`❌ [${requestId}] Error constructor:`, decryptError.constructor.name);
-          console.error(`❌ [${requestId}] Error stack:`, decryptError.stack);
-          console.error(`❌ [${requestId}] Decryption duration before error: ${Date.now() - decryptStartTime}ms`);
-          
-          // FALLBACK: Usar credenciais de teste se descriptografia falhar
-          console.log(`\n🔄🔄🔄 [${requestId}] ===== USANDO FALLBACK =====`);
-          console.log(`🔄 [${requestId}] Using fallback test credentials`);
-          credentials = {
-            apiKey: 'test-api-key',
-            apiSecret: 'test-api-secret', 
-            passphrase: 'test-passphrase',
-          };
-          console.log(`🔄 [${requestId}] Fallback credentials set`);
         }
 
         // ========================================================================

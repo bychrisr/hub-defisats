@@ -38,9 +38,10 @@ export class LNMarketsAPIService {
     });
     
     this.credentials = credentials;
+    // 🎯 TESTE 1: ABORDAGEM ANTIGA QUE FUNCIONAVA
     this.baseURL = credentials.isTestnet 
-      ? config.LN_MARKETS_API_BASE_URL_TESTNET
-      : config.LN_MARKETS_API_BASE_URL;
+      ? 'https://api.testnet4.lnmarkets.com/v2'
+      : 'https://api.lnmarkets.com/v2';
     
     console.log('🚨 TESTE SIMPLES - BaseURL:', this.baseURL);
     
@@ -121,8 +122,9 @@ export class LNMarketsAPIService {
       });
     }
     
-    // Create signature using: timestamp + method + path + params
-    const message = timestamp + method + path + params;
+    // Create signature using: timestamp + method + '/v2' + path + params
+    // CRITICAL FIX: LN Markets API v2 requires '/v2' in the signature string
+    const message = timestamp + method + '/v2' + path + params;
     console.log('🔐 LN MARKETS AUTH - Message para assinatura:', `"${message}"`);
     console.log('🔐 LN MARKETS AUTH - Signature components:', {
       timestamp,
@@ -161,6 +163,16 @@ export class LNMarketsAPIService {
       'LNM-ACCESS-PASSPHRASE': config.headers['LNM-ACCESS-PASSPHRASE'] ? `${String(config.headers['LNM-ACCESS-PASSPHRASE']).substring(0, 5)}...` : 'MISSING',
       'LNM-ACCESS-TIMESTAMP': config.headers['LNM-ACCESS-TIMESTAMP']
     });
+
+    // 🚨 AUDITORIA TOTAL - LOGS COMPLETOS PARA DEBUGGING
+    console.log('🚨 AUDITORIA TOTAL - HEADERS COMPLETOS:');
+    console.log('🚨 LNM-ACCESS-KEY COMPLETO:', config.headers['LNM-ACCESS-KEY']);
+    console.log('🚨 LNM-ACCESS-SIGNATURE COMPLETO:', config.headers['LNM-ACCESS-SIGNATURE']);
+    console.log('🚨 LNM-ACCESS-PASSPHRASE COMPLETO:', config.headers['LNM-ACCESS-PASSPHRASE']);
+    console.log('🚨 LNM-ACCESS-TIMESTAMP COMPLETO:', config.headers['LNM-ACCESS-TIMESTAMP']);
+    console.log('🚨 URL FINAL:', `${this.baseURL}${path}`);
+    console.log('🚨 MÉTODO:', method);
+    console.log('🚨 TODOS OS HEADERS:', JSON.stringify(config.headers, null, 2));
 
     // Set content type for POST/PUT requests
     if (method === 'POST' || method === 'PUT') {

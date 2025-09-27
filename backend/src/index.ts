@@ -7,6 +7,7 @@ import { automationReportsRoutes } from './routes/automation-reports.routes';
 import { tradeLogRoutes } from './routes/trade-log.routes';
 import { profileRoutes } from './routes/profile.routes';
 import { lnmarketsCentralizedRoutes } from './routes/lnmarkets-centralized.routes';
+import { lnmarketsRobustRoutes } from './routes/lnmarkets-robust.routes';
 import { dashboardOptimizedRoutes } from './routes/dashboard-optimized.routes';
 import { marketDataRoutes } from './routes/market-data.routes';
 import { couponAdminRoutes } from './routes/coupon-admin.routes';
@@ -533,6 +534,10 @@ async function registerRoutes() {
   // LN Markets Centralized routes - ALL LN Markets functionality in one place
   await fastify.register(lnmarketsCentralizedRoutes, { prefix: '/api/lnmarkets-v2' });
   console.log('✅ LN Markets Centralized routes registered');
+
+  // LN Markets Robust routes - ESTRATÉGIA HÍBRIDA E OTIMIZADA
+  await fastify.register(lnmarketsRobustRoutes, { prefix: '/api/lnmarkets-robust' });
+  console.log('✅ LN Markets Robust routes registered');
 
   // Dashboard Optimized routes já registrado acima
 
