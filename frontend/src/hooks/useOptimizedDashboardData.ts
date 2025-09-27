@@ -39,18 +39,18 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
   const isAdmin = user?.is_admin || false;
 
   const fetchDashboardData = useCallback(async () => {
-    // Pular para admins - eles não têm credenciais LN Markets
-    // TEMPORARIAMENTE COMENTADO PARA TESTE
-    // if (isAdmin) {
-    //   console.log('🔍 OPTIMIZED DASHBOARD - Admin user, skipping LN Markets queries...');
-    //   setIsLoading(false);
-    //   return;
-    // }
-
     if (!isAuthenticated || !user?.id) {
       console.log('🔍 OPTIMIZED DASHBOARD - User not authenticated, skipping...');
       return;
     }
+
+    // Log para debug
+    console.log('🔍 OPTIMIZED DASHBOARD - User authenticated:', {
+      userId: user.id,
+      isAdmin: isAdmin,
+      email: user.email,
+      token: localStorage.getItem('access_token') ? 'EXISTS' : 'MISSING'
+    });
 
     try {
       setIsLoading(true);
@@ -102,8 +102,18 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
 
   // Carregar dados inicialmente
   useEffect(() => {
+    console.log('🔍 OPTIMIZED DASHBOARD - useEffect triggered:', {
+      isAuthenticated,
+      userId: user?.id,
+      isAdmin,
+      token: localStorage.getItem('access_token') ? 'EXISTS' : 'MISSING'
+    });
+    
     if (isAuthenticated && user?.id) {
+      console.log('🚀 OPTIMIZED DASHBOARD - Calling fetchDashboardData...');
       fetchDashboardData();
+    } else {
+      console.log('❌ OPTIMIZED DASHBOARD - Not authenticated or no user ID');
     }
   }, [isAuthenticated, user?.id, isAdmin]);
 
