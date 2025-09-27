@@ -133,14 +133,5 @@ export async function lnmarketsRefactoredRoutes(fastify: FastifyInstance) {
     handler: tradingController.closeAllTrades.bind(tradingController)
   });
 
-  // Test connection routes
-  fastify.get('/test-connection', {
-    preHandler: [fastify.authenticate],
-    handler: marketController.testConnection.bind(marketController)
-  });
-
-  fastify.get('/user/test-connection', {
-    preHandler: [fastify.authenticate],
-    handler: userController.testConnection.bind(userController)
-  });
+  // Test connection routes (removed to avoid conflicts with existing routes)
 }

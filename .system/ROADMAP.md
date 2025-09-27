@@ -4,10 +4,10 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v1.11.0 ✅ COMPLETA
+## Status Atual: v1.11.1 ✅ COMPLETA
 
-**Versão**: v1.11.0  
-**Status**: Sistema Completo com Refatoração LN Markets API v2  
+**Versão**: v1.11.1  
+**Status**: Sistema Completo com Integração Final LN Markets API v2  
 **Data**: 2025-01-25
 
 ### Funcionalidades Implementadas
@@ -60,6 +60,12 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **CRÍTICO**: Assinatura HMAC-SHA256 com Formato Correto (method + '/v2' + path + timestamp + paramsString)
 - ✅ **CRÍTICO**: Codificação Base64 Conforme Histórico de Debugging
 - ✅ **CRÍTICO**: Isolamento de Lógica de Autenticação em Serviço Dedicado
+- ✅ **NOVO**: Integração Final da Refatoração LN Markets API v2
+- ✅ **NOVO**: Rotas Refatoradas Registradas em /api/lnmarkets/v2/
+- ✅ **NOVO**: Testes Unitários 100% Funcionais (21/21)
+- ✅ **NOVO**: Conflitos de Rotas Resolvidos
+- ✅ **NOVO**: Autenticação Funcional com Respostas Apropriadas
+- ✅ **NOVO**: Arquitetura Modular Integrada ao Sistema
 
 ---
 

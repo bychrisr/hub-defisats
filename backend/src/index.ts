@@ -10,6 +10,7 @@ import { lnmarketsFuturesRoutes } from './routes/lnmarkets-futures.routes';
 import { lnmarketsOptionsRoutes } from './routes/lnmarkets-options.routes';
 import { lnmarketsUserOptimizedRoutes } from './routes/lnmarkets-user-optimized.routes';
 import { lnmarketsMarketRoutes } from './routes/lnmarkets-market.routes';
+import { lnmarketsRefactoredRoutes } from './routes/lnmarkets-refactored.routes';
 import { dashboardOptimizedRoutes } from './routes/dashboard-optimized.routes';
 import { marketDataRoutes } from './routes/market-data.routes';
 import { couponAdminRoutes } from './routes/coupon-admin.routes';
@@ -533,7 +534,11 @@ async function registerRoutes() {
   await fastify.register(dashboardOptimizedRoutes, { prefix: '/api' });
   console.log('✅ LN Markets Dashboard Optimized routes registered');
 
-  // LN Markets Market Data routes - PRIMEIRO (mais genérico)
+  // LN Markets Refactored routes - PRIMEIRO (highest priority)
+  await fastify.register(lnmarketsRefactoredRoutes, { prefix: '/api/lnmarkets/v2' });
+  console.log('✅ LN Markets Refactored routes registered');
+
+  // LN Markets Market Data routes - SEGUNDO (mais genérico)
   await fastify.register(lnmarketsMarketRoutes, { prefix: '/api' });
   console.log('✅ LN Markets Market Data routes registered');
 

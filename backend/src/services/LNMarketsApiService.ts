@@ -37,7 +37,6 @@ export interface LNMarketsCredentials extends ExchangeCredentials {
 
 export class LNMarketsApiService extends BaseExchangeApiService {
   private client: AxiosInstance;
-  private credentials: LNMarketsCredentials;
   private baseURL: string;
   private circuitBreaker: CircuitBreaker;
   private retryService: RetryService;
@@ -645,7 +644,7 @@ export class LNMarketsApiService extends BaseExchangeApiService {
   }
 
   isSandbox(): boolean {
-    return this.credentials.isTestnet || false;
+    return (this.credentials as LNMarketsCredentials).isTestnet || false;
   }
 
   async getRateLimit(): Promise<ExchangeApiResponse<{ remaining: number; reset: Date }>> {
@@ -664,21 +663,5 @@ export class LNMarketsApiService extends BaseExchangeApiService {
       return [];
     }
     return response.data || [];
-  }
-
-  async getTicker() {
-    const response = await this.getTicker('BTCUSD');
-    if (!response.success) {
-      return null;
-    }
-    return response.data;
-  }
-
-  async closePosition(tradeId: string) {
-    const response = await this.closePosition({ positionId: tradeId });
-    if (!response.success) {
-      throw new Error(response.error || 'Failed to close position');
-    }
-    return response.data;
   }
 }

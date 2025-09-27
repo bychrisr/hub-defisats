@@ -81,7 +81,7 @@ export function getLNMarketsEndpointsByCategory(category: LNMarketsEndpointCateg
 // Helper function to get category of an endpoint
 export function getLNMarketsEndpointCategory(key: LNMarketsEndpointKey): LNMarketsEndpointCategory | null {
   for (const [category, endpoints] of Object.entries(LN_MARKETS_ENDPOINT_CATEGORIES)) {
-    if (endpoints.includes(key as any)) {
+    if ((endpoints as unknown as string[]).includes(key)) {
       return category as LNMarketsEndpointCategory;
     }
   }
