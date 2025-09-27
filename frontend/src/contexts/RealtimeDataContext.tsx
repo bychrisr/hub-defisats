@@ -60,6 +60,13 @@ interface RealtimeDataContextType {
 const RealtimeDataContext = createContext<RealtimeDataContextType | undefined>(undefined);
 
 export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Verificação imediata de porta errada
+  if (typeof window !== 'undefined' && (window.location.port === '13010' || window.location.host === 'localhost:13010')) {
+    console.log('⚠️ REALTIME - Detectado acesso direto ao backend, redirecionando imediatamente...');
+    window.location.replace(window.location.href.replace(':13010', ':13000'));
+    return <div>Redirecionando para frontend...</div>;
+  }
+
   const { user, isAuthenticated } = useAuthStore();
   
   // Verificar se é admin
@@ -169,14 +176,17 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
   // }, [data.marketData, data.positions.length]); // Add positions.length to dependencies
 
   // Verificar se está na porta errada ANTES de criar o WebSocket
-  if (window.location.port === '13010') {
+  if (window.location.port === '13010' || window.location.host === 'localhost:13010') {
     console.log('⚠️ REALTIME - Detectado acesso direto ao backend (porta 13010), redirecionando para frontend...');
-    window.location.href = window.location.href.replace(':13010', ':13000');
+    console.log('⚠️ REALTIME - window.location:', window.location.href);
+    window.location.replace(window.location.href.replace(':13010', ':13000'));
     return null; // Retornar null para evitar criação do WebSocket
   }
 
   // Gerar URL do WebSocket com verificação de porta
-  const wsUrl = (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname === 'localhost' ? 'localhost:13000' : window.location.host}/ws`) + '?userId=' + (user?.id || 'anonymous');
+  // SEMPRE usar localhost:13000 para desenvolvimento local
+  const wsHost = window.location.hostname === 'localhost' ? 'localhost:13000' : window.location.host;
+  const wsUrl = (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${wsHost}/ws`) + '?userId=' + (user?.id || 'anonymous');
   
   console.log('🔗 REALTIME - URL do WebSocket gerada:', wsUrl);
   console.log('🔗 REALTIME - window.location:', {
@@ -373,6 +383,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
       
       // Garantir que sempre use a porta do frontend (13000) para o proxy funcionar
+      // SEMPRE usar localhost:13000 para desenvolvimento local
       const host = window.location.hostname === 'localhost' ? 'localhost:13000' : window.location.host;
       const wsUrl = (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${host}/ws`) + '?userId=' + user.id;
       console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
