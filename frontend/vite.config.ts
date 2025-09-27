@@ -9,7 +9,8 @@ export default defineConfig(({ mode }) => ({
     port: 3001,
     hmr: {
       port: 3001,
-      host: 'localhost'
+      host: 'localhost',
+      clientPort: 13000 // Porta externa para HMR
     },
     proxy: {
       '/api': {
