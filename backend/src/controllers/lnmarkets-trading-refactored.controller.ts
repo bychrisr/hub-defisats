@@ -81,7 +81,7 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
       }
 
       const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.closePosition(tradeId);
+      const result = await exchangeService.closePosition({ positionId: tradeId });
       
       if (!result.success) {
         return this.sendError(reply, 'POSITION_CLOSE_FAILED', result.error || 'Failed to close position');
@@ -117,20 +117,8 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
         return this.sendError(reply, 'INVALID_AMOUNT', 'Valid amount is required');
       }
 
-      const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.addMargin(tradeId, amount);
-      
-      if (!result.success) {
-        return this.sendError(reply, 'MARGIN_ADD_FAILED', result.error || 'Failed to add margin');
-      }
-
-      this.logger.info(`[TradingController] Margin added for user ${userId}`, {
-        userId,
-        tradeId,
-        amount
-      });
-
-      return this.sendSuccess(reply, result.data, 'Margin added successfully');
+      // TODO: addMargin not implemented in generic interface
+      return this.sendError(reply, 'NOT_IMPLEMENTED', 'Add margin not implemented in generic interface');
     } catch (error: any) {
       return this.handleExchangeError(error, reply, 'add margin');
     }
@@ -155,20 +143,8 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
         return this.sendError(reply, 'INVALID_QUANTITY', 'Valid quantity is required');
       }
 
-      const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.reducePosition(tradeId, quantity);
-      
-      if (!result.success) {
-        return this.sendError(reply, 'POSITION_REDUCE_FAILED', result.error || 'Failed to reduce position');
-      }
-
-      this.logger.info(`[TradingController] Position reduced for user ${userId}`, {
-        userId,
-        tradeId,
-        quantity
-      });
-
-      return this.sendSuccess(reply, result.data, 'Position reduced successfully');
+      // TODO: reducePosition not implemented in generic interface
+      return this.sendError(reply, 'NOT_IMPLEMENTED', 'Reduce position not implemented in generic interface');
     } catch (error: any) {
       return this.handleExchangeError(error, reply, 'reduce position');
     }
@@ -193,20 +169,8 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
         return this.sendError(reply, 'INVALID_TAKE_PROFIT', 'Valid take profit value is required');
       }
 
-      const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.updateTakeProfit(tradeId, takeProfit);
-      
-      if (!result.success) {
-        return this.sendError(reply, 'TAKE_PROFIT_UPDATE_FAILED', result.error || 'Failed to update take profit');
-      }
-
-      this.logger.info(`[TradingController] Take profit updated for user ${userId}`, {
-        userId,
-        tradeId,
-        takeProfit
-      });
-
-      return this.sendSuccess(reply, result.data, 'Take profit updated successfully');
+      // TODO: updateTakeProfit not implemented in generic interface
+      return this.sendError(reply, 'NOT_IMPLEMENTED', 'Update take profit not implemented in generic interface');
     } catch (error: any) {
       return this.handleExchangeError(error, reply, 'update take profit');
     }
@@ -231,20 +195,8 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
         return this.sendError(reply, 'INVALID_STOP_LOSS', 'Valid stop loss value is required');
       }
 
-      const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.updateStopLoss(tradeId, stopLoss);
-      
-      if (!result.success) {
-        return this.sendError(reply, 'STOP_LOSS_UPDATE_FAILED', result.error || 'Failed to update stop loss');
-      }
-
-      this.logger.info(`[TradingController] Stop loss updated for user ${userId}`, {
-        userId,
-        tradeId,
-        stopLoss
-      });
-
-      return this.sendSuccess(reply, result.data, 'Stop loss updated successfully');
+      // TODO: updateStopLoss not implemented in generic interface
+      return this.sendError(reply, 'NOT_IMPLEMENTED', 'Update stop loss not implemented in generic interface');
     } catch (error: any) {
       return this.handleExchangeError(error, reply, 'update stop loss');
     }
@@ -258,15 +210,8 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
       const userId = this.validateUser(request, reply);
       if (!userId) return;
 
-      const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.cancelAllTrades();
-      
-      if (!result.success) {
-        return this.sendError(reply, 'CANCEL_ALL_TRADES_FAILED', result.error || 'Failed to cancel all trades');
-      }
-
-      this.logger.info(`[TradingController] All trades cancelled for user ${userId}`);
-      return this.sendSuccess(reply, result.data, 'All trades cancelled successfully');
+      // TODO: cancelAllTrades not implemented in generic interface
+      return this.sendError(reply, 'NOT_IMPLEMENTED', 'Cancel all trades not implemented in generic interface');
     } catch (error: any) {
       return this.handleExchangeError(error, reply, 'cancel all trades');
     }
@@ -280,15 +225,8 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
       const userId = this.validateUser(request, reply);
       if (!userId) return;
 
-      const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.closeAllTrades();
-      
-      if (!result.success) {
-        return this.sendError(reply, 'CLOSE_ALL_TRADES_FAILED', result.error || 'Failed to close all trades');
-      }
-
-      this.logger.info(`[TradingController] All trades closed for user ${userId}`);
-      return this.sendSuccess(reply, result.data, 'All trades closed successfully');
+      // TODO: closeAllTrades not implemented in generic interface
+      return this.sendError(reply, 'NOT_IMPLEMENTED', 'Close all trades not implemented in generic interface');
     } catch (error: any) {
       return this.handleExchangeError(error, reply, 'close all trades');
     }

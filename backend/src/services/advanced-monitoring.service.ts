@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { PrismaClient } from '@prisma/client';
 import { Redis } from 'ioredis';
 import { config } from '../config/env';
-import { metrics } from './metrics.service';
+import { metrics } from './metrics-export';
 import { alerting } from './alerting.service';
 import type { Logger } from 'winston';
 

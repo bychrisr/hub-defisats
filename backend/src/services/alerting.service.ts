@@ -1,5 +1,5 @@
 import { monitoring } from './monitoring.service';
-import { metrics } from './metrics.service';
+import { metrics } from './metrics-export';
 import { config } from '../config/env';
 
 // Interface for metric values

@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import { AuthService } from '../services/auth.service';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { metrics } from '../services/metrics.service';
+import { metrics } from '../services/metrics-export';
 
 // Interfaces
 interface RegisterRequestBody {

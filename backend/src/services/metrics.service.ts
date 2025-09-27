@@ -47,20 +47,20 @@ export class MetricsService {
     
     // Initialize all metrics
     this.httpRequestDuration = new Histogram({
-      name: 'http_request_duration_seconds',
+      name: 'hub_defisats_http_request_duration_seconds',
       help: 'Duration of HTTP requests in seconds',
       labelNames: ['method', 'route', 'status_code'],
       buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
     });
 
     this.httpRequestTotal = new Counter({
-      name: 'http_requests_total',
+      name: 'hub_defisats_http_requests_total',
       help: 'Total number of HTTP requests',
       labelNames: ['method', 'route', 'status_code']
     });
 
     this.httpRequestErrors = new Counter({
-      name: 'http_request_errors_total',
+      name: 'hub_defisats_http_request_errors_total',
       help: 'Total number of HTTP request errors',
       labelNames: ['method', 'route', 'status_code']
     });
@@ -204,138 +204,17 @@ export class MetricsService {
         gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
       });
 
-      // HTTP Metrics
-      this.httpRequestDuration = new Histogram({
-        name: 'hub_defisats_http_request_duration_seconds',
-        help: 'Duration of HTTP requests in seconds',
-        labelNames: ['method', 'route', 'status_code'],
-        buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
-        registers: [register],
-      });
+      // HTTP Metrics - Already initialized in constructor
+      // No need to re-initialize here
 
-      this.httpRequestTotal = new Counter({
-        name: 'hub_defisats_http_requests_total',
-        help: 'Total number of HTTP requests',
-        labelNames: ['method', 'route', 'status_code'],
-        registers: [register],
-      });
+      // Database Metrics - Already initialized in constructor
+      // No need to re-initialize here
 
-      this.httpRequestErrors = new Counter({
-        name: 'hub_defisats_http_request_errors_total',
-        help: 'Total number of HTTP request errors',
-        labelNames: ['method', 'route', 'error_type'],
-        registers: [register],
-      });
+      // Redis Metrics - Already initialized in constructor
+      // No need to re-initialize here
 
-      // Database Metrics
-      this.dbQueryDuration = new Histogram({
-        name: 'hub_defisats_db_query_duration_seconds',
-        help: 'Duration of database queries in seconds',
-        labelNames: ['operation', 'table', 'status'],
-        buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
-        registers: [register],
-      });
-
-      this.dbQueryTotal = new Counter({
-        name: 'hub_defisats_db_queries_total',
-        help: 'Total number of database queries',
-        labelNames: ['operation', 'table', 'status'],
-        registers: [register],
-      });
-
-      this.dbConnectionPool = new Gauge({
-        name: 'hub_defisats_db_connection_pool_size',
-        help: 'Number of connections in the database pool',
-        labelNames: ['state'],
-        registers: [register],
-      });
-
-      // Redis Metrics
-      this.redisOperationDuration = new Histogram({
-        name: 'hub_defisats_redis_operation_duration_seconds',
-        help: 'Duration of Redis operations in seconds',
-        labelNames: ['operation', 'status'],
-        buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1],
-        registers: [register],
-      });
-
-      this.redisOperationTotal = new Counter({
-        name: 'hub_defisats_redis_operations_total',
-        help: 'Total number of Redis operations',
-        labelNames: ['operation', 'status'],
-        registers: [register],
-      });
-
-      this.redisConnectionPool = new Gauge({
-        name: 'hub_defisats_redis_connection_pool_size',
-        help: 'Number of connections in the Redis pool',
-        labelNames: ['state'],
-        registers: [register],
-      });
-
-      // Business Metrics
-      this.userRegistrations = new Counter({
-        name: 'hub_defisats_user_registrations_total',
-        help: 'Total number of user registrations',
-        labelNames: ['source'],
-        registers: [register],
-      });
-
-      this.userLogins = new Counter({
-        name: 'hub_defisats_user_logins_total',
-        help: 'Total number of user logins',
-        labelNames: ['method'],
-        registers: [register],
-      });
-
-      this.tradeExecutions = new Counter({
-        name: 'hub_defisats_trade_executions_total',
-        help: 'Total number of trade executions',
-        labelNames: ['symbol', 'side', 'status'],
-        registers: [register],
-      });
-
-      this.automationExecutions = new Counter({
-        name: 'hub_defisats_automation_executions_total',
-        help: 'Total number of automation executions',
-        labelNames: ['type', 'status'],
-        registers: [register],
-      });
-
-      this.alertTriggers = new Counter({
-        name: 'hub_defisats_alert_triggers_total',
-        help: 'Total number of alert triggers',
-        labelNames: ['type', 'severity'],
-        registers: [register],
-      });
-
-      // System Metrics
-      this.memoryUsage = new Gauge({
-        name: 'hub_defisats_memory_usage_bytes',
-        help: 'Memory usage in bytes',
-        labelNames: ['type'],
-        registers: [register],
-      });
-
-      this.cpuUsage = new Gauge({
-        name: 'hub_defisats_cpu_usage_percent',
-        help: 'CPU usage percentage',
-        registers: [register],
-      });
-
-      this.activeConnections = new Gauge({
-        name: 'hub_defisats_active_connections',
-        help: 'Number of active connections',
-        labelNames: ['type'],
-        registers: [register],
-      });
-
-      this.queueSize = new Gauge({
-        name: 'hub_defisats_queue_size',
-        help: 'Number of items in queue',
-        labelNames: ['queue_name'],
-        registers: [register],
-      });
+      // Business and System Metrics - Already initialized in constructor
+      // No need to re-initialize here
 
       this.isInitialized = true;
       this.logger.info('Metrics service initialized successfully');
@@ -737,13 +616,19 @@ export const getMetricsService = (logger: Logger): MetricsService => {
   return metricsInstance;
 };
 
-// Export metrics instance for direct use
-export const metrics = new MetricsService({
+// Export metrics instance for direct use (using singleton)
+// Only create once to avoid duplicate metric registration
+export const metrics = (() => {
+  if (!metricsInstance) {
+    metricsInstance = new MetricsService({
   info: () => {},
   error: () => {},
   warn: () => {},
   debug: () => {},
 } as any);
+  }
+  return metricsInstance;
+})();
 
 // Export Prometheus metrics for direct use
 export { Counter, Histogram, Gauge, Summary } from 'prom-client';

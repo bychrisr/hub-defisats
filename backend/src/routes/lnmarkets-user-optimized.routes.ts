@@ -46,7 +46,7 @@ export async function lnmarketsUserOptimizedRoutes(fastify: FastifyInstance) {
       console.log(`[DEPRECATION WARNING] Rota antiga chamada: ${request.method} ${request.url} por usuário ${(request as any).user?.id || 'anônimo'}`);
 
       // Registrar métricas de deprecação
-      const { metrics } = await import('../services/metrics.service');
+      const { metrics } = await import('../services/metrics-export');
       const startTime = Date.now();
 
       console.log('🔍 TICKER ENDPOINT - Called /api/lnmarkets/market/ticker');

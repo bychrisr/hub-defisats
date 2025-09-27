@@ -99,8 +99,13 @@ export abstract class ExchangeBaseController {
    * Validate user authentication
    */
   protected validateUser(request: FastifyRequest, reply: FastifyReply): string | null {
+    console.log('🔍 EXCHANGE BASE - validateUser called');
+    console.log('🔍 EXCHANGE BASE - request.user:', (request as any).user);
+    console.log('🔍 EXCHANGE BASE - request.headers:', request.headers);
+    
     const userId = (request as any).user?.id;
     if (!userId) {
+      console.log('❌ EXCHANGE BASE - No user ID found');
       reply.status(401).send({
         success: false,
         error: 'UNAUTHORIZED',
@@ -108,6 +113,7 @@ export abstract class ExchangeBaseController {
       });
       return null;
     }
+    console.log('✅ EXCHANGE BASE - User ID found:', userId);
     return userId;
   }
 

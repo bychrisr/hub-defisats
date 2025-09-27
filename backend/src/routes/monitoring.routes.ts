@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { Redis } from 'ioredis';
 import { config } from '../config/env';
-import { metrics } from '../services/metrics.service';
+import { metrics } from '../services/metrics-export';
 import { alerting } from '../services/alerting.service';
 import { monitoring } from '../services/monitoring.service';
 import { authMiddleware } from '../middleware/auth.middleware';

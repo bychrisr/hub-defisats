@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { metrics } from '../services/metrics.service';
+import { metrics } from '../services/metrics-export';
 import { alerting } from '../services/alerting.service';
 // import { monitoring } from '../services/monitoring.service';
 import { authMiddleware } from '../middleware/auth.middleware';
