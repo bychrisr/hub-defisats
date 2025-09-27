@@ -105,7 +105,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     if (isAuthenticated && user?.id) {
       fetchDashboardData();
     }
-  }, [isAuthenticated, user?.id, fetchDashboardData]);
+  }, [isAuthenticated, user?.id, isAdmin]);
 
   // Função para refresh manual
   const refresh = useCallback(async () => {
