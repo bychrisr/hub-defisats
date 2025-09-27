@@ -172,7 +172,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // ✅ CONEXÃO DIRETA: Removendo verificações de redirecionamento
 
-  // ✅ WEBSOCKET: Forçar URL para ws://localhost:13000/ws
+  // ✅ WEBSOCKET: URL correta para ws://localhost:13000/ws
   const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;
   
   console.log('🔗 REALTIME - URL do WebSocket gerada:', wsUrl);
@@ -369,7 +369,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
       
-      // ✅ WEBSOCKET: Forçar URL para ws://localhost:13000/ws
+      // ✅ WEBSOCKET: URL correta para ws://localhost:13000/ws
       const wsUrl = `ws://localhost:13000/ws?userId=${user.id}`;
       console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
       console.log('🔗 REALTIME - VITE_WS_URL env var:', import.meta.env.VITE_WS_URL);

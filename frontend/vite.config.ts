@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         secure: false,
       },
-      '/ws': {
+      '/api/ws': {
         target: 'ws://backend:3010', // ✅ WebSocket proxy usando nome do serviço
         ws: true,
         changeOrigin: true,

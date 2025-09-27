@@ -64,7 +64,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
     });
 
     // Send welcome message
-    connection.socket.send(JSON.stringify({
+    connection.send(JSON.stringify({
       type: 'welcome',
       message: 'Connected to LN Markets WebSocket',
       userId: userId,
@@ -153,7 +153,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.socket.send(JSON.stringify(message));
+        connection.send(JSON.stringify(message));
       });
 
       wsService.on('positionUpdate', (data) => {
@@ -173,7 +173,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.socket.send(JSON.stringify(message));
+        connection.send(JSON.stringify(message));
       });
 
       wsService.on('marginUpdate', (data) => {
@@ -187,7 +187,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
             timestamp: data.timestamp
           }
         };
-        connection.socket.send(JSON.stringify(message));
+        connection.send(JSON.stringify(message));
       });
 
       // Handle client messages

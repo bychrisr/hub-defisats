@@ -592,8 +592,8 @@ async function registerRoutes() {
   await fastify.register(dynamicPagesConfigRoutes);
   console.log('✅ Dynamic pages config routes registered');
 
-  // WebSocket routes
-  await fastify.register(websocketRoutes, { prefix: '/api' });
+  // WebSocket routes - Registrado em /ws para compatibilidade com proxy
+  await fastify.register(websocketRoutes, { prefix: '/ws' });
   console.log('✅ WebSocket routes registered');
 
   // WebSocket test routes (without authentication)
