@@ -91,7 +91,7 @@ export const useHistoricalData = () => {
 
       console.log('🔍 HISTORICAL DATA HOOK - Fetching trades from API...');
       // Buscar trades históricos
-      const tradesResponse = await api.get('/api/lnmarkets/user/trades?limit=100&type=closed');
+      const tradesResponse = await api.get('/api/lnmarkets-robust/dashboard');
       const tradesData = tradesResponse.data;
       
       console.log('🔍 HISTORICAL DATA HOOK - API Response:', {

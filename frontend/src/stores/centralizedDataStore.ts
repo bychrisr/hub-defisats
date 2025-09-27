@@ -82,8 +82,8 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
 
         // Fazer todas as chamadas em paralelo usando cached API para market data
         const [balanceResponse, positionsResponse, marketResponse, menuResponse] = await Promise.allSettled([
-          api.get('/api/lnmarkets/user/balance'),
-          api.get('/api/lnmarkets/user/positions'),
+          api.get('/api/lnmarkets-robust/dashboard'),
+          api.get('/api/lnmarkets-robust/dashboard'),
           cachedApi.get('/api/market/index/public'), // Usar cached API para market data
           isAdmin ? api.get('/api/admin/menu') : Promise.resolve({ data: { success: true, data: null } })
         ]);

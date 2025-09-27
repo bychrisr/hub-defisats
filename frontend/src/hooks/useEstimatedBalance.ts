@@ -75,7 +75,7 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
 
       console.log('🔍 ESTIMATED BALANCE HOOK - Fetching estimated balance from API...');
       
-      const response = await api.get('/api/lnmarkets/user/estimated-balance');
+      const response = await api.get('/api/lnmarkets-robust/dashboard');
       console.log('🔍 ESTIMATED BALANCE HOOK - Response received:', response.data);
       
       if (response.data.success && response.data.data) {

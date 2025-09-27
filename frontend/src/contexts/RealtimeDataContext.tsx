@@ -172,10 +172,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // ✅ CONEXÃO DIRETA: Removendo verificações de redirecionamento
 
-  // ✅ PROXY: Usar origem do navegador para WebSocket via proxy
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const wsHost = window.location.host; // 'localhost:13000'
-  const wsUrl = (import.meta.env.VITE_WS_URL || `${wsProtocol}//${wsHost}/ws`) + '?userId=' + (user?.id || 'anonymous');
+  // ✅ WEBSOCKET: Forçar URL para ws://localhost:13000/ws
+  const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;
   
   console.log('🔗 REALTIME - URL do WebSocket gerada:', wsUrl);
   console.log('🔗 REALTIME - window.location:', {
@@ -371,10 +369,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
       
-      // ✅ PROXY: Usar origem do navegador para WebSocket via proxy
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsHost = window.location.host; // 'localhost:13000'
-      const wsUrl = (import.meta.env.VITE_WS_URL || `${wsProtocol}//${wsHost}/ws`) + '?userId=' + user.id;
+      // ✅ WEBSOCKET: Forçar URL para ws://localhost:13000/ws
+      const wsUrl = `ws://localhost:13000/ws?userId=${user.id}`;
       console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
       console.log('🔗 REALTIME - VITE_WS_URL env var:', import.meta.env.VITE_WS_URL);
       connect();
