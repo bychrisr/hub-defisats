@@ -34,11 +34,15 @@ const envSchema = z.object({
     .min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
 
   // LN Markets API
-  LN_MARKETS_API_URL: z.string().url().default('https://api.lnmarkets.com'),
-  LN_MARKETS_SANDBOX_URL: z
+  LN_MARKETS_API_BASE_URL: z.string().url().default('https://api.lnmarkets.com/v2'),
+  LN_MARKETS_API_BASE_URL_TESTNET: z
     .string()
     .url()
-    .default('https://api.lnmarkets.com/sandbox'),
+    .default('https://api.lnmarkets.com/v2'),
+  LN_MARKETS_API_BASE_URL_CURRENT: z
+    .string()
+    .url()
+    .default('https://api.lnmarkets.com/v2'),
 
   // Social Auth
   GOOGLE_CLIENT_ID: z.string().optional(),
@@ -191,8 +195,9 @@ export const corsConfig = {
 
 // LN Markets configuration
 export const lnMarketsConfig = {
-  apiUrl: env.LN_MARKETS_API_URL,
-  sandboxUrl: env.LN_MARKETS_SANDBOX_URL,
+  baseUrl: env.LN_MARKETS_API_BASE_URL,
+  testnetUrl: env.LN_MARKETS_API_BASE_URL_TESTNET,
+  currentUrl: env.LN_MARKETS_API_BASE_URL_CURRENT,
   timeout: 30000,
   retries: 3,
 };

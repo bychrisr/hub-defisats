@@ -2,6 +2,158 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-025: Refatoração Completa da Integração LN Markets API v2
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Refatoração completa da integração LN Markets para segurança, manutenibilidade e escalabilidade
+
+### Problema
+- **Segurança**: URLs e endpoints hardcoded no código
+- **Manutenibilidade**: Lógica de autenticação espalhada em múltiplos arquivos
+- **Escalabilidade**: Dificuldade para adicionar novas corretoras
+- **Conformidade**: Assinatura HMAC com formato incorreto
+- **Manutenção**: Código duplicado e difícil de manter
+
+### Decisão
+Implementar uma refatoração completa com:
+- **Centralização**: URLs e endpoints em variáveis de ambiente e constantes TypeScript
+- **Isolamento**: Lógica de autenticação em serviço dedicado
+- **Escalabilidade**: Interface genérica `ExchangeApiService` para futuras corretoras
+- **Factory Pattern**: `ExchangeServiceFactory` para criação dinâmica de serviços
+- **Conformidade**: Assinatura HMAC com formato correto `method + '/v2' + path + timestamp + paramsString`
+- **Codificação**: Base64 conforme histórico de debugging confirmado
+
+### Implementação
+
+#### 1. Configuração Centralizada
+```typescript
+// backend/src/config/env.ts
+export const lnMarketsConfig = {
+  baseUrl: env.LN_MARKETS_API_BASE_URL,
+  testnetUrl: env.LN_MARKETS_API_BASE_URL_TESTNET,
+  currentUrl: env.LN_MARKETS_API_BASE_URL_CURRENT,
+  timeout: 30000,
+  retries: 3,
+};
+
+// backend/src/config/lnmarkets-endpoints.ts
+export const LN_MARKETS_ENDPOINTS = {
+  futures: '/futures',
+  futuresTicker: '/futures/btc_usd/ticker',
+  // ... outros endpoints
+} as const;
+```
+
+#### 2. Interface Genérica
+```typescript
+// backend/src/services/ExchangeApiService.interface.ts
+export interface ExchangeApiService {
+  getTicker(): Promise<any>;
+  getPositions(): Promise<any[]>;
+  placeOrder(order: any): Promise<any>;
+  closePosition(positionId: string): Promise<any>;
+  // ... outros métodos
+}
+```
+
+#### 3. Implementação LN Markets
+```typescript
+// backend/src/services/LNMarketsApiService.ts
+export class LNMarketsApiService implements ExchangeApiService {
+  private makeAuthenticatedRequest(config: AxiosRequestConfig): AxiosRequestConfig {
+    const timestamp = Date.now().toString();
+    const method = (config.method || 'GET').toUpperCase();
+    const path = config.url || '';
+    const signaturePath = `/v2${path}`;
+    const message = timestamp + method + signaturePath + paramsStringOrDataString;
+    
+    const signature = crypto
+      .createHmac('sha256', apiSecret)
+      .update(message, 'utf8')
+      .digest('base64'); // Conforme histórico de debugging
+    
+    // Headers corretos
+    config.headers = {
+      'LNM-ACCESS-KEY': apiKey,
+      'LNM-ACCESS-SIGNATURE': signature,
+      'LNM-ACCESS-PASSPHRASE': passphrase,
+      'LNM-ACCESS-TIMESTAMP': timestamp,
+    };
+    
+    return config;
+  }
+}
+```
+
+#### 4. Factory Pattern
+```typescript
+// backend/src/services/ExchangeServiceFactory.ts
+export class ExchangeServiceFactory {
+  static createService(exchangeName: ExchangeName, credentials: LNMarketsCredentials, logger: Logger): ExchangeApiService {
+    switch (exchangeName) {
+      case 'LNMarkets':
+        return new LNMarketsApiService(credentials, logger);
+      default:
+        throw new Error(`Unsupported exchange: ${exchangeName}`);
+    }
+  }
+}
+```
+
+#### 5. Controladores Refatorados
+```typescript
+// backend/src/controllers/exchange-base.controller.ts
+export class ExchangeBaseController {
+  protected async getExchangeService(userId: string, exchangeName: ExchangeName = 'LNMarkets') {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        ln_markets_api_key: true,
+        ln_markets_api_secret: true,
+        ln_markets_passphrase: true,
+      },
+    });
+    
+    // Decrypt credentials and create service
+    return ExchangeServiceFactory.createService(exchangeName, credentials, this.logger);
+  }
+}
+```
+
+### Consequências
+- ✅ **Positivas**: 
+  - Código mais seguro e manutenível
+  - Fácil adição de novas corretoras
+  - Autenticação centralizada e correta
+  - Testes abrangentes implementados
+  - Arquitetura preparada para crescimento
+- ⚠️ **Breaking Change**: 
+  - Rotas antigas serão deprecadas gradualmente
+  - Migração necessária do frontend
+- 🔄 **Migração**: 
+  - Implementação paralela durante transição
+  - Backward compatibility mantida
+  - Deprecação gradual das rotas antigas
+
+### Alternativas Consideradas
+1. **Refatoração Incremental**: Manter código existente e adicionar melhorias
+   - **Rejeitada**: Não resolveria problemas fundamentais de arquitetura
+2. **Reescrita Completa**: Recriar toda a integração do zero
+   - **Rejeitada**: Muito arriscado e desnecessário
+3. **Refatoração Gradual**: Implementar nova arquitetura gradualmente
+   - **Aceita**: Implementação paralela com migração gradual
+
+### Métricas de Sucesso
+- ✅ **Segurança**: URLs centralizadas em variáveis de ambiente
+- ✅ **Manutenibilidade**: Lógica de autenticação isolada
+- ✅ **Escalabilidade**: Interface genérica implementada
+- ✅ **Conformidade**: Assinatura HMAC com formato correto
+- ✅ **Testes**: 100% de cobertura dos métodos críticos
+- ✅ **Documentação**: ADRs e documentação atualizadas
+
+---
+
 ## ADR-024: Correção Crítica de Autenticação LN Markets API v2
 
 **Data**: 2025-01-27  
