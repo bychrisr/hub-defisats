@@ -12,6 +12,95 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Favicon
+app.get('/favicon.svg', (req, res) => {
+  res.status(200).send(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+      <path d="M2 17l10 5 10-5"/>
+      <path d="M2 12l10 5 10-5"/>
+    </svg>
+  `);
+});
+
+// Auth endpoints (mock)
+app.post('/api/auth/login', (req, res) => {
+  console.log('🔐 LOGIN - Request received:', {
+    body: req.body,
+    timestamp: new Date().toISOString()
+  });
+  
+  res.json({
+    success: true,
+    message: 'Login successful',
+    data: {
+      user: {
+        id: 'test-user-123',
+        email: 'test@example.com',
+        username: 'testuser',
+        isTestnet: true
+      },
+      token: 'mock-jwt-token-12345',
+      refreshToken: 'mock-refresh-token-67890'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.post('/api/auth/register', (req, res) => {
+  console.log('🔐 REGISTER - Request received:', {
+    body: req.body,
+    timestamp: new Date().toISOString()
+  });
+  
+  res.json({
+    success: true,
+    message: 'Registration successful',
+    data: {
+      user: {
+        id: 'test-user-123',
+        email: req.body.email || 'test@example.com',
+        username: req.body.username || 'testuser',
+        isTestnet: true
+      },
+      token: 'mock-jwt-token-12345',
+      refreshToken: 'mock-refresh-token-67890'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  console.log('🔐 LOGOUT - Request received:', {
+    headers: req.headers,
+    timestamp: new Date().toISOString()
+  });
+  
+  res.json({
+    success: true,
+    message: 'Logout successful',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// WebSocket endpoint (mock)
+app.get('/ws', (req, res) => {
+  console.log('🔌 WEBSOCKET - Request received:', {
+    query: req.query,
+    timestamp: new Date().toISOString()
+  });
+  
+  res.json({
+    success: true,
+    message: 'WebSocket endpoint (mock)',
+    data: {
+      connected: true,
+      token: req.query.token || 'no-token'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Mock positions endpoint
 app.get('/api/lnmarkets/v2/trading/positions', (req, res) => {
   console.log('📊 POSITIONS - Request received:', {

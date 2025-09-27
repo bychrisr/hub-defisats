@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automationStore';
 import { useLNMarketsRefactoredDashboard, useLNMarketsRefactoredMetrics, useLNMarketsRefactoredPositions, useLNMarketsRefactoredTicker, useLNMarketsRefactoredConnectionStatus, useLNMarketsRefactoredRealtime } from '@/hooks/useLNMarketsRefactored';
 import { useOptimizedMarketData } from '@/hooks/useOptimizedMarketData';
