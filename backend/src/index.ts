@@ -436,6 +436,29 @@ async function registerRoutes() {
 
   console.log('✅ Public market prices endpoint registered');
 
+  // Add redirect middleware for direct backend access
+  fastify.addHook('onRequest', (request, reply, done) => {
+    // Redirect direct backend access to frontend (only for root path)
+    if (request.url === '/' && request.headers.host?.includes(':13010')) {
+      console.log('🔄 BACKEND - Redirecting direct access to frontend...');
+      reply.type('text/html').send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Redirecting to Frontend...</title>
+          <meta http-equiv="refresh" content="0; url=http://localhost:13000">
+        </head>
+        <body>
+          <p>Redirecting to frontend... <a href="http://localhost:13000">Click here if not redirected automatically</a></p>
+          <script>window.location.href = 'http://localhost:13000';</script>
+        </body>
+        </html>
+      `);
+      return;
+    }
+    done();
+  });
+
   // Add monitoring hooks
   fastify.addHook('onRequest', (_request, _reply, done) => {
     // Set start time for response time calculation
