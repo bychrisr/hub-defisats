@@ -105,8 +105,8 @@ async function testCombination(
   encoding: 'base64' | 'hex',
   testEndpoint: string = '/user'
 ): Promise<{ success: boolean; status: number; response: any; error?: string }> {
-  try {
-    const timestamp = Date.now().toString();
+    try {
+      const timestamp = Date.now().toString();
     const method = 'GET';
     const path = testEndpoint;
     const params = ''; // GET request sem parâmetros
@@ -120,35 +120,35 @@ async function testCombination(
     // Headers de autenticação
     const headers = {
       'LNM-ACCESS-KEY': apiKey,
-      'LNM-ACCESS-SIGNATURE': signature,
+          'LNM-ACCESS-SIGNATURE': signature,
       'LNM-ACCESS-PASSPHRASE': passphrase,
-      'LNM-ACCESS-TIMESTAMP': timestamp,
+          'LNM-ACCESS-TIMESTAMP': timestamp,
       'Content-Type': 'application/json'
     };
 
     // Fazer requisição para a API da LN Markets
     const response = await axios.get(`https://api.lnmarkets.com/v2${testEndpoint}`, {
       headers,
-      timeout: 10000
-    });
+        timeout: 10000
+      });
 
-    return {
-      success: true,
-      status: response.status,
-      response: response.data
-    };
+      return {
+        success: true,
+        status: response.status,
+        response: response.data
+      };
 
-  } catch (error: any) {
-    return {
-      success: false,
+    } catch (error: any) {
+      return {
+        success: false,
       status: error.response?.status || 0,
       response: error.response?.data || null,
       error: error.message
-    };
+      };
+    }
   }
-}
 
-/**
+  /**
  * Função principal do script
  */
 async function main() {
