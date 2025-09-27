@@ -25,7 +25,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
   // WebSocket para dados em tempo real
   const { isConnected, isConnecting, error, connect, disconnect, sendMessage } = useWebSocket({
-    url: `${import.meta.env.VITE_WS_URL || 'wss://defisats.site/ws'}/ws/market?symbol=${symbol}`,
+    url: `${import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`}/ws/market?symbol=${symbol}`,
     onMessage: (message) => {
       const newCandle = marketDataService.processWebSocketMessage(message);
       if (newCandle && seriesRef.current) {

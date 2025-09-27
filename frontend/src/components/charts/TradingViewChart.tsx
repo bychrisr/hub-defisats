@@ -86,7 +86,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
   // WebSocket para dados em tempo real
   useEffect(() => {
     const connectWebSocket = () => {
-      const wsUrl = `${import.meta.env.VITE_WS_URL || 'wss://defisats.site/ws'}/api/ws/market?symbol=${symbol}`;
+      const wsUrl = `${import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`}/api/ws/market?symbol=${symbol}`;
       console.log('🔌 TRADING VIEW - Connecting to WebSocket:', wsUrl);
       
       wsRef.current = new WebSocket(wsUrl);

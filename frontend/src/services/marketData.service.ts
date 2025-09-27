@@ -31,7 +31,7 @@ class MarketDataService {
   constructor() {
     // ✅ Usar caminho relativo para funcionar com proxy do Vite
     this.baseUrl = '';
-    this.wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:13000/ws';
+    this.wsUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
   }
 
   // Obter dados históricos via REST API

@@ -274,7 +274,7 @@ export default function Documentation() {
   const connectWebSocket = () => {
     try {
       const token = localStorage.getItem('access_token');
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:13000';
+      const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
       const wsUrl = `${baseUrl.replace('http', 'ws')}/api/docs/watch?token=${token}`;
       
       console.log('🔍 DOCUMENTATION - WebSocket URL:', wsUrl);
