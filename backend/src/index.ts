@@ -530,7 +530,11 @@ async function registerRoutes() {
   await fastify.register(profileRoutes, { prefix: '/api' });
   console.log('✅ Profile routes registered');
 
-  // LN Markets routes
+  // LN Markets User routes (DEVE VIR ANTES - mais específica)
+  await fastify.register(lnmarketsUserRoutes, { prefix: '/api' });
+  console.log('✅ LN Markets User routes registered');
+
+  // LN Markets routes (menos específica)
   await fastify.register(lnmarketsRoutes, { prefix: '/api/lnmarkets' });
   console.log('✅ LN Markets routes registered');
 
@@ -541,10 +545,6 @@ async function registerRoutes() {
   // LN Markets Options routes
   await fastify.register(lnmarketsOptionsRoutes, { prefix: '/api' });
   console.log('✅ LN Markets Options routes registered');
-
-  // LN Markets User routes
-  await fastify.register(lnmarketsUserRoutes, { prefix: '/api' });
-  console.log('✅ LN Markets User routes registered');
 
   // LN Markets Market Data routes
   await fastify.register(lnmarketsMarketRoutes, { prefix: '/api' });

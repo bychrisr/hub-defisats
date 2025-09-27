@@ -130,11 +130,11 @@ export class LNMarketsAPIService {
       message
     });
     
-    // Gerar assinatura com UTF-8 explícito
+    // Gerar assinatura com UTF-8 explícito - LN Markets requer HEXADECIMAL
     const signature = crypto
       .createHmac('sha256', apiSecret)
       .update(message, 'utf8')
-      .digest('base64');
+      .digest('hex');
 
     console.log('🔐 LN MARKETS AUTH - Assinatura gerada:', signature);
     console.log('🔐 LN MARKETS AUTH - Credentials info:', {

@@ -53,6 +53,12 @@ export class LNMarketsUserController {
         passphraseLength: user.ln_markets_passphrase?.length || 0
       });
       
+      console.log(`🔍 GET LN MARKETS SERVICE - Encrypted data samples:`, {
+        apiKey: user.ln_markets_api_key?.substring(0, 20) + '...',
+        apiSecret: user.ln_markets_api_secret?.substring(0, 20) + '...',
+        passphrase: user.ln_markets_passphrase?.substring(0, 10) + '...'
+      });
+      
       let apiKey, apiSecret, passphrase;
       
       try {
@@ -86,6 +92,20 @@ export class LNMarketsUserController {
       });
 
       // Create a logger for the LNMarketsAPIService
+      console.log(`🔍 GET LN MARKETS SERVICE - Creating LNMarketsAPIService with credentials:`, {
+        apiKey: apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING',
+        apiSecret: apiSecret ? `${apiSecret.substring(0, 10)}...` : 'MISSING',
+        passphrase: passphrase ? `${passphrase.substring(0, 5)}...` : 'MISSING',
+        isTestnet: false
+      });
+      
+      console.log(`🔍 GET LN MARKETS SERVICE - Full decrypted credentials:`, {
+        apiKey: apiKey,
+        apiSecret: apiSecret,
+        passphrase: passphrase,
+        isTestnet: false
+      });
+
       const logger = {
         info: (message: string, meta?: any) => console.log(`[LNMarketsAPI] ${message}`, meta || ''),
         error: (message: string, meta?: any) => console.error(`[LNMarketsAPI] ${message}`, meta || ''),
@@ -887,9 +907,12 @@ export class LNMarketsUserController {
   }
 
   async getUserPositions(request: FastifyRequest, reply: FastifyReply) {
+    console.log('🔍 USER CONTROLLER - getUserPositions called');
     try {
       const userId = (request as any).user?.id;
+      console.log('🔍 USER CONTROLLER - User ID:', userId);
       if (!userId) {
+        console.log('❌ USER CONTROLLER - No user ID found');
         return reply.status(401).send({
           success: false,
           error: 'UNAUTHORIZED',
@@ -947,10 +970,20 @@ export class LNMarketsUserController {
       }
 
       try {
+        console.log('🔍 USER CONTROLLER - Getting LN Markets service...');
         const lnmarkets = await this.getLNMarketsService(userId);
+        console.log('🔍 USER CONTROLLER - LN Markets service obtained, calling getUserPositions...');
         const result = await lnmarkets.getUserPositions();
         
-        console.log(`[UserController] User positions retrieved for user ${userId}`);
+        console.log(`🔍 USER CONTROLLER - User positions retrieved for user ${userId}:`, {
+          resultType: typeof result,
+          isArray: Array.isArray(result),
+          length: Array.isArray(result) ? result.length : 'not array',
+          firstItem: Array.isArray(result) && result.length > 0 ? result[0] : 'no items'
+        });
+
+        // DEBUG: Log completo do resultado
+        console.log(`🔍 USER CONTROLLER - Full result data:`, JSON.stringify(result, null, 2));
 
         return reply.send({
           success: true,
