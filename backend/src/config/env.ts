@@ -68,11 +68,11 @@ const envSchema = z.object({
 
   // Monitoring
   SENTRY_DSN: z.string().optional().or(z.literal('')),
-  PROMETHEUS_PORT: z.string().transform(Number).default(() => 9090),
+  PROMETHEUS_PORT: z.union([z.string().transform(Number), z.number()]).default(9090),
 
   // Rate Limiting
-  RATE_LIMIT_MAX: z.string().transform(Number).default(() => 100),
-  RATE_LIMIT_TIME_WINDOW: z.string().transform(Number).default(() => 60000),
+  RATE_LIMIT_MAX: z.union([z.string().transform(Number), z.number()]).default(100),
+  RATE_LIMIT_TIME_WINDOW: z.union([z.string().transform(Number), z.number()]).default(60000),
 
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:13000'),
