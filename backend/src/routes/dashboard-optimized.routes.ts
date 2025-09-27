@@ -110,6 +110,18 @@ export async function dashboardOptimizedRoutes(fastify: FastifyInstance) {
           withdrawalsData: withdrawalsData.status
         });
 
+        // Debug específico para posições
+        if (positionsData.status === 'fulfilled') {
+          console.log('🔍 DASHBOARD OPTIMIZED - Positions data:', {
+            type: typeof positionsData.value,
+            isArray: Array.isArray(positionsData.value),
+            length: Array.isArray(positionsData.value) ? positionsData.value.length : 'not array',
+            firstItem: Array.isArray(positionsData.value) && positionsData.value.length > 0 ? positionsData.value[0] : 'no items'
+          });
+        } else {
+          console.log('❌ DASHBOARD OPTIMIZED - Positions error:', positionsData.reason);
+        }
+
         const processedData = {
           user: userData.status === 'fulfilled' ? userData.value : null,
           balance: balanceData.status === 'fulfilled' ? balanceData.value : null,

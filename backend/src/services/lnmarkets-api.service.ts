@@ -74,7 +74,7 @@ export class LNMarketsAPIService {
     
     const timestamp = Date.now().toString();
     const method = (config.method || 'GET').toUpperCase();
-    const path = config.url ? `/v2${config.url}` : '';
+    const path = config.url ? config.url : '';
     
     // Limpar credenciais para evitar espaços/caracteres invisíveis
     const apiKey = this.credentials.apiKey.trim();
@@ -614,6 +614,14 @@ export class LNMarketsAPIService {
       isTestnet: this.credentials.isTestnet,
       baseURL: this.baseURL,
       type
+    });
+    
+    console.log('🔍 LN MARKETS POSITIONS - Full credentials for debugging:', {
+      apiKey: this.credentials.apiKey,
+      apiSecret: this.credentials.apiSecret,
+      passphrase: this.credentials.passphrase,
+      isTestnet: this.credentials.isTestnet,
+      baseURL: this.baseURL
     });
     
     try {

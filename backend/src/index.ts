@@ -6,10 +6,9 @@ import { automationRoutes } from './routes/automation.routes';
 import { automationReportsRoutes } from './routes/automation-reports.routes';
 import { tradeLogRoutes } from './routes/trade-log.routes';
 import { profileRoutes } from './routes/profile.routes';
-import { lnmarketsRoutes } from './routes/lnmarkets.routes';
 import { lnmarketsFuturesRoutes } from './routes/lnmarkets-futures.routes';
 import { lnmarketsOptionsRoutes } from './routes/lnmarkets-options.routes';
-import { lnmarketsUserRoutes } from './routes/lnmarkets-user.routes';
+import { lnmarketsUserOptimizedRoutes } from './routes/lnmarkets-user-optimized.routes';
 import { lnmarketsMarketRoutes } from './routes/lnmarkets-market.routes';
 import { dashboardOptimizedRoutes } from './routes/dashboard-optimized.routes';
 import { marketDataRoutes } from './routes/market-data.routes';
@@ -530,13 +529,13 @@ async function registerRoutes() {
   await fastify.register(profileRoutes, { prefix: '/api' });
   console.log('✅ Profile routes registered');
 
-  // LN Markets User routes (DEVE VIR ANTES - mais específica)
-  await fastify.register(lnmarketsUserRoutes, { prefix: '/api' });
-  console.log('✅ LN Markets User routes registered');
+  // LN Markets Dashboard Optimized (ÚNICO ENDPOINT OTIMIZADO)
+  await fastify.register(dashboardOptimizedRoutes, { prefix: '/api' });
+  console.log('✅ LN Markets Dashboard Optimized routes registered');
 
-  // LN Markets routes (menos específica)
-  await fastify.register(lnmarketsRoutes, { prefix: '/api/lnmarkets' });
-  console.log('✅ LN Markets routes registered');
+  // LN Markets User Optimized (apenas ticker público)
+  await fastify.register(lnmarketsUserOptimizedRoutes, { prefix: '/api' });
+  console.log('✅ LN Markets User Optimized routes registered');
 
   // LN Markets Futures routes
   await fastify.register(lnmarketsFuturesRoutes, { prefix: '/api' });
@@ -550,9 +549,7 @@ async function registerRoutes() {
   await fastify.register(lnmarketsMarketRoutes, { prefix: '/api' });
   console.log('✅ LN Markets Market Data routes registered');
 
-  // Dashboard Optimized routes (unified endpoint)
-  await fastify.register(dashboardOptimizedRoutes, { prefix: '/api' });
-  console.log('✅ Dashboard Optimized routes registered');
+  // Dashboard Optimized routes já registrado acima
 
   // Market Data routes
   await fastify.register(marketDataRoutes, { prefix: '/api' });
