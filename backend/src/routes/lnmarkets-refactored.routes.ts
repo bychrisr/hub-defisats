@@ -13,7 +13,7 @@ import { LNMarketsTradingRefactoredController } from '../controllers/lnmarkets-t
 
 export async function lnmarketsRefactoredRoutes(fastify: FastifyInstance) {
   const prisma = (fastify as any).prisma as PrismaClient;
-  const logger = fastify.log as Logger;
+  const logger = fastify.log as any;
 
   // Initialize controllers
   const marketController = new LNMarketsMarketRefactoredController(prisma, logger);
@@ -91,27 +91,9 @@ export async function lnmarketsRefactoredRoutes(fastify: FastifyInstance) {
   fastify.get('/trading/positions', {
     preHandler: [(fastify as any).authenticate],
     handler: async (request: any, reply: any) => {
-      console.log('🔍 POSITIONS ROUTE - Starting with mock data');
       return reply.send({
         success: true,
-        message: 'Positions retrieved successfully (mock data)',
-        data: [
-          {
-            id: 'pos-1',
-            symbol: 'BTCUSD',
-            side: 'long',
-            size: 0.001,
-            entryPrice: 65000,
-            currentPrice: 66000,
-            pnl: 1.0,
-            margin: 65.0,
-            maintenanceMargin: 32.5,
-            leverage: 100,
-            status: 'open',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ],
+        message: 'Positions route working',
         user: request.user
       });
     }
