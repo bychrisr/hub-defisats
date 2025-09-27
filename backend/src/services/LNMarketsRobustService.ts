@@ -220,27 +220,24 @@ export class LNMarketsRobustService {
     console.log('🚀 ROBUST SERVICE - Fetching all user data in single request...');
     
     try {
-      // Estratégia: Fazer múltiplas requisições para endpoints específicos
-      const [userData, positionsData, balanceData, marketData] = await Promise.all([
-        this.makeRequest({ method: 'GET', path: getLNMarketsEndpoint('user') }),
-        this.makeRequest({ method: 'GET', path: '/futures', params: { type: 'running' } }),
-        this.makeRequest({ method: 'GET', path: getLNMarketsEndpoint('userBalance') }),
-        this.makeRequest({ method: 'GET', path: getLNMarketsEndpoint('futuresTicker') })
-      ]);
+      // Estratégia: Fazer uma requisição para /user que deve retornar dados completos
+      const userData = await this.makeRequest({
+        method: 'GET',
+        path: getLNMarketsEndpoint('user')
+      });
 
-      console.log('✅ ROBUST SERVICE - All data received:', {
-        user: userData ? 'present' : 'missing',
-        positions: Array.isArray(positionsData) ? positionsData.length : 'not array',
-        balance: balanceData ? 'present' : 'missing',
-        market: marketData ? 'present' : 'missing'
+      console.log('✅ ROBUST SERVICE - User data received:', {
+        type: typeof userData,
+        isArray: Array.isArray(userData),
+        keys: userData && typeof userData === 'object' ? Object.keys(userData) : 'not object'
       });
 
       // Estruturar dados de forma escalável
       const structuredData: LNMarketsUserData = {
         user: userData?.user || userData?.profile || userData || null,
-        balance: balanceData?.balance || balanceData?.wallet || balanceData || null,
-        positions: Array.isArray(positionsData) ? positionsData : [],
-        market: marketData?.market || marketData?.ticker || marketData || null,
+        balance: userData?.balance || userData?.wallet || null,
+        positions: userData?.positions || userData?.trades || [],
+        market: userData?.market || userData?.ticker || null,
         deposits: userData?.deposits || userData?.transactions?.deposits || [],
         withdrawals: userData?.withdrawals || userData?.transactions?.withdrawals || [],
         trades: userData?.trades || userData?.history || [],
@@ -287,8 +284,7 @@ export class LNMarketsRobustService {
   async getPositions(): Promise<any[]> {
     return this.makeRequest({
       method: 'GET',
-      path: '/futures',
-      params: { type: 'running' }
+      path: getLNMarketsEndpoint('futuresPositions')
     });
   }
 
