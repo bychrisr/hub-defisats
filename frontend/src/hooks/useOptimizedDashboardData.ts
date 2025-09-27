@@ -76,6 +76,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
           duration: `${duration}ms`
         });
 
+
         setData(dashboardData.data);
         setLastUpdate(dashboardData.data.lastUpdate);
         setCacheHit(dashboardData.data.cacheHit);
@@ -196,8 +197,10 @@ export const useOptimizedDashboardMetrics = () => {
 export const useOptimizedPositions = () => {
   const { data, isLoading, error } = useOptimizedDashboardData();
 
+  const positions = data?.lnMarkets?.positions || [];
+
   return {
-    positions: data?.lnMarkets?.positions || [],
+    positions,
     isLoading,
     error
   };

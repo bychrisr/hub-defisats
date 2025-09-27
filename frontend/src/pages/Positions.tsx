@@ -135,6 +135,7 @@ export default function Positions() {
 
   // Sincronizar dados otimizados - apenas quando há mudanças nas posições
   useEffect(() => {
+
     if (realtimePositions.length > 0) {
       console.log('📊 POSITIONS - Atualizando posições com dados otimizados:', realtimePositions.length);
       
@@ -156,19 +157,19 @@ export default function Positions() {
         id: pos.id,
         quantity: pos.quantity,
         price: pos.price,
-        liquidation: (pos as any).liquidation || 0,
+        liquidation: pos.liquidation || 0,
         leverage: pos.leverage,
         margin: pos.margin,
-        pnl: pos.pnl,
-        pnlPercentage: pos.pnlPercent,
-        marginRatio: (pos as any).marginRatio || 0,
-        tradingFees: (pos as any).tradingFees || 0,
-        fundingCost: (pos as any).fundingCost || 0,
-        status: 'open' as const,
-        side: pos.side,
-        asset: pos.symbol,
-        createdAt: pos.timestamp ? new Date(pos.timestamp).toISOString() : new Date().toISOString(),
-        updatedAt: pos.timestamp ? new Date(pos.timestamp).toISOString() : new Date().toISOString()
+        pnl: pos.pl || 0,
+        pnlPercentage: pos.margin && pos.margin > 0 ? ((pos.pl || 0) / pos.margin) * 100 : 0,
+        marginRatio: pos.maintenance_margin && pos.margin && pos.pl ? (pos.maintenance_margin / (pos.margin + pos.pl)) * 100 : 0,
+        tradingFees: (pos.opening_fee || 0) + (pos.closing_fee || 0),
+        fundingCost: pos.sum_carry_fees || 0,
+        status: pos.running ? 'open' : 'closed' as const,
+        side: pos.side === 'b' ? 'long' : 'short',
+        asset: 'BTC',
+        createdAt: pos.creation_ts ? new Date(pos.creation_ts).toISOString() : new Date().toISOString(),
+        updatedAt: pos.market_filled_ts ? new Date(pos.market_filled_ts).toISOString() : new Date().toISOString()
       }));
       
       setPositions(convertedPositions);
@@ -201,7 +202,10 @@ export default function Positions() {
   };
 
   // Função para formatar porcentagem
-  const formatPercentage = (value: number) => {
+  const formatPercentage = (value: number | undefined) => {
+    if (value === undefined || value === null || isNaN(value)) {
+      return '0.00%';
+    }
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 

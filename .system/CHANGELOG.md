@@ -4,6 +4,35 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.2.0] - 2025-09-27
+
+### 🎯 **CORREÇÃO CRÍTICA: Exibição de Posições Running da LN Markets**
+
+#### ✅ **Problema Resolvido**
+- **Frontend não exibia posições**: As 11 posições `running` da LN Markets não apareciam na página `/positions`
+- **Status "Conectando..."**: Página de posições ficava travada em estado de carregamento
+- **Dashboard sem métricas**: Contagem de posições ativas sempre mostrava 0
+
+#### 🔧 **Correções Implementadas**
+- **Backend**: Corrigido `LNMarketsRobustService.getAllUserData()` para buscar posições específicas via `/futures` com `type: 'running'`
+- **Frontend**: Ajustado processamento de posições para reconhecer propriedades `running` e `closed`
+- **Filtragem**: Corrigido filtro `activeTrades` para usar `p.running && !p.closed`
+- **Status**: Posições agora mostram status correto baseado em `pos.running`
+
+#### 📊 **Resultados**
+- ✅ **11 posições running** agora são exibidas corretamente
+- ✅ **Página `/positions`** carrega instantaneamente
+- ✅ **Dashboard** mostra contagem correta de trades ativos
+- ✅ **Dados reais** da LN Markets (username: "mulinete", balance: 1668 sats)
+
+#### 🧪 **Validação**
+- **Usuário de teste**: `brainoschris@gmail.com` / `TestPassword123!`
+- **Endpoint**: `/api/lnmarkets-robust/dashboard` retorna 11 posições
+- **Frontend**: Página de posições exibe todas as posições ativas
+- **Métricas**: Dashboard calcula corretamente P&L, margem e contagem
+
+---
+
 ## [v2.1.0] - 2025-09-27
 
 ### 🔧 **CORREÇÃO DEFINITIVA: WebSocket e Endpoints LN Markets**

@@ -217,34 +217,68 @@ export class LNMarketsRobustService {
    * 🎯 MÉTODO PRINCIPAL: Buscar TODOS os dados em uma única requisição otimizada
    */
   async getAllUserData(): Promise<LNMarketsUserData> {
-    console.log('🚀 ROBUST SERVICE - Fetching all user data in single request...');
+    console.log('🚀 ROBUST SERVICE - Fetching all user data in parallel requests...');
     
     try {
-      // Estratégia: Fazer uma requisição para /user que deve retornar dados completos
-      const userData = await this.makeRequest({
-        method: 'GET',
-        path: getLNMarketsEndpoint('user')
+      // 🔧 CORREÇÃO: Buscar dados específicos em paralelo para garantir que posições running sejam retornadas
+      const [userData, balanceData, positionsData, marketData] = await Promise.allSettled([
+        this.makeRequest({
+          method: 'GET',
+          path: getLNMarketsEndpoint('user')
+        }),
+        this.makeRequest({
+          method: 'GET',
+          path: getLNMarketsEndpoint('userBalance')
+        }),
+        this.makeRequest({
+          method: 'GET',
+          path: '/futures',
+          params: { type: 'running' }
+        }),
+        this.makeRequest({
+          method: 'GET',
+          path: getLNMarketsEndpoint('futuresTicker')
+        })
+      ]);
+
+      console.log('✅ ROBUST SERVICE - Data received:', {
+        userData: userData.status,
+        balanceData: balanceData.status,
+        positionsData: positionsData.status,
+        marketData: marketData.status
       });
 
-      console.log('✅ ROBUST SERVICE - User data received:', {
-        type: typeof userData,
-        isArray: Array.isArray(userData),
-        keys: userData && typeof userData === 'object' ? Object.keys(userData) : 'not object'
-      });
+      // Debug específico para posições
+      if (positionsData.status === 'fulfilled') {
+        console.log('🔍 ROBUST SERVICE - Positions data:', {
+          type: typeof positionsData.value,
+          isArray: Array.isArray(positionsData.value),
+          length: Array.isArray(positionsData.value) ? positionsData.value.length : 'not array',
+          firstItem: Array.isArray(positionsData.value) && positionsData.value.length > 0 ? positionsData.value[0] : 'no items'
+        });
+      } else {
+        console.log('❌ ROBUST SERVICE - Positions error:', positionsData.reason);
+      }
 
       // Estruturar dados de forma escalável
       const structuredData: LNMarketsUserData = {
-        user: userData?.user || userData?.profile || userData || null,
-        balance: userData?.balance || userData?.wallet || null,
-        positions: userData?.positions || userData?.trades || [],
-        market: userData?.market || userData?.ticker || null,
-        deposits: userData?.deposits || userData?.transactions?.deposits || [],
-        withdrawals: userData?.withdrawals || userData?.transactions?.withdrawals || [],
-        trades: userData?.trades || userData?.history || [],
-        orders: userData?.orders || userData?.openOrders || []
+        user: userData.status === 'fulfilled' ? userData.value : null,
+        balance: balanceData.status === 'fulfilled' ? balanceData.value : null,
+        positions: positionsData.status === 'fulfilled' ? positionsData.value : [],
+        market: marketData.status === 'fulfilled' ? marketData.value : null,
+        deposits: [],
+        withdrawals: [],
+        trades: [],
+        orders: []
       };
 
-      console.log('📊 ROBUST SERVICE - Data structured successfully');
+      console.log('📊 ROBUST SERVICE - Data structured successfully:', {
+        user: !!structuredData.user,
+        balance: !!structuredData.balance,
+        positionsCount: structuredData.positions.length,
+        market: !!structuredData.market
+      });
+      
       return structuredData;
 
     } catch (error: any) {
