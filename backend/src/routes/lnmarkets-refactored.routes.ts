@@ -91,7 +91,6 @@ export async function lnmarketsRefactoredRoutes(fastify: FastifyInstance) {
   fastify.get('/trading/positions', {
     preHandler: [(fastify as any).authenticate],
     handler: async (request: any, reply: any) => {
-      console.log('🔍 POSITIONS ROUTE - Starting');
       return reply.send({
         success: true,
         message: 'Positions route working',
