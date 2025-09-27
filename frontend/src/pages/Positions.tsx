@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { LNMarketsError } from '@/components/LNMarketsError';
 import { LNMarketsGuard } from '@/components/LNMarketsGuard';
 import SatsIcon from '@/components/SatsIcon';
-import { useUserPositions, useUserBalance, useConnectionStatus, useRealtimeData } from '@/contexts/RealtimeDataContext';
+import { useOptimizedPositions, useOptimizedDashboardMetrics } from '@/hooks/useOptimizedDashboardData';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import {
   Table,
@@ -74,19 +74,15 @@ interface LNPositionsResponse {
 }
 
 export default function Positions() {
-  // Dados em tempo real
-  const realtimePositions = useUserPositions();
-  const userBalance = useUserBalance();
-  const { isConnected } = useConnectionStatus();
-  const { loadRealPositions, updatePositions } = useRealtimeData();
+  // Dados otimizados
+  const { positions: realtimePositions, isLoading, error } = useOptimizedPositions();
+  const { totalPL, totalMargin, positionCount } = useOptimizedDashboardMetrics();
   
   const [positions, setPositions] = useState<LNPosition[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [totalValue, setTotalValue] = useState(0);
   const [totalPnl, setTotalPnl] = useState(0);
-  const [totalMargin, setTotalMargin] = useState(0);
+  const [totalMarginValue, setTotalMarginValue] = useState(0);
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -137,42 +133,52 @@ export default function Positions() {
     );
   };
 
-  // Sincronizar dados em tempo real - apenas quando há mudanças nas posições do contexto
+  // Sincronizar dados otimizados - apenas quando há mudanças nas posições
   useEffect(() => {
     if (realtimePositions.length > 0) {
-      console.log('📊 TRADES - Atualizando posições em tempo real:', realtimePositions.length);
+      console.log('📊 POSITIONS - Atualizando posições com dados otimizados:', realtimePositions.length);
       
-      // Converter dados de tempo real para formato da página
-      const convertedPositions: LNPosition[] = realtimePositions.map(pos => ({
+      // Filtrar posições vazias (objetos {})
+      const validPositions = realtimePositions.filter(pos => 
+        pos && typeof pos === 'object' && Object.keys(pos).length > 0
+      );
+      
+      console.log('📊 POSITIONS - Posições válidas encontradas:', validPositions.length);
+      
+      if (validPositions.length === 0) {
+        console.log('📊 POSITIONS - Nenhuma posição válida encontrada, limpando estado');
+        setPositions([]);
+        return;
+      }
+      
+      // Converter dados otimizados para formato da página
+      const convertedPositions: LNPosition[] = validPositions.map(pos => ({
         id: pos.id,
         quantity: pos.quantity,
         price: pos.price,
-        liquidation: (pos as any).liquidation || 0, // Usar valor real da API LN Markets
+        liquidation: (pos as any).liquidation || 0,
         leverage: pos.leverage,
         margin: pos.margin,
         pnl: pos.pnl,
         pnlPercentage: pos.pnlPercent,
-        marginRatio: (pos as any).marginRatio || 0, // Usar apenas valor calculado ou 0
+        marginRatio: (pos as any).marginRatio || 0,
         tradingFees: (pos as any).tradingFees || 0,
         fundingCost: (pos as any).fundingCost || 0,
         status: 'open' as const,
         side: pos.side,
         asset: pos.symbol,
-        createdAt: new Date(pos.timestamp).toISOString(),
-        updatedAt: new Date(pos.timestamp).toISOString()
+        createdAt: pos.timestamp ? new Date(pos.timestamp).toISOString() : new Date().toISOString(),
+        updatedAt: pos.timestamp ? new Date(pos.timestamp).toISOString() : new Date().toISOString()
       }));
       
       setPositions(convertedPositions);
       
-      // Calcular totais
-      const totalPnlValue = convertedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
-      const totalMarginValue = convertedPositions.reduce((sum, pos) => sum + pos.margin, 0);
-      
-      setTotalPnl(totalPnlValue);
-      setTotalMargin(totalMarginValue);
-      setTotalValue(totalMarginValue); // Total Value agora é Total Margin
+      // Usar dados otimizados para totais
+      setTotalPnl(totalPL);
+      setTotalMarginValue(totalMargin);
+      setTotalValue(totalMargin);
     }
-  }, [realtimePositions]);
+  }, [realtimePositions, totalPL, totalMargin]);
 
   // Função para obter posições ordenadas
   const getSortedPositions = () => {
@@ -199,178 +205,11 @@ export default function Positions() {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 
-  const fetchPositions = async (isInitialLoad = false) => {
-    try {
-      // Só mostrar loading no carregamento inicial
-      if (isInitialLoad) {
-        setIsLoading(true);
-      } else {
-        setIsUpdating(true);
-      }
-      setError(null);
-      
-      console.log('🔍 TRADES - Fetching LN Markets positions...', isInitialLoad ? '(Initial Load)' : '(Background Update)');
-      
-      const response = await api.get('/api/lnmarkets/user/positions');
-      const data = response.data;
-      
-      console.log('✅ TRADES - Received positions:', data);
-      console.log('🔍 TRADES - Full response data:', JSON.stringify(data, null, 2));
-      
-      if (data.success && data.data && Array.isArray(data.data)) {
-        // Transform LN Markets data to our interface
-        const transformedPositions: LNPosition[] = data.data.map((pos: any) => {
-          console.log('🔍 TRADES - Transforming position:', pos);
-          console.log('🔍 TRADES - TEST LOG - Position ID:', pos.id);
-          console.log('🔍 TRADES - TEST LOG - Opening Fee:', pos.opening_fee);
-          console.log('🔍 TRADES - TEST LOG - Closing Fee:', pos.closing_fee);
-          console.log('🔍 TRADES - TEST LOG - Sum Carry Fees:', pos.sum_carry_fees);
-          console.log('🔍 TRADES - TEST LOG - Maintenance Margin:', pos.maintenance_margin);
-          
-          // Teste simples
-          console.log('🔍 TRADES - SIMPLE TEST - marginRatio calculation:', {
-            maintenance_margin: pos.maintenance_margin,
-            margin: pos.margin,
-            pl: pos.pl,
-            leverage: pos.leverage
-          });
-          
-          // Calculate P&L percentage
-          const pnlPercentage = pos.margin > 0 ? (pos.pl / pos.margin) * 100 : 0;
-          
-          // Calculate margin ratio (maintenance_margin / (margin + pl))
-          // Fórmula correta: maintenance_margin / (margin + pl) * 100
-          // Se maintenance_margin não estiver disponível, não é possível calcular corretamente
-          const marginRatio = pos.maintenance_margin > 0 
-            ? (pos.maintenance_margin / (pos.margin + pos.pl)) * 100 
-            : 0; // Se não há maintenance_margin, retorna 0
-          
-          console.log('🔍 TRADES - Margin ratio calculation:', {
-            maintenance_margin: pos.maintenance_margin,
-            margin: pos.margin,
-            pl: pos.pl,
-            leverage: pos.leverage,
-            calculated_marginRatio: marginRatio,
-            formula: pos.maintenance_margin > 0 
-              ? `(${pos.maintenance_margin} / (${pos.margin} + ${pos.pl})) * 100 = ${marginRatio}`
-              : `No maintenance_margin available - returning 0`
-          });
-          
-          const tradingFees = (pos.opening_fee || 0) + (pos.closing_fee || 0);
-          const fundingCost = pos.sum_carry_fees || 0;
-          
-          console.log('🔍 TRADES - Fees calculation:', {
-            opening_fee: pos.opening_fee,
-            closing_fee: pos.closing_fee,
-            sum_carry_fees: pos.sum_carry_fees,
-            calculated_tradingFees: tradingFees,
-            calculated_fundingCost: fundingCost,
-            formula_trading: `${pos.opening_fee || 0} + ${pos.closing_fee || 0} = ${tradingFees}`,
-            formula_funding: `sum_carry_fees = ${fundingCost}`
-          });
-
-          return {
-            id: pos.id,
-            quantity: pos.quantity || 0,
-            price: pos.price || 0,
-            liquidation: pos.liquidation || 0,
-            leverage: pos.leverage || 1,
-            margin: pos.margin || 0,
-            pnl: pos.pl || 0,
-            pnlPercentage: pnlPercentage,
-            marginRatio: marginRatio,
-            tradingFees: tradingFees,
-            fundingCost: fundingCost,
-            status: pos.running ? 'open' as const : 'closed' as const,
-            side: pos.side === 'b' ? 'long' as const : 'short' as const, // 'b' = buy = long, 's' = sell = short
-            asset: 'BTC', // LN Markets only trades BTC futures
-            createdAt: new Date(pos.creation_ts || Date.now()).toISOString(),
-            updatedAt: new Date(pos.market_filled_ts || Date.now()).toISOString(),
-          };
-        });
-
-        setPositions(transformedPositions);
-        
-        // Calculate totals from actual positions data
-        // Total value should be the sum of all margins (total capital at risk)
-        const totalValue = transformedPositions.reduce((sum, pos) => sum + pos.margin, 0);
-        const totalPnl = transformedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
-        const totalMargin = transformedPositions.reduce((sum, pos) => sum + pos.margin, 0);
-        
-        setTotalValue(totalValue);
-        setTotalPnl(totalPnl);
-        setTotalMargin(totalMargin);
-
-        // Atualizar contexto de tempo real com dados reais (dados brutos da LN Markets)
-        if (isInitialLoad) {
-          console.log('🔄 TRADES - Carregando posições iniciais no contexto de tempo real');
-          loadRealPositions(data.data); // Passar dados brutos da LN Markets
-        } else {
-          console.log('🔄 TRADES - Atualizando posições no contexto de tempo real (silent)');
-          updatePositions(data.data); // Passar dados brutos da LN Markets
-        }
-      } else {
-        console.error('❌ TRADES - Invalid data structure:', data);
-        setError('Invalid response format from LN Markets');
-      }
-    } catch (err: any) {
-      console.error('❌ TRADES - Error fetching positions:', err);
-      let errorMessage = 'Failed to fetch positions from LN Markets';
-      
-      if (err.response?.status === 400) {
-        if (err.response?.data?.error === 'MISSING_CREDENTIALS') {
-          errorMessage = 'MISSING_CREDENTIALS';
-        } else if (err.response?.data?.error === 'INVALID_CREDENTIALS') {
-          errorMessage = 'INVALID_CREDENTIALS';
-        } else if (err.response?.data?.error === 'INSUFFICIENT_PERMISSIONS') {
-          errorMessage = 'INSUFFICIENT_PERMISSIONS';
-        } else {
-          errorMessage = err.response?.data?.message || errorMessage;
-        }
-      } else if (err.response?.status === 429) {
-        errorMessage = 'RATE_LIMIT';
-      } else {
-        errorMessage = err.response?.data?.message || err.message || errorMessage;
-      }
-      
-      setError(errorMessage);
-    } finally {
-      // Só parar loading no carregamento inicial
-      if (isInitialLoad) {
-        setIsLoading(false);
-      } else {
-        setIsUpdating(false);
-      }
-    }
+  // Função de refresh usando dados otimizados
+  const handleRefresh = () => {
+    console.log('🔄 POSITIONS - Refresh requested (using optimized data)');
+    // Os dados são atualizados automaticamente pelo hook otimizado
   };
-
-  useEffect(() => {
-    fetchPositions(true); // Carregamento inicial
-  }, []);
-
-  // Atualizar posições periodicamente com dados reais da LN Markets
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    
-    // Aguardar 3 segundos após o carregamento inicial antes de começar as atualizações automáticas
-    const initialDelay = setTimeout(() => {
-      intervalId = setInterval(() => {
-        console.log('🔄 TRADES - Atualizando posições automaticamente...');
-        fetchPositions(false); // Atualização periódica
-      }, 5000); // Atualizar a cada 5 segundos (mais responsivo)
-    }, 3000);
-
-    return () => {
-      clearTimeout(initialDelay);
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, []);
-
-
-  // REMOVED: Este useEffect estava duplicando a lógica de atualização
-  // A atualização agora é feita diretamente na função fetchPositions
 
   const getPnlColor = (pnl: number) => {
     if (pnl > 0) return 'text-success';
@@ -378,10 +217,6 @@ export default function Positions() {
     return 'text-text-secondary';
   };
 
-  // Função wrapper para o botão de refresh
-  const handleRefresh = () => {
-    fetchPositions(false);
-  };
 
   const getPnlIcon = (pnl: number) => {
     if (pnl > 0) return <TrendingUp className="h-4 w-4 text-success" />;
@@ -709,7 +544,7 @@ export default function Positions() {
                       <TableBody>
                         {getSortedPositions().map((position, index) => (
                           <TableRow 
-                            key={position.id}
+                            key={position.id || `position-${index}`}
                             className={cn(
                               "hover:bg-background/50 transition-colors duration-200",
                               index % 2 === 0 ? "bg-background/20" : "bg-background/10"

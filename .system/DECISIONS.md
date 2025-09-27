@@ -2,6 +2,86 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-024: Correção Crítica de Autenticação LN Markets API v2
+
+**Data**: 2025-01-27  
+**Status**: Aceito  
+**Contexto**: Correção de codificação de assinatura HMAC
+
+### Problema
+A autenticação com LN Markets API v2 estava falhando porque nossa implementação usava **base64** para codificar a assinatura HMAC, mas a API requer **hexadecimal**.
+
+### Decisão
+Mudar a codificação da assinatura HMAC de base64 para hexadecimal.
+
+### Implementação
+```typescript
+// ANTES (INCORRETO)
+.digest('base64');
+
+// DEPOIS (CORRETO)
+.digest('hex');
+```
+
+### Consequências
+- ✅ **Positivas**: Autenticação funcionando, endpoints respondendo
+- ⚠️ **Breaking Change**: Mudança permanente e obrigatória
+- 🔒 **Não Reversível**: base64 não funciona com a API
+
+## ADR-023: Refatoração LN Markets API v2 com Preservação de Otimizações
+
+**Data**: 2025-01-27  
+**Status**: Aceito  
+**Contexto**: Refatoração para usar endpoints corretos da LN Markets API v2 mantendo todas as otimizações implementadas
+
+### Problema
+- Endpoints da LN Markets estavam usando URLs incorretas ou desatualizadas
+- Documentação da API v2 não estava sendo seguida corretamente
+- Alguns endpoints retornavam 404 ou dados incorretos
+- Necessidade de manter todas as otimizações já implementadas (Circuit Breaker, Retry, Cache)
+
+### Decisão
+- **Refatoração Incremental**: Manter serviço existente e adicionar métodos corretos
+- **Preservação de Otimizações**: Circuit Breaker, Retry Service e Cache mantidos
+- **Endpoints Corretos**: Implementar URLs corretas da API v2 conforme documentação
+- **Fallback Gracioso**: Dados opcionais podem falhar sem quebrar sistema
+- **Testes de Contrato**: Validação completa dos endpoints da API
+
+### Implementação
+```typescript
+// backend/src/services/lnmarkets-api.service.ts
+// Métodos corretos da API v2 mantendo otimizações
+async getUserPositions(type: 'running' | 'open' | 'closed' = 'running') {
+  return this.makeRequest({
+    method: 'GET',
+    path: '/futures',
+    params: { type }
+  });
+}
+
+async getTicker() {
+  return this.makeRequest({
+    method: 'GET',
+    path: '/futures/btc_usd/ticker'
+  });
+}
+
+// Dados opcionais com fallback
+const [depositsData, withdrawalsData] = await Promise.allSettled([
+  lnMarketsService.getDeposits().catch(() => []),
+  lnMarketsService.getWithdrawals().catch(() => [])
+]);
+```
+
+### Consequências
+- ✅ Endpoints corretos da LN Markets API v2 implementados
+- ✅ Todas as otimizações preservadas (Circuit Breaker, Retry, Cache)
+- ✅ Dashboard funcionando com dados reais
+- ✅ 11 testes de contrato implementados e passando
+- ✅ Integração testada com usuário real
+- ✅ Performance mantida (~7s para carregar dados)
+- ✅ Fallback gracioso para endpoints opcionais
+
 ## ADR-021: Correção de Race Condition do Prisma Client
 
 **Data**: 2025-01-25  

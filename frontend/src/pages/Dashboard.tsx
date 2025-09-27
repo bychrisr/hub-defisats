@@ -27,6 +27,12 @@ import { useAutomationStore } from '@/stores/automation';
 import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
 import { usePositionsMetrics, usePositions, useCredentialsError } from '@/contexts/PositionsContext';
+import { 
+  useOptimizedDashboardData, 
+  useOptimizedDashboardMetrics, 
+  useOptimizedPositions, 
+  useOptimizedMarketData 
+} from '@/hooks/useOptimizedDashboardData';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
@@ -55,32 +61,69 @@ export default function Dashboard() {
     isLoading: automationLoading,
   } = useAutomationStore();
   
-  // Dados em tempo real
-  const realtimePositions = useUserPositions();
+  // Hook otimizado para dados da dashboard (baseado no roadmap)
+  const { 
+    data: dashboardData, 
+    isLoading: dashboardLoading, 
+    error: dashboardError, 
+    refresh: refreshDashboard,
+    lastUpdate,
+    cacheHit
+  } = useOptimizedDashboardData();
+  
+  // Métricas otimizadas da dashboard
+  const {
+    totalPL,
+    estimatedProfit,
+    totalMargin,
+    estimatedFees,
+    availableMargin,
+    estimatedBalance,
+    totalInvested,
+    netProfit,
+    feesPaid,
+    positionCount,
+    activeTrades,
+    isLoading: metricsLoading,
+    error: metricsError
+  } = useOptimizedDashboardMetrics();
+  
+  // Dados de posições otimizados
+  const { positions: optimizedPositions } = useOptimizedPositions();
+  
+  // Dados de mercado otimizados
+  const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
+  
+  // Dados históricos (mantido para compatibilidade)
+  const historicalData = useHistoricalData();
+  
+  // Dados de saldo estimado já estão disponíveis via useOptimizedDashboardMetrics
+  
+  // Dados de posições já estão disponíveis via useOptimizedDashboardMetrics
+  
+  // Dados de saldo (mantido para compatibilidade)
   const balanceData = useUserBalance();
-  const { isConnected } = useConnectionStatus();
+  
+  // Hook de tempo real otimizado (menos frequente)
+  const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
+    positionsInterval: 10000, // 10 segundos (reduzido)
+    balanceInterval: 30000, // 30 segundos (reduzido)
+    marketInterval: 60000, // 1 minuto (reduzido)
+    historicalInterval: 300000, // 5 minutos (reduzido)
+    enabled: true
+  });
+  
+  // Utilitários
+  const { formatSats, getDynamicSize } = useFormatSats();
   
   // Erro de credenciais LN Markets
   const { credentialsError, clearCredentialsError } = useCredentialsError();
   
-  // Hook de tempo real para todos os dados do dashboard
-  const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
-    positionsInterval: 5000, // 5 segundos
-    balanceInterval: 10000, // 10 segundos
-    marketInterval: 30000, // 30 segundos
-    historicalInterval: 60000, // 1 minuto
-    enabled: true
-  });
+  // Estado de carregamento otimizado
+  const isLoading = authLoading || automationLoading || dashboardLoading || metricsLoading;
   
-  // Novos hooks para métricas da dashboard
-  const positionsData = usePositionsMetrics();
-  const { data: positionsContextData } = usePositions(); // Para obter o marketIndex consistente e positionsLoading
-  const historicalData = useHistoricalData();
-  const estimatedBalance = useEstimatedBalance();
-  const { formatSats, getDynamicSize } = useFormatSats();
-  
-  // Estado de carregamento das posições
-  const positionsLoading = positionsContextData?.isLoading || false;
+  // Estado de carregamento das posições (mantido para compatibilidade)
+  const positionsLoading = dashboardLoading || metricsLoading;
   
   // Função para quebrar títulos em duas linhas
   const breakTitleIntoTwoLines = (title: string) => {
@@ -144,28 +187,26 @@ export default function Dashboard() {
   
   // Funções de cálculo baseadas no PAINEL_METRICAS.md
   const calculateActiveTrades = () => {
-    if (!positionsData.positions) return 0;
-    return positionsData.positions.filter(pos => pos.status === 'running').length;
+    if (!optimizedPositions) return 0;
+    return optimizedPositions.filter(pos => pos.status === 'running').length;
   };
   
   const calculateTotalMargin = () => {
-    if (!positionsData.positions) return 0;
-    return positionsData.positions
-      .filter(pos => pos.status === 'running')
-      .reduce((sum, pos) => sum + (pos.margin || 0), 0);
+    return totalMargin || 0;
   };
   
   const calculateAvailableMargin = () => {
-    return balanceData?.total_balance || 0;
+    // Usar dados otimizados em vez de balanceData
+    return availableMargin || 0;
   };
   
   const calculateEstimatedBalance = () => {
     const availableMargin = calculateAvailableMargin();
     const totalMargin = calculateTotalMargin();
-    const estimatedProfit = positionsData.estimatedProfit || 0;
-    const estimatedFees = positionsData.estimatedFees || 0;
+    const estimatedProfitValue = estimatedProfit || 0;
+    const estimatedFeesValue = estimatedFees || 0;
     
-    return availableMargin + totalMargin + estimatedProfit - estimatedFees;
+    return availableMargin + totalMargin + estimatedProfitValue - estimatedFeesValue;
   };
   
   const calculateTotalInvested = () => {
@@ -181,7 +222,7 @@ export default function Dashboard() {
   };
   
   const calculateNetProfit = () => {
-    const totalPnl = positionsData.totalPL || 0;
+    const totalPnl = totalPL || 0;
     const feesPaid = calculateFeesPaid();
     return totalPnl - feesPaid;
   };
@@ -454,17 +495,17 @@ export default function Dashboard() {
 
   // Função para calcular o tamanho global baseado no MAIOR valor entre todos os cards
   const getGlobalDynamicSize = () => {
-    // Coletar todos os valores numéricos dos cards
+    // Coletar todos os valores numéricos dos cards (usando dados otimizados)
     const allValues = [
-      positionsData.totalPL || 0,
-      positionsData.estimatedProfit || 0,
-      calculateTotalMargin(),
-      positionsData.estimatedFees || 0,
-      calculateAvailableMargin(),
-      calculateEstimatedBalance(),
-      calculateTotalInvested(),
-      calculateNetProfit(),
-      calculateFeesPaid()
+      totalPL || 0,
+      estimatedProfit || 0,
+      totalMargin || 0,
+      estimatedFees || 0,
+      availableMargin || 0,
+      estimatedBalance || 0,
+      totalInvested || 0,
+      netProfit || 0,
+      feesPaid || 0
     ];
 
     // Encontrar o MAIOR valor absoluto (excluindo zeros)
@@ -511,9 +552,9 @@ export default function Dashboard() {
     }
     fetchAutomations();
     fetchStats();
-  }, [user, getProfile, fetchAutomations, fetchStats]);
-
-  const isLoading = authLoading || automationLoading;
+    // Usar refresh otimizado em vez de refreshAll
+    refreshDashboard();
+  }, [user, getProfile, fetchAutomations, fetchStats, refreshDashboard]);
 
   const activeAutomations = automations.filter(a => a.is_active);
 
@@ -582,7 +623,7 @@ export default function Dashboard() {
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 {(() => {
-                  const colors = getCardIconColors('total-pnl', positionsData.totalPL || 0);
+                  const colors = getCardIconColors('total-pnl', totalPL || 0);
                   return (
                     <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
@@ -593,8 +634,8 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
-                getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
+                getPnLColor(totalPL || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                getPnLColor(totalPL || 0) === 'negative' ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
@@ -621,17 +662,17 @@ export default function Dashboard() {
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
-                        getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-200' :
-                        getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-200' :
+                        getPnLColor(totalPL || 0) === 'positive' ? 'text-green-200' :
+                        getPnLColor(totalPL || 0) === 'negative' ? 'text-red-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(positionsData.totalPL || 0, { 
+                        {formatSats(totalPL || 0, { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
                           className: positionsLoading ? 'text-gray-300' :
-                            getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'text-green-300' :
-                            getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'text-red-300' :
+                            getPnLColor(totalPL || 0) === 'positive' ? 'text-green-300' :
+                            getPnLColor(totalPL || 0) === 'negative' ? 'text-red-300' :
                             'text-gray-300'
                         })}
                       </div>
@@ -643,12 +684,12 @@ export default function Dashboard() {
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
                           positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
-                          getPnLColor(positionsData.totalPL || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
-                          getPnLColor(positionsData.totalPL || 0) === 'negative' ? 'border-red-400/60 text-red-200 bg-red-600/20' :
+                          getPnLColor(totalPL || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          getPnLColor(totalPL || 0) === 'negative' ? 'border-red-400/60 text-red-200 bg-red-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
                       >
-                        {positionsData.totalMargin > 0 ? `${((positionsData.totalPL || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '0.0%'}
+                        {totalMargin > 0 ? `${((totalPL || 0) / totalMargin * 100).toFixed(1)}%` : '0.0%'}
                       </Badge>
                     </div>
                   </div>
@@ -663,7 +704,7 @@ export default function Dashboard() {
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 {(() => {
-                  const colors = getCardIconColors('estimated-profit', positionsData.estimatedProfit || 0);
+                  const colors = getCardIconColors('estimated-profit', estimatedProfit || 0);
                   return (
                     <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
@@ -674,7 +715,7 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                getProfitColor(estimatedProfit || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
@@ -701,15 +742,15 @@ export default function Dashboard() {
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} ${
                         positionsLoading ? 'text-gray-200' :
-                        getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-200' :
+                        getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(positionsData.estimatedProfit || 0, { 
+                        {formatSats(estimatedProfit || 0, { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
                           className: positionsLoading ? 'text-gray-300' :
-                            getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-300' :
+                            getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-300' :
                             'text-gray-300'
                         })}
                       </div>
@@ -721,15 +762,15 @@ export default function Dashboard() {
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
                           positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
-                          getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          getProfitColor(estimatedProfit || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
                       >
-                        {positionsData.totalMargin > 0 ? `+${((positionsData.estimatedProfit || 0) / positionsData.totalMargin * 100).toFixed(1)}%` : '+0.0%'}
+                        {totalMargin > 0 ? `+${((estimatedProfit || 0) / totalMargin * 100).toFixed(1)}%` : '+0.0%'}
                       </Badge>
                       <span className={`text-caption ${
                         positionsLoading ? 'text-gray-300/80' :
-                        getProfitColor(positionsData.estimatedProfit || 0) === 'positive' ? 'text-green-300/80' :
+                        getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-300/80' :
                         'text-gray-300/80'
                       }`}>vs Margin</span>
                     </div>
@@ -790,9 +831,9 @@ export default function Dashboard() {
                           className="text-xs px-2 py-1 border-green-400/60 text-green-200 bg-green-600/20 whitespace-nowrap"
                         >
                           {(() => {
-                            if (positionsData.positions && positionsData.positions.length > 0) {
-                              const longCount = positionsData.positions.filter(pos => pos.status === 'running' && pos.side === 'long').length;
-                              console.log('🔍 LONG COUNT - positions array:', longCount, positionsData.positions.map(p => ({ id: p.id, side: p.side, status: p.status })));
+                            if (optimizedPositions && optimizedPositions.length > 0) {
+                              const longCount = optimizedPositions.filter(pos => pos.status === 'running' && pos.side === 'long').length;
+                              console.log('🔍 LONG COUNT - positions array:', longCount, optimizedPositions.map(p => ({ id: p.id, side: p.side, status: p.status })));
                               return longCount;
                             }
                             console.log('🔍 LONG COUNT - No positions array, returning 0');
@@ -804,9 +845,9 @@ export default function Dashboard() {
                           className="text-xs px-2 py-1 border-red-400/60 text-red-200 bg-red-600/20 whitespace-nowrap"
                         >
                           {(() => {
-                            if (positionsData.positions && positionsData.positions.length > 0) {
-                              const shortCount = positionsData.positions.filter(pos => pos.status === 'running' && pos.side === 'short').length;
-                              console.log('🔍 SHORT COUNT - positions array:', shortCount, positionsData.positions.map(p => ({ id: p.id, side: p.side, status: p.status })));
+                            if (optimizedPositions && optimizedPositions.length > 0) {
+                              const shortCount = optimizedPositions.filter(pos => pos.status === 'running' && pos.side === 'short').length;
+                              console.log('🔍 SHORT COUNT - positions array:', shortCount, optimizedPositions.map(p => ({ id: p.id, side: p.side, status: p.status })));
                               return shortCount;
                             }
                             console.log('🔍 SHORT COUNT - No positions array, returning 0');
@@ -918,7 +959,7 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-fees').text}`}>
-                        {formatSats(positionsData.estimatedFees || 0, { 
+                        {formatSats(estimatedFees || 0, { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'neutral',
                           forceColor: true,

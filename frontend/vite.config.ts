@@ -9,19 +9,19 @@ export default defineConfig(({ mode }) => ({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://backend:3010', // ✅ Conectar no serviço backend dentro da rede Docker
+        target: 'http://hub-defisats-backend:3010', // ✅ Usar nome do container do backend
         changeOrigin: true,
         secure: false,
         // rewrite: (path) => path.replace(/^\/api/, ''), // ❌ REMOVIDO: backend espera prefixo /api
       },
       '/test': {
-        target: 'http://backend:3010', // ✅ WebSocket proxy para endpoints de teste
+        target: 'http://hub-defisats-backend:3010', // ✅ Usar nome do container do backend
         changeOrigin: true,
         secure: false,
         ws: true,                      // ✅ Habilitar WebSocket proxy
       },
       '/version': {
-        target: 'http://backend:3010', // ✅ Proxy para endpoint de versão
+        target: 'http://hub-defisats-backend:3010', // ✅ Usar nome do container do backend
         changeOrigin: true,
         secure: false,
       },
