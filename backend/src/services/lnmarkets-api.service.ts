@@ -3,6 +3,8 @@ import * as crypto from 'crypto';
 import { CircuitBreaker } from './circuit-breaker.service';
 import { RetryService } from './retry.service';
 import { Logger } from 'winston';
+import { config } from '../config/env';
+import { getLNMarketsEndpoint } from '../config/lnmarkets-endpoints';
 
 export interface LNMarketsCredentials {
   apiKey: string;
@@ -37,8 +39,8 @@ export class LNMarketsAPIService {
     
     this.credentials = credentials;
     this.baseURL = credentials.isTestnet 
-      ? 'https://api.testnet4.lnmarkets.com/v2'
-      : 'https://api.lnmarkets.com/v2';
+      ? config.LN_MARKETS_API_BASE_URL_TESTNET
+      : config.LN_MARKETS_API_BASE_URL;
     
     console.log('🚨 TESTE SIMPLES - BaseURL:', this.baseURL);
     
@@ -74,7 +76,7 @@ export class LNMarketsAPIService {
     
     const timestamp = Date.now().toString();
     const method = (config.method || 'GET').toUpperCase();
-    const path = `/v2${config.url}`;
+    const path = config.url || '';
     
     // Limpar credenciais para evitar espaços/caracteres invisíveis
     const apiKey = this.credentials.apiKey.trim();
@@ -383,7 +385,7 @@ export class LNMarketsAPIService {
   async getUser() {
     return this.makeRequest({
       method: 'GET',
-      path: '/user'
+      path: getLNMarketsEndpoint('user')
     });
   }
 
