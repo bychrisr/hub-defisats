@@ -164,9 +164,12 @@ export interface ExchangeApiService {
   
   // User operations
   getUser(): Promise<ExchangeApiResponse<ExchangeUser>>;
+  getUserProfile(): Promise<ExchangeApiResponse<any>>; // LN Markets specific
   getUserBalance(): Promise<ExchangeApiResponse<ExchangeBalance[]>>;
   getUserDeposits(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<ExchangeDeposit[]>>;
   getUserWithdrawals(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<ExchangeWithdrawal[]>>;
+  getUserHistory(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<any[]>>; // LN Markets specific
+  getUserOrders(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<ExchangeOrder[]>>; // LN Markets specific
   
   // Position operations
   getPositions(symbol?: string): Promise<ExchangeApiResponse<ExchangePosition[]>>;
@@ -223,9 +226,12 @@ export abstract class BaseExchangeApiService implements ExchangeApiService {
   // Abstract methods that must be implemented by subclasses
   abstract validateCredentials(credentials: ExchangeCredentials): Promise<boolean>;
   abstract getUser(): Promise<ExchangeApiResponse<ExchangeUser>>;
+  abstract getUserProfile(): Promise<ExchangeApiResponse<any>>; // LN Markets specific
   abstract getUserBalance(): Promise<ExchangeApiResponse<ExchangeBalance[]>>;
   abstract getUserDeposits(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<ExchangeDeposit[]>>;
   abstract getUserWithdrawals(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<ExchangeWithdrawal[]>>;
+  abstract getUserHistory(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<any[]>>; // LN Markets specific
+  abstract getUserOrders(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<ExchangeOrder[]>>; // LN Markets specific
   abstract getPositions(symbol?: string): Promise<ExchangeApiResponse<ExchangePosition[]>>;
   abstract getPosition(positionId: string): Promise<ExchangeApiResponse<ExchangePosition>>;
   abstract closePosition(options: ExchangeClosePositionOptions): Promise<ExchangeApiResponse<ExchangeOrder>>;

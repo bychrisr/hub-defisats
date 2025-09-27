@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { CircuitBreaker } from './circuit-breaker.service';
 import { RetryService } from './retry.service';
 import { Logger } from 'winston';

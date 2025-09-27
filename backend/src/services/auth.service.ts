@@ -1,5 +1,5 @@
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { PrismaClient, User } from '@prisma/client';
 import { config } from '../config/env';
 import { FastifyInstance } from 'fastify';

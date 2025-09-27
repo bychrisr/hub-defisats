@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { Logger } from 'winston';
 import { 
   ExchangeApiService, 
@@ -226,6 +226,63 @@ export class LNMarketsApiService extends BaseExchangeApiService {
       return this.createSuccessResponse(user);
     } catch (error: any) {
       return this.createErrorResponse('USER_FETCH_FAILED', error.message);
+    }
+  }
+
+  async getUserProfile(): Promise<ExchangeApiResponse<any>> {
+    try {
+      const data = await this.makeAuthenticatedRequest('GET', getLNMarketsEndpoint('user'));
+      return this.createSuccessResponse(data);
+    } catch (error: any) {
+      return this.createErrorResponse('USER_PROFILE_FETCH_FAILED', error.message);
+    }
+  }
+
+  async getUserHistory(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<any[]>> {
+    try {
+      const params = new URLSearchParams();
+      if (options?.symbol) params.append('symbol', options.symbol);
+      if (options?.startDate) params.append('start_date', options.startDate.toISOString());
+      if (options?.endDate) params.append('end_date', options.endDate.toISOString());
+      if (options?.limit) params.append('limit', options.limit.toString());
+      if (options?.offset) params.append('offset', options.offset.toString());
+
+      const data = await this.makeAuthenticatedRequest('GET', `${getLNMarketsEndpoint('user')}/history?${params.toString()}`);
+      return this.createSuccessResponse(data);
+    } catch (error: any) {
+      return this.createErrorResponse('USER_HISTORY_FETCH_FAILED', error.message);
+    }
+  }
+
+  async getUserOrders(options?: ExchangeHistoryOptions): Promise<ExchangeApiResponse<ExchangeOrder[]>> {
+    try {
+      const params = new URLSearchParams();
+      if (options?.symbol) params.append('symbol', options.symbol);
+      if (options?.startDate) params.append('start_date', options.startDate.toISOString());
+      if (options?.endDate) params.append('end_date', options.endDate.toISOString());
+      if (options?.limit) params.append('limit', options.limit.toString());
+      if (options?.offset) params.append('offset', options.offset.toString());
+
+      const data = await this.makeAuthenticatedRequest('GET', `${getLNMarketsEndpoint('user')}/orders?${params.toString()}`);
+      
+      const orders: ExchangeOrder[] = data.map((order: any) => ({
+        id: order.id,
+        symbol: order.symbol,
+        side: order.side,
+        type: order.type,
+        size: order.size,
+        price: order.price,
+        stopPrice: order.stop_price,
+        status: order.status,
+        filledSize: order.filled_size || 0,
+        averagePrice: order.average_price,
+        createdAt: new Date(order.created_at),
+        updatedAt: new Date(order.updated_at)
+      }));
+
+      return this.createSuccessResponse(orders);
+    } catch (error: any) {
+      return this.createErrorResponse('USER_ORDERS_FETCH_FAILED', error.message);
     }
   }
 
