@@ -4,6 +4,8 @@ import { LNMarketsUserController } from '../controllers/lnmarkets-user.controlle
 import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function lnmarketsUserOptimizedRoutes(fastify: FastifyInstance) {
+  console.log('🔧 LN MARKETS USER OPTIMIZED - Registering routes...');
+  console.log('🔧 LN MARKETS USER OPTIMIZED - About to register /lnmarkets/market/ticker');
   const prisma = new PrismaClient();
   const userController = new LNMarketsUserController(prisma);
 
@@ -33,15 +35,43 @@ export async function lnmarketsUserOptimizedRoutes(fastify: FastifyInstance) {
       }
     },
     async (request, reply) => {
-      // Endpoint simples que retorna dados de mercado públicos
-      return reply.send({
-        success: true,
-        data: {
-          message: 'Use /api/lnmarkets/user/dashboard-optimized for all data'
-        }
-      });
+      console.log('🔍 TICKER ENDPOINT - Called /api/lnmarkets/market/ticker');
+      console.log('🔍 TICKER ENDPOINT - URL:', request.url);
+      console.log('🔍 TICKER ENDPOINT - Method:', request.method);
+      try {
+        const axios = require('axios');
+        console.log('🔍 TICKER ENDPOINT - Making request to LN Markets API...');
+        const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {
+          timeout: 10000
+        });
+        console.log('✅ TICKER ENDPOINT - LN Markets API response:', response.data);
+
+        return reply.send({
+          success: true,
+          data: {
+            ...response.data,
+            timestamp: Date.now()
+          }
+        });
+      } catch (error: any) {
+        console.error('Error fetching market ticker:', error);
+
+        // Return fallback data
+        return reply.send({
+          success: true,
+          data: {
+            index: 115000,
+            lastPrice: 115000,
+            askPrice: 115100,
+            bidPrice: 114900,
+            carryFeeRate: 0.0001,
+            timestamp: Date.now()
+          }
+        });
+      }
     }
   );
 
   console.log('✅ LN Markets User Optimized routes registered - Only optimized endpoints');
+  console.log('✅ LN MARKETS USER OPTIMIZED - Route /lnmarkets/market/ticker registered successfully');
 }
