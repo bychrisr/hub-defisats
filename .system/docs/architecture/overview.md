@@ -259,11 +259,14 @@ sequenceDiagram
 
 ## Otimizações de Performance
 
-### 1. Requisições Centralizadas
-- **useCentralizedData**: Hook que centraliza requisições em uma única chamada paralela
-- **Requisições Paralelas**: Balance, positions, market e menu em uma única requisição
-- **Redução de Overhead**: De 4+ requisições simultâneas para 1 requisição paralela
-- **Cache Inteligente**: Dados compartilhados entre componentes
+### 1. Requisições Centralizadas LN Markets
+- **Endpoint Único**: `/api/lnmarkets-v2/dashboard` - Todos os dados em uma requisição
+- **Estratégia Otimizada**: Uma única chamada para LN Markets API retorna todos os dados
+- **Dados Estruturados**: Frontend filtra o que precisa da resposta completa
+- **Performance Máxima**: De múltiplas requisições para uma única requisição paralela
+- **Logs Máximos**: Debugging completo com requestId único para cada requisição
+- **Tratamento Robusto**: Fallbacks automáticos e recuperação de erros
+- **Monitoramento Avançado**: Métricas detalhadas de performance por fase
 
 ### 2. Proteção de Rotas Inteligente
 - **LoadingGuard**: Componente elegante com loading animado e feedback visual

@@ -87,16 +87,64 @@ export async function lnmarketsRefactoredRoutes(fastify: FastifyInstance) {
     handler: userController.getUserWithdrawals.bind(userController)
   });
 
+  // Test route to verify middleware
+  fastify.get('/test/middleware', {
+    preHandler: [(fastify as any).authenticate],
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      console.log('🔍 TEST ROUTE - Middleware test called');
+      console.log('🔍 TEST ROUTE - request.user:', (request as any).user);
+      return reply.send({
+        success: true,
+        message: 'Middleware test successful',
+        user: (request as any).user
+      });
+    }
+  });
+
+  // Test route to verify positions without middleware
+  fastify.get('/test/positions-direct', {
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      console.log('🔍 TEST POSITIONS DIRECT - Called');
+      console.log('🔍 TEST POSITIONS DIRECT - request.user:', (request as any).user);
+      console.log('🔍 TEST POSITIONS DIRECT - request.headers:', request.headers);
+      
+      // Get user ID from JWT token directly
+      const authHeader = request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return reply.status(401).send({
+          success: false,
+          error: 'UNAUTHORIZED',
+          message: 'Authorization header with Bearer token is required',
+        });
+      }
+
+      const token = authHeader.substring(7);
+      
+      // Validate token and get user ID
+      const { AuthService } = await import('../services/auth.service');
+      const authService = new AuthService(prisma, request.server);
+      const user = await authService.validateSession(token);
+      
+      if (!user?.id) {
+        return reply.status(401).send({
+          success: false,
+          error: 'UNAUTHORIZED',
+          message: 'Invalid token or user not found',
+        });
+      }
+      
+      return reply.send({
+        success: true,
+        message: 'Direct positions test successful',
+        user: user
+      });
+    }
+  });
+
   // Trading routes
   fastify.get('/trading/positions', {
     preHandler: [(fastify as any).authenticate],
-    handler: async (request: any, reply: any) => {
-      return reply.send({
-        success: true,
-        message: 'Positions route working',
-        user: request.user
-      });
-    }
+    handler: tradingController.getPositions.bind(tradingController)
   });
 
   fastify.post('/trading/order', {

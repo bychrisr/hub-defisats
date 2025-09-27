@@ -16,23 +16,167 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
 
   /**
    * Get positions using the new standardized service
+   * Based on the original working implementation
    */
   async getPositions(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const userId = this.validateUser(request, reply);
-      if (!userId) return;
-
-      const exchangeService = await this.createExchangeService(userId);
-      const result = await exchangeService.getPositions();
-      
-      if (!result.success) {
-        return this.sendError(reply, 'POSITIONS_FETCH_FAILED', result.error || 'Failed to fetch positions');
+      // Get user ID from request.user (populated by middleware)
+      const userId = (request as any).user?.id;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: 'UNAUTHORIZED',
+          message: 'User not authenticated',
+        });
       }
 
-      this.logger.info(`[TradingController] Positions retrieved for user ${userId}`);
-      return this.sendSuccess(reply, result.data, 'Positions retrieved successfully');
+      // Get user credentials from database (based on original implementation)
+      console.log('🔍 TRADING CONTROLLER - Fetching user credentials from database');
+      const userProfile = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          ln_markets_api_key: true,
+          ln_markets_api_secret: true,
+          ln_markets_passphrase: true,
+        },
+      });
+
+      console.log('🔍 TRADING CONTROLLER - User profile from DB:', {
+        hasApiKey: !!userProfile?.ln_markets_api_key,
+        hasApiSecret: !!userProfile?.ln_markets_api_secret,
+        hasPassphrase: !!userProfile?.ln_markets_passphrase,
+        apiKeyPreview: userProfile?.ln_markets_api_key ? `${userProfile.ln_markets_api_key.substring(0, 10)}...` : 'MISSING',
+        apiSecretPreview: userProfile?.ln_markets_api_secret ? `${userProfile.ln_markets_api_secret.substring(0, 10)}...` : 'MISSING',
+        passphrasePreview: userProfile?.ln_markets_passphrase ? `${userProfile.ln_markets_passphrase.substring(0, 5)}...` : 'MISSING'
+      });
+
+      if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+        console.log('❌ TRADING CONTROLLER - Missing credentials, returning 400');
+        return reply.status(400).send({
+          success: false,
+          error: 'MISSING_CREDENTIALS',
+          message: 'LN Markets credentials not configured',
+        });
+      }
+
+      // Decrypt credentials (based on original implementation)
+      console.log('🔍 TRADING CONTROLLER - Decrypting credentials...');
+      
+      // Import AuthService and create instance
+      const { AuthService } = await import('../services/auth.service');
+      const authService = new AuthService(this.prisma, request.server);
+      
+      const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
+      const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
+      const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
+
+      console.log('✅ TRADING CONTROLLER - Credentials decrypted successfully');
+
+      // Initialize LN Markets service directly (based on original implementation)
+      console.log('🔍 TRADING CONTROLLER - Initializing LN Markets service');
+      const { LNMarketsAPIService } = await import('../services/lnmarkets-api.service');
+      const lnMarketsService = new LNMarketsAPIService({
+        apiKey,
+        apiSecret,
+        passphrase,
+        isTestnet: false, // Force mainnet for now
+      }, this.logger);
+
+      console.log('✅ TRADING CONTROLLER - Service initialized, calling getUserPositions');
+      // Get positions using the service (based on original implementation)
+      const positions = await lnMarketsService.getUserPositions();
+
+      console.log('✅ TRADING CONTROLLER - Positions retrieved successfully:', {
+        positionsCount: Array.isArray(positions) ? positions.length : 'not array',
+        positions: positions
+      });
+      
+      // Log detailed info about positions
+      if (Array.isArray(positions) && positions.length > 0) {
+        console.log('🔍 TRADING CONTROLLER - First position details:', {
+          id: positions[0].id,
+          side: positions[0].side,
+          quantity: positions[0].quantity,
+          price: positions[0].price,
+          liquidation: positions[0].liquidation,
+          margin: positions[0].margin,
+          pl: positions[0].pl,
+          leverage: positions[0].leverage,
+          allKeys: Object.keys(positions[0])
+        });
+      }
+
+      return reply.status(200).send({
+        success: true,
+        data: {
+          positions: positions || [],
+        },
+      });
     } catch (error: any) {
-      return this.handleExchangeError(error, reply, 'get positions');
+      console.error('❌ TRADING CONTROLLER - Error getting positions:', {
+        message: error.message,
+        stack: error.stack,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        fullError: error
+      });
+      
+      // Handle specific error types (based on original implementation)
+      if (error.message?.includes('LN Markets credentials not configured')) {
+        return reply.status(400).send({
+          success: false,
+          error: 'MISSING_CREDENTIALS',
+          message: 'LN Markets credentials not configured. Please update your profile with API credentials.',
+        });
+      }
+      
+      if (error.message?.includes('Invalid API credentials')) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INVALID_CREDENTIALS',
+          message: 'Invalid LN Markets API credentials. Please check your API key, secret, and passphrase.',
+        });
+      }
+      
+      if (error.message?.includes('Insufficient permissions')) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INSUFFICIENT_PERMISSIONS',
+          message: 'LN Markets API credentials do not have sufficient permissions.',
+        });
+      }
+      
+      // Handle HTTP status codes
+      if (error.response?.status === 401) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INVALID_CREDENTIALS',
+          message: 'Invalid LN Markets API credentials. Please check your API key, secret, and passphrase.',
+        });
+      }
+      
+      if (error.response?.status === 403) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INSUFFICIENT_PERMISSIONS',
+          message: 'LN Markets API credentials do not have sufficient permissions.',
+        });
+      }
+      
+      if (error.response?.status === 429) {
+        return reply.status(429).send({
+          success: false,
+          error: 'RATE_LIMIT',
+          message: 'Rate limit exceeded. Please try again later.',
+        });
+      }
+      
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to get LN Markets positions. Please try again later.',
+      });
     }
   }
 

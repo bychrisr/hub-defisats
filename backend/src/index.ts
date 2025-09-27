@@ -6,11 +6,7 @@ import { automationRoutes } from './routes/automation.routes';
 import { automationReportsRoutes } from './routes/automation-reports.routes';
 import { tradeLogRoutes } from './routes/trade-log.routes';
 import { profileRoutes } from './routes/profile.routes';
-import { lnmarketsFuturesRoutes } from './routes/lnmarkets-futures.routes';
-import { lnmarketsOptionsRoutes } from './routes/lnmarkets-options.routes';
-import { lnmarketsUserOptimizedRoutes } from './routes/lnmarkets-user-optimized.routes';
-import { lnmarketsMarketRoutes } from './routes/lnmarkets-market.routes';
-import { lnmarketsRefactoredRoutes } from './routes/lnmarkets-refactored.routes';
+import { lnmarketsCentralizedRoutes } from './routes/lnmarkets-centralized.routes';
 import { dashboardOptimizedRoutes } from './routes/dashboard-optimized.routes';
 import { marketDataRoutes } from './routes/market-data.routes';
 import { couponAdminRoutes } from './routes/coupon-admin.routes';
@@ -534,25 +530,9 @@ async function registerRoutes() {
   await fastify.register(dashboardOptimizedRoutes, { prefix: '/api' });
   console.log('✅ LN Markets Dashboard Optimized routes registered');
 
-  // LN Markets Refactored routes - PRIMEIRO (highest priority)
-  await fastify.register(lnmarketsRefactoredRoutes, { prefix: '/api/lnmarkets/v2' });
-  console.log('✅ LN Markets Refactored routes registered');
-
-  // LN Markets Market Data routes - SEGUNDO (mais genérico)
-  await fastify.register(lnmarketsMarketRoutes, { prefix: '/api' });
-  console.log('✅ LN Markets Market Data routes registered');
-
-  // LN Markets User Optimized (apenas ticker público) - DEPOIS (mais específico)
-  await fastify.register(lnmarketsUserOptimizedRoutes, { prefix: '/api' });
-  console.log('✅ LN Markets User Optimized routes registered');
-
-  // LN Markets Futures routes
-  await fastify.register(lnmarketsFuturesRoutes, { prefix: '/api' });
-  console.log('✅ LN Markets Futures routes registered');
-
-  // LN Markets Options routes
-  await fastify.register(lnmarketsOptionsRoutes, { prefix: '/api' });
-  console.log('✅ LN Markets Options routes registered');
+  // LN Markets Centralized routes - ALL LN Markets functionality in one place
+  await fastify.register(lnmarketsCentralizedRoutes, { prefix: '/api/lnmarkets-v2' });
+  console.log('✅ LN Markets Centralized routes registered');
 
   // Dashboard Optimized routes já registrado acima
 
@@ -853,6 +833,10 @@ async function start() {
     
     fastify.log.info('Database connected successfully');
     console.log('✅ Database connected successfully');
+
+    // Register Prisma in Fastify instance for routes to access
+    fastify.decorate('prisma', prisma);
+    console.log('✅ Prisma registered in Fastify instance');
 
     // Initialize advanced services with connected Prisma
     advancedHealth = new AdvancedHealthService(prisma, redis, {

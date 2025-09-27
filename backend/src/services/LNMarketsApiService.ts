@@ -75,7 +75,7 @@ export class LNMarketsApiService extends BaseExchangeApiService {
   private authenticateRequest(config: AxiosRequestConfig): AxiosRequestConfig {
     const timestamp = Date.now().toString();
     const method = (config.method || 'GET').toUpperCase();
-    const path = config.url || '';
+    const path = config.url || '';  // CORREÇÃO: Não duplicar /v2, baseURL já inclui
     
     // Clean credentials to avoid spaces/invisible characters
     const apiKey = this.credentials.apiKey.trim();
@@ -715,10 +715,67 @@ export class LNMarketsApiService extends BaseExchangeApiService {
 
   // Legacy methods for backward compatibility
   async getUserPositions(type: 'running' | 'open' | 'closed' = 'running') {
-    const response = await this.getPositions();
-    if (!response.success) {
-      return [];
+    console.log('🔍 LN MARKETS POSITIONS - Starting getUserPositions (Legacy)');
+    console.log('🔍 LN MARKETS POSITIONS - Service credentials:', {
+      apiKey: this.credentials.apiKey ? `${this.credentials.apiKey.substring(0, 10)}...` : 'MISSING',
+      apiSecret: this.credentials.apiSecret ? `${this.credentials.apiSecret.substring(0, 10)}...` : 'MISSING',
+      passphrase: this.credentials.passphrase ? `${this.credentials.passphrase.substring(0, 5)}...` : 'MISSING',
+      isTestnet: (this.credentials as LNMarketsCredentials).isTestnet,
+      baseURL: this.baseURL
+    });
+    
+    try {
+      console.log('🔍 LN MARKETS POSITIONS - Attempting to get user positions from /futures');
+      // Usar makeAuthenticatedRequest diretamente como no sistema antigo
+      const result = await this.makeAuthenticatedRequest('GET', '/futures', undefined, {
+        type: 'running'
+      });
+      
+      console.log('✅ LN MARKETS POSITIONS - User positions retrieved successfully:', result);
+      console.log('🔍 LN MARKETS POSITIONS - Result type:', typeof result);
+      console.log('🔍 LN MARKETS POSITIONS - Result is array:', Array.isArray(result));
+      console.log('🔍 LN MARKETS POSITIONS - Result length:', Array.isArray(result) ? result.length : 'not array');
+      
+      if (Array.isArray(result) && result.length > 0) {
+        console.log('🔍 LN MARKETS POSITIONS - First position:', result[0]);
+        console.log('🔍 LN MARKETS POSITIONS - First position keys:', Object.keys(result[0]));
+        console.log('🔍 LN MARKETS POSITIONS - First position values:', {
+          id: result[0].id,
+          side: result[0].side,
+          quantity: result[0].quantity,
+          price: result[0].price,
+          liquidation: result[0].liquidation,
+          margin: result[0].margin,
+          pl: result[0].pl,
+          leverage: result[0].leverage
+        });
+      }
+      
+      return result; // Retornar dados diretamente como no sistema antigo
+    } catch (error: any) {
+      console.log('⚠️ LN MARKETS POSITIONS - Error getting user positions:', {
+        message: error.message,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        fullError: error
+      });
+      
+      // If endpoint doesn't exist (404) or returns empty, return empty array
+      if (error?.response?.status === 404 || error?.message?.includes('404')) {
+        console.log('📝 LN MARKETS POSITIONS - Endpoint /futures not found, returning empty positions');
+        return [];
+      }
+      
+      // If no data returned, return empty array
+      if (error.message?.includes('No data') || error.message?.includes('empty')) {
+        console.log('📝 LN MARKETS POSITIONS - No positions data, returning empty array');
+        return [];
+      }
+      
+      // Re-throw other errors
+      console.log('❌ LN MARKETS POSITIONS - Re-throwing error:', error);
+      throw error;
     }
-    return response.data || [];
   }
 }
