@@ -6,6 +6,74 @@ import { websocketManager } from '../services/websocket-manager.service';
 export async function websocketRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
 
+  // ✅ CONEXÃO DIRETA: Rota WebSocket simples para conexão direta
+  fastify.get('/ws', { websocket: true }, async (connection: any, req) => {
+    const userId = (req.query as any).userId as string;
+    
+    console.log('🔌 WEBSOCKET DIRECT - Nova conexão direta recebida:', {
+      userId,
+      remoteAddress: req.socket.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date().toISOString()
+    });
+    
+    if (!userId) {
+      console.log('❌ WEBSOCKET DIRECT - User ID não fornecido, fechando conexão');
+      connection.close(1008, 'User ID is required');
+      return;
+    }
+
+    console.log('🔌 WEBSOCKET DIRECT - Processando conexão direta para usuário:', userId);
+    
+    // Get user credentials from database
+    const userProfile = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        lnmarkets_api_key: true,
+        lnmarkets_api_secret: true,
+        lnmarkets_passphrase: true,
+        is_admin: true
+      }
+    });
+
+    if (!userProfile) {
+      console.log('❌ WEBSOCKET DIRECT - Usuário não encontrado:', userId);
+      connection.close(1008, 'User not found');
+      return;
+    }
+
+    console.log('✅ WEBSOCKET DIRECT - Usuário encontrado:', {
+      id: userProfile.id,
+      email: userProfile.email,
+      hasCredentials: !!(userProfile.lnmarkets_api_key && userProfile.lnmarkets_api_secret)
+    });
+
+    // Register connection with websocket manager
+    websocketManager.addConnection(userId, connection);
+    
+    connection.on('close', () => {
+      console.log('🔌 WEBSOCKET DIRECT - Conexão fechada para usuário:', userId);
+      websocketManager.removeConnection(userId);
+    });
+
+    connection.on('error', (error: any) => {
+      console.log('❌ WEBSOCKET DIRECT - Erro na conexão:', error);
+      websocketManager.removeConnection(userId);
+    });
+
+    // Send welcome message
+    connection.socket.send(JSON.stringify({
+      type: 'welcome',
+      message: 'Connected to LN Markets WebSocket',
+      userId: userId,
+      timestamp: Date.now()
+    }));
+
+    console.log('✅ WEBSOCKET DIRECT - Conexão estabelecida com sucesso para usuário:', userId);
+  });
+
   // WebSocket route for real-time data (without authentication for testing)
   fastify.get('/ws/realtime', { websocket: true }, async (connection: any, req) => {
     const userId = (req.query as any).userId as string;

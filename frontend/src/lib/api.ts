@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// ✅ Usar variável de ambiente ou caminho relativo para funcionar com proxy do Vite
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// ✅ CONEXÃO DIRETA: Conectar diretamente ao backend via localhost:13010
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:13010';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

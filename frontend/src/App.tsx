@@ -1,7 +1,6 @@
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import PortRedirect from '@/components/PortRedirect';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -230,7 +229,6 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PortRedirect />
       <ThemeProvider>
         <VersionProvider autoCheck={true}>
           <RealtimeDataProvider>
