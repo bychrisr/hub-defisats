@@ -150,17 +150,17 @@ export const useOptimizedDashboardMetrics = () => {
   }
 
   // Calcular métricas dos dados unificados (API v2)
-  const totalPL = data.estimatedBalance?.balance || 0;
-  const estimatedProfit = data.estimatedBalance?.balance || 0;
-  const totalMargin = data.positions?.reduce((sum, pos) => sum + (pos.margin || 0), 0) || 0;
-  const estimatedFees = data.positions?.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0) || 0;
-  const availableMargin = data.balance?.balance || 0;
-  const estimatedBalance = data.estimatedBalance?.balance || 0;
-  const totalInvested = data.positions?.reduce((sum, pos) => sum + (pos.margin || 0), 0) || 0;
-  const netProfit = data.positions?.reduce((sum, pos) => sum + (pos.pl || 0), 0) || 0;
-  const feesPaid = data.positions?.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0) || 0;
-  const positionCount = data.positions?.length || 0;
-  const activeTrades = data.positions?.filter(p => p.running && !p.closed).length || 0;
+  const totalPL = data.lnMarkets?.estimatedBalance?.balance || 0;
+  const estimatedProfit = data.lnMarkets?.estimatedBalance?.balance || 0;
+  const totalMargin = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.margin || 0), 0) || 0;
+  const estimatedFees = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0) || 0;
+  const availableMargin = data.lnMarkets?.balance?.balance || 0;
+  const estimatedBalance = data.lnMarkets?.estimatedBalance?.balance || 0;
+  const totalInvested = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.margin || 0), 0) || 0;
+  const netProfit = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.pl || 0), 0) || 0;
+  const feesPaid = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0) || 0;
+  const positionCount = data.lnMarkets?.positions?.length || 0;
+  const activeTrades = data.lnMarkets?.positions?.filter(p => p.running && !p.closed).length || 0;
 
   return {
     totalPL,
@@ -187,7 +187,7 @@ export const useOptimizedPositions = () => {
   const { data, isLoading, error } = useOptimizedDashboardData();
 
   return {
-    positions: data?.positions || [],
+    positions: data?.lnMarkets?.positions || [],
     isLoading,
     error
   };
@@ -201,9 +201,9 @@ export const useOptimizedMarketData = () => {
   const { data, isLoading, error } = useOptimizedDashboardData();
 
   return {
-    marketIndex: data?.marketIndex || null,
-    deposits: data?.deposits || [],
-    withdrawals: data?.withdrawals || [],
+    marketIndex: data?.lnMarkets?.market || null,
+    deposits: data?.lnMarkets?.deposits || [],
+    withdrawals: data?.lnMarkets?.withdrawals || [],
     isLoading,
     error
   };
