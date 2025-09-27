@@ -33,6 +33,12 @@ export class MetricsService {
   private activeConnections: Gauge<string>;
   private queueSize: Gauge<string>;
 
+  // LN Markets Migration Metrics
+  private lnMarketsRefactoredEndpointCalls: Counter<string>;
+  private lnMarketsRefactoredEndpointDuration: Histogram<string>;
+  private lnMarketsDeprecatedEndpointCalls: Counter<string>;
+  private lnMarketsDeprecatedEndpointDuration: Histogram<string>;
+
   // Custom Metrics
   private customMetrics: Map<string, any> = new Map();
 
@@ -148,6 +154,37 @@ export class MetricsService {
       name: 'queue_size',
       help: 'Number of items in queue',
       labelNames: ['queue_name']
+    });
+
+    // LN Markets Migration Metrics
+    this.lnMarketsRefactoredEndpointCalls = new Counter({
+      name: 'lnmarkets_refactored_endpoint_calls_total',
+      help: 'Total calls to refactored LN Markets endpoints',
+      labelNames: ['endpoint', 'method', 'status_code'],
+      registers: [register],
+    });
+
+    this.lnMarketsRefactoredEndpointDuration = new Histogram({
+      name: 'lnmarkets_refactored_endpoint_duration_seconds',
+      help: 'Duration of refactored LN Markets endpoint calls',
+      labelNames: ['endpoint', 'method'],
+      buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
+      registers: [register],
+    });
+
+    this.lnMarketsDeprecatedEndpointCalls = new Counter({
+      name: 'lnmarkets_deprecated_endpoint_calls_total',
+      help: 'Total calls to deprecated LN Markets endpoints',
+      labelNames: ['endpoint', 'method', 'status_code'],
+      registers: [register],
+    });
+
+    this.lnMarketsDeprecatedEndpointDuration = new Histogram({
+      name: 'lnmarkets_deprecated_endpoint_duration_seconds',
+      help: 'Duration of deprecated LN Markets endpoint calls',
+      labelNames: ['endpoint', 'method'],
+      buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
+      registers: [register],
     });
 
     this.initializeMetrics();
@@ -610,6 +647,68 @@ export class MetricsService {
     if (statusCode >= 500) return 'server_error';
     if (statusCode >= 400) return 'client_error';
     return 'unknown';
+  }
+
+  /**
+   * Record refactored endpoint call
+   */
+  public recordRefactoredEndpointCall(endpoint: string, method: string, statusCode: number): void {
+    this.lnMarketsRefactoredEndpointCalls.inc({
+      endpoint,
+      method,
+      status_code: statusCode.toString()
+    });
+  }
+
+  /**
+   * Record refactored endpoint duration
+   */
+  public recordRefactoredEndpointDuration(endpoint: string, method: string, duration: number): void {
+    this.lnMarketsRefactoredEndpointDuration.observe({
+      endpoint,
+      method
+    }, duration);
+  }
+
+  /**
+   * Record deprecated endpoint call
+   */
+  public recordDeprecatedEndpointCall(endpoint: string, method: string, statusCode: number): void {
+    this.lnMarketsDeprecatedEndpointCalls.inc({
+      endpoint,
+      method,
+      status_code: statusCode.toString()
+    });
+  }
+
+  /**
+   * Record deprecated endpoint duration
+   */
+  public recordDeprecatedEndpointDuration(endpoint: string, method: string, duration: number): void {
+    this.lnMarketsDeprecatedEndpointDuration.observe({
+      endpoint,
+      method
+    }, duration);
+  }
+
+  /**
+   * Get migration metrics
+   */
+  public getMigrationMetrics(): {
+    refactoredCalls: number;
+    deprecatedCalls: number;
+    migrationProgress: number;
+  } {
+    const refactoredCalls = this.lnMarketsRefactoredEndpointCalls.get().values.reduce((sum, val) => sum + val.value, 0);
+    const deprecatedCalls = this.lnMarketsDeprecatedEndpointCalls.get().values.reduce((sum, val) => sum + val.value, 0);
+    const totalCalls = refactoredCalls + deprecatedCalls;
+    const migrationProgress = totalCalls > 0 ? (refactoredCalls / totalCalls) * 100 : 0;
+
+    return {
+      refactoredCalls,
+      deprecatedCalls,
+      migrationProgress
+    };
   }
 
   /**

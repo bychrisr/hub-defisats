@@ -39,9 +39,22 @@ export async function dashboardOptimizedRoutes(fastify: FastifyInstance) {
       }
     },
     async (request, reply) => {
+      // Headers de deprecação
+      reply.headers({
+        'Deprecation': 'true',
+        'Sunset': 'Wed, 01 Jan 2025 00:00:00 GMT',
+        'Warning': '299 - "This endpoint is deprecated, please use /api/lnmarkets/v2/user/dashboard instead"'
+      });
+
+      // Log de chamada à rota antiga
+      console.log(`[DEPRECATION WARNING] Rota antiga chamada: ${request.method} ${request.url} por usuário ${(request as any).user?.id || 'anônimo'}`);
+
+      // Registrar métricas de deprecação
+      const { metrics } = await import('../services/metrics.service');
+      const startTime = Date.now();
+
       try {
         const user = (request as any).user;
-        const startTime = Date.now();
         
         console.log(`🚀 DASHBOARD OPTIMIZED - Starting unified data fetch for user: ${user.id}`);
         
@@ -193,11 +206,19 @@ export async function dashboardOptimizedRoutes(fastify: FastifyInstance) {
           });
         }
 
+        const duration = Date.now() - startTime;
+        metrics.recordDeprecatedEndpointCall('/api/lnmarkets/user/dashboard-optimized', 'GET', 500);
+        metrics.recordDeprecatedEndpointDuration('/api/lnmarkets/user/dashboard-optimized', 'GET', duration / 1000);
+
         return reply.status(500).send({
           success: false,
           error: 'INTERNAL_ERROR',
           message: 'Failed to fetch dashboard data'
         });
+      } finally {
+        const duration = Date.now() - startTime;
+        metrics.recordDeprecatedEndpointCall('/api/lnmarkets/user/dashboard-optimized', 'GET', reply.statusCode);
+        metrics.recordDeprecatedEndpointDuration('/api/lnmarkets/user/dashboard-optimized', 'GET', duration / 1000);
       }
     }
   );

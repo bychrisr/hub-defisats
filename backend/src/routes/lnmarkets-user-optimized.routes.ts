@@ -35,6 +35,20 @@ export async function lnmarketsUserOptimizedRoutes(fastify: FastifyInstance) {
       }
     },
     async (request, reply) => {
+      // Headers de deprecação
+      reply.headers({
+        'Deprecation': 'true',
+        'Sunset': 'Wed, 01 Jan 2025 00:00:00 GMT',
+        'Warning': '299 - "This endpoint is deprecated, please use /api/lnmarkets/v2/market/ticker instead"'
+      });
+
+      // Log de chamada à rota antiga
+      console.log(`[DEPRECATION WARNING] Rota antiga chamada: ${request.method} ${request.url} por usuário ${(request as any).user?.id || 'anônimo'}`);
+
+      // Registrar métricas de deprecação
+      const { metrics } = await import('../services/metrics.service');
+      const startTime = Date.now();
+
       console.log('🔍 TICKER ENDPOINT - Called /api/lnmarkets/market/ticker');
       console.log('🔍 TICKER ENDPOINT - URL:', request.url);
       console.log('🔍 TICKER ENDPOINT - Method:', request.method);
@@ -46,6 +60,10 @@ export async function lnmarketsUserOptimizedRoutes(fastify: FastifyInstance) {
         });
         console.log('✅ TICKER ENDPOINT - LN Markets API response:', response.data);
 
+        const duration = Date.now() - startTime;
+        metrics.recordDeprecatedEndpointCall('/api/lnmarkets/market/ticker', 'GET', 200);
+        metrics.recordDeprecatedEndpointDuration('/api/lnmarkets/market/ticker', 'GET', duration / 1000);
+
         return reply.send({
           success: true,
           data: {
@@ -55,6 +73,10 @@ export async function lnmarketsUserOptimizedRoutes(fastify: FastifyInstance) {
         });
       } catch (error: any) {
         console.error('Error fetching market ticker:', error);
+
+        const duration = Date.now() - startTime;
+        metrics.recordDeprecatedEndpointCall('/api/lnmarkets/market/ticker', 'GET', 500);
+        metrics.recordDeprecatedEndpointDuration('/api/lnmarkets/market/ticker', 'GET', duration / 1000);
 
         // Return fallback data
         return reply.send({
