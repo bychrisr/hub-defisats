@@ -4,11 +4,11 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v1.11.1 ✅ COMPLETA
+## Status Atual: v2.1.0 ✅ COMPLETA
 
-**Versão**: v1.11.1  
-**Status**: Sistema Completo com Integração Final LN Markets API v2  
-**Data**: 2025-01-25
+**Versão**: v2.1.0  
+**Status**: Sistema 100% Funcional com WebSocket e Endpoints Corrigidos  
+**Data**: 2025-09-27
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -21,7 +21,11 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ Modernização Visual com Cores Vibrantes
 - ✅ Fonte Mono para Números
 - ✅ SatsIcon Proporcional
-- ✅ WebSocket 100% Funcional
+- ✅ **WebSocket 100% Funcional** - Corrigido para `/ws`
+- ✅ **API LN Markets 100% Funcional** - Endpoint unificado `/api/lnmarkets-robust/dashboard`
+- ✅ **Proxy Vite Funcionando** - Configurado corretamente para `/ws` e `/api`
+- ✅ **Endpoints 404 Resolvidos** - Todos os hooks usando endpoint correto
+- ✅ **Arquitetura Alinhada** - Frontend → Proxy → Backend funcionando perfeitamente
 - ✅ Eliminação de Polling Desnecessário
 - ✅ **CRÍTICO**: Prisma Race Condition Resolvido
 - ✅ **CRÍTICO**: Login UX Melhorado

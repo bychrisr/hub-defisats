@@ -2,6 +2,94 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-027: Correção Definitiva WebSocket e Endpoints LN Markets
+
+**Data**: 2025-09-27  
+**Status**: Aceito  
+**Contexto**: Resolução definitiva de problemas de WebSocket e endpoints 404
+
+### Problema
+- **WebSocket 404**: Frontend tentando conectar em `/api/ws` que não existia
+- **Endpoints 404**: Hooks usando endpoints inexistentes após refatoração
+- **Inconsistência de Configuração**: Frontend, proxy e backend usando URLs diferentes
+- **Sistema Não Funcional**: WebSocket e API não funcionando corretamente
+
+### Decisão
+Implementar correção sistemática com:
+- **Alinhamento de URLs**: Usar `/ws` em toda a arquitetura WebSocket
+- **Endpoint Unificado**: Usar `/api/lnmarkets-robust/dashboard` para todos os dados LN Markets
+- **Proxy Correto**: Configurar Vite para `/ws` e `/api`
+- **Validação Completa**: Testar com timeout para confirmar funcionamento
+
+### Implementação
+
+#### 1. Correção Frontend WebSocket
+```typescript
+// frontend/src/contexts/RealtimeDataContext.tsx
+// ANTES (incorreto):
+const wsUrl = `ws://localhost:13000/api/ws?userId=${user?.id || 'anonymous'}`;
+
+// DEPOIS (correto):
+const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;
+```
+
+#### 2. Correção Proxy Vite
+```typescript
+// frontend/vite.config.ts
+// ANTES (incorreto):
+'/api/ws': {
+  target: 'ws://backend:3010',
+  ws: true,
+  changeOrigin: true,
+},
+
+// DEPOIS (correto):
+'/ws': {
+  target: 'ws://backend:3010',
+  ws: true,
+  changeOrigin: true,
+},
+```
+
+#### 3. Correção Backend Routes
+```typescript
+// backend/src/index.ts
+// ANTES (incorreto):
+await fastify.register(websocketRoutes, { prefix: '/api' });
+
+// DEPOIS (correto):
+await fastify.register(websocketRoutes, { prefix: '/ws' });
+```
+
+#### 4. Correção Endpoints API
+```typescript
+// frontend/src/hooks/useHistoricalData.ts
+// ANTES (endpoints inexistentes):
+const tradesResponse = await api.get('/api/lnmarkets/user/trades?limit=100&type=closed');
+
+// DEPOIS (endpoint unificado):
+const tradesResponse = await api.get('/api/lnmarkets-robust/dashboard');
+```
+
+### Justificativa
+- **Consistência**: Arquitetura alinhada em toda a stack
+- **Funcionalidade**: WebSocket e API funcionando corretamente
+- **Manutenibilidade**: Configuração simples e clara
+- **Performance**: Endpoint unificado mais eficiente
+
+### Consequências
+- ✅ **WebSocket Funcionando**: Conecta via proxy (testado com timeout)
+- ✅ **API Funcionando**: Retorna dados reais da LN Markets
+- ✅ **Endpoints Corrigidos**: Todos os hooks usando endpoint correto
+- ✅ **Sistema Estável**: Arquitetura documentada e validada
+
+### Alternativas Consideradas
+- **Manter `/api/ws`**: Rejeitado por inconsistência com backend
+- **Múltiplos Endpoints**: Rejeitado por complexidade desnecessária
+- **WebSocket Direto**: Rejeitado por problemas de CORS
+
+---
+
 ## ADR-026: Integração Final da Refatoração LN Markets API v2
 
 **Data**: 2025-01-25  
