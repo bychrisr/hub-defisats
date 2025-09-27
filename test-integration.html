@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Integração - Dados do Usuário</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste de Integração - Dados do Usuário</h1>
+        
+        <div class="card">
+            <h2>Backend Status</h2>
+            <button onclick="testBackendHealth()">Testar Health Check</button>
+            <div id="health-result"></div>
+        </div>
+
+        <div class="card">
+            <h2>Dados do Usuário (Dashboard)</h2>
+            <button onclick="testUserData()">Carregar Dados do Usuário</button>
+            <div id="user-result"></div>
+        </div>
+
+        <div class="card">
+            <h2>Posições do Usuário</h2>
+            <button onclick="testPositions()">Carregar Posições</button>
+            <div id="positions-result"></div>
+        </div>
+
+        <div class="card">
+            <h2>Teste Completo</h2>
+            <button onclick="runFullTest()">Executar Teste Completo</button>
+            <div id="full-test-result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:13000';
+        
+        async function testBackendHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<div class="loading">🔄 Testando health check...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Backend funcionando!<br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Erro ao conectar com backend:<br>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testUserData() {
+            const resultDiv = document.getElementById('user-result');
+            resultDiv.innerHTML = '<div class="loading">🔄 Carregando dados do usuário...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/lnmarkets/v2/user/dashboard`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Dados do usuário carregados!<br>
+                            <h3>Informações do Usuário:</h3>
+                            <pre>${JSON.stringify(data.data.user, null, 2)}</pre>
+                            <h3>Saldo:</h3>
+                            <pre>${JSON.stringify(data.data.balance, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`Erro na resposta: ${data.message || 'Resposta inválida'}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Erro ao carregar dados do usuário:<br>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testPositions() {
+            const resultDiv = document.getElementById('positions-result');
+            resultDiv.innerHTML = '<div class="loading">🔄 Carregando posições...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/lnmarkets/v2/trading/positions`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Posições carregadas! (${data.data.length} posições)<br>
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`Erro na resposta: ${data.message || 'Resposta inválida'}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Erro ao carregar posições:<br>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function runFullTest() {
+            const resultDiv = document.getElementById('full-test-result');
+            resultDiv.innerHTML = '<div class="loading">🔄 Executando teste completo...</div>';
+            
+            let results = [];
+            
+            // Teste 1: Health Check
+            try {
+                const healthResponse = await fetch(`${API_BASE}/api/health`);
+                const healthData = await healthResponse.json();
+                results.push('✅ Health Check: OK');
+            } catch (error) {
+                results.push(`❌ Health Check: ${error.message}`);
+            }
+            
+            // Teste 2: Dashboard
+            try {
+                const dashboardResponse = await fetch(`${API_BASE}/api/lnmarkets/v2/user/dashboard`);
+                const dashboardData = await dashboardResponse.json();
+                if (dashboardData.success) {
+                    results.push(`✅ Dashboard: OK (Usuário: ${dashboardData.data.user.username})`);
+                } else {
+                    results.push('❌ Dashboard: Resposta inválida');
+                }
+            } catch (error) {
+                results.push(`❌ Dashboard: ${error.message}`);
+            }
+            
+            // Teste 3: Posições
+            try {
+                const positionsResponse = await fetch(`${API_BASE}/api/lnmarkets/v2/trading/positions`);
+                const positionsData = await positionsResponse.json();
+                if (positionsData.success) {
+                    results.push(`✅ Posições: OK (${positionsData.data.length} posições)`);
+                } else {
+                    results.push('❌ Posições: Resposta inválida');
+                }
+            } catch (error) {
+                results.push(`❌ Posições: ${error.message}`);
+            }
+            
+            const allPassed = results.every(r => r.startsWith('✅'));
+            
+            resultDiv.innerHTML = `
+                <div class="${allPassed ? 'success' : 'error'}">
+                    <h3>${allPassed ? '🎉 Todos os testes passaram!' : '⚠️ Alguns testes falharam'}</h3>
+                    <pre>${results.join('\n')}</pre>
+                </div>
+            `;
+        }
+
+        // Executar teste automático ao carregar a página
+        window.onload = function() {
+            runFullTest();
+        };
+    </script>
+</body>
+</html>
