@@ -612,6 +612,55 @@ export default function Dashboard() {
             />
           )}
 
+          {/* LN Markets Data Display */}
+          {dashboardData?.lnMarkets && (
+            <Card className="gradient-card border-2 border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30">
+              <CardHeader>
+                <CardTitle className="text-h3 text-vibrant flex items-center gap-2">
+                  <Wallet className="w-6 h-6" />
+                  LN Markets Account
+                </CardTitle>
+                <CardDescription className="text-muted">
+                  Real-time account information from LN Markets
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm text-muted mb-1">Username</div>
+                    <div className="text-lg font-semibold text-vibrant">
+                      {dashboardData.lnMarkets.user?.username || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted mb-1">Balance</div>
+                    <div className="text-lg font-semibold text-vibrant flex items-center gap-1">
+                      <SatsIcon className="w-4 h-4" />
+                      {dashboardData.lnMarkets.balance || 0} sats
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted mb-1">Email</div>
+                    <div className="text-sm text-vibrant">
+                      {dashboardData.lnMarkets.user?.email || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted mb-1">Positions</div>
+                    <div className="text-sm text-vibrant">
+                      {dashboardData.lnMarkets.positions?.length || 0} open
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-600">
+                  <div className="text-xs text-muted">
+                    Last update: {new Date(dashboardData.lnMarkets.metadata?.lastUpdate || Date.now()).toLocaleString()}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
         {/* Nova Linha - Cards Principais */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-vibrant">Key Metrics</h2>

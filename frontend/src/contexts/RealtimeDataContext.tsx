@@ -353,6 +353,14 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
         return;
       }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
+      
+      // Detectar se está na porta errada e redirecionar
+      if (window.location.port === '13010') {
+        console.log('⚠️ REALTIME - Detectado acesso direto ao backend (porta 13010), redirecionando para frontend...');
+        window.location.href = window.location.href.replace(':13010', ':13000');
+        return;
+      }
+      
       // Garantir que sempre use a porta do frontend (13000) para o proxy funcionar
       const host = window.location.hostname === 'localhost' ? 'localhost:13000' : window.location.host;
       const wsUrl = (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${host}/ws`) + '?userId=' + user.id;
