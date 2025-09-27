@@ -23,12 +23,14 @@ import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Dashboard from '@/pages/Dashboard';
+import DashboardRefactored from '@/pages/DashboardRefactored';
 import Profile from '@/pages/Profile';
 import MarginGuard from '@/pages/MarginGuard';
 import { Automation } from '@/pages/Automation';
 import { Logs } from '@/pages/Logs';
 import Reports from '@/pages/Reports';
 import Positions from '@/pages/Positions';
+import PositionsRefactored from '@/pages/PositionsRefactored';
 import Backtests from '@/pages/Backtests';
 import Trading from '@/pages/Trading';
 import Simulation from '@/pages/Simulation';
@@ -281,6 +283,18 @@ const App = () => {
               }
             />
                   <Route
+              path="/dashboard-refactored"
+                element={
+                <ProtectedRoute>
+                  <RouteGuard>
+                    <ResponsiveLayout>
+                      <DashboardRefactored />
+                    </ResponsiveLayout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+                  <Route
               path="/profile"
                 element={
                 <ProtectedRoute>
@@ -347,6 +361,18 @@ const App = () => {
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
                       <Positions />
+                    </ResponsiveLayout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+                  <Route
+              path="/positions-refactored"
+                element={
+                <ProtectedRoute>
+                  <RouteGuard requiredPlan="basic">
+                    <ResponsiveLayout>
+                      <PositionsRefactored />
                     </ResponsiveLayout>
                   </RouteGuard>
                 </ProtectedRoute>
