@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const WebSocket = require('ws');
 const app = express();
 const PORT = 13000;
 
@@ -208,9 +210,58 @@ app.get('/api/lnmarkets/v2/user/dashboard', (req, res) => {
   });
 });
 
+// Create HTTP server
+const server = http.createServer(app);
+
+// Create WebSocket server
+const wss = new WebSocket.Server({ 
+  server,
+  path: '/ws'
+});
+
+// WebSocket connection handling
+wss.on('connection', (ws, req) => {
+  console.log('🔌 WEBSOCKET - New connection established');
+  
+  // Send welcome message
+  ws.send(JSON.stringify({
+    type: 'connection',
+    message: 'Connected to WebSocket server',
+    timestamp: new Date().toISOString()
+  }));
+  
+  // Handle incoming messages
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      console.log('🔌 WEBSOCKET - Message received:', data);
+      
+      // Echo back the message
+      ws.send(JSON.stringify({
+        type: 'echo',
+        originalMessage: data,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('🔌 WEBSOCKET - Error parsing message:', error);
+    }
+  });
+  
+  // Handle connection close
+  ws.on('close', () => {
+    console.log('🔌 WEBSOCKET - Connection closed');
+  });
+  
+  // Handle errors
+  ws.on('error', (error) => {
+    console.error('🔌 WEBSOCKET - Error:', error);
+  });
+});
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Simple Backend running on http://localhost:${PORT}`);
+  console.log(`🔌 WebSocket server running on ws://localhost:${PORT}/ws`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`📊 Positions: http://localhost:${PORT}/api/lnmarkets/v2/trading/positions`);
   console.log(`📊 Dashboard: http://localhost:${PORT}/api/lnmarkets/v2/user/dashboard`);
