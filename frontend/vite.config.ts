@@ -13,23 +13,23 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:13000', // ✅ Usar backend local
+        target: 'http://backend:3010', // ✅ Usar nome do serviço Docker
         changeOrigin: true,
         secure: false,
       },
       '/ws': {
-        target: 'ws://localhost:13000', // ✅ WebSocket proxy
+        target: 'ws://backend:3010', // ✅ WebSocket proxy usando nome do serviço
         ws: true,
         changeOrigin: true,
       },
       '/test': {
-        target: 'http://localhost:13000', // ✅ Usar backend local
+        target: 'http://backend:3010', // ✅ Usar nome do serviço Docker
         changeOrigin: true,
         secure: false,
         ws: true,
       },
       '/version': {
-        target: 'http://localhost:13000', // ✅ Usar backend local
+        target: 'http://backend:3010', // ✅ Usar nome do serviço Docker
         changeOrigin: true,
         secure: false,
       },
