@@ -196,15 +196,40 @@ console.log('✅ Prisma registered in Fastify instance');
 - **Data Available**: ✅ true
 - **Last Sync**: 2025-09-27T18:33:00.731Z
 
+## 🔧 FASE 1 CONCLUÍDA - Correções de Autenticação
+
+### Problemas Identificados e Resolvidos
+
+#### 1. ❌ Path Duplicado
+**Problema**: `/v2` duplicado causando URLs inválidas  
+**Causa**: `const path = '/v2${config.url}'` com baseURL já incluindo `/v2`  
+**Solução**: `const path = config.url || ''`  
+**Resultado**: URLs válidas construídas corretamente
+
+#### 2. ❌ Configurações Hardcoded
+**Problema**: URLs base hardcoded no serviço  
+**Causa**: Não usando configurações centralizadas  
+**Solução**: Implementado uso de `config.LN_MARKETS_API_BASE_URL`  
+**Resultado**: Melhor manutenibilidade e conformidade
+
+#### 3. ❌ Endpoints Hardcoded
+**Problema**: Endpoints hardcoded em vez de centralizados  
+**Causa**: Não usando `getLNMarketsEndpoint()`  
+**Solução**: Implementado `getLNMarketsEndpoint('user')`  
+**Resultado**: Endpoints centralizados e type-safe
+
+### Arquivos Modificados
+- `backend/src/services/lnmarkets-api.service.ts` - Correções de autenticação e configurações
+
 ## 🎯 Próximos Passos
 
-### 1. 🔄 Corrigir Autenticação LN Markets
-**Status**: ⚠️ Em progresso  
+### 1. ✅ Corrigir Autenticação LN Markets
+**Status**: ✅ **CONCLUÍDO**  
 **Problema**: Erro 401 na API LN Markets  
-**Ação**: Investigar credenciais válidas e corrigir autenticação
+**Solução**: Corrigido path duplicado e implementado configurações centralizadas
 
 ### 2. 🔄 Implementar Dados Reais
-**Status**: ⚠️ Pendente  
+**Status**: 🔄 **EM PROGRESSO**  
 **Problema**: Usando fallback com dados vazios  
 **Ação**: Conectar com API real e retornar dados verdadeiros
 
