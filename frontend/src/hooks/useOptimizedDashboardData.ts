@@ -60,7 +60,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
       const startTime = Date.now();
 
       // Uma única chamada para todos os dados (otimização principal)
-      const response = await api.get('/api/lnmarkets/user/dashboard-optimized');
+      const response = await api.get('/api/lnmarkets-robust/dashboard');
       const dashboardData = response.data;
 
       const endTime = Date.now();

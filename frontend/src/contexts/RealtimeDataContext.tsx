@@ -90,7 +90,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     try {
       // Usar axios para aproveitar os interceptors de autenticação
-      const response = await api.get('/api/lnmarkets/user/balance');
+      const response = await api.get('/api/lnmarkets-robust/dashboard');
       const data = response.data;
       
       if (data.success) {
@@ -170,7 +170,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // WebSocket para dados em tempo real
   const { isConnected, isConnecting, error, connect, disconnect, sendMessage } = useWebSocket({
-    url: (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`) + '?userId=' + (user?.id || 'anonymous'),
+    url: (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname === 'localhost' ? 'localhost:13000' : window.location.host}/ws`) + '?userId=' + (user?.id || 'anonymous'),
     onMessage: useCallback((message) => {
       console.log('📊 REALTIME - Mensagem recebida:', {
         type: message.type,
@@ -353,7 +353,9 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
         return;
       }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
-      const wsUrl = (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`) + '?userId=' + user.id;
+      // Garantir que sempre use a porta do frontend (13000) para o proxy funcionar
+      const host = window.location.hostname === 'localhost' ? 'localhost:13000' : window.location.host;
+      const wsUrl = (import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${host}/ws`) + '?userId=' + user.id;
       console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
       console.log('🔗 REALTIME - VITE_WS_URL env var:', import.meta.env.VITE_WS_URL);
       connect();
