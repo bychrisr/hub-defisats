@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
+import { useWebSocket } from './useWebSocket';
 
 interface DashboardData {
   user: any;
@@ -100,6 +101,20 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
       setIsLoading(false);
     }
   }, [isAuthenticated, user?.id, isAdmin]);
+
+  // WebSocket para atualizações em tempo real
+  const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;
+  const { isConnected, sendMessage } = useWebSocket({
+    url: wsUrl,
+    onMessage: useCallback((message) => {
+      console.log('📊 OPTIMIZED DASHBOARD - Mensagem WebSocket recebida:', message);
+      
+      if (message.type === 'position_update' || message.type === 'balance_update') {
+        console.log('🔄 OPTIMIZED DASHBOARD - Atualizando dados via WebSocket...');
+        fetchDashboardData();
+      }
+    }, [fetchDashboardData])
+  });
 
   // Carregar dados inicialmente
   useEffect(() => {
