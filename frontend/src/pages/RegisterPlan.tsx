@@ -359,7 +359,7 @@ export default function RegisterPlan() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Redirecionar para página de pagamento
-      navigate('/payment', {
+      navigate('/register/plan/payment', {
         state: {
           paymentData: {
             planId: selectedPlan,

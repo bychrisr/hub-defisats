@@ -248,7 +248,7 @@ const App = () => {
               }
             />
             <Route
-              path="/payment"
+              path="/register/plan/payment"
               element={
                 <PublicRoute>
                   <Payment />
