@@ -270,63 +270,168 @@ export default function Payment() {
               </CardContent>
             </Card>
 
-            {/* LNMarkets Transfer Instructions */}
-            {paymentMethod === 'lnmarkets' && (
-              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white">How to make internal transfer on LNMarkets</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ol className="space-y-2 text-slate-300 text-sm">
-                    <li>1. Access your LNMarkets account and go to the Dashboard section.</li>
-                    <li>2. Locate your Lightning address (usually displayed as "user@lnmarkets.com").</li>
-                    <li>3. Copy the Lightning address and paste it in the field below.</li>
-                    <li>4. Click "Generate Invoice" to start the transfer process.</li>
-                  </ol>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="lightning-address" className="text-slate-300">
-                      Payer's Lightning Address:
-                    </Label>
-                    <div className="flex space-x-2">
-                      <Input
-                        id="lightning-address"
-                        placeholder="Enter your username (e.g.: myusername) or full address (e.g.: user@lnm"
-                        value={lightningAddress}
-                        onChange={(e) => setLightningAddress(e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                      <Button
-                        onClick={handleCopyAddress}
-                        variant="outline"
-                        size="sm"
-                        className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
 
-          {/* Right Column - Payment Interface */}
+          {/* Right Column - Dynamic Payment Interface */}
           <div className="space-y-6">
-            {!invoiceGenerated ? (
-              /* Generate Invoice Section */
+            {paymentMethod === 'lightning' ? (
+              /* Lightning Payment Interface */
+              <>
+                {!invoiceGenerated ? (
+                  /* Generate Lightning Invoice */
+                  <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="text-white">Generate Lightning Invoice</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="text-center">
+                        <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                          <Zap className="h-12 w-12 text-white" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">Lightning Payment</h3>
+                        <p className="text-slate-400 mb-4">
+                          Generate a Lightning invoice to complete your payment
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Amount:</span>
+                          <span className="text-white font-bold">${paymentData.price}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Satoshis:</span>
+                          <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Rate:</span>
+                          <span className="text-slate-400">${btcPrice.toLocaleString()}/BTC</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleGenerateInvoice}
+                        disabled={isGeneratingInvoice}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                      >
+                        {isGeneratingInvoice ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Generating Invoice...
+                          </>
+                        ) : (
+                          'Generate Invoice'
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  /* Lightning Payment Interface */
+                  <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center space-x-2">
+                        <span>Lightning Payment Invoice</span>
+                        {paymentStatus === 'confirmed' && (
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                        )}
+                        {paymentStatus === 'expired' && (
+                          <Clock className="h-5 w-5 text-red-400" />
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* QR Code Placeholder */}
+                      <div className="text-center">
+                        <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center mx-auto mb-4 border-2 border-slate-600">
+                          <div className="text-center">
+                            <div className="w-32 h-32 bg-gray-200 rounded flex items-center justify-center mb-2">
+                              <span className="text-gray-500 text-xs">QR Code</span>
+                            </div>
+                            <p className="text-xs text-gray-500">Scan with Lightning wallet</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <p className="text-slate-300">
+                            {paymentStatus === 'pending' && 'Waiting for payment confirmation...'}
+                            {paymentStatus === 'confirmed' && 'Payment confirmed! Redirecting...'}
+                            {paymentStatus === 'expired' && 'Payment expired. Please generate a new invoice.'}
+                          </p>
+                          
+                          {paymentStatus === 'pending' && (
+                            <div className="flex items-center justify-center space-x-2 text-orange-400">
+                              <Clock className="h-4 w-4" />
+                              <span className="text-sm font-medium">
+                                This invoice expires in {formatTime(timeRemaining)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Invoice Details */}
+                      <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Amount:</span>
+                          <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">USD Value:</span>
+                          <span className="text-white font-bold">${paymentData.price}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Rate:</span>
+                          <span className="text-slate-400">${satoshiPrice.toFixed(8)}/sat</span>
+                        </div>
+                      </div>
+
+                      {/* Copy Invoice */}
+                      <div className="space-y-2">
+                        <Label className="text-slate-300">Lightning Invoice:</Label>
+                        <div className="flex space-x-2">
+                          <Input
+                            value={lightningInvoice}
+                            readOnly
+                            className="bg-slate-700 border-slate-600 text-white text-xs font-mono"
+                          />
+                          <Button
+                            onClick={handleCopyInvoice}
+                            variant="outline"
+                            size="sm"
+                            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <p className="text-slate-400 text-xs">
+                          (Copy the exact value for the transfer)
+                        </p>
+                      </div>
+
+                      {/* Payment Instructions */}
+                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                        <p className="text-blue-200 text-sm">
+                          To pay, scan the QR code above with your Lightning wallet or copy the invoice and paste it into your Bitcoin Lightning wallet. The payment will be processed automatically after confirmation on the network.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              /* LNMarkets Transfer Interface */
               <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-white">Generate Payment Invoice</CardTitle>
+                  <CardTitle className="text-white">LNMarkets Internal Transfer</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center">
-                    <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                      <Zap className="h-12 w-12 text-white" />
+                    <div className="w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <ExternalLink className="h-12 w-12 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Lightning Payment</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">Internal Transfer</h3>
                     <p className="text-slate-400 mb-4">
-                      Generate a Lightning invoice to complete your payment
+                      Transfer funds directly from your LNMarkets account
                     </p>
                   </div>
 
@@ -340,115 +445,60 @@ export default function Payment() {
                       <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-300">Rate:</span>
-                      <span className="text-slate-400">${btcPrice.toLocaleString()}/BTC</span>
+                      <span className="text-slate-300">Fees:</span>
+                      <span className="text-green-400 font-bold">No fees</span>
                     </div>
                   </div>
 
-                  <Button
-                    onClick={handleGenerateInvoice}
-                    disabled={isGeneratingInvoice}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 transition-all duration-200 shadow-lg shadow-blue-500/25"
-                  >
-                    {isGeneratingInvoice ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Generating Invoice...
-                      </>
-                    ) : (
-                      'Generate Invoice'
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              /* Payment Interface */
-              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center space-x-2">
-                    <span>Payment Invoice</span>
-                    {paymentStatus === 'confirmed' && (
-                      <CheckCircle className="h-5 w-5 text-green-400" />
-                    )}
-                    {paymentStatus === 'expired' && (
-                      <Clock className="h-5 w-5 text-red-400" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* QR Code Placeholder */}
-                  <div className="text-center">
-                    <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center mx-auto mb-4 border-2 border-slate-600">
-                      <div className="text-center">
-                        <div className="w-32 h-32 bg-gray-200 rounded flex items-center justify-center mb-2">
-                          <span className="text-gray-500 text-xs">QR Code</span>
-                        </div>
-                        <p className="text-xs text-gray-500">Scan with Lightning wallet</p>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="lightning-address" className="text-slate-300">
+                        Your LNMarkets Lightning Address:
+                      </Label>
+                      <div className="flex space-x-2">
+                        <Input
+                          id="lightning-address"
+                          placeholder="Enter your username (e.g.: myusername) or full address (e.g.: user@lnmarkets.com)"
+                          value={lightningAddress}
+                          onChange={(e) => setLightningAddress(e.target.value)}
+                          className="bg-slate-700 border-slate-600 text-white"
+                        />
+                        <Button
+                          onClick={handleCopyAddress}
+                          variant="outline"
+                          size="sm"
+                          className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <p className="text-slate-300">
-                        {paymentStatus === 'pending' && 'Waiting for payment confirmation...'}
-                        {paymentStatus === 'confirmed' && 'Payment confirmed! Redirecting...'}
-                        {paymentStatus === 'expired' && 'Payment expired. Please generate a new invoice.'}
-                      </p>
-                      
-                      {paymentStatus === 'pending' && (
-                        <div className="flex items-center justify-center space-x-2 text-orange-400">
-                          <Clock className="h-4 w-4" />
-                          <span className="text-sm font-medium">
-                            This invoice expires in {formatTime(timeRemaining)}
-                          </span>
-                        </div>
+
+                    <Button
+                      onClick={handleGenerateInvoice}
+                      disabled={!lightningAddress.trim() || isGeneratingInvoice}
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium py-3 transition-all duration-200 shadow-lg shadow-green-500/25"
+                    >
+                      {isGeneratingInvoice ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Generating Transfer...
+                        </>
+                      ) : (
+                        'Generate Transfer Request'
                       )}
-                    </div>
+                    </Button>
                   </div>
 
-                  {/* Invoice Details */}
-                  <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-300">Amount:</span>
-                      <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-300">USD Value:</span>
-                      <span className="text-white font-bold">${paymentData.price}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-300">Rate:</span>
-                      <span className="text-slate-400">${satoshiPrice.toFixed(8)}/sat</span>
-                    </div>
-                  </div>
-
-                  {/* Copy Invoice */}
-                  <div className="space-y-2">
-                    <Label className="text-slate-300">Lightning Invoice:</Label>
-                    <div className="flex space-x-2">
-                      <Input
-                        value={lightningInvoice}
-                        readOnly
-                        className="bg-slate-700 border-slate-600 text-white text-xs font-mono"
-                      />
-                      <Button
-                        onClick={handleCopyInvoice}
-                        variant="outline"
-                        size="sm"
-                        className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <p className="text-slate-400 text-xs">
-                      (Copy the exact value for the transfer)
-                    </p>
-                  </div>
-
-                  {/* Payment Instructions */}
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                    <p className="text-blue-200 text-sm">
-                      To pay, scan the QR code above with your Lightning wallet or copy the invoice and paste it into your Bitcoin Lightning wallet. The payment will be processed automatically after confirmation on the network.
-                    </p>
+                  {/* LNMarkets Instructions */}
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                    <h4 className="text-green-200 font-medium mb-2">Transfer Instructions:</h4>
+                    <ol className="text-green-200 text-sm space-y-1">
+                      <li>1. Access your LNMarkets account dashboard</li>
+                      <li>2. Go to the Lightning section</li>
+                      <li>3. Use the generated invoice to make the transfer</li>
+                      <li>4. Payment will be processed automatically</li>
+                    </ol>
                   </div>
                 </CardContent>
               </Card>
