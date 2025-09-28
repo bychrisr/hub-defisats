@@ -562,25 +562,6 @@ export default function Dashboard() {
     <RouteGuard isLoading={isLoading}>
       <div className="container mx-auto py-4 sm:py-6 lg:py-8 px-4 overflow-x-hidden">
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <div className="flex items-center space-x-3">
-                <h1 className="text-4xl font-bold text-vibrant">Dashboard</h1>
-                {isRealtimeEnabled && (
-                  <div className="hidden sm:flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-success rounded-full animate-pulse shadow-lg"></div>
-                    <span className="text-sm text-success font-semibold">Live</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
-                <p className="text-vibrant-secondary text-lg font-medium break-all">Welcome back, {user?.email}</p>
-                <Badge variant="outline" className="text-sm font-semibold px-3 py-1 border-primary/30 text-primary w-fit">
-                  {user?.plan_type.toUpperCase()} Plan
-                </Badge>
-              </div>
-            </div>
             <div className="flex items-center space-x-3">
               {/* TODO: Botão Refresh comentado para futuras modificações */}
               {/* 
@@ -612,54 +593,6 @@ export default function Dashboard() {
             />
           )}
 
-          {/* LN Markets Data Display */}
-          {dashboardData?.lnMarkets && (
-            <Card className="gradient-card border-2 border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30">
-              <CardHeader>
-                <CardTitle className="text-h3 text-vibrant flex items-center gap-2">
-                  <Wallet className="w-6 h-6" />
-                  LN Markets Account
-                </CardTitle>
-                <CardDescription className="text-muted">
-                  Real-time account information from LN Markets
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-muted mb-1">Username</div>
-                    <div className="text-lg font-semibold text-vibrant">
-                      {dashboardData.lnMarkets.user?.username || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted mb-1">Balance</div>
-                    <div className="text-lg font-semibold text-vibrant flex items-center gap-1">
-                      <SatsIcon className="w-4 h-4" />
-                      {dashboardData.lnMarkets.balance || 0} sats
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted mb-1">Email</div>
-                    <div className="text-sm text-vibrant">
-                      {dashboardData.lnMarkets.user?.email || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted mb-1">Positions</div>
-                    <div className="text-sm text-vibrant">
-                      {dashboardData.lnMarkets.positions?.length || 0} open
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t border-gray-600">
-                  <div className="text-xs text-muted">
-                    Last update: {new Date(dashboardData.lnMarkets.metadata?.lastUpdate || Date.now()).toLocaleString()}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
         {/* Nova Linha - Cards Principais */}
         <div className="space-y-4">
@@ -2088,70 +2021,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-          {/* Automation Types Overview */}
-          {stats && stats.total > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Automation Overview</CardTitle>
-                <CardDescription>
-                  Breakdown of your automation types
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Target className="h-5 w-5 text-primary" />
-                      <div>
-                        <div className="font-medium">Margin Guard</div>
-                        <div className="text-sm text-text-secondary">
-                          Position protection
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold">
-                      {stats.byType.margin_guard}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <TrendingUp className="h-5 w-5 text-success" />
-                      <div>
-                        <div className="font-medium">TP/SL</div>
-                        <div className="text-sm text-text-secondary">
-                          Take profit / Stop loss
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold">{stats.byType.tp_sl}</div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Activity className="h-5 w-5 text-secondary" />
-                      <div>
-                        <div className="font-medium">Auto Entry</div>
-                        <div className="text-sm text-text-secondary">
-                          Automatic entries
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold">
-                      {stats.byType.auto_entry}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* BTC Chart - Gráfico de candlesticks */}
         <div className="mt-6">
           <BTCChart height={500} />
         </div>
-      </div>
     </RouteGuard>
   );
 }

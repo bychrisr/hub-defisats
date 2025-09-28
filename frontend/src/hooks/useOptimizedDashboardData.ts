@@ -161,17 +161,21 @@ export const useOptimizedDashboardMetrics = () => {
   }
 
   // Calcular métricas dos dados unificados (API v2)
-  const totalPL = data.lnMarkets?.estimatedBalance?.balance || 0;
-  const estimatedProfit = data.lnMarkets?.estimatedBalance?.balance || 0;
-  const totalMargin = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.margin || 0), 0) || 0;
-  const estimatedFees = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0) || 0;
-  const availableMargin = data.lnMarkets?.balance?.balance || 0;
-  const estimatedBalance = data.lnMarkets?.estimatedBalance?.balance || 0;
-  const totalInvested = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.margin || 0), 0) || 0;
-  const netProfit = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.pl || 0), 0) || 0;
-  const feesPaid = data.lnMarkets?.positions?.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0) || 0;
-  const positionCount = data.lnMarkets?.positions?.length || 0;
-  const activeTrades = data.lnMarkets?.positions?.filter(p => p.running && !p.closed).length || 0;
+  const positions = data.lnMarkets?.positions || [];
+  const user = data.lnMarkets?.user || {};
+  
+  // Calcular P&L total das posições running
+  const totalPL = positions.reduce((sum, pos) => sum + (pos.pl || 0), 0);
+  const estimatedProfit = totalPL; // P&L atual
+  const totalMargin = positions.reduce((sum, pos) => sum + (pos.margin || 0), 0);
+  const estimatedFees = positions.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0);
+  const availableMargin = user.balance || 0; // Saldo da wallet
+  const estimatedBalance = (user.balance || 0) + totalPL; // Saldo + P&L
+  const totalInvested = totalMargin; // Margem total investida
+  const netProfit = totalPL; // P&L líquido
+  const feesPaid = estimatedFees; // Taxas pagas
+  const positionCount = positions.length;
+  const activeTrades = positions.filter(p => p.running && !p.closed).length;
 
   return {
     totalPL,
