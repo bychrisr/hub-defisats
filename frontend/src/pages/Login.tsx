@@ -68,10 +68,7 @@ export default function Login() {
           <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-6">
             <span className="text-white text-2xl">🤖</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Sign in to Axisor Bot</h1>
-          <p className="text-slate-400 text-sm">
-            Access your trading dashboard and automation tools
-          </p>
+          <h1 className="text-2xl font-bold text-white mb-2">Sign in to Axisor Bot</h1>
         </div>
 
         {/* Main Login Card */}
