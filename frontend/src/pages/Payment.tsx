@@ -114,6 +114,24 @@ export default function Payment() {
     return priceUSD * usdToBrlRate;
   };
 
+  const getEstimatedLightningFees = (satoshis: number) => {
+    // Lightning Network fees are typically very low
+    // Base fee: 1 satoshi + 0.0001% of amount
+    const baseFee = 1; // 1 satoshi base fee
+    const percentageFee = Math.round(satoshis * 0.000001); // 0.0001% of amount
+    const totalFee = baseFee + percentageFee;
+    
+    // Convert fee to USD
+    const feeInUSD = (totalFee / 100000000) * (btcPrice?.price || 0);
+    
+    return {
+      feeSatoshis: totalFee,
+      feeUSD: feeInUSD,
+      totalSatoshis: satoshis + totalFee,
+      totalUSD: paymentData.price + feeInUSD
+    };
+  };
+
   const handleGenerateInvoice = async () => {
     setIsGeneratingInvoice(true);
     
@@ -346,6 +364,18 @@ export default function Payment() {
                               <span className="text-slate-300">Rate per Sat:</span>
                               <span className="text-slate-400">${(paymentData.price / satoshis).toFixed(8)}/sat</span>
                             </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-300">Lightning Fees:</span>
+                              <span className="text-orange-400 font-bold">
+                                {getEstimatedLightningFees(satoshis).feeSatoshis} sats (~${getEstimatedLightningFees(satoshis).feeUSD.toFixed(4)})
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center border-t border-slate-600 pt-2">
+                              <span className="text-slate-300 font-medium">Total:</span>
+                              <span className="text-white font-bold">
+                                {getEstimatedLightningFees(satoshis).totalSatoshis.toLocaleString()} sats (~${getEstimatedLightningFees(satoshis).totalUSD.toFixed(2)})
+                              </span>
+                            </div>
                           </>
                         ) : (
                           <div className="text-center py-4">
@@ -369,11 +399,12 @@ export default function Payment() {
                           </div>
                           <p className="text-blue-200 text-sm">
                             Current BTC price: <span className="font-bold">${currentBTCPrice!.toLocaleString()}</span>
-                            <span className="text-blue-300 ml-2">(R$ {btcPrice?.priceBRL.toLocaleString()})</span>
                             <span className="text-green-400 ml-2">• Live data</span>
                           </p>
                           <p className="text-blue-200 text-xs mt-1">
                             Your payment will be converted to <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> at current market rate.
+                            <br />
+                            <span className="text-orange-300">Lightning Network fees (~{getEstimatedLightningFees(satoshis).feeSatoshis} sats) will be added to the total.</span>
                           </p>
                         </div>
                       ) : btcLoading ? (
@@ -595,11 +626,12 @@ export default function Payment() {
                       </div>
                       <p className="text-green-200 text-sm">
                         Current BTC price: <span className="font-bold">${currentBTCPrice!.toLocaleString()}</span>
-                        <span className="text-green-300 ml-2">(R$ {btcPrice?.priceBRL.toLocaleString()})</span>
                         <span className="text-green-400 ml-2">• Live data</span>
                       </p>
                       <p className="text-green-200 text-xs mt-1">
-                        Transfer amount: <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> (no fees)
+                        Transfer amount: <span className="font-bold">{satoshis.toLocaleString()} satoshis</span>
+                        <br />
+                        <span className="text-green-300">✅ No Lightning Network fees - direct internal transfer</span>
                       </p>
                     </div>
                   ) : btcLoading ? (
