@@ -25,30 +25,8 @@ export async function websocketRoutes(fastify: FastifyInstance) {
 
     console.log('🔌 WEBSOCKET DIRECT - Processando conexão direta para usuário:', userId);
     
-    // Get user credentials from database
-    const userProfile = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        lnmarkets_api_key: true,
-        lnmarkets_api_secret: true,
-        lnmarkets_passphrase: true,
-        is_admin: true
-      }
-    });
-
-    if (!userProfile) {
-      console.log('❌ WEBSOCKET DIRECT - Usuário não encontrado:', userId);
-      connection.close(1008, 'User not found');
-      return;
-    }
-
-    console.log('✅ WEBSOCKET DIRECT - Usuário encontrado:', {
-      id: userProfile.id,
-      email: userProfile.email,
-      hasCredentials: !!(userProfile.lnmarkets_api_key && userProfile.lnmarkets_api_secret)
-    });
+    // Simplified WebSocket connection for real-time updates
+    console.log('✅ WEBSOCKET DIRECT - Conexão estabelecida para usuário:', userId);
 
     // Register connection with websocket manager
     websocketManager.addConnection(userId, connection);

@@ -23,6 +23,11 @@ export default defineConfig(({ mode }) => ({
         ws: true,
         changeOrigin: true,
       },
+      '/ws': {
+        target: 'ws://backend:3010', // ✅ WebSocket proxy para /ws
+        ws: true,
+        changeOrigin: true,
+      },
       '/test': {
         target: 'http://backend:3010', // ✅ Usar nome do serviço Docker
         changeOrigin: true,
