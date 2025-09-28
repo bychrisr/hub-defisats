@@ -21,6 +21,7 @@ import {
   ExternalLink,
   TrendingUp
 } from 'lucide-react';
+import SatsIcon from '@/components/SatsIcon';
 import { useBtcPrice } from '@/hooks/useBtcPrice';
 
 interface PaymentData {
@@ -351,7 +352,9 @@ export default function Payment() {
                           <>
                             <div className="flex justify-between items-center">
                               <span className="text-slate-300">Satoshis:</span>
-                              <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
+                              <span className="text-white font-bold flex items-center gap-1">
+                                {satoshis.toLocaleString()} <SatsIcon className="h-4 w-4" />
+                              </span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-slate-300">BTC Rate:</span>
@@ -366,14 +369,14 @@ export default function Payment() {
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-slate-300">Lightning Fees:</span>
-                              <span className="text-orange-400 font-bold">
-                                {getEstimatedLightningFees(satoshis).feeSatoshis} sats (~${getEstimatedLightningFees(satoshis).feeUSD.toFixed(4)})
+                              <span className="text-orange-400 font-bold flex items-center gap-1">
+                                {getEstimatedLightningFees(satoshis).feeSatoshis} <SatsIcon className="h-4 w-4" /> (~${getEstimatedLightningFees(satoshis).feeUSD.toFixed(4)})
                               </span>
                             </div>
                             <div className="flex justify-between items-center border-t border-slate-600 pt-2">
                               <span className="text-slate-300 font-medium">Total:</span>
-                              <span className="text-white font-bold">
-                                {getEstimatedLightningFees(satoshis).totalSatoshis.toLocaleString()} sats (~${getEstimatedLightningFees(satoshis).totalUSD.toFixed(2)})
+                              <span className="text-white font-bold flex items-center gap-1">
+                                {getEstimatedLightningFees(satoshis).totalSatoshis.toLocaleString()} <SatsIcon className="h-4 w-4" /> (~${getEstimatedLightningFees(satoshis).totalUSD.toFixed(2)})
                               </span>
                             </div>
                           </>
@@ -402,9 +405,9 @@ export default function Payment() {
                             <span className="text-green-400 ml-2">• Live data</span>
                           </p>
                           <p className="text-blue-200 text-xs mt-1">
-                            Your payment will be converted to <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> at current market rate.
+                            Your payment will be converted to <span className="font-bold flex items-center gap-1 inline">{satoshis.toLocaleString()} <SatsIcon className="h-3 w-3" /></span> at current market rate.
                             <br />
-                            <span className="text-orange-300">Lightning Network fees (~{getEstimatedLightningFees(satoshis).feeSatoshis} sats) will be added to the total.</span>
+                            <span className="text-orange-300">Lightning Network fees (1 base + 0.0001% of amount) will be added to the total.</span>
                           </p>
                         </div>
                       ) : btcLoading ? (
@@ -590,7 +593,9 @@ export default function Payment() {
                       <>
                         <div className="flex justify-between items-center">
                           <span className="text-slate-300">Satoshis:</span>
-                          <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
+                          <span className="text-white font-bold flex items-center gap-1">
+                            {satoshis.toLocaleString()} <SatsIcon className="h-4 w-4" />
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-slate-300">BTC Rate:</span>
@@ -629,7 +634,7 @@ export default function Payment() {
                         <span className="text-green-400 ml-2">• Live data</span>
                       </p>
                       <p className="text-green-200 text-xs mt-1">
-                        Transfer amount: <span className="font-bold">{satoshis.toLocaleString()} satoshis</span>
+                        Transfer amount: <span className="font-bold flex items-center gap-1 inline">{satoshis.toLocaleString()} <SatsIcon className="h-3 w-3" /></span>
                         <br />
                         <span className="text-green-300">✅ No Lightning Network fees - direct internal transfer</span>
                       </p>
