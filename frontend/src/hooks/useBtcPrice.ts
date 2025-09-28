@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 
 interface BtcPriceData {
   price: number;
-  change24h: number;
-  changePercent24h: number;
+  priceBRL: number;
   lastUpdated: string;
 }
 
@@ -24,8 +23,8 @@ export const useBtcPrice = (): UseBtcPriceReturn => {
       setLoading(true);
       setError(null);
 
-      // Usar endpoint do backend em vez de CoinGecko diretamente (evita CORS) - fetch direto para evitar conflitos
-      const response = await fetch('/api/market/index/public');
+      // Buscar preços USD e BRL do CoinGecko
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,brl');
 
       if (!response.ok) {
         throw new Error('Falha ao buscar preço do BTC');
@@ -33,11 +32,10 @@ export const useBtcPrice = (): UseBtcPriceReturn => {
 
       const result = await response.json();
       
-      if (result.success && result.data) {
+      if (result.bitcoin) {
         setData({
-          price: result.data.index,
-          change24h: result.data.index24hChange || 0,
-          changePercent24h: result.data.index24hChange || 0,
+          price: result.bitcoin.usd,
+          priceBRL: result.bitcoin.brl,
           lastUpdated: new Date().toLocaleString('pt-BR'),
         });
       }
@@ -45,11 +43,10 @@ export const useBtcPrice = (): UseBtcPriceReturn => {
       console.error('Erro ao buscar preço do BTC:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
       
-      // Fallback com preço simulado em caso de erro
+      // Fallback com preços simulados em caso de erro
       setData({
-        price: 50000, // Preço simulado
-        change24h: 0,
-        changePercent24h: 0,
+        price: 65000, // Preço simulado USD
+        priceBRL: 325000, // Preço simulado BRL (aproximadamente 5:1)
         lastUpdated: new Date().toLocaleString('pt-BR'),
       });
     } finally {

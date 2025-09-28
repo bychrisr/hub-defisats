@@ -21,7 +21,7 @@ import {
   ExternalLink,
   TrendingUp
 } from 'lucide-react';
-import { useRealtimeData } from '@/contexts/RealtimeDataContext';
+import { useBtcPrice } from '@/hooks/useBtcPrice';
 
 interface PaymentData {
   planId: string;
@@ -37,12 +37,12 @@ type PaymentMethod = 'lightning' | 'lnmarkets';
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { data } = useRealtimeData();
+  const { data: btcPrice, loading: btcLoading, error: btcError } = useBtcPrice();
   
   // Debug logs
-  console.log('🔍 PAYMENT - RealtimeData:', data);
-  console.log('🔍 PAYMENT - MarketData:', data.marketData);
-  console.log('🔍 PAYMENT - BTC Price:', data.marketData?.BTC?.price);
+  console.log('🔍 PAYMENT - BTC Price Data:', btcPrice);
+  console.log('🔍 PAYMENT - BTC Loading:', btcLoading);
+  console.log('🔍 PAYMENT - BTC Error:', btcError);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('lightning');
   const [lightningAddress, setLightningAddress] = useState('');
@@ -93,17 +93,25 @@ export default function Payment() {
   };
 
   const getPriceInSatoshis = (priceUSD: number) => {
-    // Use real BTC price from WebSocket only - no fallback
-    const btcPrice = data.marketData?.BTC?.price;
-    if (!btcPrice) {
+    // Use real BTC price from useBtcPrice hook
+    if (!btcPrice?.price) {
       return 0; // No price available
     }
-    const btcAmount = priceUSD / btcPrice;
+    const btcAmount = priceUSD / btcPrice.price;
     return Math.round(btcAmount * 100000000); // Convert to satoshis
   };
 
   const getCurrentBTCPrice = () => {
-    return data.marketData?.BTC?.price || null; // No fallback - show nothing if no data
+    return btcPrice?.price || null; // No fallback - show nothing if no data
+  };
+
+  const getPriceInBRL = (priceUSD: number) => {
+    // Convert USD to BRL using BTC price ratio
+    if (!btcPrice?.price || !btcPrice?.priceBRL) {
+      return null;
+    }
+    const usdToBrlRate = btcPrice.priceBRL / btcPrice.price;
+    return priceUSD * usdToBrlRate;
   };
 
   const handleGenerateInvoice = async () => {
@@ -168,7 +176,7 @@ export default function Payment() {
 
   const satoshis = getPriceInSatoshis(paymentData.price);
   const currentBTCPrice = getCurrentBTCPrice();
-  const hasPriceData = currentBTCPrice !== null;
+  const hasPriceData = !btcLoading && !btcError && currentBTCPrice !== null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -312,7 +320,14 @@ export default function Payment() {
                       <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-slate-300">Amount:</span>
-                          <span className="text-white font-bold">${paymentData.price}</span>
+                          <div className="text-right">
+                            <span className="text-white font-bold">${paymentData.price}</span>
+                            {getPriceInBRL(paymentData.price) && (
+                              <div className="text-slate-400 text-sm">
+                                R$ {getPriceInBRL(paymentData.price)!.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </div>
+                            )}
+                          </div>
                         </div>
                         {hasPriceData ? (
                           <>
@@ -354,23 +369,37 @@ export default function Payment() {
                           </div>
                           <p className="text-blue-200 text-sm">
                             Current BTC price: <span className="font-bold">${currentBTCPrice!.toLocaleString()}</span>
+                            <span className="text-blue-300 ml-2">(R$ {btcPrice?.priceBRL.toLocaleString()})</span>
                             <span className="text-green-400 ml-2">• Live data</span>
                           </p>
                           <p className="text-blue-200 text-xs mt-1">
                             Your payment will be converted to <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> at current market rate.
                           </p>
                         </div>
-                      ) : (
+                      ) : btcLoading ? (
                         <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                           <div className="flex items-center space-x-2 mb-2">
                             <Clock className="h-4 w-4 text-orange-400" />
-                            <span className="text-orange-200 font-medium">Connecting to Market Data</span>
+                            <span className="text-orange-200 font-medium">Loading Bitcoin Price</span>
                           </div>
                           <p className="text-orange-200 text-sm">
-                            Waiting for real-time Bitcoin price...
+                            Fetching current market data...
                           </p>
                           <p className="text-orange-200 text-xs mt-1">
-                            Please wait while we fetch current market data.
+                            Please wait while we get the latest Bitcoin price.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <AlertTriangle className="h-4 w-4 text-red-400" />
+                            <span className="text-red-200 font-medium">Unable to Load Price</span>
+                          </div>
+                          <p className="text-red-200 text-sm">
+                            Failed to fetch Bitcoin price data.
+                          </p>
+                          <p className="text-red-200 text-xs mt-1">
+                            Please refresh the page or try again later.
                           </p>
                         </div>
                       )}
@@ -385,8 +414,10 @@ export default function Payment() {
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                             Generating Invoice...
                           </>
-                        ) : !hasPriceData ? (
-                          'Waiting for Bitcoin Price...'
+                        ) : btcLoading ? (
+                          'Loading Bitcoin Price...'
+                        ) : btcError ? (
+                          'Unable to Load Price'
                         ) : (
                           'Generate Invoice'
                         )}
@@ -451,7 +482,7 @@ export default function Payment() {
                           <span className="text-slate-300">BTC Rate:</span>
                           <div className="flex items-center space-x-2">
                             <span className="text-slate-400">${getCurrentBTCPrice().toLocaleString()}/BTC</span>
-                            {data.marketData?.BTC?.price && (
+                            {btcPrice?.price && (
                               <TrendingUp className="h-4 w-4 text-green-400" />
                             )}
                           </div>
@@ -515,7 +546,14 @@ export default function Payment() {
                   <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-300">Amount:</span>
-                      <span className="text-white font-bold">${paymentData.price}</span>
+                      <div className="text-right">
+                        <span className="text-white font-bold">${paymentData.price}</span>
+                        {getPriceInBRL(paymentData.price) && (
+                          <div className="text-slate-400 text-sm">
+                            R$ {getPriceInBRL(paymentData.price)!.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     {hasPriceData ? (
                       <>
@@ -557,23 +595,37 @@ export default function Payment() {
                       </div>
                       <p className="text-green-200 text-sm">
                         Current BTC price: <span className="font-bold">${currentBTCPrice!.toLocaleString()}</span>
+                        <span className="text-green-300 ml-2">(R$ {btcPrice?.priceBRL.toLocaleString()})</span>
                         <span className="text-green-400 ml-2">• Live data</span>
                       </p>
                       <p className="text-green-200 text-xs mt-1">
                         Transfer amount: <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> (no fees)
                       </p>
                     </div>
-                  ) : (
+                  ) : btcLoading ? (
                     <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                       <div className="flex items-center space-x-2 mb-2">
                         <Clock className="h-4 w-4 text-orange-400" />
-                        <span className="text-orange-200 font-medium">Connecting to Market Data</span>
+                        <span className="text-orange-200 font-medium">Loading Bitcoin Price</span>
                       </div>
                       <p className="text-orange-200 text-sm">
-                        Waiting for real-time Bitcoin price...
+                        Fetching current market data...
                       </p>
                       <p className="text-orange-200 text-xs mt-1">
-                        Please wait while we fetch current market data.
+                        Please wait while we get the latest Bitcoin price.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-red-400" />
+                        <span className="text-red-200 font-medium">Unable to Load Price</span>
+                      </div>
+                      <p className="text-red-200 text-sm">
+                        Failed to fetch Bitcoin price data.
+                      </p>
+                      <p className="text-red-200 text-xs mt-1">
+                        Please refresh the page or try again later.
                       </p>
                     </div>
                   )}
