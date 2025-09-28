@@ -432,6 +432,18 @@ export default function RegisterPlan() {
                 Save up to 20% with yearly billing
               </p>
             )}
+            
+            {/* Payment Disclaimer */}
+            <div className="text-center mb-8">
+              <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 backdrop-blur-sm inline-block">
+                <p className="text-slate-300 text-sm font-medium">
+                  💡 Pagamentos somente em satoshis (via Lightning Network)
+                </p>
+                <p className="text-slate-400 text-xs mt-1">
+                  Todos os planos são cobrados em Bitcoin através da rede Lightning para máxima privacidade e eficiência.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -601,17 +613,6 @@ export default function RegisterPlan() {
         </div>
 
 
-        {/* Disclaimer */}
-        <div className="text-center mt-12 mb-8">
-          <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 backdrop-blur-sm">
-            <p className="text-slate-300 text-sm font-medium">
-              💡 Pagamentos somente em satoshis (via Lightning Network)
-            </p>
-            <p className="text-slate-400 text-xs mt-1">
-              Todos os planos são cobrados em Bitcoin através da rede Lightning para máxima privacidade e eficiência.
-            </p>
-          </div>
-        </div>
 
         {/* Footer */}
         <div className="text-center mt-8">
