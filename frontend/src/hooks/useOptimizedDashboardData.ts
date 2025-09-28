@@ -146,7 +146,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
         // Fallback para fetchDashboardData em caso de erro
         fetchDashboardData();
       }
-    }, [fetchDashboardData, user?.id, sendMessage])
+    }, [fetchDashboardData, user?.id])
   });
 
   // ✅ FALLBACK CRÍTICO: Refresh periódico se WebSocket falhar
@@ -201,7 +201,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
       console.log('🔄 OPTIMIZED DASHBOARD - WebSocket não disponível, usando fetch...');
       await fetchDashboardData();
     }
-  }, [fetchDashboardData, isConnected, sendMessage, user?.id]);
+  }, [fetchDashboardData, isConnected, user?.id]);
 
   return {
     data,
