@@ -74,7 +74,8 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
           withdrawals: dashboardData.data.withdrawals?.length || 0,
           marketIndex: dashboardData.data.marketIndex ? 'present' : 'null',
           cacheHit: dashboardData.data.cacheHit,
-          duration: `${duration}ms`
+          duration: `${duration}ms`,
+          fullData: dashboardData.data // 🔍 DEBUG: Log completo dos dados
         });
 
 
@@ -149,24 +150,28 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }, [fetchDashboardData, user?.id])
   });
 
-  // ✅ SISTEMA HÍBRIDO: WebSocket + Fallback Inteligente
+  // ✅ SISTEMA HÍBRIDO OTIMIZADO: WebSocket Primário + Fallback HTTP Condicional
   useEffect(() => {
     if (!isAuthenticated || !user?.id) return;
 
-    console.log('🔄 OPTIMIZED DASHBOARD - Configurando sistema híbrido...');
+    console.log('🔄 OPTIMIZED DASHBOARD - Configurando sistema híbrido otimizado...');
     
-    // ✅ FALLBACK INTELIGENTE: Refresh periódico apenas se WebSocket falhar
-    const interval = setInterval(() => {
-      if (!isConnected) {
-        console.log('🔄 OPTIMIZED DASHBOARD - WebSocket desconectado, usando fallback HTTP...');
+    let intervalId: NodeJS.Timeout | null = null;
+    let healthCheckId: NodeJS.Timeout | null = null;
+    
+    // ✅ FALLBACK HTTP CONDICIONAL: Só ativa se WebSocket estiver explicitamente desconectado
+    if (!isConnected) {
+      console.log('🔄 OPTIMIZED DASHBOARD - WebSocket desconectado, ativando fallback HTTP...');
+      intervalId = setInterval(() => {
+        console.log('🔄 OPTIMIZED DASHBOARD - Executando fallback HTTP...');
         fetchDashboardData();
-      } else {
-        console.log('✅ OPTIMIZED DASHBOARD - WebSocket conectado, pulando fallback');
-      }
-    }, 30000); // 30 segundos - máximo seguro para mercados voláteis
+      }, 30000); // 30 segundos - máximo seguro para mercados voláteis
+    } else {
+      console.log('✅ OPTIMIZED DASHBOARD - WebSocket conectado, fallback HTTP DESATIVADO');
+    }
 
     // ✅ HEALTH CHECK: Verificar conexão WebSocket periodicamente
-    const healthCheck = setInterval(() => {
+    healthCheckId = setInterval(() => {
       if (isConnected) {
         console.log('💚 OPTIMIZED DASHBOARD - WebSocket health check: OK');
       } else {
@@ -175,9 +180,9 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }, 10000); // Verificar a cada 10 segundos
 
     return () => {
-      console.log('🔄 OPTIMIZED DASHBOARD - Limpando sistema híbrido...');
-      clearInterval(interval);
-      clearInterval(healthCheck);
+      console.log('🔄 OPTIMIZED DASHBOARD - Limpando sistema híbrido otimizado...');
+      if (intervalId) clearInterval(intervalId);
+      if (healthCheckId) clearInterval(healthCheckId);
     };
   }, [isAuthenticated, user?.id, isConnected, fetchDashboardData]);
 
@@ -198,22 +203,25 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }
   }, [isAuthenticated, user?.id, isAdmin]);
 
-  // ✅ FUNÇÃO DE REFRESH HÍBRIDA: WebSocket + Fallback HTTP
+  // ✅ FUNÇÃO DE REFRESH OTIMIZADA: WebSocket Primário + HTTP Fallback
   const refresh = useCallback(async () => {
     console.log('🔄 OPTIMIZED DASHBOARD - Manual refresh triggered...');
     
-    // ✅ PRIORIDADE: Tentar WebSocket primeiro (mais rápido)
+    // ✅ PRIORIDADE ABSOLUTA: WebSocket quando conectado
     if (isConnected && sendMessage) {
-      console.log('🚀 OPTIMIZED DASHBOARD - Solicitando dados via WebSocket...');
+      console.log('🚀 OPTIMIZED DASHBOARD - Solicitando dados via WebSocket (prioridade)...');
       sendMessage({
         type: 'refresh_data',
         userId: user?.id
       });
-    } else {
-      console.log('🔄 OPTIMIZED DASHBOARD - WebSocket não disponível, usando fetch...');
-      await fetchDashboardData();
+      // ✅ NÃO executar fetchDashboardData quando WebSocket está ativo
+      return;
     }
-  }, [fetchDashboardData, isConnected, user?.id]);
+    
+    // ✅ FALLBACK: HTTP apenas quando WebSocket não está disponível
+    console.log('🔄 OPTIMIZED DASHBOARD - WebSocket não disponível, usando HTTP fallback...');
+    await fetchDashboardData();
+  }, [fetchDashboardData, isConnected, sendMessage, user?.id]);
 
   // ✅ FUNÇÃO DE RECONEXÃO AUTOMÁTICA
   const reconnectWebSocket = useCallback(() => {
@@ -305,9 +313,29 @@ export const useOptimizedDashboardMetrics = () => {
   const positions = data.lnMarkets?.positions || [];
   const user = data.lnMarkets?.user || {};
   
+  // ✅ Dados recebidos com sucesso
+  const calculatedTotalPL = positions.reduce((sum, pos) => sum + (pos.pl || 0), 0);
+  
+  console.log('✅ OPTIMIZED DASHBOARD METRICS - Data processed:', {
+    hasData: !!data,
+    hasLnMarkets: !!data.lnMarkets,
+    positionsCount: positions.length,
+    userBalance: user.balance,
+    totalPL: calculatedTotalPL,
+    timestamp: new Date().toISOString()
+  });
+  
   // Calcular P&L total das posições running
   const totalPL = positions.reduce((sum, pos) => sum + (pos.pl || 0), 0);
-  const estimatedProfit = totalPL; // P&L atual
+  
+  // Estimated Profit: Lucro estimado se fechar TODAS as posições AGORA
+  // Isso inclui o PnL atual + taxas de fechamento estimadas
+  const estimatedProfit = positions.reduce((sum, pos) => {
+    const currentPnL = pos.pl || 0;
+    const closingFee = pos.closing_fee || 0;
+    // PnL atual menos a taxa de fechamento (que seria cobrada ao fechar)
+    return sum + (currentPnL - closingFee);
+  }, 0);
   const totalMargin = positions.reduce((sum, pos) => sum + (pos.margin || 0), 0);
   const estimatedFees = positions.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0);
   const availableMargin = user.balance || 0; // Saldo da wallet

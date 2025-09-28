@@ -119,11 +119,11 @@ export default function Dashboard() {
   // Erro de credenciais LN Markets
   const { credentialsError, clearCredentialsError } = useCredentialsError();
   
-  // Estado de carregamento otimizado
-  const isLoading = authLoading || automationLoading || dashboardLoading || metricsLoading;
+  // Estado de carregamento otimizado - APENAS para autenticação inicial
+  const isLoading = authLoading || automationLoading;
   
-  // Estado de carregamento das posições (mantido para compatibilidade)
-  const positionsLoading = dashboardLoading || metricsLoading;
+  // Estado de carregamento para atualizações (sem modal)
+  const isUpdating = dashboardLoading || metricsLoading;
   
   // Função para quebrar títulos em duas linhas
   const breakTitleIntoTwoLines = (title: string) => {
@@ -147,20 +147,17 @@ export default function Dashboard() {
 
   // Funções para determinar cores dinâmicas
   const getPnLColor = (value: number) => {
-    if (positionsLoading) return 'neutral';
     if (value > 0) return 'positive';
     if (value < 0) return 'negative';
     return 'neutral';
   };
   
   const getProfitColor = (value: number) => {
-    if (positionsLoading) return 'neutral';
     if (value > 0) return 'positive';
     return 'neutral';
   };
   
   const getTradesColor = (value: number) => {
-    if (positionsLoading) return 'neutral';
     if (value > 0) return 'positive';
     return 'neutral';
   };
@@ -451,14 +448,6 @@ export default function Dashboard() {
     }
 
     // Cards monetários dinâmicos (valores em sats - mudam baseado no valor)
-    if (positionsLoading) {
-      return {
-        card: 'gradient-card-gray border-gray-500 hover:border-gray-400',
-        icon: { bg: 'bg-gray-600/20', border: 'border-gray-500/30', shadow: '', icon: 'text-gray-300 group-hover:text-gray-200' },
-        text: 'text-gray-200',
-        satsIcon: 'text-gray-300'
-      };
-    }
 
     // Lógica para cards monetários dinâmicos (valores em sats)
     if (value === undefined) value = 0;
@@ -561,7 +550,7 @@ export default function Dashboard() {
   return (
     <RouteGuard isLoading={isLoading}>
       <div className="container mx-auto py-4 sm:py-6 lg:py-8 px-4 overflow-x-hidden">
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
             <div className="flex items-center space-x-3">
               {/* TODO: Botão Refresh comentado para futuras modificações */}
               {/* 
@@ -572,7 +561,7 @@ export default function Dashboard() {
                   onClick={refreshAll}
                   className="text-xs btn-modern-primary"
                 >
-                  <Activity className="w-4 h-4 mr-2 icon-primary" />
+                  <Activity className="w-3 h-3 sm:w-4 sm:h-4 mr-2 icon-primary" />
                   Refresh
                 </Button>
               )}
@@ -595,11 +584,11 @@ export default function Dashboard() {
 
 
         {/* Nova Linha - Cards Principais */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-vibrant">Key Metrics</h2>
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-vibrant">Key Metrics</h2>
           
-          {/* Cards com degradês coloridos */}
-          <div className="grid grid-cols-5 gap-6">
+          {/* Cards com degradês coloridos - Layout responsivo */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
             {/* Card PnL Total com cores dinâmicas */}
             <div className="relative group">
               {/* Ícone posicionado fora do card */}
@@ -607,26 +596,25 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('total-pnl', totalPL || 0);
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
-                      <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <TrendingUp className={`w-4 h-4 sm:w-6 sm:h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                 </div>
                   );
                 })()}
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                 getPnLColor(totalPL || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
                 getPnLColor(totalPL || 0) === 'negative' ? 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                       <CardTitle 
-                        className="text-h3 text-vibrant"
+                        className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total PL') }}
                         />
                         <Tooltip 
@@ -635,7 +623,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -643,7 +631,6 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} ${
-                        positionsLoading ? 'text-gray-200' :
                         getPnLColor(totalPL || 0) === 'positive' ? 'text-green-200' :
                         getPnLColor(totalPL || 0) === 'negative' ? 'text-red-200' :
                         'text-gray-200'
@@ -652,8 +639,7 @@ export default function Dashboard() {
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: positionsLoading ? 'text-gray-300' :
-                            getPnLColor(totalPL || 0) === 'positive' ? 'text-green-300' :
+                          className: getPnLColor(totalPL || 0) === 'positive' ? 'text-green-300' :
                             getPnLColor(totalPL || 0) === 'negative' ? 'text-red-300' :
                             'text-gray-300'
                         })}
@@ -665,7 +651,6 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
                           getPnLColor(totalPL || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           getPnLColor(totalPL || 0) === 'negative' ? 'border-red-400/60 text-red-200 bg-red-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
@@ -688,25 +673,24 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('estimated-profit', estimatedProfit || 0);
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
-                      <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <TrendingUp className={`w-4 h-4 sm:w-6 sm:h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
                 })()}
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                 getProfitColor(estimatedProfit || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                       <CardTitle 
-                        className="text-h3 text-vibrant"
+                        className="text-lg sm:text-h3 text-vibrant"
                         dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Profit') }}
                       />
                         <Tooltip 
@@ -715,7 +699,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -723,7 +707,6 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} ${
-                        positionsLoading ? 'text-gray-200' :
                         getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
@@ -731,8 +714,7 @@ export default function Dashboard() {
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: positionsLoading ? 'text-gray-300' :
-                            getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-300' :
+                          className: getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-300' :
                             'text-gray-300'
                         })}
                       </div>
@@ -743,7 +725,6 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
                           getProfitColor(estimatedProfit || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
@@ -751,7 +732,6 @@ export default function Dashboard() {
                         {totalMargin > 0 ? `+${((estimatedProfit || 0) / totalMargin * 100).toFixed(1)}%` : '+0.0%'}
                       </Badge>
                       <span className={`text-caption ${
-                        positionsLoading ? 'text-gray-300/80' :
                         getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-300/80' :
                         'text-gray-300/80'
                       }`}>vs Margin</span>
@@ -770,7 +750,7 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('active-trades');
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <Activity className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
@@ -779,12 +759,12 @@ export default function Dashboard() {
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                       <CardTitle 
-                        className="text-h3 text-vibrant"
+                        className="text-lg sm:text-h3 text-vibrant"
                         dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Active Trades') }}
                       />
                         <Tooltip 
@@ -793,7 +773,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -853,7 +833,7 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('total-margin');
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <PieChart className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
@@ -862,12 +842,12 @@ export default function Dashboard() {
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                       <CardTitle 
-                        className="text-h3 text-vibrant"
+                        className="text-lg sm:text-h3 text-vibrant"
                         dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Margin') }}
                       />
                         <Tooltip 
@@ -876,7 +856,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -907,7 +887,7 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('estimated-fees');
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <TrendingDown className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
@@ -915,16 +895,15 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                 getCardColors('estimated-fees').card
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     {/* Título maior */}
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                       <CardTitle 
-                        className="text-h3 text-vibrant"
+                        className="text-lg sm:text-h3 text-vibrant"
                         dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Fees') }}
                       />
                         <Tooltip 
@@ -933,7 +912,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -970,16 +949,16 @@ export default function Dashboard() {
         </div>
 
         {/* History */}
-          <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-vibrant">History</h2>
-          <div className="grid grid-cols-5 gap-6">
+          <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-vibrant">History</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
             {/* Available Margin */}
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 {(() => {
                   const colors = getCardIconColors('available-margin', calculateAvailableMargin());
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <Wallet className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
@@ -987,15 +966,14 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                 getCardColors('available-margin', calculateAvailableMargin()).card
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Available Margin') }}
                         />
                         <Tooltip 
@@ -1004,7 +982,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1024,7 +1002,6 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
                           calculateAvailableMargin() > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
@@ -1044,7 +1021,7 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0);
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <Wallet className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
@@ -1052,15 +1029,14 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                 getCardColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0).card
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Estimated Balance') }}
                         />
                         <Tooltip 
@@ -1069,7 +1045,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1089,7 +1065,6 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
                           calculateEstimatedBalance() > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           calculateEstimatedBalance() < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
@@ -1110,7 +1085,7 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('total-invested');
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <Target className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
@@ -1119,11 +1094,11 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${getCardColors('total-invested').card}`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Invested') }}
                         />
                         <Tooltip 
@@ -1132,7 +1107,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
             </div>
           </div>
@@ -1159,23 +1134,22 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('net-profit', historicalMetrics?.totalProfit || 0);
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
-                      <TrendingUp className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                      <TrendingUp className={`w-4 h-4 sm:w-6 sm:h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
                 })()}
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                 getCardColors('net-profit', historicalMetrics?.totalProfit || 0).card
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Net Profit') }}
                         />
                         <Tooltip 
@@ -1184,7 +1158,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1204,7 +1178,6 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          positionsLoading ? 'border-gray-400/60 text-gray-200 bg-gray-600/20' :
                           calculateNetProfit() > 0 ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           calculateNetProfit() < 0 ? 'border-red-400/60 text-red-200 bg-red-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
@@ -1225,7 +1198,7 @@ export default function Dashboard() {
                 {(() => {
                   const colors = getCardIconColors('fees-paid');
                   return (
-                    <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <DollarSign className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
                     </div>
                   );
@@ -1234,11 +1207,11 @@ export default function Dashboard() {
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${getCardColors('fees-paid').card}`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Fees Paid') }}
                         />
                         <Tooltip 
@@ -1247,7 +1220,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1290,11 +1263,11 @@ export default function Dashboard() {
                 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Success Rate') }}
                         />
                         <Tooltip 
@@ -1303,7 +1276,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
             </div>
           </div>
@@ -1355,11 +1328,11 @@ export default function Dashboard() {
                 'gradient-card-red border-red-500 hover:border-red-400 hover:shadow-red-500/30'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Profitability') }}
                         />
                         <Tooltip 
@@ -1368,7 +1341,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1409,11 +1382,11 @@ export default function Dashboard() {
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Total Trades') }}
                         />
                         <Tooltip 
@@ -1422,7 +1395,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1453,11 +1426,11 @@ export default function Dashboard() {
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Winning Trades') }}
                         />
                         <Tooltip 
@@ -1466,7 +1439,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1497,11 +1470,11 @@ export default function Dashboard() {
               
               <Card className="gradient-card gradient-card-gray border-2 border-gray-500 hover:border-gray-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Lost Trades') }}
                         />
                         <Tooltip 
@@ -1510,7 +1483,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1555,11 +1528,11 @@ export default function Dashboard() {
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Average PnL') }}
                         />
                         <Tooltip 
@@ -1568,7 +1541,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1583,8 +1556,7 @@ export default function Dashboard() {
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: positionsLoading ? 'text-gray-300' :
-                            calculateAveragePnL() > 0 ? 'text-green-300' :
+                          className: calculateAveragePnL() > 0 ? 'text-green-300' :
                             calculateAveragePnL() < 0 ? 'text-red-300' :
                             'text-gray-300'
                         })}
@@ -1606,11 +1578,11 @@ export default function Dashboard() {
               
               <Card className="gradient-card gradient-card-orange border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Max Drawdown') }}
                         />
                         <Tooltip 
@@ -1619,7 +1591,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1662,11 +1634,11 @@ export default function Dashboard() {
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Sharpe Ratio') }}
                         />
                         <Tooltip 
@@ -1675,7 +1647,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1718,11 +1690,11 @@ export default function Dashboard() {
               
               <Card className="gradient-card gradient-card-purple border-2 border-purple-500 hover:border-purple-400 transition-all duration-300 hover:shadow-xl cursor-default">
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Volatility') }}
                         />
                         <Tooltip 
@@ -1731,7 +1703,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1771,11 +1743,11 @@ export default function Dashboard() {
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Win Streak') }}
                         />
                         <Tooltip 
@@ -1784,7 +1756,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1834,11 +1806,11 @@ export default function Dashboard() {
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Best Trade') }}
                         />
                         <Tooltip 
@@ -1847,7 +1819,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1905,11 +1877,11 @@ export default function Dashboard() {
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Risk/Reward') }}
                         />
                         <Tooltip 
@@ -1918,7 +1890,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>
@@ -1973,11 +1945,11 @@ export default function Dashboard() {
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
-                  <div className="p-6">
+                  <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="mb-4">
                       <div className="flex items-center gap-2">
                         <CardTitle 
-                          className="text-h3 text-vibrant"
+                          className="text-lg sm:text-h3 text-vibrant"
                           dangerouslySetInnerHTML={{ __html: breakTitleIntoTwoLines('Trading Frequency') }}
                         />
                         <Tooltip 
@@ -1986,7 +1958,7 @@ export default function Dashboard() {
                           delay={200}
                           className="z-50"
                         >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-help hover:text-vibrant transition-colors" />
                         </Tooltip>
                       </div>
                     </div>

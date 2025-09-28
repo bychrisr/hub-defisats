@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -13,10 +13,11 @@ import { LNMarketsGuard } from '@/components/LNMarketsGuard';
 import SatsIcon from '@/components/SatsIcon';
 import { useOptimizedPositions, useOptimizedDashboardMetrics } from '@/hooks/useOptimizedDashboardData';
 import RealtimeStatus from '@/components/RealtimeStatus';
+import PositionRow from '@/components/PositionRow';
+import DashboardCard from '@/components/DashboardCard';
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -86,37 +87,36 @@ export default function Positions() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-  // Função para ordenar posições
-  const sortPositions = (field: SortField) => {
+  // ✅ FUNÇÃO OTIMIZADA COM USECALLBACK
+  const sortPositions = useCallback((field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('asc');
     }
-  };
+  }, [sortField, sortDirection]);
 
-  // Função para obter ícone de ordenação
-  const getSortIcon = (field: SortField) => {
+  // ✅ FUNÇÃO OTIMIZADA COM USECALLBACK
+  const getSortIcon = useCallback((field: SortField) => {
     if (sortField !== field) {
       return <ArrowUpDown className="h-4 w-4 text-text-secondary" />;
     }
     return sortDirection === 'asc' 
       ? <ArrowUp className="h-4 w-4 text-primary" />
       : <ArrowDown className="h-4 w-4 text-primary" />;
-  };
+  }, [sortField, sortDirection]);
 
-  // Função para formatar valores USD como na LN Markets
-  const formatCurrency = (value: number) => {
+  // ✅ FUNÇÕES OTIMIZADAS COM USECALLBACK
+  const formatCurrency = useCallback((value: number) => {
     if (value >= 1000) {
       return `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
     } else {
       return `$${value.toFixed(0)}`;
     }
-  };
+  }, []);
 
-  // Função para formatar sats com ícone
-  const formatSats = (value: number | undefined) => {
+  const formatSats = useCallback((value: number | undefined) => {
     if (value === undefined || value === null) {
       return (
         <span className="flex items-center gap-1">
@@ -131,7 +131,7 @@ export default function Positions() {
         <SatsIcon size={28} variant="default" />
       </span>
     );
-  };
+  }, []);
 
   // Sincronizar dados otimizados - apenas quando há mudanças nas posições
   useEffect(() => {
@@ -352,45 +352,24 @@ export default function Positions() {
                 </CardContent>
               </Card>
               
-              {/* Total P&L Card */}
-              <Card className={cn(
-                "gradient-card-green backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl",
-                isUpdating ? 'opacity-75' : 'opacity-100'
-              )}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                    Total P&L
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold ${getPnlColor(totalPnl)}`}>
-                    {formatSats(totalPnl)}
-                  </div>
-                  <p className="text-xs text-text-secondary mt-1">
-                    Unrealized profit/loss
-                  </p>
-                </CardContent>
-              </Card>
+              {/* ✅ CARDS OTIMIZADOS COM REACT.MEMO */}
+              <DashboardCard
+                title="Total P&L"
+                value={formatSats(totalPnl)}
+                subtitle="Unrealized profit/loss"
+                icon={TrendingUp}
+                variant="success"
+                isLoading={isUpdating}
+              />
               
-              {/* Active Positions Card */}
-              <Card className={cn(
-                "gradient-card-purple backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl",
-                isUpdating ? 'opacity-75' : 'opacity-100'
-              )}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-purple-500" />
-                    Active Positions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-text-primary">{positions.length}</div>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {positions.length === 1 ? 'Position' : 'Positions'} open
-                  </p>
-                </CardContent>
-              </Card>
+              <DashboardCard
+                title="Active Positions"
+                value={positions.length}
+                subtitle={`${positions.length === 1 ? 'Position' : 'Positions'} open`}
+                icon={Activity}
+                variant="default"
+                isLoading={isUpdating}
+              />
             </div>
 
             {/* Positions Table */}
@@ -546,82 +525,13 @@ export default function Positions() {
                     </TableRow>
                   </TableHeader>
                       <TableBody>
+                        {/* ✅ TABELA OTIMIZADA COM REACT.MEMO */}
                         {getSortedPositions().map((position, index) => (
-                          <TableRow 
+                          <PositionRow
                             key={position.id || `position-${index}`}
-                            className={cn(
-                              "hover:bg-background/50 transition-colors duration-200",
-                              index % 2 === 0 ? "bg-background/20" : "bg-background/10"
-                            )}
-                          >
-                            <TableCell className="font-medium">
-                              <Badge 
-                                variant={position.side === 'long' ? 'default' : 'destructive'}
-                                className={cn(
-                                  "font-semibold px-3 py-1 rounded-full border-0",
-                                  position.side === 'long' 
-                                    ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25' 
-                                    : 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25'
-                                )}
-                              >
-                                {position.side === 'long' ? 'LONG' : 'SHORT'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-mono text-text-primary">
-                              {formatCurrency(position.quantity)}
-                            </TableCell>
-                            <TableCell className="font-mono text-text-primary">
-                              {formatCurrency(position.price)}
-                            </TableCell>
-                            <TableCell className="font-mono text-text-primary">
-                              {formatCurrency(position.liquidation)}
-                            </TableCell>
-                            {/* <TableCell className="text-center text-text-secondary">
-                              <span className="text-lg">+</span>
-                            </TableCell>
-                            <TableCell className="text-center text-text-secondary">
-                              <span className="text-lg">+</span>
-                            </TableCell> */}
-                            <TableCell className="font-mono">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 text-primary font-semibold">
-                                {position.leverage.toFixed(2)}x
-                              </span>
-                            </TableCell>
-                            <TableCell className="font-mono text-text-primary">
-                              {formatSats(position.margin)}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center space-x-2">
-                                {getPnlIcon(position.pnl)}
-                                <div className="flex flex-col">
-                                  <span className={cn("font-mono font-semibold", getPnlColor(position.pnl))}>
-                                    {formatSats(position.pnl)}
-                                  </span>
-                                  <span className={cn("text-xs font-mono", getPnlColor(position.pnl))}>
-                                    ({formatPercentage(position.pnlPercentage)})
-                                  </span>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-mono">
-                              <span className={cn(
-                                "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold",
-                                position.marginRatio > 50 
-                                  ? "bg-red-500/20 text-red-600" 
-                                  : position.marginRatio > 25 
-                                    ? "bg-yellow-500/20 text-yellow-600"
-                                    : "bg-green-500/20 text-green-600"
-                              )}>
-                                {position.marginRatio.toFixed(1)}%
-                              </span>
-                            </TableCell>
-                            <TableCell className="font-mono text-text-primary">
-                              {formatSats(position.tradingFees)}
-                            </TableCell>
-                            <TableCell className="font-mono text-text-primary">
-                              {formatSats(position.fundingCost)}
-                            </TableCell>
-                          </TableRow>
+                            position={position}
+                            index={index}
+                          />
                         ))}
                       </TableBody>
                     </Table>
