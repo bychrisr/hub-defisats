@@ -600,47 +600,6 @@ export default function RegisterPlan() {
           </div>
         </div>
 
-        {/* Selected Plan Summary */}
-        {selectedPlanData && (
-          <Card className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm shadow-lg shadow-blue-500/25">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className={`w-16 h-16 bg-gradient-to-r ${selectedPlanData.color} rounded-lg flex items-center justify-center shadow-lg`}>
-                    <div className="text-white">
-                      {selectedPlanData.icon}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">{selectedPlanData.name} Plan</h3>
-                    <p className="text-slate-400 text-lg">
-                      {getPrice(selectedPlanData) === 0 ? 'Free forever' : `$${getPrice(selectedPlanData)}/${getPeriodText()}`}
-                    </p>
-                    {getSavings(selectedPlanData) && (
-                      <p className="text-green-400 font-medium">
-                        {getSavings(selectedPlanData)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                <Button
-                  onClick={handleContinue}
-                  disabled={isLoading}
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-8 py-3 transition-all duration-200 shadow-lg shadow-blue-500/25"
-                >
-                  {isLoading ? 'Processing...' : (
-                    <>
-                      Continue
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Footer */}
         <div className="text-center mt-16">
