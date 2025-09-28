@@ -31,7 +31,8 @@ import {
   BarChart2,
   Bell,
   ArrowRightLeft,
-  BookOpen
+  BookOpen,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -53,6 +54,7 @@ const navigation = [
   { name: 'Menus', href: '/admin/menus', icon: MenuIcon },
   { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
   { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
+  { name: 'Load Testing', href: '/admin/load-test', icon: Zap },
   { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor, badge: { text: 'done', color: 'green' } },
   { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle, badge: { text: 'done', color: 'green' } },
   { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield, badge: { text: 'done', color: 'green' } },

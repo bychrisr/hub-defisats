@@ -64,6 +64,7 @@ import TestPermissions from '@/pages/TestPermissions';
 import DesignSystem from '@/pages/DesignSystem';
 import Documentation from '@/pages/admin/Documentation';
 import RateLimiting from '@/pages/admin/RateLimiting';
+import LoadTest from '@/pages/admin/LoadTest';
 
 const queryClient = new QueryClient();
 
@@ -467,6 +468,7 @@ const App = () => {
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="documentation" element={<Documentation />} />
+              <Route path="load-test" element={<LoadTest />} />
             </Route>
                   <Route path="*" element={<NotFound />} />
           </Routes>
