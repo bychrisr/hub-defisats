@@ -43,78 +43,89 @@ const plans: Plan[] = [
   {
     id: 'free',
     name: 'Free',
-    description: 'For individuals to organize personal projects and life.',
+    description: 'Perfect for beginners to explore automated trading.',
     monthlyPrice: 0,
     quarterlyPrice: 0,
     yearlyPrice: 0,
     features: [
-      'Basic trading automation',
-      'Up to 3 active strategies',
-      'Community support',
-      'Basic analytics'
+      'Basic LN Markets integration',
+      'Up to 2 active trading bots',
+      'Real-time market data',
+      'Basic position monitoring',
+      'Community Discord support',
+      'Basic risk management'
     ],
     icon: <Gift className="h-6 w-6" />,
     color: 'from-gray-500 to-gray-600',
-    buttonText: 'Sign up',
+    buttonText: 'Start Free',
     buttonVariant: 'outline'
   },
   {
     id: 'basic',
     name: 'Basic',
-    description: 'For small teams and professionals to work together.',
-    monthlyPrice: 29,
-    quarterlyPrice: 79, // 3 months with 10% discount
-    yearlyPrice: 290, // 12 months with 20% discount
+    description: 'For active traders looking to automate their strategies.',
+    monthlyPrice: 19,
+    quarterlyPrice: 51, // 3 months with 10% discount
+    yearlyPrice: 190, // 12 months with 20% discount
     features: [
+      'Full LN Markets API access',
+      'Up to 5 active trading bots',
       'Advanced trading strategies',
-      'Up to 10 active strategies',
-      'Priority support',
-      'Advanced analytics',
-      'Risk management tools'
+      'Real-time WebSocket data',
+      'Position & balance tracking',
+      'Email support',
+      'Basic analytics dashboard',
+      'Stop-loss automation'
     ],
     icon: <Zap className="h-6 w-6" />,
     color: 'from-blue-500 to-blue-600',
-    buttonText: 'Get started',
+    buttonText: 'Get Started',
     buttonVariant: 'default'
   },
   {
     id: 'advanced',
     name: 'Advanced',
-    description: 'For growing businesses to streamline teamwork.',
-    monthlyPrice: 79,
-    quarterlyPrice: 213, // 3 months with 10% discount
-    yearlyPrice: 790, // 12 months with 20% discount
+    description: 'For serious traders who need professional automation.',
+    monthlyPrice: 49,
+    quarterlyPrice: 132, // 3 months with 10% discount
+    yearlyPrice: 490, // 12 months with 20% discount
     features: [
-      'Professional trading strategies',
-      'Unlimited active strategies',
-      '24/7 premium support',
-      'Professional analytics',
+      'Unlimited trading bots',
+      'Professional trading algorithms',
       'Advanced risk management',
-      'Custom indicators',
-      'API access'
+      'Custom indicator development',
+      'Priority WebSocket connections',
+      '24/7 premium support',
+      'Advanced analytics & reporting',
+      'Multi-timeframe analysis',
+      'Backtesting capabilities',
+      'API rate limit priority'
     ],
     icon: <Star className="h-6 w-6" />,
     color: 'from-purple-500 to-purple-600',
     popular: true,
-    buttonText: 'Get started',
+    buttonText: 'Get Started',
     buttonVariant: 'default'
   },
   {
     id: 'pro',
     name: 'Pro',
-    description: 'For organizations to operate with scalability, control, and security.',
-    monthlyPrice: 149,
-    quarterlyPrice: 402, // 3 months with 10% discount
-    yearlyPrice: 1490, // 12 months with 20% discount
+    description: 'For institutions and high-volume traders.',
+    monthlyPrice: 99,
+    quarterlyPrice: 267, // 3 months with 10% discount
+    yearlyPrice: 990, // 12 months with 20% discount
     features: [
-      'Enterprise trading strategies',
-      'Unlimited everything',
+      'Everything in Advanced',
       'Dedicated account manager',
-      'Enterprise analytics',
-      'Advanced risk management',
-      'Custom development',
-      'Full API access',
-      'White-label options'
+      'Custom strategy development',
+      'White-label dashboard options',
+      'Advanced compliance tools',
+      'Priority infrastructure access',
+      'Custom integrations',
+      'Dedicated server resources',
+      'Advanced security features',
+      'SLA guarantees',
+      'Custom reporting & analytics'
     ],
     icon: <Crown className="h-6 w-6" />,
     color: 'from-yellow-500 to-orange-500',
@@ -125,28 +136,35 @@ const plans: Plan[] = [
 
 const featureCategories: FeatureCategory[] = [
   {
-    category: 'Trading Features',
+    category: 'Trading Automation',
     features: [
       {
-        name: 'Active trading strategies',
-        free: 'Up to 3',
-        basic: 'Up to 10',
+        name: 'Active trading bots',
+        free: 'Up to 2',
+        basic: 'Up to 5',
         advanced: 'Unlimited',
         pro: 'Unlimited'
       },
       {
-        name: 'Strategy types',
+        name: 'LN Markets integration',
+        free: 'Basic',
+        basic: 'Full API',
+        advanced: 'Priority API',
+        pro: 'Enterprise API'
+      },
+      {
+        name: 'Trading strategies',
         free: 'Basic automation',
         basic: 'Advanced strategies',
-        advanced: 'Professional strategies',
-        pro: 'Enterprise strategies'
+        advanced: 'Professional algorithms',
+        pro: 'Custom development'
       },
       {
         name: 'Risk management',
-        free: 'Basic',
-        basic: 'Advanced',
-        advanced: 'Professional',
-        pro: 'Enterprise'
+        free: 'Basic stop-loss',
+        basic: 'Advanced stops',
+        advanced: 'Professional risk',
+        pro: 'Enterprise risk'
       },
       {
         name: 'Custom indicators',
@@ -158,7 +176,47 @@ const featureCategories: FeatureCategory[] = [
     ]
   },
   {
-    category: 'Analytics & Reporting',
+    category: 'Real-time Data & Monitoring',
+    features: [
+      {
+        name: 'WebSocket connections',
+        free: 'Basic',
+        basic: 'Standard',
+        advanced: 'Priority',
+        pro: 'Dedicated'
+      },
+      {
+        name: 'Market data updates',
+        free: 'Standard',
+        basic: 'Fast',
+        advanced: 'Real-time',
+        pro: 'Ultra-fast'
+      },
+      {
+        name: 'Position tracking',
+        free: 'Basic',
+        basic: 'Advanced',
+        advanced: 'Professional',
+        pro: 'Enterprise'
+      },
+      {
+        name: 'Balance monitoring',
+        free: 'Basic',
+        basic: 'Real-time',
+        advanced: 'Multi-account',
+        pro: 'Enterprise'
+      },
+      {
+        name: 'Performance analytics',
+        free: 'Basic',
+        basic: 'Advanced',
+        advanced: 'Professional',
+        pro: 'Custom'
+      }
+    ]
+  },
+  {
+    category: 'Dashboard & Analytics',
     features: [
       {
         name: 'Analytics dashboard',
@@ -175,80 +233,61 @@ const featureCategories: FeatureCategory[] = [
         pro: 'Unlimited'
       },
       {
-        name: 'Custom reports',
+        name: 'Backtesting',
+        free: false,
+        basic: 'Basic',
+        advanced: 'Advanced',
+        pro: 'Professional'
+      },
+      {
+        name: 'Multi-timeframe analysis',
         free: false,
         basic: false,
         advanced: true,
         pro: true
       },
       {
-        name: 'Real-time monitoring',
-        free: 'Basic',
-        basic: 'Advanced',
-        advanced: 'Professional',
-        pro: 'Enterprise'
+        name: 'Custom reporting',
+        free: false,
+        basic: false,
+        advanced: true,
+        pro: true
       }
     ]
   },
   {
-    category: 'Support & Integration',
+    category: 'Support & Infrastructure',
     features: [
       {
         name: 'Support level',
-        free: 'Community',
-        basic: 'Priority',
-        advanced: '24/7 Premium',
-        pro: 'Dedicated Manager'
+        free: 'Discord community',
+        basic: 'Email support',
+        advanced: '24/7 premium',
+        pro: 'Dedicated manager'
       },
       {
-        name: 'API access',
-        free: false,
-        basic: 'Basic',
-        advanced: 'Full',
-        pro: 'Full + Custom'
-      },
-      {
-        name: 'Webhook integrations',
-        free: false,
-        basic: 'Basic',
-        advanced: 'Advanced',
+        name: 'API rate limits',
+        free: 'Standard',
+        basic: 'Enhanced',
+        advanced: 'Priority',
         pro: 'Enterprise'
+      },
+      {
+        name: 'Server resources',
+        free: 'Shared',
+        basic: 'Shared+',
+        advanced: 'Dedicated',
+        pro: 'Enterprise'
+      },
+      {
+        name: 'SLA guarantees',
+        free: false,
+        basic: false,
+        advanced: '99.9%',
+        pro: '99.99%'
       },
       {
         name: 'White-label options',
-        free: false,
-        basic: false,
-        advanced: false,
-        pro: true
-      }
-    ]
-  },
-  {
-    category: 'Security & Compliance',
-    features: [
-      {
-        name: 'Data encryption',
-        free: 'Basic',
-        basic: 'Advanced',
-        advanced: 'Professional',
-        pro: 'Enterprise'
-      },
-      {
-        name: 'Audit logs',
-        free: false,
-        basic: 'Basic',
-        advanced: 'Advanced',
-        pro: 'Enterprise'
-      },
-      {
-        name: 'SSO integration',
-        free: false,
-        basic: false,
-        advanced: true,
-        pro: true
-      },
-      {
-        name: 'Compliance reporting',
         free: false,
         basic: false,
         advanced: false,
@@ -346,10 +385,10 @@ export default function RegisterPlan() {
               <span className="text-white text-2xl">🤖</span>
             </div>
             <h1 className="text-4xl font-bold text-white mb-4">
-              One tool for your whole trading operation.
+              Automate your Bitcoin trading with Axisor Bot.
             </h1>
             <p className="text-xl text-slate-400 mb-8">
-              Free for individuals to try.
+              Professional trading automation powered by LN Markets.
             </p>
             
             {/* Billing Period Tabs */}
@@ -575,7 +614,7 @@ export default function RegisterPlan() {
                   <div>
                     <h3 className="text-2xl font-bold text-white">{selectedPlanData.name} Plan</h3>
                     <p className="text-slate-400 text-lg">
-                      {selectedPlanData.price === 0 ? 'Free forever' : `$${getPrice(selectedPlanData)}/${getPeriodText()}`}
+                      {getPrice(selectedPlanData) === 0 ? 'Free forever' : `$${getPrice(selectedPlanData)}/${getPeriodText()}`}
                     </p>
                     {getSavings(selectedPlanData) && (
                       <p className="text-green-400 font-medium">
