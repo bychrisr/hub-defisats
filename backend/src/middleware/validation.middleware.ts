@@ -47,7 +47,7 @@ const registerSchema = z
 
 // Schema de validação para login
 const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  emailOrUsername: z.string().min(1, 'Email or username is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -153,7 +153,7 @@ export async function validateLoginInput(
   try {
     // Sanitizar entrada
     const sanitizedBody = {
-      email: Sanitizer.sanitizeEmail((request.body as Record<string, unknown>)?.['email'] as string || ''),
+      emailOrUsername: Sanitizer.sanitizeString((request.body as Record<string, unknown>)?.['emailOrUsername'] as string || ''),
       password: Sanitizer.sanitizeString((request.body as Record<string, unknown>)?.['password'] as string || ''),
     };
 

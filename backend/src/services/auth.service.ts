@@ -198,20 +198,25 @@ export class AuthService {
   }
 
   /**
-   * Login user with email and password
+   * Login user with email/username and password
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
-    console.log('🔍 AUTH SERVICE - Login called with:', { email: data.email });
+    console.log('🔍 AUTH SERVICE - Login called with:', { emailOrUsername: data.emailOrUsername });
     console.log('🔍 AUTH SERVICE - This is the login method');
-    const { email, password } = data;
+    const { emailOrUsername, password } = data;
 
-    // Find user
-    const user = await this.prisma.user.findUnique({
-      where: { email },
+    // Find user by email or username
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: emailOrUsername },
+          { username: emailOrUsername }
+        ]
+      },
     });
 
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid email/username or password');
     }
 
     if (!user.password_hash) {
@@ -223,7 +228,7 @@ export class AuthService {
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
     if (!isValidPassword) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid email/username or password');
     }
 
     if (!user.is_active) {

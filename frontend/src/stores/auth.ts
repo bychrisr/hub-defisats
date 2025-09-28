@@ -26,7 +26,7 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (email: string, password: string) => Promise<void>;
+  login: (emailOrUsername: string, password: string) => Promise<void>;
   register: (data: {
     email: string;
     username: string;
@@ -53,11 +53,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       error: null,
 
       // Actions
-      login: async (email: string, password: string) => {
+      login: async (emailOrUsername: string, password: string) => {
         set({ isLoading: true, error: null });
 
         try {
-          const response = await authAPI.login({ email, password });
+          const response = await authAPI.login({ emailOrUsername, password });
           const { user_id, token, refresh_token, plan_type } = response.data;
 
           // Store tokens

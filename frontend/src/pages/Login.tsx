@@ -18,7 +18,7 @@ import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  emailOrUsername: z.string().min(1, 'Email or username is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -40,7 +40,7 @@ export default function Login() {
   const onSubmit = async (data: LoginForm) => {
     try {
       clearError();
-      await login(data.email, data.password);
+      await login(data.emailOrUsername, data.password);
       
       // O redirecionamento será feito automaticamente pelo PublicRoute
       // baseado no campo is_admin que vem do backend
@@ -76,16 +76,16 @@ export default function Login() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="emailOrUsername">Email or Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  {...register('email')}
-                  className={errors.email ? 'border-red-500' : ''}
+                  id="emailOrUsername"
+                  type="text"
+                  placeholder="Enter your email or username"
+                  {...register('emailOrUsername')}
+                  className={errors.emailOrUsername ? 'border-red-500' : ''}
                 />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                {errors.emailOrUsername && (
+                  <p className="text-sm text-destructive">{errors.emailOrUsername.message}</p>
                 )}
               </div>
 

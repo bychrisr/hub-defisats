@@ -321,13 +321,13 @@ export async function authRoutes(fastify: FastifyInstance) {
     {
       preHandler: [dynamicRateLimiters.auth, validateLoginInput],
       schema: {
-        description: 'Login user with email and password',
+        description: 'Login user with email or username and password',
         tags: ['Authentication'],
         body: {
           type: 'object',
-          required: ['email', 'password'],
+          required: ['emailOrUsername', 'password'],
           properties: {
-            email: { type: 'string', format: 'email' },
+            emailOrUsername: { type: 'string', minLength: 1 },
             password: { type: 'string', minLength: 1 },
           },
         },

@@ -134,7 +134,7 @@ export const authAPI = {
     coupon_code?: string;
   }) => api.post('/api/auth/register', data),
 
-  login: (data: { email: string; password: string }) =>
+  login: (data: { emailOrUsername: string; password: string }) =>
     api.post('/api/auth/login', data),
 
   refresh: (data: { refresh_token: string }) =>
