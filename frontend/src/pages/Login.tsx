@@ -215,7 +215,7 @@ export default function Login() {
             </div>
 
             {/* Footer Links */}
-            <div className="mt-8 text-center">
+            <div className="mt-8 text-center space-y-3">
               <p className="text-slate-400 text-sm">
                 New to Axisor Bot?{' '}
                 <Link
@@ -223,6 +223,15 @@ export default function Login() {
                   className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
                 >
                   Create an account
+                </Link>
+              </p>
+              <p className="text-slate-400 text-sm">
+                Forgot your password?{' '}
+                <Link
+                  to="/forgot-password"
+                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                >
+                  Reset it here
                 </Link>
               </p>
             </div>

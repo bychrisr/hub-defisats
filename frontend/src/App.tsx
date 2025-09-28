@@ -29,6 +29,8 @@ import Register from '@/pages/Register';
 import RegisterPlan from '@/pages/RegisterPlan';
 import RegisterCredentials from '@/pages/RegisterCredentials';
 import Payment from '@/pages/Payment';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import DashboardRefactored from '@/pages/DashboardRefactored';
 import Profile from '@/pages/Profile';
@@ -220,6 +222,22 @@ const App = () => {
                 element={
                   <PublicRoute>
                   <Login />
+                </PublicRoute>
+              }
+            />
+                  <Route
+              path="/forgot-password"
+                element={
+                  <PublicRoute>
+                  <ForgotPassword />
+                </PublicRoute>
+              }
+            />
+                  <Route
+              path="/reset-password"
+                element={
+                  <PublicRoute>
+                  <ResetPassword />
                 </PublicRoute>
               }
             />
