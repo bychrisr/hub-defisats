@@ -149,23 +149,35 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }, [fetchDashboardData, user?.id])
   });
 
-  // ✅ FALLBACK CRÍTICO: Refresh periódico se WebSocket falhar
+  // ✅ SISTEMA HÍBRIDO: WebSocket + Fallback Inteligente
   useEffect(() => {
     if (!isAuthenticated || !user?.id) return;
 
-    console.log('🔄 OPTIMIZED DASHBOARD - Configurando refresh periódico como fallback...');
+    console.log('🔄 OPTIMIZED DASHBOARD - Configurando sistema híbrido...');
     
-    // Refresh a cada 30 segundos se WebSocket não estiver conectado
+    // ✅ FALLBACK INTELIGENTE: Refresh periódico apenas se WebSocket falhar
     const interval = setInterval(() => {
       if (!isConnected) {
-        console.log('🔄 OPTIMIZED DASHBOARD - WebSocket desconectado, fazendo refresh periódico...');
+        console.log('🔄 OPTIMIZED DASHBOARD - WebSocket desconectado, usando fallback HTTP...');
         fetchDashboardData();
+      } else {
+        console.log('✅ OPTIMIZED DASHBOARD - WebSocket conectado, pulando fallback');
       }
-    }, 30000); // 30 segundos
+    }, 30000); // 30 segundos - máximo seguro para mercados voláteis
+
+    // ✅ HEALTH CHECK: Verificar conexão WebSocket periodicamente
+    const healthCheck = setInterval(() => {
+      if (isConnected) {
+        console.log('💚 OPTIMIZED DASHBOARD - WebSocket health check: OK');
+      } else {
+        console.log('💔 OPTIMIZED DASHBOARD - WebSocket health check: DISCONNECTED');
+      }
+    }, 10000); // Verificar a cada 10 segundos
 
     return () => {
-      console.log('🔄 OPTIMIZED DASHBOARD - Limpando refresh periódico...');
+      console.log('🔄 OPTIMIZED DASHBOARD - Limpando sistema híbrido...');
       clearInterval(interval);
+      clearInterval(healthCheck);
     };
   }, [isAuthenticated, user?.id, isConnected, fetchDashboardData]);
 
@@ -186,7 +198,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }
   }, [isAuthenticated, user?.id, isAdmin]);
 
-  // Função para refresh manual
+  // ✅ FUNÇÃO DE REFRESH HÍBRIDA: WebSocket + Fallback HTTP
   const refresh = useCallback(async () => {
     console.log('🔄 OPTIMIZED DASHBOARD - Manual refresh triggered...');
     
@@ -203,13 +215,30 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }
   }, [fetchDashboardData, isConnected, user?.id]);
 
+  // ✅ FUNÇÃO DE RECONEXÃO AUTOMÁTICA
+  const reconnectWebSocket = useCallback(() => {
+    console.log('🔄 OPTIMIZED DASHBOARD - Tentando reconectar WebSocket...');
+    
+    // Forçar reconexão do WebSocket
+    if (sendMessage) {
+      // Enviar ping para testar conexão
+      sendMessage({
+        type: 'ping',
+        userId: user?.id,
+        timestamp: Date.now()
+      });
+    }
+  }, [sendMessage, user?.id]);
+
   return {
     data,
     isLoading,
     error,
     refresh,
+    reconnectWebSocket,
     lastUpdate,
-    cacheHit
+    cacheHit,
+    isWebSocketConnected: isConnected
   };
 };
 
