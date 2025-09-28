@@ -60,6 +60,7 @@ model User {
   trading_logs               TradingLog[]
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
+  registration_progress      RegistrationProgress?
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -647,6 +648,29 @@ model RateLimitConfig {
   @@index([endpointType])
   @@index([isActive])
   @@map("rate_limit_configs")
+}
+
+model RegistrationProgress {
+  id              String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id         String   @unique
+  current_step    String   @default("personal_data") // personal_data, plan_selection, payment, credentials, completed
+  completed_steps Json     @default("[]") // Array of completed steps
+  personal_data   Json?    // Store personal data from step 1
+  selected_plan   String? // Store selected plan from step 2
+  payment_data    Json?    // Store payment information from step 3
+  credentials_data Json?   // Store LN Markets credentials from step 4
+  coupon_code     String?  // Store coupon code if used
+  session_token   String?  // Temporary token for unauthenticated users
+  expires_at      DateTime? @db.Timestamp(6) // For session-based progress
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
+  user            User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([current_step])
+  @@index([session_token])
+  @@index([expires_at])
+  @@map("registration_progress")
 }
 
 enum PlanType {
