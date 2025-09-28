@@ -33,32 +33,24 @@ export const usePWA = () => {
     const registerServiceWorker = async () => {
       if ('serviceWorker' in navigator) {
         try {
-          const registration = await navigator.serviceWorker.register('/sw.js');
-          console.log('[PWA] Service Worker registrado:', registration);
+          // ✅ TEMPORÁRIO: Desabilitar Service Worker até implementação completa
+          console.log('[PWA] Service Worker temporariamente desabilitado');
+          
+          // Verificar se há um Service Worker ativo e removê-lo
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            console.log('[PWA] Removendo Service Worker existente:', registration);
+            await registration.unregister();
+          }
           
           setPwaState(prev => ({
             ...prev,
-            swRegistration: registration,
+            swRegistration: null,
             isInstalled: checkIfInstalled(),
           }));
 
-          // Verificar atualizações
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  setPwaState(prev => ({
-                    ...prev,
-                    isUpdateAvailable: true,
-                  }));
-                }
-              });
-            }
-          });
-
         } catch (error) {
-          console.error('[PWA] Erro ao registrar Service Worker:', error);
+          console.error('[PWA] Erro ao gerenciar Service Worker:', error);
         }
       }
     };

@@ -281,12 +281,12 @@ export const useOptimizedDashboardMetrics = () => {
   const lastUpdate = data.lnMarkets?.metadata?.lastUpdate;
   if (lastUpdate) {
     const dataAge = Date.now() - new Date(lastUpdate).getTime();
-    const maxAge = 30 * 1000; // 30 segundos máximo
+    const maxAge = 5 * 60 * 1000; // 5 minutos máximo (mais razoável para dados de mercado)
     
     if (dataAge > maxAge) {
       console.warn('🚨 SEGURANÇA - Dados muito antigos:', {
-        age: dataAge,
-        maxAge,
+        age: Math.floor(dataAge / 1000) + 's',
+        maxAge: Math.floor(maxAge / 1000) + 's',
         lastUpdate,
         message: 'Rejeitando dados antigos por segurança'
       });

@@ -31,11 +31,11 @@ interface CentralizedDataState {
   clearData: () => void;
 }
 
-// Cache global para dados centralizados (30 segundos - apenas para evitar spam)
+// Cache global para dados centralizados (2 minutos - balanceado entre performance e segurança)
 let globalCache = {
   data: null as CentralizedData | null,
   timestamp: 0,
-  ttl: 30 * 1000 // 30 segundos - dados devem ser muito recentes
+  ttl: 2 * 60 * 1000 // 2 minutos - balanceado entre performance e segurança
 };
 
 export const useCentralizedDataStore = create<CentralizedDataState>()(
@@ -60,10 +60,10 @@ export const useCentralizedDataStore = create<CentralizedDataState>()(
       // Verificar se é admin
       const isAdmin = user?.is_admin || false;
       
-      // Verificar cache apenas para evitar spam (30 segundos máximo)
+      // Verificar cache apenas para evitar spam (2 minutos máximo)
       const now = Date.now();
       if (!force && globalCache.data && (now - globalCache.timestamp) < globalCache.ttl) {
-        console.log('✅ CENTRALIZED DATA - Using recent cached data (30s)');
+        console.log('✅ CENTRALIZED DATA - Using recent cached data (2min)');
         set({ data: globalCache.data, isLoading: false, error: null });
         return;
       }
