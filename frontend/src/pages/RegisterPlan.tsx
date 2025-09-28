@@ -337,50 +337,50 @@ export default function RegisterPlan() {
   const selectedPlanData = plans.find(plan => plan.id === selectedPlan);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-slate-900/50 border-b border-slate-700 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-6">
+            <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-6 shadow-lg shadow-blue-500/25">
               <span className="text-white text-2xl">🤖</span>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-white mb-4">
               One tool for your whole trading operation.
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-slate-400 mb-8">
               Free for individuals to try.
             </p>
             
             {/* Billing Period Tabs */}
             <div className="flex justify-center mb-8">
-              <div className="bg-gray-100 rounded-lg p-1 flex">
+              <div className="bg-slate-800/50 rounded-lg p-1 flex backdrop-blur-sm border border-slate-700">
                 <button
                   onClick={() => setBillingPeriod('monthly')}
-                  className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                     billingPeriod === 'monthly'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   Pay monthly
                 </button>
                 <button
                   onClick={() => setBillingPeriod('quarterly')}
-                  className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                     billingPeriod === 'quarterly'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   Pay quarterly
                 </button>
                 <button
                   onClick={() => setBillingPeriod('yearly')}
-                  className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                     billingPeriod === 'yearly'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   Pay yearly
@@ -389,7 +389,7 @@ export default function RegisterPlan() {
             </div>
             
             {billingPeriod === 'yearly' && (
-              <p className="text-green-600 font-medium mb-8">
+              <p className="text-green-400 font-medium mb-8">
                 Save up to 20% with yearly billing
               </p>
             )}
@@ -407,39 +407,39 @@ export default function RegisterPlan() {
             return (
               <Card
                 key={plan.id}
-                className={`relative cursor-pointer transition-all duration-200 ${
+                className={`relative cursor-pointer transition-all duration-200 bg-slate-800/50 border-slate-700 backdrop-blur-sm ${
                   selectedPlan === plan.id
-                    ? 'ring-2 ring-blue-500 shadow-lg'
-                    : 'hover:shadow-md'
+                    ? 'ring-2 ring-blue-500 shadow-lg shadow-blue-500/25 bg-slate-700/50'
+                    : 'hover:shadow-lg hover:shadow-slate-500/10 hover:border-slate-600'
                 }`}
                 onClick={() => handlePlanSelect(plan.id)}
               >
                 {plan.popular && (
-                  <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white">
+                  <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25">
                     Recommended
                   </Badge>
                 )}
                 
                 <CardHeader className="text-center pb-4">
-                  <div className={`mx-auto w-12 h-12 bg-gradient-to-r ${plan.color} rounded-lg flex items-center justify-center mb-4`}>
+                  <div className={`mx-auto w-12 h-12 bg-gradient-to-r ${plan.color} rounded-lg flex items-center justify-center mb-4 shadow-lg`}>
                     <div className="text-white">
                       {plan.icon}
                     </div>
                   </div>
-                  <CardTitle className="text-gray-900 text-xl">{plan.name}</CardTitle>
-                  <CardDescription className="text-gray-600 text-sm mb-4">
+                  <CardTitle className="text-white text-xl">{plan.name}</CardTitle>
+                  <CardDescription className="text-slate-400 text-sm mb-4">
                     {plan.description}
                   </CardDescription>
                   
                   <div className="mb-4">
                     {price === 0 ? (
-                      <span className="text-3xl font-bold text-gray-900">Free</span>
+                      <span className="text-3xl font-bold text-white">Free</span>
                     ) : (
                       <div>
-                        <span className="text-3xl font-bold text-gray-900">${price}</span>
-                        <span className="text-gray-600">/{getPeriodText()}</span>
+                        <span className="text-3xl font-bold text-white">${price}</span>
+                        <span className="text-slate-400">/{getPeriodText()}</span>
                         {savings && (
-                          <div className="text-green-600 text-sm font-medium mt-1">
+                          <div className="text-green-400 text-sm font-medium mt-1">
                             {savings}
                           </div>
                         )}
@@ -449,7 +449,13 @@ export default function RegisterPlan() {
                   
                   <Button
                     variant={plan.buttonVariant}
-                    className="w-full"
+                    className={`w-full transition-all duration-200 ${
+                      plan.buttonVariant === 'default' 
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25'
+                        : plan.buttonVariant === 'outline'
+                        ? 'border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white'
+                    }`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handlePlanSelect(plan.id);
@@ -463,8 +469,8 @@ export default function RegisterPlan() {
                   <ul className="space-y-3">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start space-x-2">
-                        <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 text-sm">{feature}</span>
+                        <Check className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                        <span className="text-slate-300 text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -475,75 +481,75 @@ export default function RegisterPlan() {
         </div>
 
         {/* Detailed Features Table */}
-        <div className="bg-gray-50 rounded-lg p-8 mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+        <div className="bg-slate-800/50 rounded-lg p-8 mb-16 backdrop-blur-sm border border-slate-700 shadow-lg shadow-slate-500/10">
+          <h2 className="text-2xl font-bold text-white mb-8 text-center">
             Plans and features
           </h2>
           
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-4 font-semibold text-gray-900">Features</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-900">Free</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-900">Basic</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-900">Advanced</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-900">Pro</th>
+                <tr className="border-b border-slate-600">
+                  <th className="text-left py-4 px-4 font-semibold text-white">Features</th>
+                  <th className="text-center py-4 px-4 font-semibold text-white">Free</th>
+                  <th className="text-center py-4 px-4 font-semibold text-white">Basic</th>
+                  <th className="text-center py-4 px-4 font-semibold text-white">Advanced</th>
+                  <th className="text-center py-4 px-4 font-semibold text-white">Pro</th>
                 </tr>
               </thead>
               <tbody>
                 {featureCategories.map((category, categoryIndex) => (
                   <React.Fragment key={categoryIndex}>
-                    <tr className="bg-gray-100">
-                      <td colSpan={5} className="py-3 px-4 font-semibold text-gray-900">
+                    <tr className="bg-slate-700/50">
+                      <td colSpan={5} className="py-3 px-4 font-semibold text-white">
                         {category.category}
                       </td>
                     </tr>
                     {category.features.map((feature, featureIndex) => (
-                      <tr key={featureIndex} className="border-b border-gray-200 hover:bg-gray-50">
-                        <td className="py-4 px-4 text-gray-700">{feature.name}</td>
+                      <tr key={featureIndex} className="border-b border-slate-600 hover:bg-slate-700/30 transition-colors">
+                        <td className="py-4 px-4 text-slate-300">{feature.name}</td>
                         <td className="py-4 px-4 text-center">
                           {typeof feature.free === 'boolean' ? (
                             feature.free ? (
-                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                              <Check className="h-5 w-5 text-green-400 mx-auto" />
                             ) : (
-                              <span className="text-gray-400">—</span>
+                              <span className="text-slate-500">—</span>
                             )
                           ) : (
-                            <span className="text-gray-700">{feature.free}</span>
+                            <span className="text-slate-300">{feature.free}</span>
                           )}
                         </td>
                         <td className="py-4 px-4 text-center">
                           {typeof feature.basic === 'boolean' ? (
                             feature.basic ? (
-                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                              <Check className="h-5 w-5 text-green-400 mx-auto" />
                             ) : (
-                              <span className="text-gray-400">—</span>
+                              <span className="text-slate-500">—</span>
                             )
                           ) : (
-                            <span className="text-gray-700">{feature.basic}</span>
+                            <span className="text-slate-300">{feature.basic}</span>
                           )}
                         </td>
                         <td className="py-4 px-4 text-center">
                           {typeof feature.advanced === 'boolean' ? (
                             feature.advanced ? (
-                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                              <Check className="h-5 w-5 text-green-400 mx-auto" />
                             ) : (
-                              <span className="text-gray-400">—</span>
+                              <span className="text-slate-500">—</span>
                             )
                           ) : (
-                            <span className="text-gray-700">{feature.advanced}</span>
+                            <span className="text-slate-300">{feature.advanced}</span>
                           )}
                         </td>
                         <td className="py-4 px-4 text-center">
                           {typeof feature.pro === 'boolean' ? (
                             feature.pro ? (
-                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                              <Check className="h-5 w-5 text-green-400 mx-auto" />
                             ) : (
-                              <span className="text-gray-400">—</span>
+                              <span className="text-slate-500">—</span>
                             )
                           ) : (
-                            <span className="text-gray-700">{feature.pro}</span>
+                            <span className="text-slate-300">{feature.pro}</span>
                           )}
                         </td>
                       </tr>
@@ -557,22 +563,22 @@ export default function RegisterPlan() {
 
         {/* Selected Plan Summary */}
         {selectedPlanData && (
-          <Card className="bg-white border border-gray-200 shadow-lg">
+          <Card className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm shadow-lg shadow-blue-500/25">
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
-                  <div className={`w-16 h-16 bg-gradient-to-r ${selectedPlanData.color} rounded-lg flex items-center justify-center`}>
+                  <div className={`w-16 h-16 bg-gradient-to-r ${selectedPlanData.color} rounded-lg flex items-center justify-center shadow-lg`}>
                     <div className="text-white">
                       {selectedPlanData.icon}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900">{selectedPlanData.name} Plan</h3>
-                    <p className="text-gray-600 text-lg">
+                    <h3 className="text-2xl font-bold text-white">{selectedPlanData.name} Plan</h3>
+                    <p className="text-slate-400 text-lg">
                       {selectedPlanData.price === 0 ? 'Free forever' : `$${getPrice(selectedPlanData)}/${getPeriodText()}`}
                     </p>
                     {getSavings(selectedPlanData) && (
-                      <p className="text-green-600 font-medium">
+                      <p className="text-green-400 font-medium">
                         {getSavings(selectedPlanData)}
                       </p>
                     )}
@@ -583,7 +589,7 @@ export default function RegisterPlan() {
                   onClick={handleContinue}
                   disabled={isLoading}
                   size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 transition-all duration-200"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-8 py-3 transition-all duration-200 shadow-lg shadow-blue-500/25"
                 >
                   {isLoading ? 'Processing...' : (
                     <>
@@ -599,7 +605,7 @@ export default function RegisterPlan() {
 
         {/* Footer */}
         <div className="text-center mt-16">
-          <p className="text-gray-600 text-sm">
+          <p className="text-slate-400 text-sm">
             You can change your plan at any time in your account settings.
           </p>
         </div>
