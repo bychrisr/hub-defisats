@@ -24,6 +24,7 @@ import { adminUpgradeRoutes } from './routes/admin-upgrade.routes';
 import { websocketRoutes } from './routes/websocket.routes';
 import { websocketTestRoutes } from './routes/websocket-test.routes';
 import { websocketMarketRoutes } from './routes/websocket-market.routes';
+import { loadTestRoutes } from './routes/load-test.routes';
 import { simulationRoutes } from './routes/simulation.routes';
 import { notificationRoutes } from './routes/notification.routes';
 import { backtestRoutes } from './routes/backtest.routes';
@@ -717,6 +718,10 @@ async function registerRoutes() {
   // Monitoring routes (admin only)
   await fastify.register(monitoringRoutes, { prefix: '/api/admin' });
   console.log('✅ Monitoring routes registered');
+
+  // Load Test routes (admin only)
+  await fastify.register(loadTestRoutes, { prefix: '/api/admin/load-test' });
+  console.log('✅ Load Test routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler
