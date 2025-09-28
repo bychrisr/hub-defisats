@@ -28,6 +28,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import RegisterPlan from '@/pages/RegisterPlan';
 import RegisterCredentials from '@/pages/RegisterCredentials';
+import Payment from '@/pages/Payment';
 import Dashboard from '@/pages/Dashboard';
 import DashboardRefactored from '@/pages/DashboardRefactored';
 import Profile from '@/pages/Profile';
@@ -238,11 +239,19 @@ const App = () => {
                 </PublicRoute>
               }
             />
-                  <Route
+            <Route
               path="/register/credentials"
-                element={
-                  <PublicRoute>
+              element={
+                <PublicRoute>
                   <RegisterCredentials />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/payment"
+              element={
+                <PublicRoute>
+                  <Payment />
                 </PublicRoute>
               }
             />

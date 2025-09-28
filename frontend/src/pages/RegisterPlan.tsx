@@ -358,12 +358,17 @@ export default function RegisterPlan() {
       // Simular salvamento do plano
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Redirecionar para o próximo passo (credenciais)
-      navigate('/register/credentials', {
+      // Redirecionar para página de pagamento
+      navigate('/payment', {
         state: {
-          ...location.state,
-          selectedPlan: selectedPlan,
-          billingPeriod: billingPeriod
+          paymentData: {
+            planId: selectedPlan,
+            planName: selectedPlanData?.name,
+            planDescription: selectedPlanData?.description,
+            price: getPrice(selectedPlanData!),
+            billingPeriod: getPeriodText(),
+            savings: getSavings(selectedPlanData!)
+          }
         }
       });
     } catch (error) {
