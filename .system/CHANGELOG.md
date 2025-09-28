@@ -4,6 +4,42 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.1] - 2025-09-28
+
+### 📱 **OTIMIZAÇÃO MOBILE: Layout Responsivo para Dashboard**
+
+#### ✅ **Problema Resolvido**
+- **Cards "espremendo"**: Layout mobile empilhava cards em 1 coluna
+- **Espaçamento inadequado**: Padding e gaps muito grandes para mobile
+- **Ícones grandes**: Elementos ocupavam muito espaço em telas pequenas
+
+#### 🔧 **Otimizações Implementadas**
+
+##### **1. Grid Responsivo Otimizado**
+- **Mobile**: `grid-cols-2` (2 colunas em vez de 1)
+- **Small**: `grid-cols-3` (3 colunas)
+- **Large**: `grid-cols-4` (4 colunas)
+- **Extra Large**: `grid-cols-5` (5 colunas - layout original)
+
+##### **2. Elementos Adaptados para Mobile**
+- **Padding**: `p-3` no mobile, `p-6` em telas maiores
+- **Gap**: `gap-3` no mobile, `gap-6` em telas maiores
+- **Ícones Principais**: `w-8 h-8` no mobile, `w-12 h-12` em telas maiores
+- **Ícones Secundários**: `w-4 h-4` no mobile, `w-6 h-6` em telas maiores
+
+#### 📊 **Resultados**
+- ✅ **Layout mobile otimizado**: 2 colunas em vez de 1 empilhada
+- ✅ **Cards não se espremem**: Espaçamento adequado para mobile
+- ✅ **Elementos proporcionais**: Ícones e textos adaptados ao tamanho da tela
+- ✅ **Experiência fluida**: Transições suaves entre breakpoints
+
+#### 🧪 **Validação**
+- **Breakpoints testados**: Mobile (320px+), Small (640px+), Large (1024px+), XL (1280px+)
+- **Layout responsivo**: Cards se adaptam corretamente a diferentes tamanhos
+- **Performance mantida**: Otimizações não afetam velocidade de carregamento
+
+---
+
 ## [v2.3.0] - 2025-09-28
 
 ### 🚀 **OTIMIZAÇÃO CRÍTICA: Frontend para Atualizações Suaves**

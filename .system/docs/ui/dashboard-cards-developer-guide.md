@@ -4,6 +4,16 @@
 
 Este documento é um guia completo para desenvolvedores que irão continuar implementando e corrigindo os cards do dashboard do Hub DeFiSats. Ele contém toda a lógica, configuração, troubleshooting e exemplos práticos.
 
+## 🚀 **ATUALIZAÇÃO v2.3.1 - Layout Mobile Responsivo**
+
+### ✅ **Melhorias Implementadas**
+- **Grid Responsivo**: Mobile com 2 colunas (em vez de 1 empilhada)
+- **Elementos Adaptados**: Padding, ícones e gaps otimizados para mobile
+- **Breakpoints Inteligentes**: `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5`
+- **Performance Mantida**: Otimizações não afetam velocidade de carregamento
+
+---
+
 ## 🚀 **ATUALIZAÇÃO v2.3.0 - Sistema Híbrido Otimizado**
 
 ### ✅ **Melhorias Implementadas**
