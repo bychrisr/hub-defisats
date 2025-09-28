@@ -38,6 +38,11 @@ export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data } = useRealtimeData();
+  
+  // Debug logs
+  console.log('🔍 PAYMENT - RealtimeData:', data);
+  console.log('🔍 PAYMENT - MarketData:', data.marketData);
+  console.log('🔍 PAYMENT - BTC Price:', data.marketData?.BTC?.price);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('lightning');
   const [lightningAddress, setLightningAddress] = useState('');
@@ -88,14 +93,17 @@ export default function Payment() {
   };
 
   const getPriceInSatoshis = (priceUSD: number) => {
-    // Use real BTC price from WebSocket or fallback to realistic price
-    const btcPrice = data.marketData?.BTC?.price || 65000; // Fallback to $65,000 (more realistic)
+    // Use real BTC price from WebSocket only - no fallback
+    const btcPrice = data.marketData?.BTC?.price;
+    if (!btcPrice) {
+      return 0; // No price available
+    }
     const btcAmount = priceUSD / btcPrice;
     return Math.round(btcAmount * 100000000); // Convert to satoshis
   };
 
   const getCurrentBTCPrice = () => {
-    return data.marketData?.BTC?.price || 65000; // Fallback to $65,000 (more realistic)
+    return data.marketData?.BTC?.price || null; // No fallback - show nothing if no data
   };
 
   const handleGenerateInvoice = async () => {
@@ -159,6 +167,8 @@ export default function Payment() {
   }
 
   const satoshis = getPriceInSatoshis(paymentData.price);
+  const currentBTCPrice = getCurrentBTCPrice();
+  const hasPriceData = currentBTCPrice !== null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -304,54 +314,79 @@ export default function Payment() {
                           <span className="text-slate-300">Amount:</span>
                           <span className="text-white font-bold">${paymentData.price}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-300">Satoshis:</span>
-                          <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-300">BTC Rate:</span>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-slate-400">${getCurrentBTCPrice().toLocaleString()}/BTC</span>
-                            {data.marketData?.BTC?.price && (
-                              <TrendingUp className="h-4 w-4 text-green-400" />
-                            )}
+                        {hasPriceData ? (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-300">Satoshis:</span>
+                              <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-300">BTC Rate:</span>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-slate-400">${currentBTCPrice!.toLocaleString()}/BTC</span>
+                                <TrendingUp className="h-4 w-4 text-green-400" />
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-300">Rate per Sat:</span>
+                              <span className="text-slate-400">${(paymentData.price / satoshis).toFixed(8)}/sat</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-center py-4">
+                            <div className="text-orange-400 mb-2">
+                              <Clock className="h-8 w-8 mx-auto mb-2" />
+                              <p className="text-sm font-medium">Loading Bitcoin Price...</p>
+                            </div>
+                            <p className="text-slate-400 text-xs">
+                              Waiting for real-time market data
+                            </p>
                           </div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-300">Rate per Sat:</span>
-                          <span className="text-slate-400">${(paymentData.price / satoshis).toFixed(8)}/sat</span>
-                        </div>
+                        )}
                       </div>
 
                       {/* Real-time Price Info */}
-                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <TrendingUp className="h-4 w-4 text-blue-400" />
-                          <span className="text-blue-200 font-medium">Real-time Bitcoin Price</span>
-                        </div>
-                        <p className="text-blue-200 text-sm">
-                          Current BTC price: <span className="font-bold">${getCurrentBTCPrice().toLocaleString()}</span>
-                          {data.marketData?.BTC?.price ? (
+                      {hasPriceData ? (
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <TrendingUp className="h-4 w-4 text-blue-400" />
+                            <span className="text-blue-200 font-medium">Real-time Bitcoin Price</span>
+                          </div>
+                          <p className="text-blue-200 text-sm">
+                            Current BTC price: <span className="font-bold">${currentBTCPrice!.toLocaleString()}</span>
                             <span className="text-green-400 ml-2">• Live data</span>
-                          ) : (
-                            <span className="text-orange-400 ml-2">• Using fallback price</span>
-                          )}
-                        </p>
-                        <p className="text-blue-200 text-xs mt-1">
-                          Your payment will be converted to <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> at current market rate.
-                        </p>
-                      </div>
+                          </p>
+                          <p className="text-blue-200 text-xs mt-1">
+                            Your payment will be converted to <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> at current market rate.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Clock className="h-4 w-4 text-orange-400" />
+                            <span className="text-orange-200 font-medium">Connecting to Market Data</span>
+                          </div>
+                          <p className="text-orange-200 text-sm">
+                            Waiting for real-time Bitcoin price...
+                          </p>
+                          <p className="text-orange-200 text-xs mt-1">
+                            Please wait while we fetch current market data.
+                          </p>
+                        </div>
+                      )}
 
                       <Button
                         onClick={handleGenerateInvoice}
-                        disabled={isGeneratingInvoice}
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                        disabled={isGeneratingInvoice || !hasPriceData}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 transition-all duration-200 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isGeneratingInvoice ? (
                           <>
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                             Generating Invoice...
                           </>
+                        ) : !hasPriceData ? (
+                          'Waiting for Bitcoin Price...'
                         ) : (
                           'Generate Invoice'
                         )}
@@ -482,43 +517,66 @@ export default function Payment() {
                       <span className="text-slate-300">Amount:</span>
                       <span className="text-white font-bold">${paymentData.price}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-300">Satoshis:</span>
-                      <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-300">BTC Rate:</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-slate-400">${getCurrentBTCPrice().toLocaleString()}/BTC</span>
-                        {data.marketData?.BTC?.price && (
-                          <TrendingUp className="h-4 w-4 text-green-400" />
-                        )}
+                    {hasPriceData ? (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Satoshis:</span>
+                          <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">BTC Rate:</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-slate-400">${currentBTCPrice!.toLocaleString()}/BTC</span>
+                            <TrendingUp className="h-4 w-4 text-green-400" />
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Fees:</span>
+                          <span className="text-green-400 font-bold">No fees</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-4">
+                        <div className="text-orange-400 mb-2">
+                          <Clock className="h-8 w-8 mx-auto mb-2" />
+                          <p className="text-sm font-medium">Loading Bitcoin Price...</p>
+                        </div>
+                        <p className="text-slate-400 text-xs">
+                          Waiting for real-time market data
+                        </p>
                       </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-300">Fees:</span>
-                      <span className="text-green-400 font-bold">No fees</span>
-                    </div>
+                    )}
                   </div>
 
                   {/* Real-time Price Info for LNMarkets */}
-                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <TrendingUp className="h-4 w-4 text-green-400" />
-                      <span className="text-green-200 font-medium">Real-time Bitcoin Price</span>
-                    </div>
-                    <p className="text-green-200 text-sm">
-                      Current BTC price: <span className="font-bold">${getCurrentBTCPrice().toLocaleString()}</span>
-                      {data.marketData?.BTC?.price ? (
+                  {hasPriceData ? (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <TrendingUp className="h-4 w-4 text-green-400" />
+                        <span className="text-green-200 font-medium">Real-time Bitcoin Price</span>
+                      </div>
+                      <p className="text-green-200 text-sm">
+                        Current BTC price: <span className="font-bold">${currentBTCPrice!.toLocaleString()}</span>
                         <span className="text-green-400 ml-2">• Live data</span>
-                      ) : (
-                        <span className="text-orange-400 ml-2">• Using fallback price</span>
-                      )}
-                    </p>
-                    <p className="text-green-200 text-xs mt-1">
-                      Transfer amount: <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> (no fees)
-                    </p>
-                  </div>
+                      </p>
+                      <p className="text-green-200 text-xs mt-1">
+                        Transfer amount: <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> (no fees)
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Clock className="h-4 w-4 text-orange-400" />
+                        <span className="text-orange-200 font-medium">Connecting to Market Data</span>
+                      </div>
+                      <p className="text-orange-200 text-sm">
+                        Waiting for real-time Bitcoin price...
+                      </p>
+                      <p className="text-orange-200 text-xs mt-1">
+                        Please wait while we fetch current market data.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -546,14 +604,16 @@ export default function Payment() {
 
                     <Button
                       onClick={handleGenerateInvoice}
-                      disabled={!lightningAddress.trim() || isGeneratingInvoice}
-                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium py-3 transition-all duration-200 shadow-lg shadow-green-500/25"
+                      disabled={!lightningAddress.trim() || isGeneratingInvoice || !hasPriceData}
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium py-3 transition-all duration-200 shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isGeneratingInvoice ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                           Generating Transfer...
                         </>
+                      ) : !hasPriceData ? (
+                        'Waiting for Bitcoin Price...'
                       ) : (
                         'Generate Transfer Request'
                       )}

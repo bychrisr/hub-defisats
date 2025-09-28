@@ -140,8 +140,8 @@ export default function Register() {
       });
     } catch (error: any) {
       console.error('Registration error:', error);
-      setError('root', { 
-        type: 'manual', 
+          setError('root', { 
+            type: 'manual', 
         message: 'Registration failed. Please try again.' 
       });
     } finally {
@@ -371,20 +371,20 @@ export default function Register() {
               </div>
 
               {/* Continue Button */}
-              <Button
-                type="submit"
-                disabled={isLoading || isSubmitting || !emailValidation.isValid || !emailValidation.isAvailable}
+                <Button
+                  type="submit"
+                  disabled={isLoading || isSubmitting || !emailValidation.isValid || !emailValidation.isAvailable}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
-              >
-                {isLoading || isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
+                >
+                  {isLoading || isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
                   'Continue'
-                )}
-              </Button>
+                  )}
+                </Button>
             </form>
 
             {/* Divider */}
