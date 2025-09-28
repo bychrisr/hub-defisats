@@ -26,6 +26,8 @@ import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import RegisterPlan from '@/pages/RegisterPlan';
+import RegisterCredentials from '@/pages/RegisterCredentials';
 import Dashboard from '@/pages/Dashboard';
 import DashboardRefactored from '@/pages/DashboardRefactored';
 import Profile from '@/pages/Profile';
@@ -225,6 +227,22 @@ const App = () => {
                 element={
                   <PublicRoute>
                   <Register />
+                </PublicRoute>
+              }
+            />
+                  <Route
+              path="/register/plan"
+                element={
+                  <PublicRoute>
+                  <RegisterPlan />
+                </PublicRoute>
+              }
+            />
+                  <Route
+              path="/register/credentials"
+                element={
+                  <PublicRoute>
+                  <RegisterCredentials />
                 </PublicRoute>
               }
             />
