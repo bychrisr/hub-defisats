@@ -116,6 +116,26 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }, [fetchDashboardData])
   });
 
+  // ✅ FALLBACK CRÍTICO: Refresh periódico se WebSocket falhar
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return;
+
+    console.log('🔄 OPTIMIZED DASHBOARD - Configurando refresh periódico como fallback...');
+    
+    // Refresh a cada 30 segundos se WebSocket não estiver conectado
+    const interval = setInterval(() => {
+      if (!isConnected) {
+        console.log('🔄 OPTIMIZED DASHBOARD - WebSocket desconectado, fazendo refresh periódico...');
+        fetchDashboardData();
+      }
+    }, 30000); // 30 segundos
+
+    return () => {
+      console.log('🔄 OPTIMIZED DASHBOARD - Limpando refresh periódico...');
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, user?.id, isConnected, fetchDashboardData]);
+
   // Carregar dados inicialmente
   useEffect(() => {
     console.log('🔍 OPTIMIZED DASHBOARD - useEffect triggered:', {

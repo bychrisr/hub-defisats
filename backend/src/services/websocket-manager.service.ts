@@ -99,6 +99,66 @@ export class WebSocketManagerService extends EventEmitter {
   }
 
   /**
+   * Add direct WebSocket connection (for frontend connections)
+   */
+  addConnection(userId: string, connection: any): void {
+    console.log('🔌 WEBSOCKET MANAGER - Adicionando conexão direta para usuário:', userId);
+    
+    // Store the direct connection
+    this.connections.set(userId, {
+      userId,
+      wsService: null as any, // Direct connection, not LN Markets service
+      subscriptions: new Set(),
+      lastActivity: Date.now()
+    });
+
+    // Set up connection event handlers
+    connection.on('close', () => {
+      console.log('🔌 WEBSOCKET MANAGER - Conexão direta fechada para usuário:', userId);
+      this.removeConnection(userId);
+    });
+
+    connection.on('error', (error: any) => {
+      console.log('❌ WEBSOCKET MANAGER - Erro na conexão direta:', error);
+      this.removeConnection(userId);
+    });
+
+    // Send welcome message
+    try {
+      connection.send(JSON.stringify({
+        type: 'welcome',
+        message: 'Connected to LN Markets WebSocket',
+        userId: userId,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.log('❌ WEBSOCKET MANAGER - Erro ao enviar mensagem de boas-vindas:', error);
+    }
+  }
+
+  /**
+   * Remove connection for user
+   */
+  removeConnection(userId: string): void {
+    console.log('🔌 WEBSOCKET MANAGER - Removendo conexão para usuário:', userId);
+    const connection = this.connections.get(userId);
+    
+    if (connection) {
+      // Close LN Markets WebSocket if exists
+      if (connection.wsService) {
+        try {
+          connection.wsService.disconnect();
+        } catch (error) {
+          console.log('❌ WEBSOCKET MANAGER - Erro ao desconectar serviço LN Markets:', error);
+        }
+      }
+      
+      this.connections.delete(userId);
+      this.emit('userDisconnected', userId);
+    }
+  }
+
+  /**
    * Subscribe user to market data
    */
   async subscribeToMarket(userId: string, market: string = 'BTC'): Promise<void> {
