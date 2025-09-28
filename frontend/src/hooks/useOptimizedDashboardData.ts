@@ -157,22 +157,55 @@ export const useOptimizedDashboardMetrics = () => {
   const { data, isLoading, error } = useOptimizedDashboardData();
 
   if (!data || isLoading || error) {
-    // Retornar dados de teste quando não há dados reais
+    // ✅ SEGURO: Retornar valores zero quando não há dados reais
+    // Nunca usar dados simulados em mercados voláteis!
     return {
-      totalPL: 0.001234, // 0.001234 BTC
-      estimatedProfit: 0.000567, // 0.000567 BTC
-      totalMargin: 0.002345, // 0.002345 BTC
-      estimatedFees: 0.000123, // 0.000123 BTC
-      availableMargin: 1.628, // 1.628 BTC (como mostrado na imagem)
-      estimatedBalance: 1.628, // 1.628 BTC
-      totalInvested: 0.0, // 0 BTC
-      netProfit: 0.001234, // 0.001234 BTC
-      feesPaid: 0.000123, // 0.000123 BTC
-      positionCount: 0, // 0 posições
-      activeTrades: 0, // 0 trades ativos
+      totalPL: 0, // Zero - dados indisponíveis
+      estimatedProfit: 0, // Zero - dados indisponíveis
+      totalMargin: 0, // Zero - dados indisponíveis
+      estimatedFees: 0, // Zero - dados indisponíveis
+      availableMargin: 0, // Zero - dados indisponíveis
+      estimatedBalance: 0, // Zero - dados indisponíveis
+      totalInvested: 0, // Zero - dados indisponíveis
+      netProfit: 0, // Zero - dados indisponíveis
+      feesPaid: 0, // Zero - dados indisponíveis
+      positionCount: 0, // Zero - dados indisponíveis
+      activeTrades: 0, // Zero - dados indisponíveis
       isLoading,
-      error
+      error: error || 'Dados indisponíveis - por segurança, não exibimos dados antigos'
     };
+  }
+
+  // ✅ VALIDAÇÃO DE SEGURANÇA: Verificar se dados são recentes
+  const lastUpdate = data.lnMarkets?.metadata?.lastUpdate;
+  if (lastUpdate) {
+    const dataAge = Date.now() - new Date(lastUpdate).getTime();
+    const maxAge = 30 * 1000; // 30 segundos máximo
+    
+    if (dataAge > maxAge) {
+      console.warn('🚨 SEGURANÇA - Dados muito antigos:', {
+        age: dataAge,
+        maxAge,
+        lastUpdate,
+        message: 'Rejeitando dados antigos por segurança'
+      });
+      
+      return {
+        totalPL: 0,
+        estimatedProfit: 0,
+        totalMargin: 0,
+        estimatedFees: 0,
+        availableMargin: 0,
+        estimatedBalance: 0,
+        totalInvested: 0,
+        netProfit: 0,
+        feesPaid: 0,
+        positionCount: 0,
+        activeTrades: 0,
+        isLoading: false,
+        error: 'Dados muito antigos - por segurança, não exibimos dados desatualizados'
+      };
+    }
   }
 
   // Calcular métricas dos dados unificados (API v2)
