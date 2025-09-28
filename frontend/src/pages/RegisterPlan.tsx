@@ -433,23 +433,23 @@ export default function RegisterPlan() {
               </p>
             )}
             
-            {/* Payment Disclaimer */}
-            <div className="text-center mb-8">
-              <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 backdrop-blur-sm inline-block">
-                <p className="text-slate-300 text-sm font-medium">
-                  💡 Pagamentos somente em satoshis (via Lightning Network)
-                </p>
-                <p className="text-slate-400 text-xs mt-1">
-                  Todos os planos são cobrados em Bitcoin através da rede Lightning para máxima privacidade e eficiência.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Plans Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Payment Disclaimer */}
+        <div className="text-center mb-8">
+          <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 backdrop-blur-sm inline-block">
+            <p className="text-slate-300 text-sm font-medium">
+              💡 Pagamentos somente em satoshis (via Lightning Network)
+            </p>
+            <p className="text-slate-400 text-xs mt-1">
+              Todos os planos são cobrados em Bitcoin através da rede Lightning para máxima privacidade e eficiência.
+            </p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {plans.map((plan) => {
             const price = getPrice(plan);
