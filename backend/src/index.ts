@@ -54,6 +54,7 @@ import { routeRedirectsRoutes } from './routes/route-redirects.routes';
 import { routeRedirectRoutes } from './routes/route-redirect.routes';
 import { rateLimitConfigRoutes } from './routes/admin/rate-limit-config.routes';
 import { passwordResetRoutes } from './routes/password-reset.routes';
+import { registrationRoutes } from './routes/registration.routes';
 import { cacheRoutes as adminCacheRoutes } from './routes/admin/cache.routes';
 import { loadBalancerRoutes } from './routes/admin/load-balancer.routes';
 import { monitoringRoutes } from './routes/monitoring.routes';
@@ -522,6 +523,10 @@ async function registerRoutes() {
   // Password reset routes
   await fastify.register(passwordResetRoutes, { prefix: '/api/password-reset' });
   console.log('✅ Password reset routes registered');
+
+  // Registration routes
+  await fastify.register(registrationRoutes, { prefix: '/api/registration' });
+  console.log('✅ Registration routes registered');
 
   // Tooltip routes moved to the end to avoid hook leakage
 
