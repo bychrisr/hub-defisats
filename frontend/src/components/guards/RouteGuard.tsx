@@ -66,18 +66,10 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
     );
   }
 
-  // Se não está autenticado, mostrar tela de acesso negado com loading
+  // Se não está autenticado, redirecionar para login (não deveria chegar aqui se ProtectedRoute estiver funcionando)
   if (!isAuthenticated) {
-    console.log('❌ ROUTE GUARD - Not authenticated, showing access denied');
-    return (
-      <LoadingGuard 
-        isLoading={false}
-        isAuthenticated={false}
-        message="Acesso negado"
-      >
-        {children}
-      </LoadingGuard>
-    );
+    console.log('❌ ROUTE GUARD - Not authenticated, redirecting to login (fallback)');
+    return <Navigate to="/login" replace />;
   }
 
   // Verificar se é admin quando necessário

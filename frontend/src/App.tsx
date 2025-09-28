@@ -17,6 +17,9 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useDynamicFavicon } from '@/hooks/useDynamicFavicon';
 import { useDynamicPageConfig } from '@/hooks/useDynamicPageConfig';
 import { RouteGuard } from '@/components/guards/RouteGuard';
+import { AuthGuard } from '@/components/guards/AuthGuard';
+import { SecureRoute } from '@/components/guards/SecureRoute';
+import { ProtectedRouteWrapper } from '@/components/guards/ProtectedRouteWrapper';
 import { SmartRedirect } from '@/components/guards/SmartRedirect';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
@@ -65,37 +68,18 @@ import DesignSystem from '@/pages/DesignSystem';
 import Documentation from '@/pages/admin/Documentation';
 import RateLimiting from '@/pages/admin/RateLimiting';
 import LoadTest from '@/pages/admin/LoadTest';
+import TestAuth from '@/pages/TestAuth';
+import TestRedirect from '@/pages/TestRedirect';
 
 const queryClient = new QueryClient();
 
-// Protected Route Component
+// Protected Route Component - Usa wrapper robusto de proteção
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, isInitialized } = useAuthStore();
-
-  console.log('🔍 PROTECTED ROUTE - State check:', {
-    isAuthenticated,
-    isLoading,
-    isInitialized
-  });
-
-  // Se não foi inicializado ainda, mostrar loading
-  if (!isInitialized) {
-    console.log('⏳ PROTECTED ROUTE - Not initialized yet, showing loading...');
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Se não está autenticado, redirecionar para login
-  if (!isAuthenticated) {
-    console.log('❌ PROTECTED ROUTE - Not authenticated, redirecting to login');
-    return <Navigate to="/login" />;
-  }
-
-  console.log('✅ PROTECTED ROUTE - Access granted, rendering content');
-  return <>{children}</>;
+  return (
+    <ProtectedRouteWrapper fallbackRoute="/login">
+      {children}
+    </ProtectedRouteWrapper>
+  );
 };
 
 // Public Route Component (redirect authenticated users to appropriate page)
@@ -122,42 +106,13 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Admin Route Component (requires superadmin role)
+// Admin Route Component - Usa wrapper com verificação de admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, isInitialized, user } = useAuthStore();
-
-  console.log('🔍 ADMIN ROUTE - State check:', {
-    isAuthenticated,
-    isLoading,
-    isInitialized,
-    user: user ? { id: user.id, email: user.email, is_admin: user.is_admin } : null
-  });
-
-  // Se não foi inicializado ainda, mostrar loading
-  if (!isInitialized) {
-    console.log('⏳ ADMIN ROUTE - Not initialized yet, showing loading...');
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Se não está autenticado OU não tem usuário, redirecionar para login
-  if (!isAuthenticated || !user) {
-    console.log('❌ ADMIN ROUTE - Not authenticated or no user, redirecting to login');
-    return <Navigate to="/login" />;
-  }
-
-  // Verificar se o usuário é admin
-  if (!user.is_admin) {
-    console.log('❌ ADMIN ROUTE - User is not admin, redirecting to dashboard');
-    // Se não é admin, redirecionar para dashboard do usuário comum
-    return <Navigate to="/dashboard" />;
-  }
-
-  console.log('✅ ADMIN ROUTE - Access granted, rendering admin content');
-  return <>{children}</>;
+  return (
+    <ProtectedRouteWrapper fallbackRoute="/login" requireAdmin={true}>
+      {children}
+    </ProtectedRouteWrapper>
+  );
 };
 
 // Componente interno para gerenciar título global (deve estar dentro do Router)
@@ -432,6 +387,26 @@ const App = () => {
                       <DesignSystem />
                     </ResponsiveLayout>
                   </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+                  <Route
+              path="/test-auth"
+                element={
+                <ProtectedRoute>
+                  <ResponsiveLayout>
+                    <TestAuth />
+                  </ResponsiveLayout>
+                </ProtectedRoute>
+              }
+            />
+                  <Route
+              path="/test-redirect"
+                element={
+                <ProtectedRoute>
+                  <ResponsiveLayout>
+                    <TestRedirect />
+                  </ResponsiveLayout>
                 </ProtectedRoute>
               }
             />
