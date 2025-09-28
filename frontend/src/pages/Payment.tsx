@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import SatsIcon from '@/components/SatsIcon';
 import { useBtcPrice } from '@/hooks/useBtcPrice';
+import { useRegistration } from '@/hooks/useRegistration';
 
 interface PaymentData {
   planId: string;
@@ -39,6 +40,7 @@ export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: btcPrice, loading: btcLoading, error: btcError } = useBtcPrice();
+  const { processPayment, isLoading, error, clearError } = useRegistration();
   
   // Debug logs
   console.log('🔍 PAYMENT - BTC Price Data:', btcPrice);
@@ -137,20 +139,21 @@ export default function Payment() {
     setIsGeneratingInvoice(true);
     
     try {
-      // Simulate API call to generate Lightning invoice
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      clearError();
       
-      // Mock invoice data
-      const mockInvoice = 'lnbc' + Math.random().toString(36).substring(2, 15) + '...';
-      const mockQrCode = `lightning:${mockInvoice}`;
+      const paymentData = {
+        paymentMethod: paymentMethod,
+        lightningAddress: lightningAddress,
+        sessionToken: location.state?.sessionToken,
+      };
+
+      console.log('🚀 Payment data being sent:', paymentData);
       
-      setLightningInvoice(mockInvoice);
-      setQrCodeData(mockQrCode);
-      setInvoiceGenerated(true);
-      setTimeRemaining(600); // Reset timer
+      // Chamar a função de processamento de pagamento do hook
+      await processPayment(paymentData);
       
     } catch (error) {
-      console.error('Error generating invoice:', error);
+      console.error('Error processing payment:', error);
     } finally {
       setIsGeneratingInvoice(false);
     }

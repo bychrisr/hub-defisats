@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Eye, EyeOff, Github, Info } from 'lucide-react';
-import { useAuthStore } from '@/stores/auth';
 import { useUsernameValidation } from '@/hooks/useUsernameValidation';
+import { useRegistration } from '@/hooks/useRegistration';
 import SimpleEmailValidator from '@/components/SimpleEmailValidator';
 import SimplePasswordValidator from '@/components/SimplePasswordValidator';
 
@@ -28,8 +28,12 @@ const personalDataSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be at most 20 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string().min(8, 'Please confirm your password'),
   coupon_code: z.string().optional(),
   consent: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type PersonalDataForm = z.infer<typeof personalDataSchema>;
@@ -44,7 +48,7 @@ export default function Register() {
   });
 
   const { usernameAvailable, usernameChecking, checkUsername } = useUsernameValidation();
-  const { register: registerUser, isLoading, error, clearError } = useAuthStore();
+  const { savePersonalData, isLoading, error, clearError } = useRegistration();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -115,7 +119,8 @@ export default function Register() {
         username: data.username,
         email: data.email,
         password: data.password,
-        coupon_code: data.coupon_code || undefined,
+        confirmPassword: data.confirmPassword,
+        couponCode: data.coupon_code || undefined,
       };
 
       console.log('🚀 Personal data being sent:', {
@@ -124,20 +129,11 @@ export default function Register() {
         username: personalData.username,
         email: personalData.email,
         password: '***',
-        coupon_code: personalData.coupon_code || 'NOT_SENT',
+        couponCode: personalData.couponCode || 'NOT_SENT',
       });
       
-      // TODO: Implementar endpoint para salvar dados pessoais
-      // Por enquanto, vamos simular o salvamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirecionar para o próximo passo (escolha de plano)
-      navigate('/register/plan', { 
-        state: { 
-          personalData,
-          couponApplied: !!data.coupon_code 
-        } 
-      });
+      // Chamar a função de registro do hook
+      await savePersonalData(personalData);
     } catch (error: any) {
       console.error('Registration error:', error);
           setError('root', { 
@@ -313,6 +309,40 @@ export default function Register() {
                 )}
                 {errors.password && (
                   <p className="text-sm text-red-400">{errors.password.message}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Field */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-slate-200 text-sm font-medium">
+                  Confirm Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Confirm your password"
+                    {...register('confirmPassword')}
+                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-10 ${
+                      errors.confirmPassword ? 'border-red-500' : ''
+                    }`}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-slate-400 hover:text-slate-300"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-400">{errors.confirmPassword.message}</p>
                 )}
               </div>
 

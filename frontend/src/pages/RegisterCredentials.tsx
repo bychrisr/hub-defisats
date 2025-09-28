@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Eye, EyeOff, Info, CheckCircle } from 'lucide-react';
-import { useAuthStore } from '@/stores/auth';
+import { useRegistration } from '@/hooks/useRegistration';
 
 // Schema para credenciais LN Markets
 const credentialsSchema = z.object({
@@ -38,7 +38,7 @@ export default function RegisterCredentials() {
     message: string;
   } | null>(null);
 
-  const { register: registerUser, error, clearError } = useAuthStore();
+  const { saveCredentials, isLoading, error, clearError } = useRegistration();
 
   // TODO: Reativar verificação quando backend estiver pronto
   // useEffect(() => {
@@ -97,38 +97,28 @@ export default function RegisterCredentials() {
       return;
     }
 
-    setIsLoading(true);
     try {
       clearError();
       
-      // Combinar todos os dados dos passos anteriores
-      const completeData = {
-        ...location.state.personalData,
-        ln_markets_api_key: data.ln_markets_api_key,
-        ln_markets_api_secret: data.ln_markets_api_secret,
-        ln_markets_passphrase: data.ln_markets_passphrase,
-        plan_type: location.state.selectedPlan,
+      const credentialsData = {
+        lnMarketsApiKey: data.ln_markets_api_key,
+        lnMarketsApiSecret: data.ln_markets_api_secret,
+        lnMarketsPassphrase: data.ln_markets_passphrase,
+        sessionToken: location.state?.sessionToken,
       };
 
-      console.log('🚀 Complete registration data:', {
-        firstName: completeData.firstName,
-        lastName: completeData.lastName,
-        username: completeData.username,
-        email: completeData.email,
-        password: '***',
-        ln_markets_api_key: completeData.ln_markets_api_key,
-        ln_markets_api_secret: completeData.ln_markets_api_secret,
-        ln_markets_passphrase: completeData.ln_markets_passphrase,
-        plan_type: completeData.plan_type,
-        coupon_code: completeData.coupon_code || 'NOT_SENT',
+      console.log('🚀 Credentials data being sent:', {
+        lnMarketsApiKey: credentialsData.lnMarketsApiKey,
+        lnMarketsApiSecret: credentialsData.lnMarketsApiSecret,
+        lnMarketsPassphrase: credentialsData.lnMarketsPassphrase,
+        sessionToken: credentialsData.sessionToken ? 'EXISTS' : 'MISSING',
       });
       
-      await registerUser(completeData);
-      navigate('/dashboard');
+      // Chamar a função de salvamento de credenciais do hook
+      await saveCredentials(credentialsData);
+      
     } catch (error: any) {
       console.error('Registration error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

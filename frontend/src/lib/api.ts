@@ -145,6 +145,48 @@ export const authAPI = {
   getProfile: () => api.get('/api/auth/me'),
 };
 
+// Registration API for phased registration
+export const registrationAPI = {
+  // Step 1: Save personal data
+  savePersonalData: (data: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    couponCode?: string;
+  }) => api.post('/api/registration/personal-data', data),
+
+  // Step 2: Select plan
+  selectPlan: (data: {
+    planId: 'free' | 'basic' | 'advanced' | 'pro' | 'lifetime';
+    billingPeriod: 'monthly' | 'quarterly' | 'yearly';
+    sessionToken?: string;
+  }) => api.post('/api/registration/select-plan', data),
+
+  // Step 3: Process payment
+  processPayment: (data: {
+    paymentMethod: 'lightning' | 'lnmarkets';
+    lightningAddress?: string;
+    sessionToken?: string;
+  }) => api.post('/api/registration/payment', data),
+
+  // Step 4: Save credentials
+  saveCredentials: (data: {
+    lnMarketsApiKey: string;
+    lnMarketsApiSecret: string;
+    lnMarketsPassphrase: string;
+    sessionToken?: string;
+  }) => api.post('/api/registration/credentials', data),
+
+  // Get registration progress
+  getProgress: (sessionToken?: string) => 
+    api.get('/api/registration/progress', {
+      params: { sessionToken }
+    }),
+};
+
 // Automation API
 export const automationAPI = {
   create: (data: { type: string; config: any }) =>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useRegistration } from '@/hooks/useRegistration';
 import {
   Card,
   CardContent,
@@ -300,9 +301,9 @@ const featureCategories: FeatureCategory[] = [
 export default function RegisterPlan() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { selectPlan, isLoading, error, clearError } = useRegistration();
   const [selectedPlan, setSelectedPlan] = useState<string>('advanced');
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
-  const [isLoading, setIsLoading] = useState(false);
 
   // TODO: Reativar verificação quando backend estiver pronto
   // useEffect(() => {
@@ -352,29 +353,22 @@ export default function RegisterPlan() {
   };
 
   const handleContinue = async () => {
-    setIsLoading(true);
-    
     try {
-      // Simular salvamento do plano
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      clearError();
       
-      // Redirecionar para página de pagamento
-      navigate('/register/plan/payment', {
-        state: {
-          paymentData: {
-            planId: selectedPlan,
-            planName: selectedPlanData?.name,
-            planDescription: selectedPlanData?.description,
-            price: getPrice(selectedPlanData!),
-            billingPeriod: getPeriodText(),
-            savings: getSavings(selectedPlanData!)
-          }
-        }
-      });
+      const planData = {
+        planId: selectedPlan as 'free' | 'basic' | 'advanced' | 'pro' | 'lifetime',
+        billingPeriod: billingPeriod,
+        sessionToken: location.state?.sessionToken,
+      };
+
+      console.log('🚀 Plan data being sent:', planData);
+      
+      // Chamar a função de seleção de plano do hook
+      await selectPlan(planData);
+      
     } catch (error) {
       console.error('Error selecting plan:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
