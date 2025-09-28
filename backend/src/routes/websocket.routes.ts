@@ -89,8 +89,18 @@ export async function websocketRoutes(fastify: FastifyInstance) {
                     }
 
                     // ✅ CRIAR SERVIÇO E BUSCAR DADOS
+                    console.log('🔄 WEBSOCKET - Criando LNMarketsRobustService com credenciais...');
                     const lnMarketsService = new LNMarketsRobustService(credentials);
+                    
+                    console.log('🔄 WEBSOCKET - Buscando dados via getAllUserData...');
                     const userData = await lnMarketsService.getAllUserData();
+                    
+                    console.log('📊 WEBSOCKET - Dados recebidos:', {
+                      hasUser: !!userData.user,
+                      positionsCount: userData.positions?.length || 0,
+                      userBalance: userData.user?.balance || 'N/A',
+                      username: userData.user?.username || 'N/A'
+                    });
                     
                     // ✅ ENVIAR DADOS ATUALIZADOS
                     connection.send(JSON.stringify({
