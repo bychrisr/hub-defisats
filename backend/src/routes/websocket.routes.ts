@@ -38,9 +38,8 @@ export async function websocketRoutes(fastify: FastifyInstance) {
                   console.log('🔄 WEBSOCKET - Atualizando dados via LNMarketsRobustService...');
                   
                   try {
-                    // ✅ BUSCAR CREDENCIAIS (mesma lógica do endpoint dashboard)
-                    const { PrismaClient } = await import('@prisma/client');
-                    const prisma = new PrismaClient();
+                    // ✅ BUSCAR CREDENCIAIS (usar instância global do Prisma)
+                    const prisma = (req.server as any).prisma;
                     
                     const userProfile = await prisma.user.findUnique({
                       where: { id: userId },
