@@ -88,14 +88,14 @@ export default function Payment() {
   };
 
   const getPriceInSatoshis = (priceUSD: number) => {
-    // Use real BTC price from WebSocket or fallback to mock
-    const btcPrice = data.marketData?.BTC?.price || 50000; // Fallback to $50,000 if no data
+    // Use real BTC price from WebSocket or fallback to realistic price
+    const btcPrice = data.marketData?.BTC?.price || 65000; // Fallback to $65,000 (more realistic)
     const btcAmount = priceUSD / btcPrice;
     return Math.round(btcAmount * 100000000); // Convert to satoshis
   };
 
   const getCurrentBTCPrice = () => {
-    return data.marketData?.BTC?.price || 50000; // Fallback to $50,000 if no data
+    return data.marketData?.BTC?.price || 65000; // Fallback to $65,000 (more realistic)
   };
 
   const handleGenerateInvoice = async () => {
