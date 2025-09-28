@@ -33,52 +33,88 @@ export async function websocketRoutes(fastify: FastifyInstance) {
         const data = JSON.parse(message.toString());
         console.log('🔌 WEBSOCKET - Mensagem recebida:', data);
         
-        // ✅ HANDLE REFRESH DATA (integração com LNMarketsRobustService)
-        if (data.type === 'refresh_data') {
-          console.log('🔄 WEBSOCKET - Atualizando dados via LNMarketsRobustService...');
-          
-          try {
-            // Buscar credenciais do usuário
-            const authService = new AuthService();
-            const userCredentials = await authService.getUserCredentials(userId);
-            
-            if (!userCredentials) {
-              connection.send(JSON.stringify({
-                type: 'error',
-                message: 'User credentials not found',
-                timestamp: new Date().toISOString()
-              }));
-              return;
-            }
+                // ✅ HANDLE REFRESH DATA (integração com LNMarketsRobustService)
+                if (data.type === 'refresh_data') {
+                  console.log('🔄 WEBSOCKET - Atualizando dados via LNMarketsRobustService...');
+                  
+                  try {
+                    // ✅ BUSCAR CREDENCIAIS (mesma lógica do endpoint dashboard)
+                    const { PrismaClient } = await import('@prisma/client');
+                    const prisma = new PrismaClient();
+                    
+                    const userProfile = await prisma.user.findUnique({
+                      where: { id: userId },
+                      select: {
+                        ln_markets_api_key: true,
+                        ln_markets_api_secret: true,
+                        ln_markets_passphrase: true,
+                        email: true,
+                        username: true,
+                        plan_type: true,
+                      },
+                    });
 
-            // Criar instância do LNMarketsRobustService
-            const lnMarketsService = new LNMarketsRobustService(userCredentials);
-            
-            // Buscar dados atualizados
-            const userData = await lnMarketsService.getAllUserData();
-            
-            // Enviar dados atualizados
-            connection.send(JSON.stringify({
-              type: 'data_update',
-              data: userData,
-              timestamp: new Date().toISOString()
-            }));
-            
-            console.log('✅ WEBSOCKET - Dados atualizados enviados:', {
-              userId,
-              positionsCount: userData.positions.length,
-              hasUser: !!userData.user
-            });
-            
-          } catch (error) {
-            console.error('❌ WEBSOCKET - Erro ao buscar dados:', error);
-            connection.send(JSON.stringify({
-              type: 'error',
-              message: 'Failed to fetch data',
-              error: error.message,
-              timestamp: new Date().toISOString()
-            }));
-          }
+                    if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+                      connection.send(JSON.stringify({
+                        type: 'error',
+                        message: 'LN Markets credentials not configured',
+                        timestamp: new Date().toISOString()
+                      }));
+                      return;
+                    }
+
+                    // ✅ DESCRIPTOGRAFIA (mesma lógica do endpoint dashboard)
+                    const { AuthService } = await import('../services/auth.service');
+                    const authService = new AuthService(prisma, req.server);
+                    
+                    let credentials;
+                    
+                    // Detectar se credenciais estão criptografadas
+                    const isEncrypted = userProfile.ln_markets_api_key?.includes(':') && 
+                                       /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || '');
+                    
+                    if (isEncrypted) {
+                      console.log('🔐 WEBSOCKET - Credentials are encrypted, decrypting...');
+                      credentials = {
+                        apiKey: authService.decryptData(userProfile.ln_markets_api_key),
+                        apiSecret: authService.decryptData(userProfile.ln_markets_api_secret),
+                        passphrase: authService.decryptData(userProfile.ln_markets_passphrase),
+                      };
+                    } else {
+                      console.log('🔓 WEBSOCKET - Credentials are plain text');
+                      credentials = {
+                        apiKey: userProfile.ln_markets_api_key,
+                        apiSecret: userProfile.ln_markets_api_secret,
+                        passphrase: userProfile.ln_markets_passphrase,
+                      };
+                    }
+
+                    // ✅ CRIAR SERVIÇO E BUSCAR DADOS
+                    const lnMarketsService = new LNMarketsRobustService(credentials);
+                    const userData = await lnMarketsService.getAllUserData();
+                    
+                    // ✅ ENVIAR DADOS ATUALIZADOS
+                    connection.send(JSON.stringify({
+                      type: 'data_update',
+                      data: userData,
+                      timestamp: new Date().toISOString()
+                    }));
+                    
+                    console.log('✅ WEBSOCKET - Dados atualizados enviados:', {
+                      userId,
+                      positionsCount: userData.positions.length,
+                      hasUser: !!userData.user
+                    });
+                    
+                  } catch (error) {
+                    console.error('❌ WEBSOCKET - Erro ao buscar dados:', error);
+                    connection.send(JSON.stringify({
+                      type: 'error',
+                      message: 'Failed to fetch data',
+                      error: error.message,
+                      timestamp: new Date().toISOString()
+                    }));
+                  }
         } else {
           // ✅ ECHO BACK OTHER MESSAGES (como commit estável)
           connection.send(JSON.stringify({
