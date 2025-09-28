@@ -18,8 +18,10 @@ import {
   CheckCircle, 
   Zap,
   ArrowLeft,
-  ExternalLink
+  ExternalLink,
+  TrendingUp
 } from 'lucide-react';
+import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 
 interface PaymentData {
   planId: string;
@@ -35,6 +37,7 @@ type PaymentMethod = 'lightning' | 'lnmarkets';
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { data } = useRealtimeData();
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('lightning');
   const [lightningAddress, setLightningAddress] = useState('');
@@ -85,10 +88,14 @@ export default function Payment() {
   };
 
   const getPriceInSatoshis = (priceUSD: number) => {
-    // Mock BTC price: $50,000
-    const btcPrice = 50000;
+    // Use real BTC price from WebSocket or fallback to mock
+    const btcPrice = data.marketData?.BTC?.price || 50000; // Fallback to $50,000 if no data
     const btcAmount = priceUSD / btcPrice;
     return Math.round(btcAmount * 100000000); // Convert to satoshis
+  };
+
+  const getCurrentBTCPrice = () => {
+    return data.marketData?.BTC?.price || 50000; // Fallback to $50,000 if no data
   };
 
   const handleGenerateInvoice = async () => {
@@ -152,8 +159,6 @@ export default function Payment() {
   }
 
   const satoshis = getPriceInSatoshis(paymentData.price);
-  const btcPrice = 50000; // Mock BTC price
-  const satoshiPrice = paymentData.price / btcPrice;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -304,9 +309,37 @@ export default function Payment() {
                           <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-300">Rate:</span>
-                          <span className="text-slate-400">${btcPrice.toLocaleString()}/BTC</span>
+                          <span className="text-slate-300">BTC Rate:</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-slate-400">${getCurrentBTCPrice().toLocaleString()}/BTC</span>
+                            {data.marketData?.BTC?.price && (
+                              <TrendingUp className="h-4 w-4 text-green-400" />
+                            )}
+                          </div>
                         </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Rate per Sat:</span>
+                          <span className="text-slate-400">${(paymentData.price / satoshis).toFixed(8)}/sat</span>
+                        </div>
+                      </div>
+
+                      {/* Real-time Price Info */}
+                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <TrendingUp className="h-4 w-4 text-blue-400" />
+                          <span className="text-blue-200 font-medium">Real-time Bitcoin Price</span>
+                        </div>
+                        <p className="text-blue-200 text-sm">
+                          Current BTC price: <span className="font-bold">${getCurrentBTCPrice().toLocaleString()}</span>
+                          {data.marketData?.BTC?.price ? (
+                            <span className="text-green-400 ml-2">• Live data</span>
+                          ) : (
+                            <span className="text-orange-400 ml-2">• Using fallback price</span>
+                          )}
+                        </p>
+                        <p className="text-blue-200 text-xs mt-1">
+                          Your payment will be converted to <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> at current market rate.
+                        </p>
                       </div>
 
                       <Button
@@ -380,8 +413,17 @@ export default function Payment() {
                           <span className="text-white font-bold">${paymentData.price}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-300">Rate:</span>
-                          <span className="text-slate-400">${satoshiPrice.toFixed(8)}/sat</span>
+                          <span className="text-slate-300">BTC Rate:</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-slate-400">${getCurrentBTCPrice().toLocaleString()}/BTC</span>
+                            {data.marketData?.BTC?.price && (
+                              <TrendingUp className="h-4 w-4 text-green-400" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Rate per Sat:</span>
+                          <span className="text-slate-400">${(paymentData.price / satoshis).toFixed(8)}/sat</span>
                         </div>
                       </div>
 
@@ -445,9 +487,37 @@ export default function Payment() {
                       <span className="text-white font-bold">{satoshis.toLocaleString()} sats</span>
                     </div>
                     <div className="flex justify-between items-center">
+                      <span className="text-slate-300">BTC Rate:</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-slate-400">${getCurrentBTCPrice().toLocaleString()}/BTC</span>
+                        {data.marketData?.BTC?.price && (
+                          <TrendingUp className="h-4 w-4 text-green-400" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
                       <span className="text-slate-300">Fees:</span>
                       <span className="text-green-400 font-bold">No fees</span>
                     </div>
+                  </div>
+
+                  {/* Real-time Price Info for LNMarkets */}
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <TrendingUp className="h-4 w-4 text-green-400" />
+                      <span className="text-green-200 font-medium">Real-time Bitcoin Price</span>
+                    </div>
+                    <p className="text-green-200 text-sm">
+                      Current BTC price: <span className="font-bold">${getCurrentBTCPrice().toLocaleString()}</span>
+                      {data.marketData?.BTC?.price ? (
+                        <span className="text-green-400 ml-2">• Live data</span>
+                      ) : (
+                        <span className="text-orange-400 ml-2">• Using fallback price</span>
+                      )}
+                    </p>
+                    <p className="text-green-200 text-xs mt-1">
+                      Transfer amount: <span className="font-bold">{satoshis.toLocaleString()} satoshis</span> (no fees)
+                    </p>
                   </div>
 
                   <div className="space-y-4">
