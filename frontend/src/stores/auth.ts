@@ -250,7 +250,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             Promise.race([
               state.get().getProfile(),
               new Promise((_, reject) => setTimeout(() => reject(new Error('Token validation timeout')), 10000))
-            ]).catch((error) => {
+            ]).then(() => {
+              // ✅ Token validation successful
+              console.log('✅ onRehydrateStorage: Token validation successful');
+              state.set({ 
+                isLoading: false, 
+                isInitialized: true,
+                error: null
+              });
+            }).catch((error) => {
               console.log('❌ onRehydrateStorage: Token validation failed:', error.message);
               localStorage.removeItem('access_token');
               localStorage.removeItem('refresh_token');

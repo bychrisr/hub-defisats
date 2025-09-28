@@ -20,6 +20,7 @@ import { RouteGuard } from '@/components/guards/RouteGuard';
 import { AuthGuard } from '@/components/guards/AuthGuard';
 import { SecureRoute } from '@/components/guards/SecureRoute';
 import { ProtectedRouteWrapper } from '@/components/guards/ProtectedRouteWrapper';
+import { RobustAuthGuard } from '@/components/guards/RobustAuthGuard';
 import { SmartRedirect } from '@/components/guards/SmartRedirect';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
@@ -73,12 +74,21 @@ import TestRedirect from '@/pages/TestRedirect';
 
 const queryClient = new QueryClient();
 
-// Protected Route Component - Usa wrapper robusto de proteção
+// Protected Route Component - Usa guard robusto de autenticação
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ProtectedRouteWrapper fallbackRoute="/login">
+    <RobustAuthGuard fallbackRoute="/login">
       {children}
-    </ProtectedRouteWrapper>
+    </RobustAuthGuard>
+  );
+};
+
+// Admin Route Component - Usa guard robusto com verificação de admin
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <RobustAuthGuard fallbackRoute="/login" requireAdmin={true}>
+      {children}
+    </RobustAuthGuard>
   );
 };
 
@@ -106,14 +116,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Admin Route Component - Usa wrapper com verificação de admin
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <ProtectedRouteWrapper fallbackRoute="/login" requireAdmin={true}>
-      {children}
-    </ProtectedRouteWrapper>
-  );
-};
 
 // Componente interno para gerenciar título global (deve estar dentro do Router)
 const GlobalPageTitle = () => {
