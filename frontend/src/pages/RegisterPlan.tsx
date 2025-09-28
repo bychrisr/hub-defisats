@@ -300,7 +300,7 @@ const featureCategories: FeatureCategory[] = [
 export default function RegisterPlan() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedPlan, setSelectedPlan] = useState<string>('free');
+  const [selectedPlan, setSelectedPlan] = useState<string>('advanced');
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -601,8 +601,20 @@ export default function RegisterPlan() {
         </div>
 
 
+        {/* Disclaimer */}
+        <div className="text-center mt-12 mb-8">
+          <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 backdrop-blur-sm">
+            <p className="text-slate-300 text-sm font-medium">
+              💡 Pagamentos somente em satoshis (via Lightning Network)
+            </p>
+            <p className="text-slate-400 text-xs mt-1">
+              Todos os planos são cobrados em Bitcoin através da rede Lightning para máxima privacidade e eficiência.
+            </p>
+          </div>
+        </div>
+
         {/* Footer */}
-        <div className="text-center mt-16">
+        <div className="text-center mt-8">
           <p className="text-slate-400 text-sm">
             You can change your plan at any time in your account settings.
           </p>
