@@ -3,7 +3,7 @@
 > Índice gerado automaticamente de toda a documentação técnica do Hub DeFiSats
 
 **📅 Última Atualização**: 
-2025-09-24 13:19:38
+2025-09-28 01:15:00
 
 ## 📋 Visão Geral
 
@@ -131,6 +131,14 @@ Este índice é gerado automaticamente e lista todos os documentos disponíveis 
 - **💾 Tamanho**: 12K
 - **📅 Modificado**: /home/bychrisr/projects/hub-defisats/.system/docs/architecture/workers.md c67a54df077736d1 255 ef53 4096 4096 9062300 6146484 5678094 2321984 2084288
 2025-09-17
+
+### 📄 [🔌 Sistema WebSocket - Documentação Completa](architecture/websocket-system.md)
+> O sistema WebSocket do Hub DeFiSats implementa uma arquitetura híbrida robusta que combina WebSocket em tempo real com fallback HTTP inteligente, garantindo atualizações instantâneas dos dados de trading enquanto mantém alta disponibilidade e confiabilidade.
+
+- **📊 Linhas**: 800+
+- **💾 Tamanho**: 35K
+- **📅 Modificado**: /home/bychrisr/projects/hub-defisats/.system/docs/architecture/websocket-system.md
+2025-09-28
 
 ---
 
@@ -564,9 +572,9 @@ Este índice é gerado automaticamente e lista todos os documentos disponíveis 
 ## 📊 Estatísticas Gerais
 
 - **📁 Total de diretórios**: 15
-- **📄 Total de arquivos**: 64 documentos
-- **📊 Total de linhas**: 24797 linhas
-- **💾 Tamanho total**: 896K
+- **📄 Total de arquivos**: 65 documentos
+- **📊 Total de linhas**: 25597+ linhas
+- **💾 Tamanho total**: 931K+
 
 ## 🔍 Como Usar Este Índice
 
