@@ -102,18 +102,51 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }
   }, [isAuthenticated, user?.id, isAdmin]);
 
-  // WebSocket para atualizações em tempo real
+  // WebSocket para atualizações em tempo real (integrado com LNMarketsRobustService)
   const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;
   const { isConnected, sendMessage } = useWebSocket({
     url: wsUrl,
     onMessage: useCallback((message) => {
       console.log('📊 OPTIMIZED DASHBOARD - Mensagem WebSocket recebida:', message);
       
-      if (message.type === 'position_update' || message.type === 'balance_update') {
-        console.log('🔄 OPTIMIZED DASHBOARD - Atualizando dados via WebSocket...');
+      // ✅ HANDLE DATA UPDATE (dados reais da LN Markets)
+      if (message.type === 'data_update') {
+        console.log('🔄 OPTIMIZED DASHBOARD - Dados atualizados via WebSocket:', message.data);
+        
+        // Atualizar dados diretamente sem fazer nova requisição
+        setData(prev => ({
+          ...prev,
+          lnMarkets: message.data,
+          lastUpdate: Date.now(),
+          cacheHit: false // Dados frescos do WebSocket
+        }));
+        
+        console.log('✅ OPTIMIZED DASHBOARD - Dados atualizados com sucesso:', {
+          positionsCount: message.data.positions?.length || 0,
+          hasUser: !!message.data.user,
+          timestamp: new Date().toISOString()
+        });
+      }
+      // ✅ HANDLE CONNECTION ESTABLISHED
+      else if (message.type === 'connection') {
+        console.log('✅ OPTIMIZED DASHBOARD - Conexão WebSocket estabelecida');
+        
+        // Solicitar dados iniciais após conexão
+        setTimeout(() => {
+          console.log('🔄 OPTIMIZED DASHBOARD - Solicitando dados iniciais via WebSocket...');
+          sendMessage({
+            type: 'refresh_data',
+            userId: user?.id
+          });
+        }, 1000);
+      }
+      // ✅ HANDLE ERROR
+      else if (message.type === 'error') {
+        console.error('❌ OPTIMIZED DASHBOARD - Erro WebSocket:', message.message);
+        // Fallback para fetchDashboardData em caso de erro
         fetchDashboardData();
       }
-    }, [fetchDashboardData])
+    }, [fetchDashboardData, user?.id, sendMessage])
   });
 
   // ✅ FALLBACK CRÍTICO: Refresh periódico se WebSocket falhar
@@ -156,8 +189,19 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
   // Função para refresh manual
   const refresh = useCallback(async () => {
     console.log('🔄 OPTIMIZED DASHBOARD - Manual refresh triggered...');
-    await fetchDashboardData();
-  }, [fetchDashboardData]);
+    
+    // ✅ PRIORIDADE: Tentar WebSocket primeiro (mais rápido)
+    if (isConnected && sendMessage) {
+      console.log('🚀 OPTIMIZED DASHBOARD - Solicitando dados via WebSocket...');
+      sendMessage({
+        type: 'refresh_data',
+        userId: user?.id
+      });
+    } else {
+      console.log('🔄 OPTIMIZED DASHBOARD - WebSocket não disponível, usando fetch...');
+      await fetchDashboardData();
+    }
+  }, [fetchDashboardData, isConnected, sendMessage, user?.id]);
 
   return {
     data,
