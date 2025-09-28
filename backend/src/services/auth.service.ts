@@ -593,13 +593,19 @@ export class AuthService {
     return iv.toString('hex') + ':' + encrypted;
   }
 
+  // Cache da chave de descriptografia para evitar scryptSync custoso
+  private static decryptionKey: Buffer | null = null;
+
   /**
-   * Decrypt sensitive data
+   * Decrypt sensitive data - OTIMIZADO com cache de chave
    */
   public decryptData(encryptedData: string): string {
-    // const crypto = require('crypto');
     const algorithm = 'aes-256-cbc';
-    const key = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
+    
+    // Usar chave em cache ou criar uma vez
+    if (!AuthService.decryptionKey) {
+      AuthService.decryptionKey = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
+    }
 
     const parts = encryptedData.split(':');
     if (parts.length !== 2 || !parts[0] || !parts[1]) {
@@ -609,7 +615,7 @@ export class AuthService {
     const iv = Buffer.from(parts[0] as string, 'hex');
     const encrypted = parts[1] as string;
 
-    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    const decipher = crypto.createDecipheriv(algorithm, AuthService.decryptionKey, iv);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
 

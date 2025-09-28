@@ -220,32 +220,22 @@ export class LNMarketsRobustService {
     console.log('🚀 ROBUST SERVICE - Fetching all user data in parallel requests...');
     
     try {
-      // 🔧 CORREÇÃO: Buscar dados específicos em paralelo para garantir que posições running sejam retornadas
-      const [userData, balanceData, positionsData, marketData] = await Promise.allSettled([
+      // 🔧 OTIMIZAÇÃO: Buscar apenas dados essenciais para melhorar performance
+      const [userData, positionsData] = await Promise.allSettled([
         this.makeRequest({
           method: 'GET',
           path: getLNMarketsEndpoint('user')
         }),
         this.makeRequest({
           method: 'GET',
-          path: getLNMarketsEndpoint('userBalance')
-        }),
-        this.makeRequest({
-          method: 'GET',
           path: '/futures',
           params: { type: 'running' }
-        }),
-        this.makeRequest({
-          method: 'GET',
-          path: getLNMarketsEndpoint('futuresTicker')
         })
       ]);
 
       console.log('✅ ROBUST SERVICE - Data received:', {
         userData: userData.status,
-        balanceData: balanceData.status,
-        positionsData: positionsData.status,
-        marketData: marketData.status
+        positionsData: positionsData.status
       });
 
       // Debug específico para posições
@@ -263,9 +253,9 @@ export class LNMarketsRobustService {
       // Estruturar dados de forma escalável
       const structuredData: LNMarketsUserData = {
         user: userData.status === 'fulfilled' ? userData.value : null,
-        balance: balanceData.status === 'fulfilled' ? balanceData.value : null,
+        balance: null, // Removido para otimizar performance
         positions: positionsData.status === 'fulfilled' ? positionsData.value : [],
-        market: marketData.status === 'fulfilled' ? marketData.value : null,
+        market: null, // Removido para otimizar performance
         deposits: [],
         withdrawals: [],
         trades: [],
@@ -274,9 +264,7 @@ export class LNMarketsRobustService {
 
       console.log('📊 ROBUST SERVICE - Data structured successfully:', {
         user: !!structuredData.user,
-        balance: !!structuredData.balance,
-        positionsCount: structuredData.positions.length,
-        market: !!structuredData.market
+        positionsCount: structuredData.positions.length
       });
       
       return structuredData;
