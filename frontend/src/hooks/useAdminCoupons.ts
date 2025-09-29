@@ -65,24 +65,50 @@ export function useAdminCoupons(filters: CouponFilters = { search: '', status: '
   const fetchCoupons = async () => {
     try {
       console.log('🔄 ADMIN COUPONS - Starting fetchCoupons...');
+      console.log('🔍 ADMIN COUPONS - Current filters:', filters);
+      console.log('🔍 ADMIN COUPONS - Current state:', { loading: true, error: null });
+      
       setState(prev => ({ ...prev, loading: true, error: null }));
 
+      // Debug: Check token before request
+      const token = localStorage.getItem('access_token');
+      console.log('🔑 ADMIN COUPONS - Token exists:', !!token);
+      console.log('🔑 ADMIN COUPONS - Token preview:', token ? token.substring(0, 20) + '...' : 'null');
+      
+      // Debug: Check API base URL
+      console.log('🌐 ADMIN COUPONS - API base URL:', api.defaults.baseURL);
+      console.log('🌐 ADMIN COUPONS - Full URL will be:', `${api.defaults.baseURL}/api/admin/coupons`);
+
+      const requestParams = {
+        search: filters.search || undefined,
+        status: filters.status !== 'all' ? filters.status : undefined,
+        plan_type: filters.plan_type !== 'all' ? filters.plan_type : undefined,
+      };
+      
+      console.log('📤 ADMIN COUPONS - Request params:', requestParams);
+      console.log('📤 ADMIN COUPONS - Making GET request to /api/admin/coupons...');
+
       const response = await api.get('/api/admin/coupons', {
-        params: {
-          search: filters.search || undefined,
-          status: filters.status !== 'all' ? filters.status : undefined,
-          plan_type: filters.plan_type !== 'all' ? filters.plan_type : undefined,
-        }
+        params: requestParams
       });
 
-      console.log('✅ ADMIN COUPONS - Data received:', response.data);
+      console.log('✅ ADMIN COUPONS - Response received!');
+      console.log('📊 ADMIN COUPONS - Response status:', response.status);
+      console.log('📊 ADMIN COUPONS - Response headers:', response.headers);
+      console.log('📊 ADMIN COUPONS - Response data:', response.data);
+      console.log('📊 ADMIN COUPONS - Response data type:', typeof response.data);
+      console.log('📊 ADMIN COUPONS - Response data keys:', response.data ? Object.keys(response.data) : 'null');
 
       // Validate response structure
       if (!response.data || typeof response.data !== 'object') {
+        console.error('❌ ADMIN COUPONS - Invalid response structure:', response.data);
         throw new Error('Invalid response structure from server');
       }
 
       const couponsData = response.data.data || response.data || [];
+      console.log('🔍 ADMIN COUPONS - Extracted coupons data:', couponsData);
+      console.log('🔍 ADMIN COUPONS - Coupons data type:', typeof couponsData);
+      console.log('🔍 ADMIN COUPONS - Is coupons data array?', Array.isArray(couponsData));
       
       // Ensure couponsData is an array
       if (!Array.isArray(couponsData)) {
@@ -90,6 +116,7 @@ export function useAdminCoupons(filters: CouponFilters = { search: '', status: '
         throw new Error('Expected array of coupons from server');
       }
 
+      console.log('✅ ADMIN COUPONS - Setting state with coupons:', couponsData.length, 'items');
       setState(prev => ({
         ...prev,
         coupons: couponsData,
@@ -97,9 +124,23 @@ export function useAdminCoupons(filters: CouponFilters = { search: '', status: '
         error: null,
         lastUpdated: new Date()
       }));
+      
+      console.log('✅ ADMIN COUPONS - fetchCoupons completed successfully');
     } catch (error) {
-      console.error('❌ ADMIN COUPONS - Error:', error);
+      console.error('❌ ADMIN COUPONS - Error in fetchCoupons:', error);
+      console.error('❌ ADMIN COUPONS - Error type:', typeof error);
+      console.error('❌ ADMIN COUPONS - Error message:', error.message);
+      console.error('❌ ADMIN COUPONS - Error stack:', error.stack);
+      
+      if (error.response) {
+        console.error('❌ ADMIN COUPONS - Error response status:', error.response.status);
+        console.error('❌ ADMIN COUPONS - Error response data:', error.response.data);
+        console.error('❌ ADMIN COUPONS - Error response headers:', error.response.headers);
+      }
+      
       const errorMessage = handleApiError(error);
+      console.log('🔍 ADMIN COUPONS - Handled error message:', errorMessage);
+      
       setState(prev => ({
         ...prev,
         loading: false,
@@ -110,23 +151,85 @@ export function useAdminCoupons(filters: CouponFilters = { search: '', status: '
 
   const createCoupon = async (couponData: CreateCouponData): Promise<Coupon> => {
     try {
-      console.log('🔄 ADMIN COUPONS - Creating coupon:', couponData);
+      console.log('🔄 ADMIN COUPONS - Starting createCoupon...');
+      console.log('📤 ADMIN COUPONS - Coupon data to create:', couponData);
+      console.log('📤 ADMIN COUPONS - Coupon data type:', typeof couponData);
+      console.log('📤 ADMIN COUPONS - Coupon data keys:', Object.keys(couponData));
       
       // Debug: Check if we have a token
       const token = localStorage.getItem('access_token');
       console.log('🔑 ADMIN COUPONS - Token exists:', !!token);
       console.log('🔑 ADMIN COUPONS - Token preview:', token ? token.substring(0, 20) + '...' : 'null');
       
+      // Debug: Check API base URL
+      console.log('🌐 ADMIN COUPONS - API base URL:', api.defaults.baseURL);
+      console.log('🌐 ADMIN COUPONS - Full URL will be:', `${api.defaults.baseURL}/api/admin/coupons`);
+      
+      // Debug: Check current state before request
+      console.log('🔍 ADMIN COUPONS - Current state before create:', state);
+      
+      console.log('📤 ADMIN COUPONS - Making POST request to /api/admin/coupons...');
+      console.log('📤 ADMIN COUPONS - Request payload:', JSON.stringify(couponData, null, 2));
+      
       const response = await api.post('/api/admin/coupons', couponData);
       
-      console.log('✅ ADMIN COUPONS - Coupon created:', response.data);
+      console.log('✅ ADMIN COUPONS - Create response received!');
+      console.log('📊 ADMIN COUPONS - Response status:', response.status);
+      console.log('📊 ADMIN COUPONS - Response headers:', response.headers);
+      console.log('📊 ADMIN COUPONS - Response data:', response.data);
+      console.log('📊 ADMIN COUPONS - Response data type:', typeof response.data);
+      console.log('📊 ADMIN COUPONS - Response data keys:', response.data ? Object.keys(response.data) : 'null');
       
-      // Refresh the list
-      await fetchCoupons();
+      // Validate response structure
+      if (!response.data || typeof response.data !== 'object') {
+        console.error('❌ ADMIN COUPONS - Invalid create response structure:', response.data);
+        throw new Error('Invalid response structure from server');
+      }
       
-      return response.data.data;
+      const createdCoupon = response.data.data;
+      console.log('🔍 ADMIN COUPONS - Created coupon:', createdCoupon);
+      console.log('🔍 ADMIN COUPONS - Created coupon type:', typeof createdCoupon);
+      
+      if (!createdCoupon) {
+        console.error('❌ ADMIN COUPONS - No coupon data in response:', response.data);
+        throw new Error('No coupon data in response');
+      }
+      
+      // Add the new coupon to the current list instead of refetching
+      console.log('🔄 ADMIN COUPONS - Adding coupon to current list...');
+      console.log('🔍 ADMIN COUPONS - Current coupons count:', state.coupons?.length || 0);
+      
+      setState(prev => {
+        const newCoupons = [...(prev.coupons || []), createdCoupon];
+        console.log('✅ ADMIN COUPONS - New coupons list:', newCoupons.length, 'items');
+        console.log('✅ ADMIN COUPONS - New coupons:', newCoupons);
+        
+        return {
+          ...prev,
+          coupons: newCoupons,
+          lastUpdated: new Date()
+        };
+      });
+      
+      console.log('✅ ADMIN COUPONS - createCoupon completed successfully');
+      return createdCoupon;
     } catch (error) {
-      console.error('❌ ADMIN COUPONS - Error creating coupon:', error);
+      console.error('❌ ADMIN COUPONS - Error in createCoupon:', error);
+      console.error('❌ ADMIN COUPONS - Error type:', typeof error);
+      console.error('❌ ADMIN COUPONS - Error message:', error.message);
+      console.error('❌ ADMIN COUPONS - Error stack:', error.stack);
+      
+      if (error.response) {
+        console.error('❌ ADMIN COUPONS - Error response status:', error.response.status);
+        console.error('❌ ADMIN COUPONS - Error response data:', error.response.data);
+        console.error('❌ ADMIN COUPONS - Error response headers:', error.response.headers);
+      }
+      
+      if (error.request) {
+        console.error('❌ ADMIN COUPONS - Error request:', error.request);
+      }
+      
+      console.error('❌ ADMIN COUPONS - Full error object:', error);
       throw error;
     }
   };

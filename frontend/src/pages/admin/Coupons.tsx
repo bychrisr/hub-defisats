@@ -90,13 +90,49 @@ export default function Coupons() {
 
   const handleCreateCoupon = async () => {
     try {
-      await createCoupon(formData);
+      console.log('🔄 COUPONS COMPONENT - Starting handleCreateCoupon...');
+      console.log('📤 COUPONS COMPONENT - Form data:', formData);
+      console.log('📤 COUPONS COMPONENT - Form data type:', typeof formData);
+      console.log('📤 COUPONS COMPONENT - Form data keys:', Object.keys(formData));
+      console.log('📤 COUPONS COMPONENT - Form data JSON:', JSON.stringify(formData, null, 2));
+      
+      // Validate form data before sending
+      if (!formData.code || !formData.plan_type) {
+        console.error('❌ COUPONS COMPONENT - Invalid form data:', formData);
+        toast.error('Please fill in all required fields');
+        return;
+      }
+      
+      console.log('🔄 COUPONS COMPONENT - Calling createCoupon hook...');
+      const createdCoupon = await createCoupon(formData);
+      
+      console.log('✅ COUPONS COMPONENT - Coupon created successfully:', createdCoupon);
       toast.success('Coupon created successfully!');
       setCreateDialogOpen(false);
       resetForm();
+      
+      console.log('✅ COUPONS COMPONENT - handleCreateCoupon completed successfully');
     } catch (error: any) {
-      console.error('Error creating coupon:', error);
-      toast.error(error.response?.data?.message || 'Error creating coupon');
+      console.error('❌ COUPONS COMPONENT - Error in handleCreateCoupon:', error);
+      console.error('❌ COUPONS COMPONENT - Error type:', typeof error);
+      console.error('❌ COUPONS COMPONENT - Error message:', error.message);
+      console.error('❌ COUPONS COMPONENT - Error stack:', error.stack);
+      
+      if (error.response) {
+        console.error('❌ COUPONS COMPONENT - Error response status:', error.response.status);
+        console.error('❌ COUPONS COMPONENT - Error response data:', error.response.data);
+        console.error('❌ COUPONS COMPONENT - Error response headers:', error.response.headers);
+      }
+      
+      if (error.request) {
+        console.error('❌ COUPONS COMPONENT - Error request:', error.request);
+      }
+      
+      console.error('❌ COUPONS COMPONENT - Full error object:', error);
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Error creating coupon';
+      console.log('🔍 COUPONS COMPONENT - Error message to show:', errorMessage);
+      toast.error(errorMessage);
     }
   };
 

@@ -27,6 +27,7 @@ api.interceptors.request.use(
     const token = localStorage.getItem('access_token');
     console.log('🔑 Token from localStorage:', token ? 'EXISTS' : 'MISSING');
     console.log('🔑 Token value:', token ? '[REDACTED]' : 'null');
+    console.log('🔑 Token preview:', token ? token.substring(0, 20) + '...' : 'null');
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -35,10 +36,23 @@ api.interceptors.request.use(
     } else {
       console.log('❌ No token found in localStorage');
     }
+    
+    // Special logging for coupon requests
+    if (config.url?.includes('/admin/coupons')) {
+      console.log('🎫 COUPON REQUEST - Special logging for coupon endpoint');
+      console.log('🎫 COUPON REQUEST - Method:', config.method);
+      console.log('🎫 COUPON REQUEST - URL:', config.url);
+      console.log('🎫 COUPON REQUEST - Data:', config.data);
+      console.log('🎫 COUPON REQUEST - Headers:', config.headers);
+    }
+    
     return config;
   },
   error => {
     console.log('❌ AXIOS REQUEST INTERCEPTOR - Error:', error);
+    console.log('❌ AXIOS REQUEST INTERCEPTOR - Error type:', typeof error);
+    console.log('❌ AXIOS REQUEST INTERCEPTOR - Error message:', error.message);
+    console.log('❌ AXIOS REQUEST INTERCEPTOR - Error stack:', error.stack);
     return Promise.reject(error);
   }
 );
@@ -52,8 +66,18 @@ api.interceptors.response.use(
       statusText: response.statusText,
       url: response.config.url,
       data: response.data,
+      headers: response.headers,
       timestamp: new Date().toISOString()
     });
+    
+    // Special logging for coupon responses
+    if (response.config.url?.includes('/admin/coupons')) {
+      console.log('🎫 COUPON RESPONSE - Special logging for coupon endpoint');
+      console.log('🎫 COUPON RESPONSE - Status:', response.status);
+      console.log('🎫 COUPON RESPONSE - Data:', response.data);
+      console.log('🎫 COUPON RESPONSE - Headers:', response.headers);
+    }
+    
     return response;
   },
   async error => {
@@ -66,6 +90,15 @@ api.interceptors.response.use(
       message: error.message,
       timestamp: new Date().toISOString()
     });
+    
+    // Special logging for coupon errors
+    if (error.config?.url?.includes('/admin/coupons')) {
+      console.log('🎫 COUPON ERROR - Special logging for coupon endpoint');
+      console.log('🎫 COUPON ERROR - Status:', error.response?.status);
+      console.log('🎫 COUPON ERROR - Data:', error.response?.data);
+      console.log('🎫 COUPON ERROR - Headers:', error.response?.headers);
+      console.log('🎫 COUPON ERROR - Request config:', error.config);
+    }
     
     const originalRequest = error.config;
 
