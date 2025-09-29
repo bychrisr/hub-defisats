@@ -12,6 +12,7 @@ const PersonalDataSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirmPassword: z.string(),
   couponCode: z.string().optional(),
+  consent: z.boolean().optional().default(false),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -49,6 +50,7 @@ export class RegistrationService {
   async savePersonalData(data: z.infer<typeof PersonalDataSchema>, ipAddress?: string) {
     try {
       console.log('📝 REGISTRATION - Saving personal data for:', data.email);
+      console.log('📝 REGISTRATION - Consent value:', data.consent, typeof data.consent);
 
       // Check if user already exists
       const existingUser = await this.prisma.user.findFirst({
@@ -76,7 +78,11 @@ export class RegistrationService {
         data: {
           email: data.email,
           username: data.username,
+          first_name: data.firstName,
+          last_name: data.lastName,
           password_hash: hashedPassword,
+          email_marketing_consent: data.consent || false,
+          email_marketing_consent_at: data.consent ? new Date() : null,
           plan_type: 'free', // Default plan
           is_active: false, // Will be activated after payment
         }

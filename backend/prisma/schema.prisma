@@ -12,6 +12,8 @@ model User {
   id                         String               @id @default(dbgenerated("(gen_random_uuid())::text"))
   email                      String               @unique
   username                   String               @unique
+  first_name                 String?              // Campo separado para nome
+  last_name                  String?              // Campo separado para sobrenome
   password_hash              String?
   social_provider            String?
   social_id                  String?
@@ -43,6 +45,10 @@ model User {
   website                    String?              @db.VarChar(255)
   risk_limits                Json?
   risk_profile               String?              @default("moderate") @db.VarChar(50)
+  // Campos para email marketing
+  email_marketing_consent    Boolean?             @default(false) // Consentimento para email marketing
+  email_marketing_consent_at DateTime?            @db.Timestamp(6) // Data do consentimento
+  marketing_preferences       Json?                // Preferências de marketing (JSON)
   admin_user                 AdminUser?
   automations                Automation[]
   backtest_reports           BacktestReport[]

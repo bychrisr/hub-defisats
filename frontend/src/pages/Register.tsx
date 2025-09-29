@@ -121,6 +121,7 @@ export default function Register() {
         password: data.password,
         confirmPassword: data.confirmPassword,
         couponCode: data.coupon_code || undefined,
+        consent: data.consent,
       };
 
       console.log('🚀 Personal data being sent:', {
@@ -371,7 +372,7 @@ export default function Register() {
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     id="consent"
-                    {...register('consent')}
+                    {...register('consent', { value: false })}
                     className="mt-1"
                   />
                   <div className="space-y-1">

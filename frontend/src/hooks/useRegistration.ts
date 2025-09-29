@@ -11,6 +11,7 @@ export interface RegistrationData {
   password: string;
   confirmPassword: string;
   couponCode?: string;
+  consent?: boolean;
   
   // Step 2: Plan Selection
   planId?: 'free' | 'basic' | 'advanced' | 'pro' | 'lifetime';
