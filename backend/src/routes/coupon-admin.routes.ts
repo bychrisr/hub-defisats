@@ -261,7 +261,7 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
         required: ['code', 'plan_type', 'value_type', 'value_amount', 'time_type'],
         properties: {
           code: { type: 'string', minLength: 3, maxLength: 50 },
-          plan_type: { type: 'string', enum: ['free', 'basic', 'advanced', 'pro', 'lifetime'] },
+          plan_type: { type: 'string', enum: ['basic', 'advanced', 'pro', 'lifetime'] },
           usage_limit: { type: 'number', minimum: 1, maximum: 1000 },
           expires_at: { type: 'string', format: 'date-time' },
           value_type: { type: 'string', enum: ['fixed', 'percentage'] },
@@ -365,7 +365,7 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
         type: 'object',
         properties: {
           code: { type: 'string', minLength: 3, maxLength: 50 },
-          plan_type: { type: 'string', enum: ['free', 'basic', 'advanced', 'pro', 'lifetime'] },
+          plan_type: { type: 'string', enum: ['basic', 'advanced', 'pro', 'lifetime'] },
           usage_limit: { type: 'number', minimum: 1, maximum: 1000 },
           expires_at: { type: 'string', format: 'date-time' },
           value_type: { type: 'string', enum: ['fixed', 'percentage'] },
