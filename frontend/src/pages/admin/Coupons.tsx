@@ -305,7 +305,12 @@ export default function Coupons() {
                       Refresh
                     </Button>
                     <Button
-                      onClick={() => setCreateDialogOpen(true)}
+                      onClick={() => {
+                        console.log('🔄 COUPONS COMPONENT - Novo Cupom button clicked!');
+                        console.log('🔄 COUPONS COMPONENT - Opening create dialog...');
+                        setCreateDialogOpen(true);
+                        console.log('🔄 COUPONS COMPONENT - Create dialog should be open now');
+                      }}
                       className="backdrop-blur-sm bg-green-600/90 hover:bg-green-600 text-white shadow-lg shadow-green-600/25"
                     >
                       <Plus className="h-4 w-4 mr-2" />
