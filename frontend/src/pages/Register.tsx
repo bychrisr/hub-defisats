@@ -64,6 +64,7 @@ export default function Register() {
     formState: { errors },
     watch,
     setError,
+    setValue,
   } = useForm<PersonalDataForm>({
     resolver: zodResolver(personalDataSchema),
   });
@@ -374,7 +375,10 @@ export default function Register() {
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     id="emailMarketingConsent"
-                    {...register('emailMarketingConsent', { value: false })}
+                    checked={watch('emailMarketingConsent') || false}
+                    onCheckedChange={(checked) => {
+                      setValue('emailMarketingConsent', checked === true);
+                    }}
                     className="mt-1"
                   />
                   <div className="space-y-1">
@@ -396,7 +400,10 @@ export default function Register() {
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     id="termsConsent"
-                    {...register('termsConsent', { value: false })}
+                    checked={watch('termsConsent') || false}
+                    onCheckedChange={(checked) => {
+                      setValue('termsConsent', checked === true);
+                    }}
                     className="mt-1"
                   />
                   <div className="space-y-1">
