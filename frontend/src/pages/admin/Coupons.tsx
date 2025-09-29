@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,195 +39,127 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-interface Coupon {
-  id: string;
-  code: string;
-  plan_type: 'free' | 'basic' | 'advanced' | 'pro' | 'lifetime';
-  usage_limit: number;
-  used_count: number;
-  expires_at: string | null;
-  created_at: string;
-  updated_at: string;
-  value_type: 'fixed' | 'percentage';
-  value_amount: number;
-  time_type: 'fixed' | 'lifetime';
-  time_days?: number;
-  is_active: boolean;
-  description?: string;
-  created_by?: string;
-  total_revenue_saved: number;
-  new_users_count: number;
-  conversion_rate: number;
-  usage_history: Array<{
-    used_at: string;
-    user_email: string;
-  }>;
-}
+import { useAdminCoupons, type Coupon, type CreateCouponData, type CouponFilters } from '@/hooks/useAdminCoupons';
 
 export default function Coupons() {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<CouponFilters>({
     search: '',
     status: 'all',
     plan_type: 'all'
   });
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateCouponData>({
     code: '',
-    plan_type: 'basic' as const,
-    value_type: 'percentage' as const,
+    plan_type: 'basic',
+    value_type: 'percentage',
     value_amount: 0,
-    time_type: 'fixed' as const,
+    time_type: 'fixed',
     time_days: 30,
     usage_limit: 100,
     description: '',
     is_active: true
   });
 
-  useEffect(() => {
-    fetchCoupons();
-  }, [filters]);
+  const { 
+    coupons, 
+    loading, 
+    error, 
+    createCoupon, 
+    updateCoupon, 
+    deleteCoupon, 
+    refresh 
+  } = useAdminCoupons(filters);
 
-  const fetchCoupons = async () => {
-    setRefreshing(true);
-    try {
-      // Simular dados de cupons
-      const mockCoupons: Coupon[] = [
-        {
-          id: '1',
-          code: 'WELCOME20',
-          plan_type: 'basic',
-          usage_limit: 100,
-          used_count: 45,
-          expires_at: '2024-12-31T23:59:59Z',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-          value_type: 'percentage',
-          value_amount: 20,
-          time_type: 'fixed',
-          time_days: 30,
-          is_active: true,
-          description: 'Desconto de boas-vindas para novos usuários',
-          created_by: 'admin@defisats.com',
-          total_revenue_saved: 45000,
-          new_users_count: 45,
-          conversion_rate: 0.75,
-          usage_history: []
-        },
-        {
-          id: '2',
-          code: 'PRO50',
-          plan_type: 'pro',
-          usage_limit: 50,
-          used_count: 12,
-          expires_at: '2024-06-30T23:59:59Z',
-          created_at: '2024-01-15T00:00:00Z',
-          updated_at: '2024-01-15T00:00:00Z',
-          value_type: 'percentage',
-          value_amount: 50,
-          time_type: 'lifetime',
-          is_active: true,
-          description: 'Desconto especial para plano Pro',
-          created_by: 'admin@defisats.com',
-          total_revenue_saved: 300000,
-          new_users_count: 12,
-          conversion_rate: 0.85,
-          usage_history: []
-        },
-        {
-          id: '3',
-          code: 'LIFETIME1000',
-          plan_type: 'lifetime',
-          usage_limit: 10,
-          used_count: 3,
-          expires_at: null,
-          created_at: '2024-02-01T00:00:00Z',
-          updated_at: '2024-02-01T00:00:00Z',
-          value_type: 'fixed',
-          value_amount: 100000,
-          time_type: 'lifetime',
-          is_active: false,
-          description: 'Desconto fixo para plano Lifetime',
-          created_by: 'admin@defisats.com',
-          total_revenue_saved: 300000,
-          new_users_count: 3,
-          conversion_rate: 0.90,
-          usage_history: []
-        }
-      ];
-
-      setTimeout(() => {
-        setCoupons(mockCoupons);
-        setLoading(false);
-        setRefreshing(false);
-        toast.success('Cupons carregados com sucesso!');
-      }, 1000);
-    } catch (error) {
-      console.error('Error fetching coupons:', error);
-      setLoading(false);
-      setRefreshing(false);
-      toast.error('Erro ao carregar cupons');
-    }
+  const resetForm = () => {
+    setFormData({
+      code: '',
+      plan_type: 'basic',
+      value_type: 'percentage',
+      value_amount: 0,
+      time_type: 'fixed',
+      time_days: 30,
+      usage_limit: 100,
+      description: '',
+      is_active: true
+    });
   };
 
   const handleCreateCoupon = async () => {
     try {
-      // Simular criação
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Cupom criado com sucesso!');
+      await createCoupon(formData);
+      toast.success('Coupon created successfully!');
       setCreateDialogOpen(false);
-      fetchCoupons();
-    } catch (error) {
-      toast.error('Erro ao criar cupom');
+      resetForm();
+    } catch (error: any) {
+      console.error('Error creating coupon:', error);
+      toast.error(error.response?.data?.message || 'Error creating coupon');
     }
   };
 
   const handleEditCoupon = async () => {
+    if (!selectedCoupon) return;
+    
     try {
-      // Simular edição
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Cupom atualizado com sucesso!');
+      await updateCoupon(selectedCoupon.id, formData);
+      toast.success('Coupon updated successfully!');
       setEditDialogOpen(false);
-      fetchCoupons();
-    } catch (error) {
-      toast.error('Erro ao atualizar cupom');
+      resetForm();
+    } catch (error: any) {
+      console.error('Error updating coupon:', error);
+      toast.error(error.response?.data?.message || 'Error updating coupon');
     }
   };
 
   const handleDeleteCoupon = async () => {
+    if (!selectedCoupon) return;
+    
     try {
-      // Simular exclusão
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Cupom excluído com sucesso!');
+      await deleteCoupon(selectedCoupon.id);
+      toast.success('Coupon deleted successfully!');
       setDeleteDialogOpen(false);
-      fetchCoupons();
-    } catch (error) {
-      toast.error('Erro ao excluir cupom');
+    } catch (error: any) {
+      console.error('Error deleting coupon:', error);
+      toast.error(error.response?.data?.message || 'Error deleting coupon');
     }
+  };
+
+  const openEditDialog = (coupon: Coupon) => {
+    setSelectedCoupon(coupon);
+    setFormData({
+      code: coupon.code,
+      plan_type: coupon.plan_type,
+      value_type: coupon.value_type,
+      value_amount: coupon.value_amount,
+      time_type: coupon.time_type,
+      time_days: coupon.time_days || 30,
+      usage_limit: coupon.usage_limit || 100,
+      description: coupon.description || '',
+      is_active: coupon.is_active
+    });
+    setEditDialogOpen(true);
+  };
+
+  const openDeleteDialog = (coupon: Coupon) => {
+    setSelectedCoupon(coupon);
+    setDeleteDialogOpen(true);
   };
 
   const handleToggleStatus = async (coupon: Coupon) => {
     try {
-      // Simular toggle
-      await new Promise(resolve => setTimeout(resolve, 500));
-      toast.success(`Cupom ${coupon.is_active ? 'desativado' : 'ativado'} com sucesso!`);
-      fetchCoupons();
-    } catch (error) {
-      toast.error('Erro ao alterar status do cupom');
+      await updateCoupon(coupon.id, { is_active: !coupon.is_active });
+      toast.success(`Coupon ${coupon.is_active ? 'deactivated' : 'activated'} successfully!`);
+    } catch (error: any) {
+      console.error('Error toggling coupon status:', error);
+      toast.error(error.response?.data?.message || 'Error updating coupon status');
     }
   };
 
   const getPlanIcon = (planType: string) => {
     switch (planType) {
-      case 'free':
-        return <Gift className="h-4 w-4" />;
       case 'basic':
         return <Zap className="h-4 w-4" />;
       case 'advanced':
@@ -243,8 +175,6 @@ export default function Coupons() {
 
   const getPlanColor = (planType: string) => {
     switch (planType) {
-      case 'free':
-        return 'bg-gray-500 text-white hover:bg-gray-600 shadow-lg shadow-gray-500/25';
       case 'basic':
         return 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/25';
       case 'advanced':
@@ -429,7 +359,6 @@ export default function Coupons() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="free">Free</SelectItem>
                     <SelectItem value="basic">Basic</SelectItem>
                     <SelectItem value="advanced">Advanced</SelectItem>
                     <SelectItem value="pro">Pro</SelectItem>
@@ -647,7 +576,6 @@ export default function Coupons() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="free">Free</SelectItem>
                     <SelectItem value="basic">Basic</SelectItem>
                     <SelectItem value="advanced">Advanced</SelectItem>
                     <SelectItem value="pro">Pro</SelectItem>
