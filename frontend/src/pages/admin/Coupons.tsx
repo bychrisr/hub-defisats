@@ -56,7 +56,7 @@ export default function Coupons() {
     code: '',
     plan_type: 'basic',
     value_type: 'percentage',
-    value_amount: 0,
+    value_amount: 10, // ✅ CORREÇÃO: Valor mínimo válido
     time_type: 'fixed',
     time_days: 30,
     usage_limit: 100,
@@ -79,7 +79,7 @@ export default function Coupons() {
       code: '',
       plan_type: 'basic',
       value_type: 'percentage',
-      value_amount: 0,
+      value_amount: 10, // ✅ CORREÇÃO: Valor mínimo válido
       time_type: 'fixed',
       time_days: 30,
       usage_limit: 100,
