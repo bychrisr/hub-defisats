@@ -156,7 +156,8 @@ export const registrationAPI = {
     password: string;
     confirmPassword: string;
     couponCode?: string;
-    consent?: boolean;
+    emailMarketingConsent?: boolean;
+    termsConsent?: boolean;
   }) => api.post('/api/registration/personal-data', data),
 
   // Step 2: Select plan

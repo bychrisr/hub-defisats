@@ -30,7 +30,8 @@ const personalDataSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirmPassword: z.string().min(8, 'Please confirm your password'),
   coupon_code: z.string().optional(),
-  consent: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
+  emailMarketingConsent: z.boolean().optional().default(false),
+  termsConsent: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -121,7 +122,8 @@ export default function Register() {
         password: data.password,
         confirmPassword: data.confirmPassword,
         couponCode: data.coupon_code || undefined,
-        consent: data.consent,
+        emailMarketingConsent: data.emailMarketingConsent,
+        termsConsent: data.termsConsent,
       };
 
       console.log('🚀 Personal data being sent:', {
@@ -367,24 +369,43 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Consent Checkbox */}
+              {/* Email Marketing Consent Checkbox */}
               <div className="space-y-3">
                 <div className="flex items-start space-x-3">
                   <Checkbox
-                    id="consent"
-                    {...register('consent', { value: false })}
+                    id="emailMarketingConsent"
+                    {...register('emailMarketingConsent', { value: false })}
                     className="mt-1"
                   />
                   <div className="space-y-1">
-                    <Label htmlFor="consent" className="text-slate-200 text-sm">
+                    <Label htmlFor="emailMarketingConsent" className="text-slate-200 text-sm">
                       I authorize Axisor Bot to contact me by email about products, services, or events.
                     </Label>
                     <p className="text-xs text-slate-400">
-                      By clicking Continue, you accept our{' '}
+                      This is optional and you can unsubscribe at any time.
+                    </p>
+                  </div>
+                </div>
+                {errors.emailMarketingConsent && (
+                  <p className="text-sm text-red-400">{errors.emailMarketingConsent.message}</p>
+                )}
+              </div>
+
+              {/* Terms and Conditions Consent Checkbox */}
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="termsConsent"
+                    {...register('termsConsent', { value: false })}
+                    className="mt-1"
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="termsConsent" className="text-slate-200 text-sm">
+                      I accept the{' '}
                       <Link to="/terms" className="text-blue-400 hover:text-blue-300">
                         Terms of Use
                       </Link>
-                      {' '}and acknowledge our{' '}
+                      {' '}and acknowledge the{' '}
                       <Link to="/privacy" className="text-blue-400 hover:text-blue-300">
                         Privacy Policy
                       </Link>
@@ -392,12 +413,14 @@ export default function Register() {
                       <Link to="/cookies" className="text-blue-400 hover:text-blue-300">
                         Cookie Policy
                       </Link>
-                      .
+                    </Label>
+                    <p className="text-xs text-slate-400">
+                      You must accept the terms and conditions to continue.
                     </p>
                   </div>
                 </div>
-                {errors.consent && (
-                  <p className="text-sm text-red-400">{errors.consent.message}</p>
+                {errors.termsConsent && (
+                  <p className="text-sm text-red-400">{errors.termsConsent.message}</p>
                 )}
               </div>
 
