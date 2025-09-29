@@ -244,12 +244,12 @@ export default function Coupons() {
                   </div>
                   <div className="flex items-center space-x-4">
                     <Button
-                      onClick={fetchCoupons}
-                      disabled={refreshing}
+                      onClick={refresh}
+                      disabled={loading}
                       className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
                       size="sm"
                     >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                      <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                       Refresh
                     </Button>
                     <Button
