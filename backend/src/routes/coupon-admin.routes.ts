@@ -337,7 +337,7 @@ export async function couponAdminRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({
           success: false,
           error: 'VALIDATION_ERROR',
-          message: error.errors.map((e: any) => e.message).join(', ')
+          message: error.errors?.map((e: any) => e.message).join(', ') || 'Validation error'
         });
       }
       

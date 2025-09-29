@@ -12,65 +12,103 @@ export class CouponService {
    * Create a new coupon
    */
   async createCoupon(data: CreateCouponRequest, createdBy?: string): Promise<CouponResponse> {
-    const { 
-      code, 
-      plan_type, 
-      usage_limit, 
-      expires_at,
-      value_type,
-      value_amount,
-      time_type,
-      time_days,
-      description,
-      is_active = true
-    } = data as { 
-      code: string; 
-      plan_type: string; 
-      usage_limit?: number; 
-      expires_at?: string;
-      value_type: string;
-      value_amount: number;
-      time_type: string;
-      time_days?: number;
-      description?: string;
-      is_active?: boolean;
-    };
-
-    // Check if coupon code already exists
-    const existingCoupon = await this.prisma.coupon.findUnique({
-      where: { code },
-    });
-
-    if (existingCoupon) {
-      throw new Error('Coupon code already exists');
-    }
-
-    // Validate coupon configuration
-    this.validateCouponConfiguration({
-      value_type,
-      value_amount,
-      time_type,
-      ...(time_days !== undefined && { time_days })
-    });
-
-    // Create coupon
-    const coupon = await this.prisma.coupon.create({
-      data: {
-        code,
-        plan_type: plan_type as PlanType,
-        usage_limit: usage_limit ?? null,
-        expires_at: expires_at ? new Date(expires_at) : null,
+    try {
+      console.log('🔍 COUPON SERVICE - Starting createCoupon...');
+      console.log('📤 COUPON SERVICE - Received data:', JSON.stringify(data, null, 2));
+      console.log('📤 COUPON SERVICE - Created by:', createdBy);
+      
+      const { 
+        code, 
+        plan_type, 
+        usage_limit, 
+        expires_at,
         value_type,
         value_amount,
         time_type,
-        time_days: time_type === 'fixed' ? (time_days ?? null) : null,
-        description: description ?? null,
-        is_active,
-        created_by: createdBy ?? null,
-      },
-    });
+        time_days,
+        description,
+        is_active = true
+      } = data as { 
+        code: string; 
+        plan_type: string; 
+        usage_limit?: number; 
+        expires_at?: string;
+        value_type: string;
+        value_amount: number;
+        time_type: string;
+        time_days?: number;
+        description?: string;
+        is_active?: boolean;
+      };
 
-    return this.mapCouponToResponse(coupon);
+      console.log('🔍 COUPON SERVICE - Extracted fields:', {
+        code,
+        plan_type,
+        usage_limit,
+        expires_at,
+        value_type,
+        value_amount,
+        time_type,
+        time_days,
+        description,
+        is_active
+      });
+
+      // Check if coupon code already exists
+      console.log('🔍 COUPON SERVICE - Checking if coupon code exists...');
+      const existingCoupon = await this.prisma.coupon.findUnique({
+        where: { code },
+      });
+
+      if (existingCoupon) {
+        console.log('❌ COUPON SERVICE - Coupon code already exists:', code);
+        throw new Error('Coupon code already exists');
+      }
+
+      console.log('✅ COUPON SERVICE - Coupon code is available');
+
+      // Validate coupon configuration
+      console.log('🔍 COUPON SERVICE - Validating coupon configuration...');
+      this.validateCouponConfiguration({
+        value_type,
+        value_amount,
+        time_type,
+        ...(time_days !== undefined && { time_days })
+      });
+
+      console.log('✅ COUPON SERVICE - Configuration validated');
+
+      // Create coupon
+      console.log('🔍 COUPON SERVICE - Creating coupon in database...');
+      const coupon = await this.prisma.coupon.create({
+        data: {
+          code,
+          plan_type: plan_type as PlanType,
+          usage_limit: usage_limit ?? null,
+          expires_at: expires_at ? new Date(expires_at) : null,
+          value_type,
+          value_amount,
+          time_type,
+          time_days: time_type === 'fixed' ? (time_days ?? null) : null,
+          description: description ?? null,
+          is_active,
+          created_by: createdBy ?? null,
+        },
+      });
+
+      console.log('✅ COUPON SERVICE - Coupon created in database:', coupon.id);
+
+      const response = this.mapCouponToResponse(coupon);
+      console.log('✅ COUPON SERVICE - Mapped response:', response);
+      
+      return response;
+    } catch (error: any) {
+      console.error('❌ COUPON SERVICE - Error in createCoupon:', error);
+      console.error('❌ COUPON SERVICE - Error type:', typeof error);
+      console.error('❌ COUPON SERVICE - Error message:', error.message);
+      console.error('❌ COUPON SERVICE - Error stack:', error.stack);
+      throw error;
+    }
   }
 
   /**
