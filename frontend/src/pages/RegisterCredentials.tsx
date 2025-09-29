@@ -31,7 +31,6 @@ export default function RegisterCredentials() {
   const navigate = useNavigate();
   const [showApiSecret, setShowApiSecret] = useState(false);
   const [showPassphrase, setShowPassphrase] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationStatus, setValidationStatus] = useState<{
     isValid: boolean;
