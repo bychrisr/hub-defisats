@@ -35,7 +35,7 @@ export const RobustAuthGuard: React.FC<RobustAuthGuardProps> = ({
         
         if (!token) {
           console.log('🔧 ROBUST AUTH GUARD - Sem token, definindo estado não autenticado');
-          useAuthStore.setState({
+          useAuthStore.getState().set({
             isAuthenticated: false,
             user: null,
             isLoading: false,
@@ -44,7 +44,7 @@ export const RobustAuthGuard: React.FC<RobustAuthGuardProps> = ({
           });
         } else {
           console.log('🔧 ROBUST AUTH GUARD - Com token, definindo estado autenticado');
-          useAuthStore.setState({
+          useAuthStore.getState().set({
             isLoading: false,
             isInitialized: true,
             error: null
@@ -71,7 +71,7 @@ export const RobustAuthGuard: React.FC<RobustAuthGuardProps> = ({
 
       if (!token) {
         console.log('🔧 ROBUST AUTH GUARD - Sem token, forçando estado não autenticado');
-        useAuthStore.setState({
+        useAuthStore.getState().set({
           isAuthenticated: false,
           user: null,
           isLoading: false,
