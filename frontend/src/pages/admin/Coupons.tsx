@@ -744,7 +744,10 @@ export default function Coupons() {
               Cancelar
             </Button>
             <Button
-              onClick={handleCreateCoupon}
+              onClick={() => {
+                console.log('🔄 COUPONS COMPONENT - Create button clicked!');
+                handleCreateCoupon();
+              }}
               className="backdrop-blur-sm bg-green-600/90 hover:bg-green-600 text-white shadow-lg shadow-green-600/25"
             >
               <Plus className="h-4 w-4 mr-2" />
