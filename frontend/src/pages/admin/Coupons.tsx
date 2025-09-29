@@ -427,7 +427,8 @@ export default function Coupons() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {coupons.map((coupon, index) => (
+                    {Array.isArray(coupons) && coupons.length > 0 ? (
+                      coupons.map((coupon, index) => (
                       <TableRow
                         key={coupon.id}
                         className={cn(
@@ -539,7 +540,20 @@ export default function Coupons() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <Gift className="h-8 w-8 text-text-secondary" />
+                            <p className="text-text-secondary">Nenhum cupom encontrado</p>
+                            <p className="text-sm text-text-secondary">
+                              {loading ? 'Carregando...' : 'Crie seu primeiro cupom para começar'}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>

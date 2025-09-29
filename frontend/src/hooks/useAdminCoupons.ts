@@ -77,9 +77,22 @@ export function useAdminCoupons(filters: CouponFilters = { search: '', status: '
 
       console.log('✅ ADMIN COUPONS - Data received:', response.data);
 
+      // Validate response structure
+      if (!response.data || typeof response.data !== 'object') {
+        throw new Error('Invalid response structure from server');
+      }
+
+      const couponsData = response.data.data || response.data || [];
+      
+      // Ensure couponsData is an array
+      if (!Array.isArray(couponsData)) {
+        console.warn('⚠️ ADMIN COUPONS - Expected array but got:', typeof couponsData, couponsData);
+        throw new Error('Expected array of coupons from server');
+      }
+
       setState(prev => ({
         ...prev,
-        coupons: response.data.data || [],
+        coupons: couponsData,
         loading: false,
         error: null,
         lastUpdated: new Date()
@@ -98,6 +111,11 @@ export function useAdminCoupons(filters: CouponFilters = { search: '', status: '
   const createCoupon = async (couponData: CreateCouponData): Promise<Coupon> => {
     try {
       console.log('🔄 ADMIN COUPONS - Creating coupon:', couponData);
+      
+      // Debug: Check if we have a token
+      const token = localStorage.getItem('access_token');
+      console.log('🔑 ADMIN COUPONS - Token exists:', !!token);
+      console.log('🔑 ADMIN COUPONS - Token preview:', token ? token.substring(0, 20) + '...' : 'null');
       
       const response = await api.post('/api/admin/coupons', couponData);
       
