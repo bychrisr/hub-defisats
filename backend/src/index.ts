@@ -787,10 +787,24 @@ fastify.setErrorHandler((error, request, reply) => {
 
   // Validation errors
   if ((error as any).validation) {
+    const validationDetails = (error as any).validation;
+    console.log('🔍 VALIDATION ERROR - Details:', validationDetails);
+    
+    // Extract specific validation errors
+    let specificMessage = 'Request validation failed';
+    if (validationDetails && validationDetails.length > 0) {
+      const firstError = validationDetails[0];
+      if (firstError.message) {
+        specificMessage = firstError.message;
+      } else if (firstError.instancePath && firstError.keyword) {
+        specificMessage = `${firstError.instancePath}: ${firstError.keyword}`;
+      }
+    }
+    
     return reply.status(400).send({
       error: 'VALIDATION_ERROR',
-      message: 'Request validation failed',
-      details: (error as any).validation,
+      message: specificMessage,
+      details: validationDetails,
     });
   }
 
