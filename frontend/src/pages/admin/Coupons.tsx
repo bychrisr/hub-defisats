@@ -132,7 +132,13 @@ export default function Coupons() {
       
       const errorMessage = error.response?.data?.message || error.message || 'Error creating coupon';
       console.log('🔍 COUPONS COMPONENT - Error message to show:', errorMessage);
-      toast.error(errorMessage);
+      
+      // Show specific error message instead of generic "Validation error"
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 
