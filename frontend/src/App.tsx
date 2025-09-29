@@ -458,9 +458,9 @@ const App = () => {
               }
             />
             {/* Admin Routes */}
-                  <Route
+            <Route
               path="/admin"
-                element={
+              element={
                 <AdminRoute>
                   <RouteGuard requireAdmin>
                     <AdminLayout />
@@ -482,8 +482,8 @@ const App = () => {
               <Route path="menus" element={<AdminMenuManagement />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />
-        <Route path="monitoring" element={<Monitoring />} />
-        <Route path="alerts" element={<Alerts />} />
+              <Route path="monitoring" element={<Monitoring />} />
+              <Route path="alerts" element={<Alerts />} />
               <Route path="rate-limiting" element={<RateLimiting />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="plans" element={<Plans />} />
