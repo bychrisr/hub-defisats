@@ -97,12 +97,20 @@ export default function Coupons() {
       console.log('📤 COUPONS COMPONENT - Form data JSON:', JSON.stringify(formData, null, 2));
       
       // Validate form data before sending
+      console.log('🔍 COUPONS COMPONENT - Validating form data...');
+      console.log('🔍 COUPONS COMPONENT - Code value:', formData.code);
+      console.log('🔍 COUPONS COMPONENT - Code empty?', !formData.code);
+      console.log('🔍 COUPONS COMPONENT - Plan type:', formData.plan_type);
+      
       if (!formData.code || !formData.plan_type) {
         console.error('❌ COUPONS COMPONENT - Invalid form data:', formData);
+        console.log('❌ COUPONS COMPONENT - Showing toast error...');
         toast.error('Please fill in all required fields');
+        console.log('❌ COUPONS COMPONENT - Toast error shown, returning...');
         return;
       }
       
+      console.log('✅ COUPONS COMPONENT - Form validation passed');
       console.log('🔄 COUPONS COMPONENT - Calling createCoupon hook...');
       const createdCoupon = await createCoupon(formData);
       
@@ -135,8 +143,10 @@ export default function Coupons() {
       
       // Show specific error message instead of generic "Validation error"
       if (error.response?.data?.message) {
+        console.log('🔍 COUPONS COMPONENT - Showing backend error message...');
         toast.error(error.response.data.message);
       } else {
+        console.log('🔍 COUPONS COMPONENT - Showing fallback error message...');
         toast.error(errorMessage);
       }
     }
