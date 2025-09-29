@@ -21,25 +21,25 @@ import { useRegistration } from '@/hooks/useRegistration';
 import SimpleEmailValidator from '@/components/SimpleEmailValidator';
 import SimplePasswordValidator from '@/components/SimplePasswordValidator';
 
-// Schema para o primeiro passo: dados pessoais
+// Schema for the first step: personal data
 const personalDataSchema = z.object({
-  firstName: z.string().min(1, 'Nome é obrigatório'),
-  lastName: z.string().min(1, 'Sobrenome é obrigatório'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
   username: z.string()
-    .min(3, 'Nome de usuário deve ter pelo menos 3 caracteres')
-    .max(20, 'Nome de usuário deve ter no máximo 20 caracteres')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Nome de usuário deve conter apenas letras, números e underscore'),
-  email: z.string().email('Email inválido'),
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username must contain only letters, numbers and underscore'),
+  email: z.string().email('Invalid email address'),
   password: z.string()
-    .min(8, 'Senha deve ter pelo menos 8 caracteres')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 'Senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial'),
-  confirmPassword: z.string().min(8, 'Confirmação de senha é obrigatória'),
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 'Password must contain at least: 1 lowercase letter, 1 uppercase letter, 1 number and 1 special character'),
+  confirmPassword: z.string().min(8, 'Please confirm your password'),
   coupon_code: z.string().optional(),
   emailMarketingConsent: z.boolean().optional().default(false),
   termsConsent: z.boolean()
-    .refine(val => val === true, 'Você deve aceitar os termos e condições para continuar'),
+    .refine(val => val === true, 'You must accept the terms and conditions to continue'),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
+  message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
@@ -197,7 +197,7 @@ export default function Register() {
                     <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
                       <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                        <span className="font-medium">Nome obrigatório</span>
+                        <span className="font-medium">First name required</span>
                       </div>
                       <p className="mt-1 text-red-300 text-xs">
                         {errors.firstName.message}
@@ -224,7 +224,7 @@ export default function Register() {
                     <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
                       <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                        <span className="font-medium">Sobrenome obrigatório</span>
+                        <span className="font-medium">Last name required</span>
                       </div>
                       <p className="mt-1 text-red-300 text-xs">
                         {errors.lastName.message}
@@ -263,7 +263,7 @@ export default function Register() {
                   <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Nome de usuário inválido</span>
+                      <span className="font-medium">Invalid username</span>
                     </div>
                     <p className="mt-1 text-red-300 text-xs">
                       {errors.username.message}
@@ -308,7 +308,7 @@ export default function Register() {
                   <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Email inválido</span>
+                      <span className="font-medium">Invalid email</span>
                     </div>
                     <p className="mt-1 text-red-300 text-xs">
                       {errors.email.message}
@@ -353,7 +353,7 @@ export default function Register() {
                   <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Senha inválida</span>
+                      <span className="font-medium">Invalid password</span>
                     </div>
                     <p className="mt-1 text-red-300 text-xs">
                       {errors.password.message}
@@ -395,7 +395,7 @@ export default function Register() {
                   <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Confirmação de senha inválida</span>
+                      <span className="font-medium">Password confirmation invalid</span>
                     </div>
                     <p className="mt-1 text-red-300 text-xs">
                       {errors.confirmPassword.message}
@@ -448,7 +448,7 @@ export default function Register() {
                   <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-3">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Erro no consentimento de email</span>
+                      <span className="font-medium">Email marketing consent error</span>
                     </div>
                     <p className="mt-1 text-red-300">
                       {errors.emailMarketingConsent.message}
@@ -492,7 +492,7 @@ export default function Register() {
                   <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-3">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Aceite os termos obrigatórios</span>
+                      <span className="font-medium">Terms and conditions required</span>
                     </div>
                     <p className="mt-1 text-red-300">
                       {errors.termsConsent.message}
