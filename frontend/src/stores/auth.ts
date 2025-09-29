@@ -62,7 +62,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           // Store tokens
           console.log('💾 Storing token in localStorage:', '[REDACTED]');
+          console.log('💾 Token length:', token?.length || 0);
+          console.log('💾 Token preview:', token?.substring(0, 50) + '...' || 'null');
           localStorage.setItem('access_token', token);
+          
+          // Verify token was stored
+          const storedToken = localStorage.getItem('access_token');
+          console.log('🔍 Verification - Token stored?', storedToken ? 'YES' : 'NO');
+          console.log('🔍 Verification - Stored token matches?', storedToken === token);
+          
           if (refresh_token) {
             console.log('💾 Storing refresh token in localStorage:', '[REDACTED]');
             localStorage.setItem('refresh_token', refresh_token);
@@ -161,6 +169,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       getProfile: async () => {
         console.log('🔄 AUTH STORE - Starting getProfile...');
+        
+        // Check token before making request
+        const tokenBeforeRequest = localStorage.getItem('access_token');
+        console.log('🔍 AUTH STORE - Token before getProfile request:', tokenBeforeRequest ? 'EXISTS' : 'MISSING');
+        console.log('🔍 AUTH STORE - Token preview:', tokenBeforeRequest?.substring(0, 50) + '...' || 'null');
+        
         set({ isLoading: true });
 
         try {
@@ -186,14 +200,27 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           console.log('✅ AUTH STORE - Profile set successfully');
         } catch (error: any) {
           console.log('❌ AUTH STORE - getProfile error:', error);
+          console.log('❌ AUTH STORE - Error response:', error.response);
+          console.log('❌ AUTH STORE - Error status:', error.response?.status);
+          console.log('❌ AUTH STORE - Error data:', error.response?.data);
+          
           const errorMessage =
             error.response?.data?.message || 'Failed to get profile';
           console.log('❌ AUTH STORE - Error message:', errorMessage);
           
+          // Check token before potentially clearing it
+          const tokenBeforeClearing = localStorage.getItem('access_token');
+          console.log('🔍 AUTH STORE - Token before potential clearing:', tokenBeforeClearing ? 'EXISTS' : 'MISSING');
+          
           // Se o erro for de token expirado, limpar localStorage
           if (error.response?.status === 401 || errorMessage.includes('Invalid session') || errorMessage.includes('UNAUTHORIZED')) {
             console.log('🔑 AUTH STORE - Token expired/invalid, clearing localStorage');
+            console.log('🔑 AUTH STORE - Removing tokens from localStorage...');
             localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            console.log('🔑 AUTH STORE - Tokens removed from localStorage');
+          } else {
+            console.log('🔍 AUTH STORE - Error is not 401/auth related, keeping tokens');
           }
           
           set({
