@@ -245,15 +245,29 @@ export default function Register() {
 
               {/* Username Field */}
               <div className="space-y-2">
+                {/* Hidden field to prevent browser autocomplete */}
+                <input
+                  type="text"
+                  name="fake_username"
+                  autoComplete="username"
+                  style={{ display: 'none' }}
+                  tabIndex={-1}
+                />
                 <Label htmlFor="username" className="text-slate-200 text-sm font-medium">
                   Username
                 </Label>
                 <div className="relative">
                   <Input
                     id="username"
+                    name="user_handle"
                     type="text"
                     placeholder="Choose a username"
                     autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
                     {...register('username')}
                     className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-8 ${
                       errors.username ? 'border-red-500' : ''

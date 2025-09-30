@@ -389,10 +389,25 @@ export default function Profile() {
           {/* Form Fields */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
+              {/* Hidden field to prevent browser autocomplete */}
+              <input
+                type="text"
+                name="fake_username"
+                autoComplete="username"
+                style={{ display: 'none' }}
+                tabIndex={-1}
+              />
               <Label htmlFor="username">Username</Label>
               <div className="relative">
                 <Input
                   id="username"
+                  name="user_handle"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-form-type="other"
+                  data-lpignore="true"
                   {...register('username')}
                   className={cn(
                     "pr-16",
