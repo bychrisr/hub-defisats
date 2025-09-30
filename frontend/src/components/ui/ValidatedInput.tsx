@@ -67,10 +67,10 @@ export const ValidatedInput = React.forwardRef<HTMLInputElement, ValidatedInputP
           className={cn(
             'bg-slate-700/50 text-white placeholder-slate-400 transition-all duration-200',
             getBorderColor(),
-            getFocusBorderColor(),
-            getRingColor(),
             getHoverBorderColor(),
             getHoverRingColor(),
+            getFocusBorderColor(),
+            getRingColor(),
             getActiveBorderColor(),
             getActiveRingColor(),
             'focus:ring-2 hover:ring-2 active:ring-2',
