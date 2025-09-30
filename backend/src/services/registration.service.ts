@@ -190,7 +190,7 @@ export class RegistrationService {
 
         // Generate JWT token for auto-login
         console.log('🔑 REGISTRATION - Generating JWT token for user:', updatedUser.id);
-        const token = await this.authService.generateAccessToken(updatedUser);
+        const token = await this.authService.generateAccessTokenPublic(updatedUser);
         console.log('🔑 REGISTRATION - JWT token generated successfully');
 
         const completionReason = data.planId === 'free' ? 'Free plan' : '100% discount coupon';

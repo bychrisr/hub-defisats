@@ -496,9 +496,11 @@ export class AuthService {
   }
 
   /**
-   * Generate access token
+   * Generate access token (public method for registration)
    */
-  private async generateAccessToken(user: User): Promise<string> {
+  async generateAccessTokenPublic(user: User): Promise<string> {
+    return this.generateAccessToken(user);
+  }
     const expiresIn = await this.securityConfig.getJWTExpiration();
     return this.fastify.jwt.sign(
       {
