@@ -33,7 +33,7 @@ const personalDataSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 'Password must contain at least: 1 lowercase letter, 1 uppercase letter, 1 number and 1 special character'),
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/, 'Password must contain at least: 1 lowercase letter, 1 uppercase letter, 1 number and 1 special character'),
   confirmPassword: z.string().min(8, 'Please confirm your password'),
   coupon_code: z.string().optional(),
   emailMarketingConsent: z.boolean().optional().default(false),
