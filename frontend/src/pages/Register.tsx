@@ -469,6 +469,17 @@ export default function Register() {
                     </p>
                   </div>
                 )}
+                {!errors.confirmPassword && watch('confirmPassword') && (
+                  <p className={`text-sm ${
+                    watch('confirmPassword') === password && password && password.length >= 8 ? 'text-green-400' :
+                    watch('confirmPassword') !== password && watch('confirmPassword').length > 0 ? 'text-red-400' :
+                    'text-slate-400'
+                  }`}>
+                    {watch('confirmPassword') === password && password && password.length >= 8 ? '✓ Passwords match' :
+                     watch('confirmPassword') !== password && watch('confirmPassword').length > 0 ? '✗ Passwords do not match' :
+                     'Enter password confirmation'}
+                  </p>
+                )}
               </div>
 
               {/* Coupon Code Field */}
