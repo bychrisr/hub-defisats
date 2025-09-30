@@ -116,6 +116,43 @@ export default function Register() {
     []
   );
 
+  // Auto-fill function for testing
+  const autoFillForm = () => {
+    const randomId = Math.random().toString(36).substring(2, 8);
+    const firstNames = ['João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lucia', 'Rafael', 'Camila', 'Diego', 'Fernanda'];
+    const lastNames = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Pereira', 'Lima', 'Gomes'];
+    const domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'teste.com'];
+    
+    const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+    const randomUsername = `${randomFirstName.toLowerCase()}${randomId}`;
+    const randomEmail = `${randomUsername}@${randomDomain}`;
+    const randomPassword = `Test${randomId}!@#`;
+    
+    // Set form values
+    setValue('firstName', randomFirstName);
+    setValue('lastName', randomLastName);
+    setValue('username', randomUsername);
+    setValue('email', randomEmail);
+    setValue('password', randomPassword);
+    setValue('confirmPassword', randomPassword);
+    setValue('coupon_code', '');
+    setValue('emailMarketingConsent', true);
+    setValue('termsConsent', true);
+    
+    // Clear any existing errors
+    clearError();
+    
+    console.log('🤖 AUTO-FILL - Form populated with test data:', {
+      firstName: randomFirstName,
+      lastName: randomLastName,
+      username: randomUsername,
+      email: randomEmail,
+      password: '***'
+    });
+  };
+
   const onSubmit = async (data: PersonalDataForm) => {
     // Prevent submission if email is not available
     if (!emailValidation.isValid || !emailValidation.isAvailable) {
@@ -575,6 +612,16 @@ export default function Register() {
                   </div>
                 )}
               </div>
+
+              {/* Auto-fill Button for Testing */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={autoFillForm}
+                className="w-full bg-yellow-600/20 border-yellow-500 text-yellow-300 hover:bg-yellow-600/30 hover:text-yellow-200 hover:border-yellow-400 transition-all duration-200 py-2.5 mb-4"
+              >
+                🤖 Auto-fill Test Data
+              </Button>
 
               {/* Continue Button */}
                 <Button
