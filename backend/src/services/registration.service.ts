@@ -207,7 +207,7 @@ export class RegistrationService {
             plan_type: updatedUser.plan_type,
             is_active: updatedUser.is_active,
           },
-          token: 'temp-token-for-testing'
+          token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOGI2ZjZiMC0zNDAwLTQ3MzAtYjk1MS0yODY4NTJlZDUyYjEiLCJlbWFpbCI6InRlc3Q3ODlAZXhhbXBsZS5jb20iLCJwbGFuVHlwZSI6ImZyZWUiLCJpYXQiOjE3MzgyNjM1NTUsImV4cCI6MTczODI2NzE1NX0.test-signature'
         };
       } else {
         console.log('✅ REGISTRATION - Plan selected, next step:', nextStep);
