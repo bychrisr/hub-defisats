@@ -152,6 +152,8 @@ export class RegistrationService {
         nextStep = 'completed'; // Free plan completes registration immediately
       } else if (couponData?.planType === 'lifetime') {
         nextStep = 'credentials'; // Skip payment for lifetime coupons
+      } else if (couponData?.discountType === 'percentage' && couponData?.discountValue === 100) {
+        nextStep = 'completed'; // 100% discount coupon completes registration immediately
       }
 
       // Update registration progress
@@ -165,13 +167,15 @@ export class RegistrationService {
         }
       });
 
-      // If free plan, activate user and complete registration
-      if (data.planId === 'free') {
+      // If free plan or 100% discount coupon, activate user and complete registration
+      if (data.planId === 'free' || (couponData?.discountType === 'percentage' && couponData?.discountValue === 100)) {
+        const planType = data.planId === 'free' ? 'free' : data.planId;
+        
         const updatedUser = await this.prisma.user.update({
           where: { id: progress.user_id },
           data: {
             is_active: true,
-            plan_type: 'free',
+            plan_type: planType,
             activated_at: new Date(),
           }
         });
@@ -188,14 +192,15 @@ export class RegistrationService {
         // Generate JWT token for auto-login
         const token = await this.authService.generateAccessToken(updatedUser);
 
-        console.log('✅ REGISTRATION - Free plan selected, user activated and registration completed');
+        const completionReason = data.planId === 'free' ? 'Free plan' : '100% discount coupon';
+        console.log(`✅ REGISTRATION - ${completionReason} selected, user activated and registration completed`);
 
         return {
           success: true,
           nextStep,
           couponData,
           message: 'Plan selected successfully',
-          // Include user data and token for free plan auto-login
+          // Include user data and token for auto-login
           user: {
             id: updatedUser.id,
             email: updatedUser.email,
