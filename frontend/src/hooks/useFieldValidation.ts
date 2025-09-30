@@ -109,6 +109,40 @@ export const useFieldValidation = ({
     }
   };
 
+  const getHoverBorderColor = () => {
+    if (!validationState.hasBeenFocused && !validationState.hasBeenTouched) {
+      return 'hover:border-blue-500'; // Default hover border
+    }
+
+    switch (validationState.state) {
+      case 'valid':
+        return 'hover:border-green-500';
+      case 'invalid':
+        return 'hover:border-red-500';
+      case 'checking':
+        return 'hover:border-yellow-500';
+      default:
+        return 'hover:border-blue-500';
+    }
+  };
+
+  const getHoverRingColor = () => {
+    if (!validationState.hasBeenFocused && !validationState.hasBeenTouched) {
+      return 'hover:ring-blue-500/20'; // Default hover ring
+    }
+
+    switch (validationState.state) {
+      case 'valid':
+        return 'hover:ring-green-500/20';
+      case 'invalid':
+        return 'hover:ring-red-500/20';
+      case 'checking':
+        return 'hover:ring-yellow-500/20';
+      default:
+        return 'hover:ring-blue-500/20';
+    }
+  };
+
   const getValidationIcon = () => {
     switch (validationState.state) {
       case 'valid':
@@ -142,6 +176,8 @@ export const useFieldValidation = ({
     getBorderColor,
     getFocusBorderColor,
     getRingColor,
+    getHoverBorderColor,
+    getHoverRingColor,
     getValidationIcon,
     getValidationIconColor,
     isFieldValid: validationState.state === 'valid',
