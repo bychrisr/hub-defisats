@@ -506,9 +506,6 @@ export default function Register() {
                     <Label htmlFor="emailMarketingConsent" className="text-slate-200 text-sm">
                       I authorize Axisor Bot to contact me by email about products, services, or events.
                     </Label>
-                    <p className="text-xs text-slate-400">
-                      This is optional and you can unsubscribe at any time.
-                    </p>
                   </div>
                 </div>
                 {errors.emailMarketingConsent && (
