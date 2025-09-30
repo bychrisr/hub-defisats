@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registrationAPI } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth';
 
 export interface RegistrationData {
   // Step 1: Personal Data
@@ -150,7 +151,31 @@ export const useRegistration = () => {
       }));
 
       // Navigate to next step
-      if (response.data.nextStep === 'credentials') {
+      if (response.data.nextStep === 'completed') {
+        // Free plan - auto-login and redirect to dashboard
+        if (response.data.user && response.data.token) {
+          // Store token and user data
+          localStorage.setItem('access_token', response.data.token);
+          
+          // Update auth store
+          const { setUser, setIsAuthenticated } = useAuthStore.getState();
+          setUser({
+            id: response.data.user.id,
+            email: response.data.user.email,
+            username: response.data.user.username,
+            plan_type: response.data.user.plan_type,
+            email_verified: false,
+            two_factor_enabled: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+          setIsAuthenticated(true);
+          
+          console.log('✅ REGISTRATION - Free plan auto-login successful');
+        }
+        
+        navigate('/dashboard', { replace: true });
+      } else if (response.data.nextStep === 'credentials') {
         // Skip payment for lifetime coupons
         navigate('/register/credentials', {
           state: {

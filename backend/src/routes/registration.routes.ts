@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
-const registrationService = new RegistrationService(prisma);
+const registrationService = new RegistrationService(prisma, fastify);
 
 // Schemas for validation
 const PersonalDataSchema = z.object({

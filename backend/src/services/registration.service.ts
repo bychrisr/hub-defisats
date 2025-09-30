@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
+import { AuthService } from './auth.service';
 
 // Schemas for validation
 const PersonalDataSchema = z.object({
@@ -40,9 +41,11 @@ const CredentialsDataSchema = z.object({
 
 export class RegistrationService {
   private prisma: PrismaClient;
+  private authService: AuthService;
 
-  constructor(prisma: PrismaClient) {
+  constructor(prisma: PrismaClient, fastify: any) {
     this.prisma = prisma;
+    this.authService = new AuthService(prisma, fastify);
   }
 
   /**
@@ -143,9 +146,11 @@ export class RegistrationService {
         couponData = await this.validateCoupon(progress.personal_data.couponCode);
       }
 
-      // Determine next step based on coupon
+      // Determine next step based on plan and coupon
       let nextStep = 'payment';
-      if (couponData?.planType === 'lifetime') {
+      if (data.planId === 'free') {
+        nextStep = 'completed'; // Free plan completes registration immediately
+      } else if (couponData?.planType === 'lifetime') {
         nextStep = 'credentials'; // Skip payment for lifetime coupons
       }
 
@@ -160,14 +165,56 @@ export class RegistrationService {
         }
       });
 
-      console.log('✅ REGISTRATION - Plan selected, next step:', nextStep);
+      // If free plan, activate user and complete registration
+      if (data.planId === 'free') {
+        const updatedUser = await this.prisma.user.update({
+          where: { id: progress.user_id },
+          data: {
+            is_active: true,
+            plan_type: 'free',
+            activated_at: new Date(),
+          }
+        });
 
-      return {
-        success: true,
-        nextStep,
-        couponData,
-        message: 'Plan selected successfully'
-      };
+        // Mark registration as completed
+        await this.prisma.registrationProgress.update({
+          where: { id: progress.id },
+          data: {
+            current_step: 'completed',
+            completed_steps: [...progress.completed_steps as string[], 'plan_selection', 'completed'],
+          }
+        });
+
+        // Generate JWT token for auto-login
+        const token = await this.authService.generateAccessToken(updatedUser);
+
+        console.log('✅ REGISTRATION - Free plan selected, user activated and registration completed');
+
+        return {
+          success: true,
+          nextStep,
+          couponData,
+          message: 'Plan selected successfully',
+          // Include user data and token for free plan auto-login
+          user: {
+            id: updatedUser.id,
+            email: updatedUser.email,
+            username: updatedUser.username,
+            plan_type: updatedUser.plan_type,
+            is_active: updatedUser.is_active,
+          },
+          token
+        };
+      } else {
+        console.log('✅ REGISTRATION - Plan selected, next step:', nextStep);
+        
+        return {
+          success: true,
+          nextStep,
+          couponData,
+          message: 'Plan selected successfully'
+        };
+      }
 
     } catch (error) {
       console.error('❌ REGISTRATION - Error selecting plan:', error);
