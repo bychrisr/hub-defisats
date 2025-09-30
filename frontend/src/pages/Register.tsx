@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ValidatedInput } from '@/components/ui/ValidatedInput';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -256,32 +257,26 @@ export default function Register() {
                 <Label htmlFor="username" className="text-slate-200 text-sm font-medium">
                   Username
                 </Label>
-                <div className="relative">
-                  <Input
-                    id="username"
-                    name="user_handle"
-                    type="text"
-                    placeholder="Choose a username"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    spellCheck="false"
-                    data-form-type="other"
-                    data-lpignore="true"
-                    {...register('username')}
-                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-8 ${
-                      errors.username ? 'border-red-500' : ''
-                    }`}
-                    onKeyDown={e => handleKeyDown(e, 'username')}
-                  />
-                  {usernameChecking ? (
-                    <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-slate-400" />
-                  ) : usernameAvailable === true ? (
-                    <div className="absolute right-2 top-2 h-4 w-4 text-green-400">✓</div>
-                  ) : usernameAvailable === false ? (
-                    <div className="absolute right-2 top-2 h-4 w-4 text-red-400">✗</div>
-                  ) : null}
-                </div>
+                <ValidatedInput
+                  id="username"
+                  name="user_handle"
+                  type="text"
+                  placeholder="Choose a username"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-form-type="other"
+                  data-lpignore="true"
+                  fieldName="username"
+                  error={errors.username}
+                  isValid={usernameAvailable === true}
+                  isChecking={usernameChecking}
+                  value={username}
+                  showValidationIcon={false}
+                  {...register('username')}
+                  onKeyDown={e => handleKeyDown(e, 'username')}
+                />
                 {errors.username && (
                   <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
                     <div className="flex items-center gap-2">
@@ -311,14 +306,15 @@ export default function Register() {
                 <Label htmlFor="email" className="text-slate-200 text-sm font-medium">
                   Email
                 </Label>
-                <Input
+                <ValidatedInput
                   id="email"
                   type="email"
                   placeholder="Enter your email"
+                  fieldName="email"
+                  error={errors.email}
+                  isValid={emailValidation.isValid && emailValidation.isAvailable}
+                  value={watch('email')}
                   {...register('email')}
-                  className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 ${
-                    errors.email ? 'border-red-500' : ''
-                  }`}
                   onKeyDown={e => handleKeyDown(e, 'email')}
                 />
                 {watch('email') && (
@@ -361,7 +357,7 @@ export default function Register() {
                   Password
                 </Label>
                 <div className="relative">
-                  <Input
+                  <ValidatedInput
                     id="password"
                     name="user_password"
                     type={showPassword ? 'text' : 'password'}
@@ -372,10 +368,13 @@ export default function Register() {
                     spellCheck="false"
                     data-form-type="other"
                     data-lpignore="true"
+                    fieldName="password"
+                    error={errors.password}
+                    isValid={!errors.password && password && password.length >= 8}
+                    value={password}
+                    showValidationIcon={false}
+                    className="pr-10"
                     {...register('password')}
-                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-10 ${
-                      errors.password ? 'border-red-500' : ''
-                    }`}
                   />
                   <Button
                     type="button"
@@ -413,7 +412,7 @@ export default function Register() {
                   Confirm Password
                 </Label>
                 <div className="relative">
-                  <Input
+                  <ValidatedInput
                     id="confirmPassword"
                     name="user_confirm_password"
                     type={showPassword ? 'text' : 'password'}
@@ -424,10 +423,13 @@ export default function Register() {
                     spellCheck="false"
                     data-form-type="other"
                     data-lpignore="true"
+                    fieldName="confirmPassword"
+                    error={errors.confirmPassword}
+                    isValid={!errors.confirmPassword && watch('confirmPassword') && watch('confirmPassword') === password}
+                    value={watch('confirmPassword')}
+                    showValidationIcon={false}
+                    className="pr-10"
                     {...register('confirmPassword')}
-                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-10 ${
-                      errors.confirmPassword ? 'border-red-500' : ''
-                    }`}
                   />
                   <Button
                     type="button"

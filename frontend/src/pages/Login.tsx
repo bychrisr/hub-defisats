@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ValidatedInput } from '@/components/ui/ValidatedInput';
 import { Label } from '@/components/ui/label';
 import {
   Card,
@@ -95,14 +96,15 @@ export default function Login() {
                 <Label htmlFor="emailOrUsername" className="text-slate-200 text-sm font-medium">
                   Email or Username
                 </Label>
-                <Input
+                <ValidatedInput
                   id="emailOrUsername"
                   type="text"
                   placeholder="Enter your email or username"
+                  fieldName="emailOrUsername"
+                  error={errors.emailOrUsername}
+                  isValid={!errors.emailOrUsername && watch('emailOrUsername') && watch('emailOrUsername').length > 0}
+                  value={watch('emailOrUsername')}
                   {...register('emailOrUsername')}
-                  className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 ${
-                    errors.emailOrUsername ? 'border-red-500' : ''
-                  }`}
                 />
                 {errors.emailOrUsername && (
                   <p className="text-sm text-red-400">{errors.emailOrUsername.message}</p>
@@ -123,7 +125,7 @@ export default function Login() {
                   </Link>
                 </div>
                 <div className="relative">
-                  <Input
+                  <ValidatedInput
                     id="password"
                     name="login_password"
                     type={showPassword ? 'text' : 'password'}
@@ -134,10 +136,13 @@ export default function Login() {
                     spellCheck="false"
                     data-form-type="other"
                     data-lpignore="true"
+                    fieldName="password"
+                    error={errors.password}
+                    isValid={!errors.password && watch('password') && watch('password').length > 0}
+                    value={watch('password')}
+                    showValidationIcon={false}
+                    className="pr-10"
                     {...register('password')}
-                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-10 ${
-                      errors.password ? 'border-red-500' : ''
-                    }`}
                   />
                   <Button
                     type="button"
