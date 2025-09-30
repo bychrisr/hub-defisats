@@ -80,20 +80,29 @@ export default function Register() {
 
   // Check username availability with debouncing
   useEffect(() => {
+    console.log('🔄 REGISTER - useEffect triggered for username:', username);
+    
     if (!username || username.length < 3) {
+      console.log('🔄 REGISTER - Username too short, not checking');
       return;
     }
 
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
     if (!usernameRegex.test(username)) {
+      console.log('🔄 REGISTER - Username format invalid, not checking');
       return;
     }
 
+    console.log('🔄 REGISTER - Username valid, setting debounce timer');
     const debounceTimer = setTimeout(() => {
+      console.log('🔄 REGISTER - Debounce timer fired, calling checkUsername');
       checkUsername(username);
     }, 500);
 
-    return () => clearTimeout(debounceTimer);
+    return () => {
+      console.log('🔄 REGISTER - Cleaning up debounce timer');
+      clearTimeout(debounceTimer);
+    };
   }, [username, checkUsername]);
 
   // Keyboard navigation handlers

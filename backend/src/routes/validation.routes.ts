@@ -293,10 +293,28 @@ export async function validationRoutes(fastify: FastifyInstance) {
       
       // Validar formato do username
       const usernameRegex = /^[a-zA-Z0-9_]+$/;
+      
+      // Lista de domínios de email comuns que não podem ser usados como sufixo de username
+      const emailDomains = [
+        '.com', '.com.br', '.org', '.net', '.edu', '.gov', '.mil', '.int',
+        '.co.uk', '.co.jp', '.co.kr', '.co.in', '.co.za', '.co.nz',
+        '.com.au', '.com.mx', '.com.ar', '.com.pe', '.com.co', '.com.ve',
+        '.org.br', '.net.br', '.edu.br', '.gov.br', '.mil.br',
+        '.info', '.biz', '.name', '.pro', '.aero', '.coop', '.museum',
+        '.travel', '.jobs', '.mobi', '.tel', '.asia', '.cat', '.post',
+        '.xxx', '.arpa', '.local', '.test', '.example', '.invalid'
+      ];
+      
+      // Verificar se username termina com domínio de email
+      const endsWithEmailDomain = emailDomains.some(domain => 
+        username.toLowerCase().endsWith(domain.toLowerCase())
+      );
+      
       const formatValid = usernameRegex.test(username) && 
                          username.length >= 3 && 
                          username.length <= 20 &&
-                         !username.includes('@');
+                         !username.includes('@') &&
+                         !endsWithEmailDomain;
       
       let available = true;
       let suggestions: string[] = [];
@@ -306,6 +324,7 @@ export async function validationRoutes(fastify: FastifyInstance) {
         if (username.length > 20) suggestions.push('Username must be at most 20 characters');
         if (!usernameRegex.test(username)) suggestions.push('Username can only contain letters, numbers, and underscores');
         if (username.includes('@')) suggestions.push('Username cannot contain @ symbol');
+        if (endsWithEmailDomain) suggestions.push('Username cannot end with email domains like .com, .com.br, .org, etc.');
       } else {
         // Verificar se username já existe
         try {
