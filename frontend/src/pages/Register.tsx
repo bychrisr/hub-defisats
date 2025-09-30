@@ -383,7 +383,7 @@ export default function Register() {
                     data-lpignore="true"
                     fieldName="password"
                     error={errors.password}
-                    isValid={!errors.password && password && password.length >= 8 && /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)}
+                    isValid={!errors.password && password && password.length >= 8 && /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)}
                     value={password}
                     showValidationIcon={false}
                     className="pr-10"
