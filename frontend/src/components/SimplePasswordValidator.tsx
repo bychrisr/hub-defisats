@@ -15,7 +15,7 @@ export default function SimplePasswordValidator({
   const [validationResult, setValidationResult] = useState<any>(null);
 
   useEffect(() => {
-    if (!password || password.length < 3) {
+    if (!password) {
       setValidationResult(null);
       return;
     }
@@ -33,7 +33,7 @@ export default function SimplePasswordValidator({
     return () => clearTimeout(timeoutId);
   }, [password, validatePassword]);
 
-  if (!password || password.length < 3) {
+  if (!password) {
     return null;
   }
 
