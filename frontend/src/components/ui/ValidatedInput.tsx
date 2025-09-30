@@ -34,6 +34,8 @@ export const ValidatedInput = React.forwardRef<HTMLInputElement, ValidatedInputP
       getRingColor,
       getHoverBorderColor,
       getHoverRingColor,
+      getActiveBorderColor,
+      getActiveRingColor,
       getValidationIcon,
       getValidationIconColor,
       shouldShowValidation
@@ -69,7 +71,9 @@ export const ValidatedInput = React.forwardRef<HTMLInputElement, ValidatedInputP
             getRingColor(),
             getHoverBorderColor(),
             getHoverRingColor(),
-            'focus:ring-2 hover:ring-2',
+            getActiveBorderColor(),
+            getActiveRingColor(),
+            'focus:ring-2 hover:ring-2 active:ring-2',
             className
           )}
         />

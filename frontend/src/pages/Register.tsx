@@ -193,14 +193,15 @@ export default function Register() {
                   <Label htmlFor="firstName" className="text-slate-200 text-sm font-medium">
                     First Name
                   </Label>
-                  <Input
+                  <ValidatedInput
                     id="firstName"
                     type="text"
                     placeholder="Enter your first name"
+                    fieldName="firstName"
+                    error={errors.firstName}
+                    isValid={!errors.firstName && watch('firstName') && watch('firstName').length > 0}
+                    value={watch('firstName')}
                     {...register('firstName')}
-                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 ${
-                      errors.firstName ? 'border-red-500' : ''
-                    }`}
                     onKeyDown={e => handleKeyDown(e, 'firstName')}
                   />
                   {errors.firstName && (
@@ -220,14 +221,15 @@ export default function Register() {
                   <Label htmlFor="lastName" className="text-slate-200 text-sm font-medium">
                     Last Name
                   </Label>
-                  <Input
+                  <ValidatedInput
                     id="lastName"
                     type="text"
                     placeholder="Enter your last name"
+                    fieldName="lastName"
+                    error={errors.lastName}
+                    isValid={!errors.lastName && watch('lastName') && watch('lastName').length > 0}
+                    value={watch('lastName')}
                     {...register('lastName')}
-                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 ${
-                      errors.lastName ? 'border-red-500' : ''
-                    }`}
                     onKeyDown={e => handleKeyDown(e, 'lastName')}
                   />
                   {errors.lastName && (
