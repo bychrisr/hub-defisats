@@ -4,7 +4,6 @@ import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
-const registrationService = new RegistrationService(prisma, fastify);
 
 // Schemas for validation
 const PersonalDataSchema = z.object({
@@ -40,6 +39,8 @@ const CredentialsDataSchema = z.object({
 });
 
 export async function registrationRoutes(fastify: FastifyInstance) {
+  const registrationService = new RegistrationService(prisma, fastify);
+  
   // Step 1: Save personal data
   fastify.post(
     '/personal-data',
