@@ -271,7 +271,7 @@ export default function Register() {
                   data-form-type="other"
                   data-lpignore="true"
                   fieldName="username"
-                  error={errors.username}
+                  error={errors.username || (usernameAvailable === false && username && username.length >= 3)}
                   isValid={usernameAvailable === true && username && username.length >= 3}
                   isChecking={usernameChecking}
                   value={username}
@@ -315,7 +315,7 @@ export default function Register() {
                   type="email"
                   placeholder="Enter your email"
                   fieldName="email"
-                  error={errors.email}
+                  error={errors.email || (!emailValidation.isAvailable && emailValidation.isValid)}
                   isValid={emailValidation.isValid && emailValidation.isAvailable}
                   value={watch('email')}
                   {...register('email')}
@@ -374,7 +374,7 @@ export default function Register() {
                     data-lpignore="true"
                     fieldName="password"
                     error={errors.password}
-                    isValid={!errors.password && password && password.length >= 8}
+                    isValid={!errors.password && password && password.length >= 8 && /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)}
                     value={password}
                     showValidationIcon={false}
                     className="pr-10"
@@ -428,8 +428,8 @@ export default function Register() {
                     data-form-type="other"
                     data-lpignore="true"
                     fieldName="confirmPassword"
-                    error={errors.confirmPassword}
-                    isValid={!errors.confirmPassword && watch('confirmPassword') && watch('confirmPassword') === password}
+                    error={errors.confirmPassword || (watch('confirmPassword') && watch('confirmPassword') !== password && watch('confirmPassword').length > 0)}
+                    isValid={!errors.confirmPassword && watch('confirmPassword') && watch('confirmPassword') === password && password && password.length >= 8}
                     value={watch('confirmPassword')}
                     showValidationIcon={false}
                     className="pr-10"
