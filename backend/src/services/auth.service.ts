@@ -501,6 +501,11 @@ export class AuthService {
   async generateAccessTokenPublic(user: User): Promise<string> {
     return this.generateAccessToken(user);
   }
+
+  /**
+   * Generate access token
+   */
+  private async generateAccessToken(user: User): Promise<string> {
     const expiresIn = await this.securityConfig.getJWTExpiration();
     return this.fastify.jwt.sign(
       {
