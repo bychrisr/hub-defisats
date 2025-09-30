@@ -171,14 +171,13 @@ export class RegistrationService {
       if (data.planId === 'free' || (couponData?.discountType === 'percentage' && couponData?.discountValue === 100)) {
         const planType = data.planId === 'free' ? 'free' : data.planId;
         
-        const updatedUser = await this.prisma.user.update({
-          where: { id: progress.user_id },
-          data: {
-            is_active: true,
-            plan_type: planType,
-            activated_at: new Date(),
-          }
-        });
+             const updatedUser = await this.prisma.user.update({
+               where: { id: progress.user_id },
+               data: {
+                 is_active: true,
+                 plan_type: planType,
+               }
+             });
 
         // Mark registration as completed
         await this.prisma.registrationProgress.update({
