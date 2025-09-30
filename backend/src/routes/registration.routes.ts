@@ -150,6 +150,17 @@ export async function registrationRoutes(fastify: FastifyInstance) {
               nextStep: { type: 'string' },
               couponData: { type: 'object' },
               message: { type: 'string' },
+              user: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  email: { type: 'string' },
+                  username: { type: 'string' },
+                  plan_type: { type: 'string' },
+                  is_active: { type: 'boolean' },
+                },
+              },
+              token: { type: 'string' },
             },
           },
           400: {
