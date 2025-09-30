@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,33 @@ export default function Coupons() {
     refresh 
   } = useAdminCoupons(filters);
 
+  // Effect to populate form when edit dialog opens
+  useEffect(() => {
+    if (editDialogOpen && selectedCoupon) {
+      console.log('🔄 COUPONS COMPONENT - useEffect triggered for edit dialog');
+      console.log('🔍 COUPONS COMPONENT - Selected coupon:', selectedCoupon);
+      
+      const formDataToSet: CreateCouponData = {
+        code: selectedCoupon.code || '',
+        plan_type: selectedCoupon.plan_type,
+        value_type: selectedCoupon.value_type,
+        value_amount: selectedCoupon.value_amount,
+        time_type: selectedCoupon.time_type,
+        usage_limit: selectedCoupon.usage_limit || 100,
+        description: selectedCoupon.description || '',
+        is_active: selectedCoupon.is_active
+      };
+      
+      // Only add time_days if time_type is 'fixed'
+      if (selectedCoupon.time_type === 'fixed') {
+        formDataToSet.time_days = selectedCoupon.time_days || 30;
+      }
+      
+      console.log('📤 COUPONS COMPONENT - Setting form data in useEffect:', formDataToSet);
+      setFormData(formDataToSet);
+    }
+  }, [editDialogOpen, selectedCoupon]);
+
   const resetForm = () => {
     setFormData({
       code: '',
@@ -110,9 +137,17 @@ export default function Coupons() {
         return;
       }
       
+      // Prepare data for API - remove time_days if time_type is lifetime
+      const dataToSend = { ...formData };
+      if (dataToSend.time_type === 'lifetime') {
+        delete dataToSend.time_days;
+        console.log('🔧 COUPONS COMPONENT - Removed time_days for lifetime coupon');
+      }
+      
       console.log('✅ COUPONS COMPONENT - Form validation passed');
+      console.log('📤 COUPONS COMPONENT - Data to send:', dataToSend);
       console.log('🔄 COUPONS COMPONENT - Calling createCoupon hook...');
-      const createdCoupon = await createCoupon(formData);
+      const createdCoupon = await createCoupon(dataToSend);
       
       console.log('✅ COUPONS COMPONENT - Coupon created successfully:', createdCoupon);
       toast.success('Coupon created successfully!');
@@ -156,13 +191,55 @@ export default function Coupons() {
     if (!selectedCoupon) return;
     
     try {
-      await updateCoupon(selectedCoupon.id, formData);
+      console.log('🔄 COUPONS COMPONENT - Starting handleEditCoupon...');
+      console.log('📤 COUPONS COMPONENT - Form data:', formData);
+      console.log('📤 COUPONS COMPONENT - Selected coupon ID:', selectedCoupon.id);
+      
+      // Prepare data for API - remove time_days if time_type is lifetime
+      const dataToSend = { ...formData };
+      if (dataToSend.time_type === 'lifetime') {
+        delete dataToSend.time_days;
+        console.log('🔧 COUPONS COMPONENT - Removed time_days for lifetime coupon');
+      }
+      
+      console.log('📤 COUPONS COMPONENT - Data to send:', dataToSend);
+      console.log('🔄 COUPONS COMPONENT - Calling updateCoupon hook...');
+      
+      await updateCoupon(selectedCoupon.id, dataToSend);
+      
+      console.log('✅ COUPONS COMPONENT - Coupon updated successfully!');
       toast.success('Coupon updated successfully!');
       setEditDialogOpen(false);
       resetForm();
     } catch (error: any) {
-      console.error('Error updating coupon:', error);
-      toast.error(error.response?.data?.message || 'Error updating coupon');
+      console.error('❌ COUPONS COMPONENT - Error updating coupon:', error);
+      console.error('❌ COUPONS COMPONENT - Error type:', typeof error);
+      console.error('❌ COUPONS COMPONENT - Error message:', error.message);
+      console.error('❌ COUPONS COMPONENT - Error stack:', error.stack);
+      
+      if (error.response) {
+        console.error('❌ COUPONS COMPONENT - Error response status:', error.response.status);
+        console.error('❌ COUPONS COMPONENT - Error response data:', error.response.data);
+        console.error('❌ COUPONS COMPONENT - Error response headers:', error.response.headers);
+      }
+      
+      if (error.request) {
+        console.error('❌ COUPONS COMPONENT - Error request:', error.request);
+      }
+      
+      console.error('❌ COUPONS COMPONENT - Full error object:', error);
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Error updating coupon';
+      console.log('🔍 COUPONS COMPONENT - Error message to show:', errorMessage);
+      
+      // Show specific error message instead of generic "Validation error"
+      if (error.response?.data?.message) {
+        console.log('🔍 COUPONS COMPONENT - Showing backend error message...');
+        toast.error(error.response.data.message);
+      } else {
+        console.log('🔍 COUPONS COMPONENT - Showing fallback error message...');
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -180,18 +257,10 @@ export default function Coupons() {
   };
 
   const openEditDialog = (coupon: Coupon) => {
+    console.log('🔄 COUPONS COMPONENT - Opening edit dialog for coupon:', coupon);
+    console.log('🔍 COUPONS COMPONENT - Coupon code:', coupon.code);
+    
     setSelectedCoupon(coupon);
-    setFormData({
-      code: coupon.code,
-      plan_type: coupon.plan_type,
-      value_type: coupon.value_type,
-      value_amount: coupon.value_amount,
-      time_type: coupon.time_type,
-      time_days: coupon.time_days || 30,
-      usage_limit: coupon.usage_limit || 100,
-      description: coupon.description || '',
-      is_active: coupon.is_active
-    });
     setEditDialogOpen(true);
   };
 
@@ -521,7 +590,7 @@ export default function Coupons() {
                             <span className="font-medium text-text-primary">
                               {coupon.value_type === 'percentage' 
                                 ? `${coupon.value_amount}%` 
-                                : `${coupon.value_amount.toLocaleString()} sats`
+                                : `$${coupon.value_amount.toLocaleString()}`
                               }
                             </span>
                           </div>
@@ -664,7 +733,7 @@ export default function Coupons() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="percentage">Percentual</SelectItem>
-                    <SelectItem value="fixed">Valor Fixo (sats)</SelectItem>
+                    <SelectItem value="fixed">Valor Fixo ($)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -757,6 +826,156 @@ export default function Coupons() {
             >
               <Plus className="h-4 w-4 mr-2" />
               Criar Cupom
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Coupon Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-vibrant">Editar Cupom</DialogTitle>
+            <DialogDescription className="text-vibrant-secondary">
+              Modifique os detalhes do cupom "{selectedCoupon?.code}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_code">Código do Cupom</Label>
+                <Input
+                  id="edit_code"
+                  value={formData.code || ''}
+                  onChange={(e) => {
+                    console.log('🔄 COUPONS COMPONENT - Code input changed:', e.target.value);
+                    setFormData({ ...formData, code: e.target.value });
+                  }}
+                  placeholder="EXEMPLO123"
+                  className="backdrop-blur-sm bg-background/50 border-border/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_plan_type">Tipo de Plano</Label>
+                <Select value={formData.plan_type} onValueChange={(value: any) => setFormData({ ...formData, plan_type: value })}>
+                  <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basic">Basic</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="lifetime">Lifetime</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_value_type">Tipo de Valor</Label>
+                <Select value={formData.value_type} onValueChange={(value: any) => setFormData({ ...formData, value_type: value })}>
+                  <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fixed">Valor Fixo</SelectItem>
+                    <SelectItem value="percentage">Percentual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_value_amount">Valor do Desconto</Label>
+                <Input
+                  id="edit_value_amount"
+                  type="number"
+                  value={formData.value_amount}
+                  onChange={(e) => setFormData({ ...formData, value_amount: parseInt(e.target.value) })}
+                  placeholder="10"
+                  className="backdrop-blur-sm bg-background/50 border-border/50"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_time_type">Tipo de Tempo</Label>
+                <Select value={formData.time_type} onValueChange={(value: any) => setFormData({ ...formData, time_type: value })}>
+                  <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fixed">Tempo Fixo</SelectItem>
+                    <SelectItem value="lifetime">Vitalício</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {formData.time_type === 'fixed' && (
+                <div className="space-y-2">
+                  <Label htmlFor="edit_time_days">Dias de Validade</Label>
+                  <Input
+                    id="edit_time_days"
+                    type="number"
+                    value={formData.time_days}
+                    onChange={(e) => setFormData({ ...formData, time_days: parseInt(e.target.value) })}
+                    placeholder="30"
+                    className="backdrop-blur-sm bg-background/50 border-border/50"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_usage_limit">Limite de Uso</Label>
+                <Input
+                  id="edit_usage_limit"
+                  type="number"
+                  value={formData.usage_limit}
+                  onChange={(e) => setFormData({ ...formData, usage_limit: parseInt(e.target.value) })}
+                  placeholder="100"
+                  className="backdrop-blur-sm bg-background/50 border-border/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_is_active">Cupom Ativo</Label>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="edit_is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                  <Label htmlFor="edit_is_active" className="text-sm">
+                    {formData.is_active ? 'Ativo' : 'Inativo'}
+                  </Label>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit_description">Descrição</Label>
+              <Textarea
+                id="edit_description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Descrição do cupom..."
+                className="backdrop-blur-sm bg-background/50 border-border/50 min-h-[80px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/70"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                console.log('🔄 COUPONS COMPONENT - Edit button clicked!');
+                handleEditCoupon();
+              }}
+              className="backdrop-blur-sm bg-blue-600/90 hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Salvar Alterações
             </Button>
           </DialogFooter>
         </DialogContent>

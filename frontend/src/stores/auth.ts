@@ -54,11 +54,25 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       // Actions
       login: async (emailOrUsername: string, password: string) => {
+        console.log('🔄 AUTH STORE - login function called');
+        console.log('🔄 AUTH STORE - emailOrUsername:', emailOrUsername);
+        console.log('🔄 AUTH STORE - password length:', password?.length || 0);
+        
         set({ isLoading: true, error: null });
+        console.log('🔄 AUTH STORE - isLoading set to true');
 
         try {
+          console.log('🔄 AUTH STORE - Calling authAPI.login...');
+          console.log('🔄 AUTH STORE - About to await authAPI.login...');
+          
           const response = await authAPI.login({ emailOrUsername, password });
+          console.log('🔄 AUTH STORE - authAPI.login response received:', response);
+          console.log('🔄 AUTH STORE - response type:', typeof response);
+          console.log('🔄 AUTH STORE - response.data:', response.data);
+          console.log('🔄 AUTH STORE - response.status:', response.status);
+          
           const { user_id, token, refresh_token, plan_type } = response.data;
+          console.log('🔄 AUTH STORE - Destructured response data:', { user_id, token: token ? 'EXISTS' : 'MISSING', refresh_token: refresh_token ? 'EXISTS' : 'MISSING', plan_type });
 
           // Store tokens
           console.log('💾 Storing token in localStorage:', '[REDACTED]');
@@ -82,7 +96,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           await get().getProfile();
           
         } catch (error: any) {
+          console.log('❌ AUTH STORE - Error in login function:', error);
+          console.log('❌ AUTH STORE - Error type:', typeof error);
+          console.log('❌ AUTH STORE - Error message:', error.message);
+          console.log('❌ AUTH STORE - Error response:', error.response);
+          console.log('❌ AUTH STORE - Error status:', error.response?.status);
+          console.log('❌ AUTH STORE - Error data:', error.response?.data);
+          
           const errorMessage = error.response?.data?.message || 'Login failed';
+          console.log('❌ AUTH STORE - Error message to set:', errorMessage);
+          
           set({
             user: null,
             isAuthenticated: false,

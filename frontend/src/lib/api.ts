@@ -70,6 +70,14 @@ api.interceptors.response.use(
       timestamp: new Date().toISOString()
     });
     
+    // Special logging for login responses
+    if (response.config.url?.includes('/auth/login')) {
+      console.log('🔑 LOGIN RESPONSE - Special logging for login endpoint');
+      console.log('🔑 LOGIN RESPONSE - Status:', response.status);
+      console.log('🔑 LOGIN RESPONSE - Data:', response.data);
+      console.log('🔑 LOGIN RESPONSE - Headers:', response.headers);
+    }
+    
     // Special logging for coupon responses
     if (response.config.url?.includes('/admin/coupons')) {
       console.log('🎫 COUPON RESPONSE - Special logging for coupon endpoint');
@@ -90,6 +98,15 @@ api.interceptors.response.use(
       message: error.message,
       timestamp: new Date().toISOString()
     });
+    
+    // Special logging for login errors
+    if (error.config?.url?.includes('/auth/login')) {
+      console.log('🔑 LOGIN ERROR - Special logging for login endpoint');
+      console.log('🔑 LOGIN ERROR - Status:', error.response?.status);
+      console.log('🔑 LOGIN ERROR - Data:', error.response?.data);
+      console.log('🔑 LOGIN ERROR - Headers:', error.response?.headers);
+      console.log('🔑 LOGIN ERROR - Message:', error.message);
+    }
     
     // Special logging for coupon errors
     if (error.config?.url?.includes('/admin/coupons')) {
@@ -167,8 +184,21 @@ export const authAPI = {
     coupon_code?: string;
   }) => api.post('/api/auth/register', data),
 
-  login: (data: { emailOrUsername: string; password: string }) =>
-    api.post('/api/auth/login', data),
+  login: (data: { emailOrUsername: string; password: string }) => {
+    console.log('🔄 AUTH API - login function called');
+    
+    // Use the working configuration from our Node.js test
+    const config = {
+      timeout: 15000,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    };
+    
+    // Return the working axios call
+    return api.post('/api/auth/login', data, config);
+  },
 
   refresh: (data: { refresh_token: string }) =>
     api.post('/api/auth/refresh', data),

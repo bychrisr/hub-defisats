@@ -38,14 +38,22 @@ export default function Login() {
   });
 
   const onSubmit = async (data: LoginForm) => {
+    console.log('🔄 LOGIN FORM - onSubmit called with data:', data);
+    console.log('🔄 LOGIN FORM - emailOrUsername:', data.emailOrUsername);
+    console.log('🔄 LOGIN FORM - password length:', data.password?.length || 0);
+    
     try {
+      console.log('🔄 LOGIN FORM - Calling clearError...');
       clearError();
+      
+      console.log('🔄 LOGIN FORM - Calling login function...');
       await login(data.emailOrUsername, data.password);
       
       // O redirecionamento será feito automaticamente pelo PublicRoute
       // baseado no campo is_admin que vem do backend
       console.log('✅ LOGIN - Login successful, redirecting will be handled by PublicRoute');
     } catch (error) {
+      console.log('❌ LOGIN FORM - Error in onSubmit:', error);
       // Error is handled by the store
     }
   };
@@ -147,6 +155,11 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={isLoading}
+                onClick={() => {
+                  console.log('🔄 LOGIN FORM - Submit button clicked!');
+                  console.log('🔄 LOGIN FORM - isLoading:', isLoading);
+                  console.log('🔄 LOGIN FORM - errors:', errors);
+                }}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
               >
                 {isLoading ? (

@@ -312,7 +312,7 @@
 @layer components {
   /* Custom button variants - CoinGecko inspired */
   .btn-hero {
-    @apply bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:shadow-glow transition-all duration-300;
+    @apply bg-gradient-to-r from-primary to-secondary text-primary-foreground transition-all duration-300;
   }
 
   .btn-success {
@@ -332,28 +332,19 @@
     @apply bg-success/5 border border-success/20;
   }
 
-  .card-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 10px 10px 20px -10px rgba(34, 197, 94, 0.1), 0 10px 10px -5px rgba(34, 197, 94, 0.04);
-  }
+  /* .card-success:hover removed - no hover effects */
 
   .card-danger {
     @apply bg-destructive/5 border border-destructive/20;
   }
 
-  .card-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 10px 10px 20px -10px rgba(239, 68, 68, 0.1), 0 10px 10px -5px rgba(239, 68, 68, 0.04);
-  }
+  /* .card-danger:hover removed - no hover effects */
 
   .card-warning {
     @apply bg-warning/5 border border-warning/20;
   }
 
-  .card-warning:hover {
-    transform: translateY(-2px);
-    box-shadow: 10px 10px 20px -10px rgba(245, 158, 11, 0.1), 0 10px 10px -5px rgba(245, 158, 11, 0.04);
-  }
+  /* .card-warning:hover removed - no hover effects */
 
   /* Hover para estilos inline dos componentes */
   .border-success\/30:hover {
@@ -373,7 +364,7 @@
 
   /* CoinGecko specific components */
   .coingecko-card {
-    @apply bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow;
+    @apply bg-card border border-border rounded-lg p-4 transition-shadow;
   }
 
   .coingecko-header {
@@ -450,25 +441,19 @@
 
   /* Card improvements - Mais moderno */
   .card-modern {
-    @apply bg-card border border-border rounded-xl p-6 shadow-coingecko-md hover:shadow-coingecko-lg transition-all duration-300;
+    @apply bg-card border border-border rounded-xl p-6 shadow-coingecko-md transition-all duration-300;
     background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
   }
 
-.card-modern:hover {
-  transform: translateY(-2px);
-  box-shadow: 10px 10px 20px -10px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
-}
+/* .card-modern:hover removed - no hover effects */
 
   /* Card Neutral - Sem padding duplo */
   .card-neutral {
-    @apply bg-card border border-border rounded-xl shadow-coingecko-md hover:shadow-coingecko-lg transition-all duration-300;
+    @apply bg-card border border-border rounded-xl shadow-coingecko-md transition-all duration-300;
     background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
   }
 
-.card-neutral:hover {
-  transform: translateY(-2px);
-  box-shadow: 10px 10px 20px -10px rgba(55, 115, 245, 0.1), 0 10px 10px -5px rgba(55, 115, 245, 0.04);
-}
+/* .card-neutral:hover removed - no hover effects */
 
   /* Dashboard Cards - Configuração Global */
   .dashboard-card {
@@ -717,11 +702,11 @@
   }
 
   .btn-modern-primary {
-    @apply btn-modern bg-primary text-primary-foreground hover:bg-primary-hover shadow-coingecko-md hover:shadow-glow;
+    @apply btn-modern bg-primary text-primary-foreground hover:bg-primary-hover shadow-coingecko-md;
   }
 
   .btn-modern-secondary {
-    @apply btn-modern bg-secondary text-secondary-foreground hover:bg-secondary-hover shadow-coingecko-md hover:shadow-glow;
+    @apply btn-modern bg-secondary text-secondary-foreground hover:bg-secondary-hover shadow-coingecko-md;
   }
 
   /* Light Mode - Botões específicos otimizados */
@@ -2200,21 +2185,21 @@
 
   /* Card Variants */
   .card-axisor {
-    @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 transition-all duration-300 hover:border-[#3773F5] hover:neon-glow;
+    @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 transition-all duration-300;
   }
 
   .card-axisor-elevated {
-    @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-[#3773F5] hover:neon-glow hover:shadow-2xl;
+    @apply bg-gradient-card border border-[#2A3441] rounded-xl p-6 shadow-lg transition-all duration-300;
   }
 
   /* Light Mode - Cards otimizados */
   .light .card-axisor {
-    @apply bg-card border border-border rounded-xl p-6 transition-all duration-300 hover:border-primary hover:shadow-lg;
+    @apply bg-card border border-border rounded-xl p-6 transition-all duration-300;
     background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
   }
 
   .light .card-axisor-elevated {
-    @apply bg-card border border-border rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-primary hover:shadow-2xl;
+    @apply bg-card border border-border rounded-xl p-6 shadow-lg transition-all duration-300;
     background: linear-gradient(135deg, hsl(var(--bg-card)), hsl(var(--bg-card-alt)));
   }
 
