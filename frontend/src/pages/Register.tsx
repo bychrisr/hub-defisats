@@ -144,6 +144,23 @@ export default function Register() {
     // Clear any existing errors
     clearError();
     
+    // Trigger validations after setting values
+    setTimeout(() => {
+      // Trigger username validation
+      checkUsername(randomUsername);
+      
+      // Trigger email validation by simulating change
+      handleEmailValidationChange(true, true, []);
+      
+      console.log('🤖 AUTO-FILL - Validations triggered for:', {
+        firstName: randomFirstName,
+        lastName: randomLastName,
+        username: randomUsername,
+        email: randomEmail,
+        password: '***'
+      });
+    }, 100);
+    
     console.log('🤖 AUTO-FILL - Form populated with test data:', {
       firstName: randomFirstName,
       lastName: randomLastName,
