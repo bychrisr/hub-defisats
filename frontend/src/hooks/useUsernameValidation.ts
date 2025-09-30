@@ -23,6 +23,23 @@ export const useUsernameValidation = (): UseUsernameValidationReturn => {
       return;
     }
 
+    // Validação local para @ e domínios de email
+    if (username.includes('@')) {
+      console.log('🔄 USERNAME VALIDATION - Username contains @, setting to false');
+      setUsernameAvailable(false);
+      setUsernameChecking(false);
+      return;
+    }
+
+    // Verificar se termina com domínios de email
+    const emailDomainRegex = /\.(com|com\.br|org|net|edu|gov|mil|int|co\.uk|co\.jp|co\.kr|co\.in|co\.za|co\.nz|com\.au|com\.mx|com\.ar|com\.pe|com\.co|com\.ve|org\.br|net\.br|edu\.br|gov\.br|mil\.br|info|biz|name|pro|aero|coop|museum|travel|jobs|mobi|tel|asia|cat|post|xxx|arpa|local|test|example|invalid)$/i;
+    if (emailDomainRegex.test(username)) {
+      console.log('🔄 USERNAME VALIDATION - Username ends with email domain, setting to false');
+      setUsernameAvailable(false);
+      setUsernameChecking(false);
+      return;
+    }
+
     console.log('🔄 USERNAME VALIDATION - Setting checking to true');
     setUsernameChecking(true);
     

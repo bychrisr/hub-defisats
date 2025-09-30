@@ -271,8 +271,13 @@ export default function Register() {
                   data-form-type="other"
                   data-lpignore="true"
                   fieldName="username"
-                  error={errors.username || (usernameAvailable === false && username && username.length >= 3)}
-                  isValid={usernameAvailable === true && username && username.length >= 3}
+                  error={errors.username || 
+                         (username && username.includes('@')) ||
+                         (username && /\.(com|com\.br|org|net|edu|gov|mil|int|co\.uk|co\.jp|co\.kr|co\.in|co\.za|co\.nz|com\.au|com\.mx|com\.ar|com\.pe|com\.co|com\.ve|org\.br|net\.br|edu\.br|gov\.br|mil\.br|info|biz|name|pro|aero|coop|museum|travel|jobs|mobi|tel|asia|cat|post|xxx|arpa|local|test|example|invalid)$/i.test(username)) ||
+                         (usernameAvailable === false && username && username.length >= 3)}
+                  isValid={usernameAvailable === true && username && username.length >= 3 && 
+                           !username.includes('@') && 
+                           !/\.(com|com\.br|org|net|edu|gov|mil|int|co\.uk|co\.jp|co\.kr|co\.in|co\.za|co\.nz|com\.au|com\.mx|com\.ar|com\.pe|com\.co|com\.ve|org\.br|net\.br|edu\.br|gov\.br|mil\.br|info|biz|name|pro|aero|coop|museum|travel|jobs|mobi|tel|asia|cat|post|xxx|arpa|local|test|example|invalid)$/i.test(username)}
                   isChecking={usernameChecking}
                   value={username}
                   showValidationIcon={false}
@@ -293,11 +298,15 @@ export default function Register() {
                 {!errors.username && username && (
                   <p className={`text-sm ${
                     username.length < 3 ? 'text-yellow-400' :
+                    username.includes('@') ? 'text-red-400' :
+                    /\.(com|com\.br|org|net|edu|gov|mil|int|co\.uk|co\.jp|co\.kr|co\.in|co\.za|co\.nz|com\.au|com\.mx|com\.ar|com\.pe|com\.co|com\.ve|org\.br|net\.br|edu\.br|gov\.br|mil\.br|info|biz|name|pro|aero|coop|museum|travel|jobs|mobi|tel|asia|cat|post|xxx|arpa|local|test|example|invalid)$/i.test(username) ? 'text-red-400' :
                     usernameAvailable === true ? 'text-green-400' : 
                     usernameAvailable === false ? 'text-red-400' : 
                     'text-slate-400'
                   }`}>
                     {username.length < 3 ? '⚠ Username must be at least 3 characters' :
+                     username.includes('@') ? '✗ Username cannot contain @ symbol' :
+                     /\.(com|com\.br|org|net|edu|gov|mil|int|co\.uk|co\.jp|co\.kr|co\.in|co\.za|co\.nz|com\.au|com\.mx|com\.ar|com\.pe|com\.co|com\.ve|org\.br|net\.br|edu\.br|gov\.br|mil\.br|info|biz|name|pro|aero|coop|museum|travel|jobs|mobi|tel|asia|cat|post|xxx|arpa|local|test|example|invalid)$/i.test(username) ? '✗ Username cannot end with email domains (.com, .org, etc.)' :
                      usernameAvailable === true ? '✓ Username available' :
                      usernameAvailable === false ? '✗ Username already taken' :
                      'Checking availability...'}
