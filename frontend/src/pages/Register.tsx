@@ -272,7 +272,7 @@ export default function Register() {
                   data-lpignore="true"
                   fieldName="username"
                   error={errors.username}
-                  isValid={usernameAvailable === true}
+                  isValid={usernameAvailable === true && username && username.length >= 3}
                   isChecking={usernameChecking}
                   value={username}
                   showValidationIcon={false}
@@ -290,13 +290,15 @@ export default function Register() {
                     </p>
                   </div>
                 )}
-                {!errors.username && username && username.length >= 3 && (
+                {!errors.username && username && (
                   <p className={`text-sm ${
+                    username.length < 3 ? 'text-yellow-400' :
                     usernameAvailable === true ? 'text-green-400' : 
                     usernameAvailable === false ? 'text-red-400' : 
                     'text-slate-400'
                   }`}>
-                    {usernameAvailable === true ? '✓ Username available' :
+                    {username.length < 3 ? '⚠ Username must be at least 3 characters' :
+                     usernameAvailable === true ? '✓ Username available' :
                      usernameAvailable === false ? '✗ Username already taken' :
                      'Checking availability...'}
                   </p>
