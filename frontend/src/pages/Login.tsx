@@ -125,8 +125,15 @@ export default function Login() {
                 <div className="relative">
                   <Input
                     id="password"
+                    name="login_password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
+                    autoComplete="current-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
                     {...register('password')}
                     className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-10 ${
                       errors.password ? 'border-red-500' : ''
