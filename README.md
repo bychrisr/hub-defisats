@@ -23,6 +23,7 @@ O Axisor é uma plataforma completa de automação de trading para LN Markets, c
 - **Design System**: Documentação interna completa com Gradient Cards e Floating Icons
 - **Sistema de Proteção**: Dashboard completo para monitoramento e proteção de dados de mercado
 - **Sistema de Documentação**: Interface com acordeão expansível para navegação intuitiva de 149 documentos organizados em 18 categorias
+- **Sistema de Cupons**: Gerenciamento completo de cupons de desconto com CRUD, validação inteligente e interface moderna
 
 ## 🏗️ Estrutura do Projeto
 
