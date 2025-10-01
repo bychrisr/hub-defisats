@@ -92,19 +92,19 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       return;
     }
 
+    const chart = widgetRef.current.chart();
     try {
-      console.log('📊 TRADINGVIEW - Adicionando linha de liquidação:', price);
-      
-      // Criar linha horizontal de liquidação
-      widgetRef.current.chart().createShape(
-        { time: Date.now() / 1000, price: price },
+      console.log('📊 TRADINGVIEW - Tentando createShape(horizontal_line):', price);
+      const time = Math.floor(Date.now() / 1000);
+      const shapeId = chart.createShape(
+        { time, price },
         {
           shape: 'horizontal_line',
           text: `Liquidação: $${price.toLocaleString()}`,
           overrides: {
             linecolor: '#ff4444',
             linewidth: 2,
-            linestyle: 1, // Linha sólida
+            linestyle: 1,
             textcolor: '#ffffff',
             fontSize: 10,
             extendLeft: true,
@@ -112,10 +112,31 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
           }
         }
       );
-      
-      console.log('✅ TRADINGVIEW - Linha de liquidação adicionada com sucesso');
-    } catch (error) {
-      console.warn('⚠️ TRADINGVIEW - Erro ao adicionar linha de liquidação:', error);
+      console.log('✅ TRADINGVIEW - Linha (createShape) adicionada:', shapeId);
+      return;
+    } catch (err1) {
+      console.warn('⚠️ TRADINGVIEW - createShape falhou:', err1);
+    }
+
+    try {
+      // Alguns builds expõem createLineTool
+      if (typeof (chart as any).createLineTool === 'function') {
+        console.log('📊 TRADINGVIEW - Tentando createLineTool(HorizontalLine)');
+        const id = (chart as any).createLineTool('HorizontalLine', { price, text: `Liquidação: $${price.toLocaleString()}` });
+        console.log('✅ TRADINGVIEW - Linha (createLineTool) adicionada:', id);
+        return;
+      }
+    } catch (err2) {
+      console.warn('⚠️ TRADINGVIEW - createLineTool falhou:', err2);
+    }
+
+    try {
+      // Fallback extremo: usar uma study para plotar uma linha no preço (plot horizontal)
+      console.log('📊 TRADINGVIEW - Tentando fallback com estudo Horizontal Line');
+      const studyId = chart.createStudy('Horizontal Line', false, false, [price], { 'Line Color': '#ff4444' });
+      console.log('✅ TRADINGVIEW - Linha (study) adicionada:', studyId);
+    } catch (err3) {
+      console.warn('⚠️ TRADINGVIEW - Fallback study falhou:', err3);
     }
   }, []);
 
@@ -255,6 +276,18 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         widgetRef.current.onChartReady(() => {
           console.log('✅ TRADINGVIEW - Widget pronto, gráfico disponível');
           setIsLoading(false);
+          try {
+            const chart = widgetRef.current.chart();
+            console.log('🔧 TRADINGVIEW - Chart API disponível?', !!chart);
+            console.log('🔧 TRADINGVIEW - Métodos do chart:', chart ? Object.keys(chart) : 'N/A');
+            if (chart) {
+              console.log('🔧 TRADINGVIEW - createShape existe?', typeof chart.createShape === 'function');
+              console.log('🔧 TRADINGVIEW - createLineTool existe?', typeof (chart as any).createLineTool === 'function');
+              console.log('🔧 TRADINGVIEW - createStudy existe?', typeof chart.createStudy === 'function');
+            }
+          } catch (e) {
+            console.warn('⚠️ TRADINGVIEW - Não foi possível inspecionar chart API:', e);
+          }
           
           // Adicionar linha de liquidação se especificada
           if (showLiquidationLine && liquidationPrice) {
