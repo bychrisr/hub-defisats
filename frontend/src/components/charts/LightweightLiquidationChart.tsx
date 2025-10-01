@@ -27,6 +27,9 @@ interface LightweightLiquidationChartProps {
   showToolbar?: boolean;
   onTimeframeChange?: (timeframe: string) => void;
   onIndicatorAdd?: (indicator: string) => void;
+  displaySymbol?: string; // Ex.: XBTUSD
+  symbolDescription?: string; // Ex.: BTCUSD: LNM FUTURES
+  logoUrl?: string; // Ex.: ícone LNM
   /**
    * Série de preços para exibir contexto (opcional). Se ausente, mostramos apenas a linha de liquidação no eixo.
    */
@@ -45,7 +48,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   timeframe = '1h',
   showToolbar = true,
   onTimeframeChange,
-  onIndicatorAdd
+  onIndicatorAdd,
+  displaySymbol,
+  symbolDescription,
+  logoUrl
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
@@ -82,6 +88,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     onIndicatorAdd?.(indicator);
     setShowIndicators(false);
   }, [onIndicatorAdd]);
+
+  // Derivar rótulos padrão estilo LN Markets
+  const derivedDisplaySymbol = displaySymbol || (symbol?.includes('BTCUSDT') ? 'XBTUSD' : (symbol || ''));
+  const derivedDescription = symbolDescription || (symbol?.includes('BTCUSDT') ? 'BTCUSD: LNM FUTURES' : symbol || '');
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -252,13 +262,20 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           <div className="flex items-center justify-between">
             {/* Lado esquerdo: Símbolo e informações */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              {logoUrl ? (
+                <img src={logoUrl} alt="logo" className="h-5 w-5 rounded-full" />
+              ) : (
                 <BarChart3 className="h-4 w-4 text-blue-500" />
-                <span className="font-semibold text-sm">{symbol}</span>
-                <Badge variant="secondary" className="text-xs">
-                  {currentTimeframe.toUpperCase()}
-                </Badge>
+              )}
+              <div className="flex flex-col leading-tight">
+                <span className="font-semibold text-sm text-blue-400 hover:underline cursor-default">{derivedDisplaySymbol}</span>
+                <span className="text-[11px] opacity-70">{derivedDescription}</span>
               </div>
+              <Badge variant="secondary" className="text-xs">
+                {currentTimeframe.toUpperCase()}
+              </Badge>
+            </div>
               
               {/* Informações OHLC */}
               {candleData && candleData.length > 0 && (
