@@ -148,6 +148,10 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
     }
   }, [isAdmin, user?.id, isAuthenticated, isInitialized]);
 
+  // ✅ REFATORAÇÃO: Otimização de Performance (Conforme VOLATILE_MARKET_SAFETY.md)
+  const isInitialLoad = useRef(true);
+  const lastUserId = useRef(user?.id);
+
   useEffect(() => {
     console.log('🔍 ESTIMATED BALANCE HOOK - useEffect triggered:', { 
       userId: user?.id, 
@@ -156,7 +160,14 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
       isInitialized,
       hasToken: !!localStorage.getItem('access_token')
     });
-    fetchEstimatedBalance();
+    
+    // ✅ REFATORAÇÃO: Executar apenas quando necessário
+    if (isInitialLoad.current || lastUserId.current !== user?.id) {
+      console.log('🔍 ESTIMATED BALANCE HOOK - Fetching estimated balance from API...');
+      fetchEstimatedBalance();
+      isInitialLoad.current = false;
+      lastUserId.current = user?.id;
+    }
     
     // Desabilitar polling automático - será controlado pelo useRealtimeDashboard
     // const interval = setInterval(() => {
@@ -164,7 +175,7 @@ export const useEstimatedBalance = (): UseEstimatedBalanceReturn => {
     // }, 30000);
     
     // return () => clearInterval(interval);
-  }, [fetchEstimatedBalance]);
+  }, [user?.id, isAdmin, isAuthenticated, isInitialized]); // ✅ REFATORAÇÃO: Removido fetchEstimatedBalance para evitar loop
 
   return {
     data,

@@ -166,7 +166,7 @@ export const useLNMarketsRefactoredDashboard = (): UseLNMarketsRefactoredDashboa
     if (isAuthenticated && user?.id) {
       fetchDashboardData();
     }
-  }, [isAuthenticated, user?.id, fetchDashboardData]);
+  }, [isAuthenticated, user?.id]); // Removido fetchDashboardData para evitar loop
 
   // Função para refresh manual
   const refresh = useCallback(async () => {

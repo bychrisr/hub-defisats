@@ -56,13 +56,13 @@ export const useMarketTicker = () => {
   useEffect(() => {
     fetchMarketTicker();
 
-    // Atualizar a cada 30 segundos
+    // Atualizar a cada 30 segundos (conforme VOLATILE_MARKET_SAFETY.md)
     const interval = setInterval(() => {
       fetchMarketTicker();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, []); // Array vazio para executar apenas uma vez
 
   return {
     data,

@@ -126,6 +126,10 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     updateHistoricalData
   ]);
 
+  // ✅ REFATORAÇÃO: Prevenção de Loops Infinitos (Conforme documentação)
+  const isInitialLoad = useRef(true);
+  const lastUser = useRef(user?.id);
+
   // Efeito para gerenciar os intervalos
   useEffect(() => {
     // DESABILITAR COMPLETAMENTE para admins
@@ -135,13 +139,22 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
       return;
     }
 
+    // ✅ REFATORAÇÃO: Carregamento inicial vs recarregamento
     if (enabled && isAuthenticated && user?.id) {
-      // Atualização inicial imediata
-      updateMainData();
-      updateHistoricalData();
-
-      // Iniciar intervalos
-      startAllIntervals();
+      if (isInitialLoad.current || lastUser.current !== user?.id) {
+        console.log('🚀 REALTIME DASHBOARD - Initial load or user changed');
+        // Atualização inicial imediata
+        updateMainData();
+        updateHistoricalData();
+        
+        // Iniciar intervalos apenas no carregamento inicial
+        if (isInitialLoad.current) {
+          startAllIntervals();
+          isInitialLoad.current = false;
+        }
+        
+        lastUser.current = user?.id;
+      }
     } else {
       // Limpar intervalos quando não autenticado ou desabilitado
       clearAllIntervals();
@@ -156,7 +169,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
     isAuthenticated,
     user?.id,
     isAdmin
-    // Removidas dependências que causam re-execução constante
+    // ✅ REFATORAÇÃO: Dependências mínimas para evitar loops
   ]);
 
   // Função para forçar atualização manual de todos os dados

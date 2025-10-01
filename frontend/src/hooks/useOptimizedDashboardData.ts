@@ -184,7 +184,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
       if (intervalId) clearInterval(intervalId);
       if (healthCheckId) clearInterval(healthCheckId);
     };
-  }, [isAuthenticated, user?.id, isConnected, fetchDashboardData]);
+  }, [isAuthenticated, user?.id, isConnected]); // Removido fetchDashboardData para evitar loop
 
   // Carregar dados inicialmente
   useEffect(() => {
@@ -201,9 +201,9 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     } else {
       console.log('❌ OPTIMIZED DASHBOARD - Not authenticated or no user ID');
     }
-  }, [isAuthenticated, user?.id, isAdmin]);
+  }, [isAuthenticated, user?.id, isAdmin]); // Mantém dependências necessárias
 
-  // ✅ FUNÇÃO DE REFRESH OTIMIZADA: WebSocket Primário + HTTP Fallback
+  // ✅ REFATORAÇÃO: Sistema Híbrido Otimizado (Conforme documentação)
   const refresh = useCallback(async () => {
     console.log('🔄 OPTIMIZED DASHBOARD - Manual refresh triggered...');
     
@@ -221,7 +221,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     // ✅ FALLBACK: HTTP apenas quando WebSocket não está disponível
     console.log('🔄 OPTIMIZED DASHBOARD - WebSocket não disponível, usando HTTP fallback...');
     await fetchDashboardData();
-  }, [fetchDashboardData, isConnected, sendMessage, user?.id]);
+  }, [isConnected, sendMessage, user?.id]); // ✅ REFATORAÇÃO: Removido fetchDashboardData para evitar loop
 
   // ✅ FUNÇÃO DE RECONEXÃO AUTOMÁTICA
   const reconnectWebSocket = useCallback(() => {
