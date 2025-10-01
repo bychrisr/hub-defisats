@@ -23,6 +23,9 @@ interface TradingViewWidgetConfig {
   details: boolean;
   hotlist: boolean;
   calendar: boolean;
+  hide_side_toolbar: boolean;
+  hide_top_toolbar: boolean;
+  hide_legend: boolean;
   studies: string[];
   show_popup_button: boolean;
   popup_width: string;

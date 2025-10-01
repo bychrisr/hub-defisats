@@ -82,10 +82,13 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         locale: 'en',
         toolbar_bg: theme === 'dark' ? '#1e1e1e' : '#f1f3f6',
         enable_publishing: false,
-        allow_symbol_change: true,
-        details: true,
-        hotlist: true,
-        calendar: true,
+        allow_symbol_change: false, // Desabilitar mudança de símbolo
+        details: false, // Remover painel de detalhes
+        hotlist: false, // Remover hotlist
+        calendar: false, // Remover calendário
+        hide_side_toolbar: true, // Esconder toolbar lateral
+        hide_top_toolbar: false, // Manter toolbar superior
+        hide_legend: false, // Manter legenda dos indicadores
         studies: [
           'MACD@tv-basicstudies',
           'RSI@tv-basicstudies',
