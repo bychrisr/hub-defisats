@@ -51,6 +51,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       
       if (window.TradingView) {
         console.log('✅ TRADINGVIEW - TradingView script already loaded');
+        console.log('🔄 TRADINGVIEW - Setting isScriptLoaded to true');
         setIsScriptLoaded(true);
         return;
       }
@@ -61,6 +62,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       script.async = true;
       script.onload = () => {
         console.log('✅ TRADINGVIEW - Script loaded successfully');
+        console.log('🔄 TRADINGVIEW - Setting isScriptLoaded to true');
         setIsScriptLoaded(true);
       };
       script.onerror = (error) => {
