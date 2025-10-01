@@ -60,6 +60,7 @@ Esta documentação técnica fornece informações detalhadas sobre o desenvolvi
 ### 🏗️ **Arquitetura**
 - **[overview.md](architecture/overview.md)** - Visão geral da arquitetura
 - **[exchange-credentials-architecture.md](architecture/exchange-credentials-architecture.md)** - Sistema escalável de exchanges
+- **[data-centralization.md](architecture/data-centralization.md)** - Sistema centralizado de dados (MarketDataContext)
 - **[workers.md](architecture/workers.md)** - Sistema de workers
 - **[simulations.md](architecture/simulations.md)** - Sistema de simulações
 - **[charts.md](architecture/charts.md)** - Sistema de gráficos
