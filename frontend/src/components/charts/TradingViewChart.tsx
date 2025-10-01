@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface TradingViewChartProps {
   symbol?: string;
@@ -14,7 +15,7 @@ interface TradingViewChartProps {
 export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   symbol = 'BINANCE:BTCUSDT',
   interval = '60',
-  theme = 'dark',
+  theme: propTheme,
   height = 500,
   width = '100%',
   className = ''
@@ -24,6 +25,37 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  
+  // Usar tema da aplicação se não especificado
+  const { theme: appTheme } = useTheme();
+  const theme = propTheme || appTheme;
+
+  // Função para gerar tema transparente que se adapta à aplicação
+  const getTransparentThemeConfig = (isDark: boolean) => {
+    console.log('🎨 TRADINGVIEW - Gerando tema transparente:', isDark ? 'dark' : 'light');
+    
+    return {
+      theme: isDark ? 'dark' : 'light',
+      background: 'transparent',
+      toolbar_bg: 'transparent',
+      grid_color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+      crosshair_color: isDark ? '#ffffff' : '#000000',
+      text_color: isDark ? '#ffffff' : '#000000',
+      candle_up_color: isDark ? '#26a69a' : '#26a69a',
+      candle_down_color: isDark ? '#ef5350' : '#ef5350',
+      wick_up_color: isDark ? '#26a69a' : '#26a69a',
+      wick_down_color: isDark ? '#ef5350' : '#ef5350',
+      volume_up_color: isDark ? 'rgba(38,166,154,0.3)' : 'rgba(38,166,154,0.3)',
+      volume_down_color: isDark ? 'rgba(239,83,80,0.3)' : 'rgba(239,83,80,0.3)',
+      border_up_color: isDark ? '#26a69a' : '#26a69a',
+      border_down_color: isDark ? '#ef5350' : '#ef5350',
+      border_visible: false,
+      wick_thick: 1,
+      border_thick: 1,
+      font_family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+      font_size: 12
+    };
+  };
 
   // Carregar script TradingView
   useEffect(() => {
@@ -106,7 +138,13 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       console.log('🔄 TRADINGVIEW - Criando widget...');
       console.log('🔄 TRADINGVIEW - window.TradingView.widget tipo:', typeof window.TradingView.widget);
       
-      // Criar widget
+      // Gerar configuração de tema transparente
+      const isDark = theme === 'dark';
+      const transparentTheme = getTransparentThemeConfig(isDark);
+      
+      console.log('🎨 TRADINGVIEW - Aplicando tema transparente:', transparentTheme);
+      
+      // Criar widget com tema transparente
       widgetRef.current = new (window.TradingView.widget as any)({
         container_id: containerId,
         width: width,
@@ -114,10 +152,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         symbol: symbol,
         interval: interval,
         timezone: 'Etc/UTC',
-        theme: theme,
-        style: '1',
         locale: 'en',
-        toolbar_bg: theme === 'dark' ? '#1e1e1e' : '#f1f3f6',
         enable_publishing: false,
         allow_symbol_change: false,
         details: false,
@@ -129,7 +164,9 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         studies: [],
         show_popup_button: true,
         popup_width: '1000',
-        popup_height: '650'
+        popup_height: '650',
+        // Aplicar tema transparente
+        ...transparentTheme
       });
 
       console.log('✅ TRADINGVIEW - Widget criado com sucesso');
