@@ -4,6 +4,55 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.2] - 2025-01-09
+
+### 🔧 **CORREÇÕES CRÍTICAS: Fluxo de Cadastro Gratuito**
+
+#### ✅ **Problemas Resolvidos**
+- **Fluxo de cadastro gratuito**: Plano gratuito estava indo para payment em vez de credenciais
+- **Erros de JavaScript**: `Cannot read properties of null (reading 'completedSteps')`
+- **Renderização de objetos**: Tentativa de renderizar objeto como React child
+- **Incompatibilidade Prisma**: Versões diferentes causando corrupção do client
+- **Senha sem números**: Auto-fill Test Data não incluía números na senha
+
+#### 🔧 **Correções Implementadas**
+
+##### **1. Fluxo de Cadastro Gratuito**
+- **Backend**: Plano `free` agora vai direto para `credentials` (pula `payment`)
+- **Frontend**: Navegação correta implementada com `handleContinueWithPlan()`
+- **Estado**: Inicialização correta do `sessionToken` no `RegisterPlan`
+
+##### **2. Correções de Erros JavaScript**
+- **useRegistration.ts**: Proteção contra `null` progress em todas as funções
+- **RegisterCredentials.tsx**: Extração correta do `planId` de objetos
+- **Estado**: Uso de optional chaining (`?.`) para evitar erros de null
+
+##### **3. Correções do Prisma Client**
+- **Versões**: Sincronizadas `prisma@5.22.0` e `@prisma/client@5.22.0`
+- **Regeneração**: Client regenerado com schema válido
+- **Tipos**: Modelo `registrationProgress` agora disponível corretamente
+
+##### **4. Melhorias na Interface**
+- **Auto-fill**: Senha agora inclui números (formato: `Test[100-999]!@#`)
+- **Limpeza**: Arquivos `.env` desnecessários removidos
+- **Organização**: Mantido apenas `.env.development` em `config/env/`
+
+#### 🧪 **Testes Realizados**
+- ✅ Fluxo completo de cadastro gratuito
+- ✅ Navegação correta: Personal Data → Plan Selection → Credentials
+- ✅ Validação de senhas com números
+- ✅ Backend e frontend funcionando sem erros
+
+#### 📁 **Arquivos Modificados**
+- `backend/src/services/registration.service.ts`
+- `frontend/src/hooks/useRegistration.ts`
+- `frontend/src/pages/RegisterPlan.tsx`
+- `frontend/src/pages/RegisterCredentials.tsx`
+- `frontend/src/pages/Register.tsx`
+- `config/env/.env.development`
+
+---
+
 ## [v2.3.1] - 2025-09-28
 
 ### 📱 **OTIMIZAÇÃO MOBILE: Layout Responsivo para Dashboard**
