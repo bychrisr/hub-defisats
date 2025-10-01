@@ -47,8 +47,8 @@ export const useHistoricalData = ({
     return 60; // Default 1h
   }, []);
 
-  // Carregar dados iniciais
-  const loadInitialData = useCallback(async () => {
+  // Carregar dados iniciais (sem useCallback para evitar problemas de dependência)
+  const loadInitialData = async () => {
     console.log('🔄 HISTORICAL - loadInitialData called:', { enabled, loadingRef: loadingRef.current });
     if (!enabled || loadingRef.current) {
       console.log('🔄 HISTORICAL - Early return from loadInitialData:', { enabled, loadingRef: loadingRef.current });
@@ -97,7 +97,7 @@ export const useHistoricalData = ({
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [symbol, timeframe, initialLimit, enabled]);
+  };
 
   // Carregar mais dados históricos
   const loadMoreHistorical = useCallback(async () => {
