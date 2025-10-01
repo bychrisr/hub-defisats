@@ -106,6 +106,18 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
   // Usar dados históricos se habilitado, senão usar props
   const effectiveCandleData = useApiData ? historicalData : candleData;
+  
+  // Debug logs
+  console.log('🔍 LIGHTWEIGHT CHART - Debug info:', {
+    useApiData,
+    historicalDataLength: historicalData?.length || 0,
+    candleDataLength: candleData?.length || 0,
+    effectiveCandleDataLength: effectiveCandleData?.length || 0,
+    candleLoading,
+    candleError,
+    hasMoreData,
+    isLoadingMoreHistorical
+  });
 
   // Hook para indicadores
   const { indicators, addIndicator, removeIndicator, toggleIndicator } = useIndicators();

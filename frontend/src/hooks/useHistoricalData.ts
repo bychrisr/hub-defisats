@@ -173,7 +173,7 @@ export const useHistoricalData = ({
     if (enabled) {
       loadInitialData();
     }
-  }, [enabled, loadInitialData]);
+  }, [enabled, symbol, timeframe, initialLimit]); // Remover loadInitialData das dependências
 
   return {
     candleData,
