@@ -50,6 +50,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { RouteGuard } from '@/components/guards/RouteGuard';
 import { Tooltip } from '@/components/ui/tooltip';
 import TradingViewChart from '@/components/charts/TradingViewChart';
+import LightweightLiquidationChart from '@/components/charts/LightweightLiquidationChart';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -1973,6 +1974,16 @@ export default function Dashboard() {
             liquidationPrice={50000}
             showLiquidationLine={true}
           />
+
+          {/* Novo card: gráfico leve com linha de liquidação */}
+          <div className="mt-6">
+            <LightweightLiquidationChart
+              symbol="BINANCE:BTCUSDT"
+              height={220}
+              liquidationPrice={50000}
+              className="w-full"
+            />
+          </div>
         </div>
     </RouteGuard>
   );
