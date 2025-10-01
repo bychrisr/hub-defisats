@@ -204,12 +204,6 @@ export default function Dashboard() {
     return estimatedBalance.data.total_invested || 0;
   }, [estimatedBalance.data]);
   
-  const calculateNetProfit = useCallback(() => {
-    const totalPnl = totalPL || 0;
-    const feesPaid = calculateFeesPaid();
-    return totalPnl - feesPaid;
-  }, [totalPL, calculateFeesPaid]);
-  
   const calculateFeesPaid = useCallback(() => {
     // Usar dados do estimated-balance como fonte primária para fees
     if (estimatedBalance.data?.total_fees !== undefined) {
@@ -218,6 +212,12 @@ export default function Dashboard() {
     // Fallback para dados históricos se disponível
     return historicalMetrics?.totalFees || 0;
   }, [estimatedBalance.data?.total_fees, historicalMetrics?.totalFees]);
+  
+  const calculateNetProfit = useCallback(() => {
+    const totalPnl = totalPL || 0;
+    const feesPaid = calculateFeesPaid();
+    return totalPnl - feesPaid;
+  }, [totalPL, calculateFeesPaid]);
   
   const calculateTotalProfitability = () => {
     const netProfit = calculateNetProfit();
