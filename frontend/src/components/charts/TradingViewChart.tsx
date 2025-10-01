@@ -322,6 +322,15 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
           console.log('✅ TRADINGVIEW - Widget pronto, gráfico disponível');
           setIsLoading(false);
           try {
+            // Expor para debug no console
+            (window as any).__tvWidget = widgetRef.current;
+            const chart = widgetRef.current.chart && widgetRef.current.chart();
+            (window as any).__tvChart = chart;
+            console.log('🔎 TRADINGVIEW - Expostos no window: __tvWidget e __tvChart');
+          } catch (e) {
+            console.warn('⚠️ TRADINGVIEW - Falha ao expor objetos para debug:', e);
+          }
+          try {
             const chart = widgetRef.current.chart();
             console.log('🔧 TRADINGVIEW - Chart API disponível?', !!chart);
             console.log('🔧 TRADINGVIEW - Métodos do chart:', chart ? Object.keys(chart) : 'N/A');
