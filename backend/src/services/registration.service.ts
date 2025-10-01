@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import crypto from 'crypto';
-import bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 
 // Schemas for validation
@@ -89,7 +89,7 @@ export class RegistrationService {
           email_marketing_consent: data.emailMarketingConsent || false,
           email_marketing_consent_at: data.emailMarketingConsent ? new Date() : null,
           plan_type: 'free', // Default plan
-          is_active: false, // Will be activated after payment
+          is_active: false, // Will be activated on first login
         }
       });
 
@@ -105,6 +105,7 @@ export class RegistrationService {
             username: data.username,
             email: data.email,
             couponCode: data.couponCode,
+            emailMarketingConsent: data.emailMarketingConsent,
           },
           session_token: sessionToken,
           expires_at: expiresAt,
@@ -142,18 +143,21 @@ export class RegistrationService {
 
       // Check coupon if provided
       let couponData = null;
-      if (progress.personal_data?.couponCode) {
-        couponData = await this.validateCoupon(progress.personal_data.couponCode);
+      if (progress.personal_data && typeof progress.personal_data === 'object' && 'couponCode' in progress.personal_data) {
+        const personalData = progress.personal_data as any;
+        if (personalData.couponCode) {
+          couponData = await this.validateCoupon(personalData.couponCode);
+        }
       }
 
       // Determine next step based on plan and coupon
       let nextStep = 'payment';
       if (data.planId === 'free') {
-        nextStep = 'completed'; // Free plan completes registration immediately
+        nextStep = 'credentials'; // Free plan goes directly to API credentials
       } else if (couponData?.planType === 'lifetime') {
         nextStep = 'credentials'; // Skip payment for lifetime coupons
       } else if (couponData?.discountType === 'percentage' && couponData?.discountValue === 100) {
-        nextStep = 'completed'; // 100% discount coupon completes registration immediately
+        nextStep = 'credentials'; // 100% discount coupon goes to credentials
       }
 
       // Update registration progress
@@ -163,62 +167,28 @@ export class RegistrationService {
           current_step: nextStep,
           completed_steps: [...progress.completed_steps as string[], 'plan_selection'],
           selected_plan: data.planId,
-          coupon_code: progress.personal_data?.couponCode,
+          coupon_code: progress.personal_data && typeof progress.personal_data === 'object' && 'couponCode' in progress.personal_data 
+            ? (progress.personal_data as any).couponCode 
+            : null,
         }
       });
 
-      // If free plan or 100% discount coupon, activate user and complete registration
-      if (data.planId === 'free' || (couponData?.discountType === 'percentage' && couponData?.discountValue === 100)) {
-        const planType = data.planId === 'free' ? 'free' : data.planId;
-        
-             const updatedUser = await this.prisma.user.update({
-               where: { id: progress.user_id },
-               data: {
-                 is_active: true,
-                 plan_type: planType,
-               }
-             });
+      // Update user plan
+      await this.prisma.user.update({
+        where: { id: progress.user_id },
+        data: {
+          plan_type: data.planId as any,
+        }
+      });
 
-        // Mark registration as completed
-        await this.prisma.registrationProgress.update({
-          where: { id: progress.id },
-          data: {
-            current_step: 'completed',
-            completed_steps: [...progress.completed_steps as string[], 'plan_selection', 'completed'],
-          }
-        });
+      console.log('✅ REGISTRATION - Plan selected, next step:', nextStep);
 
-        // Generate JWT token for auto-login
-        console.log('🔑 REGISTRATION - Generating JWT token for user:', updatedUser.id);
-        
-        const completionReason = data.planId === 'free' ? 'Free plan' : '100% discount coupon';
-        console.log(`✅ REGISTRATION - ${completionReason} selected, user activated and registration completed`);
-
-        return {
-          success: true,
-          nextStep,
-          couponData,
-          message: 'Plan selected successfully',
-          // Include user data and token for auto-login
-          user: {
-            id: updatedUser.id,
-            email: updatedUser.email,
-            username: updatedUser.username,
-            plan_type: updatedUser.plan_type,
-            is_active: updatedUser.is_active,
-          },
-          token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOGI2ZjZiMC0zNDAwLTQ3MzAtYjk1MS0yODY4NTJlZDUyYjEiLCJlbWFpbCI6InRlc3Q3ODlAZXhhbXBsZS5jb20iLCJwbGFuVHlwZSI6ImZyZWUiLCJpYXQiOjE3MzgyNjM1NTUsImV4cCI6MTczODI2NzE1NX0.test-signature'
-        };
-      } else {
-        console.log('✅ REGISTRATION - Plan selected, next step:', nextStep);
-        
-        return {
-          success: true,
-          nextStep,
-          couponData,
-          message: 'Plan selected successfully'
-        };
-      }
+      return {
+        success: true,
+        nextStep,
+        couponData,
+        message: 'Plan selected successfully'
+      };
 
     } catch (error) {
       console.error('❌ REGISTRATION - Error selecting plan:', error);
@@ -280,7 +250,7 @@ export class RegistrationService {
         throw new Error('Registration progress not found');
       }
 
-      // Update user with credentials and activate account
+      // Update user with credentials (user will be activated on first login)
       await this.prisma.user.update({
         where: { id: progress.user_id },
         data: {
@@ -288,7 +258,7 @@ export class RegistrationService {
           ln_markets_api_secret: data.lnMarketsApiSecret,
           ln_markets_passphrase: data.lnMarketsPassphrase,
           plan_type: progress.selected_plan as any,
-          is_active: true,
+          // User will be activated on first login
         }
       });
 

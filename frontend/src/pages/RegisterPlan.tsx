@@ -301,16 +301,16 @@ const featureCategories: FeatureCategory[] = [
 export default function RegisterPlan() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectPlan, isLoading, error, clearError } = useRegistration();
+  const { selectPlan, isLoading, error, clearError, initializeRegistration } = useRegistration();
   const [selectedPlan, setSelectedPlan] = useState<string>('advanced');
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
 
-  // TODO: Reativar verificação quando backend estiver pronto
-  // useEffect(() => {
-  //   if (!location.state?.personalData) {
-  //     navigate('/register');
-  //   }
-  // }, [location.state, navigate]);
+  // Initialize registration with session token from location state
+  useEffect(() => {
+    if (location.state?.sessionToken) {
+      initializeRegistration(location.state.sessionToken, location.state.progress);
+    }
+  }, [location.state, initializeRegistration]);
 
   const getPrice = (plan: Plan) => {
     switch (billingPeriod) {
@@ -363,6 +363,26 @@ export default function RegisterPlan() {
       };
 
       console.log('🚀 Plan data being sent:', planData);
+      
+      // Chamar a função de seleção de plano do hook
+      await selectPlan(planData);
+      
+    } catch (error) {
+      console.error('Error selecting plan:', error);
+    }
+  };
+
+  const handleContinueWithPlan = async (planId: string) => {
+    try {
+      clearError();
+      
+      const planData = {
+        planId: planId as 'free' | 'basic' | 'advanced' | 'pro' | 'lifetime',
+        billingPeriod: billingPeriod,
+        sessionToken: location.state?.sessionToken,
+      };
+
+      console.log('🚀 Plan data being sent (direct):', planData);
       
       // Chamar a função de seleção de plano do hook
       await selectPlan(planData);
@@ -508,10 +528,24 @@ export default function RegisterPlan() {
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handlePlanSelect(plan.id);
+                      if (plan.id === 'free') {
+                        // For free plan, immediately proceed with the correct plan
+                        handleContinueWithPlan(plan.id);
+                      } else {
+                        // For other plans, just select
+                        handlePlanSelect(plan.id);
+                      }
                     }}
+                    disabled={isLoading}
                   >
-                    {plan.buttonText}
+                    {isLoading && selectedPlan === plan.id ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                        <span>Processing...</span>
+                      </div>
+                    ) : (
+                      plan.buttonText
+                    )}
                   </Button>
                 </CardHeader>
                 
@@ -612,6 +646,33 @@ export default function RegisterPlan() {
         </div>
 
 
+
+        {/* Continue Button */}
+        <div className="text-center mt-12">
+          <Button
+            onClick={handleContinue}
+            disabled={isLoading}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-semibold shadow-lg shadow-blue-500/25 transition-all duration-200"
+          >
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <span>Processing...</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <span>Continue with {selectedPlanData?.name} Plan</span>
+                <ArrowRight className="h-5 w-5" />
+              </div>
+            )}
+          </Button>
+          
+          {error && (
+            <div className="mt-4 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+        </div>
 
         {/* Footer */}
         <div className="text-center mt-8">

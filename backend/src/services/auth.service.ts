@@ -231,15 +231,38 @@ export class AuthService {
       throw new Error('Invalid email/username or password');
     }
 
-    if (!user.is_active) {
-      throw new Error('Account is deactivated');
+    // Check if this is the first login
+    const isFirstLogin = !user.last_login_at;
+    
+    if (isFirstLogin) {
+      console.log('🎉 AUTH SERVICE - First login detected for user:', user.id);
+      
+      // Activate user on first login
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          is_active: true,
+          last_login_at: new Date(),
+          last_activity_at: new Date() 
+        },
+      });
+      
+      console.log('✅ AUTH SERVICE - User activated on first login');
+    } else if (!user.is_active) {
+      console.log('⚠️ AUTH SERVICE - User account is deactivated:', user.id);
+      throw new Error('Account is deactivated. Please contact support.');
+    } else {
+      // Update last activity for regular logins
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          last_login_at: new Date(),
+          last_activity_at: new Date() 
+        },
+      });
+      
+      console.log('✅ AUTH SERVICE - Regular login successful');
     }
-
-    // Update last activity
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { last_activity_at: new Date() },
-    });
 
     // Generate tokens
     const token = await this.generateAccessToken(user);

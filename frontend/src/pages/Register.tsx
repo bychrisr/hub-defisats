@@ -119,6 +119,7 @@ export default function Register() {
   // Auto-fill function for testing
   const autoFillForm = () => {
     const randomId = Math.random().toString(36).substring(2, 8);
+    const randomNumber = Math.floor(Math.random() * 1000) + 100; // Gera número entre 100-999
     const firstNames = ['João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lucia', 'Rafael', 'Camila', 'Diego', 'Fernanda'];
     const lastNames = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Pereira', 'Lima', 'Gomes'];
     const domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'teste.com'];
@@ -128,7 +129,7 @@ export default function Register() {
     const randomDomain = domains[Math.floor(Math.random() * domains.length)];
     const randomUsername = `${randomFirstName.toLowerCase()}${randomId}`;
     const randomEmail = `${randomUsername}@${randomDomain}`;
-    const randomPassword = `Test${randomId}!@#`;
+    const randomPassword = `Test${randomNumber}!@#`;
     
     // Set form values
     setValue('firstName', randomFirstName);

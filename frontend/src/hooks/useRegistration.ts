@@ -134,7 +134,7 @@ export const useRegistration = () => {
       const response = await registrationAPI.selectPlan({
         planId: data.planId!,
         billingPeriod: data.billingPeriod!,
-        sessionToken: state.sessionToken || undefined,
+        sessionToken: data.sessionToken || state.sessionToken || undefined,
       });
 
       console.log('✅ REGISTRATION - Plan selected:', response.data);
@@ -143,40 +143,19 @@ export const useRegistration = () => {
         ...prev,
         currentStep: response.data.nextStep,
         progress: {
-          ...prev.progress!,
           currentStep: response.data.nextStep,
-          completedSteps: [...prev.progress!.completedSteps, 'plan_selection'],
+          completedSteps: [...(prev.progress?.completedSteps || []), 'plan_selection'],
           selectedPlan: data.planId,
+          personalData: prev.progress?.personalData,
+          paymentData: prev.progress?.paymentData,
+          credentialsData: prev.progress?.credentialsData,
+          couponCode: prev.progress?.couponCode,
         },
       }));
 
       // Navigate to next step
-      if (response.data.nextStep === 'completed') {
-        // Free plan - auto-login and redirect to dashboard
-        if (response.data.user && response.data.token) {
-          // Store token and user data
-          localStorage.setItem('access_token', response.data.token);
-          
-          // Update auth store
-          const { setUser, setIsAuthenticated } = useAuthStore.getState();
-          setUser({
-            id: response.data.user.id,
-            email: response.data.user.email,
-            username: response.data.user.username,
-            plan_type: response.data.user.plan_type,
-            email_verified: false,
-            two_factor_enabled: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-          setIsAuthenticated(true);
-          
-          console.log('✅ REGISTRATION - Free plan auto-login successful');
-        }
-        
-        navigate('/dashboard', { replace: true });
-      } else if (response.data.nextStep === 'credentials') {
-        // Skip payment for lifetime coupons
+      if (response.data.nextStep === 'credentials') {
+        // Free plan or 100% discount - go directly to credentials
         navigate('/register/credentials', {
           state: {
             sessionToken: state.sessionToken,
@@ -232,10 +211,13 @@ export const useRegistration = () => {
         ...prev,
         currentStep: response.data.nextStep,
         progress: {
-          ...prev.progress!,
           currentStep: response.data.nextStep,
-          completedSteps: [...prev.progress!.completedSteps, 'payment'],
+          completedSteps: [...(prev.progress?.completedSteps || []), 'payment'],
           paymentData: data,
+          personalData: prev.progress?.personalData,
+          selectedPlan: prev.progress?.selectedPlan,
+          credentialsData: prev.progress?.credentialsData,
+          couponCode: prev.progress?.couponCode,
         },
       }));
 
@@ -285,10 +267,13 @@ export const useRegistration = () => {
         ...prev,
         currentStep: 'completed',
         progress: {
-          ...prev.progress!,
           currentStep: 'completed',
-          completedSteps: [...prev.progress!.completedSteps, 'credentials'],
+          completedSteps: [...(prev.progress?.completedSteps || []), 'credentials'],
           credentialsData: data,
+          personalData: prev.progress?.personalData,
+          selectedPlan: prev.progress?.selectedPlan,
+          paymentData: prev.progress?.paymentData,
+          couponCode: prev.progress?.couponCode,
         },
       }));
 

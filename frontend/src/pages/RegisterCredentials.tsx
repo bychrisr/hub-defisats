@@ -129,7 +129,9 @@ export default function RegisterCredentials() {
     username: 'johndoe',
     coupon_code: null
   };
-  const selectedPlan = location.state?.selectedPlan || 'free';
+  const selectedPlan = typeof location.state?.selectedPlan === 'string' 
+    ? location.state.selectedPlan 
+    : location.state?.selectedPlan?.planId || 'free';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
