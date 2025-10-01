@@ -48,10 +48,15 @@ import {
   RefreshCw,
   BarChart3,
   Clock,
-  User
+  User,
+  Play,
+  Pause,
+  CheckCircle
 } from 'lucide-react';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Automation {
   id: string;
@@ -72,12 +77,15 @@ export const Automations = () => {
   const [editingAutomation, setEditingAutomation] = useState<Automation | null>(
     null
   );
+  const [activeTab, setActiveTab] = useState<'active' | 'inactive' | 'all'>('active');
   const [formData, setFormData] = useState({
     user_id: '',
     type: 'margin_guard',
     config: '{}',
     is_active: true,
   });
+
+  const { theme } = useTheme();
 
   useEffect(() => {
     fetchAutomations();
@@ -91,6 +99,20 @@ export const Automations = () => {
       console.error('Error fetching automations:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para filtrar automações por status da aba
+  const getFilteredAutomations = () => {
+    switch (activeTab) {
+      case 'active':
+        return automations.filter(automation => automation.is_active === true);
+      case 'inactive':
+        return automations.filter(automation => automation.is_active === false);
+      case 'all':
+        return automations;
+      default:
+        return automations;
     }
   };
 
@@ -302,7 +324,39 @@ export const Automations = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto rounded-lg border border-border/50">
+              {/* Tabs */}
+              <div className="mb-6">
+                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'inactive' | 'all')} className="w-full">
+                  <TabsList className={cn(
+                    "grid w-full grid-cols-3 h-12",
+                    theme === 'dark' ? 'profile-tabs-glow' : 'profile-tabs-glow-light'
+                  )}>
+                    <TabsTrigger 
+                      value="active" 
+                      className="profile-tab-trigger text-sm font-medium"
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Active
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="inactive" 
+                      className="profile-tab-trigger text-sm font-medium"
+                    >
+                      <Pause className="h-4 w-4 mr-2" />
+                      Inactive
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="all" 
+                      className="profile-tab-trigger text-sm font-medium"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      All
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Active Automations Tab Content */}
+                  <TabsContent value="active" className="space-y-6">
+                    <div className="overflow-x-auto rounded-lg border border-border/50">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
@@ -339,7 +393,7 @@ export const Automations = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {automations.map((automation, index) => (
+                    {getFilteredAutomations().map((automation, index) => (
                       <TableRow 
                         key={automation.id}
                         className={cn(
@@ -405,9 +459,214 @@ export const Automations = () => {
                     ))}
                   </TableBody>
                 </Table>
+                    </div>
+                  </TabsContent>
+
+                  {/* Inactive Automations Tab Content */}
+                  <TabsContent value="inactive" className="space-y-6">
+                    <div className="overflow-x-auto rounded-lg border border-border/50">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                User
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Settings className="h-4 w-4" />
+                                Type
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Pause className="h-4 w-4" />
+                                Status
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                Created
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Zap className="h-4 w-4" />
+                                Actions
+                              </div>
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getFilteredAutomations().map((automation, index) => (
+                            <TableRow 
+                              key={automation.id}
+                              className={cn(
+                                "hover:bg-background/50 transition-colors duration-200",
+                                index % 2 === 0 ? "bg-background/20" : "bg-background/10"
+                              )}
+                            >
+                              <TableCell className="font-medium text-text-primary">
+                                {automation.user.email}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary" className="bg-orange-500/20 text-orange-600 border-orange-500/30">
+                                  {automation.type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary" className="bg-red-500/20 text-red-600 border-red-500/30">
+                                  <Pause className="h-3 w-3 mr-1" />
+                                  Inactive
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-text-secondary">
+                                {new Date(automation.created_at).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEdit(automation)}
+                                    className="hover:bg-primary/10 hover:border-primary/30"
+                                  >
+                                    <Edit className="h-3 w-3 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDelete(automation.id)}
+                                    className="hover:bg-red-500/10 hover:border-red-500/30 text-red-600"
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </TabsContent>
+
+                  {/* All Automations Tab Content */}
+                  <TabsContent value="all" className="space-y-6">
+                    <div className="overflow-x-auto rounded-lg border border-border/50">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                User
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Settings className="h-4 w-4" />
+                                Type
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Activity className="h-4 w-4" />
+                                Status
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                Created
+                              </div>
+                            </TableHead>
+                            <TableHead className="font-semibold text-text-primary">
+                              <div className="flex items-center gap-2">
+                                <Zap className="h-4 w-4" />
+                                Actions
+                              </div>
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getFilteredAutomations().map((automation, index) => (
+                            <TableRow 
+                              key={automation.id}
+                              className={cn(
+                                "hover:bg-background/50 transition-colors duration-200",
+                                index % 2 === 0 ? "bg-background/20" : "bg-background/10"
+                              )}
+                            >
+                              <TableCell className="font-medium text-text-primary">
+                                {automation.user.email}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary" className="bg-blue-500/20 text-blue-600 border-blue-500/30">
+                                  {automation.type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant="secondary" 
+                                  className={cn(
+                                    automation.is_active 
+                                      ? "bg-green-500/20 text-green-600 border-green-500/30"
+                                      : "bg-red-500/20 text-red-600 border-red-500/30"
+                                  )}
+                                >
+                                  {automation.is_active ? (
+                                    <>
+                                      <Play className="h-3 w-3 mr-1" />
+                                      Active
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Pause className="h-3 w-3 mr-1" />
+                                      Inactive
+                                    </>
+                                  )}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-text-secondary">
+                                {new Date(automation.created_at).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEdit(automation)}
+                                    className="hover:bg-primary/10 hover:border-primary/30"
+                                  >
+                                    <Edit className="h-3 w-3 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDelete(automation.id)}
+                                    className="hover:bg-red-500/10 hover:border-red-500/30 text-red-600"
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </CardContent>
-      </Card>
+          </Card>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent className="max-w-2xl backdrop-blur-xl bg-card/50 border-border/50 shadow-2xl profile-sidebar-glow">

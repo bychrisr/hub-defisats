@@ -4,6 +4,56 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.11] - 2025-01-09
+
+### 📑 **IMPLEMENTAÇÃO DE ABAS NO MESMO ESTILO EM AUTOMATIONS**
+
+#### ✅ **Abas TradingView-style Implementadas**
+- **Estrutura idêntica**: Mesmo padrão visual das abas em Positions.tsx
+- **Três abas**: Active, Inactive, All automations
+- **Ícones específicos**: Play (Active), Pause (Inactive), CheckCircle (All)
+- **Tema adaptativo**: Glow effects e cores que se adaptam ao tema dark/light
+- **Classes CSS**: profile-tabs-glow e profile-tab-trigger para consistência
+
+#### 🎨 **Design Consistente**
+- **TabsList**: Grid de 3 colunas com altura de 12 (h-12)
+- **TabsTrigger**: Classes profile-tab-trigger com font-medium
+- **Ícones**: Lucide icons específicos para cada tipo de automação
+- **Cores**: Verde para Active, Vermelho para Inactive, Azul para All
+- **Badges**: Cores diferenciadas por status (verde/vermelho/laranja/azul)
+
+#### 🔧 **Funcionalidade de Filtro**
+- **getFilteredAutomations()**: Função para filtrar por status da aba
+- **Active**: Filtra automations com is_active === true
+- **Inactive**: Filtra automations com is_active === false
+- **All**: Mostra todas as automations sem filtro
+- **Estado reativo**: activeTab state com useState
+
+#### 📊 **Tabelas Específicas por Aba**
+- **Active Tab**: Badges verdes com ícone Play
+- **Inactive Tab**: Badges vermelhos com ícone Pause
+- **All Tab**: Badges dinâmicos baseados no status real
+- **Headers personalizados**: Ícones específicos para cada aba
+- **Ações consistentes**: Edit e Delete em todas as abas
+
+#### 🛠️ **Arquivos Modificados**
+- `frontend/src/pages/Automations.tsx` - Implementação completa das abas
+- Imports adicionados: Tabs, TabsList, TabsTrigger, TabsContent, useTheme
+- Ícones adicionados: Play, Pause, CheckCircle
+- Estado adicionado: activeTab com useState
+- Função adicionada: getFilteredAutomations()
+
+#### 📚 **Funcionalidades Implementadas**
+- ✅ Abas com mesmo estilo visual de Positions
+- ✅ Filtro por status (Active/Inactive/All)
+- ✅ Ícones específicos para cada aba
+- ✅ Badges coloridos por status
+- ✅ Tabelas específicas para cada aba
+- ✅ Tema adaptativo (dark/light)
+- ✅ Classes CSS consistentes
+
+---
+
 ## [v2.3.10] - 2025-01-09
 
 ### 📋 **CRIAÇÃO DO PADRÃO OFICIAL DE GRÁFICOS**
