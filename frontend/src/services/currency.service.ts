@@ -53,11 +53,11 @@ class CurrencyService {
     try {
       console.log('Updating currency rates...');
 
-      // Fetch BTC price from backend (evita CORS) - usar fetch direto para evitar problemas com Axios
-      const btcResponse = await fetch('/api/market/index/public');
+      // Fetch BTC price from backend (evita CORS) - usar instância api configurada
+      const btcResponse = await api.get('/api/market/index/public');
 
-      if (btcResponse.ok) {
-        const result = await btcResponse.json();
+      if (btcResponse.status === 200) {
+        const result = btcResponse.data;
         if (result.success && result.data) {
           this.btcPrice = result.data.index;
         }

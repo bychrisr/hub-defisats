@@ -545,10 +545,10 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     try {
       console.log('🔍 POSITIONS CONTEXT - Fetching real positions, market index and menu from LN Markets...');
 
-      // Atualizar posições, índice e menu simultaneamente - usar fetch direto para market data para evitar conflitos
+      // Atualizar posições, índice e menu simultaneamente
       const [positionsResponse, indexResponse, menuResponse] = await Promise.all([
         api.get('/api/lnmarkets-robust/dashboard'),
-        fetch('/api/market/index/public').then(async res => ({ data: res.ok ? await res.json() : { success: false } })), // Use fetch direto para evitar conflitos
+        api.get('/api/market/index/public'), // Usar instância api configurada
         api.get('/api/menu')
       ]);
 
