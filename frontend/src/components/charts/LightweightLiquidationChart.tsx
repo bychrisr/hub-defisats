@@ -64,6 +64,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
+  const isInitialLoad = useRef(true); // Controle de carregamento inicial
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [showIndicators, setShowIndicators] = useState(false);
 
@@ -348,9 +349,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       indicatorSeries.push(indicatorSeriesInstance);
     }
 
-    // Variável para controlar se é o primeiro carregamento
-    const isInitialLoad = useRef(true);
-    
     // Configurar zoom inicial para mostrar aproximadamente 7 dias (apenas no primeiro carregamento)
     const setInitialZoom = () => {
       if (effectiveCandleData && effectiveCandleData.length > 0) {
