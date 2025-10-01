@@ -83,14 +83,16 @@ export default function Dashboard() {
   
   // Dados de posições otimizados
   const { positions: optimizedPositions } = useOptimizedPositions();
-  // Preço de liquidação calculado dinamicamente (média das posições com valor válido)
-  const liquidationPrice = useMemo(() => {
-    const values = (optimizedPositions ?? [])
-      .map((p: any) => Number((p as any).liquidation))
-      .filter((v: number) => Number.isFinite(v) && v > 0);
-    if (!values.length) return undefined;
-    const avg = values.reduce((a: number, b: number) => a + b, 0) / values.length;
-    return Math.round(avg);
+  // Linhas de liquidação: uma por posição válida
+  const liquidationLines = useMemo(() => {
+    const lines = (optimizedPositions ?? [])
+      .map((p: any, idx: number) => {
+        const price = Number((p as any).liquidation);
+        if (!Number.isFinite(price) || price <= 0) return null;
+        return { price: Math.round(price), label: p?.symbol ? `${p.symbol} #${idx + 1}` : `Pos #${idx + 1}` };
+      })
+      .filter(Boolean) as Array<{ price: number; label?: string }>;
+    return lines.length ? lines : undefined;
   }, [optimizedPositions]);
   
   // Dados de mercado otimizados (agora via contexto centralizado)
@@ -1974,24 +1976,24 @@ export default function Dashboard() {
 
         {/* TradingView Chart - Implementação funcional com integração de dados */}
         <div className="mt-6">
-          {!!liquidationPrice && (
+          {!!liquidationLines && liquidationLines.length > 0 && (
           <TradingViewChart 
             symbol="BINANCE:BTCUSDT"
             interval="60"
             theme="dark"
             height={500}
             className="w-full"
-            liquidationPrice={liquidationPrice}
+            liquidationPrice={undefined}
             showLiquidationLine={true}
           />)}
 
           {/* Novo card: gráfico leve com linha de liquidação */}
           <div className="mt-6">
-            {!!liquidationPrice && (
+            {!!liquidationLines && (
             <LightweightLiquidationChart
               symbol="BINANCE:BTCUSDT"
               height={220}
-              liquidationPrice={liquidationPrice}
+              liquidationLines={liquidationLines}
               className="w-full"
             />)}
           </div>

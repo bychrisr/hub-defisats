@@ -10,7 +10,8 @@ interface LightweightLiquidationChartProps {
   symbol?: string;
   height?: number;
   className?: string;
-  liquidationPrice: number;
+  liquidationPrice?: number; // compat: uma linha
+  liquidationLines?: Array<{ price: number; label?: string; color?: string }>; // múltiplas linhas
   /**
    * Série de preços para exibir contexto (opcional). Se ausente, mostramos apenas a linha de liquidação no eixo.
    */
@@ -23,6 +24,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   height = 220,
   className = '',
   liquidationPrice,
+  liquidationLines,
   linePriceData,
   candleData
 }) => {
@@ -72,17 +74,30 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       seriesRef.current = s;
     }
 
-    // Linha de liquidação (horizontal price line)
-    // Lightweight Charts não tem API nativa para linha horizontal infinita com label fora da série,
-    // mas podemos usar priceLine na(s) série(s) visível(is):
-    seriesRef.current?.createPriceLine({
-      price: liquidationPrice,
-      color: '#ff4444',
-      lineStyle: LineStyle.Solid,
-      lineWidth: 2,
-      axisLabelVisible: true,
-      title: `Liquidação: $${Number(liquidationPrice).toLocaleString()}`,
-    });
+    // Render das linhas de liquidação (uma ou múltiplas)
+    const series = seriesRef.current;
+    const createdLines: any[] = [];
+    const lines = (liquidationLines && liquidationLines.length > 0)
+      ? liquidationLines
+      : (typeof liquidationPrice === 'number' && liquidationPrice > 0
+          ? [{ price: liquidationPrice }]
+          : []);
+
+    for (const [idx, ln] of lines.entries()) {
+      const price = Number(ln.price);
+      if (!Number.isFinite(price) || price <= 0) continue;
+      const color = ln.color || '#ff4444';
+      const label = ln.label || `Liquidação${lines.length > 1 ? ` #${idx+1}` : ''}: $${price.toLocaleString()}`;
+      const pl = series?.createPriceLine({
+        price,
+        color,
+        lineStyle: LineStyle.Solid,
+        lineWidth: 2,
+        axisLabelVisible: true,
+        title: label,
+      });
+      if (pl) createdLines.push(pl);
+    }
 
     // Fit content inicial
     chart.timeScale().fitContent();
@@ -97,9 +112,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     return () => {
       ro.disconnect();
+      // remover priceLines criadas
+      if (seriesRef.current && createdLines.length) {
+        for (const l of createdLines) {
+          try { (seriesRef.current as any).removePriceLine(l); } catch {}
+        }
+      }
       chart.remove();
     };
-  }, [height, isDark, liquidationPrice, JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(candleData?.slice(-200))]);
+  }, [height, isDark, liquidationPrice, JSON.stringify(liquidationLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(candleData?.slice(-200))]);
 
   return (
     <Card className={className}>
