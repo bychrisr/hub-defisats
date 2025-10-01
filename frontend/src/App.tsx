@@ -40,6 +40,7 @@ import ProfileRefactored from '@/pages/ProfileRefactored';
 import ProfileRestored from '@/pages/ProfileRestored';
 import MarginGuard from '@/pages/MarginGuard';
 import { Automation } from '@/pages/Automation';
+import { Automations } from '@/pages/Automations';
 import { Logs } from '@/pages/Logs';
 import Reports from '@/pages/Reports';
 import Positions from '@/pages/Positions';
@@ -330,6 +331,18 @@ const App = () => {
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
                       <Automation />
+                    </ResponsiveLayout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+                  <Route
+              path="/automations"
+                element={
+                <ProtectedRoute>
+                  <RouteGuard requiredPlan="basic">
+                    <ResponsiveLayout>
+                      <Automations />
                     </ResponsiveLayout>
                   </RouteGuard>
                 </ProtectedRoute>
