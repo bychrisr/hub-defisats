@@ -49,6 +49,7 @@ import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
 import { RouteGuard } from '@/components/guards/RouteGuard';
 import { Tooltip } from '@/components/ui/tooltip';
+import TradingViewChart from '@/components/charts/TradingViewChart';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -1987,24 +1988,15 @@ export default function Dashboard() {
 
         </div>
 
-        {/* TradingView Chart - Será implementado */}
+        {/* TradingView Chart - Implementação funcional */}
         <div className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>TradingView Chart</CardTitle>
-              <CardDescription>
-                Gráfico avançado de preços BTC/USD será implementado aqui
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-64 bg-muted/50 rounded-lg">
-                <div className="text-center">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">TradingView Chart em desenvolvimento</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <TradingViewChart 
+            symbol="BINANCE:BTCUSDT"
+            interval="1"
+            theme="dark"
+            height={500}
+            className="w-full"
+          />
         </div>
     </RouteGuard>
   );
