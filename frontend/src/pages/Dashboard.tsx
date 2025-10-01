@@ -85,7 +85,26 @@ export default function Dashboard() {
   const { positions: optimizedPositions } = useOptimizedPositions();
   // Linhas de liquidação: uma por posição válida
   const liquidationLines = useMemo(() => {
-    const src = optimizedPositions ?? [];
+    // Tentar extrair posições de múltiplas fontes (hooks/contextos)
+    const candidates: any[] = [];
+    if (Array.isArray(optimizedPositions) && optimizedPositions.length) candidates.push(optimizedPositions);
+    const md: any = marketData?.positions ?? marketData?.data ?? marketData;
+    if (md) {
+      // candidatos comuns
+      const maybeArrays = [
+        md.positions,
+        md.openPositions,
+        md.runningPositions,
+        md.userPositions,
+        md?.lnMarkets?.positions,
+        md?.dashboard?.positions,
+      ].filter(Boolean);
+      for (const arr of maybeArrays) {
+        if (Array.isArray(arr) && arr.length) candidates.push(arr);
+      }
+    }
+
+    const src: any[] = candidates.length ? candidates[0] : [];
     const lines = src
       .map((p: any, idx: number) => {
         const candidate = (p as any);
@@ -103,11 +122,13 @@ export default function Dashboard() {
       .filter(Boolean) as Array<{ price: number; label?: string }>;
     console.log('📊 DASHBOARD - liquidationLines calculadas:', {
       positionsCount: src?.length ?? 0,
-      sample: src?.slice(0, 3),
+      sample: Array.isArray(src) ? src.slice(0, 3) : src,
+      fromOptimized: Array.isArray(optimizedPositions) ? optimizedPositions.length : 'n/a',
+      fromMarketDataKeys: marketData ? Object.keys(marketData as any) : 'n/a',
       lines
     });
     return lines.length ? lines : undefined;
-  }, [optimizedPositions]);
+  }, [optimizedPositions, marketData]);
   
   // Dados de mercado otimizados (agora via contexto centralizado)
   const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
