@@ -40,7 +40,6 @@ import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
 import { useFormatSats } from '@/hooks/useFormatSats';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
-import BTCChart from '@/components/charts/BTCChart';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -1988,9 +1987,24 @@ export default function Dashboard() {
 
         </div>
 
-        {/* BTC Chart - Gráfico de candlesticks */}
+        {/* TradingView Chart - Será implementado */}
         <div className="mt-6">
-          <BTCChart height={500} />
+          <Card>
+            <CardHeader>
+              <CardTitle>TradingView Chart</CardTitle>
+              <CardDescription>
+                Gráfico avançado de preços BTC/USD será implementado aqui
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-64 bg-muted/50 rounded-lg">
+                <div className="text-center">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">TradingView Chart em desenvolvimento</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
     </RouteGuard>
   );
