@@ -3,7 +3,7 @@
 > Índice gerado automaticamente de toda a documentação técnica do Hub DeFiSats
 
 **📅 Última Atualização**: 
-2025-09-28 01:15:00
+2025-10-01 15:20:00
 
 ## 📋 Visão Geral
 
@@ -369,6 +369,25 @@ Este índice é gerado automaticamente e lista todos os documentos disponíveis 
 2025-09-22
 
 ---
+
+## 📈 Charts
+
+### 📄 [Guia do Plugin Lightweight Charts (Frontend)](tradingview/lightweight-charts-guia.md)
+> Como usar, integrar e customizar o Lightweight Charts (opções, endpoints e boas práticas). Referência API: https://tradingview.github.io/lightweight-charts/docs/api
+
+- **📊 Linhas**: 120+
+- **💾 Tamanho**: 6K+
+- **📅 Modificado**: .system/docs/tradingview/lightweight-charts-guia.md
+2025-10-01
+
+### 📄 [Guia de Linhas Customizadas (Lightweight)](tradingview/linhas-customizadas.md)
+> Especificação das linhas horizontais (liquidação agora; futuras: stop, alvo, entrada).
+
+- **📊 Linhas**: 60+
+- **💾 Tamanho**: 4K+
+- **📅 Modificado**: .system/docs/tradingview/linhas-customizadas.md
+2025-10-01
+
 
 ## 🏗️ Infraestrutura
 

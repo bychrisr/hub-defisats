@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Card,
@@ -51,6 +51,7 @@ import { RouteGuard } from '@/components/guards/RouteGuard';
 import { Tooltip } from '@/components/ui/tooltip';
 import TradingViewChart from '@/components/charts/TradingViewChart';
 import LightweightLiquidationChart from '@/components/charts/LightweightLiquidationChart';
+import { marketDataService } from '@/services/marketData.service';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -146,7 +147,7 @@ export default function Dashboard() {
 
   // Extrair candles de marketData (unitário, tolerante a formatos)
   type Candle = { time: number; open: number; high: number; low: number; close: number };
-  const candleData: Candle[] | undefined = useMemo(() => {
+  const candleDataFromContext: Candle[] | undefined = useMemo(() => {
     const md: any = marketData ?? {};
     const candidates = [
       md.candles,
@@ -184,7 +185,31 @@ export default function Dashboard() {
 
     return mapped.length ? mapped : undefined;
   }, [marketData]);
+
+  // Fallback: buscar candles reais via API pública do backend se o contexto não tiver
+  const [fetchedCandles, setFetchedCandles] = useState<Candle[] | undefined>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    if (candleDataFromContext && candleDataFromContext.length) {
+      setFetchedCandles(undefined);
+      return;
+    }
+    (async () => {
+      try {
+        const raw = await marketDataService.getHistoricalData('BTCUSDT', '1h', 500);
+        if (cancelled) return;
+        const mapped = raw.map((c) => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })) as Candle[];
+        setFetchedCandles(mapped && mapped.length ? mapped : undefined);
+      } catch {
+        if (!cancelled) setFetchedCandles(undefined);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [candleDataFromContext]);
   
+  // Dados de candles a usar no gráfico (contexto ou fallback fetch)
+  const candleData = candleDataFromContext ?? fetchedCandles;
+
   // Hook de tempo real otimizado (menos frequente)
   const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
     positionsInterval: 10000, // 10 segundos (reduzido)

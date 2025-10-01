@@ -12,6 +12,8 @@ interface LightweightLiquidationChartProps {
   className?: string;
   liquidationPrice?: number; // compat: uma linha
   liquidationLines?: Array<{ price: number; label?: string; color?: string }>; // múltiplas linhas
+  timeframe?: string; // exibição e formatação do eixo
+  showToolbar?: boolean;
   /**
    * Série de preços para exibir contexto (opcional). Se ausente, mostramos apenas a linha de liquidação no eixo.
    */
@@ -26,7 +28,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   liquidationPrice,
   liquidationLines,
   linePriceData,
-  candleData
+  candleData,
+  timeframe = '1h',
+  showToolbar = true
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
@@ -48,7 +52,27 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         horzLines: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
       },
       rightPriceScale: { borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)' },
-      timeScale: { borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)', secondsVisible: false },
+      timeScale: {
+        borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
+        timeVisible: true,
+        secondsVisible: false,
+        tickMarkFormatter: (time) => {
+          // time pode ser número (segundos) ou BusinessDay
+          const ts = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
+          const d = new Date(ts * 1000);
+          const dd = String(d.getDate()).padStart(2, '0');
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const HH = String(d.getHours()).padStart(2, '0');
+          const MM = String(d.getMinutes()).padStart(2, '0');
+          // Para intraday, mostrar HH:mm; quando muda o dia, incluir dd/MM HH:mm
+          if (timeframe && /m|h/i.test(timeframe)) {
+            // marca maior (meia-noite) mostra data
+            if (d.getHours() === 0 && d.getMinutes() === 0) return `${dd}/${mm} ${HH}:${MM}`;
+            return `${HH}:${MM}`;
+          }
+          return `${dd}/${mm}`;
+        }
+      },
       crosshair: { mode: 1 },
       handleScroll: { mouseWheel: true, pressedMouseMove: true },
       handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
@@ -147,10 +171,21 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Linha de Liquidação</CardTitle>
-        <CardDescription>
-          {symbol} — {hasAnyLine ? 'linhas de liquidação' : 'sem dados de liquidação'}
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Linha de Liquidação</CardTitle>
+            <CardDescription>
+              {symbol} — {hasAnyLine ? 'linhas de liquidação' : 'sem dados de liquidação'}
+            </CardDescription>
+          </div>
+          {showToolbar && (
+            <div className="text-xs opacity-75 flex items-center gap-2">
+              <span>{symbol}</span>
+              <span>•</span>
+              <span>{timeframe.toUpperCase()}</span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div ref={containerRef} className="w-full rounded-lg overflow-hidden" style={{ height }} />

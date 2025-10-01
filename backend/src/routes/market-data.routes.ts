@@ -274,6 +274,31 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // Lightweight Charts - Configuração remota simples
+  // GET atual
+  let lightweightConfig: any = {
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    theme: 'dark',
+    options: {}
+  };
+
+  fastify.get('/lightweight/config', async (_req, _res) => {
+    return { success: true, data: lightweightConfig };
+  });
+
+  // PUT atualização
+  fastify.put('/lightweight/config', async (req, res) => {
+    try {
+      const body = req.body as any;
+      lightweightConfig = { ...lightweightConfig, ...body };
+      return { success: true, data: lightweightConfig };
+    } catch (e) {
+      res.status(400);
+      return { success: false, message: 'Invalid config body' };
+    }
+  });
+
   // Get LN Markets index data
   fastify.get('/market/index', {
     schema: {
