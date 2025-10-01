@@ -28,23 +28,36 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   // Carregar script TradingView
   useEffect(() => {
     const loadTradingViewScript = () => {
+      console.log('🔄 TRADINGVIEW - Iniciando carregamento do script...');
+      console.log('🔄 TRADINGVIEW - window.TradingView existe?', !!window.TradingView);
+      
       if (window.TradingView) {
+        console.log('✅ TRADINGVIEW - TradingView já carregado');
         setIsScriptLoaded(true);
         return;
       }
 
+      console.log('🔄 TRADINGVIEW - Criando script...');
       const script = document.createElement('script');
       script.src = 'https://s3.tradingview.com/tv.js';
       script.async = true;
+      
       script.onload = () => {
+        console.log('✅ TRADINGVIEW - Script carregado com sucesso');
+        console.log('🔄 TRADINGVIEW - window.TradingView após carregamento:', !!window.TradingView);
+        console.log('🔄 TRADINGVIEW - window.TradingView.widget:', !!window.TradingView?.widget);
         setIsScriptLoaded(true);
       };
-      script.onerror = () => {
+      
+      script.onerror = (error) => {
+        console.error('❌ TRADINGVIEW - Erro ao carregar script:', error);
+        console.error('❌ TRADINGVIEW - URL do script:', script.src);
         setError('Erro ao carregar script TradingView');
         setIsLoading(false);
       };
       
       document.head.appendChild(script);
+      console.log('✅ TRADINGVIEW - Script adicionado ao document.head');
     };
 
     loadTradingViewScript();
@@ -52,23 +65,47 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
   // Inicializar widget quando script estiver carregado
   useEffect(() => {
-    if (!isScriptLoaded || !containerRef.current || !window.TradingView) return;
+    console.log('🔄 TRADINGVIEW - useEffect de inicialização do widget disparado');
+    console.log('🔄 TRADINGVIEW - Estado atual:', {
+      isScriptLoaded,
+      hasContainer: !!containerRef.current,
+      hasTradingView: !!window.TradingView,
+      containerRef: containerRef.current
+    });
+
+    if (!isScriptLoaded || !containerRef.current || !window.TradingView) {
+      console.log('❌ TRADINGVIEW - Inicialização cancelada - requisitos não atendidos:', {
+        isScriptLoaded,
+        hasContainer: !!containerRef.current,
+        hasTradingView: !!window.TradingView
+      });
+      return;
+    }
 
     try {
+      console.log('🔄 TRADINGVIEW - Iniciando criação do widget...');
       setIsLoading(true);
       setError(null);
 
       const containerId = `tradingview_${symbol.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      console.log('🔄 TRADINGVIEW - Container ID:', containerId);
       
       // Criar container se não existir
       if (!document.getElementById(containerId)) {
+        console.log('🔄 TRADINGVIEW - Criando container...');
         const container = document.createElement('div');
         container.id = containerId;
         container.style.width = width;
         container.style.height = `${height}px`;
         containerRef.current.appendChild(container);
+        console.log('✅ TRADINGVIEW - Container criado');
+      } else {
+        console.log('✅ TRADINGVIEW - Container já existe');
       }
 
+      console.log('🔄 TRADINGVIEW - Criando widget...');
+      console.log('🔄 TRADINGVIEW - window.TradingView.widget tipo:', typeof window.TradingView.widget);
+      
       // Criar widget
       widgetRef.current = new (window.TradingView.widget as any)({
         container_id: containerId,
@@ -95,11 +132,21 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         popup_height: '650'
       });
 
+      console.log('✅ TRADINGVIEW - Widget criado com sucesso');
+      console.log('🔄 TRADINGVIEW - Configurando onChartReady...');
+
       // Aguardar widget estar pronto
       widgetRef.current.onChartReady(() => {
+        console.log('✅ TRADINGVIEW - Widget pronto, gráfico disponível');
         setIsLoading(false);
       });
     } catch (err) {
+      console.error('❌ TRADINGVIEW - Erro na inicialização do widget:', err);
+      console.error('❌ TRADINGVIEW - Detalhes do erro:', {
+        error: err,
+        message: err instanceof Error ? err.message : 'Erro desconhecido',
+        stack: err instanceof Error ? err.stack : 'Sem stack trace'
+      });
       setError('Erro ao inicializar widget TradingView');
       setIsLoading(false);
     }
