@@ -21,6 +21,7 @@ import { AuthGuard } from '@/components/guards/AuthGuard';
 import { SecureRoute } from '@/components/guards/SecureRoute';
 import { ProtectedRouteWrapper } from '@/components/guards/ProtectedRouteWrapper';
 import { RobustAuthGuard } from '@/components/guards/RobustAuthGuard';
+import { SimpleAuthGuard } from '@/components/guards/SimpleAuthGuard';
 import { SmartRedirect } from '@/components/guards/SmartRedirect';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
@@ -80,21 +81,21 @@ import TestRedirect from '@/pages/TestRedirect';
 
 const queryClient = new QueryClient();
 
-// Protected Route Component - Usa guard robusto de autenticação
+// Protected Route Component - Usa guard simples de autenticação
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return (
-    <RobustAuthGuard fallbackRoute="/login">
+    <SimpleAuthGuard fallbackRoute="/login">
       {children}
-    </RobustAuthGuard>
+    </SimpleAuthGuard>
   );
 };
 
-// Admin Route Component - Usa guard robusto com verificação de admin
+// Admin Route Component - Usa guard simples com verificação de admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return (
-    <RobustAuthGuard fallbackRoute="/login" requireAdmin={true}>
+    <SimpleAuthGuard fallbackRoute="/login" requireAdmin={true}>
       {children}
-    </RobustAuthGuard>
+    </SimpleAuthGuard>
   );
 };
 
@@ -172,24 +173,9 @@ const GlobalDynamicFavicon = () => {
 };
 
 const App = () => {
-  const { getProfile, setLoading } = useAuthStore();
-
-  useEffect(() => {
-    // Try to get profile on app load
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      console.log('🔄 APP - Token found, calling getProfile...');
-      // Don't call setLoading here - onRehydrateStorage already set it to true
-      getProfile().catch((error) => {
-        console.log('❌ APP - getProfile failed:', error);
-        // Don't clear tokens automatically - let the user decide
-        // The auth store will handle the error state
-      });
-    } else {
-      console.log('❌ APP - No token found');
-      setLoading(false);
-    }
-  }, [getProfile, setLoading]);
+  // ✅ CORREÇÃO: Removido useEffect problemático do App
+  // A inicialização agora é feita apenas pelo SimpleAuthGuard
+  // Isso evita loops infinitos e duplicação de lógica
 
   return (
     <QueryClientProvider client={queryClient}>
