@@ -85,13 +85,27 @@ export default function Dashboard() {
   const { positions: optimizedPositions } = useOptimizedPositions();
   // Linhas de liquidação: uma por posição válida
   const liquidationLines = useMemo(() => {
-    const lines = (optimizedPositions ?? [])
+    const src = optimizedPositions ?? [];
+    const lines = src
       .map((p: any, idx: number) => {
-        const price = Number((p as any).liquidation);
+        const candidate = (p as any);
+        const price = Number(
+          candidate.liquidation ??
+          candidate.liquidationPrice ??
+          candidate.liquidation_price ??
+          candidate.liq ??
+          candidate.liq_price ??
+          candidate.liqPrice
+        );
         if (!Number.isFinite(price) || price <= 0) return null;
         return { price: Math.round(price), label: p?.symbol ? `${p.symbol} #${idx + 1}` : `Pos #${idx + 1}` };
       })
       .filter(Boolean) as Array<{ price: number; label?: string }>;
+    console.log('📊 DASHBOARD - liquidationLines calculadas:', {
+      positionsCount: src?.length ?? 0,
+      sample: src?.slice(0, 3),
+      lines
+    });
     return lines.length ? lines : undefined;
   }, [optimizedPositions]);
   

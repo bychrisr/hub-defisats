@@ -122,12 +122,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     };
   }, [height, isDark, liquidationPrice, JSON.stringify(liquidationLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(candleData?.slice(-200))]);
 
+  const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle>Linha de Liquidação</CardTitle>
         <CardDescription>
-          {symbol} — preço de liquidação em {`$${Number(liquidationPrice).toLocaleString()}`}
+          {symbol} — {hasAnyLine ? 'linhas de liquidação' : 'sem dados de liquidação'}
         </CardDescription>
       </CardHeader>
       <CardContent>
