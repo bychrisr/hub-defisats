@@ -27,6 +27,7 @@ interface LightweightLiquidationChartProps {
   className?: string;
   liquidationPrice?: number; // compat: uma linha
   liquidationLines?: Array<{ price: number; label?: string; color?: string }>; // múltiplas linhas
+  takeProfitLines?: Array<{ price: number; label?: string; color?: string }>; // linhas de Take Profit
   timeframe?: string; // exibição e formatação do eixo
   showToolbar?: boolean;
   onTimeframeChange?: (timeframe: string) => void;
@@ -48,6 +49,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   className = '',
   liquidationPrice,
   liquidationLines,
+  takeProfitLines,
   linePriceData,
   candleData,
   timeframe = '1h',
@@ -230,17 +232,35 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     // Render das linhas de liquidação (uma ou múltiplas)
     const series = seriesRef.current;
     const createdLines: any[] = [];
-    const lines = (liquidationLines && liquidationLines.length > 0)
+    const liquidationLinesData = (liquidationLines && liquidationLines.length > 0)
       ? liquidationLines
       : (typeof liquidationPrice === 'number' && liquidationPrice > 0
           ? [{ price: liquidationPrice }]
           : []);
 
-    for (const [idx, ln] of lines.entries()) {
+    for (const [idx, ln] of liquidationLinesData.entries()) {
       const price = Number(ln.price);
       if (!Number.isFinite(price) || price <= 0) continue;
       const color = ln.color || '#ff4444';
-      const label = ln.label || `Liquidação${lines.length > 1 ? ` #${idx+1}` : ''}: $${price.toLocaleString()}`;
+      const label = ln.label || `Liquidação${liquidationLinesData.length > 1 ? ` #${idx+1}` : ''}: $${price.toLocaleString()}`;
+      const pl = series?.createPriceLine({
+        price,
+        color,
+        lineStyle: LineStyle.Solid,
+        lineWidth: 2,
+        axisLabelVisible: true,
+        title: label,
+      });
+      if (pl) createdLines.push(pl);
+    }
+
+    // Render das linhas de Take Profit (verdes)
+    const takeProfitLinesData = takeProfitLines || [];
+    for (const [idx, tp] of takeProfitLinesData.entries()) {
+      const price = Number(tp.price);
+      if (!Number.isFinite(price) || price <= 0) continue;
+      const color = tp.color || '#22c55e'; // Verde padrão para Take Profit
+      const label = tp.label || `Take Profit #${idx+1}: $${price.toLocaleString()}`;
       const pl = series?.createPriceLine({
         price,
         color,
@@ -274,13 +294,18 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     // Fit content inicial
     chart.timeScale().fitContent();
-    // Auto-range para incluir todas as priceLines
+    // Auto-range para incluir todas as priceLines (liquidação + take profit)
     try {
-      const prices = lines.map(l => l.price);
-      const min = Math.min(...prices);
-      const max = Math.max(...prices);
-      if (Number.isFinite(min) && Number.isFinite(max) && min < max) {
-        chart.priceScale('right').setVisibleLogicalRange({ from: min, to: max } as any);
+      const allPrices = [
+        ...liquidationLinesData.map(l => l.price),
+        ...takeProfitLinesData.map(tp => tp.price)
+      ];
+      if (allPrices.length > 0) {
+        const min = Math.min(...allPrices);
+        const max = Math.max(...allPrices);
+        if (Number.isFinite(min) && Number.isFinite(max) && min < max) {
+          chart.priceScale('right').setVisibleLogicalRange({ from: min, to: max } as any);
+        }
       }
     } catch {}
 
@@ -306,7 +331,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
       chart.remove();
     };
-  }, [height, isDark, liquidationPrice, currentTimeframe, JSON.stringify(liquidationLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(effectiveCandleData?.slice(-200))]);
+  }, [height, isDark, liquidationPrice, currentTimeframe, JSON.stringify(liquidationLines), JSON.stringify(takeProfitLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(effectiveCandleData?.slice(-200))]);
 
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 

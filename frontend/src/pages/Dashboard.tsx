@@ -131,6 +131,62 @@ export default function Dashboard() {
     });
     return lines.length ? lines : undefined;
   }, [optimizedPositions, marketData]);
+
+  // Linhas de Take Profit: uma por posição com takeprofit válido
+  const takeProfitLines = useMemo(() => {
+    // Tentar extrair posições de múltiplas fontes (hooks/contextos)
+    const candidates: any[] = [];
+    if (Array.isArray(optimizedPositions) && optimizedPositions.length) candidates.push(optimizedPositions);
+    const md: any = marketData?.positions ?? marketData?.data ?? marketData;
+    if (md) {
+      // candidatos comuns
+      const maybeArrays = [
+        md.positions,
+        md.openPositions,
+        md.runningPositions,
+        md.userPositions,
+        md?.lnMarkets?.positions,
+        md?.dashboard?.positions,
+      ].filter(Boolean);
+      for (const arr of maybeArrays) {
+        if (Array.isArray(arr) && arr.length) candidates.push(arr);
+      }
+    }
+
+    const src: any[] = candidates.length ? candidates[0] : [];
+    const lines = src
+      .map((p: any, idx: number) => {
+        const candidate = (p as any);
+        const takeprofit = Number(
+          candidate.takeprofit ??
+          candidate.takeProfit ??
+          candidate.take_profit ??
+          candidate.tp ??
+          candidate.tp_price
+        );
+        if (!Number.isFinite(takeprofit) || takeprofit <= 0) return null;
+        
+        const side = candidate.side === 'b' ? 'Long' : 'Short';
+        const quantity = candidate.quantity || 0;
+        const label = `TP ${side} ${quantity} @ $${takeprofit.toLocaleString()}`;
+        
+        return { 
+          price: Math.round(takeprofit), 
+          label,
+          color: '#22c55e' // Verde para Take Profit
+        };
+      })
+      .filter(Boolean) as Array<{ price: number; label?: string; color?: string }>;
+    
+    console.log('📊 DASHBOARD - takeProfitLines calculadas:', {
+      positionsCount: src?.length ?? 0,
+      sample: Array.isArray(src) ? src.slice(0, 3) : src,
+      fromOptimized: Array.isArray(optimizedPositions) ? optimizedPositions.length : 'n/a',
+      fromMarketDataKeys: marketData ? Object.keys(marketData as any) : 'n/a',
+      lines
+    });
+    return lines.length ? lines : undefined;
+  }, [optimizedPositions, marketData]);
   
   // Dados de mercado otimizados (agora via contexto centralizado)
   const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
@@ -2096,6 +2152,7 @@ export default function Dashboard() {
               symbol="BINANCE:BTCUSDT"
               height={400}
               liquidationLines={liquidationLines}
+              takeProfitLines={takeProfitLines}
               className="w-full"
               showToolbar={true}
               displaySymbol="XBTUSD"

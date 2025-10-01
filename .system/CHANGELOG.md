@@ -4,6 +4,42 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.9] - 2025-01-09
+
+### 🟢 **IMPLEMENTAÇÃO DE LINHAS DE TAKE PROFIT**
+
+#### ✅ **Linhas Horizontais Verdes de Take Profit**
+- **Prop takeProfitLines**: Nova prop para linhas de Take Profit no LightweightLiquidationChart
+- **Dados dinâmicos**: Extração automática de posições com takeprofit válido
+- **Renderização**: Linhas horizontais verdes (`#22c55e`) nos preços de Take Profit
+- **Labels informativos**: Formato "TP [Side] [Quantity] @ $[Price]" (ex: "TP Long 0.1 @ $45,000")
+- **Auto-range**: Ajuste automático do range para incluir todas as linhas (liquidação + Take Profit)
+
+#### 🔄 **Integração com Dashboard**
+- **Cálculo automático**: takeProfitLines calculadas via useMemo no Dashboard
+- **Múltiplas fontes**: Suporte a diferentes hooks de dados (optimizedPositions, marketData)
+- **Filtros inteligentes**: Apenas posições com takeprofit válido são renderizadas
+- **Logs detalhados**: Console logs para debugging e monitoramento
+
+#### 📚 **Documentação Atualizada**
+- **linhas-customizadas.md**: Documentação completa das linhas de Take Profit
+- **API expandida**: Exemplos de uso e integração
+- **Roadmap atualizado**: Marcação de Take Profit como implementado
+
+#### 🛠️ **Arquivos Modificados**
+- `frontend/src/pages/Dashboard.tsx` - Cálculo de takeProfitLines
+- `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Renderização das linhas
+- `.system/docs/tradingview/linhas-customizadas.md` - Documentação atualizada
+
+#### 📊 **Funcionalidades Implementadas**
+- ✅ Linhas horizontais verdes de Take Profit
+- ✅ Labels informativos com side, quantity e preço
+- ✅ Auto-range para incluir todas as linhas
+- ✅ Integração com dados reais das posições
+- ✅ Documentação completa
+
+---
+
 ## [v2.3.8] - 2025-01-09
 
 ### 🔄 **IMPLEMENTAÇÃO COMPLETA DE TIMEFRAME E INDICADORES DINÂMICOS**
