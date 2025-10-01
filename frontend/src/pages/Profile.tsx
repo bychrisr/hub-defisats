@@ -233,7 +233,7 @@ export default function Profile() {
         ln_markets_passphrase: user.ln_markets_passphrase || '',
       });
     }
-  }, [user, reset]);
+  }, [user]); // ✅ CORREÇÃO: Removido reset das dependências para evitar loop infinito
 
   const onSubmit = async (data: ProfileForm) => {
     try {
