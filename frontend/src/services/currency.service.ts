@@ -1,3 +1,5 @@
+import { api } from '../lib/api';
+
 export interface CurrencyRate {
   from: string;
   to: string;
