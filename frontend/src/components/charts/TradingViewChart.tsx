@@ -88,12 +88,28 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
   // Função para adicionar linha de liquidação
   const addLiquidationLine = useCallback((price: number) => {
-    if (!widgetRef.current || !widgetRef.current.chart) {
-      console.log('❌ TRADINGVIEW - Widget ou chart não disponível para linha de liquidação');
+    if (!widgetRef.current) {
+      console.log('❌ TRADINGVIEW - Widget não disponível para linha de liquidação');
       return;
     }
 
-    const chart = widgetRef.current.chart();
+    const getChart = () => {
+      try {
+        if (typeof widgetRef.current.activeChart === 'function') {
+          return widgetRef.current.activeChart();
+        }
+        if (typeof widgetRef.current.chart === 'function') {
+          return widgetRef.current.chart();
+        }
+      } catch {}
+      return null;
+    };
+
+    const chart = getChart();
+    if (!chart) {
+      console.log('❌ TRADINGVIEW - Chart API indisponível (nem activeChart nem chart)');
+      return;
+    }
 
     // 0) createOrderLine (API comum do Advanced Chart)
     try {
