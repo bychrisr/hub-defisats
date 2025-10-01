@@ -172,34 +172,57 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
     const loadTradingViewScript = () => {
       console.log('🔄 TRADINGVIEW - Iniciando carregamento do script...');
       console.log('🔄 TRADINGVIEW - window.TradingView existe?', !!window.TradingView);
-      
+
+      // Se já existe, marca como carregado
       if (window.TradingView) {
         console.log('✅ TRADINGVIEW - TradingView já carregado');
         setIsScriptLoaded(true);
         return;
       }
 
-      console.log('🔄 TRADINGVIEW - Criando script...');
-      const script = document.createElement('script');
-      script.src = 'https://s3.tradingview.com/tv.js';
-      script.async = true;
-      
-      script.onload = () => {
-        console.log('✅ TRADINGVIEW - Script carregado com sucesso');
-        console.log('🔄 TRADINGVIEW - window.TradingView após carregamento:', !!window.TradingView);
-        console.log('🔄 TRADINGVIEW - window.TradingView.widget:', !!window.TradingView?.widget);
-        setIsScriptLoaded(true);
-      };
-      
-      script.onerror = (error) => {
-        console.error('❌ TRADINGVIEW - Erro ao carregar script:', error);
-        console.error('❌ TRADINGVIEW - URL do script:', script.src);
-        setError('Erro ao carregar script TradingView');
-        setIsLoading(false);
-      };
-      
-      document.head.appendChild(script);
-      console.log('✅ TRADINGVIEW - Script adicionado ao document.head');
+      // Evitar adicionar múltiplas vezes
+      const existing = document.getElementById('tv-js');
+      if (existing) {
+        console.log('⚠️ TRADINGVIEW - Script já presente no DOM, iniciando polling...');
+      } else {
+        console.log('🔄 TRADINGVIEW - Criando script...');
+        const script = document.createElement('script');
+        script.id = 'tv-js';
+        script.src = 'https://s3.tradingview.com/tv.js';
+        script.async = true;
+
+        script.onload = () => {
+          console.log('✅ TRADINGVIEW - onload do script disparado');
+          console.log('🔄 TRADINGVIEW - window.TradingView após onload:', !!window.TradingView);
+          setIsScriptLoaded(!!window.TradingView);
+        };
+
+        script.onerror = (error) => {
+          console.error('❌ TRADINGVIEW - Erro ao carregar script:', error);
+          console.error('❌ TRADINGVIEW - URL do script:', script.src);
+          setError('Erro ao carregar script TradingView');
+          setIsLoading(false);
+        };
+
+        document.head.appendChild(script);
+        console.log('✅ TRADINGVIEW - Script adicionado ao document.head');
+      }
+
+      // Polling: aguarda até 10s pelo global TradingView
+      const start = Date.now();
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - start;
+        if (window.TradingView) {
+          console.log('✅ TRADINGVIEW - Detectado via polling em', elapsed, 'ms');
+          clearInterval(interval);
+          setIsScriptLoaded(true);
+        } else if (elapsed > 10000) {
+          console.error('❌ TRADINGVIEW - Polling expirou (10s) sem TradingView disponível');
+          clearInterval(interval);
+          setError('Timeout ao carregar TradingView');
+          setIsLoading(false);
+        }
+      }, 200);
     };
 
     loadTradingViewScript();
