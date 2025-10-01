@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Card,
@@ -84,7 +84,7 @@ export default function Dashboard() {
   // Dados de posições otimizados
   const { positions: optimizedPositions } = useOptimizedPositions();
   // Preço de liquidação calculado dinamicamente (média das posições com valor válido)
-  const liquidationPrice = React.useMemo(() => {
+  const liquidationPrice = useMemo(() => {
     const values = (optimizedPositions ?? [])
       .map((p: any) => Number((p as any).liquidation))
       .filter((v: number) => Number.isFinite(v) && v > 0);
@@ -1974,24 +1974,26 @@ export default function Dashboard() {
 
         {/* TradingView Chart - Implementação funcional com integração de dados */}
         <div className="mt-6">
+          {!!liquidationPrice && (
           <TradingViewChart 
             symbol="BINANCE:BTCUSDT"
             interval="60"
             theme="dark"
             height={500}
             className="w-full"
-            liquidationPrice={liquidationPrice ?? 50000}
+            liquidationPrice={liquidationPrice}
             showLiquidationLine={true}
-          />
+          />)}
 
           {/* Novo card: gráfico leve com linha de liquidação */}
           <div className="mt-6">
+            {!!liquidationPrice && (
             <LightweightLiquidationChart
               symbol="BINANCE:BTCUSDT"
               height={220}
-              liquidationPrice={liquidationPrice ?? 50000}
+              liquidationPrice={liquidationPrice}
               className="w-full"
-            />
+            />)}
           </div>
         </div>
     </RouteGuard>
