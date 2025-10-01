@@ -44,6 +44,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<any>(null);
+  const liquidationAppliedRef = useRef<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
@@ -338,6 +339,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
               console.log('🔧 TRADINGVIEW - createShape existe?', typeof chart.createShape === 'function');
               console.log('🔧 TRADINGVIEW - createLineTool existe?', typeof (chart as any).createLineTool === 'function');
               console.log('🔧 TRADINGVIEW - createStudy existe?', typeof chart.createStudy === 'function');
+              console.log('🔧 TRADINGVIEW - createOrderLine existe?', typeof (chart as any).createOrderLine === 'function');
             }
           } catch (e) {
             console.warn('⚠️ TRADINGVIEW - Não foi possível inspecionar chart API:', e);
@@ -345,10 +347,28 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
           
           // Adicionar linha de liquidação se especificada
           if (showLiquidationLine && liquidationPrice) {
-            console.log('📊 TRADINGVIEW - Adicionando linha de liquidação após widget pronto');
-            setTimeout(() => {
-              addLiquidationLine(liquidationPrice);
-            }, 1000); // Aguardar um pouco para garantir que o chart está totalmente carregado
+            console.log('📊 TRADINGVIEW - Agendando linha de liquidação com retries');
+            liquidationAppliedRef.current = false;
+            const startedAt = Date.now();
+            const interval = setInterval(() => {
+              if (liquidationAppliedRef.current) {
+                clearInterval(interval);
+                return;
+              }
+              const elapsed = Date.now() - startedAt;
+              if (elapsed > 3000) {
+                console.warn('⚠️ TRADINGVIEW - Timeout aplicando linha de liquidação');
+                clearInterval(interval);
+                return;
+              }
+              try {
+                addLiquidationLine(liquidationPrice);
+                liquidationAppliedRef.current = true;
+                clearInterval(interval);
+              } catch (e) {
+                console.warn('⚠️ TRADINGVIEW - Tentativa de aplicar linha falhou, nova tentativa...', e);
+              }
+            }, 300);
           }
         });
       } else {
@@ -405,7 +425,9 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
     }
 
     console.log('📊 TRADINGVIEW - Dados de liquidação mudaram, atualizando linha...');
+    liquidationAppliedRef.current = false;
     addLiquidationLine(liquidationPrice);
+    liquidationAppliedRef.current = true;
   }, [liquidationPrice, showLiquidationLine, isScriptLoaded, addLiquidationLine]);
 
   // Debug: Log quando props mudarem
