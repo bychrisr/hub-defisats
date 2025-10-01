@@ -97,8 +97,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     { value: '1d', label: '1d' }
   ];
 
-  // Indicadores disponíveis
-  const indicators = [
+  // Indicadores disponíveis (catálogo)
+  const availableIndicators = [
     { id: 'rsi', name: 'RSI', icon: Activity },
     { id: 'macd', name: 'MACD', icon: TrendingUp },
     { id: 'bollinger', name: 'Bollinger Bands', icon: Target }
@@ -435,7 +435,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
                     isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
                   }`}>
                     <div className="py-1">
-                      {indicators.map((indicator) => {
+                      {availableIndicators.map((indicator) => {
                         const IconComponent = indicator.icon;
                         return (
                           <button
