@@ -11,8 +11,7 @@ import { Button } from '@/components/ui/button';
 import { LNMarketsError } from '@/components/LNMarketsError';
 import { LNMarketsGuard } from '@/components/LNMarketsGuard';
 import SatsIcon from '@/components/SatsIcon';
-import { useOptimizedPositions, useOptimizedDashboardMetrics } from '@/hooks/useOptimizedDashboardData';
-import RealtimeStatus from '@/components/RealtimeStatus';
+import { useOptimizedPositions, useOptimizedDashboardMetrics } from '@/contexts/MarketDataContext';
 import PositionRow from '@/components/PositionRow';
 import DashboardCard from '@/components/DashboardCard';
 import {
@@ -31,16 +30,19 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  BarChart3,
   DollarSign,
   Shield,
   Activity,
   Zap,
   Target,
   PieChart,
+  CheckCircle,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 interface LNPosition {
   id: string;
@@ -78,6 +80,8 @@ export default function Positions() {
   // Dados otimizados
   const { positions: realtimePositions, isLoading, error } = useOptimizedPositions();
   const { totalPL, totalMargin, positionCount } = useOptimizedDashboardMetrics();
+  const { theme } = useTheme();
+  const navigate = useNavigate();
   
   const [positions, setPositions] = useState<LNPosition[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -86,6 +90,7 @@ export default function Positions() {
   const [totalMarginValue, setTotalMarginValue] = useState(0);
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [activeTab, setActiveTab] = useState<'open' | 'running' | 'closed'>('open');
 
   // ✅ FUNÇÃO OTIMIZADA COM USECALLBACK
   const sortPositions = useCallback((field: SortField) => {
@@ -181,11 +186,26 @@ export default function Positions() {
     }
   }, [realtimePositions, totalPL, totalMargin]);
 
+  // Função para filtrar posições por status da aba
+  const getFilteredPositions = () => {
+    switch (activeTab) {
+      case 'open':
+        return positions.filter(pos => pos.status === 'open');
+      case 'running':
+        return positions.filter(pos => pos.status === 'open' && pos.quantity > 0);
+      case 'closed':
+        return positions.filter(pos => pos.status === 'closed');
+      default:
+        return positions;
+    }
+  };
+
   // Função para obter posições ordenadas
   const getSortedPositions = () => {
-    if (!sortField) return positions;
+    const filteredPositions = getFilteredPositions();
+    if (!sortField) return filteredPositions;
     
-    return [...positions].sort((a, b) => {
+    return [...filteredPositions].sort((a, b) => {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
       
@@ -209,11 +229,31 @@ export default function Positions() {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 
-  // Função de refresh usando dados otimizados
-  const handleRefresh = () => {
-    console.log('🔄 POSITIONS - Refresh requested (using optimized data)');
-    // Os dados são atualizados automaticamente pelo hook otimizado
-  };
+  // ✅ RELOAD AUTOMÁTICO SUTIL: Conectar com o sistema de dados otimizados
+  useEffect(() => {
+    // Ativar estado de atualização quando os dados estão carregando
+    if (isLoading) {
+      setIsUpdating(true);
+    } else {
+      // Pequeno delay para mostrar o efeito de opacidade
+      const timer = setTimeout(() => {
+        setIsUpdating(false);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  // ✅ DEBUG: Verificar se há erro sendo detectado incorretamente
+  useEffect(() => {
+    console.log('🔍 POSITIONS DEBUG:', {
+      error,
+      isLoading,
+      hasError: !!error,
+      errorType: error ? typeof error : 'null',
+      errorLength: error ? error.length : 0
+    });
+  }, [error, isLoading]);
 
   const getPnlColor = (pnl: number) => {
     if (pnl > 0) return 'text-success';
@@ -262,7 +302,7 @@ export default function Positions() {
               <CardContent className="p-6">
                 <LNMarketsError 
                   error={error}
-                  onConfigure={() => window.location.href = '/profile'}
+                  onConfigure={() => navigate('/profile')}
                   showConfigureButton={error.includes('MISSING_CREDENTIALS') || error.includes('INVALID_CREDENTIALS')}
                 />
                 <div className="mt-6 text-center">
@@ -288,51 +328,9 @@ export default function Positions() {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
         <div className="container mx-auto py-8 px-4">
           <div className="max-w-7xl mx-auto space-y-8">
-            {/* Header */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl blur-3xl"></div>
-              <Card className="relative backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                          <BarChart3 className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <h1 className="text-3xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
-                            Positions
-                          </h1>
-                          <p className="text-text-secondary">Monitor your active positions on LN Markets</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 mt-4">
-                        <RealtimeStatus />
-                        {isUpdating && (
-                          <div className="flex items-center gap-2 text-sm text-text-secondary">
-                            <RefreshCw className="h-4 w-4 animate-spin" />
-                            <span>Updating data...</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={handleRefresh} 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={isUpdating}
-                      className="backdrop-blur-sm bg-background/50 border-border/50 hover:bg-background/80 transition-all duration-200"
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
-                      {isUpdating ? 'Updating...' : 'Refresh'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
               {/* Total Margin Card */}
               <Card className={cn(
                 "gradient-card-blue backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300 hover:shadow-3xl",
@@ -372,7 +370,37 @@ export default function Positions() {
               />
             </div>
 
-            {/* Positions Table */}
+
+            {/* Tabs */}
+            <div className={`transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'open' | 'running' | 'closed')} className="w-full">
+              <TabsList className={cn(
+                "grid w-full grid-cols-3 h-12",
+                theme === 'dark' ? 'profile-tabs-glow' : 'profile-tabs-glow-light'
+              )}>
+                <TabsTrigger 
+                  value="open" 
+                  className="profile-tab-trigger text-sm font-medium"
+                >
+                  Open
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="running" 
+                  className="profile-tab-trigger text-sm font-medium"
+                >
+                  Running
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="closed" 
+                  className="profile-tab-trigger text-sm font-medium"
+                >
+                  Closed
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Open Positions Tab Content */}
+              <TabsContent value="open" className="space-y-6">
+                {/* Positions Table */}
             <Card className={cn(
               "backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300",
               isUpdating ? 'opacity-75' : 'opacity-100'
@@ -487,7 +515,7 @@ export default function Positions() {
                             onClick={() => sortPositions('pnl')}
                           >
                             <div className="flex items-center gap-2">
-                              <BarChart3 className="h-4 w-4" />
+                              <TrendingUp className="h-4 w-4" />
                               PL
                               {getSortIcon('pnl')}
                             </div>
@@ -539,6 +567,143 @@ export default function Positions() {
                 )}
               </CardContent>
             </Card>
+              </TabsContent>
+
+              {/* Running Positions Tab Content */}
+              <TabsContent value="running" className="space-y-6">
+                <Card className={cn(
+                  "backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300",
+                  isUpdating ? 'opacity-75' : 'opacity-100'
+                )}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                        <PieChart className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl font-semibold">Running Positions</CardTitle>
+                        <CardDescription className="text-text-secondary">
+                          {getFilteredPositions().length === 0 
+                            ? 'No running positions found' 
+                            : `Showing ${getFilteredPositions().length} running position${getFilteredPositions().length !== 1 ? 's' : ''}`
+                          }
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {getFilteredPositions().length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full blur-2xl"></div>
+                          <div className="relative bg-gradient-to-br from-primary/20 to-primary/10 rounded-full p-6 w-24 h-24 mx-auto flex items-center justify-center">
+                            <Activity className="h-12 w-12 text-primary/60" />
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-semibold text-text-primary mb-2">No Running Positions</h3>
+                        <p className="text-text-secondary">Active positions with quantity &gt; 0 will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto rounded-lg border border-border/50">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
+                              <TableHead className="font-semibold text-text-primary">Side</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Quantity</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Price</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Liquidation</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Leverage</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Margin</TableHead>
+                              <TableHead className="font-semibold text-text-primary">P&L</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Margin Ratio</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Trading Fees</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Funding Cost</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {getSortedPositions().map((position, index) => (
+                              <PositionRow
+                                key={position.id || `position-${index}`}
+                                position={position}
+                                index={index}
+                              />
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Closed Positions Tab Content */}
+              <TabsContent value="closed" className="space-y-6">
+                <Card className={cn(
+                  "backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl transition-all duration-300",
+                  isUpdating ? 'opacity-75' : 'opacity-100'
+                )}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                        <PieChart className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl font-semibold">Closed Positions</CardTitle>
+                        <CardDescription className="text-text-secondary">
+                          {getFilteredPositions().length === 0 
+                            ? 'No closed positions found' 
+                            : `Showing ${getFilteredPositions().length} closed position${getFilteredPositions().length !== 1 ? 's' : ''}`
+                          }
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {getFilteredPositions().length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full blur-2xl"></div>
+                          <div className="relative bg-gradient-to-br from-primary/20 to-primary/10 rounded-full p-6 w-24 h-24 mx-auto flex items-center justify-center">
+                            <CheckCircle className="h-12 w-12 text-primary/60" />
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-semibold text-text-primary mb-2">No Closed Positions</h3>
+                        <p className="text-text-secondary">Closed positions will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto rounded-lg border border-border/50">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-gradient-to-r from-background/50 to-background/30 backdrop-blur-sm">
+                              <TableHead className="font-semibold text-text-primary">Side</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Quantity</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Price</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Liquidation</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Leverage</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Margin</TableHead>
+                              <TableHead className="font-semibold text-text-primary">P&L</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Margin Ratio</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Trading Fees</TableHead>
+                              <TableHead className="font-semibold text-text-primary">Funding Cost</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {getSortedPositions().map((position, index) => (
+                              <PositionRow
+                                key={position.id || `position-${index}`}
+                                position={position}
+                                index={index}
+                              />
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            </div>
           </div>
         </div>
       </div>

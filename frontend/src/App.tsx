@@ -9,6 +9,7 @@ import { PositionsProvider } from '@/contexts/PositionsContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { AccountProvider } from '@/contexts/AccountContext';
 import { VersionProvider } from '@/contexts/VersionContext';
+import { MarketDataProvider } from '@/contexts/MarketDataContext';
 import UpdateNotification from '@/components/UpdateNotification';
 import RouteRedirectMiddleware from '@/components/RouteRedirectMiddleware';
 import { Layout } from '@/components/layout/Layout';
@@ -182,11 +183,12 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <VersionProvider autoCheck={true}>
-          <RealtimeDataProvider>
-            <PositionsProvider>
-              <NotificationProvider>
-                <AccountProvider>
-                  <TooltipProvider>
+          <MarketDataProvider refreshInterval={0}>
+            <RealtimeDataProvider>
+              <PositionsProvider>
+                <NotificationProvider>
+                  <AccountProvider>
+                    <TooltipProvider>
               <Toaster />
               <Sonner />
               <UpdateNotification />
@@ -484,11 +486,12 @@ const App = () => {
           </Routes>
                 </RouteRedirectMiddleware>
         </BrowserRouter>
-                </TooltipProvider>
-              </AccountProvider>
-            </NotificationProvider>
-          </PositionsProvider>
-        </RealtimeDataProvider>
+                    </TooltipProvider>
+                  </AccountProvider>
+                </NotificationProvider>
+              </PositionsProvider>
+            </RealtimeDataProvider>
+          </MarketDataProvider>
         </VersionProvider>
       </ThemeProvider>
     </QueryClientProvider>

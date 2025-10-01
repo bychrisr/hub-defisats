@@ -2,6 +2,7 @@ import React from 'react';
 import { useLNMarketsCredentials } from '@/hooks/useLNMarketsCredentials';
 import { LNMarketsError } from '@/components/LNMarketsError';
 import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface LNMarketsGuardProps {
   children: React.ReactNode;
@@ -15,6 +16,15 @@ export function LNMarketsGuard({
   showConfigureButton = true 
 }: LNMarketsGuardProps) {
   const { hasCredentials, isLoading, needsConfiguration } = useLNMarketsCredentials();
+  const navigate = useNavigate();
+
+  // ✅ DEBUG: Verificar se o guard está sendo ativado incorretamente
+  console.log('🔍 LN MARKETS GUARD DEBUG:', {
+    hasCredentials,
+    isLoading,
+    needsConfiguration,
+    showConfigureButton
+  });
 
   if (isLoading) {
     return (
@@ -37,7 +47,7 @@ export function LNMarketsGuard({
         <div className="max-w-2xl mx-auto">
           <LNMarketsError 
             error="MISSING_CREDENTIALS"
-            onConfigure={() => window.location.href = '/profile'}
+            onConfigure={() => navigate('/profile')}
             showConfigureButton={showConfigureButton}
           />
         </div>

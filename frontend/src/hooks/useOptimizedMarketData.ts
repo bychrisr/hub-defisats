@@ -208,11 +208,12 @@ export const useOptimizedMarketData = (): UseOptimizedMarketDataReturn => {
   useEffect(() => {
     fetchMarketData();
 
-    const interval = setInterval(() => {
-      fetchMarketData();
-    }, 30000); // 30 segundos
+    // ✅ DESABILITADO: Atualização automática para evitar recarregamentos
+    // const interval = setInterval(() => {
+    //   fetchMarketData();
+    // }, 30000); // 30 segundos
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [fetchMarketData]);
 
   // Calcular idade do cache e status de stale

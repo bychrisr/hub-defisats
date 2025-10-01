@@ -278,3 +278,5 @@ console.log('📊 MARKET DATA - Data received:', {
 - [Custom Hooks](https://react.dev/learn/reusing-logic-with-custom-hooks)
 - [Performance Optimization](https://react.dev/learn/render-and-commit)
 - [TypeScript Best Practices](https://typescript-eslint.io/rules/)
+
+

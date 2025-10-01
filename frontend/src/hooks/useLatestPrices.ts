@@ -74,9 +74,10 @@ export function useLatestPrices(options: UseLatestPricesOptions = {}): UseLatest
 
     fetchPrices(); // Initial fetch
 
-    const interval = setInterval(fetchPrices, refreshInterval);
+    // ✅ DESABILITADO: Atualização automática para evitar recarregamentos
+    // const interval = setInterval(fetchPrices, refreshInterval);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [fetchPrices, refreshInterval, enabled]);
 
   // Manual refetch

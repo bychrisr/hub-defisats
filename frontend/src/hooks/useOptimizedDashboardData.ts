@@ -159,17 +159,10 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     let intervalId: NodeJS.Timeout | null = null;
     let healthCheckId: NodeJS.Timeout | null = null;
     
-    // ✅ FALLBACK HTTP CONDICIONAL: Só ativa se WebSocket estiver explicitamente desconectado
-    if (!isConnected) {
-      console.log('🔄 OPTIMIZED DASHBOARD - WebSocket desconectado, ativando fallback HTTP...');
-      intervalId = setInterval(() => {
-        console.log('🔄 OPTIMIZED DASHBOARD - Executando fallback HTTP...');
-        fetchDashboardData();
-      }, 30000); // 30 segundos - máximo seguro para mercados voláteis
-    } else {
-      console.log('✅ OPTIMIZED DASHBOARD - WebSocket conectado, fallback HTTP DESATIVADO');
-    }
-
+    // ✅ FALLBACK HTTP CONDICIONAL: DESABILITADO PARA EVITAR RECARREGAMENTOS
+    // O WebSocket deve ser suficiente para atualizações em tempo real
+    console.log('✅ OPTIMIZED DASHBOARD - Fallback HTTP DESABILITADO para evitar recarregamentos');
+    
     // ✅ HEALTH CHECK: Verificar conexão WebSocket periodicamente
     healthCheckId = setInterval(() => {
       if (isConnected) {

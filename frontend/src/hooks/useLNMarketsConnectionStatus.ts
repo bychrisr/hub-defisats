@@ -44,13 +44,13 @@ export function useLNMarketsConnectionStatus() {
     isLoading
   });
 
-  // More flexible validation: check if we have any data from LN Markets
+  // ✅ CORREÇÃO: Validação mais flexível seguindo VOLATILE_MARKET_SAFETY
+  // Se o endpoint retorna success: true, consideramos conectado
   const hasValidData = centralizedData && centralizedData.lastUpdate > 0 && (
-    (centralizedData.userBalance !== null && 
-     centralizedData.userBalance !== undefined) ||
-    (centralizedData.userPositions && 
-     centralizedData.userPositions.length > 0) ||
-    (centralizedData.lastUpdate && centralizedData.lastUpdate > 0)
+    // Se temos dados de mercado (obrigatório)
+    centralizedData.marketIndex && 
+    centralizedData.marketIndex.index > 0 &&
+    centralizedData.marketIndex.timestamp > 0
   );
   
   // Check for specific credential errors in the error message

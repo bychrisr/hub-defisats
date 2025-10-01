@@ -387,3 +387,5 @@ const TradingViewChart = ({ ...props }) => {
 ---
 
 **🎯 Esta análise fornece uma base sólida para implementar o TradingView Advanced Chart como substituto do chart atual que não funcionava.**
+
+

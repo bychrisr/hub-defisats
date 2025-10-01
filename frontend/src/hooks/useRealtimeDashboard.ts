@@ -15,10 +15,10 @@ interface RealtimeDashboardConfig {
 
 export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   const {
-    positionsInterval = 5000, // 5 segundos
-    balanceInterval = 10000, // 10 segundos
-    marketInterval = 30000, // 30 segundos
-    historicalInterval = 60000, // 1 minuto
+    positionsInterval = 0, // DESABILITADO para evitar recarregamentos
+    balanceInterval = 0, // DESABILITADO para evitar recarregamentos
+    marketInterval = 0, // DESABILITADO para evitar recarregamentos
+    historicalInterval = 0, // DESABILITADO para evitar recarregamentos
     enabled = true
   } = config;
 
