@@ -104,6 +104,8 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       script.onload = () => {
         console.log('✅ TRADINGVIEW - Script loaded successfully');
         console.log('🔄 TRADINGVIEW - window.TradingView after load:', !!window.TradingView);
+        console.log('🔄 TRADINGVIEW - window.TradingView type:', typeof window.TradingView);
+        console.log('🔄 TRADINGVIEW - window.TradingView.widget:', !!window.TradingView?.widget);
         console.log('🔄 TRADINGVIEW - Setting isScriptLoaded to true');
         console.log('🔄 TRADINGVIEW - Before setIsScriptLoaded, isScriptLoaded:', isScriptLoaded);
         setIsScriptLoaded(true);
@@ -115,7 +117,9 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         console.error('❌ TRADINGVIEW - Script load error details:', {
           error,
           src: script.src,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          readyState: script.readyState,
+          crossOrigin: script.crossOrigin
         });
         setError('Erro ao carregar script TradingView');
         setIsLoading(false);
@@ -124,6 +128,22 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       console.log('🔄 TRADINGVIEW - Appending script to document.head...');
       document.head.appendChild(script);
       console.log('✅ TRADINGVIEW - Script appended to document.head');
+
+      // Timeout para detectar se o script não carrega
+      setTimeout(() => {
+        if (!window.TradingView) {
+          console.error('❌ TRADINGVIEW - Script load timeout - TradingView not available after 10 seconds');
+          console.error('❌ TRADINGVIEW - Timeout details:', {
+            src: script.src,
+            readyState: script.readyState,
+            hasOnload: !!script.onload,
+            hasOnerror: !!script.onerror,
+            timestamp: new Date().toISOString()
+          });
+          setError('Timeout ao carregar script TradingView');
+          setIsLoading(false);
+        }
+      }, 10000); // 10 segundos
     };
 
     loadTradingViewScript();
