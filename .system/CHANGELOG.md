@@ -4,6 +4,42 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.4] - 2025-01-09
+
+### 📖 **GUIA COMPLETO DO SISTEMA REFATORADO**
+
+#### ✅ **Guia Técnico Criado**
+- **Arquivo**: `.system/docs/GUIA_SISTEMA_REFATORADO.md`
+- **Conteúdo**: 706 linhas de documentação técnica completa
+- **Cobertura**: Arquitetura, backend, frontend, LN Markets, WebSocket, padrões
+- **Objetivo**: Fonte de verdade para desenvolvedores
+
+#### 📚 **Seções Documentadas**
+- **Visão Geral**: Objetivo, stack tecnológica, autenticação
+- **Arquitetura**: Diagramas Mermaid, componentes principais
+- **Backend**: Estrutura, rotas, serviços, middleware
+- **Frontend**: Hooks otimizados, componentes React.memo
+- **LN Markets**: Autenticação HMAC SHA256, endpoints, fluxo de dados
+- **WebSocket**: Sistema híbrido, health check, otimizações
+- **Padrões**: Clean Architecture, nomenclatura, tratamento de erros
+- **Próximos Passos**: Dicas, pontos de atenção, melhorias futuras
+
+#### 🔧 **Detalhes Técnicos Incluídos**
+- **Autenticação LN Markets**: String de assinatura correta (`timestamp + method + '/v2' + path + params`)
+- **Headers**: `LNM-ACCESS-KEY`, `LNM-ACCESS-SIGNATURE`, `LNM-ACCESS-PASSPHRASE`, `LNM-ACCESS-TIMESTAMP`
+- **WebSocket**: URLs, mensagens, reconexão automática
+- **Hooks**: `useOptimizedDashboardData`, `useWebSocket`, `useRealtimeDashboard`
+- **Serviços**: `LNMarketsRobustService`, `LNMarketsAPIService`, `ExchangeServiceFactory`
+
+#### 📊 **Benefícios do Guia**
+- **Referência Definitiva**: Documentação completa do sistema atual
+- **Onboarding**: Facilita integração de novos desenvolvedores
+- **Manutenção**: Orienta desenvolvimentos futuros
+- **Consistência**: Padrões e práticas recomendadas
+- **Troubleshooting**: Exemplos de código e fluxos de dados
+
+---
+
 ## [v2.3.3] - 2025-01-09
 
 ### 📚 **CONSOLIDAÇÃO DE DOCUMENTAÇÃO: Reorganização Completa**
