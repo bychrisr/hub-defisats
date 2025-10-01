@@ -24,7 +24,7 @@ export const RobustAuthGuard: React.FC<RobustAuthGuardProps> = ({
   const [forceInitialized, setForceInitialized] = useState(false);
 
   useEffect(() => {
-    // ✅ TIMEOUT DE SEGURANÇA: Se não inicializou em 5 segundos, forçar
+    // ✅ TIMEOUT DE SEGURANÇA: Se não inicializou em 3 segundos, forçar
     const timeout = setTimeout(() => {
       if (!isInitialized && !forceInitialized) {
         console.log('⏰ ROBUST AUTH GUARD - Timeout atingido, forçando inicialização...');
@@ -53,35 +53,13 @@ export const RobustAuthGuard: React.FC<RobustAuthGuardProps> = ({
         
         setForceInitialized(true);
       }
-    }, 5000);
+    }, 3000); // ✅ Reduzido de 5s para 3s
 
     return () => clearTimeout(timeout);
   }, [isInitialized, forceInitialized]);
 
-  // ✅ VERIFICAÇÃO ADICIONAL: Se persistir sem inicializar, verificar localStorage
-  useEffect(() => {
-    if (!isInitialized && !isLoading && !forceInitialized) {
-      const token = localStorage.getItem('access_token');
-      console.log('🔍 ROBUST AUTH GUARD - Verificação adicional:', {
-        isInitialized,
-        isLoading,
-        hasToken: !!token,
-        forceInitialized
-      });
-
-      if (!token) {
-        console.log('🔧 ROBUST AUTH GUARD - Sem token, forçando estado não autenticado');
-        useAuthStore.setState({
-          isAuthenticated: false,
-          user: null,
-          isLoading: false,
-          isInitialized: true,
-          error: null
-        });
-        setForceInitialized(true);
-      }
-    }
-  }, [isInitialized, isLoading, forceInitialized]);
+  // ✅ CORREÇÃO: Removido segundo useEffect para evitar loops desnecessários
+  // A validação já é feita pelo timeout acima
 
   console.log('🛡️ ROBUST AUTH GUARD - State check:', {
     path: location.pathname,

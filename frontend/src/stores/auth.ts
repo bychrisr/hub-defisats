@@ -296,30 +296,32 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               error: null 
             });
             
-            // Validate token with a timeout to prevent infinite loading
-            Promise.race([
-              state.get().getProfile(),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Token validation timeout')), 10000))
-            ]).then(() => {
-              // ✅ Token validation successful
-              console.log('✅ onRehydrateStorage: Token validation successful');
-              state.set({ 
-                isLoading: false, 
-                isInitialized: true,
-                error: null
-              });
-            }).catch((error) => {
-              console.log('❌ onRehydrateStorage: Token validation failed:', error.message);
-              localStorage.removeItem('access_token');
-              localStorage.removeItem('refresh_token');
-              state.set({ 
-                isAuthenticated: false, 
-                user: null, 
-                isLoading: false, 
-                isInitialized: true,
-                error: null
-              });
+            // ✅ CORREÇÃO: Validação simplificada para evitar loops
+            // Não chamar getProfile() durante rehidratação para evitar loops infinitos
+            console.log('✅ onRehydrateStorage: Token exists, setting authenticated state');
+            state.set({ 
+              isAuthenticated: true,
+              isLoading: false, 
+              isInitialized: true,
+              error: null
             });
+            
+            // Validar token em background sem bloquear a inicialização
+            setTimeout(() => {
+              state.get().getProfile().catch((error) => {
+                console.log('❌ Background token validation failed:', error.message);
+                // Se falhar, limpar tokens e desautenticar
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                state.set({ 
+                  isAuthenticated: false, 
+                  user: null, 
+                  isLoading: false, 
+                  isInitialized: true,
+                  error: null
+                });
+              });
+            }, 100);
           }
         }
       },
