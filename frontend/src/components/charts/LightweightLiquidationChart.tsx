@@ -66,7 +66,27 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [showIndicators, setShowIndicators] = useState(false);
 
-  // Hook para dados de candles da API
+  // Função para calcular limite baseado no timeframe (aproximadamente 7 dias)
+  function getLimitForTimeframe(timeframe: string): number {
+    const timeframeMinutes = getTimeframeMinutes(timeframe);
+    const sevenDaysMinutes = 7 * 24 * 60; // 7 dias em minutos
+    return Math.ceil(sevenDaysMinutes / timeframeMinutes);
+  }
+
+  // Função para converter timeframe para minutos
+  function getTimeframeMinutes(timeframe: string): number {
+    const tf = timeframe.toLowerCase();
+    if (tf.includes('1m')) return 1;
+    if (tf.includes('5m')) return 5;
+    if (tf.includes('15m')) return 15;
+    if (tf.includes('30m')) return 30;
+    if (tf.includes('1h')) return 60;
+    if (tf.includes('4h')) return 240;
+    if (tf.includes('1d')) return 1440;
+    return 60; // Default 1h
+  }
+
+  // Hook para dados de candles da API - limitado para 7 dias
   const { 
     candleData: apiCandleData, 
     isLoading: candleLoading, 
@@ -75,7 +95,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   } = useCandleData({
     symbol: symbol.replace('BINANCE:', ''),
     timeframe: currentTimeframe,
-    limit: 500,
+    limit: getLimitForTimeframe(currentTimeframe), // Limite baseado no timeframe para ~7 dias
     enabled: useApiData
   });
 
@@ -166,23 +186,24 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
           const date = new Date(timestamp * 1000);
           
-          // Formatação baseada no timeframe
+          // Formatação baseada no timeframe - estilo LN Markets
           const hours = String(date.getUTCHours()).padStart(2, '0');
           const minutes = String(date.getUTCMinutes()).padStart(2, '0');
           const day = String(date.getUTCDate()).padStart(2, '0');
           const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+          const monthName = date.toLocaleDateString('en-US', { month: 'short' });
           
-          // Para timeframes intraday (minutos/horas)
+          // Para timeframes intraday (minutos/horas) - mostrar HH:mm
           if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-            // Se for meia-noite UTC, mostrar data completa
+            // Se for meia-noite UTC, mostrar data + hora
             if (date.getUTCHours() === 0 && date.getUTCMinutes() === 0) {
-              return `${day}/${month} ${hours}:${minutes}`;
+              return `${day} ${monthName} ${hours}:${minutes}`;
             }
             // Caso contrário, mostrar apenas hora:minuto
             return `${hours}:${minutes}`;
           }
           
-          // Para timeframes diários ou maiores
+          // Para timeframes diários ou maiores - mostrar dd/MM
           return `${day}/${month}`;
         }
       },
@@ -292,8 +313,36 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       indicatorSeries.push(indicatorSeriesInstance);
     }
 
-    // Fit content inicial
-    chart.timeScale().fitContent();
+    // Configurar zoom inicial para mostrar aproximadamente 7 dias
+    const setInitialZoom = () => {
+      if (effectiveCandleData && effectiveCandleData.length > 0) {
+        const dataLength = effectiveCandleData.length;
+        const visibleBars = Math.min(dataLength, getLimitForTimeframe(currentTimeframe));
+        
+        // Calcular range para mostrar os últimos 7 dias (ou todos os dados se menos)
+        const fromIndex = Math.max(0, dataLength - visibleBars);
+        const toIndex = dataLength - 1;
+        
+        // Aplicar zoom inicial
+        chart.timeScale().setVisibleLogicalRange({
+          from: fromIndex,
+          to: toIndex
+        });
+        
+        console.log('🎯 ZOOM - Initial zoom set:', {
+          timeframe: currentTimeframe,
+          totalBars: dataLength,
+          visibleBars: visibleBars,
+          fromIndex,
+          toIndex,
+          daysVisible: (visibleBars * getTimeframeMinutes(currentTimeframe)) / (24 * 60)
+        });
+      } else {
+        // Fallback: fit content se não há dados
+        chart.timeScale().fitContent();
+      }
+    };
+
     // Auto-range para incluir todas as priceLines (liquidação + take profit)
     try {
       const allPrices = [
@@ -309,11 +358,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     } catch {}
 
+    // Aplicar zoom inicial após um pequeno delay para garantir que os dados foram renderizados
+    setTimeout(setInitialZoom, 100);
+
     // Resize
     const ro = new ResizeObserver(() => {
       if (!containerRef.current) return;
       chart.applyOptions({ width: containerRef.current.clientWidth, height });
-      chart.timeScale().fitContent();
+      // Manter o zoom inicial em vez de fit content
+      setTimeout(setInitialZoom, 50);
     });
     ro.observe(containerRef.current);
 
