@@ -334,6 +334,16 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
     addLiquidationLine(liquidationPrice);
   }, [liquidationPrice, showLiquidationLine, isScriptLoaded, addLiquidationLine]);
 
+  // Debug: Log quando props mudarem
+  useEffect(() => {
+    console.log('🔍 TRADINGVIEW - Props de liquidação:', {
+      liquidationPrice,
+      showLiquidationLine,
+      isScriptLoaded,
+      hasWidget: !!widgetRef.current
+    });
+  }, [liquidationPrice, showLiquidationLine, isScriptLoaded]);
+
   if (error) {
   return (
       <Card className={className}>

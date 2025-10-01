@@ -1964,18 +1964,29 @@ export default function Dashboard() {
 
         {/* TradingView Chart - Implementação funcional com integração de dados */}
         <div className="mt-6">
-          <TradingViewChart 
-            symbol="BINANCE:BTCUSDT"
-            interval="60"
-            theme="dark"
-            height={500}
-            className="w-full"
-            liquidationPrice={optimizedPositions.length > 0 ? 
+          {(() => {
+            const liquidationPrice = optimizedPositions.length > 0 ? 
               optimizedPositions.reduce((sum, pos) => sum + pos.liquidation, 0) / optimizedPositions.length : 
-              undefined
-            }
-            showLiquidationLine={true}
-          />
+              undefined;
+            
+            console.log('📊 DASHBOARD - Calculando liquidationPrice:', {
+              positionsCount: optimizedPositions.length,
+              positions: optimizedPositions.map(pos => ({ id: pos.id, liquidation: pos.liquidation })),
+              liquidationPrice
+            });
+            
+            return (
+              <TradingViewChart 
+                symbol="BINANCE:BTCUSDT"
+                interval="60"
+                theme="dark"
+                height={500}
+                className="w-full"
+                liquidationPrice={liquidationPrice}
+                showLiquidationLine={true}
+              />
+            );
+          })()}
         </div>
     </RouteGuard>
   );
