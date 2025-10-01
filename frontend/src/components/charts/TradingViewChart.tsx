@@ -2,6 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertTriangle } from 'lucide-react';
 
+interface UserPosition {
+  id: string;
+  side: 'long' | 'short';
+  entryPrice: number;
+  liquidationPrice: number;
+  quantity: number;
+  margin: number;
+  pnl: number;
+}
+
 interface TradingViewChartProps {
   symbol?: string;
   interval?: string;
@@ -9,6 +19,11 @@ interface TradingViewChartProps {
   height?: number;
   width?: string;
   className?: string;
+  // Props para integração com dados da aplicação
+  userPositions?: UserPosition[];
+  liquidationPrice?: number;
+  showLiquidationLine?: boolean;
+  showPositionMarkers?: boolean;
 }
 
 export const TradingViewChart: React.FC<TradingViewChartProps> = ({
@@ -17,7 +32,11 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   theme = 'dark',
   height = 500,
   width = '100%',
-  className = ''
+  className = '',
+  userPositions = [],
+  liquidationPrice,
+  showLiquidationLine = true,
+  showPositionMarkers = true
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<any>(null);
@@ -115,6 +134,88 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       }
     };
   }, [isScriptLoaded, symbol, interval, theme, height, width]);
+
+  // Adicionar linhas quando dados mudarem
+  useEffect(() => {
+    if (!widgetRef.current || !isScriptLoaded) return;
+
+    // Adicionar linha de liquidação se especificada
+    if (showLiquidationLine && liquidationPrice) {
+      addLiquidationLine(liquidationPrice);
+    }
+
+    // Adicionar marcadores de posições
+    if (showPositionMarkers && userPositions.length > 0) {
+      addPositionMarkers(userPositions);
+    }
+  }, [liquidationPrice, userPositions, isScriptLoaded, showLiquidationLine, showPositionMarkers]);
+
+  // Função para adicionar linha de liquidação
+  const addLiquidationLine = (price: number) => {
+    if (widgetRef.current && widgetRef.current.chart) {
+      try {
+        widgetRef.current.chart().createShape(
+          { time: Date.now() / 1000, price: price },
+          {
+            shape: 'horizontal_line',
+            text: `Liquidação: $${price.toLocaleString()}`,
+            overrides: {
+              linecolor: '#ff4444',
+              linewidth: 2,
+              linestyle: 1, // Solid line
+              textcolor: '#ffffff',
+              fontSize: 10
+            }
+          }
+        );
+      } catch (error) {
+        console.warn('Erro ao adicionar linha de liquidação:', error);
+      }
+    }
+  };
+
+  // Função para adicionar marcadores de posições
+  const addPositionMarkers = (positions: UserPosition[]) => {
+    if (!widgetRef.current || !widgetRef.current.chart) return;
+
+    positions.forEach(position => {
+      try {
+        // Linha de entrada
+        widgetRef.current.chart().createShape(
+          { time: Date.now() / 1000, price: position.entryPrice },
+          {
+            shape: 'horizontal_line',
+            text: `${position.side.toUpperCase()}: $${position.entryPrice.toLocaleString()}`,
+            overrides: {
+              linecolor: position.side === 'long' ? '#00ff00' : '#ff0000',
+              linewidth: 1,
+              linestyle: 2, // Dashed line
+              textcolor: '#ffffff',
+              fontSize: 9
+            }
+          }
+        );
+
+        // Linha de liquidação individual
+        widgetRef.current.chart().createShape(
+          { time: Date.now() / 1000, price: position.liquidationPrice },
+          {
+            shape: 'horizontal_line',
+            text: `Liquidação: $${position.liquidationPrice.toLocaleString()}`,
+            overrides: {
+              linecolor: '#ff4444',
+              linewidth: 1,
+              linestyle: 3, // Dotted line
+              textcolor: '#ffffff',
+              fontSize: 9
+            }
+          }
+        );
+      } catch (error) {
+        console.warn('Erro ao adicionar marcador de posição:', error);
+      }
+    });
+  };
 
   if (error) {
     return (

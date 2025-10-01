@@ -1988,7 +1988,7 @@ export default function Dashboard() {
 
         </div>
 
-        {/* TradingView Chart - Implementação funcional */}
+        {/* TradingView Chart - Implementação funcional com integração de dados */}
         <div className="mt-6">
           <TradingViewChart 
             symbol="BINANCE:BTCUSDT"
@@ -1996,6 +1996,13 @@ export default function Dashboard() {
             theme="dark"
             height={500}
             className="w-full"
+            userPositions={optimizedPositions}
+            liquidationPrice={optimizedPositions.length > 0 ? 
+              optimizedPositions.reduce((sum, pos) => sum + pos.liquidation, 0) / optimizedPositions.length : 
+              undefined
+            }
+            showLiquidationLine={true}
+            showPositionMarkers={true}
           />
         </div>
     </RouteGuard>
