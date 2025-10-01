@@ -108,11 +108,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         hide_side_toolbar: true, // Esconder toolbar lateral
         hide_top_toolbar: false, // Manter toolbar superior
         hide_legend: false, // Manter legenda dos indicadores
-        studies: [
-          'MACD@tv-basicstudies',
-          'RSI@tv-basicstudies',
-          'Volume@tv-basicstudies'
-        ],
+        studies: [], // Remover todos os indicadores técnicos
         show_popup_button: true,
         popup_width: '1000',
         popup_height: '650'
