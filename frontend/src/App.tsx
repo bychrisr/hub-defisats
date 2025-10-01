@@ -291,7 +291,7 @@ const App = () => {
                 <ProtectedRoute>
                   <RouteGuard>
                     <ResponsiveLayout>
-                      <ProfileRestored />
+                      <Profile />
                     </ResponsiveLayout>
                   </RouteGuard>
                 </ProtectedRoute>
