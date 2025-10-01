@@ -161,6 +161,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         background: { type: ColorType.Solid, color: 'transparent' },
         fontSize: 12,
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        // Configurações para eliminar espaço em branco na direita
+        rightOffset: 0, // Zero offset à direita
+        fixRightEdge: true, // Fixar borda direita
       },
       grid: {
         vertLines: { 
@@ -185,6 +188,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         timeVisible: true,
         secondsVisible: false,
         textColor: isDark ? '#9ca3af' : '#6b7280',
+        // Configurações para eliminar espaço em branco
+        fixLeftEdge: false, // Não fixar borda esquerda
+        fixRightEdge: true, // Fixar borda direita
         tickMarkFormatter: (time) => {
           // Converter para timestamp UTC
           const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
@@ -447,7 +453,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     };
 
-    // Listener específico para corrigir espaço em branco na direita
+    // Listener específico para corrigir espaço em branco na direita (simplificado)
     const handleZoomChange = () => {
       if (!effectiveCandleData || effectiveCandleData.length === 0) return;
       
@@ -458,23 +464,23 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         const dataLength = effectiveCandleData.length;
         const lastCandleIndex = dataLength - 1;
         
-        // Se o último candle não está na posição mais à direita, corrigir
-        if (visibleRange.to < lastCandleIndex) {
-          const visibleBars = Math.round(visibleRange.to - visibleRange.from);
-          const newFromIndex = Math.max(0, lastCandleIndex - visibleBars + 1);
+        // Só corrigir se há diferença significativa (mais de 0.5 candles)
+        if (visibleRange.to < lastCandleIndex - 0.5) {
+          const visibleBars = visibleRange.to - visibleRange.from;
+          const newFromIndex = Math.max(0, lastCandleIndex - visibleBars);
           
-          // Aplicar correção imediatamente
+          // Aplicar correção suavemente
           timeScale.setVisibleLogicalRange({
             from: newFromIndex,
             to: lastCandleIndex
           });
           
-          console.log('🎯 ZOOM FIX - Corrected right margin:', {
+          console.log('🎯 ZOOM FIX - Corrected right margin (simplified):', {
             originalFrom: visibleRange.from,
             originalTo: visibleRange.to,
             newFromIndex,
             lastCandleIndex,
-            visibleBars
+            visibleBars: Math.round(visibleBars)
           });
         }
       }
