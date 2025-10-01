@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { marketDataService } from '@/services/marketData.service';
 
 type CandlestickPoint = { time: number; open: number; high: number; low: number; close: number };
@@ -165,6 +165,13 @@ export const useHistoricalData = ({
     setError(null);
     loadingRef.current = false;
   }, []);
+
+  // Carregar dados iniciais automaticamente
+  useEffect(() => {
+    if (enabled) {
+      loadInitialData();
+    }
+  }, [enabled, loadInitialData]);
 
   return {
     candleData,
