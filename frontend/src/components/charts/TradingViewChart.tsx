@@ -317,7 +317,16 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
   // Adicionar linha de liquidação quando dados mudarem
   useEffect(() => {
+    console.log('📊 TRADINGVIEW - useEffect de liquidação disparado:', {
+      hasWidget: !!widgetRef.current,
+      isScriptLoaded,
+      showLiquidationLine,
+      liquidationPrice,
+      widgetMethods: widgetRef.current ? Object.keys(widgetRef.current) : 'N/A'
+    });
+
     if (!widgetRef.current || !isScriptLoaded || !showLiquidationLine || !liquidationPrice) {
+      console.log('❌ TRADINGVIEW - Condições não atendidas para linha de liquidação');
       return;
     }
 
