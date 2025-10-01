@@ -1996,7 +1996,15 @@ export default function Dashboard() {
             theme="dark"
             height={500}
             className="w-full"
-            userPositions={optimizedPositions}
+            userPositions={optimizedPositions.map(pos => ({
+              id: pos.id,
+              side: pos.side === 'b' ? 'long' : 'short',
+              entryPrice: pos.price,
+              liquidationPrice: pos.liquidation,
+              quantity: pos.quantity,
+              margin: pos.margin,
+              pnl: pos.pl || 0
+            }))}
             liquidationPrice={optimizedPositions.length > 0 ? 
               optimizedPositions.reduce((sum, pos) => sum + pos.liquidation, 0) / optimizedPositions.length : 
               undefined

@@ -133,15 +133,30 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
   // Adicionar linhas quando dados mudarem
   useEffect(() => {
-    if (!widgetRef.current || !isScriptLoaded) return;
+    console.log('🔍 TRADINGVIEW - useEffect triggered:', {
+      hasWidget: !!widgetRef.current,
+      isScriptLoaded,
+      liquidationPrice,
+      userPositionsCount: userPositions.length,
+      showLiquidationLine,
+      showPositionMarkers,
+      userPositions: userPositions.slice(0, 2) // Log apenas as primeiras 2 posições
+    });
+
+    if (!widgetRef.current || !isScriptLoaded) {
+      console.log('❌ TRADINGVIEW - Widget not ready, skipping line creation');
+      return;
+    }
 
     // Adicionar linha de liquidação se especificada
     if (showLiquidationLine && liquidationPrice) {
+      console.log('🔄 TRADINGVIEW - Adding liquidation line:', liquidationPrice);
       addLiquidationLine(liquidationPrice);
     }
 
     // Adicionar marcadores de posições
     if (showPositionMarkers && userPositions.length > 0) {
+      console.log('🔄 TRADINGVIEW - Adding position markers:', userPositions.length);
       addPositionMarkers(userPositions);
     }
   }, [liquidationPrice, userPositions, isScriptLoaded, showLiquidationLine, showPositionMarkers]);
@@ -172,10 +187,22 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
   // Função para adicionar marcadores de posições
   const addPositionMarkers = (positions: UserPosition[]) => {
-    if (!widgetRef.current || !widgetRef.current.chart) return;
+    if (!widgetRef.current || !widgetRef.current.chart) {
+      console.log('❌ TRADINGVIEW - Widget or chart not available for position markers');
+      return;
+    }
 
-    positions.forEach(position => {
+    console.log('🔄 TRADINGVIEW - Processing positions:', positions.length);
+
+    positions.forEach((position, index) => {
       try {
+        console.log(`🔄 TRADINGVIEW - Adding position ${index + 1}:`, {
+          id: position.id,
+          side: position.side,
+          entryPrice: position.entryPrice,
+          liquidationPrice: position.liquidationPrice
+        });
+
         // Linha de entrada
         widgetRef.current.chart().createShape(
           { time: Date.now() / 1000, price: position.entryPrice },
@@ -207,8 +234,10 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
             }
           }
         );
+
+        console.log(`✅ TRADINGVIEW - Position ${index + 1} markers added successfully`);
       } catch (error) {
-        console.warn('Erro ao adicionar marcador de posição:', error);
+        console.warn(`❌ TRADINGVIEW - Error adding position ${index + 1} marker:`, error);
       }
     });
   };
