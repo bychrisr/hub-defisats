@@ -292,12 +292,8 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       containerRef: containerRef.current
     });
 
-    if (!isScriptLoaded || !containerRef.current || !window.TradingView) {
-      console.log('❌ TRADINGVIEW - Inicialização cancelada - requisitos não atendidos:', {
-        isScriptLoaded,
-        hasContainer: !!containerRef.current,
-        hasTradingView: !!window.TradingView
-      });
+    if (!containerRef.current) {
+      console.log('❌ TRADINGVIEW - Sem container, adiando inicialização');
       return;
     }
 
