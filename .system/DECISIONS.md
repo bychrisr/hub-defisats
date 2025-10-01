@@ -2,6 +2,121 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-028: Personalização Completa do Lightweight Charts para TradingView-style
+
+**Data**: 2025-01-09  
+**Status**: Aceito  
+**Contexto**: Implementação de personalização completa do componente LightweightLiquidationChart
+
+### Problema
+- **Aparência básica**: Gráfico Lightweight Charts com aparência muito simples
+- **Falta de controles**: Sem barra superior de customização como TradingView
+- **Horários incorretos**: Barra inferior exibindo timestamps incorretos
+- **UX limitada**: Sem opções de timeframe, indicadores ou configurações
+
+### Decisão
+Implementar personalização completa do Lightweight Charts para se assemelhar ao TradingView Chart:
+
+#### 1. Barra Superior TradingView-style
+- **Toolbar completa**: Botões de timeframe (1m, 5m, 15m, 30m, 1h, 4h, 1d)
+- **Indicadores dropdown**: RSI, MACD, Bollinger Bands com ícones Lucide
+- **Informações OHLC**: Exibição em tempo real dos valores Open, High, Low, Close
+- **Símbolo e timeframe**: Badge dinâmico com informações do ativo
+- **Botão Settings**: Preparado para futuras configurações
+
+#### 2. Correção da Barra Inferior
+- **Formatação UTC**: Correção completa dos timestamps para UTC
+- **TickMarkFormatter**: Lógica aprimorada para intraday (HH:mm) e diário (dd/mm)
+- **Timezone correto**: Uso consistente de UTC em vez de timezone local
+
+#### 3. Melhorias Visuais
+- **Cores TradingView**: Paleta de cores similar ao TradingView Chart
+- **Tipografia**: Font-family system com tamanho otimizado (12px)
+- **Grid sutil**: Linhas de grade com baixo contraste para melhor legibilidade
+- **Margens de escala**: Configuração otimizada (top: 0.1, bottom: 0.1)
+
+### Implementação
+
+#### 1. Interface Estendida
+```typescript
+interface LightweightLiquidationChartProps {
+  // ... props existentes
+  onTimeframeChange?: (timeframe: string) => void;
+  onIndicatorAdd?: (indicator: string) => void;
+}
+```
+
+#### 2. Estado Interno
+```typescript
+const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
+const [showIndicators, setShowIndicators] = useState(false);
+```
+
+#### 3. TickMarkFormatter Corrigido
+```typescript
+tickMarkFormatter: (time) => {
+  const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
+  const date = new Date(timestamp * 1000);
+  
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  
+  if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+    if (date.getUTCHours() === 0 && date.getUTCMinutes() === 0) {
+      return `${day}/${month} ${hours}:${minutes}`;
+    }
+    return `${hours}:${minutes}`;
+  }
+  
+  return `${day}/${month}`;
+}
+```
+
+#### 4. Configuração Visual Aprimorada
+```typescript
+const chart = createChart(containerRef.current, {
+  layout: {
+    textColor: isDark ? '#d1d5db' : '#374151',
+    background: { type: ColorType.Solid, color: 'transparent' },
+    fontSize: 12,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  grid: {
+    vertLines: { 
+      color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      style: 0
+    },
+    horzLines: { 
+      color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      style: 0
+    },
+  },
+  rightPriceScale: { 
+    borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    textColor: isDark ? '#9ca3af' : '#6b7280',
+    scaleMargins: { top: 0.1, bottom: 0.1 },
+  },
+});
+```
+
+### Consequências
+- **UX melhorada**: Interface similar ao TradingView Chart
+- **Funcionalidade completa**: Controles de timeframe e indicadores
+- **Horários corretos**: Formatação UTC adequada
+- **Visual profissional**: Aparência enterprise-grade
+- **Extensibilidade**: Preparado para futuras funcionalidades
+
+### Arquivos Modificados
+- `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Personalização completa
+- `frontend/src/pages/Dashboard.tsx` - Integração com novas props
+- `.system/docs/tradingview/lightweight-charts-guia.md` - Documentação atualizada
+- `.system/docs/tradingview/linhas-customizadas.md` - Guia de linhas customizadas
+- `.system/CHANGELOG.md` - Registro da versão v2.3.7
+
+---
+
 ## ADR-027: Correção Definitiva WebSocket e Endpoints LN Markets
 
 **Data**: 2025-09-27  

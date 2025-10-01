@@ -4,6 +4,49 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.7] - 2025-01-09
+
+### 📈 **PERSONALIZAÇÃO COMPLETA DO GRÁFICO LIGHTWEIGHT CHARTS**
+
+#### ✅ **Barra Superior TradingView-style**
+- **Toolbar completa**: Botões de timeframe (1m, 5m, 15m, 30m, 1h, 4h, 1d)
+- **Indicadores dropdown**: RSI, MACD, Bollinger Bands com ícones
+- **Informações OHLC**: Exibição em tempo real dos valores Open, High, Low, Close
+- **Símbolo e timeframe**: Badge dinâmico com informações do ativo
+- **Botão Settings**: Preparado para futuras configurações
+
+#### 🔧 **Correção da Barra Inferior**
+- **Formatação UTC**: Correção completa dos timestamps para UTC
+- **TickMarkFormatter**: Lógica aprimorada para intraday (HH:mm) e diário (dd/mm)
+- **Timezone correto**: Uso consistente de UTC em vez de timezone local
+- **Marcas de tempo**: Exibição correta de horas e minutos
+
+#### 🎨 **Melhorias Visuais**
+- **Cores TradingView**: Paleta de cores similar ao TradingView Chart
+- **Tipografia**: Font-family system com tamanho otimizado (12px)
+- **Grid sutil**: Linhas de grade com baixo contraste para melhor legibilidade
+- **Margens de escala**: Configuração otimizada (top: 0.1, bottom: 0.1)
+- **Candlesticks**: Cores verde/vermelho padrão com formatação de preço
+
+#### 🔌 **Integração e Callbacks**
+- **onTimeframeChange**: Callback para mudança de timeframe
+- **onIndicatorAdd**: Callback para adição de indicadores
+- **Estado interno**: Gerenciamento de timeframe atual e dropdown de indicadores
+- **Props estendidas**: Interface completa para customização
+
+#### 🛠️ **Arquivos Modificados**
+- `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Personalização completa
+- `frontend/src/pages/Dashboard.tsx` - Integração com novas props
+- `.system/docs/tradingview/lightweight-charts-guia.md` - Documentação atualizada
+- `.system/docs/tradingview/linhas-customizadas.md` - Guia de linhas customizadas
+
+#### 📚 **Documentação Atualizada**
+- **Guia completo**: Instalação, uso, opções, endpoints, troubleshooting
+- **Linhas customizadas**: Especificação técnica e roadmap
+- **AUTO_INDEX.md**: Nova seção "Charts" com documentação
+
+---
+
 ## [v2.3.5] - 2025-01-09
 
 ### 🚀 **CENTRALIZAÇÃO DE DADOS E CORREÇÕES CRÍTICAS**

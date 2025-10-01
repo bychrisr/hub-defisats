@@ -2097,6 +2097,15 @@ export default function Dashboard() {
               liquidationLines={liquidationLines}
               candleData={candleData as any}
               className="w-full"
+              showToolbar={true}
+              onTimeframeChange={(tf) => {
+                console.log('Timeframe changed to:', tf);
+                // TODO: Implementar busca de dados com novo timeframe
+              }}
+              onIndicatorAdd={(indicator) => {
+                console.log('Indicator added:', indicator);
+                // TODO: Implementar adição de indicadores
+              }}
             />)}
           </div>
         </div>
