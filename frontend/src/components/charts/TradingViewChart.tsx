@@ -93,6 +93,28 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
     }
 
     const chart = widgetRef.current.chart();
+
+    // 0) createOrderLine (API comum do Advanced Chart)
+    try {
+      if (typeof (chart as any).createOrderLine === 'function') {
+        console.log('📊 TRADINGVIEW - Tentando createOrderLine()');
+        const orderLine = (chart as any).createOrderLine();
+        orderLine.setPrice(price);
+        orderLine.setText(`Liquidação: $${price.toLocaleString()}`);
+        if (typeof orderLine.setLineStyle === 'function') orderLine.setLineStyle(0);
+        if (typeof orderLine.setLineColor === 'function') orderLine.setLineColor('#ff4444');
+        if (typeof orderLine.setBodyBackgroundColor === 'function') orderLine.setBodyBackgroundColor('rgba(255,68,68,0.12)');
+        if (typeof orderLine.setBodyBorderColor === 'function') orderLine.setBodyBorderColor('#ff4444');
+        if (typeof orderLine.setBodyTextColor === 'function') orderLine.setBodyTextColor('#ffffff');
+        if (typeof orderLine.setQuantity === 'function') orderLine.setQuantity('');
+        console.log('✅ TRADINGVIEW - Linha de liquidação (orderLine) adicionada');
+        return;
+      } else {
+        console.log('⚠️ TRADINGVIEW - createOrderLine não disponível');
+      }
+    } catch (errOrder) {
+      console.warn('⚠️ TRADINGVIEW - createOrderLine falhou:', errOrder);
+    }
     try {
       console.log('📊 TRADINGVIEW - Tentando createShape(horizontal_line):', price);
       const time = Math.floor(Date.now() / 1000);
