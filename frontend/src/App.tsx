@@ -36,6 +36,7 @@ import Dashboard from '@/pages/Dashboard';
 import DashboardRefactored from '@/pages/DashboardRefactored';
 import Profile from '@/pages/Profile';
 import ProfileRefactored from '@/pages/ProfileRefactored';
+import ProfileRestored from '@/pages/ProfileRestored';
 import MarginGuard from '@/pages/MarginGuard';
 import { Automation } from '@/pages/Automation';
 import { Logs } from '@/pages/Logs';
@@ -290,7 +291,7 @@ const App = () => {
                 <ProtectedRoute>
                   <RouteGuard>
                     <ResponsiveLayout>
-                      <ProfileRefactored />
+                      <ProfileRestored />
                     </ResponsiveLayout>
                   </RouteGuard>
                 </ProtectedRoute>
