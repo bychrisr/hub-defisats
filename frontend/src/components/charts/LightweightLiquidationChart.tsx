@@ -348,7 +348,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       indicatorSeries.push(indicatorSeriesInstance);
     }
 
-    // Configurar zoom inicial para mostrar aproximadamente 7 dias
+    // Variável para controlar se é o primeiro carregamento
+    const isInitialLoad = useRef(true);
+    
+    // Configurar zoom inicial para mostrar aproximadamente 7 dias (apenas no primeiro carregamento)
     const setInitialZoom = () => {
       if (effectiveCandleData && effectiveCandleData.length > 0) {
         const dataLength = effectiveCandleData.length;
@@ -373,9 +376,45 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           toIndex,
           daysVisible: (visibleBars * getTimeframeMinutes(currentTimeframe)) / (24 * 60)
         });
+        
+        // Marcar que o carregamento inicial foi feito
+        isInitialLoad.current = false;
       } else {
         // Fallback: fit content se não há dados
         chart.timeScale().fitContent();
+      }
+    };
+
+    // Função para preservar zoom atual quando novos dados são carregados
+    const preserveCurrentZoom = () => {
+      if (!effectiveCandleData || effectiveCandleData.length === 0) return;
+      
+      const timeScale = chart.timeScale();
+      const currentRange = timeScale.getVisibleLogicalRange();
+      
+      if (currentRange && !isInitialLoad.current) {
+        const dataLength = effectiveCandleData.length;
+        const lastCandleIndex = dataLength - 1;
+        
+        // Se o usuário estava visualizando dados antigos, preservar essa visualização
+        if (currentRange.to < lastCandleIndex) {
+          // Ajustar apenas se necessário para manter a proporção
+          const visibleBars = currentRange.to - currentRange.from;
+          const newFromIndex = Math.max(0, lastCandleIndex - visibleBars);
+          
+          timeScale.setVisibleLogicalRange({
+            from: newFromIndex,
+            to: lastCandleIndex
+          });
+          
+          console.log('🎯 ZOOM - Preserved user zoom:', {
+            originalFrom: currentRange.from,
+            originalTo: currentRange.to,
+            newFromIndex,
+            lastCandleIndex,
+            visibleBars: Math.round(visibleBars)
+          });
+        }
       }
     };
 
@@ -432,8 +471,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     } catch {}
 
-    // Aplicar zoom inicial após um pequeno delay para garantir que os dados foram renderizados
-    setTimeout(setInitialZoom, 100);
+    // Aplicar zoom inicial ou preservar zoom atual após um pequeno delay
+    setTimeout(() => {
+      if (isInitialLoad.current) {
+        setInitialZoom();
+      } else {
+        preserveCurrentZoom();
+      }
+    }, 100);
 
     // Detectar scroll para carregar dados históricos
     const handleScroll = () => {
@@ -502,8 +547,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     const ro = new ResizeObserver(() => {
       if (!containerRef.current) return;
       chart.applyOptions({ width: containerRef.current.clientWidth, height });
-      // Apenas ajustar zoom inicial após resize, sem forçar posição
-      setTimeout(setInitialZoom, 50);
+      // Preservar zoom atual após resize (não resetar para 7 dias)
+      setTimeout(() => {
+        if (isInitialLoad.current) {
+          setInitialZoom();
+        } else {
+          preserveCurrentZoom();
+        }
+      }, 50);
     });
     ro.observe(containerRef.current);
 
