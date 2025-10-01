@@ -192,7 +192,12 @@ export default function Dashboard() {
   const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
   
   // Dados históricos (mantido para compatibilidade)
-  const historicalData = useHistoricalData();
+  const historicalData = useHistoricalData({
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    initialLimit: 168,
+    enabled: false // Desabilitado por enquanto
+  });
   
   // Dados de saldo estimado (hook específico)
   const estimatedBalance = useEstimatedBalance();

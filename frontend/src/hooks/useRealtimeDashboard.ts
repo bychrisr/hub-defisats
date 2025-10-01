@@ -29,7 +29,12 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   
   const { refreshData: refreshCentralizedData, isLoading: centralizedLoading } = useCentralizedData();
   const { refetch: refetchEstimatedBalance } = useEstimatedBalance();
-  const { refetch: refetchHistoricalData } = useHistoricalData();
+  const { refetch: refetchHistoricalData } = useHistoricalData({
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    initialLimit: 168,
+    enabled: false
+  });
   const { refreshPositions } = usePositions();
 
   // Refs para controlar os intervalos
