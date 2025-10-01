@@ -49,7 +49,11 @@ export const useHistoricalData = ({
 
   // Carregar dados iniciais
   const loadInitialData = useCallback(async () => {
-    if (!enabled || loadingRef.current) return;
+    console.log('🔄 HISTORICAL - loadInitialData called:', { enabled, loadingRef: loadingRef.current });
+    if (!enabled || loadingRef.current) {
+      console.log('🔄 HISTORICAL - Early return from loadInitialData:', { enabled, loadingRef: loadingRef.current });
+      return;
+    }
     
     loadingRef.current = true;
     setIsLoading(true);
@@ -180,6 +184,7 @@ export const useHistoricalData = ({
 
   // Carregar dados iniciais automaticamente
   useEffect(() => {
+    console.log('🔄 HISTORICAL - useEffect triggered:', { enabled, symbol, timeframe, initialLimit });
     if (enabled) {
       loadInitialData();
     }
