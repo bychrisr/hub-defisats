@@ -133,13 +133,23 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       });
 
       console.log('✅ TRADINGVIEW - Widget criado com sucesso');
-      console.log('🔄 TRADINGVIEW - Configurando onChartReady...');
-
-      // Aguardar widget estar pronto
-      widgetRef.current.onChartReady(() => {
-        console.log('✅ TRADINGVIEW - Widget pronto, gráfico disponível');
-        setIsLoading(false);
-      });
+      console.log('🔄 TRADINGVIEW - Widget methods:', Object.keys(widgetRef.current));
+      
+      // Verificar se onChartReady existe
+      if (typeof widgetRef.current.onChartReady === 'function') {
+        console.log('✅ TRADINGVIEW - onChartReady disponível, configurando...');
+        widgetRef.current.onChartReady(() => {
+          console.log('✅ TRADINGVIEW - Widget pronto, gráfico disponível');
+          setIsLoading(false);
+        });
+      } else {
+        console.log('⚠️ TRADINGVIEW - onChartReady não disponível, usando setTimeout...');
+        // Fallback: aguardar um tempo e considerar pronto
+        setTimeout(() => {
+          console.log('✅ TRADINGVIEW - Widget considerado pronto (timeout)');
+          setIsLoading(false);
+        }, 2000);
+      }
     } catch (err) {
       console.error('❌ TRADINGVIEW - Erro na inicialização do widget:', err);
       console.error('❌ TRADINGVIEW - Detalhes do erro:', {
