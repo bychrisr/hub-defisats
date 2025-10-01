@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useCandleData } from '@/hooks/useCandleData';
+import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useIndicators, IndicatorType } from '@/hooks/useIndicators';
 import { 
   BarChart3, 
@@ -86,21 +87,24 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     return 60; // Default 1h
   }
 
-  // Hook para dados de candles da API - limitado para 7 dias
+  // Hook para dados históricos com navegação
   const { 
-    candleData: apiCandleData, 
+    candleData: historicalData, 
     isLoading: candleLoading, 
+    isLoadingMore: isLoadingMoreHistorical,
     error: candleError,
-    refetch: refetchCandles
-  } = useCandleData({
+    hasMoreData,
+    loadMoreHistorical,
+    resetData: resetHistoricalData
+  } = useHistoricalData({
     symbol: symbol.replace('BINANCE:', ''),
     timeframe: currentTimeframe,
-    limit: getLimitForTimeframe(currentTimeframe), // Limite baseado no timeframe para ~7 dias
+    initialLimit: getLimitForTimeframe(currentTimeframe), // Limite baseado no timeframe para ~7 dias
     enabled: useApiData
   });
 
-  // Usar dados da API se habilitado, senão usar props
-  const effectiveCandleData = useApiData ? apiCandleData : candleData;
+  // Usar dados históricos se habilitado, senão usar props
+  const effectiveCandleData = useApiData ? historicalData : candleData;
 
   // Hook para indicadores
   const { indicators, addIndicator, removeIndicator, toggleIndicator } = useIndicators();
@@ -361,6 +365,27 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     // Aplicar zoom inicial após um pequeno delay para garantir que os dados foram renderizados
     setTimeout(setInitialZoom, 100);
 
+    // Detectar scroll para carregar dados históricos
+    const handleScroll = () => {
+      if (!useApiData || !hasMoreData || isLoadingMoreHistorical) return;
+      
+      const timeScale = chart.timeScale();
+      const visibleRange = timeScale.getVisibleLogicalRange();
+      
+      if (visibleRange && visibleRange.from <= 10) { // Se está próximo do início dos dados
+        console.log('🔄 SCROLL - Loading more historical data...', {
+          visibleFrom: visibleRange.from,
+          visibleTo: visibleRange.to,
+          hasMoreData,
+          isLoadingMore: isLoadingMoreHistorical
+        });
+        loadMoreHistorical();
+      }
+    };
+
+    // Adicionar listener de scroll
+    chart.timeScale().subscribeVisibleLogicalRangeChange(handleScroll);
+
     // Resize
     const ro = new ResizeObserver(() => {
       if (!containerRef.current) return;
@@ -372,6 +397,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     return () => {
       ro.disconnect();
+      // remover listener de scroll
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(handleScroll);
       // remover priceLines criadas
       if (seriesRef.current && createdLines.length) {
         for (const l of createdLines) {
@@ -384,7 +411,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
       chart.remove();
     };
-  }, [height, isDark, liquidationPrice, currentTimeframe, JSON.stringify(liquidationLines), JSON.stringify(takeProfitLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(effectiveCandleData?.slice(-200))]);
+  }, [height, isDark, liquidationPrice, currentTimeframe, JSON.stringify(liquidationLines), JSON.stringify(takeProfitLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(effectiveCandleData?.slice(-200)), useApiData, hasMoreData, isLoadingMoreHistorical, loadMoreHistorical]);
 
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 
@@ -451,6 +478,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
             {/* Lado direito: Controles */}
             <div className="flex items-center gap-2">
+              {/* Indicador de carregamento histórico */}
+              {isLoadingMoreHistorical && (
+                <div className="flex items-center gap-1 text-xs text-blue-500">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>Loading history...</span>
+                </div>
+              )}
+              
               {/* Timeframe buttons */}
               <div className="flex items-center gap-1">
                 {timeframes.map((tf) => (

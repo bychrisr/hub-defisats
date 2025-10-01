@@ -1,322 +1,180 @@
-import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
-import { useAuthStore } from '@/stores/auth';
-import { useRealtimeData } from '@/contexts/RealtimeDataContext';
+import { useState, useCallback, useRef } from 'react';
+import { marketDataService } from '@/services/marketData.service';
 
-export interface HistoricalTrade {
-  id: string;
-  side: 'long' | 'short';
-  quantity: number;
-  entryPrice: number;
-  exitPrice?: number;
-  pnl: number;
-  fees: number;
-  status: 'open' | 'closed';
-  createdAt: string;
-  closedAt?: string;
+type CandlestickPoint = { time: number; open: number; high: number; low: number; close: number };
+
+interface UseHistoricalDataProps {
+  symbol: string;
+  timeframe: string;
+  initialLimit?: number;
+  enabled?: boolean;
 }
 
-export interface HistoricalData {
-  trades: HistoricalTrade[];
-  totalProfit: number;
-  totalFees: number;
-  successRate: number;
-  totalPositions: number;
-  winningPositions: number;
-  losingPositions: number;
-  totalTrades: number;
-  winningTrades: number;
-  lostTrades: number;
+interface UseHistoricalDataReturn {
+  candleData: CandlestickPoint[];
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  error: string | null;
+  hasMoreData: boolean;
+  loadMoreHistorical: () => Promise<void>;
+  resetData: () => void;
 }
 
-export const useHistoricalData = () => {
-  const { user } = useAuthStore();
-  const { userPositions } = useRealtimeData();
-  const [data, setData] = useState<HistoricalData | null>(null);
+export const useHistoricalData = ({
+  symbol,
+  timeframe,
+  initialLimit = 168, // 7 dias para 1h
+  enabled = true
+}: UseHistoricalDataProps): UseHistoricalDataReturn => {
+  const [candleData, setCandleData] = useState<CandlestickPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const isAdmin = user?.is_admin || false;
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const [oldestTimestamp, setOldestTimestamp] = useState<number | null>(null);
+  const loadingRef = useRef(false);
 
-  const fetchHistoricalData = async () => {
-    console.log('🔍 HISTORICAL DATA HOOK - Starting fetchHistoricalData');
-    console.log('🔍 HISTORICAL DATA HOOK - isAdmin:', isAdmin);
-    console.log('🔍 HISTORICAL DATA HOOK - userPositions length:', userPositions?.length || 0);
-    
-    // Para admins, usar apenas dados das posições atuais
-    if (isAdmin) {
-      console.log('🔍 HISTORICAL DATA HOOK - Admin user, using current positions only...');
-      setIsLoading(true);
-      
-      // Usar dados das posições atuais para admins
-      const currentPositions = userPositions || [];
-      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
-      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
-      const totalPositions = currentPositions.length;
-      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
-      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
-      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
-
-      console.log('🔍 HISTORICAL DATA HOOK - Admin fallback data:', {
-        totalPositions,
-        winningPositions,
-        losingPositions,
-        successRate,
-        totalProfit,
-        totalFees
-      });
-
-      setData({
-        trades: [],
-        totalProfit: 0.001234, // 0.001234 BTC de lucro total
-        totalFees: 0.000123, // 0.000123 BTC de taxas pagas
-        successRate: 65.5, // 65.5% de taxa de sucesso
-        totalPositions: 25, // 25 posições totais
-        winningPositions: 16, // 16 posições vencedoras
-        losingPositions: 9, // 9 posições perdedoras
-        totalTrades: 25, // 25 trades totais
-        winningTrades: 16, // 16 trades vencedores
-        lostTrades: 9, // 9 trades perdidos
-      });
-      
-      setIsLoading(false);
-      return;
-    }
-
-    console.log('🔍 HISTORICAL DATA HOOK - Non-admin user, fetching from API...');
-    
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log('🔍 HISTORICAL DATA HOOK - Fetching trades from API...');
-      // Buscar trades históricos
-      const tradesResponse = await api.get('/api/lnmarkets-robust/dashboard');
-      const tradesData = tradesResponse.data;
-      
-      console.log('🔍 HISTORICAL DATA HOOK - API Response:', {
-        success: tradesData.success,
-        dataLength: Array.isArray(tradesData.data) ? tradesData.data.length : 'not array',
-        data: tradesData.data
-      });
-
-      if (tradesData.success && Array.isArray(tradesData.data)) {
-        const trades: HistoricalTrade[] = tradesData.data.map((trade: any) => {
-          const mappedTrade = {
-            id: trade.id,
-            side: trade.side === 'b' ? 'long' : 'short',
-            quantity: trade.quantity || 0,
-            entryPrice: trade.entry_price || trade.price || 0,
-            exitPrice: trade.price || undefined,
-            pnl: trade.pnl || trade.pl || 0,
-            fees: (trade.opening_fee || 0) + (trade.closing_fee || 0) + (trade.sum_carry_fees || 0),
-            status: trade.status === 'closed' || trade.closed ? 'closed' : 'open',
-            createdAt: trade.creation_ts || new Date().toISOString(),
-            closedAt: trade.closed_ts || undefined,
-          };
-          
-          console.log('🔍 HISTORICAL DATA HOOK - Mapped trade:', {
-            id: mappedTrade.id,
-            status: mappedTrade.status,
-            originalStatus: trade.status,
-            closed: trade.closed,
-            pnl: mappedTrade.pnl
-          });
-          
-          return mappedTrade;
-        });
-
-        // Calcular métricas históricas
-        console.log('🔍 HISTORICAL DATA HOOK - Raw trades data:', trades.slice(0, 3)); // Mostrar primeiros 3 trades
-        console.log('🔍 HISTORICAL DATA HOOK - Trade statuses:', trades.map(t => ({ id: t.id, status: t.status, pnl: t.pnl })));
-        
-        const closedTrades = trades.filter(trade => trade.status === 'closed');
-        console.log('🔍 HISTORICAL DATA HOOK - Closed trades:', closedTrades);
-        
-        const totalProfit = closedTrades.reduce((sum, trade) => sum + trade.pnl, 0);
-        const totalFees = trades.reduce((sum, trade) => sum + trade.fees, 0);
-        const winningPositions = closedTrades.filter(trade => trade.pnl > 0).length;
-        const losingPositions = closedTrades.filter(trade => trade.pnl < 0).length;
-        const successRate = closedTrades.length > 0 ? (winningPositions / closedTrades.length) * 100 : 0;
-        const totalTrades = trades.length;
-        const winningTrades = winningPositions;
-        const lostTrades = losingPositions;
-
-        console.log('🔍 HISTORICAL DATA HOOK - Calculated metrics:', {
-          totalTrades: trades.length,
-          closedTrades: closedTrades.length,
-          winningPositions,
-          losingPositions,
-          successRate,
-          totalProfit,
-          totalFees
-        });
-
-        setData({
-          trades,
-          totalProfit,
-          totalFees,
-          successRate,
-          totalPositions: trades.length,
-          winningPositions,
-          losingPositions,
-          totalTrades,
-          winningTrades,
-          lostTrades,
-        });
-      } else {
-        console.log('🔍 HISTORICAL DATA HOOK - No historical data available, using current positions as fallback');
-        console.log('🔍 HISTORICAL DATA HOOK - tradesData:', tradesData);
-        // Se não há dados históricos, usar dados das posições atuais como fallback
-        const currentPositions = userPositions || [];
-        console.log('🔍 HISTORICAL DATA HOOK - currentPositions for fallback:', currentPositions);
-        const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
-        const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
-        const totalPositions = currentPositions.length;
-        const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
-        const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
-        const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
-        const totalTrades = totalPositions;
-        const winningTrades = winningPositions;
-        const lostTrades = losingPositions;
-
-        console.log('🔍 HISTORICAL DATA HOOK - Using current positions fallback:', {
-          totalPositions,
-          winningPositions,
-          losingPositions,
-          successRate,
-          totalProfit,
-          totalFees
-        });
-
-        setData({
-          trades: [],
-          totalProfit,
-          totalFees,
-          successRate,
-          totalPositions,
-          winningPositions,
-          losingPositions,
-          totalTrades,
-          winningTrades,
-          lostTrades,
-        });
-      }
-    } catch (err: any) {
-      console.error('Error fetching historical data:', err);
-      setError(err.message || 'Failed to fetch historical data');
-      
-      // Em caso de erro, usar dados das posições atuais como fallback
-      console.log('🔍 HISTORICAL DATA HOOK - Error occurred, using current positions as fallback');
-      const currentPositions = userPositions || [];
-      console.log('🔍 HISTORICAL DATA HOOK - currentPositions for error fallback:', currentPositions);
-      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
-      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
-      const totalPositions = currentPositions.length;
-      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
-      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
-      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
-
-      setData({
-        trades: [],
-        totalProfit,
-        totalFees,
-        successRate,
-        totalPositions,
-        winningPositions,
-        losingPositions,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchHistoricalData();
+  // Função para calcular limite baseado no timeframe
+  const getLimitForTimeframe = useCallback((tf: string): number => {
+    const tfLower = tf.toLowerCase();
+    if (tfLower.includes('1m')) return 1;
+    if (tfLower.includes('5m')) return 5;
+    if (tfLower.includes('15m')) return 15;
+    if (tfLower.includes('30m')) return 30;
+    if (tfLower.includes('1h')) return 60;
+    if (tfLower.includes('4h')) return 240;
+    if (tfLower.includes('1d')) return 1440;
+    return 60; // Default 1h
   }, []);
 
-  // Inicializar dados para admins quando userPositions estiver disponível
-  useEffect(() => {
-    console.log('🔍 HISTORICAL DATA HOOK - useEffect admin check:', { isAdmin, userPositionsLength: userPositions?.length, hasData: !!data });
-    if (isAdmin && userPositions && !data) {
-      console.log('🔍 HISTORICAL DATA HOOK - Initializing admin data with current positions');
-      console.log('🔍 HISTORICAL DATA HOOK - userPositions:', userPositions);
-      const currentPositions = userPositions || [];
-      console.log('🔍 HISTORICAL DATA HOOK - currentPositions length:', currentPositions.length);
+  // Carregar dados iniciais
+  const loadInitialData = useCallback(async () => {
+    if (!enabled || loadingRef.current) return;
+    
+    loadingRef.current = true;
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      console.log('🔄 HISTORICAL - Loading initial data:', { symbol, timeframe, limit: initialLimit });
       
-      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
-      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
-      const totalPositions = currentPositions.length;
-      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
-      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
-      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
-
-      console.log('🔍 HISTORICAL DATA HOOK - Calculated metrics:', {
-        totalPositions,
-        winningPositions,
-        losingPositions,
-        successRate,
-        totalProfit,
-        totalFees,
-        positions: currentPositions.map(pos => ({ id: pos.id, pnl: pos.pnl }))
-      });
-
-      setData({
-        trades: [],
-        totalProfit,
-        totalFees,
-        successRate,
-        totalPositions,
-        winningPositions,
-        losingPositions,
-      });
-    }
-  }, [isAdmin, userPositions, data]);
-
-  // Atualizar dados quando as posições atuais mudarem (para o fallback)
-  useEffect(() => {
-    console.log('🔍 HISTORICAL DATA HOOK - useEffect update check:', { hasData: !!data, userPositionsLength: userPositions?.length });
-    if (data && userPositions) {
-      console.log('🔍 HISTORICAL DATA HOOK - Updating fallback data with current positions');
-      console.log('🔍 HISTORICAL DATA HOOK - userPositions for update:', userPositions);
-      const currentPositions = userPositions || [];
-      console.log('🔍 HISTORICAL DATA HOOK - currentPositions length for update:', currentPositions.length);
+      const rawData = await marketDataService.getHistoricalData(symbol, timeframe, initialLimit);
       
-      const winningPositions = currentPositions.filter(pos => (pos.pnl || 0) > 0).length;
-      const losingPositions = currentPositions.filter(pos => (pos.pnl || 0) < 0).length;
-      const totalPositions = currentPositions.length;
-      const successRate = totalPositions > 0 ? (winningPositions / totalPositions) * 100 : 0;
-      const totalProfit = currentPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
-      const totalFees = currentPositions.reduce((sum, pos) => sum + (pos.tradingFees || 0) + (pos.fundingCost || 0), 0);
-
-      console.log('🔍 HISTORICAL DATA HOOK - Updated metrics:', {
-        totalPositions,
-        winningPositions,
-        losingPositions,
-        successRate,
-        totalProfit,
-        totalFees
-      });
-
-      setData(prev => ({
-        ...prev,
-        totalProfit,
-        totalFees,
-        successRate,
-        totalPositions,
-        winningPositions,
-        losingPositions,
-        totalTrades: totalPositions,
-        winningTrades: winningPositions,
-        lostTrades: losingPositions,
+      const mappedData: CandlestickPoint[] = rawData.map((candle) => ({
+        time: candle.time,
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close
       }));
+      
+      setCandleData(mappedData);
+      
+      // Definir timestamp mais antigo para próxima carga
+      if (mappedData.length > 0) {
+        const oldest = Math.min(...mappedData.map(c => c.time));
+        setOldestTimestamp(oldest);
+        setHasMoreData(mappedData.length === initialLimit); // Se retornou menos que o limite, não há mais dados
+      }
+      
+      console.log('✅ HISTORICAL - Initial data loaded:', {
+        count: mappedData.length,
+        oldestTimestamp: oldestTimestamp,
+        hasMoreData
+      });
+      
+    } catch (err: any) {
+      console.error('❌ HISTORICAL - Error loading initial data:', err);
+      setError(err.message || 'Failed to load initial data');
+    } finally {
+      setIsLoading(false);
+      loadingRef.current = false;
     }
-  }, [userPositions]);
+  }, [symbol, timeframe, initialLimit, enabled]);
+
+  // Carregar mais dados históricos
+  const loadMoreHistorical = useCallback(async () => {
+    if (!enabled || !hasMoreData || loadingRef.current || !oldestTimestamp) return;
+    
+    loadingRef.current = true;
+    setIsLoadingMore(true);
+    setError(null);
+    
+    try {
+      console.log('🔄 HISTORICAL - Loading more data:', { 
+        symbol, 
+        timeframe, 
+        oldestTimestamp,
+        limit: initialLimit 
+      });
+      
+      // Calcular timestamp de início para dados anteriores
+      const timeframeMinutes = getLimitForTimeframe(timeframe);
+      const startTime = oldestTimestamp - (initialLimit * timeframeMinutes * 60);
+      
+      const rawData = await marketDataService.getHistoricalData(
+        symbol, 
+        timeframe, 
+        initialLimit,
+        startTime
+      );
+      
+      if (rawData.length === 0) {
+        setHasMoreData(false);
+        return;
+      }
+      
+      const mappedData: CandlestickPoint[] = rawData.map((candle) => ({
+        time: candle.time,
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close
+      }));
+      
+      // Adicionar novos dados ao início do array (dados mais antigos)
+      setCandleData(prev => [...mappedData, ...prev]);
+      
+      // Atualizar timestamp mais antigo
+      if (mappedData.length > 0) {
+        const newOldest = Math.min(...mappedData.map(c => c.time));
+        setOldestTimestamp(newOldest);
+        setHasMoreData(mappedData.length === initialLimit);
+      }
+      
+      console.log('✅ HISTORICAL - More data loaded:', {
+        newCount: mappedData.length,
+        totalCount: candleData.length + mappedData.length,
+        oldestTimestamp: oldestTimestamp
+      });
+      
+    } catch (err: any) {
+      console.error('❌ HISTORICAL - Error loading more data:', err);
+      setError(err.message || 'Failed to load more historical data');
+    } finally {
+      setIsLoadingMore(false);
+      loadingRef.current = false;
+    }
+  }, [symbol, timeframe, initialLimit, enabled, hasMoreData, oldestTimestamp, candleData.length]);
+
+  // Resetar dados
+  const resetData = useCallback(() => {
+    setCandleData([]);
+    setOldestTimestamp(null);
+    setHasMoreData(true);
+    setError(null);
+    loadingRef.current = false;
+  }, []);
 
   return {
-    data,
+    candleData,
     isLoading,
+    isLoadingMore,
     error,
-    refetch: fetchHistoricalData,
+    hasMoreData,
+    loadMoreHistorical,
+    resetData,
+    // Expor função para carregar dados iniciais
+    loadInitialData
   };
 };

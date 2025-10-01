@@ -35,7 +35,7 @@ class MarketDataService {
   }
 
   // Obter dados históricos via REST API
-  async getHistoricalData(symbol: string, timeframe: string = '1m', limit: number = 100): Promise<CandleData[]> {
+  async getHistoricalData(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
     const mapTf = (tf: string) => {
       // Normalizar para intervalos do Binance
       const m = String(tf).toLowerCase();
@@ -48,7 +48,12 @@ class MarketDataService {
     };
 
     const req = async (): Promise<CandleData[]> => {
-      const response = await fetch(`${this.baseUrl}/api/market/historical?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`, {
+      let url = `${this.baseUrl}/api/market/historical?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`;
+      if (startTime) {
+        url += `&startTime=${startTime}`;
+      }
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json'
@@ -64,7 +69,13 @@ class MarketDataService {
     const fallbackBinance = async (): Promise<CandleData[]> => {
       try {
         const interval = mapTf(timeframe);
-        const url = `https://api.binance.com/api/v3/klines?symbol=${symbol.replace(':','')}&interval=${interval}&limit=${Math.min(limit || 500, 1000)}`;
+        let url = `https://api.binance.com/api/v3/klines?symbol=${symbol.replace(':','')}&interval=${interval}&limit=${Math.min(limit || 500, 1000)}`;
+        
+        // Adicionar startTime se fornecido
+        if (startTime) {
+          url += `&startTime=${startTime * 1000}`; // Binance usa milissegundos
+        }
+        
         const r = await fetch(url);
         if (!r.ok) throw new Error(`Binance HTTP ${r.status}`);
         const arr: any[] = await r.json();
