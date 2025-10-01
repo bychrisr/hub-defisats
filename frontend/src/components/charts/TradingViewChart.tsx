@@ -114,7 +114,24 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         popup_height: '650'
       });
 
-      setIsLoading(false);
+      // ✅ AGUARDAR WIDGET ESTAR PRONTO ANTES DE ADICIONAR LINHAS
+      widgetRef.current.onChartReady(() => {
+        console.log('✅ TRADINGVIEW - Widget ready, chart available');
+        setIsLoading(false);
+        
+        // Adicionar linhas quando o widget estiver pronto
+        setTimeout(() => {
+          if (showLiquidationLine && liquidationPrice) {
+            console.log('🔄 TRADINGVIEW - Adding liquidation line after widget ready:', liquidationPrice);
+            addLiquidationLine(liquidationPrice);
+          }
+
+          if (showPositionMarkers && userPositions.length > 0) {
+            console.log('🔄 TRADINGVIEW - Adding position markers after widget ready:', userPositions.length);
+            addPositionMarkers(userPositions);
+          }
+        }, 1000); // Aguardar 1 segundo para garantir que tudo está carregado
+      });
     } catch (err) {
       setError('Erro ao inicializar widget TradingView');
       setIsLoading(false);

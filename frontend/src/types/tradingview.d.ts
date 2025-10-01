@@ -37,6 +37,9 @@ interface TradingViewWidgetConfig {
 interface TradingViewWidget {
   remove: () => void;
   onChartReady: (callback: () => void) => void;
+  chart: () => {
+    createShape: (point: { time: number; price: number }, options: any) => void;
+  };
 }
 
 export {};
