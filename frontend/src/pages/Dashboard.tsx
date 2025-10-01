@@ -1967,7 +1967,7 @@ export default function Dashboard() {
           {(() => {
             const liquidationPrice = optimizedPositions.length > 0 ? 
               optimizedPositions.reduce((sum, pos) => sum + pos.liquidation, 0) / optimizedPositions.length : 
-              undefined;
+              50000; // TESTE: Valor fixo para testar a funcionalidade
             
             console.log('📊 DASHBOARD - Calculando liquidationPrice:', {
               positionsCount: optimizedPositions.length,
