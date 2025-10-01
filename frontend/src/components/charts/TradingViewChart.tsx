@@ -77,10 +77,11 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
   // Inicializar widget quando script estiver carregado
   useEffect(() => {
-    console.log('🔄 TRADINGVIEW - Widget initialization check:', {
+    console.log('🔄 TRADINGVIEW - Widget initialization useEffect triggered:', {
       isScriptLoaded,
       hasContainer: !!containerRef.current,
-      hasTradingView: !!window.TradingView
+      hasTradingView: !!window.TradingView,
+      timestamp: new Date().toISOString()
     });
 
     if (!isScriptLoaded || !containerRef.current || !window.TradingView) {
