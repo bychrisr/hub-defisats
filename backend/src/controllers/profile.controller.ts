@@ -48,38 +48,51 @@ export class ProfileController {
 
       console.log('✅ PROFILE - Profile fetched successfully');
 
-      // Decrypt LN Markets credentials for display
+      // ✅ CORREÇÃO: Detectar se os dados estão criptografados ou não
       let decryptedProfile = { ...profile };
       
       try {
         if (profile.ln_markets_api_key) {
-          console.log('🔓 PROFILE - Decrypting API key...');
-          decryptedProfile.ln_markets_api_key = this.authService.decryptData(profile.ln_markets_api_key);
-          console.log('✅ PROFILE - API key decrypted successfully');
+          // Verificar se está no formato criptografado (iv:encrypted)
+          if (profile.ln_markets_api_key.includes(':')) {
+            console.log('🔓 PROFILE - Decrypting API key...');
+            decryptedProfile.ln_markets_api_key = this.authService.decryptData(profile.ln_markets_api_key);
+            console.log('✅ PROFILE - API key decrypted successfully');
+          } else {
+            console.log('✅ PROFILE - API key is already in plain text');
+            decryptedProfile.ln_markets_api_key = profile.ln_markets_api_key;
+          }
         }
         
         if (profile.ln_markets_api_secret) {
-          console.log('🔓 PROFILE - Decrypting API secret...');
-          decryptedProfile.ln_markets_api_secret = this.authService.decryptData(profile.ln_markets_api_secret);
-          console.log('✅ PROFILE - API secret decrypted successfully');
+          // Verificar se está no formato criptografado (iv:encrypted)
+          if (profile.ln_markets_api_secret.includes(':')) {
+            console.log('🔓 PROFILE - Decrypting API secret...');
+            decryptedProfile.ln_markets_api_secret = this.authService.decryptData(profile.ln_markets_api_secret);
+            console.log('✅ PROFILE - API secret decrypted successfully');
+          } else {
+            console.log('✅ PROFILE - API secret is already in plain text');
+            decryptedProfile.ln_markets_api_secret = profile.ln_markets_api_secret;
+          }
         }
         
         if (profile.ln_markets_passphrase) {
-          console.log('🔓 PROFILE - Decrypting passphrase...');
-          decryptedProfile.ln_markets_passphrase = this.authService.decryptData(profile.ln_markets_passphrase);
-          console.log('✅ PROFILE - Passphrase decrypted successfully');
+          // Verificar se está no formato criptografado (iv:encrypted)
+          if (profile.ln_markets_passphrase.includes(':')) {
+            console.log('🔓 PROFILE - Decrypting passphrase...');
+            decryptedProfile.ln_markets_passphrase = this.authService.decryptData(profile.ln_markets_passphrase);
+            console.log('✅ PROFILE - Passphrase decrypted successfully');
+          } else {
+            console.log('✅ PROFILE - Passphrase is already in plain text');
+            decryptedProfile.ln_markets_passphrase = profile.ln_markets_passphrase;
+          }
         }
         
-        console.log('🔓 PROFILE - All credentials decrypted for display');
+        console.log('✅ PROFILE - All credentials processed for display');
       } catch (error) {
-        console.error('❌ PROFILE - Error decrypting credentials:', error);
-        // Return encrypted data with indication if decryption fails
-        decryptedProfile = {
-          ...profile,
-          ln_markets_api_key: profile.ln_markets_api_key ? '[ENCRYPTED]' : null,
-          ln_markets_api_secret: profile.ln_markets_api_secret ? '[ENCRYPTED]' : null,
-          ln_markets_passphrase: profile.ln_markets_passphrase ? '[ENCRYPTED]' : null,
-        };
+        console.error('❌ PROFILE - Error processing credentials:', error);
+        // Return original data if processing fails
+        decryptedProfile = { ...profile };
       }
 
       // Add is_admin field based on admin_user relation

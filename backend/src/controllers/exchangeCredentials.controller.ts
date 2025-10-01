@@ -11,6 +11,13 @@ export class ExchangeCredentialsController {
     this.authService = authService || new AuthService(this.prisma, null as any);
   }
 
+  private async getPrisma() {
+    if (!this.prisma) {
+      this.prisma = new PrismaClient();
+    }
+    return this.prisma;
+  }
+
   /**
    * GET /api/exchanges - Listar todas as exchanges disponíveis
    */
@@ -18,7 +25,8 @@ export class ExchangeCredentialsController {
     try {
       console.log('🔍 EXCHANGE CREDENTIALS - Fetching exchanges...');
 
-      const exchanges = await this.prisma.exchange.findMany({
+      const prisma = await this.getPrisma();
+      const exchanges = await prisma.exchange.findMany({
         where: { is_active: true },
         include: {
           credential_types: {
@@ -55,7 +63,8 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Fetching user credentials for:', user?.id);
 
-      const userCredentials = await this.prisma.userExchangeCredentials.findMany({
+      const prisma = await this.getPrisma();
+      const userCredentials = await prisma.userExchangeCredentials.findMany({
         where: { user_id: user.id },
         include: {
           exchange: {
@@ -125,7 +134,8 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Fetching credentials for exchange:', exchangeId, 'user:', user?.id);
 
-      const userCredentials = await this.prisma.userExchangeCredentials.findUnique({
+      const prisma = await this.getPrisma();
+      const userCredentials = await prisma.userExchangeCredentials.findUnique({
         where: {
           user_id_exchange_id: {
             user_id: user.id,
@@ -206,8 +216,9 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Updating credentials for exchange:', exchange_id, 'user:', user?.id);
 
+      const prisma = await this.getPrisma();
       // Verificar se a exchange existe
-      const exchange = await this.prisma.exchange.findUnique({
+      const exchange = await prisma.exchange.findUnique({
         where: { id: exchange_id },
         include: { credential_types: true }
       });
@@ -230,7 +241,7 @@ export class ExchangeCredentialsController {
       });
 
       // Upsert credenciais do usuário
-      const userCredentials = await this.prisma.userExchangeCredentials.upsert({
+      const userCredentials = await prisma.userExchangeCredentials.upsert({
         where: {
           user_id_exchange_id: {
             user_id: user.id,
@@ -308,8 +319,9 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Testing credentials for exchange:', exchangeId, 'user:', user?.id);
 
+      const prisma = await this.getPrisma();
       // Buscar credenciais do usuário
-      const userCredentials = await this.prisma.userExchangeCredentials.findUnique({
+      const userCredentials = await prisma.userExchangeCredentials.findUnique({
         where: {
           user_id_exchange_id: {
             user_id: user.id,
@@ -351,7 +363,7 @@ export class ExchangeCredentialsController {
       };
 
       // Atualizar status de verificação
-      await this.prisma.userExchangeCredentials.update({
+      await prisma.userExchangeCredentials.update({
         where: { id: userCredentials.id },
         data: {
           is_verified: testResult.success,
@@ -383,7 +395,8 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Deleting credentials for exchange:', exchangeId, 'user:', user?.id);
 
-      const deletedCredentials = await this.prisma.userExchangeCredentials.deleteMany({
+      const prisma = await this.getPrisma();
+      const deletedCredentials = await prisma.userExchangeCredentials.deleteMany({
         where: {
           user_id: user.id,
           exchange_id: exchangeId

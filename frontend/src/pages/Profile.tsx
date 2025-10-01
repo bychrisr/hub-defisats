@@ -211,12 +211,17 @@ export default function Profile() {
         console.log('🔄 PROFILE - Loading fresh profile data...');
         await getProfile();
         
-        // ✅ CARREGAR CREDENCIAIS DA NOVA ESTRUTURA
+        // ✅ CARREGAR CREDENCIAIS DA NOVA ESTRUTURA (TEMPORARIAMENTE DESABILITADO)
         console.log('🔄 PROFILE - Loading LN Markets credentials from new structure...');
         setIsLoadingCredentials(true);
-        const credentials = await ExchangeCredentialsService.getLNMarketsCredentials();
-        setLnMarketsCredentials(credentials);
-        console.log('✅ PROFILE - LN Markets credentials loaded:', credentials ? 'Found' : 'Not found');
+        try {
+          const credentials = await ExchangeCredentialsService.getLNMarketsCredentials();
+          setLnMarketsCredentials(credentials);
+          console.log('✅ PROFILE - LN Markets credentials loaded:', credentials ? 'Found' : 'Not found');
+        } catch (error) {
+          console.log('⚠️ PROFILE - New structure not available, using old structure');
+          setLnMarketsCredentials(null);
+        }
       } catch (error) {
         console.error('❌ PROFILE - Error loading profile data:', error);
       } finally {
