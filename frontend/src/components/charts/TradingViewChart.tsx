@@ -27,6 +27,9 @@ interface TradingViewChartProps {
   height?: number;
   width?: string;
   className?: string;
+  // Props para linhas de liquidação
+  liquidationPrice?: number;
+  showLiquidationLine?: boolean;
 }
 
 export const TradingViewChart: React.FC<TradingViewChartProps> = ({
@@ -35,7 +38,9 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   theme: propTheme,
   height = 500,
   width = '100%',
-  className = ''
+  className = '',
+  liquidationPrice,
+  showLiquidationLine = true
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<any>(null);
@@ -78,6 +83,40 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       font_family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
       font_size: 12
     };
+  }, []);
+
+  // Função para adicionar linha de liquidação
+  const addLiquidationLine = useCallback((price: number) => {
+    if (!widgetRef.current || !widgetRef.current.chart) {
+      console.log('❌ TRADINGVIEW - Widget ou chart não disponível para linha de liquidação');
+      return;
+    }
+
+    try {
+      console.log('📊 TRADINGVIEW - Adicionando linha de liquidação:', price);
+      
+      // Criar linha horizontal de liquidação
+      widgetRef.current.chart().createShape(
+        { time: Date.now() / 1000, price: price },
+        {
+          shape: 'horizontal_line',
+          text: `Liquidação: $${price.toLocaleString()}`,
+          overrides: {
+            linecolor: '#ff4444',
+            linewidth: 2,
+            linestyle: 1, // Linha sólida
+            textcolor: '#ffffff',
+            fontSize: 10,
+            extendLeft: true,
+            extendRight: true
+          }
+        }
+      );
+      
+      console.log('✅ TRADINGVIEW - Linha de liquidação adicionada com sucesso');
+    } catch (error) {
+      console.warn('⚠️ TRADINGVIEW - Erro ao adicionar linha de liquidação:', error);
+    }
   }, []);
 
   // Carregar script TradingView apenas quando visível (lazy loading)
@@ -229,6 +268,14 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         widgetRef.current.onChartReady(() => {
           console.log('✅ TRADINGVIEW - Widget pronto, gráfico disponível');
           setIsLoading(false);
+          
+          // Adicionar linha de liquidação se especificada
+          if (showLiquidationLine && liquidationPrice) {
+            console.log('📊 TRADINGVIEW - Adicionando linha de liquidação após widget pronto');
+            setTimeout(() => {
+              addLiquidationLine(liquidationPrice);
+            }, 1000); // Aguardar um pouco para garantir que o chart está totalmente carregado
+          }
         });
       } else {
         console.log('⚠️ TRADINGVIEW - onChartReady não disponível, usando setTimeout...');
@@ -236,6 +283,14 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         setTimeout(() => {
           console.log('✅ TRADINGVIEW - Widget considerado pronto (timeout)');
           setIsLoading(false);
+          
+          // Adicionar linha de liquidação se especificada (fallback)
+          if (showLiquidationLine && liquidationPrice) {
+            console.log('📊 TRADINGVIEW - Adicionando linha de liquidação (fallback)');
+            setTimeout(() => {
+              addLiquidationLine(liquidationPrice);
+            }, 500);
+          }
         }, 2000);
       }
     } catch (err) {
@@ -259,6 +314,16 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       }
     };
   }, [isScriptLoaded, widgetConfig, height, width]);
+
+  // Adicionar linha de liquidação quando dados mudarem
+  useEffect(() => {
+    if (!widgetRef.current || !isScriptLoaded || !showLiquidationLine || !liquidationPrice) {
+      return;
+    }
+
+    console.log('📊 TRADINGVIEW - Dados de liquidação mudaram, atualizando linha...');
+    addLiquidationLine(liquidationPrice);
+  }, [liquidationPrice, showLiquidationLine, isScriptLoaded, addLiquidationLine]);
 
   if (error) {
   return (
