@@ -68,9 +68,20 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       s.setData(linePriceData);
       seriesRef.current = s;
     } else {
-      // Sem dados: adicionar uma série vazia apenas para ancorar o eixo
+      // Sem dados: ancorar o eixo usando um preço de referência válido (primeira linha ou liquidationPrice)
+      const anchor = (typeof liquidationPrice === 'number' && liquidationPrice > 0)
+        ? liquidationPrice
+        : (liquidationLines && liquidationLines.length > 0 ? liquidationLines[0].price : undefined);
       const s = chart.addLineSeries({ color: 'transparent', lineWidth: 1 });
-      s.setData([{ time: Math.floor(Date.now() / 1000) - 3600, value: liquidationPrice }, { time: Math.floor(Date.now() / 1000), value: liquidationPrice }]);
+      if (typeof anchor === 'number' && Number.isFinite(anchor)) {
+        s.setData([
+          { time: Math.floor(Date.now() / 1000) - 3600, value: anchor },
+          { time: Math.floor(Date.now() / 1000), value: anchor }
+        ]);
+      } else {
+        // Se nem anchor existe, ainda cria série vazia para permitir price lines (não exibirá nada)
+        s.setData([{ time: Math.floor(Date.now() / 1000), value: 0 }]);
+      }
       seriesRef.current = s;
     }
 
