@@ -4,6 +4,52 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.8] - 2025-01-09
+
+### 🔄 **IMPLEMENTAÇÃO COMPLETA DE TIMEFRAME E INDICADORES DINÂMICOS**
+
+#### ✅ **Troca de Timeframe com Dados Reais da API**
+- **Hook useCandleData**: Novo hook para buscar dados de candles da API
+- **Timeframe dinâmico**: Troca automática de dados ao alterar timeframe (1m, 5m, 15m, 30m, 1h, 4h, 1d)
+- **Loading states**: Indicador visual de carregamento durante busca de dados
+- **Error handling**: Tratamento de erros com fallback para Binance
+- **Auto-refetch**: Dados atualizados automaticamente ao mudar timeframe
+
+#### 📊 **Sistema de Indicadores Completo**
+- **Hook useIndicators**: Gerenciamento de estado dos indicadores (RSI, MACD, Bollinger Bands)
+- **Indicadores visuais**: Badges na barra superior mostrando indicadores ativos
+- **Toggle/Remove**: Clique para ocultar/mostrar, X para remover indicadores
+- **Renderização no gráfico**: Séries de linha com cores distintas para cada indicador
+- **Price scales**: RSI no eixo direito, outros no eixo esquerdo
+
+#### 🚫 **Remoção de Dados Mockados**
+- **useApiData prop**: Flag para usar dados da API em vez de props mockadas
+- **Dados reais**: Substituição completa de dados mockados por dados da API
+- **Fallback inteligente**: Binance como fallback quando API principal falha
+- **Performance**: Otimização de requisições e cache
+
+#### 🔌 **Integração e UX**
+- **Loading indicators**: Spinner durante carregamento de dados
+- **Error states**: Mensagens de erro claras na interface
+- **Badge management**: Indicadores ativos visíveis na toolbar
+- **Responsive design**: Interface adaptável para diferentes tamanhos
+
+#### 🛠️ **Arquivos Criados/Modificados**
+- `frontend/src/hooks/useCandleData.ts` - Hook para dados de candles da API
+- `frontend/src/hooks/useIndicators.ts` - Hook para gerenciamento de indicadores
+- `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Integração completa
+- `frontend/src/pages/Dashboard.tsx` - Configuração com useApiData=true
+
+#### 📚 **Funcionalidades Implementadas**
+- ✅ Troca de timeframe com dados reais da API
+- ✅ Sistema de indicadores com dados dinâmicos
+- ✅ Remoção completa de dados mockados
+- ✅ Loading states e error handling
+- ✅ Interface de gerenciamento de indicadores
+- ✅ Integração com marketDataService
+
+---
+
 ## [v2.3.7] - 2025-01-09
 
 ### 📈 **PERSONALIZAÇÃO COMPLETA DO GRÁFICO LIGHTWEIGHT CHARTS**

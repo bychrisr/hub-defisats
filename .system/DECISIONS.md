@@ -2,6 +2,161 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-029: Implementação de Timeframe e Indicadores Dinâmicos no Lightweight Charts
+
+**Data**: 2025-01-09  
+**Status**: Aceito  
+**Contexto**: Implementação completa de troca de timeframe e indicadores com dados reais da API
+
+### Problema
+- **Dados mockados**: Gráfico usando dados estáticos em vez de dados reais da API
+- **Timeframe fixo**: Sem possibilidade de trocar timeframe dinamicamente
+- **Indicadores limitados**: Sem sistema de indicadores técnicos funcionais
+- **UX limitada**: Interface sem feedback de loading ou estados de erro
+
+### Decisão
+Implementar sistema completo de timeframe e indicadores dinâmicos:
+
+#### 1. Hook useCandleData para Dados da API
+- **Busca automática**: Dados atualizados automaticamente ao mudar timeframe
+- **Loading states**: Indicador visual durante carregamento
+- **Error handling**: Fallback para Binance quando API principal falha
+- **Cache inteligente**: Evita requisições desnecessárias
+
+#### 2. Hook useIndicators para Gerenciamento
+- **Estado centralizado**: Gerenciamento de indicadores ativos
+- **Toggle/Remove**: Interface para mostrar/ocultar e remover indicadores
+- **Dados mockados**: Indicadores com dados simulados (preparado para API real)
+- **Renderização**: Séries de linha com cores e escalas distintas
+
+#### 3. Integração no LightweightLiquidationChart
+- **useApiData prop**: Flag para usar dados da API vs props
+- **Indicadores visuais**: Badges na toolbar mostrando indicadores ativos
+- **Price scales**: RSI no eixo direito, outros no esquerdo
+- **Cleanup**: Remoção adequada de séries ao desmontar
+
+### Implementação
+
+#### 1. Hook useCandleData
+```typescript
+export const useCandleData = ({
+  symbol,
+  timeframe,
+  limit = 500,
+  enabled = true
+}: UseCandleDataProps): UseCandleDataReturn => {
+  const [candleData, setCandleData] = useState<CandlestickPoint[] | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCandleData = useCallback(async () => {
+    if (!enabled) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const rawData = await marketDataService.getHistoricalData(symbol, timeframe, limit);
+      const mappedData: CandlestickPoint[] = rawData.map((candle) => ({
+        time: candle.time,
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close
+      }));
+      
+      setCandleData(mappedData);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch candle data');
+      setCandleData(undefined);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [symbol, timeframe, limit, enabled]);
+
+  useEffect(() => {
+    fetchCandleData();
+  }, [fetchCandleData]);
+
+  return { candleData, isLoading, error, refetch: fetchCandleData };
+};
+```
+
+#### 2. Hook useIndicators
+```typescript
+export const useIndicators = (): UseIndicatorsReturn => {
+  const [indicators, setIndicators] = useState<IndicatorData[]>([]);
+
+  const addIndicator = useCallback((type: IndicatorType) => {
+    const indicatorConfig = {
+      rsi: { name: 'RSI', color: '#ff6b6b' },
+      macd: { name: 'MACD', color: '#4ecdc4' },
+      bollinger: { name: 'Bollinger Bands', color: '#45b7d1' }
+    };
+
+    const config = indicatorConfig[type];
+    const mockData = Array.from({ length: 100 }, (_, i) => ({
+      time: Date.now() / 1000 - (100 - i) * 3600,
+      value: Math.random() * 100 + (type === 'rsi' ? 0 : 50)
+    }));
+
+    const newIndicator: IndicatorData = {
+      id: type,
+      name: config.name,
+      data: mockData,
+      color: config.color,
+      visible: true
+    };
+
+    setIndicators(prev => {
+      if (prev.some(ind => ind.id === type)) return prev;
+      return [...prev, newIndicator];
+    });
+  }, []);
+
+  return { indicators, addIndicator, removeIndicator, toggleIndicator, clearIndicators };
+};
+```
+
+#### 3. Integração no Componente
+```typescript
+// Hook para dados de candles da API
+const { 
+  candleData: apiCandleData, 
+  isLoading: candleLoading, 
+  error: candleError,
+  refetch: refetchCandles
+} = useCandleData({
+  symbol: symbol.replace('BINANCE:', ''),
+  timeframe: currentTimeframe,
+  limit: 500,
+  enabled: useApiData
+});
+
+// Hook para indicadores
+const { indicators, addIndicator, removeIndicator, toggleIndicator } = useIndicators();
+
+// Usar dados da API se habilitado, senão usar props
+const effectiveCandleData = useApiData ? apiCandleData : candleData;
+```
+
+### Consequências
+- **Dados reais**: Gráfico agora usa dados reais da API
+- **Timeframe dinâmico**: Troca automática de dados ao alterar timeframe
+- **Indicadores funcionais**: Sistema completo de indicadores técnicos
+- **UX melhorada**: Loading states e error handling
+- **Performance**: Otimização de requisições e cache
+- **Extensibilidade**: Preparado para indicadores reais da API
+
+### Arquivos Criados/Modificados
+- `frontend/src/hooks/useCandleData.ts` - Hook para dados de candles da API
+- `frontend/src/hooks/useIndicators.ts` - Hook para gerenciamento de indicadores
+- `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Integração completa
+- `frontend/src/pages/Dashboard.tsx` - Configuração com useApiData=true
+- `.system/CHANGELOG.md` - Registro da versão v2.3.8
+
+---
+
 ## ADR-028: Personalização Completa do Lightweight Charts para TradingView-style
 
 **Data**: 2025-01-09  

@@ -2096,15 +2096,15 @@ export default function Dashboard() {
               symbol="BINANCE:BTCUSDT"
               height={400}
               liquidationLines={liquidationLines}
-              candleData={candleData as any}
               className="w-full"
               showToolbar={true}
               displaySymbol="XBTUSD"
               symbolDescription="BTCUSD: LNM FUTURES"
               logoUrl="/lnm-logo.svg"
+              useApiData={true}
               onTimeframeChange={(tf) => {
                 console.log('Timeframe changed to:', tf);
-                // TODO: Implementar busca de dados com novo timeframe
+                // Dados são automaticamente buscados via useCandleData hook
               }}
               onIndicatorAdd={(indicator) => {
                 console.log('Indicator added:', indicator);

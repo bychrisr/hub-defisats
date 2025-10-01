@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useCandleData } from '@/hooks/useCandleData';
+import { useIndicators, IndicatorType } from '@/hooks/useIndicators';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -11,7 +13,9 @@ import {
   Plus,
   ChevronDown,
   Activity,
-  Target
+  Target,
+  Loader2,
+  X
 } from 'lucide-react';
 
 type CandlestickPoint = { time: number; open: number; high: number; low: number; close: number };
@@ -34,7 +38,8 @@ interface LightweightLiquidationChartProps {
    * Série de preços para exibir contexto (opcional). Se ausente, mostramos apenas a linha de liquidação no eixo.
    */
   linePriceData?: LinePoint[];
-  candleData?: CandlestickPoint[];
+  candleData?: CandlestickPoint[]; // DEPRECATED: usar dados da API via useCandleData
+  useApiData?: boolean; // Se true, usa dados da API em vez de props
 }
 
 const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = ({
@@ -51,12 +56,32 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   onIndicatorAdd,
   displaySymbol,
   symbolDescription,
-  logoUrl
+  logoUrl,
+  useApiData = false
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [showIndicators, setShowIndicators] = useState(false);
+
+  // Hook para dados de candles da API
+  const { 
+    candleData: apiCandleData, 
+    isLoading: candleLoading, 
+    error: candleError,
+    refetch: refetchCandles
+  } = useCandleData({
+    symbol: symbol.replace('BINANCE:', ''),
+    timeframe: currentTimeframe,
+    limit: 500,
+    enabled: useApiData
+  });
+
+  // Usar dados da API se habilitado, senão usar props
+  const effectiveCandleData = useApiData ? apiCandleData : candleData;
+
+  // Hook para indicadores
+  const { indicators, addIndicator, removeIndicator, toggleIndicator } = useIndicators();
 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -82,12 +107,19 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const handleTimeframeChange = useCallback((newTimeframe: string) => {
     setCurrentTimeframe(newTimeframe);
     onTimeframeChange?.(newTimeframe);
-  }, [onTimeframeChange]);
+    
+    // Se usando dados da API, refetch com novo timeframe
+    if (useApiData) {
+      console.log('🔄 TIMEFRAME - Changing to:', newTimeframe);
+      // O hook useCandleData vai automaticamente refetch quando timeframe mudar
+    }
+  }, [onTimeframeChange, useApiData]);
 
   const handleIndicatorAdd = useCallback((indicator: string) => {
+    addIndicator(indicator as IndicatorType);
     onIndicatorAdd?.(indicator);
     setShowIndicators(false);
-  }, [onIndicatorAdd]);
+  }, [addIndicator, onIndicatorAdd]);
 
   // Derivar rótulos padrão estilo LN Markets
   const derivedDisplaySymbol = displaySymbol || (symbol?.includes('BTCUSDT') ? 'XBTUSD' : (symbol || ''));
@@ -158,7 +190,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     });
 
     // Série principal (preferir candles, senão linha)
-    if (candleData && candleData.length > 0) {
+    if (effectiveCandleData && effectiveCandleData.length > 0) {
       const s = chart.addCandlestickSeries({
         upColor: '#26a69a', 
         downColor: '#ef5350',
@@ -171,7 +203,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           minMove: 0.01,
         },
       });
-      s.setData(candleData as any);
+      s.setData(effectiveCandleData as any);
       seriesRef.current = s;
     } else if (linePriceData && linePriceData.length > 0) {
       const s = chart.addLineSeries({ color: isDark ? '#93c5fd' : '#2563eb', lineWidth: 2 });
@@ -220,6 +252,26 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       if (pl) createdLines.push(pl);
     }
 
+    // Render dos indicadores
+    const indicatorSeries: ISeriesApi<'Line'>[] = [];
+    for (const indicator of indicators) {
+      if (!indicator.visible || !indicator.data.length) continue;
+      
+      const indicatorSeriesInstance = chart.addLineSeries({
+        color: indicator.color || '#3b82f6',
+        lineWidth: 2,
+        priceScaleId: indicator.id === 'rsi' ? 'right' : 'left', // RSI no eixo direito
+        priceFormat: {
+          type: 'price',
+          precision: indicator.id === 'rsi' ? 0 : 2,
+          minMove: indicator.id === 'rsi' ? 1 : 0.01,
+        },
+      });
+      
+      indicatorSeriesInstance.setData(indicator.data);
+      indicatorSeries.push(indicatorSeriesInstance);
+    }
+
     // Fit content inicial
     chart.timeScale().fitContent();
     // Auto-range para incluir todas as priceLines
@@ -248,9 +300,13 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           try { (seriesRef.current as any).removePriceLine(l); } catch {}
         }
       }
+      // remover séries de indicadores
+      for (const indicatorSeriesInstance of indicatorSeries) {
+        try { chart.removeSeries(indicatorSeriesInstance); } catch {}
+      }
       chart.remove();
     };
-  }, [height, isDark, liquidationPrice, currentTimeframe, JSON.stringify(liquidationLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(candleData?.slice(-200))]);
+  }, [height, isDark, liquidationPrice, currentTimeframe, JSON.stringify(liquidationLines), JSON.stringify(linePriceData?.slice(-50)), JSON.stringify(effectiveCandleData?.slice(-200))]);
 
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 
@@ -278,24 +334,39 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
             </div>
               
               {/* Informações OHLC */}
-              {candleData && candleData.length > 0 && (
+              {effectiveCandleData && effectiveCandleData.length > 0 && (
                 <div className="flex items-center gap-4 text-xs">
                   <div className="flex gap-2">
                     <span className="text-gray-500">O</span>
-                    <span className="font-mono">{candleData[candleData.length - 1]?.open?.toFixed(2) || '--'}</span>
+                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.open?.toFixed(2) || '--'}</span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-gray-500">H</span>
-                    <span className="font-mono">{candleData[candleData.length - 1]?.high?.toFixed(2) || '--'}</span>
+                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.high?.toFixed(2) || '--'}</span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-gray-500">L</span>
-                    <span className="font-mono">{candleData[candleData.length - 1]?.low?.toFixed(2) || '--'}</span>
+                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.low?.toFixed(2) || '--'}</span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-gray-500">C</span>
-                    <span className="font-mono">{candleData[candleData.length - 1]?.close?.toFixed(2) || '--'}</span>
+                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.close?.toFixed(2) || '--'}</span>
                   </div>
+                </div>
+              )}
+              
+              {/* Loading indicator */}
+              {useApiData && candleLoading && (
+                <div className="flex items-center gap-2 text-xs text-blue-500">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>Loading {currentTimeframe} data...</span>
+                </div>
+              )}
+              
+              {/* Error indicator */}
+              {useApiData && candleError && (
+                <div className="flex items-center gap-2 text-xs text-red-500">
+                  <span>Error loading data</span>
                 </div>
               )}
             </div>
@@ -320,6 +391,31 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
                   </Button>
                 ))}
               </div>
+
+              {/* Indicadores ativos */}
+              {indicators.length > 0 && (
+                <div className="flex items-center gap-1">
+                  {indicators.map((indicator) => (
+                    <Badge
+                      key={indicator.id}
+                      variant="secondary"
+                      className={`text-xs cursor-pointer hover:opacity-70 ${
+                        !indicator.visible ? 'opacity-50' : ''
+                      }`}
+                      onClick={() => toggleIndicator(indicator.id)}
+                    >
+                      {indicator.name}
+                      <X 
+                        className="h-3 w-3 ml-1 hover:text-red-500" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeIndicator(indicator.id);
+                        }}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
 
               {/* Indicadores dropdown */}
               <div className="relative">
