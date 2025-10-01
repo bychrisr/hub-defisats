@@ -51,6 +51,7 @@ import { RouteGuard } from '@/components/guards/RouteGuard';
 import { Tooltip } from '@/components/ui/tooltip';
 import TradingViewChart from '@/components/charts/TradingViewChart';
 import LightweightLiquidationChart from '@/components/charts/LightweightLiquidationChart';
+import PriceReference from '@/components/lnmarkets/PriceReference';
 import { marketDataService } from '@/services/marketData.service';
 
 export default function Dashboard() {
@@ -2098,6 +2099,9 @@ export default function Dashboard() {
               candleData={candleData as any}
               className="w-full"
               showToolbar={true}
+              displaySymbol="XBTUSD"
+              symbolDescription="BTCUSD: LNM FUTURES"
+              logoUrl="/lnm-logo.svg"
               onTimeframeChange={(tf) => {
                 console.log('Timeframe changed to:', tf);
                 // TODO: Implementar busca de dados com novo timeframe
