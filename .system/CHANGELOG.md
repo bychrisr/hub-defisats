@@ -4,6 +4,57 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.10] - 2025-01-09
+
+### 📋 **CRIAÇÃO DO PADRÃO OFICIAL DE GRÁFICOS**
+
+#### ✅ **Documento Padrão Criado**
+- **lightweight-charts-padrao.md**: Padrão oficial para futuras implementações
+- **Arquitetura definida**: Estrutura completa do componente LightweightLiquidationChart
+- **Props padronizadas**: Interface TypeScript completa e documentada
+- **Hooks padrão**: useCandleData e useIndicators documentados
+- **Configurações visuais**: Cores, estilos e temas padronizados
+
+#### 🎨 **Padrões Visuais Estabelecidos**
+- **Cores padrão**: Liquidação (#ff4444), Take Profit (#22c55e), Stop Loss (#f59e0b), Entrada (#3b82f6)
+- **Estilos de linha**: 2px, LineStyle.Solid, axisLabelVisible: true
+- **Tema adaptativo**: Transparente com adaptação automática dark/light
+- **Toolbar TradingView-style**: Timeframes e indicadores padronizados
+
+#### 🔧 **Padrões de Implementação**
+- **Auto-range inteligente**: Inclui todas as linhas (liquidação + Take Profit)
+- **Validação de dados**: Filtros para valores numéricos válidos
+- **Logs padronizados**: Console logs com emojis e contexto
+- **Cleanup adequado**: Remoção de séries e priceLines no useEffect
+
+#### 📚 **Documentação Atualizada**
+- **AUTO_INDEX.md**: Nova seção "TradingView & Lightweight Charts"
+- **Estrutura organizada**: Documentação principal, linhas customizadas, troubleshooting
+- **Roadmap de extensões**: Próximas implementações planejadas
+- **Checklist de implementação**: Para novas funcionalidades e linhas
+
+#### 🚀 **Roadmap de Extensões**
+- [ ] Stop Loss (linhas laranja)
+- [ ] Entrada (linhas azuis)
+- [ ] Marcações de PnL (linhas pontilhadas)
+- [ ] Suporte/Resistência (linhas cinza)
+- [ ] Alertas visuais (pulsação, animação)
+- [ ] Agrupamento de linhas por ativo
+- [ ] Tooltips com metadados
+
+#### 📊 **Funcionalidades Padronizadas**
+- ✅ Interface TypeScript completa
+- ✅ Props obrigatórias e opcionais definidas
+- ✅ Hooks padrão documentados
+- ✅ Configuração de gráfico padronizada
+- ✅ Renderização de linhas personalizadas
+- ✅ Auto-range inteligente
+- ✅ Estados de loading e error
+- ✅ Integração com Dashboard
+- ✅ Documentação completa
+
+---
+
 ## [v2.3.9] - 2025-01-09
 
 ### 🟢 **IMPLEMENTAÇÃO DE LINHAS DE TAKE PROFIT**

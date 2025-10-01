@@ -142,6 +142,22 @@ Este índice é gerado automaticamente e lista todos os documentos disponíveis 
 
 ---
 
+## 📊 TradingView & Lightweight Charts
+
+### Documentação Principal
+- [**TradingView Integration Guide**](tradingview/tradingview-integration-guide.md) - Guia completo de integração
+- [**Lightweight Charts Plugin**](tradingview/lightweight-charts-guia.md) - Plugin alternativo para linhas customizadas
+- [**Lightweight Charts Padrão**](tradingview/lightweight-charts-padrao.md) - Padrão oficial para futuras implementações
+
+### Linhas Customizadas
+- [**Linhas Customizadas**](tradingview/linhas-customizadas.md) - Documentação das linhas horizontais (Liquidação + Take Profit)
+
+### Troubleshooting & Customização
+- [**TradingView Troubleshooting**](tradingview/tradingview-troubleshooting.md) - Resolução de problemas comuns
+- [**TradingView Toolbar Customization**](tradingview/tradingview-toolbar-customization.md) - Personalização da toolbar
+
+---
+
 ## 🚀 Deploy
 
 ### 📄 [🚀 Hub DefiSats - Documentação Completa do Servidor](deployment/complete-server-docs.md)
