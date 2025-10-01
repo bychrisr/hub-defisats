@@ -83,6 +83,15 @@ export default function Dashboard() {
   
   // Dados de posições otimizados
   const { positions: optimizedPositions } = useOptimizedPositions();
+  // Preço de liquidação calculado dinamicamente (média das posições com valor válido)
+  const liquidationPrice = React.useMemo(() => {
+    const values = (optimizedPositions ?? [])
+      .map((p: any) => Number((p as any).liquidation))
+      .filter((v: number) => Number.isFinite(v) && v > 0);
+    if (!values.length) return undefined;
+    const avg = values.reduce((a: number, b: number) => a + b, 0) / values.length;
+    return Math.round(avg);
+  }, [optimizedPositions]);
   
   // Dados de mercado otimizados (agora via contexto centralizado)
   const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
@@ -1971,7 +1980,7 @@ export default function Dashboard() {
             theme="dark"
             height={500}
             className="w-full"
-            liquidationPrice={50000}
+            liquidationPrice={liquidationPrice ?? 50000}
             showLiquidationLine={true}
           />
 
@@ -1980,7 +1989,7 @@ export default function Dashboard() {
             <LightweightLiquidationChart
               symbol="BINANCE:BTCUSDT"
               height={220}
-              liquidationPrice={50000}
+              liquidationPrice={liquidationPrice ?? 50000}
               className="w-full"
             />
           </div>
