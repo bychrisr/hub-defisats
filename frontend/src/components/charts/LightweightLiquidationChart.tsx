@@ -224,6 +224,21 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         pinch: true,
         axisDoubleClickReset: false // Evitar reset automático
       },
+      // Forçar que o último candle sempre fique visível na direita
+      rightPriceScale: {
+        borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+        textColor: isDark ? '#9ca3af' : '#6b7280',
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
+        // Configuração para evitar espaço em branco
+        alignLabels: false,
+        borderVisible: true,
+        entireTextOnly: false,
+        visible: true,
+        drawTicks: true,
+      },
     });
 
     // Série principal (preferir candles, senão linha)
@@ -432,8 +447,50 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     };
 
-    // Adicionar listener de scroll
+    // Listener específico para corrigir espaço em branco na direita
+    const handleZoomChange = () => {
+      if (!effectiveCandleData || effectiveCandleData.length === 0) return;
+      
+      const timeScale = chart.timeScale();
+      const visibleRange = timeScale.getVisibleLogicalRange();
+      
+      if (visibleRange) {
+        const dataLength = effectiveCandleData.length;
+        const lastCandleIndex = dataLength - 1;
+        
+        // Se o último candle não está na posição mais à direita, corrigir
+        if (visibleRange.to < lastCandleIndex) {
+          const visibleBars = Math.round(visibleRange.to - visibleRange.from);
+          const newFromIndex = Math.max(0, lastCandleIndex - visibleBars + 1);
+          
+          // Aplicar correção imediatamente
+          timeScale.setVisibleLogicalRange({
+            from: newFromIndex,
+            to: lastCandleIndex
+          });
+          
+          console.log('🎯 ZOOM FIX - Corrected right margin:', {
+            originalFrom: visibleRange.from,
+            originalTo: visibleRange.to,
+            newFromIndex,
+            lastCandleIndex,
+            visibleBars
+          });
+        }
+      }
+    };
+
+    // Adicionar listeners
     chart.timeScale().subscribeVisibleLogicalRangeChange(handleScroll);
+    
+    // Listener específico para mudanças de zoom com debounce
+    let zoomTimeout: NodeJS.Timeout;
+    const debouncedZoomChange = () => {
+      clearTimeout(zoomTimeout);
+      zoomTimeout = setTimeout(handleZoomChange, 50);
+    };
+    
+    chart.timeScale().subscribeVisibleLogicalRangeChange(debouncedZoomChange);
 
     // Resize
     const ro = new ResizeObserver(() => {
@@ -446,8 +503,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     return () => {
       ro.disconnect();
-      // remover listener de scroll
+      clearTimeout(zoomTimeout);
+      // remover listeners
       chart.timeScale().unsubscribeVisibleLogicalRangeChange(handleScroll);
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(debouncedZoomChange);
       // remover priceLines criadas
       if (seriesRef.current && createdLines.length) {
         for (const l of createdLines) {
