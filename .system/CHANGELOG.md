@@ -40,6 +40,39 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [v2.3.6] - 2025-01-09
+
+### 📚 **GUIA APRIMORADO COM ERROS COMUNS E SOLUÇÕES**
+
+#### ✅ **Nova Seção: Erros Comuns e Soluções**
+- **14 problemas recorrentes** documentados com exemplos práticos
+- **Autenticação LN Markets**: Assinatura HMAC, codificação base64, timestamp
+- **Configuração**: Conflitos de rota Fastify, problemas de proxy Vite
+- **React**: Keys instáveis, re-renders, dependências useEffect
+- **Dados**: Estrutura incorreta, variáveis não declaradas
+- **Segurança**: Credenciais expostas, validação de token
+- **Debugging**: Logs estruturados, verificação de estado
+
+#### 🏗️ **Nova Seção: Evolução da Arquitetura**
+- **Linha do tempo**: Fase 1 (inicial) → Fase 2 (hooks) → Fase 3 (centralizado)
+- **Decisões arquiteturais**: Por que centralizar, MarketDataContext, híbrido WebSocket+HTTP
+- **Status atual**: Quando HTTP é usado vs desabilitado
+- **Gerenciamento de credenciais**: Fluxo de segurança, criptografia AES, nunca expor no frontend
+
+#### 🔧 **Melhorias na Documentação**
+- **Exemplos práticos**: Código antes/depois para cada problema
+- **Diagramas Mermaid**: Fluxo de segurança de credenciais
+- **Categorização**: Problemas organizados por área (auth, config, React, dados, segurança)
+- **Soluções testadas**: Todas as soluções foram validadas em produção
+
+#### 📊 **Benefícios para Desenvolvedores**
+- **Onboarding**: Facilita identificação e resolução de problemas comuns
+- **Manutenção**: Orienta correções rápidas sem debugging extensivo
+- **Consistência**: Padrões claros para evitar erros recorrentes
+- **Segurança**: Boas práticas de segurança bem documentadas
+
+---
+
 ## [v2.3.4] - 2025-01-09
 
 ### 📖 **GUIA COMPLETO DO SISTEMA REFATORADO**

@@ -10,7 +10,9 @@
 6. [Sistema WebSocket vs HTTP](#6-sistema-websocket-vs-http)
 7. [Padrões de Desenvolvimento](#7-padrões-de-desenvolvimento)
 8. [Melhorias Recentes](#8-melhorias-recentes)
-9. [Próximos Passos](#9-próximos-passos)
+9. [Erros Comuns e Soluções](#9-erros-comuns-e-soluções)
+10. [Evolução da Arquitetura](#10-evolução-da-arquitetura)
+11. [Próximos Passos](#11-próximos-passos)
 
 ---
 
@@ -717,7 +719,404 @@ const consolidatedData: MarketData = {
 
 ---
 
-## 9. **PRÓXIMOS PASSOS**
+## 9. **ERROS COMUNS E SOLUÇÕES**
+
+### 🚨 **Problemas de Autenticação LN Markets**
+
+#### **1. Assinatura HMAC Incorreta**
+```typescript
+// ❌ ERRO COMUM: Ordem incorreta da string de assinatura
+const message = method + timestamp + path + params; // INCORRETO
+
+// ✅ SOLUÇÃO: Ordem exata conforme documentação LN Markets
+const message = timestamp + method + '/v2' + path + params;
+
+// Exemplo prático:
+const timestamp = Date.now().toString();
+const method = 'GET';
+const path = '/v2/user/positions';
+const params = '';
+const message = timestamp + method + '/v2' + path + params;
+// Resultado: "1640995200000GET/v2/v2/user/positions"
+```
+
+#### **2. Codificação Base64 Incorreta**
+```typescript
+// ❌ ERRO COMUM: Usar hex em vez de base64
+const signature = crypto
+  .createHmac('sha256', apiSecret)
+  .update(message, 'utf8')
+  .digest('hex'); // INCORRETO
+
+// ✅ SOLUÇÃO: Sempre usar base64
+const signature = crypto
+  .createHmac('sha256', apiSecret)
+  .update(message, 'utf8')
+  .digest('base64'); // CORRETO
+```
+
+#### **3. Timestamp em Milissegundos**
+```typescript
+// ❌ ERRO COMUM: Usar segundos
+const timestamp = Math.floor(Date.now() / 1000).toString(); // INCORRETO
+
+// ✅ SOLUÇÃO: Usar milissegundos
+const timestamp = Date.now().toString(); // CORRETO
+```
+
+### 🔧 **Problemas de Configuração**
+
+#### **4. Conflitos de Rota no Fastify**
+```typescript
+// ❌ ERRO COMUM: Ordem incorreta de registro
+await fastify.register(websocketRoutes, { prefix: '/ws' });
+await fastify.register(apiRoutes, { prefix: '/api' }); // Conflito!
+
+// ✅ SOLUÇÃO: Ordem específica e prefixos únicos
+await fastify.register(apiRoutes, { prefix: '/api' });
+await fastify.register(websocketRoutes, { prefix: '/ws' });
+```
+
+#### **5. Problemas de Proxy Vite**
+```typescript
+// ❌ ERRO COMUM: Configuração incorreta do proxy
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:13010', // Porta errada
+        changeOrigin: true,
+      }
+    }
+  }
+});
+
+// ✅ SOLUÇÃO: Usar nomes de serviços Docker
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://backend:3010', // Nome do serviço Docker
+        changeOrigin: true,
+        secure: false,
+      },
+      '/ws': {
+        target: 'ws://backend:3010', // WebSocket proxy
+        ws: true,
+        changeOrigin: true,
+      }
+    }
+  }
+});
+```
+
+### ⚛️ **Problemas de Renderização React**
+
+#### **6. Keys Instáveis em Listas**
+```typescript
+// ❌ ERRO COMUM: Usar índice como key
+{positions.map((position, index) => (
+  <PositionRow key={index} position={position} />
+))}
+
+// ✅ SOLUÇÃO: Usar ID único
+{positions.map((position) => (
+  <PositionRow key={position.id} position={position} />
+))}
+```
+
+#### **7. Re-renders Desnecessários**
+```typescript
+// ❌ ERRO COMUM: Função inline causa re-render
+<Button onClick={() => handleClick(item.id)}>
+  Click me
+</Button>
+
+// ✅ SOLUÇÃO: useCallback para estabilidade
+const handleClick = useCallback((id: string) => {
+  // lógica
+}, []);
+
+<Button onClick={() => handleClick(item.id)}>
+  Click me
+</Button>
+```
+
+#### **8. Dependências Incorretas no useEffect**
+```typescript
+// ❌ ERRO COMUM: Loop infinito
+useEffect(() => {
+  fetchData();
+}, [fetchData]); // fetchData muda a cada render
+
+// ✅ SOLUÇÃO: useCallback ou dependências corretas
+const fetchData = useCallback(async () => {
+  // lógica
+}, []);
+
+useEffect(() => {
+  fetchData();
+}, [fetchData]); // Agora é estável
+```
+
+### 🗄️ **Problemas de Dados**
+
+#### **9. Estrutura de Dados Incorreta**
+```typescript
+// ❌ ERRO COMUM: Acessar dados diretamente
+const positions = dashboardData.data?.positions || [];
+
+// ✅ SOLUÇÃO: Usar estrutura correta da API
+const positions = dashboardData.data?.lnMarkets?.positions || [];
+```
+
+#### **10. Variáveis Não Declaradas**
+```typescript
+// ❌ ERRO COMUM: Usar variáveis não declaradas
+const totalValue = estimatedProfit + totalMargin; // estimatedProfit não existe
+
+// ✅ SOLUÇÃO: Usar funções calculadas
+const totalValue = calculateEstimatedProfit() + totalMargin;
+```
+
+### 🔐 **Problemas de Segurança**
+
+#### **11. Credenciais Expostas no Frontend**
+```typescript
+// ❌ ERRO COMUM: Enviar credenciais diretamente
+const response = await api.post('/api/lnmarkets/auth', {
+  apiKey: userApiKey, // PERIGOSO!
+  apiSecret: userApiSecret, // PERIGOSO!
+});
+
+// ✅ SOLUÇÃO: Sempre descriptografar no backend
+const response = await api.post('/api/profile', {
+  username: data.username,
+  bio: data.bio,
+  email: data.email
+  // Credenciais são tratadas separadamente no backend
+});
+```
+
+#### **12. Validação de Token Insuficiente**
+```typescript
+// ❌ ERRO COMUM: Não verificar expiração
+const decoded = jwt.verify(token, secret);
+
+// ✅ SOLUÇÃO: Verificação completa
+try {
+  const decoded = jwt.verify(token, secret) as JwtPayload;
+  if (decoded.exp && decoded.exp < Date.now() / 1000) {
+    throw new Error('Token expired');
+  }
+} catch (error) {
+  return reply.status(401).send({ error: 'Invalid token' });
+}
+```
+
+### 🐛 **Debugging Avançado**
+
+#### **13. Logs de Debug Insuficientes**
+```typescript
+// ❌ ERRO COMUM: Logs genéricos
+console.log('Error:', error);
+
+// ✅ SOLUÇÃO: Logs estruturados e detalhados
+console.log('🔍 MARKET DATA - fetchAllMarketData called:', {
+  isAuthenticated,
+  userId: user?.id,
+  isAdmin: user?.is_admin,
+  hasToken: !!localStorage.getItem('access_token')
+});
+
+console.error('❌ MARKET DATA - Error fetching data:', {
+  error: error.message,
+  stack: error.stack,
+  userId: user?.id,
+  timestamp: new Date().toISOString()
+});
+```
+
+#### **14. Verificação de Estado Inadequada**
+```typescript
+// ❌ ERRO COMUM: Não verificar estado antes de executar
+const fetchData = async () => {
+  const data = await api.get('/api/data');
+  setData(data);
+};
+
+// ✅ SOLUÇÃO: Verificações de estado
+const fetchData = useCallback(async () => {
+  if (!isAuthenticated || !user?.id || user?.is_admin) {
+    console.log('❌ MARKET DATA - User not authenticated or admin, skipping...');
+    return;
+  }
+  
+  try {
+    setIsLoading(true);
+    const data = await api.get('/api/data');
+    setData(data);
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    setIsLoading(false);
+  }
+}, [isAuthenticated, user?.id, user?.is_admin]);
+```
+
+---
+
+## 10. **EVOLUÇÃO DA ARQUITETURA**
+
+### 📈 **Linha do Tempo das Decisões**
+
+#### **Fase 1: Implementação Inicial (2024)**
+- **Abordagem**: Chamadas diretas e separadas para cada endpoint
+- **Problemas**: Múltiplas requisições HTTP, dados inconsistentes
+- **Estrutura**: Cada componente fazia suas próprias chamadas de API
+
+```typescript
+// Arquitetura inicial - problemática
+const Dashboard = () => {
+  const [positions, setPositions] = useState([]);
+  const [balance, setBalance] = useState(null);
+  const [marketData, setMarketData] = useState(null);
+  
+  useEffect(() => {
+    // 3 requisições separadas
+    fetchPositions().then(setPositions);
+    fetchBalance().then(setBalance);
+    fetchMarketData().then(setMarketData);
+  }, []);
+};
+```
+
+#### **Fase 2: Otimização com Hooks (2024)**
+- **Abordagem**: Hooks customizados para reutilização
+- **Melhorias**: Redução de código duplicado, melhor organização
+- **Problemas**: Ainda múltiplas requisições, cache inconsistente
+
+```typescript
+// Hooks customizados - melhor, mas ainda problemático
+const Dashboard = () => {
+  const { data: positions } = usePositions();
+  const { data: balance } = useBalance();
+  const { data: marketData } = useMarketData();
+  // Ainda 3 requisições separadas
+};
+```
+
+#### **Fase 3: Sistema Centralizado (Janeiro 2025)**
+- **Abordagem**: MarketDataContext com requisição única
+- **Melhorias**: 80% menos requisições, dados consistentes
+- **Resultado**: Sistema robusto e performático
+
+```typescript
+// Sistema centralizado - solução final
+const Dashboard = () => {
+  const { data: marketData } = useMarketData(); // 1 requisição
+  const { positions } = useOptimizedPositions(); // Dados derivados
+  const { totalPL, totalMargin } = useOptimizedDashboardMetrics(); // Métricas derivadas
+};
+```
+
+### 🎯 **Por Que Essas Decisões?**
+
+#### **1. Por Que Centralizar?**
+- **Performance**: Redução drástica de requisições HTTP
+- **Consistência**: Dados unificados em toda a aplicação
+- **Manutenibilidade**: Código mais limpo e organizado
+- **Debugging**: Logs centralizados e estruturados
+
+#### **2. Por Que MarketDataContext?**
+- **React Pattern**: Context API é o padrão para dados globais
+- **TypeScript**: Tipagem forte para todos os dados
+- **Flexibilidade**: Hooks derivados para diferentes necessidades
+- **Cache**: Sistema de cache inteligente integrado
+
+#### **3. Por Que WebSocket + HTTP Híbrido?**
+- **Real-time**: WebSocket para atualizações instantâneas
+- **Reliability**: HTTP como fallback confiável
+- **Performance**: Prioridade para WebSocket quando disponível
+- **Resilience**: Sistema continua funcionando mesmo com falhas
+
+### 🔄 **Status Atual do Fallback HTTP**
+
+#### **Configuração Atual**
+```typescript
+// Sistema híbrido otimizado
+const refresh = useCallback(async () => {
+  // 1. PRIORIDADE: WebSocket quando conectado
+  if (isConnected && sendMessage) {
+    sendMessage({ type: 'refresh_data', userId: user?.id });
+    return; // Não executar HTTP quando WebSocket está ativo
+  }
+  
+  // 2. FALLBACK: HTTP apenas quando WebSocket não está disponível
+  await fetchDashboardData();
+}, [isConnected, sendMessage, user?.id]);
+```
+
+#### **Quando HTTP é Usado**
+- ✅ **Inicialização**: Primeira carga de dados
+- ✅ **Fallback**: Quando WebSocket está desconectado
+- ✅ **Admin Users**: Usuários admin não têm credenciais LN Markets
+- ✅ **Error Recovery**: Recuperação de erros de WebSocket
+
+#### **Quando HTTP é Desabilitado**
+- ❌ **WebSocket Ativo**: Quando conexão WebSocket está funcionando
+- ❌ **Polling Automático**: Intervalos automáticos foram desabilitados
+- ❌ **Re-renders**: Evitar loops infinitos de atualização
+
+### 🔐 **Gerenciamento de Credenciais**
+
+#### **Fluxo de Segurança**
+```mermaid
+graph TD
+    A[Frontend] --> B[Backend Auth Service]
+    B --> C[Decrypt Credentials]
+    C --> D[LN Markets API]
+    D --> E[Encrypted Response]
+    E --> F[Backend Processing]
+    F --> G[Frontend Display]
+    
+    H[Database] --> I[AES Encrypted Storage]
+    I --> C
+```
+
+#### **Implementação de Criptografia**
+```typescript
+// Backend: Descriptografia antes da chamada à API
+export class AuthService {
+  public decryptData(encryptedData: string): string {
+    const algorithm = 'aes-256-cbc';
+    const key = crypto.scryptSync(config.security.encryption.key, 'salt', 32);
+    
+    const parts = encryptedData.split(':');
+    const iv = Buffer.from(parts[0], 'hex');
+    const encrypted = parts[1];
+    
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  }
+}
+```
+
+#### **Nunca Expor no Frontend**
+```typescript
+// ❌ NUNCA FAZER: Expor credenciais no frontend
+const apiKey = user.ln_markets_api_key; // PERIGOSO!
+
+// ✅ SEMPRE FAZER: Usar dados já processados
+const { positions, balance } = useMarketData(); // Seguro
+```
+
+---
+
+## 11. **PRÓXIMOS PASSOS**
 
 ### 🎯 **Dicas para Desenvolvedores**
 
