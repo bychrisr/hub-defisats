@@ -324,10 +324,11 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         const visibleBars = Math.min(dataLength, getLimitForTimeframe(currentTimeframe));
         
         // Calcular range para mostrar os últimos 7 dias (ou todos os dados se menos)
+        // IMPORTANTE: Sempre manter o último candle fixo na direita
         const fromIndex = Math.max(0, dataLength - visibleBars);
         const toIndex = dataLength - 1;
         
-        // Aplicar zoom inicial
+        // Aplicar zoom inicial mantendo último candle na direita
         chart.timeScale().setVisibleLogicalRange({
           from: fromIndex,
           to: toIndex
@@ -344,6 +345,37 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       } else {
         // Fallback: fit content se não há dados
         chart.timeScale().fitContent();
+      }
+    };
+
+    // Função para ajustar zoom mantendo último candle fixo na direita
+    const adjustZoomToKeepLastCandleFixed = () => {
+      if (effectiveCandleData && effectiveCandleData.length > 0) {
+        const dataLength = effectiveCandleData.length;
+        const visibleRange = chart.timeScale().getVisibleLogicalRange();
+        
+        if (visibleRange) {
+          // Calcular quantos candles estão visíveis
+          const visibleBars = Math.round(visibleRange.to - visibleRange.from);
+          
+          // Ajustar para manter último candle fixo na direita
+          const newFromIndex = Math.max(0, dataLength - visibleBars);
+          const newToIndex = dataLength - 1;
+          
+          // Aplicar novo range
+          chart.timeScale().setVisibleLogicalRange({
+            from: newFromIndex,
+            to: newToIndex
+          });
+          
+          console.log('🎯 ZOOM - Adjusted to keep last candle fixed:', {
+            originalFrom: visibleRange.from,
+            originalTo: visibleRange.to,
+            newFromIndex,
+            newToIndex,
+            visibleBars
+          });
+        }
       }
     };
 
@@ -365,7 +397,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     // Aplicar zoom inicial após um pequeno delay para garantir que os dados foram renderizados
     setTimeout(setInitialZoom, 100);
 
-    // Detectar scroll para carregar dados históricos
+    // Detectar scroll para carregar dados históricos e ajustar zoom
     const handleScroll = () => {
       if (!useApiData || !hasMoreData || isLoadingMoreHistorical) return;
       
@@ -381,6 +413,11 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         });
         loadMoreHistorical();
       }
+      
+      // Ajustar zoom para manter último candle fixo na direita
+      setTimeout(() => {
+        adjustZoomToKeepLastCandleFixed();
+      }, 100);
     };
 
     // Adicionar listener de scroll
@@ -390,8 +427,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     const ro = new ResizeObserver(() => {
       if (!containerRef.current) return;
       chart.applyOptions({ width: containerRef.current.clientWidth, height });
-      // Manter o zoom inicial em vez de fit content
-      setTimeout(setInitialZoom, 50);
+      // Manter último candle fixo na direita após resize
+      setTimeout(() => {
+        adjustZoomToKeepLastCandleFixed();
+      }, 50);
     });
     ro.observe(containerRef.current);
 
