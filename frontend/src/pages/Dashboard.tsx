@@ -1992,7 +1992,7 @@ export default function Dashboard() {
         <div className="mt-6">
           <TradingViewChart 
             symbol="BINANCE:BTCUSDT"
-            interval="1"
+            interval="60"
             theme="dark"
             height={500}
             className="w-full"

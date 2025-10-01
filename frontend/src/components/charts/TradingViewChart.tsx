@@ -28,7 +28,7 @@ interface TradingViewChartProps {
 
 export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   symbol = 'BINANCE:BTCUSDT',
-  interval = '1',
+  interval = '60', // Mudar de '1' (1 minuto) para '60' (1 hora)
   theme = 'dark',
   height = 500,
   width = '100%',
@@ -238,7 +238,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       <CardHeader>
         <CardTitle>TradingView Chart</CardTitle>
         <CardDescription>
-          {symbol} - Intervalo: {interval === '1' ? '1 minuto' : interval === '5' ? '5 minutos' : interval === '60' ? '1 hora' : interval === 'D' ? 'Diário' : interval}
+          {symbol} - Intervalo: {interval === '1' ? '1 minuto' : interval === '5' ? '5 minutos' : interval === '60' ? '1 hora' : interval === '240' ? '4 horas' : interval === 'D' ? 'Diário' : interval}
         </CardDescription>
       </CardHeader>
       <CardContent>
