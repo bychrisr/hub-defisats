@@ -185,7 +185,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
                 index24hChange: parseFloat(btcChange.toFixed(3)),
                 tradingFees: 0.1,
                 nextFunding: '1h 45m 30s',
-                rate: 0.00001,
+                rate: 0.00006,
                 timestamp: new Date().toISOString()
               }
             });
@@ -202,7 +202,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
             index24hChange: -0.423,
             tradingFees: 0.1,
             nextFunding: '1h 45m 30s',
-            rate: 0.00001,
+            rate: 0.00006,
             timestamp: new Date().toISOString()
           }
         });
@@ -415,7 +415,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           index24hChange: marketIndexData.change24h || marketIndexData.changePercent24h || 0,
           tradingFees: 0.1, // LN Markets standard fee
           nextFunding: nextFunding,
-          rate: 0.00001, // 0.001% in decimal
+          rate: 0.00006, // 0.0060% in decimal
           rateChange: 0.00001,
           timestamp: Date.now()
         }
@@ -741,7 +741,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           index24hChange: parseFloat(marketData.change24h.toFixed(3)),
           tradingFees: 0.1, // LN Markets standard fee
           nextFunding: nextFunding,
-          rate: 0.0001, // 0.01% in decimal
+          rate: 0.00006, // 0.0060% in decimal
           timestamp: new Date().toISOString(),
           source: marketData.source // Include data source
         };

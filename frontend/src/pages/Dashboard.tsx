@@ -28,11 +28,12 @@ import SimpleChart from '@/components/charts/SimpleChart';
 import { useUserPositions, useUserBalance, useConnectionStatus } from '@/contexts/RealtimeDataContext';
 import { usePositionsMetrics, usePositions, useCredentialsError } from '@/contexts/PositionsContext';
 import { 
-  useOptimizedDashboardData, 
+  useMarketData,
   useOptimizedDashboardMetrics, 
   useOptimizedPositions, 
-  useOptimizedMarketData 
-} from '@/hooks/useOptimizedDashboardData';
+  useBtcPrice,
+  useOptimizedMarketData
+} from '@/contexts/MarketDataContext';
 import RealtimeStatus from '@/components/RealtimeStatus';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import CoinGeckoCard from '@/components/CoinGeckoCard';
@@ -62,47 +63,39 @@ export default function Dashboard() {
   } = useAutomationStore();
   
   // Hook otimizado para dados da dashboard (baseado no roadmap)
+  // Dados centralizados de mercado
   const { 
-    data: dashboardData, 
-    isLoading: dashboardLoading, 
-    error: dashboardError, 
-    refresh: refreshDashboard,
+    data: marketData, 
+    isLoading: marketLoading, 
+    error: marketError, 
+    refresh: refreshMarket,
     lastUpdate,
     cacheHit
-  } = useOptimizedDashboardData();
+  } = useMarketData();
   
   // Métricas otimizadas da dashboard
   const {
     totalPL,
-    estimatedProfit,
     totalMargin,
-    estimatedFees,
-    availableMargin,
-    estimatedBalance,
-    totalInvested,
-    netProfit,
-    feesPaid,
-    positionCount,
-    activeTrades,
-    isLoading: metricsLoading,
-    error: metricsError
+    positionCount
   } = useOptimizedDashboardMetrics();
   
   // Dados de posições otimizados
   const { positions: optimizedPositions } = useOptimizedPositions();
   
-  // Dados de mercado otimizados
+  // Dados de mercado otimizados (agora via contexto centralizado)
   const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
   
   // Dados históricos (mantido para compatibilidade)
   const historicalData = useHistoricalData();
   
-  // Dados de saldo estimado já estão disponíveis via useOptimizedDashboardMetrics
+  // Dados de saldo estimado (hook específico)
+  const estimatedBalance = useEstimatedBalance();
   
   // Dados de posições já estão disponíveis via useOptimizedDashboardMetrics
   
-  // Dados de saldo (mantido para compatibilidade)
-  const balanceData = useUserBalance();
+  // Dados de saldo (agora via contexto centralizado)
+  const balanceData = marketData?.balance;
   
   // Hook de tempo real otimizado (menos frequente)
   const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
@@ -123,7 +116,7 @@ export default function Dashboard() {
   const isLoading = authLoading || automationLoading;
   
   // Estado de carregamento para atualizações (sem modal)
-  const isUpdating = dashboardLoading || metricsLoading;
+  const isUpdating = marketLoading || estimatedBalance.isLoading;
   
   // Função para quebrar títulos em duas linhas
   const breakTitleIntoTwoLines = (title: string) => {
@@ -193,15 +186,15 @@ export default function Dashboard() {
   };
   
   const calculateAvailableMargin = () => {
-    // Usar dados otimizados em vez de balanceData
-    return availableMargin || 0;
+    // Usar dados do balanceData ou marketData
+    return balanceData?.available_margin || marketData?.balance?.available_margin || 0;
   };
   
   const calculateEstimatedBalance = () => {
     const availableMargin = calculateAvailableMargin();
     const totalMargin = calculateTotalMargin();
-    const estimatedProfitValue = estimatedProfit || 0;
-    const estimatedFeesValue = estimatedFees || 0;
+    const estimatedProfitValue = totalPL || 0; // Usar totalPL em vez de estimatedProfit
+    const estimatedFeesValue = calculateFeesPaid(); // Usar função calculada
     
     return availableMargin + totalMargin + estimatedProfitValue - estimatedFeesValue;
   };
@@ -487,14 +480,14 @@ export default function Dashboard() {
     // Coletar todos os valores numéricos dos cards (usando dados otimizados)
     const allValues = [
       totalPL || 0,
-      estimatedProfit || 0,
+      totalPL || 0, // estimatedProfit = totalPL
       totalMargin || 0,
-      estimatedFees || 0,
-      availableMargin || 0,
-      estimatedBalance || 0,
-      totalInvested || 0,
-      netProfit || 0,
-      feesPaid || 0
+      calculateFeesPaid(), // estimatedFees
+      calculateAvailableMargin(), // availableMargin
+      calculateEstimatedBalance(), // estimatedBalance
+      calculateTotalInvested(), // totalInvested
+      calculateNetProfit(), // netProfit
+      calculateFeesPaid() // feesPaid
     ];
 
     // Encontrar o MAIOR valor absoluto (excluindo zeros)
@@ -542,8 +535,8 @@ export default function Dashboard() {
     fetchAutomations();
     fetchStats();
     // Usar refresh otimizado em vez de refreshAll
-    refreshDashboard();
-  }, [user, getProfile, fetchAutomations, fetchStats, refreshDashboard]);
+    refreshMarket();
+  }, [user, getProfile, fetchAutomations, fetchStats, refreshMarket]);
 
   const activeAutomations = automations.filter(a => a.is_active);
 
@@ -671,7 +664,7 @@ export default function Dashboard() {
               {/* Ícone posicionado fora do card */}
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 {(() => {
-                  const colors = getCardIconColors('estimated-profit', estimatedProfit || 0);
+                  const colors = getCardIconColors('estimated-profit', totalPL || 0);
                   return (
                     <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <TrendingUp className={`w-4 h-4 sm:w-6 sm:h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
@@ -681,7 +674,7 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                getProfitColor(estimatedProfit || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
+                getProfitColor(totalPL || 0) === 'positive' ? 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30' :
                 'gradient-card-gray border-gray-500 hover:border-gray-400'
               }`}>
                 <div className="card-content">
@@ -707,14 +700,14 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} ${
-                        getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-200' :
+                        getProfitColor(totalPL || 0) === 'positive' ? 'text-green-200' :
                         'text-gray-200'
                       }`}>
-                        {formatSats(estimatedProfit || 0, { 
+                        {formatSats(totalPL || 0, { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-300' :
+                          className: getProfitColor(totalPL || 0) === 'positive' ? 'text-green-300' :
                             'text-gray-300'
                         })}
                       </div>
@@ -725,14 +718,14 @@ export default function Dashboard() {
                       <Badge 
                         variant="outline" 
                         className={`text-label-sm px-2 py-1 ${
-                          getProfitColor(estimatedProfit || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
+                          getProfitColor(totalPL || 0) === 'positive' ? 'border-green-400/60 text-green-200 bg-green-600/20' :
                           'border-gray-400/60 text-gray-200 bg-gray-600/20'
                         }`}
                       >
-                        {totalMargin > 0 ? `+${((estimatedProfit || 0) / totalMargin * 100).toFixed(1)}%` : '+0.0%'}
+                        {totalMargin > 0 ? `+${((totalPL || 0) / totalMargin * 100).toFixed(1)}%` : '+0.0%'}
                       </Badge>
                       <span className={`text-caption ${
-                        getProfitColor(estimatedProfit || 0) === 'positive' ? 'text-green-300/80' :
+                        getProfitColor(totalPL || 0) === 'positive' ? 'text-green-300/80' :
                         'text-gray-300/80'
                       }`}>vs Margin</span>
                     </div>
@@ -920,7 +913,7 @@ export default function Dashboard() {
                     {/* Valor principal */}
                     <div className="mb-3">
                       <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-fees').text}`}>
-                        {formatSats(estimatedFees || 0, { 
+                        {formatSats(calculateFeesPaid(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'neutral',
                           forceColor: true,
