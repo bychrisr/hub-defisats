@@ -112,6 +112,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     // Fit content inicial
     chart.timeScale().fitContent();
+    // Auto-range para incluir todas as priceLines
+    try {
+      const prices = lines.map(l => l.price);
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      if (Number.isFinite(min) && Number.isFinite(max) && min < max) {
+        chart.priceScale('right').setVisibleLogicalRange({ from: min, to: max } as any);
+      }
+    } catch {}
 
     // Resize
     const ro = new ResizeObserver(() => {

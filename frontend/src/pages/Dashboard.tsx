@@ -143,6 +143,47 @@ export default function Dashboard() {
   
   // Dados de saldo (agora via contexto centralizado)
   const balanceData = marketData?.balance;
+
+  // Extrair candles de marketData (unitário, tolerante a formatos)
+  type Candle = { time: number; open: number; high: number; low: number; close: number };
+  const candleData: Candle[] | undefined = useMemo(() => {
+    const md: any = marketData ?? {};
+    const candidates = [
+      md.candles,
+      md.ohlc,
+      md.klines,
+      md.kline,
+      md.history,
+      md.priceHistory,
+      md?.lnMarkets?.candles,
+      md?.dashboard?.candles,
+    ].filter(Array.isArray);
+
+    const arr: any[] = candidates.length ? candidates[0] : [];
+    if (!arr || arr.length === 0) return undefined;
+
+    const toNum = (v: any) => (typeof v === 'string' ? Number(v) : v);
+    const toSec = (v: any) => {
+      const n = toNum(v);
+      if (!Number.isFinite(n)) return undefined;
+      // Heurística: timestamps em ms são muito grandes
+      return n > 10_000_000_000 ? Math.floor(n / 1000) : Math.floor(n);
+    };
+
+    const mapped = arr
+      .map((it: any) => {
+        const time = toSec(it.time ?? it.ts ?? it.timestamp ?? it.openTime ?? it.t);
+        const open = toNum(it.open ?? it.o ?? it.open_price);
+        const high = toNum(it.high ?? it.h);
+        const low = toNum(it.low ?? it.l);
+        const close = toNum(it.close ?? it.c ?? it.close_price);
+        if (!time || ![open, high, low, close].every((x) => Number.isFinite(x))) return null;
+        return { time, open, high, low, close } as Candle;
+      })
+      .filter(Boolean) as Candle[];
+
+    return mapped.length ? mapped : undefined;
+  }, [marketData]);
   
   // Hook de tempo real otimizado (menos frequente)
   const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
@@ -2029,6 +2070,7 @@ export default function Dashboard() {
               symbol="BINANCE:BTCUSDT"
               height={220}
               liquidationLines={liquidationLines}
+              candleData={candleData as any}
               className="w-full"
             />)}
           </div>
