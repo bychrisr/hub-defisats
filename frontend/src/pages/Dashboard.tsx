@@ -2093,7 +2093,7 @@ export default function Dashboard() {
             {!!liquidationLines && (
             <LightweightLiquidationChart
               symbol="BINANCE:BTCUSDT"
-              height={220}
+              height={400}
               liquidationLines={liquidationLines}
               candleData={candleData as any}
               className="w-full"
