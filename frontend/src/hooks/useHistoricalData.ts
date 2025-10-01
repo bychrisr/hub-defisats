@@ -58,7 +58,8 @@ export const useHistoricalData = ({
     try {
       console.log('🔄 HISTORICAL - Loading initial data:', { symbol, timeframe, limit: initialLimit });
       
-      const rawData = await marketDataService.getHistoricalData(symbol, timeframe, initialLimit);
+      // Usar apenas Binance API (sem autenticação) para evitar 401
+      const rawData = await marketDataService.getHistoricalDataFromBinance(symbol, timeframe, initialLimit);
       
       const mappedData: CandlestickPoint[] = rawData.map((candle) => ({
         time: candle.time,
@@ -112,7 +113,8 @@ export const useHistoricalData = ({
       const timeframeMinutes = getLimitForTimeframe(timeframe);
       const startTime = oldestTimestamp - (initialLimit * timeframeMinutes * 60);
       
-      const rawData = await marketDataService.getHistoricalData(
+      // Usar apenas Binance API (sem autenticação) para evitar 401
+      const rawData = await marketDataService.getHistoricalDataFromBinance(
         symbol, 
         timeframe, 
         initialLimit,

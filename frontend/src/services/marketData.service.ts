@@ -34,6 +34,45 @@ class MarketDataService {
     this.wsUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
   }
 
+  // Obter dados históricos apenas do Binance (sem autenticação)
+  async getHistoricalDataFromBinance(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
+    const mapTf = (tf: string) => {
+      // Normalizar para intervalos do Binance
+      const m = String(tf).toLowerCase();
+      if (m === '1h' || m === '60' || m === '60m') return '1h';
+      if (m === '4h' || m === '240' || m === '240m') return '4h';
+      if (m === '1d' || m === 'd' || m === '1D') return '1d';
+      if (m === '15m' || m === '15') return '15m';
+      if (m === '5m' || m === '5') return '5m';
+      return '1m';
+    };
+
+    try {
+      const interval = mapTf(timeframe);
+      let url = `https://api.binance.com/api/v3/klines?symbol=${symbol.replace(':','')}&interval=${interval}&limit=${Math.min(limit || 500, 1000)}`;
+      
+      // Adicionar startTime se fornecido
+      if (startTime) {
+        url += `&startTime=${startTime * 1000}`; // Binance usa milissegundos
+      }
+      
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`Binance HTTP ${r.status}`);
+      const arr: any[] = await r.json();
+      return arr.map((k: any[]) => ({
+        time: Math.floor(k[0] / 1000),
+        open: parseFloat(k[1]),
+        high: parseFloat(k[2]),
+        low: parseFloat(k[3]),
+        close: parseFloat(k[4]),
+        volume: parseFloat(k[5])
+      }));
+    } catch (e) {
+      console.error('❌ MARKET DATA - Binance API failed:', e);
+      return this.generateSampleData();
+    }
+  }
+
   // Obter dados históricos via REST API
   async getHistoricalData(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
     const mapTf = (tf: string) => {
