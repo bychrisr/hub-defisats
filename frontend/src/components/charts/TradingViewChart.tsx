@@ -1,7 +1,24 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+
+// Hook customizado para debounce
+const useDebounce = <T,>(value: T, delay: number): T => {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 interface TradingViewChartProps {
   symbol?: string;
@@ -25,13 +42,19 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
   // Usar tema da aplicação se não especificado
   const { theme: appTheme } = useTheme();
   const theme = propTheme || appTheme;
+  
+  // Debounce para evitar recriações desnecessárias
+  const debouncedSymbol = useDebounce(symbol, 300);
+  const debouncedInterval = useDebounce(interval, 300);
+  const debouncedTheme = useDebounce(theme, 300);
 
-  // Função para gerar tema transparente que se adapta à aplicação
-  const getTransparentThemeConfig = (isDark: boolean) => {
+  // Função memoizada para gerar tema transparente que se adapta à aplicação
+  const getTransparentThemeConfig = useCallback((isDark: boolean) => {
     console.log('🎨 TRADINGVIEW - Gerando tema transparente:', isDark ? 'dark' : 'light');
     
     return {
@@ -55,10 +78,15 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       font_family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
       font_size: 12
     };
-  };
+  }, []);
 
-  // Carregar script TradingView
+  // Carregar script TradingView apenas quando visível (lazy loading)
   useEffect(() => {
+    if (!isVisible) {
+      console.log('⏸️ TRADINGVIEW - Componente não visível, aguardando...');
+      return;
+    }
+
     const loadTradingViewScript = () => {
       console.log('🔄 TRADINGVIEW - Iniciando carregamento do script...');
       console.log('🔄 TRADINGVIEW - window.TradingView existe?', !!window.TradingView);
@@ -93,7 +121,57 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
     };
 
     loadTradingViewScript();
+  }, [isVisible]);
+
+  // Lazy loading com Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          console.log('👁️ TRADINGVIEW - Componente visível, iniciando carregamento...');
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
   }, []);
+
+  // Configuração memoizada do widget
+  const widgetConfig = useMemo(() => {
+    const isDark = debouncedTheme === 'dark';
+    const transparentTheme = getTransparentThemeConfig(isDark);
+    
+    return {
+      container_id: `tradingview_${debouncedSymbol.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      width: width,
+      height: height,
+      symbol: debouncedSymbol,
+      interval: debouncedInterval,
+      timezone: 'Etc/UTC',
+      locale: 'en',
+      enable_publishing: false,
+      allow_symbol_change: false,
+      details: false,
+      hotlist: false,
+      calendar: false,
+      hide_side_toolbar: true,
+      hide_top_toolbar: false,
+      hide_legend: false,
+      studies: [],
+      show_popup_button: true,
+      popup_width: '1000',
+      popup_height: '650',
+      // Aplicar tema transparente
+      ...transparentTheme
+    };
+  }, [debouncedSymbol, debouncedInterval, debouncedTheme, width, height, getTransparentThemeConfig]);
 
   // Inicializar widget quando script estiver carregado
   useEffect(() => {
@@ -119,7 +197,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       setIsLoading(true);
       setError(null);
 
-      const containerId = `tradingview_${symbol.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const containerId = widgetConfig.container_id;
       console.log('🔄 TRADINGVIEW - Container ID:', containerId);
       
       // Criar container se não existir
@@ -137,37 +215,10 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
       console.log('🔄 TRADINGVIEW - Criando widget...');
       console.log('🔄 TRADINGVIEW - window.TradingView.widget tipo:', typeof window.TradingView.widget);
+      console.log('🎨 TRADINGVIEW - Usando configuração memoizada:', widgetConfig);
       
-      // Gerar configuração de tema transparente
-      const isDark = theme === 'dark';
-      const transparentTheme = getTransparentThemeConfig(isDark);
-      
-      console.log('🎨 TRADINGVIEW - Aplicando tema transparente:', transparentTheme);
-      
-      // Criar widget com tema transparente
-      widgetRef.current = new (window.TradingView.widget as any)({
-        container_id: containerId,
-        width: width,
-        height: height,
-        symbol: symbol,
-        interval: interval,
-        timezone: 'Etc/UTC',
-        locale: 'en',
-        enable_publishing: false,
-        allow_symbol_change: false,
-        details: false,
-        hotlist: false,
-        calendar: false,
-        hide_side_toolbar: true,
-        hide_top_toolbar: false,
-        hide_legend: false,
-        studies: [],
-        show_popup_button: true,
-        popup_width: '1000',
-        popup_height: '650',
-        // Aplicar tema transparente
-        ...transparentTheme
-      });
+      // Criar widget com configuração memoizada
+      widgetRef.current = new (window.TradingView.widget as any)(widgetConfig);
 
       console.log('✅ TRADINGVIEW - Widget criado com sucesso');
       console.log('🔄 TRADINGVIEW - Widget methods:', Object.keys(widgetRef.current));
@@ -207,7 +258,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         }
       }
     };
-  }, [isScriptLoaded, symbol, interval, theme, height, width]);
+  }, [isScriptLoaded, widgetConfig, height, width]);
 
   if (error) {
   return (
