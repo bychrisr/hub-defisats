@@ -212,8 +212,18 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         }
       },
       crosshair: { mode: 1 },
-      handleScroll: { mouseWheel: true, pressedMouseMove: true },
-      handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
+      handleScroll: { 
+        mouseWheel: true, 
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: true
+      },
+      handleScale: { 
+        axisPressedMouseMove: true, 
+        mouseWheel: true, 
+        pinch: true,
+        axisDoubleClickReset: false // Evitar reset automático
+      },
     });
 
     // Série principal (preferir candles, senão linha)
@@ -348,7 +358,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     };
 
-    // Função para ajustar zoom mantendo último candle fixo na direita
+    // Função para ajustar zoom mantendo último candle fixo na direita (mais suave)
     const adjustZoomToKeepLastCandleFixed = () => {
       if (effectiveCandleData && effectiveCandleData.length > 0) {
         const dataLength = effectiveCandleData.length;
@@ -358,23 +368,30 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           // Calcular quantos candles estão visíveis
           const visibleBars = Math.round(visibleRange.to - visibleRange.from);
           
-          // Ajustar para manter último candle fixo na direita
-          const newFromIndex = Math.max(0, dataLength - visibleBars);
-          const newToIndex = dataLength - 1;
+          // Só ajustar se o último candle não estiver na posição correta
+          const expectedToIndex = dataLength - 1;
+          const currentToIndex = Math.round(visibleRange.to);
           
-          // Aplicar novo range
-          chart.timeScale().setVisibleLogicalRange({
-            from: newFromIndex,
-            to: newToIndex
-          });
-          
-          console.log('🎯 ZOOM - Adjusted to keep last candle fixed:', {
-            originalFrom: visibleRange.from,
-            originalTo: visibleRange.to,
-            newFromIndex,
-            newToIndex,
-            visibleBars
-          });
+          // Se há diferença significativa (mais de 1 candle), ajustar suavemente
+          if (Math.abs(currentToIndex - expectedToIndex) > 1) {
+            const newFromIndex = Math.max(0, dataLength - visibleBars);
+            const newToIndex = dataLength - 1;
+            
+            // Aplicar novo range com animação suave
+            chart.timeScale().setVisibleLogicalRange({
+              from: newFromIndex,
+              to: newToIndex
+            });
+            
+            console.log('🎯 ZOOM - Smoothly adjusted to keep last candle fixed:', {
+              originalFrom: visibleRange.from,
+              originalTo: visibleRange.to,
+              newFromIndex,
+              newToIndex,
+              visibleBars,
+              difference: Math.abs(currentToIndex - expectedToIndex)
+            });
+          }
         }
       }
     };
@@ -397,7 +414,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     // Aplicar zoom inicial após um pequeno delay para garantir que os dados foram renderizados
     setTimeout(setInitialZoom, 100);
 
-    // Detectar scroll para carregar dados históricos e ajustar zoom
+    // Detectar scroll para carregar dados históricos
     const handleScroll = () => {
       if (!useApiData || !hasMoreData || isLoadingMoreHistorical) return;
       
@@ -413,11 +430,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         });
         loadMoreHistorical();
       }
-      
-      // Ajustar zoom para manter último candle fixo na direita
-      setTimeout(() => {
-        adjustZoomToKeepLastCandleFixed();
-      }, 100);
     };
 
     // Adicionar listener de scroll
@@ -427,10 +439,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     const ro = new ResizeObserver(() => {
       if (!containerRef.current) return;
       chart.applyOptions({ width: containerRef.current.clientWidth, height });
-      // Manter último candle fixo na direita após resize
-      setTimeout(() => {
-        adjustZoomToKeepLastCandleFixed();
-      }, 50);
+      // Apenas ajustar zoom inicial após resize, sem forçar posição
+      setTimeout(setInitialZoom, 50);
     });
     ro.observe(containerRef.current);
 
