@@ -493,9 +493,14 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
     return () => {
       if (widgetRef.current) {
         try {
-          widgetRef.current.remove();
+          // Verificar se o widget ainda existe antes de tentar remover
+          if (widgetRef.current && typeof widgetRef.current.remove === 'function') {
+            widgetRef.current.remove();
+          }
         } catch (err) {
           console.warn('Erro ao remover widget TradingView:', err);
+        } finally {
+          widgetRef.current = null;
         }
       }
     };

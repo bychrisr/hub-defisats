@@ -248,29 +248,8 @@ export default function Dashboard() {
     return mapped.length ? mapped : undefined;
   }, [marketData]);
 
-  // Fallback: buscar candles reais via API pública do backend se o contexto não tiver
-  const [fetchedCandles, setFetchedCandles] = useState<Candle[] | undefined>(undefined);
-  useEffect(() => {
-    let cancelled = false;
-    if (candleDataFromContext && candleDataFromContext.length) {
-      setFetchedCandles(undefined);
-      return;
-    }
-    (async () => {
-      try {
-        const raw = await marketDataService.getHistoricalData('BTCUSDT', '1h', 500);
-        if (cancelled) return;
-        const mapped = raw.map((c) => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })) as Candle[];
-        setFetchedCandles(mapped && mapped.length ? mapped : undefined);
-      } catch {
-        if (!cancelled) setFetchedCandles(undefined);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [candleDataFromContext]);
-  
-  // Dados de candles a usar no gráfico (contexto ou fallback fetch)
-  const candleData = candleDataFromContext ?? fetchedCandles;
+  // Dados de candles a usar no gráfico (apenas do contexto)
+  const candleData = candleDataFromContext;
 
   // Hook de tempo real otimizado (menos frequente)
   const { refreshAll, isEnabled: isRealtimeEnabled } = useRealtimeDashboard({
