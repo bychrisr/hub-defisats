@@ -4,6 +4,45 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.3] - 2025-01-09
+
+### 📚 **CONSOLIDAÇÃO DE DOCUMENTAÇÃO: Reorganização Completa**
+
+#### ✅ **Reorganização Implementada**
+- **Estrutura centralizada**: Documentação consolidada em `.system/` e `.system/docs/`
+- **Duplicatas removidas**: Eliminados arquivos redundantes em `backend/.system/`
+- **Relatórios consolidados**: Informações de correções integradas ao CHANGELOG
+- **Fonte única de verdade**: Documentação atualizada e organizada
+
+#### 🔧 **Correções Consolidadas dos Relatórios Temporários**
+
+##### **1. WebSocket Connection Issues**
+- **Problema**: `WebSocket connection to 'ws://localhost:13000/?token=...' failed`
+- **Solução**: Implementado servidor WebSocket real com `ws` library
+- **Status**: ✅ **RESOLVIDO - WebSocket funcionando perfeitamente**
+
+##### **2. Vite HMR WebSocket Issues**
+- **Problema**: `[vite] failed to connect to websocket`
+- **Solução**: Configurado proxy WebSocket no Vite e HMR corretamente
+- **Status**: ✅ **RESOLVIDO - HMR funcionando**
+
+##### **3. Frontend Permission Errors**
+- **Problema**: `EACCES: permission denied, mkdir '/home/bychrisr/projects/hub-defisats/frontend/node_modules/.vite/deps_temp_...'`
+- **Solução**: Configuração Vite otimizada e cache limpo
+- **Status**: ✅ **RESOLVIDO - Permissões corrigidas**
+
+##### **4. Missing Hooks Import**
+- **Problema**: `Failed to resolve import "@/hooks/useUserBalance"`
+- **Solução**: Corrigido para importar de `@/contexts/RealtimeDataContext`
+- **Status**: ✅ **RESOLVIDO - Imports funcionando**
+
+#### 📁 **Arquivos Reorganizados**
+- **Removidos**: `backend/.system/` (duplicatas)
+- **Consolidados**: Relatórios temporários integrados ao CHANGELOG
+- **Atualizados**: Documentação principal em `.system/`
+
+---
+
 ## [v2.3.2] - 2025-01-09
 
 ### 🔧 **CORREÇÕES CRÍTICAS: Fluxo de Cadastro Gratuito**

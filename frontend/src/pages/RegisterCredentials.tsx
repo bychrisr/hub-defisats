@@ -147,36 +147,6 @@ export default function RegisterCredentials() {
           </p>
         </div>
 
-        {/* Registration Summary */}
-        <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-white text-lg">Registration Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Name:</span>
-              <span className="text-white">{personalData?.firstName} {personalData?.lastName}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Email:</span>
-              <span className="text-white">{personalData?.email}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Username:</span>
-              <span className="text-white">{personalData?.username}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Plan:</span>
-              <span className="text-white capitalize">{selectedPlan}</span>
-            </div>
-            {personalData?.coupon_code && (
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Coupon:</span>
-                <span className="text-white">{personalData.coupon_code}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
         {/* Credentials Form */}
         <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm shadow-2xl">
