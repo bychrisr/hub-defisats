@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Card,
@@ -199,41 +199,25 @@ export default function Dashboard() {
     return availableMargin + totalMargin + estimatedProfitValue - estimatedFeesValue;
   };
   
-  const calculateTotalInvested = () => {
-    console.log('🔍 DASHBOARD - calculateTotalInvested called:', {
-      hasData: !!estimatedBalance.data,
-      data: estimatedBalance.data,
-      total_invested: estimatedBalance.data?.total_invested,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
+  const calculateTotalInvested = useCallback(() => {
     if (!estimatedBalance.data) return 0;
     return estimatedBalance.data.total_invested || 0;
-  };
+  }, [estimatedBalance.data]);
   
-  const calculateNetProfit = () => {
+  const calculateNetProfit = useCallback(() => {
     const totalPnl = totalPL || 0;
     const feesPaid = calculateFeesPaid();
     return totalPnl - feesPaid;
-  };
+  }, [totalPL, calculateFeesPaid]);
   
-  const calculateFeesPaid = () => {
-    console.log('🔍 DASHBOARD - calculateFeesPaid called:', {
-      hasEstimatedBalance: !!estimatedBalance.data,
-      estimatedBalanceFees: estimatedBalance.data?.total_fees,
-      hasHistoricalData: !!historicalData.data,
-      historicalMetrics: historicalMetrics,
-      historicalFees: historicalMetrics?.totalFees,
-      isLoading: historicalData.isLoading,
-      error: historicalData.error
-    });
+  const calculateFeesPaid = useCallback(() => {
     // Usar dados do estimated-balance como fonte primária para fees
     if (estimatedBalance.data?.total_fees !== undefined) {
       return estimatedBalance.data.total_fees;
     }
     // Fallback para dados históricos se disponível
     return historicalMetrics?.totalFees || 0;
-  };
+  }, [estimatedBalance.data?.total_fees, historicalMetrics?.totalFees]);
   
   const calculateTotalProfitability = () => {
     const netProfit = calculateNetProfit();
@@ -242,24 +226,14 @@ export default function Dashboard() {
     return (netProfit / totalInvested) * 100;
   };
   
-  const calculateLostTrades = () => {
-    console.log('🔍 DASHBOARD - calculateLostTrades called:', {
-      hasEstimatedBalance: !!estimatedBalance.data,
-      estimatedBalanceLostTrades: estimatedBalance.data?.lost_trades,
-      hasHistoricalData: !!historicalData.data,
-      historicalMetrics: historicalMetrics,
-      historicalLostTrades: historicalMetrics?.lostTrades,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
+  const calculateLostTrades = useCallback(() => {
     // Usar estimatedBalance como fonte primária
     if (estimatedBalance.data?.lost_trades !== undefined) {
       return estimatedBalance.data.lost_trades;
     }
     // Fallback para historicalMetrics
     return historicalMetrics?.lostTrades || 0;
-  };
+  }, [estimatedBalance.data?.lost_trades, historicalMetrics?.lostTrades]);
 
   // Novas funções para os cards adicionais
   const calculateSuccessRate = () => {
