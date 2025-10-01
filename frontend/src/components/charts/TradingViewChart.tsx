@@ -319,15 +319,35 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       }
 
       console.log('🔄 TRADINGVIEW - Criando widget...');
-      console.log('🔄 TRADINGVIEW - window.TradingView.widget tipo:', typeof window.TradingView.widget);
       console.log('🎨 TRADINGVIEW - Usando configuração memoizada:', widgetConfig);
-      
-      // Criar widget com configuração memoizada
-      widgetRef.current = new (window.TradingView.widget as any)(widgetConfig);
 
-      console.log('✅ TRADINGVIEW - Widget criado com sucesso');
-      console.log('🔄 TRADINGVIEW - Widget methods:', Object.keys(widgetRef.current));
-      
+      const createWidget = () => {
+        console.log('🔧 TRADINGVIEW - createWidget chamado. Tipo de widget:', typeof (window as any).TradingView?.widget);
+        if (!(window as any).TradingView || typeof (window as any).TradingView.widget !== 'function') {
+          throw new Error('TradingView.widget indisponível');
+        }
+        widgetRef.current = new ((window as any).TradingView.widget as any)(widgetConfig);
+        console.log('✅ TRADINGVIEW - Widget criado com sucesso');
+        console.log('🔄 TRADINGVIEW - Widget methods:', Object.keys(widgetRef.current));
+      };
+
+      if (!(window as any).TradingView || typeof (window as any).TradingView.widget !== 'function') {
+        console.log('⏳ TRADINGVIEW - Aguardando ensureTradingViewLoaded antes de criar widget...');
+        ensureTradingViewLoaded()
+          .then(() => {
+            try { createWidget(); } catch (e) { throw e; }
+          })
+          .catch((e) => {
+            console.error('❌ TRADINGVIEW - Falha ao aguardar script:', e);
+            setError('Erro ao carregar TradingView');
+            setIsLoading(false);
+          });
+        return; // sai do try, resto do fluxo roda no then acima
+      }
+
+      // Já disponível: cria imediatamente
+      createWidget();
+
       // Verificar se onChartReady existe
       if (typeof widgetRef.current.onChartReady === 'function') {
         console.log('✅ TRADINGVIEW - onChartReady disponível, configurando...');
