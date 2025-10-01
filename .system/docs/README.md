@@ -48,8 +48,8 @@ Esta documentação técnica fornece informações detalhadas sobre o desenvolvi
 - **[dashboard-status.md](ui/dashboard-status.md)** - Status do dashboard
 
 ### 🔐 **Segurança**
+- **[auth-fixes.md](security/auth-fixes.md)** - Sistema de autenticação e correções
 - **[SECURITY.md](SECURITY.md)** - Documentação de segurança
-- **[auth-fixes.md](security/auth-fixes.md)** - Correções de autenticação
 - **[overview.md](security/overview.md)** - Visão geral de segurança
 
 ### 📊 **APIs e Integração**
@@ -59,6 +59,7 @@ Esta documentação técnica fornece informações detalhadas sobre o desenvolvi
 
 ### 🏗️ **Arquitetura**
 - **[overview.md](architecture/overview.md)** - Visão geral da arquitetura
+- **[exchange-credentials-architecture.md](architecture/exchange-credentials-architecture.md)** - Sistema escalável de exchanges
 - **[workers.md](architecture/workers.md)** - Sistema de workers
 - **[simulations.md](architecture/simulations.md)** - Sistema de simulações
 - **[charts.md](architecture/charts.md)** - Sistema de gráficos

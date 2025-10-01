@@ -452,6 +452,49 @@ docker system prune -a
 ls -la /backups/
 ```
 
+## 🛠️ Ambiente de Desenvolvimento
+
+### Configuração Docker Compose Dev
+```bash
+# Navegar para o diretório de configuração Docker
+cd config/docker
+
+# Iniciar ambiente de desenvolvimento
+docker compose -f docker-compose.dev.yml up -d
+
+# Verificar status dos serviços
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+```
+
+### Portas do Ambiente de Desenvolvimento
+- **Frontend**: `http://localhost:13000`
+- **Backend**: `http://localhost:13010`
+- **PostgreSQL**: `localhost:15432`
+- **Redis**: `localhost:16379`
+
+### Credenciais de Desenvolvimento
+```
+Email/Username: admin@hub-defisats.com
+Password: Admin123!@#
+```
+
+### Scripts Úteis para Desenvolvimento
+```bash
+# Verificar exchanges no banco
+cd backend && npx tsx scripts/check-exchanges.ts
+
+# Migrar credenciais existentes
+cd backend && npx tsx scripts/migrate-credentials.ts
+
+# Executar seeder de exchanges
+cd backend && npm run seed:exchanges
+```
+
+### Sistema de Exchanges Escalável
+- **Exchange**: LN Markets configurada por padrão
+- **ExchangeCredentialType**: API Key, Secret, Passphrase
+- **UserExchangeCredentials**: Credenciais dos usuários migradas
+
 ---
 
 **📝 Nota:** Esta configuração é para um ambiente de produção. Para desenvolvimento, use os arquivos `docker-compose.dev.yml` e configure as variáveis de ambiente apropriadas.
