@@ -604,16 +604,32 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
   // useEffect separado para atualizar dados sem resetar o zoom
   useEffect(() => {
-    if (!seriesRef.current || !effectiveCandleData || effectiveCandleData.length === 0) return;
+    console.log('🔄 DATA UPDATE - useEffect triggered:', {
+      hasSeriesRef: !!seriesRef.current,
+      hasEffectiveData: !!effectiveCandleData,
+      dataLength: effectiveCandleData?.length || 0,
+      isInitialLoad: isInitialLoad.current
+    });
+    
+    if (!seriesRef.current || !effectiveCandleData || effectiveCandleData.length === 0) {
+      console.log('🔄 DATA UPDATE - Early return:', {
+        hasSeriesRef: !!seriesRef.current,
+        hasEffectiveData: !!effectiveCandleData,
+        dataLength: effectiveCandleData?.length || 0
+      });
+      return;
+    }
     
     // Atualizar dados da série sem resetar zoom
     try {
       if (effectiveCandleData[0] && 'open' in effectiveCandleData[0]) {
         // Dados de candlestick
         (seriesRef.current as ISeriesApi<'Candlestick'>).setData(effectiveCandleData as CandlestickPoint[]);
+        console.log('✅ DATA UPDATE - Candlestick data set:', effectiveCandleData.length);
       } else {
         // Dados de linha
         (seriesRef.current as ISeriesApi<'Line'>).setData(effectiveCandleData as LinePoint[]);
+        console.log('✅ DATA UPDATE - Line data set:', effectiveCandleData.length);
       }
       
       console.log('📊 DATA - Updated series data without resetting zoom:', {
