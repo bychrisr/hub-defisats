@@ -48,6 +48,7 @@ import { healthRoutes } from './routes/health.routes';
 import { swCacheRoutes } from './routes/sw-cache.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
+import { exchangeCredentialsRoutes } from './routes/exchangeCredentials.routes';
 import { versionRoutes } from './routes/version.routes';
 import { docsRoutes } from './routes/docs.routes';
 import { routeRedirectsRoutes } from './routes/route-redirects.routes';
@@ -560,6 +561,10 @@ async function registerRoutes() {
   // Profile routes
   await fastify.register(profileRoutes, { prefix: '/api' });
   console.log('✅ Profile routes registered');
+
+  // Exchange Credentials routes
+  await fastify.register(exchangeCredentialsRoutes, { prefix: '/api' });
+  console.log('✅ Exchange Credentials routes registered');
 
   // LN Markets Dashboard Optimized (ÚNICO ENDPOINT OTIMIZADO)
   await fastify.register(dashboardOptimizedRoutes, { prefix: '/api' });

@@ -54,7 +54,6 @@ import { cn } from '@/lib/utils';
 import { useLNMarketsConnectionStatus } from '@/hooks/useLNMarketsConnectionStatus';
 import { api } from '@/lib/api';
 import ImageUpload from '@/components/ui/ImageUpload';
-import { ExchangeCredentialsService, UserExchangeCredentials } from '@/services/exchangeCredentials.service';
 
 const profileSchema = z.object({
   // Profile Information
@@ -182,10 +181,6 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // ✅ NOVA ESTRUTURA DE EXCHANGES
-  const [lnMarketsCredentials, setLnMarketsCredentials] = useState<UserExchangeCredentials | null>(null);
-  const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -210,17 +205,8 @@ export default function Profile() {
       try {
         console.log('🔄 PROFILE - Loading fresh profile data...');
         await getProfile();
-        
-        // ✅ CARREGAR CREDENCIAIS DA NOVA ESTRUTURA
-        console.log('🔄 PROFILE - Loading LN Markets credentials from new structure...');
-        setIsLoadingCredentials(true);
-        const credentials = await ExchangeCredentialsService.getLNMarketsCredentials();
-        setLnMarketsCredentials(credentials);
-        console.log('✅ PROFILE - LN Markets credentials loaded:', credentials ? 'Found' : 'Not found');
       } catch (error) {
         console.error('❌ PROFILE - Error loading profile data:', error);
-      } finally {
-        setIsLoadingCredentials(false);
       }
     };
 
@@ -238,18 +224,13 @@ export default function Profile() {
         hasPassphrase: !!user.ln_markets_passphrase
       });
       
-      // ✅ USAR CREDENCIAIS DA NOVA ESTRUTURA SE DISPONÍVEL
-      const apiKey = lnMarketsCredentials?.credentials?.api_key || user.ln_markets_api_key || '';
-      const apiSecret = lnMarketsCredentials?.credentials?.api_secret || user.ln_markets_api_secret || '';
-      const passphrase = lnMarketsCredentials?.credentials?.passphrase || user.ln_markets_passphrase || '';
-      
       reset({
         username: userData.username || user.email?.split('@')[0] || '',
         bio: userData.bio || '',
         email: user.email,
-        ln_markets_api_key: apiKey,
-        ln_markets_api_secret: apiSecret,
-        ln_markets_passphrase: passphrase,
+        ln_markets_api_key: user.ln_markets_api_key || '',
+        ln_markets_api_secret: user.ln_markets_api_secret || '',
+        ln_markets_passphrase: user.ln_markets_passphrase || '',
       });
     }
   }, [user]); // ✅ CORREÇÃO: Removido reset das dependências para evitar loop infinito
@@ -267,37 +248,15 @@ export default function Profile() {
         ln_markets_passphrase: data.ln_markets_passphrase ? '***' : 'not provided',
       });
 
-      // ✅ SALVAR CREDENCIAIS NA NOVA ESTRUTURA DE EXCHANGES
-      if (data.ln_markets_api_key || data.ln_markets_api_secret || data.ln_markets_passphrase) {
-        console.log('🔄 PROFILE - Saving LN Markets credentials to new structure...');
-        await ExchangeCredentialsService.updateLNMarketsCredentials({
-          api_key: data.ln_markets_api_key,
-          api_secret: data.ln_markets_api_secret,
-          passphrase: data.ln_markets_passphrase,
-        });
-        console.log('✅ PROFILE - LN Markets credentials saved to new structure');
-      }
-
-      // Salvar dados do perfil (sem credenciais LN Markets)
-      const profileData = {
-        username: data.username,
-        bio: data.bio,
-        email: data.email,
-        // Não incluir credenciais LN Markets aqui - já foram salvas na nova estrutura
-      };
-
-      const response = await api.put('/api/profile', profileData);
+      const response = await api.put('/api/profile', data);
       const result = response.data;
 
       if (result.success) {
         console.log('✅ PROFILE - Profile updated successfully');
         setSuccess('Profile updated successfully!');
         setIsEditing(false);
-        
-        // Refresh user data and credentials
+        // Refresh user data
         await getProfile();
-        const credentials = await ExchangeCredentialsService.getLNMarketsCredentials();
-        setLnMarketsCredentials(credentials);
         
         // Auto-dismiss success message after 3 seconds
         setTimeout(() => {
