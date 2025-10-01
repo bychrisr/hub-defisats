@@ -211,7 +211,7 @@ export default function Profile() {
     };
 
     loadProfileData();
-  }, [getProfile]);
+  }, []); // Remove getProfile dependency to prevent infinite loop
 
   useEffect(() => {
     if (user) {
