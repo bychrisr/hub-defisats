@@ -3,6 +3,66 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
+// Garantia única de carregamento do TradingView (tv.js)
+let tvLoadPromise: Promise<void> | null = null;
+const ensureTradingViewLoaded = (): Promise<void> => {
+  if (typeof window !== 'undefined' && (window as any).TradingView && typeof (window as any).TradingView.widget === 'function') {
+    return Promise.resolve();
+  }
+  if (tvLoadPromise) return tvLoadPromise;
+
+  tvLoadPromise = new Promise<void>((resolve, reject) => {
+    try {
+      const existing = document.getElementById('tv-js') as HTMLScriptElement | null;
+      if (existing) {
+        // Já existe: aguardar ficar disponível
+        const start = Date.now();
+        const poll = setInterval(() => {
+          if ((window as any).TradingView && typeof (window as any).TradingView.widget === 'function') {
+            clearInterval(poll);
+            console.log('✅ TRADINGVIEW - ensureTradingViewLoaded: disponível (script pré-existente) em', Date.now() - start, 'ms');
+            resolve();
+          }
+          if (Date.now() - start > 10000) {
+            clearInterval(poll);
+            reject(new Error('Timeout aguardando TradingView (script existente)'));
+          }
+        }, 200);
+        return;
+      }
+
+      // Injetar script se não existir
+      const script = document.createElement('script');
+      script.id = 'tv-js';
+      script.src = 'https://s3.tradingview.com/tv.js';
+      script.async = true;
+      script.onload = () => {
+        console.log('✅ TRADINGVIEW - ensureTradingViewLoaded: onload do tv.js');
+        // Ainda assim, alguns ambientes precisam de um tick até expor o global
+        const start = Date.now();
+        const poll = setInterval(() => {
+          if ((window as any).TradingView && typeof (window as any).TradingView.widget === 'function') {
+            clearInterval(poll);
+            console.log('✅ TRADINGVIEW - ensureTradingViewLoaded: global pronto em', Date.now() - start, 'ms');
+            resolve();
+          }
+          if (Date.now() - start > 5000) {
+            clearInterval(poll);
+            reject(new Error('TradingView.widget indisponível após onload'));
+          }
+        }, 150);
+      };
+      script.onerror = (e) => reject(new Error('Falha ao carregar tv.js: ' + script.src));
+      document.head.appendChild(script);
+      console.log('🔄 TRADINGVIEW - ensureTradingViewLoaded: tv.js adicionado ao head');
+    } catch (e) {
+      reject(e as Error);
+    }
+  });
+
+  return tvLoadPromise;
+};
+
 // Hook customizado para debounce
 const useDebounce = <T,>(value: T, delay: number): T => {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
