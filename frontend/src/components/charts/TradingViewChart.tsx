@@ -125,8 +125,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
         <CardContent>
           <div className="flex items-center justify-center h-64 bg-muted/50 rounded-lg">
             <div className="text-center">
-              <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-red-500" />
-              <p className="text-red-500 mb-2">Erro ao carregar TradingView</p>
+              <p className="text-red-500 mb-2">❌ Erro ao carregar TradingView</p>
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
           </div>
