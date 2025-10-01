@@ -29,12 +29,11 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   
   const { refreshData: refreshCentralizedData, isLoading: centralizedLoading } = useCentralizedData();
   const { refetch: refetchEstimatedBalance } = useEstimatedBalance();
-  const { refetch: refetchHistoricalData } = useHistoricalData({
-    symbol: 'BTCUSDT',
-    timeframe: '1h',
-    initialLimit: 168,
-    enabled: false
-  });
+  // Hook desabilitado - não precisamos dos dados históricos aqui
+  const refetchHistoricalData = useCallback(async () => {
+    // Função vazia já que o hook está desabilitado
+    console.log('📊 REALTIME DASHBOARD - Historical data disabled');
+  }, []);
   const { refreshPositions } = usePositions();
 
   // Refs para controlar os intervalos
