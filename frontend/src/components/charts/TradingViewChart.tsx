@@ -89,7 +89,7 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
       }
 
       // Criar widget
-      widgetRef.current = new window.TradingView.widget({
+      widgetRef.current = new (window.TradingView.widget as any)({
         container_id: containerId,
         width: width,
         height: height,

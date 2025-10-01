@@ -2,7 +2,9 @@
 declare global {
   interface Window {
     TradingView: {
-      widget: (config: TradingViewWidgetConfig) => TradingViewWidget;
+      widget: {
+        new (config: TradingViewWidgetConfig): TradingViewWidget;
+      };
     };
   }
 }
