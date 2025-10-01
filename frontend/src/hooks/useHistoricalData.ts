@@ -75,14 +75,16 @@ export const useHistoricalData = ({
       if (mappedData.length > 0) {
         const oldest = Math.min(...mappedData.map(c => c.time));
         setOldestTimestamp(oldest);
-        setHasMoreData(mappedData.length === initialLimit); // Se retornou menos que o limite, não há mais dados
+        const hasMore = mappedData.length === initialLimit;
+        setHasMoreData(hasMore);
+        
+        console.log('✅ HISTORICAL - Initial data loaded:', {
+          count: mappedData.length,
+          oldestTimestamp: oldest,
+          hasMoreData: hasMore,
+          initialLimit
+        });
       }
-      
-      console.log('✅ HISTORICAL - Initial data loaded:', {
-        count: mappedData.length,
-        oldestTimestamp: oldestTimestamp,
-        hasMoreData
-      });
       
     } catch (err: any) {
       console.error('❌ HISTORICAL - Error loading initial data:', err);
@@ -95,7 +97,15 @@ export const useHistoricalData = ({
 
   // Carregar mais dados históricos
   const loadMoreHistorical = useCallback(async () => {
-    if (!enabled || !hasMoreData || loadingRef.current || !oldestTimestamp) return;
+    if (!enabled || !hasMoreData || loadingRef.current || !oldestTimestamp) {
+      console.log('🔄 HISTORICAL - Load more conditions not met:', {
+        enabled,
+        hasMoreData,
+        loadingRef: loadingRef.current,
+        oldestTimestamp
+      });
+      return;
+    }
     
     loadingRef.current = true;
     setIsLoadingMore(true);

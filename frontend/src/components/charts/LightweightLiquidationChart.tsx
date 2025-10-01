@@ -492,12 +492,26 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     // Detectar scroll para carregar dados históricos
     const handleScroll = () => {
-      if (!useApiData || !hasMoreData || isLoadingMoreHistorical) return;
+      if (!useApiData || !hasMoreData || isLoadingMoreHistorical) {
+        console.log('🔄 SCROLL - Conditions not met:', {
+          useApiData,
+          hasMoreData,
+          isLoadingMoreHistorical
+        });
+        return;
+      }
       
       const timeScale = chart.timeScale();
       const visibleRange = timeScale.getVisibleLogicalRange();
       
-      if (visibleRange && visibleRange.from <= 10) { // Se está próximo do início dos dados
+      console.log('🔄 SCROLL - Visible range:', {
+        visibleFrom: visibleRange?.from,
+        visibleTo: visibleRange?.to,
+        threshold: 5,
+        shouldLoad: visibleRange && visibleRange.from <= 5
+      });
+      
+      if (visibleRange && visibleRange.from <= 5) { // Reduzir threshold para 5
         console.log('🔄 SCROLL - Loading more historical data...', {
           visibleFrom: visibleRange.from,
           visibleTo: visibleRange.to,
