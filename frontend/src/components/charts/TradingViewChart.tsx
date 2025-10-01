@@ -163,23 +163,10 @@ export const TradingViewChart: React.FC<TradingViewChartProps> = ({
   }, [isVisible]);
 
   // Lazy loading com Intersection Observer
+  // Lazy loading: DESABILITADO TEMPORARIAMENTE PARA TESTE
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          console.log('👁️ TRADINGVIEW - Componente visível, iniciando carregamento...');
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
+    console.log('📊 TRADINGVIEW - Lazy loading desabilitado para teste');
+    setIsVisible(true);
   }, []);
 
   // Configuração memoizada do widget
