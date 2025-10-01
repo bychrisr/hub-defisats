@@ -67,6 +67,7 @@ model User {
   upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
   registration_progress      RegistrationProgress?
+  exchange_credentials       UserExchangeCredentials[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -677,6 +678,71 @@ model RegistrationProgress {
   @@index([session_token])
   @@index([expires_at])
   @@map("registration_progress")
+}
+
+model Exchange {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  website     String?
+  logo_url    String?
+  is_active   Boolean  @default(true)
+  api_version String?
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relacionamentos
+  credential_types ExchangeCredentialType[]
+  user_credentials UserExchangeCredentials[]
+  
+  @@index([slug])
+  @@index([is_active])
+  @@map("exchanges")
+}
+
+model ExchangeCredentialType {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  exchange_id String
+  name        String
+  field_name  String
+  field_type  String   @default("text")
+  is_required Boolean  @default(true)
+  description String?
+  order       Int      @default(0)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relacionamentos
+  exchange Exchange @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
+  
+  @@unique([exchange_id, field_name])
+  @@index([exchange_id])
+  @@index([is_required])
+  @@map("exchange_credential_types")
+}
+
+model UserExchangeCredentials {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id     String
+  exchange_id String
+  credentials Json
+  is_active   Boolean  @default(true)
+  is_verified Boolean  @default(false)
+  last_test   DateTime? @db.Timestamp(6)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relacionamentos
+  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  exchange Exchange @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
+  
+  @@unique([user_id, exchange_id])
+  @@index([user_id])
+  @@index([exchange_id])
+  @@index([is_active])
+  @@index([is_verified])
+  @@map("user_exchange_credentials")
 }
 
 enum PlanType {

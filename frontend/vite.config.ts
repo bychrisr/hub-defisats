@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/api': {
-        target: 'http://backend:3010', // ✅ Voltar para nome do serviço Docker
+        target: 'http://backend:3010', // ✅ Usar nome do serviço Docker interno
         changeOrigin: true,
         secure: false,
       },

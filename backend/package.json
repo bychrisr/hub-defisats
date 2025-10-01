@@ -12,6 +12,7 @@
     "seed:rate-limit": "tsx src/seeders/index.ts specific rate-limit-config",
     "seed:admin": "tsx src/seeders/index.ts specific admin-user",
     "seed:plans": "tsx src/seeders/index.ts specific plans",
+    "seed:exchanges": "tsx scripts/seed-exchanges.ts",
     "seed:list": "tsx src/seeders/index.ts list",
     "test": "jest",
     "test:watch": "jest --watch",
