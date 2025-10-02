@@ -231,7 +231,11 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
             tickMarkType,
             timestamp,
             date: date.toISOString(),
-            currentTimeframe
+            currentTimeframe,
+            hour: date.getHours(),
+            minute: date.getMinutes(),
+            day: date.getDate(),
+            month: date.getMonth() + 1
           });
           
           const hours = String(date.getHours()).padStart(2, '0');
@@ -240,52 +244,45 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           const monthName = date.toLocaleDateString('en-US', { month: 'short' });
           const year = date.getFullYear();
           
-          // ✅ IMPLEMENTAÇÃO DEFINITIVA: Hierarquia temporal garantida
+          // ✅ IMPLEMENTAÇÃO REVOLUCIONÁRIA: Hierarquia temporal baseada em densidade
           if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
             // Para timeframes intraday (minutos/horas) - estilo LN Markets
             
             const hour = date.getHours();
             const minute = date.getMinutes();
             
-            // Se for início de ano (1º de janeiro), mostrar ano
+            // ESTRATÉGIA: Usar uma abordagem baseada em densidade de dados
+            // Calcular um "score" baseado no contexto temporal
+            let temporalScore = 0;
+            
+            // Se for início de ano (1º de janeiro), prioridade máxima
             if (date.getMonth() === 0 && date.getDate() === 1) {
               return year.toString();
             }
             
-            // Se for início de mês (dia 1), mostrar mês
+            // Se for início de mês (dia 1), prioridade alta
             if (date.getDate() === 1) {
               return monthName;
             }
             
-            // ESTRATÉGIA: Mostrar dia em múltiplos momentos para garantir visibilidade
-            // Se for meia-noite (00:00), mostrar dia
-            if (hour === 0 && minute === 0) {
+            // Calcular score baseado na hora do dia
+            if (hour === 0) temporalScore += 100; // Meia-noite
+            if (hour === 6) temporalScore += 80;  // Manhã
+            if (hour === 12) temporalScore += 80; // Meio-dia
+            if (hour === 18) temporalScore += 80; // Tarde
+            if (hour === 21) temporalScore += 60; // Noite
+            
+            // Se for início de hora (minuto 0), aumentar score
+            if (minute === 0) temporalScore += 20;
+            
+            // Se score for alto o suficiente, mostrar dia
+            if (temporalScore >= 80) {
               return day;
             }
             
-            // Se for início de dia (primeira hora), mostrar dia
-            if (hour === 0) {
-              return day;
-            }
-            
-            // Se for manhã (06:00), mostrar dia para separação visual
-            if (hour === 6 && minute === 0) {
-              return day;
-            }
-            
-            // Se for meio-dia (12:00), mostrar dia para separação visual
-            if (hour === 12 && minute === 0) {
-              return day;
-            }
-            
-            // Se for tarde (18:00), mostrar dia para separação visual
-            if (hour === 18 && minute === 0) {
-              return day;
-            }
-            
-            // Se for noite (21:00), mostrar dia para separação visual
-            if (hour === 21 && minute === 0) {
-              return day;
+            // Se score for médio, mostrar dia + hora
+            if (temporalScore >= 40) {
+              return `${day} ${hours}:${minutes}`;
             }
             
             // Para outras horas, mostrar hora:minuto
