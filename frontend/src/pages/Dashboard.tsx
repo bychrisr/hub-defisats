@@ -48,8 +48,6 @@ import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
 import { RouteGuard } from '@/components/guards/RouteGuard';
-import { InfiniteHistoricalDataDemo } from '@/components/charts/InfiniteHistoricalDataDemo';
-import { HistoricalDataTest } from '@/components/charts/HistoricalDataTest';
 import { Tooltip } from '@/components/ui/tooltip';
 import LightweightLiquidationChart from '@/components/charts/LightweightLiquidationChart';
 import PriceReference from '@/components/lnmarkets/PriceReference';
@@ -2154,18 +2152,6 @@ export default function Dashboard() {
             <TradingViewMonitor />
           </div>
 
-          {/* Teste de Dados Históricos */}
-          <div className="mt-6">
-            <HistoricalDataTest />
-          </div>
-
-          {/* Demonstração de Dados Históricos Infinitos */}
-          <div className="mt-6">
-            <InfiniteHistoricalDataDemo 
-              symbol="BTCUSDT"
-              height={500}
-            />
-          </div>
       </div>
     </RouteGuard>
   );
