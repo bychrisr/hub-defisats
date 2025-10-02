@@ -240,7 +240,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
               year: date.getFullYear()
             });
             // Fallback para data atual
-            return `${hours}:${minutes}`;
+            const fallbackHours = String(new Date().getHours()).padStart(2, '0');
+            const fallbackMinutes = String(new Date().getMinutes()).padStart(2, '0');
+            return `${fallbackHours}:${fallbackMinutes}`;
           }
           
           // ✅ DEBUG: Log para verificar os valores recebidos
