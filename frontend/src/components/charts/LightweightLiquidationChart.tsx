@@ -66,9 +66,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   useApiData = false
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const rsiContainerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
   const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const overboughtSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const oversoldSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const isInitialLoad = useRef(true); // Controle de carregamento inicial
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [showIndicators, setShowIndicators] = useState(false);
@@ -464,6 +465,75 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       
       indicatorSeriesInstance.setData(indicator.data.map(d => ({ ...d, time: d.time as Time })));
       indicatorSeries.push(indicatorSeriesInstance);
+    }
+
+    // ✅ CRIAR SÉRIES DO RSI NO MESMO GRÁFICO
+    if (rsiEnabled) {
+      // Criar escala de preço separada para RSI (lado direito)
+      chart.priceScale('right').applyOptions({
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
+        mode: 1, // PriceScaleMode.Percentage
+      });
+
+      // Série principal do RSI
+      const rsiSeries = chart.addLineSeries({
+        color: '#8b5cf6', // Cor roxa para RSI
+        lineWidth: 2,
+        priceScaleId: 'right',
+        priceFormat: {
+          type: 'percent' as const,
+          precision: 2,
+          minMove: 0.01,
+        },
+      });
+      rsiSeriesRef.current = rsiSeries;
+
+      // Linha de referência Overbought (70%)
+      const overboughtSeries = chart.addLineSeries({
+        color: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
+        lineWidth: 1,
+        lineStyle: 2, // LineStyle.Dashed
+        priceScaleId: 'right',
+        priceFormat: {
+          type: 'percent' as const,
+          precision: 0,
+          minMove: 1,
+        },
+      });
+      overboughtSeriesRef.current = overboughtSeries;
+
+      // Linha de referência Oversold (30%)
+      const oversoldSeries = chart.addLineSeries({
+        color: isDark ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.5)',
+        lineWidth: 1,
+        lineStyle: 2, // LineStyle.Dashed
+        priceScaleId: 'right',
+        priceFormat: {
+          type: 'percent' as const,
+          precision: 0,
+          minMove: 1,
+        },
+      });
+      oversoldSeriesRef.current = oversoldSeries;
+
+      // Configurar dados das linhas de referência
+      if (effectiveCandleData && effectiveCandleData.length > 0) {
+        const firstTime = effectiveCandleData[0].time as Time;
+        const lastTime = effectiveCandleData[effectiveCandleData.length - 1].time as Time;
+        
+        overboughtSeries.setData([
+          { time: firstTime, value: rsiConfig.overbought },
+          { time: lastTime, value: rsiConfig.overbought },
+        ]);
+        
+        oversoldSeries.setData([
+          { time: firstTime, value: rsiConfig.oversold },
+          { time: lastTime, value: rsiConfig.oversold },
+        ]);
+      }
     }
 
     // Configurar zoom inicial para mostrar aproximadamente 7 dias (apenas no primeiro carregamento)
@@ -894,122 +964,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     }
   }, [rsiEnabled, effectiveCandleData, rsiConfig]);
 
-  // useEffect para criar gráfico do RSI
-  useEffect(() => {
-    if (!rsiEnabled || !rsiContainerRef.current) {
-      if (rsiSeriesRef.current) {
-        rsiSeriesRef.current = null;
-      }
-      return;
-    }
-
-    const rsiChart = createChart(rsiContainerRef.current, {
-      height: 120, // Altura fixa para o RSI
-      layout: {
-        textColor: isDark ? '#d1d5db' : '#374151',
-        background: { type: ColorType.Solid, color: 'transparent' },
-        fontSize: 10,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      },
-      grid: {
-        vertLines: { 
-          color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-          style: 0
-        },
-        horzLines: { 
-          color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-          style: 0
-        },
-      },
-      rightPriceScale: { 
-        borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-        textColor: isDark ? '#9ca3af' : '#6b7280',
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.1,
-        },
-        // Configurar escala do RSI (0-100)
-        mode: 1, // PriceScaleMode.Percentage
-      },
-      timeScale: {
-        borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-        timeVisible: false, // Ocultar eixo de tempo no RSI
-        secondsVisible: false,
-        fixRightEdge: true,
-      },
-      crosshair: {
-        mode: 1, // CrosshairMode.Normal
-        vertLine: {
-          color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-          width: 1,
-          style: 0,
-        },
-        horzLine: {
-          color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-          width: 1,
-          style: 0,
-        },
-      },
-    });
-
-    // Criar série de linha para RSI
-    const rsiSeries = rsiChart.addLineSeries({
-      color: '#8b5cf6', // Cor roxa para RSI
-      lineWidth: 2,
-      priceFormat: {
-        type: 'percent' as const,
-        precision: 2,
-        minMove: 0.01,
-      },
-    });
-
-    rsiSeriesRef.current = rsiSeries;
-
-    // Adicionar linhas de referência para overbought/oversold
-    rsiChart.addLineSeries({
-      color: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
-      lineWidth: 1,
-      lineStyle: 2, // LineStyle.Dashed
-      priceFormat: {
-        type: 'percent' as const,
-        precision: 0,
-        minMove: 1,
-      },
-    }).setData([
-      { time: 0 as Time, value: rsiConfig.overbought },
-      { time: Date.now() / 1000 as Time, value: rsiConfig.overbought },
-    ]);
-
-    rsiChart.addLineSeries({
-      color: isDark ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.5)',
-      lineWidth: 1,
-      lineStyle: 2, // LineStyle.Dashed
-      priceFormat: {
-        type: 'percent' as const,
-        precision: 0,
-        minMove: 1,
-      },
-    }).setData([
-      { time: 0 as Time, value: rsiConfig.oversold },
-      { time: Date.now() / 1000 as Time, value: rsiConfig.oversold },
-    ]);
-
-    // Atualizar dados do RSI quando disponíveis
-    if (rsiData.length > 0) {
-      const rsiChartData = rsiData.map(point => ({
-        time: point.time as Time,
-        value: point.value
-      }));
-      rsiSeries.setData(rsiChartData);
-    }
-
-    return () => {
-      rsiChart.remove();
-      rsiSeriesRef.current = null;
-    };
-  }, [rsiEnabled, isDark, rsiConfig]);
-
-  // useEffect para atualizar dados do RSI no gráfico
+  // useEffect para atualizar dados do RSI no gráfico principal
   useEffect(() => {
     if (!rsiSeriesRef.current || !rsiData.length) return;
 
@@ -1185,33 +1140,28 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       </CardHeader>
 
       <CardContent>
-        <div ref={containerRef} className="w-full rounded-lg overflow-hidden lightweight-chart-time-axis" style={{ height }} />
-        
-        {/* Gráfico do RSI - Dentro da mesma seção */}
+        {/* Header do RSI quando ativo */}
         {rsiEnabled && (
-          <div className="mt-2">
-            {/* Header do RSI */}
-            <div className="flex items-center justify-between mb-2 px-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-muted-foreground">RSI {rsiConfig.period}</span>
-                <Badge variant="outline" className="text-xs">
-                  {rsiData[rsiData.length - 1]?.value?.toFixed(2) || '0.00'}
-                </Badge>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setRsiEnabled(false)}
-                className="h-6 px-2 text-xs hover:bg-muted"
-              >
-                <X className="h-3 w-3" />
-              </Button>
+          <div className="flex items-center justify-between mb-2 px-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">RSI {rsiConfig.period}</span>
+              <Badge variant="outline" className="text-xs">
+                {rsiData[rsiData.length - 1]?.value?.toFixed(2) || '0.00'}
+              </Badge>
             </div>
-            
-            {/* Container do gráfico RSI */}
-            <div ref={rsiContainerRef} className="w-full rounded-lg overflow-hidden border border-border/50" style={{ height: 120 }} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setRsiEnabled(false)}
+              className="h-6 px-2 text-xs hover:bg-muted"
+            >
+              <X className="h-3 w-3" />
+            </Button>
           </div>
         )}
+        
+        {/* Gráfico principal com RSI integrado */}
+        <div ref={containerRef} className="w-full rounded-lg overflow-hidden lightweight-chart-time-axis" style={{ height }} />
       </CardContent>
     </Card>
     </>
