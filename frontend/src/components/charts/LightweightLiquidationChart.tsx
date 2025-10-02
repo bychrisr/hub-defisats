@@ -240,26 +240,55 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           const monthName = date.toLocaleDateString('en-US', { month: 'short' });
           const year = date.getFullYear();
           
-          // ✅ IMPLEMENTAÇÃO SIMPLIFICADA: Baseada no contexto temporal sem depender do tickMarkType
+          // ✅ IMPLEMENTAÇÃO DEFINITIVA: Hierarquia temporal garantida
           if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-            // Para timeframes intraday (minutos/horas)
+            // Para timeframes intraday (minutos/horas) - estilo LN Markets
             
-            // Se for início de ano (1º de janeiro às 00:00), mostrar ano
-            if (date.getMonth() === 0 && date.getDate() === 1 && date.getHours() === 0 && date.getMinutes() === 0) {
+            const hour = date.getHours();
+            const minute = date.getMinutes();
+            
+            // Se for início de ano (1º de janeiro), mostrar ano
+            if (date.getMonth() === 0 && date.getDate() === 1) {
               return year.toString();
             }
             
-            // Se for início de mês (dia 1 às 00:00), mostrar mês
-            if (date.getDate() === 1 && date.getHours() === 0 && date.getMinutes() === 0) {
+            // Se for início de mês (dia 1), mostrar mês
+            if (date.getDate() === 1) {
               return monthName;
             }
             
+            // ESTRATÉGIA: Mostrar dia em múltiplos momentos para garantir visibilidade
             // Se for meia-noite (00:00), mostrar dia
-            if (date.getHours() === 0 && date.getMinutes() === 0) {
+            if (hour === 0 && minute === 0) {
               return day;
             }
             
-            // Para outros momentos, mostrar hora:minuto
+            // Se for início de dia (primeira hora), mostrar dia
+            if (hour === 0) {
+              return day;
+            }
+            
+            // Se for manhã (06:00), mostrar dia para separação visual
+            if (hour === 6 && minute === 0) {
+              return day;
+            }
+            
+            // Se for meio-dia (12:00), mostrar dia para separação visual
+            if (hour === 12 && minute === 0) {
+              return day;
+            }
+            
+            // Se for tarde (18:00), mostrar dia para separação visual
+            if (hour === 18 && minute === 0) {
+              return day;
+            }
+            
+            // Se for noite (21:00), mostrar dia para separação visual
+            if (hour === 21 && minute === 0) {
+              return day;
+            }
+            
+            // Para outras horas, mostrar hora:minuto
             return `${hours}:${minutes}`;
           }
           
