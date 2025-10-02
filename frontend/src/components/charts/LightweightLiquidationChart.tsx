@@ -268,7 +268,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         },
       });
       // Garantir que os dados estejam ordenados por tempo (ascendente)
-      const sortedData = [...effectiveCandleData].sort((a, b) => a.time - b.time);
+      const sortedData = [...effectiveCandleData].sort((a, b) => (a.time as number) - (b.time as number));
       s.setData(sortedData as any);
       seriesRef.current = s;
     } else if (linePriceData && linePriceData.length > 0) {
@@ -352,7 +352,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         },
       });
       
-      indicatorSeriesInstance.setData(indicator.data);
+      indicatorSeriesInstance.setData(indicator.data.map(d => ({ ...d, time: d.time as Time })));
       indicatorSeries.push(indicatorSeriesInstance);
     }
 
@@ -706,8 +706,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         return;
       }
 
+      // Converter dados do hook (time: number) para formato Lightweight Charts (time: Time)
+      const convertedData = effectiveCandleData.map(item => ({
+        ...item,
+        time: item.time as Time
+      }));
+      
       // Remover duplicatas e ordenar por tempo (ascendente)
-      const uniqueData = effectiveCandleData.reduce((acc, current) => {
+      const uniqueData = convertedData.reduce((acc, current) => {
         const existingIndex = acc.findIndex(item => item.time === current.time);
         if (existingIndex === -1) {
           acc.push(current);
@@ -716,9 +722,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           acc[existingIndex] = current;
         }
         return acc;
-      }, [] as typeof effectiveCandleData);
+      }, [] as CandlestickPoint[]);
       
-      const sortedData = uniqueData.sort((a, b) => a.time - b.time);
+      const sortedData = uniqueData.sort((a, b) => (a.time as number) - (b.time as number));
       
       console.log(`🔄 CHART - Data deduplication: ${effectiveCandleData.length} -> ${uniqueData.length} unique points`);
       
@@ -727,9 +733,13 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         (seriesRef.current as ISeriesApi<'Candlestick'>).setData(sortedData as CandlestickPoint[]);
         console.log('✅ DATA UPDATE - Candlestick data set:', sortedData.length);
       } else {
-        // Dados de linha
-        (seriesRef.current as ISeriesApi<'Line'>).setData(sortedData as LinePoint[]);
-        console.log('✅ DATA UPDATE - Line data set:', sortedData.length);
+        // Dados de linha - converter CandlestickPoint para LinePoint usando close price
+        const lineData = sortedData.map(item => ({
+          time: item.time,
+          value: item.close // Usar preço de fechamento como valor da linha
+        })) as LinePoint[];
+        (seriesRef.current as ISeriesApi<'Line'>).setData(lineData);
+        console.log('✅ DATA UPDATE - Line data set:', lineData.length);
       }
       
       console.log('📊 DATA - Updated series data without resetting zoom:', {
