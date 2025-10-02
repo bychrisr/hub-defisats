@@ -1186,37 +1186,34 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
       <CardContent>
         <div ref={containerRef} className="w-full rounded-lg overflow-hidden lightweight-chart-time-axis" style={{ height }} />
-      </CardContent>
-    </Card>
-
-    {/* Gráfico do RSI - Sub-gráfico abaixo do principal */}
-    {rsiEnabled && (
-      <Card className="mt-2">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm">RSI {rsiConfig.period}</CardTitle>
-              <Badge variant="outline" className="text-xs">
-                {rsiData[rsiData.length - 1]?.value?.toFixed(2) || '0.00'}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
+        
+        {/* Gráfico do RSI - Dentro da mesma seção */}
+        {rsiEnabled && (
+          <div className="mt-2">
+            {/* Header do RSI */}
+            <div className="flex items-center justify-between mb-2 px-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">RSI {rsiConfig.period}</span>
+                <Badge variant="outline" className="text-xs">
+                  {rsiData[rsiData.length - 1]?.value?.toFixed(2) || '0.00'}
+                </Badge>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setRsiEnabled(false)}
-                className="h-6 px-2 text-xs"
+                className="h-6 px-2 text-xs hover:bg-muted"
               >
                 <X className="h-3 w-3" />
               </Button>
             </div>
+            
+            {/* Container do gráfico RSI */}
+            <div ref={rsiContainerRef} className="w-full rounded-lg overflow-hidden border border-border/50" style={{ height: 120 }} />
           </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div ref={rsiContainerRef} className="w-full rounded-lg overflow-hidden" style={{ height: 120 }} />
-        </CardContent>
-      </Card>
-    )}
+        )}
+      </CardContent>
+    </Card>
     </>
   );
 };
