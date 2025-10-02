@@ -10,20 +10,26 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { RSIConfig } from '@/services/technicalIndicators.service';
+import { X, Check, RotateCcw } from 'lucide-react';
 
 interface RSIConfigProps {
   config: RSIConfig;
   enabled: boolean;
   onConfigChange: (config: RSIConfig) => void;
   onEnabledChange: (enabled: boolean) => void;
+  onClose?: () => void;
+  onReset?: () => void;
 }
 
 export const RSIConfigComponent: React.FC<RSIConfigProps> = ({
   config,
   enabled,
   onConfigChange,
-  onEnabledChange
+  onEnabledChange,
+  onClose,
+  onReset
 }) => {
   const handlePeriodChange = (value: number[]) => {
     onConfigChange({

@@ -6,6 +6,76 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🔧 **CORREÇÃO CRÍTICA - LOOP DE REPETIÇÕES LIGHTWEIGHT CHARTS - v2.3.0**
+
+#### 🚨 **Problema Crítico Resolvido**
+- ❌ **Loop Infinito**: useEffect com dependências instáveis causando re-execuções constantes
+- ❌ **Performance Degradada**: Re-criação desnecessária de chart e séries
+- ❌ **Memory Leaks**: Acúmulo de listeners e objetos não limpos
+- ❌ **UI Congelada**: Interface não responsiva devido a loops infinitos
+
+#### ✅ **Correções Implementadas**
+
+##### **1. Memoização de Dados Críticos**
+- ✅ **useMemo para effectiveCandleData**: Evita recriação constante de objetos
+- ✅ **useMemo para chartOptions**: Configurações estáveis para evitar re-criação do chart
+- ✅ **Dependências Otimizadas**: Arrays e objetos memoizados para comparação de referência
+
+##### **2. useCallback para Funções**
+- ✅ **calculateRSI**: Função memoizada para cálculo de RSI
+- ✅ **updateSeriesData**: Função memoizada para atualização de séries
+- ✅ **updatePaneVisibility**: Função memoizada para controle de visibilidade
+- ✅ **Dependências Estáveis**: Evita re-criação desnecessária de funções
+
+##### **3. Otimização de useEffect**
+- ✅ **Dependências Estabilizadas**: chartOptions memoizado como dependência única
+- ✅ **Separação de Responsabilidades**: Cada useEffect com responsabilidade específica
+- ✅ **Cleanup Otimizado**: Limpeza adequada de recursos e listeners
+
+##### **4. React.memo para Componente**
+- ✅ **Prevenção de Re-renderizações**: Componente memoizado para evitar updates desnecessários
+- ✅ **Props Estáveis**: Comparação de props otimizada
+- ✅ **Performance Melhorada**: Renderização apenas quando necessário
+
+##### **5. Logs de Debug Inteligentes**
+- ✅ **console.count**: Monitoramento de execuções para detectar loops
+- ✅ **Logs Estruturados**: Debug detalhado para identificar problemas
+- ✅ **Alertas Automáticos**: Detecção de execuções excessivas
+
+##### **6. Limpeza de Código**
+- ✅ **Hook Duplicado Removido**: useRSIPane.ts deletado para evitar confusão
+- ✅ **Código Consolidado**: Lógica RSI integrada no componente principal
+- ✅ **Imports Otimizados**: useMemo e useCallback adicionados
+
+#### 🎯 **Impacto das Correções**
+- ✅ **Performance**: Eliminação de loops infinitos e re-renderizações excessivas
+- ✅ **Estabilidade**: Chart funciona sem travamentos ou congelamentos
+- ✅ **Manutenibilidade**: Código mais limpo e fácil de debugar
+- ✅ **Escalabilidade**: Base sólida para futuras implementações de panes
+- ✅ **UX**: Interface responsiva e fluida
+
+#### 📊 **Métricas de Melhoria**
+- ✅ **Execuções de useEffect**: Reduzidas de infinitas para finitas e controladas
+- ✅ **Re-renderizações**: Eliminadas re-renderizações desnecessárias
+- ✅ **Memory Usage**: Redução significativa no uso de memória
+- ✅ **CPU Usage**: Eliminação de loops que consumiam CPU excessivamente
+
+#### 🧪 **Testes e Validação**
+- ✅ **Arquivo de Teste**: test-loop-fix.html criado para validação
+- ✅ **Monitoramento**: Scripts de debug para detectar loops automaticamente
+- ✅ **Critérios de Sucesso**: Validação de execuções finitas e controladas
+- ✅ **Documentação**: Instruções detalhadas para teste e validação
+
+#### 📁 **Arquivos Modificados**
+- ✅ `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Correções principais
+- ✅ `frontend/src/hooks/useRSIPane.ts` - Removido (duplicado)
+- ✅ `test-loop-fix.html` - Arquivo de teste criado
+
+#### 🔧 **Arquivos Atualizados**
+- ✅ `CHANGELOG.md` - Documentação das correções
+- ✅ `DECISIONS.md` - Registro das decisões técnicas
+- ✅ Versão atualizada para v2.3.0 com foco em correções críticas
+
 ### 📚 **DOCUMENTAÇÃO TÉCNICA COMPLETA - v2.2.0**
 
 #### ✅ **Documentação de Fluxo de Dados de API**

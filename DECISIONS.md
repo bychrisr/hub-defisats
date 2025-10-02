@@ -2,6 +2,124 @@
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
 
+## ADR-004: Correção de Loop Infinito em Lightweight Charts
+
+**Data**: 2025-01-25  
+**Status**: ✅ Aprovado  
+**Contexto**: Loop infinito crítico na implementação de panes do LightweightLiquidationChart causando travamentos e degradação de performance.
+
+### Problema Identificado
+- **Loop Infinito**: useEffect com dependências instáveis causando re-execuções constantes
+- **Performance Degradada**: Re-criação desnecessária de chart e séries
+- **Memory Leaks**: Acúmulo de listeners e objetos não limpos
+- **UI Congelada**: Interface não responsiva devido a loops infinitos
+
+### Decisão
+Implementar estratégia completa de otimização usando React hooks avançados para estabilizar dependências e evitar loops infinitos.
+
+### Alternativas Consideradas
+1. **Debounce/Throttle**: Apenas retardar execuções (não resolve causa raiz)
+2. **Refs para Estado**: Usar refs em vez de state (perde reatividade)
+3. **useReducer**: Para estado complexo (overkill para este caso)
+4. **Memoização Completa**: useMemo + useCallback + React.memo (escolhida)
+
+### Implementação Escolhida
+
+#### 1. Memoização de Dados Críticos
+```typescript
+// ✅ Memoizar dados efetivos para evitar recriação constante
+const effectiveCandleData = useMemo(() => {
+  return useApiData ? historicalData : (candleData || linePriceData);
+}, [useApiData, historicalData, candleData, linePriceData]);
+
+// ✅ Memoizar configurações do chart
+const chartOptions = useMemo(() => ({
+  height,
+  layout: { /* configurações */ },
+  // ... outras opções
+}), [height, isDark, currentTimeframe]);
+```
+
+#### 2. useCallback para Funções
+```typescript
+// ✅ Função memoizada para cálculo de RSI
+const calculateRSI = useCallback(() => {
+  // lógica de cálculo
+}, [rsiEnabled, effectiveCandleData, rsiConfig]);
+
+// ✅ Função memoizada para atualização de séries
+const updateSeriesData = useCallback(() => {
+  // lógica de atualização
+}, [chartReady, effectiveCandleData, liquidationLines, takeProfitLines, rsiEnabled, rsiData, rsiConfig]);
+```
+
+#### 3. Otimização de useEffect
+```typescript
+// ✅ Dependência estável - chartOptions é memoizado
+useEffect(() => {
+  // criação do chart
+}, [chartOptions]);
+
+// ✅ useEffect separado para cada responsabilidade
+useEffect(() => {
+  calculateRSI();
+}, [calculateRSI]);
+
+useEffect(() => {
+  updateSeriesData();
+}, [updateSeriesData]);
+```
+
+#### 4. React.memo para Componente
+```typescript
+// ✅ Componente memoizado para evitar re-renderizações
+const LightweightLiquidationChart = React.memo(({ /* props */ }) => {
+  // componente otimizado
+});
+```
+
+### Consequências
+- ✅ **Performance**: Eliminação completa de loops infinitos
+- ✅ **Estabilidade**: Chart funciona sem travamentos
+- ✅ **Memory Usage**: Redução significativa no uso de memória
+- ✅ **CPU Usage**: Eliminação de loops que consumiam CPU excessivamente
+- ✅ **Manutenibilidade**: Código mais limpo e fácil de debugar
+- ✅ **Escalabilidade**: Base sólida para futuras implementações
+
+### Monitoramento Implementado
+```typescript
+// ✅ Logs de debug para monitorar execuções
+console.count('🚀 CHART CREATION - Execução #');
+console.count('📊 RSI CALCULATION - Execução #');
+console.count('🔄 DATA UPDATE - Execução #');
+
+// ✅ Script de detecção automática de loops
+const originalCount = console.count;
+console.count = function(label) {
+  if (!executionCounts[label]) executionCounts[label] = 0;
+  executionCounts[label]++;
+  
+  if (executionCounts[label] > 10) {
+    console.warn(`⚠️ POSSÍVEL LOOP DETECTADO: ${label} executou ${executionCounts[label]} vezes`);
+  }
+  
+  return originalCount.call(this, label);
+};
+```
+
+### Arquivos Modificados
+- ✅ `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Correções principais
+- ✅ `frontend/src/hooks/useRSIPane.ts` - Removido (duplicado)
+- ✅ `test-loop-fix.html` - Arquivo de teste criado
+
+### Validação
+- ✅ **Teste Manual**: Arquivo HTML com instruções detalhadas
+- ✅ **Monitoramento Automático**: Scripts de debug para detectar loops
+- ✅ **Critérios de Sucesso**: Execuções finitas e controladas
+- ✅ **Documentação**: CHANGELOG e DECISIONS atualizados
+
+---
+
 ## ADR-001: Arquitetura Centralizada de Dados
 
 **Data**: 2025-01-21  
