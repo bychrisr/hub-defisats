@@ -211,10 +211,28 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         fixLeftEdge: false, // Não fixar borda esquerda
         fixRightEdge: true, // Fixar borda direita
         
-        // ✅ NOVA FUNCIONALIDADE: Eixo temporal hierárquico estilo LN Markets usando TickMarkType
+        // ✅ CORREÇÃO DO BUG: Eixo temporal hierárquico estilo LN Markets
         tickMarkFormatter: (time, tickMarkType) => {
-          const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
+          // ✅ CORREÇÃO CRÍTICA: Converter timestamp corretamente
+          let timestamp: number;
+          if (typeof time === 'number') {
+            // Se time já é um número, é um timestamp Unix em segundos
+            timestamp = time;
+          } else {
+            // Se time é um objeto BusinessDay, converter para timestamp
+            timestamp = Date.UTC(time.year, time.month - 1, time.day) / 1000;
+          }
+          
           const date = new Date(timestamp * 1000);
+          
+          // ✅ DEBUG: Log para verificar os valores recebidos
+          console.log('🔍 TICK MARK DEBUG:', {
+            time,
+            tickMarkType,
+            timestamp,
+            date: date.toISOString(),
+            currentTimeframe
+          });
           
           const hours = String(date.getHours()).padStart(2, '0');
           const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -222,45 +240,47 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           const monthName = date.toLocaleDateString('en-US', { month: 'short' });
           const year = date.getFullYear();
           
-          // ✅ IMPLEMENTAÇÃO HIERÁRQUICA: Usando TickMarkType oficial da Lightweight Charts
-          // Baseado na documentação: https://tradingview.github.io/lightweight-charts/docs/api/enumerations/TickMarkType
-          switch (tickMarkType) {
-            case 0: // Year - Início do ano
+          // ✅ IMPLEMENTAÇÃO SIMPLIFICADA: Baseada no contexto temporal sem depender do tickMarkType
+          if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+            // Para timeframes intraday (minutos/horas)
+            
+            // Se for início de ano (1º de janeiro às 00:00), mostrar ano
+            if (date.getMonth() === 0 && date.getDate() === 1 && date.getHours() === 0 && date.getMinutes() === 0) {
               return year.toString();
-              
-            case 1: // Month - Início do mês
+            }
+            
+            // Se for início de mês (dia 1 às 00:00), mostrar mês
+            if (date.getDate() === 1 && date.getHours() === 0 && date.getMinutes() === 0) {
               return monthName;
-              
-            case 2: // DayOfMonth - Dia do mês
-              if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-                // Para timeframes intraday, mostrar dia apenas se for meia-noite
-                if (date.getHours() === 0 && date.getMinutes() === 0) {
-                  return day;
-                }
-                // Para outros momentos, não mostrar nada (será mostrado pelo Time)
-                return '';
-              }
-              // Para timeframes diários, sempre mostrar o dia
+            }
+            
+            // Se for meia-noite (00:00), mostrar dia
+            if (date.getHours() === 0 && date.getMinutes() === 0) {
               return day;
-              
-            case 3: // Time - Hora sem segundos
-              if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-                // Para timeframes intraday, mostrar hora:minuto
-                return `${hours}:${minutes}`;
-              }
-              // Para timeframes diários, não mostrar hora
-              return '';
-              
-            case 4: // TimeWithSeconds - Hora com segundos (não usado normalmente)
-              return `${hours}:${minutes}:${String(date.getSeconds()).padStart(2, '0')}`;
-              
-            default:
-              // Fallback para formatação padrão
-              if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-                return `${hours}:${minutes}`;
-              }
-              return `${day} • ${monthName}`;
+            }
+            
+            // Para outros momentos, mostrar hora:minuto
+            return `${hours}:${minutes}`;
           }
+          
+          // Para timeframes diários ou maiores
+          if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
+            // Se for início de ano (1º de janeiro), mostrar ano
+            if (date.getMonth() === 0 && date.getDate() === 1) {
+              return year.toString();
+            }
+            
+            // Se for início de mês (dia 1), mostrar mês
+            if (date.getDate() === 1) {
+              return monthName;
+            }
+            
+            // Para outros dias, mostrar dia
+            return day;
+          }
+          
+          // Fallback para formatação padrão
+          return `${day} • ${monthName}`;
         }
       },
       crosshair: { mode: 1 },
