@@ -52,6 +52,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 import TradingViewChart from '@/components/charts/TradingViewChart';
 import LightweightLiquidationChart from '@/components/charts/LightweightLiquidationChart';
 import PriceReference from '@/components/lnmarkets/PriceReference';
+import ExchangeWeightMonitor from '@/components/ExchangeWeightMonitor';
 import { marketDataService } from '@/services/marketData.service';
 
 export default function Dashboard() {
@@ -198,6 +199,14 @@ export default function Dashboard() {
     initialLimit: 168,
     enabled: false // Desabilitado por enquanto
   });
+
+  // Função para resetar dados históricos
+  const resetHistoricalData = () => {
+    if (historicalData.resetData) {
+      historicalData.resetData();
+      console.log('🔄 DASHBOARD - Historical data reset');
+    }
+  };
   
   // Dados de saldo estimado (hook específico)
   const estimatedBalance = useEstimatedBalance();
@@ -2152,6 +2161,14 @@ export default function Dashboard() {
                 // TODO: Implementar adição de indicadores
               }}
             />)}
+          </div>
+
+          {/* Exchange Weight Monitor */}
+          <div className="mt-6">
+            <ExchangeWeightMonitor 
+              className="w-full"
+              showDetails={true}
+            />
           </div>
         </div>
     </RouteGuard>

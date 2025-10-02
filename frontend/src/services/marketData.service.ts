@@ -1,3 +1,5 @@
+import { exchangeWeightService, CandleData } from './exchangeWeight.service';
+
 interface CandleData {
   time: number;
   open: number;
@@ -34,8 +36,33 @@ class MarketDataService {
     this.wsUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
   }
 
-  // Obter dados históricos apenas do Binance (sem autenticação)
+  // Obter dados históricos usando Exchange Weight Service (distribuição entre exchanges)
   async getHistoricalDataFromBinance(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
+    console.log('🔄 MARKET DATA - Using Exchange Weight Service for historical data');
+    
+    try {
+      const result = await exchangeWeightService.getHistoricalData(symbol, timeframe, limit, startTime);
+      
+      if (result.success) {
+        console.log(`✅ MARKET DATA - Data from ${result.source}:`, {
+          symbol,
+          timeframe,
+          count: result.data.length,
+          distribution: exchangeWeightService.getDistributionStats()
+        });
+        return result.data;
+      } else {
+        console.warn(`⚠️ MARKET DATA - Failed to get data from ${result.source}:`, result.error);
+        throw new Error(result.error || 'Failed to get historical data');
+      }
+    } catch (error: any) {
+      console.error('❌ MARKET DATA - Exchange Weight Service error:', error);
+      throw error;
+    }
+  }
+
+  // Método legado mantido para compatibilidade (agora usa Exchange Weight Service)
+  async getHistoricalDataFromBinanceLegacy(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
     const mapTf = (tf: string) => {
       // Normalizar para intervalos do Binance
       const m = String(tf).toLowerCase();

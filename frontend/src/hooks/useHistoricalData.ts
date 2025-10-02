@@ -11,7 +11,7 @@ interface UseHistoricalDataProps {
 }
 
 interface UseHistoricalDataReturn {
-  candleData: CandlestickPoint[];
+  candleData: CandlestickPoint[] | undefined;
   isLoading: boolean;
   isLoadingMore: boolean;
   error: string | null;
@@ -26,7 +26,7 @@ export const useHistoricalData = ({
   initialLimit = 168, // 7 dias para 1h
   enabled = true
 }: UseHistoricalDataProps): UseHistoricalDataReturn => {
-  const [candleData, setCandleData] = useState<CandlestickPoint[]>([]);
+  const [candleData, setCandleData] = useState<CandlestickPoint[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,8 +62,14 @@ export const useHistoricalData = ({
     try {
       console.log('🔄 HISTORICAL - Loading initial data:', { symbol, timeframe, limit: initialLimit });
       
-      // Usar apenas Binance API (sem autenticação) para evitar 401
-      const rawData = await marketDataService.getHistoricalDataFromBinance(symbol, timeframe, initialLimit);
+      // Timeout de 15 segundos para evitar travamento
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout after 15 seconds')), 15000);
+      });
+
+      const dataPromise = marketDataService.getHistoricalDataFromBinance(symbol, timeframe, initialLimit);
+      
+      const rawData = await Promise.race([dataPromise, timeoutPromise]);
       
       const mappedData: CandlestickPoint[] = rawData.map((candle) => ({
         time: candle.time,
@@ -73,7 +79,10 @@ export const useHistoricalData = ({
         close: candle.close
       }));
       
-      setCandleData(mappedData);
+      // Ordenar dados por tempo (ascendente) - REQUISITO OBRIGATÓRIO do Lightweight Charts
+      const sortedData = mappedData.sort((a, b) => a.time - b.time);
+      
+      setCandleData(sortedData);
       
       // Definir timestamp mais antigo para próxima carga
       if (mappedData.length > 0) {
@@ -93,6 +102,9 @@ export const useHistoricalData = ({
     } catch (err: any) {
       console.error('❌ HISTORICAL - Error loading initial data:', err);
       setError(err.message || 'Failed to load initial data');
+      
+      // Reset loadingRef em caso de erro para permitir nova tentativa
+      loadingRef.current = false;
     } finally {
       setIsLoading(false);
       loadingRef.current = false;
@@ -149,7 +161,14 @@ export const useHistoricalData = ({
       }));
       
       // Adicionar novos dados ao início do array (dados mais antigos)
-      setCandleData(prev => [...mappedData, ...prev]);
+      setCandleData(prev => {
+        const combinedData = [...mappedData, ...(prev || [])];
+        
+        // Ordenar dados por tempo (ascendente) - REQUISITO OBRIGATÓRIO do Lightweight Charts
+        const sortedData = combinedData.sort((a, b) => a.time - b.time);
+        
+        return sortedData;
+      });
       
       // Atualizar timestamp mais antigo
       if (mappedData.length > 0) {
@@ -160,7 +179,7 @@ export const useHistoricalData = ({
       
       console.log('✅ HISTORICAL - More data loaded:', {
         newCount: mappedData.length,
-        totalCount: candleData.length + mappedData.length,
+        totalCount: (candleData?.length || 0) + mappedData.length,
         oldestTimestamp: oldestTimestamp
       });
       
@@ -171,11 +190,11 @@ export const useHistoricalData = ({
       setIsLoadingMore(false);
       loadingRef.current = false;
     }
-  }, [symbol, timeframe, initialLimit, enabled, hasMoreData, oldestTimestamp, candleData.length]);
+  }, [symbol, timeframe, initialLimit, enabled, hasMoreData, oldestTimestamp, candleData?.length]);
 
   // Resetar dados
   const resetData = useCallback(() => {
-    setCandleData([]);
+    setCandleData(undefined);
     setOldestTimestamp(null);
     setHasMoreData(true);
     setError(null);

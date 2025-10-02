@@ -105,7 +105,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   });
 
   // Usar dados históricos se habilitado, senão usar props
-  const effectiveCandleData = useApiData ? historicalData : candleData;
+  const effectiveCandleData = useApiData ? historicalData : (candleData || linePriceData);
   
   // Debug logs
   console.log('🔍 LIGHTWEIGHT CHART - Debug info:', {
@@ -274,7 +274,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           minMove: 0.01,
         },
       });
-      s.setData(effectiveCandleData as any);
+      // Garantir que os dados estejam ordenados por tempo (ascendente)
+      const sortedData = [...effectiveCandleData].sort((a, b) => a.time - b.time);
+      s.setData(sortedData as any);
       seriesRef.current = s;
     } else if (linePriceData && linePriceData.length > 0) {
       const s = chart.addLineSeries({ color: isDark ? '#93c5fd' : '#2563eb', lineWidth: 2 });
@@ -600,7 +602,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
       chart.remove();
     };
-  }, [height, isDark, liquidationPrice, currentTimeframe, JSON.stringify(liquidationLines), JSON.stringify(takeProfitLines), JSON.stringify(linePriceData?.slice(-50)), useApiData]);
+  }, [height, isDark, liquidationPrice, currentTimeframe, liquidationLines, takeProfitLines, linePriceData, useApiData]);
 
   // useEffect separado para atualizar dados sem resetar o zoom
   useEffect(() => {
@@ -622,18 +624,27 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     
     // Atualizar dados da série sem resetar zoom
     try {
-      if (effectiveCandleData[0] && 'open' in effectiveCandleData[0]) {
+      // Verificar se há dados válidos
+      if (!effectiveCandleData || effectiveCandleData.length === 0) {
+        console.log('🔄 DATA UPDATE - No data to update');
+        return;
+      }
+
+      // Garantir que os dados estejam ordenados por tempo (ascendente)
+      const sortedData = [...effectiveCandleData].sort((a, b) => a.time - b.time);
+      
+      if (sortedData[0] && 'open' in sortedData[0]) {
         // Dados de candlestick
-        (seriesRef.current as ISeriesApi<'Candlestick'>).setData(effectiveCandleData as CandlestickPoint[]);
-        console.log('✅ DATA UPDATE - Candlestick data set:', effectiveCandleData.length);
+        (seriesRef.current as ISeriesApi<'Candlestick'>).setData(sortedData as CandlestickPoint[]);
+        console.log('✅ DATA UPDATE - Candlestick data set:', sortedData.length);
       } else {
         // Dados de linha
-        (seriesRef.current as ISeriesApi<'Line'>).setData(effectiveCandleData as LinePoint[]);
-        console.log('✅ DATA UPDATE - Line data set:', effectiveCandleData.length);
+        (seriesRef.current as ISeriesApi<'Line'>).setData(sortedData as LinePoint[]);
+        console.log('✅ DATA UPDATE - Line data set:', sortedData.length);
       }
       
       console.log('📊 DATA - Updated series data without resetting zoom:', {
-        dataLength: effectiveCandleData.length,
+        dataLength: sortedData.length,
         isInitialLoad: isInitialLoad.current
       });
     } catch (error) {

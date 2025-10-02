@@ -664,27 +664,26 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
             timeout: 15000
           });
           
-          // Get price from 24h ago from Binance
-          const historicalResponse = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=2', {
+          // Get 24h ticker data from Binance (includes 24h change calculation)
+          const tickerResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
             timeout: 15000
           });
           
-          if (currentResponse.ok && historicalResponse.ok) {
+          if (currentResponse.ok && tickerResponse.ok) {
             const currentData = await currentResponse.json();
-            const historicalData = await historicalResponse.json();
+            const tickerData = await tickerResponse.json();
             
             const currentPrice = parseFloat(currentData.price);
-            const price24hAgo = parseFloat(historicalData[0][4]); // Close price from 24h ago
+            const priceChangePercent = parseFloat(tickerData.priceChangePercent);
             
-            if (currentPrice && price24hAgo && price24hAgo > 0) {
-              const change24h = ((currentPrice - price24hAgo) / price24hAgo) * 100;
+            if (currentPrice && !isNaN(priceChangePercent)) {
               change24hData = {
-                change24h: parseFloat(change24h.toFixed(3))
+                change24h: parseFloat(priceChangePercent.toFixed(3))
               };
-              console.log('✅ PUBLIC MARKET INDEX - 24h change calculated:', {
+              console.log('✅ PUBLIC MARKET INDEX - 24h change calculated (CoinGecko style):', {
                 currentPrice,
-                price24hAgo,
-                change24h: change24hData.change24h
+                priceChangePercent: change24hData.change24h,
+                method: 'binance-24hr-ticker'
               });
               break; // Sucesso, sair do loop
             }
