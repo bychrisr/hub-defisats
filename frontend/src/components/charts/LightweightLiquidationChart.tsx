@@ -216,14 +216,32 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           // ✅ CORREÇÃO CRÍTICA: Converter timestamp corretamente
           let timestamp: number;
           if (typeof time === 'number') {
-            // Se time já é um número, é um timestamp Unix em segundos
-            timestamp = time;
+            // Se time já é um número, verificar se é timestamp válido
+            // Timestamps Unix válidos estão entre 1970 e 2100 (aproximadamente)
+            if (time > 0 && time < 4102444800) { // 2100-01-01 em segundos
+              timestamp = time;
+            } else {
+              // Se não for um timestamp válido, tratar como milissegundos
+              timestamp = Math.floor(time / 1000);
+            }
           } else {
             // Se time é um objeto BusinessDay, converter para timestamp
             timestamp = Date.UTC(time.year, time.month - 1, time.day) / 1000;
           }
           
           const date = new Date(timestamp * 1000);
+          
+          // ✅ VALIDAÇÃO: Verificar se a data é válida
+          if (isNaN(date.getTime()) || date.getFullYear() < 1970 || date.getFullYear() > 2100) {
+            console.warn('⚠️ TICK MARK DATE INVÁLIDA:', {
+              time,
+              timestamp,
+              date: date.toISOString(),
+              year: date.getFullYear()
+            });
+            // Fallback para data atual
+            return `${hours}:${minutes}`;
+          }
           
           // ✅ DEBUG: Log para verificar os valores recebidos
           console.log('🔍 TICK MARK DEBUG:', {
