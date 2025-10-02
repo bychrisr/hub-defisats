@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { createChart, ColorType, ISeriesApi, LineStyle, Time } from 'lightweight-charts';
+import { createChart, ColorType, ISeriesApi, LineStyle, Time, IChartApi } from 'lightweight-charts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +67,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rsiContainerRef = useRef<HTMLDivElement | null>(null);
+  const mainChartRef = useRef<IChartApi | null>(null);
+  const rsiChartInstanceRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
   const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const overboughtSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
@@ -226,7 +228,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       },
       timeScale: {
         borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-        timeVisible: true,
+        timeVisible: false, // ✅ OCULTAR EIXO DE TEMPO DO GRÁFICO PRINCIPAL
         secondsVisible: false,
         // Configurações para eliminar espaço em branco
         fixLeftEdge: false, // Não fixar borda esquerda
@@ -790,8 +792,22 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         try { chart.removeSeries(indicatorSeriesInstance); } catch {}
       }
       chart.remove();
+      mainChartRef.current = null;
     };
-  }, [height, isDark, liquidationPrice, currentTimeframe, liquidationLines, takeProfitLines, linePriceData, useApiData]);
+
+    // ✅ ARMAZENAR REFERÊNCIA DO GRÁFICO PRINCIPAL
+    mainChartRef.current = chart;
+
+    // ✅ SINCRONIZAR GRÁFICOS QUANDO RSI ESTIVER ATIVO
+    if (rsiEnabled && rsiChartInstanceRef.current) {
+      // Sincronização manual de zoom e pan
+      chart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
+        if (rsiChartInstanceRef.current && timeRange) {
+          rsiChartInstanceRef.current.timeScale().setVisibleRange(timeRange);
+        }
+      });
+    }
+  }, [height, isDark, liquidationPrice, currentTimeframe, liquidationLines, takeProfitLines, linePriceData, useApiData, rsiEnabled]);
 
   // useEffect separado para atualizar dados sem resetar o zoom
   useEffect(() => {
@@ -1070,11 +1086,25 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       rsiSeries.setData(rsiChartData);
     }
 
+    // ✅ ARMAZENAR REFERÊNCIA DO GRÁFICO RSI
+    rsiChartInstanceRef.current = rsiChart;
+
+    // ✅ SINCRONIZAR COM GRÁFICO PRINCIPAL
+    if (mainChartRef.current) {
+      // Sincronização manual de zoom e pan
+      mainChartRef.current.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
+        if (timeRange) {
+          rsiChart.timeScale().setVisibleRange(timeRange);
+        }
+      });
+    }
+
     return () => {
       rsiChart.remove();
       rsiSeriesRef.current = null;
       overboughtSeriesRef.current = null;
       oversoldSeriesRef.current = null;
+      rsiChartInstanceRef.current = null;
     };
   }, [rsiEnabled, isDark, rsiConfig, currentTimeframe, effectiveCandleData]);
 
@@ -1089,6 +1119,27 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     rsiSeriesRef.current.setData(rsiChartData);
   }, [rsiData]);
+
+  // ✅ useEffect para sincronizar gráficos quando ambos estiverem disponíveis
+  useEffect(() => {
+    if (mainChartRef.current && rsiChartInstanceRef.current && rsiEnabled) {
+      // Sincronização manual de zoom e pan
+      const mainChart = mainChartRef.current;
+      const rsiChart = rsiChartInstanceRef.current;
+      
+      mainChart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
+        if (timeRange) {
+          rsiChart.timeScale().setVisibleRange(timeRange);
+        }
+      });
+      
+      console.log('🔄 SYNC - Gráficos sincronizados:', {
+        mainChart: !!mainChartRef.current,
+        rsiChart: !!rsiChartInstanceRef.current,
+        rsiEnabled
+      });
+    }
+  }, [rsiEnabled, mainChartRef.current, rsiChartInstanceRef.current]);
 
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 
