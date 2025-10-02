@@ -1,13 +1,7 @@
-import { exchangeWeightService, CandleData } from './exchangeWeight.service';
+import { tradingViewDataService } from './tradingViewData.service';
+import { CandleData } from '../types/market';
 
-interface CandleData {
-  time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
+// CandleData já importado de types/market
 
 interface MarketData {
   symbol: string;
@@ -36,27 +30,23 @@ class MarketDataService {
     this.wsUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
   }
 
-  // Obter dados históricos usando Exchange Weight Service (distribuição entre exchanges)
+  // Obter dados históricos usando TradingView Data Service (nova arquitetura)
   async getHistoricalDataFromBinance(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
-    console.log('🔄 MARKET DATA - Using Exchange Weight Service for historical data');
+    console.log('🔄 MARKET DATA - Using TradingView Data Service for historical data');
     
     try {
-      const result = await exchangeWeightService.getHistoricalData(symbol, timeframe, limit, startTime);
+      const data = await tradingViewDataService.getHistoricalData(symbol, timeframe, limit, startTime);
       
-      if (result.success) {
-        console.log(`✅ MARKET DATA - Data from ${result.source}:`, {
-          symbol,
-          timeframe,
-          count: result.data.length,
-          distribution: exchangeWeightService.getDistributionStats()
-        });
-        return result.data;
-      } else {
-        console.warn(`⚠️ MARKET DATA - Failed to get data from ${result.source}:`, result.error);
-        throw new Error(result.error || 'Failed to get historical data');
-      }
+      console.log(`✅ MARKET DATA - Data fetched successfully:`, {
+        symbol,
+        timeframe,
+        count: data.length,
+        source: 'TradingView-first with fallbacks'
+      });
+      
+      return data;
     } catch (error: any) {
-      console.error('❌ MARKET DATA - Exchange Weight Service error:', error);
+      console.error('❌ MARKET DATA - TradingView Data Service failed:', error);
       throw error;
     }
   }

@@ -4,11 +4,11 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.1.0 ✅ COMPLETA
+## Status Atual: v2.2.0 ✅ COMPLETA
 
-**Versão**: v2.1.0  
-**Status**: Sistema 100% Funcional com WebSocket e Endpoints Corrigidos  
-**Data**: 2025-09-27
+**Versão**: v2.2.0  
+**Status**: Sistema 100% Funcional com Documentação Técnica Completa  
+**Data**: 2025-01-21
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -70,6 +70,40 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **NOVO**: Conflitos de Rotas Resolvidos
 - ✅ **NOVO**: Autenticação Funcional com Respostas Apropriadas
 - ✅ **NOVO**: Arquitetura Modular Integrada ao Sistema
+
+---
+
+## ✅ DOCUMENTAÇÃO TÉCNICA COMPLETA (CONCLUÍDA - v2.2.0)
+
+### ✅ Documentação de Fluxo de Dados de API
+**Status**: ✅ **CONCLUÍDO**  
+**Descrição**: Documentação completa sobre como a aplicação lida com dados de API  
+**Funcionalidades**:
+- ✅ **Arquitetura Centralizada**: MarketDataContext como coração do sistema
+- ✅ **Fluxo do Header**: LNMarketsHeader → PositionsContext → Backend API
+- ✅ **Fluxo da Dashboard**: Cards utilizando dados centralizados
+- ✅ **Fluxo dos Gráficos**: TradingView-first com fallbacks robustos
+- ✅ **Sistema de Cache**: Implementação de segurança em mercados voláteis
+- ✅ **Tratamento de Erros**: Hierarquia de fallbacks e retry logic
+- ✅ **Monitoramento**: Logs estruturados e debugging
+**Prioridade**: Alta  
+**Impacto**: Manutenibilidade - desenvolvedores podem entender e modificar o sistema
+
+### ✅ Documentação de Gráficos de Candles
+**Status**: ✅ **CONCLUÍDO**  
+**Descrição**: Documentação técnica detalhada da implementação dos gráficos de candles  
+**Funcionalidades**:
+- ✅ **Arquitetura TradingView-First**: TradingViewDataService com fallbacks
+- ✅ **Hook useHistoricalData**: Sistema completo de lazy loading e cache
+- ✅ **Componente LightweightLiquidationChart**: Configuração otimizada
+- ✅ **Sistema de Lazy Loading**: Detecção de scroll e carregamento por range
+- ✅ **Deduplicação e Validação**: Remoção de timestamps duplicados
+- ✅ **Configuração do Chart**: Formatação de tempo e zoom inteligente
+- ✅ **Linhas Dinâmicas**: Liquidação e take profit baseadas em posições
+- ✅ **Cache Inteligente**: Sistema de cache com TTL e estatísticas
+- ✅ **Tratamento de Erros**: Timeout, retry logic e fallbacks
+**Prioridade**: Alta  
+**Impacto**: Desenvolvimento - implementação de novos recursos de gráficos
 
 ---
 

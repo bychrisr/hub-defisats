@@ -88,7 +88,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     return 60; // Default 1h
   }
 
-  // Hook para dados históricos com navegação
+  // Hook para dados históricos com navegação infinita
   const { 
     candleData: historicalData, 
     isLoading: candleLoading, 
@@ -96,12 +96,18 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     error: candleError,
     hasMoreData,
     loadMoreHistorical,
-    resetData: resetHistoricalData
+    resetData: resetHistoricalData,
+    // Novas funções para controle avançado
+    loadDataForRange,
+    getDataRange,
+    isDataAvailable
   } = useHistoricalData({
     symbol: symbol.replace('BINANCE:', ''),
     timeframe: currentTimeframe,
     initialLimit: getLimitForTimeframe(currentTimeframe), // Limite baseado no timeframe para ~7 dias
-    enabled: useApiData
+    enabled: useApiData,
+    maxDataPoints: 10000, // Máximo 10k candles em memória
+    loadThreshold: currentTimeframe === '1h' ? 50 : 20 // Threshold dinâmico baseado no timeframe
   });
 
   // Usar dados históricos se habilitado, senão usar props
@@ -209,25 +215,25 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
           const date = new Date(timestamp * 1000);
           
-          // Formatação baseada no timeframe - estilo LN Markets
+          // Formatação corrigida - estilo LN Markets melhorado
           const hours = String(date.getUTCHours()).padStart(2, '0');
           const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-          const day = String(date.getUTCDate()).padStart(2, '0');
-          const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(date.getUTCDate());
           const monthName = date.toLocaleDateString('en-US', { month: 'short' });
           
-          // Para timeframes intraday (minutos/horas) - mostrar HH:mm
+          // Para timeframes intraday (minutos/horas)
           if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-            // Se for meia-noite UTC, mostrar data + hora
+            // Se for meia-noite UTC, mostrar dia + mês (formato claro)
             if (date.getUTCHours() === 0 && date.getUTCMinutes() === 0) {
-              return `${day} ${monthName} ${hours}:${minutes}`;
+              // Formato: "30 • Oct" - usando bullet point para separar dia e mês
+              return `${day} • ${monthName}`;
             }
             // Caso contrário, mostrar apenas hora:minuto
             return `${hours}:${minutes}`;
           }
           
-          // Para timeframes diários ou maiores - mostrar dd/MM
-          return `${day}/${month}`;
+          // Para timeframes diários ou maiores - mostrar dia/mês
+          return `${day} • ${monthName}`;
         }
       },
       crosshair: { mode: 1 },
@@ -492,7 +498,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     }, 100);
 
-    // Detectar scroll para carregar dados históricos
+    // Detectar scroll para carregar dados históricos (versão melhorada)
     const handleScroll = () => {
       if (!useApiData || !hasMoreData || isLoadingMoreHistorical) {
         console.log('🔄 SCROLL - Conditions not met:', {
@@ -506,21 +512,101 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       const timeScale = chart.timeScale();
       const visibleRange = timeScale.getVisibleLogicalRange();
       
-      console.log('🔄 SCROLL - Visible range:', {
-        visibleFrom: visibleRange?.from,
-        visibleTo: visibleRange?.to,
-        threshold: 5,
-        shouldLoad: visibleRange && visibleRange.from <= 5
+      if (!visibleRange || !effectiveCandleData) return;
+      
+      // Calcular quantos candles estão visíveis
+      const visibleCandles = Math.round(visibleRange.to - visibleRange.from);
+      const totalCandles = effectiveCandleData.length;
+      
+      // Calcular quantos candles restam antes do início dos dados visíveis
+      const candlesBeforeVisible = Math.round(visibleRange.from);
+      
+      // Threshold dinâmico baseado no timeframe
+      const dynamicThreshold = currentTimeframe === '1h' ? 50 : 20;
+      
+      console.log('🔄 SCROLL - Scroll analysis:', {
+        visibleFrom: visibleRange.from,
+        visibleTo: visibleRange.to,
+        visibleCandles,
+        totalCandles,
+        candlesBeforeVisible,
+        threshold: dynamicThreshold,
+        timeframe: currentTimeframe,
+        shouldLoad: candlesBeforeVisible <= dynamicThreshold
       });
       
-      if (visibleRange && visibleRange.from <= 5) { // Reduzir threshold para 5
+      // Carregar mais dados se estamos próximos do início dos dados disponíveis
+      if (candlesBeforeVisible <= dynamicThreshold) {
         console.log('🔄 SCROLL - Loading more historical data...', {
-          visibleFrom: visibleRange.from,
-          visibleTo: visibleRange.to,
+          candlesBeforeVisible,
+          threshold: dynamicThreshold,
+          timeframe: currentTimeframe,
           hasMoreData,
           isLoadingMore: isLoadingMoreHistorical
         });
         loadMoreHistorical();
+      }
+    };
+
+    // Detectar quando usuário navega para períodos sem dados
+    const handleVisibleRangeChange = () => {
+      if (!useApiData || !effectiveCandleData) return;
+      
+      const timeScale = chart.timeScale();
+      const visibleRange = timeScale.getVisibleLogicalRange();
+      
+      if (!visibleRange) return;
+      
+      // Converter range lógico para timestamps
+      const startIndex = Math.floor(visibleRange.from);
+      const endIndex = Math.floor(visibleRange.to);
+      
+      // Threshold dinâmico baseado no timeframe
+      const dynamicThreshold = currentTimeframe === '1h' ? 50 : 20;
+      
+      console.log('🔄 RANGE - Range change analysis:', {
+        startIndex,
+        endIndex,
+        dataLength: effectiveCandleData.length,
+        threshold: dynamicThreshold,
+        timeframe: currentTimeframe,
+        shouldLoadMore: startIndex <= dynamicThreshold
+      });
+      
+      // Se estamos próximos do início dos dados, carregar mais
+      if (startIndex <= dynamicThreshold && hasMoreData && !isLoadingMoreHistorical) {
+        console.log('🔄 RANGE - Loading more historical data (range change)...', {
+          startIndex,
+          threshold: dynamicThreshold,
+          hasMoreData,
+          isLoadingMore: isLoadingMoreHistorical
+        });
+        loadMoreHistorical();
+      }
+      
+      // Se usuário está navegando para fora dos dados disponíveis
+      if (startIndex < 0 || endIndex >= effectiveCandleData.length) {
+        const dataRange = getDataRange();
+        if (!dataRange) return;
+        
+        // Calcular timestamps aproximados para o range visível
+        const timeframeMinutes = getTimeframeMinutes(currentTimeframe);
+        const startTime = dataRange.start + (startIndex * timeframeMinutes * 60);
+        const endTime = dataRange.start + (endIndex * timeframeMinutes * 60);
+        
+        console.log('🔄 RANGE - User navigating outside available data:', {
+          startIndex,
+          endIndex,
+          dataLength: effectiveCandleData.length,
+          startTime,
+          endTime,
+          dataRange
+        });
+        
+        // Carregar dados para este range se necessário
+        if (startTime < dataRange.start || endTime > dataRange.end) {
+          loadDataForRange(startTime, endTime);
+        }
       }
     };
 
@@ -557,8 +643,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     };
 
-    // Adicionar listeners
+    // Adicionar listeners para navegação infinita
     chart.timeScale().subscribeVisibleLogicalRangeChange(handleScroll);
+    chart.timeScale().subscribeVisibleLogicalRangeChange(handleVisibleRangeChange);
     
     // Listener específico para mudanças de zoom com debounce
     let zoomTimeout: NodeJS.Timeout;
@@ -589,6 +676,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       clearTimeout(zoomTimeout);
       // remover listeners
       chart.timeScale().unsubscribeVisibleLogicalRangeChange(handleScroll);
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(handleVisibleRangeChange);
       chart.timeScale().unsubscribeVisibleLogicalRangeChange(debouncedZoomChange);
       // remover priceLines criadas
       if (seriesRef.current && createdLines.length) {
@@ -630,8 +718,21 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         return;
       }
 
-      // Garantir que os dados estejam ordenados por tempo (ascendente)
-      const sortedData = [...effectiveCandleData].sort((a, b) => a.time - b.time);
+      // Remover duplicatas e ordenar por tempo (ascendente)
+      const uniqueData = effectiveCandleData.reduce((acc, current) => {
+        const existingIndex = acc.findIndex(item => item.time === current.time);
+        if (existingIndex === -1) {
+          acc.push(current);
+        } else {
+          // Se já existe, manter o mais recente (substituir)
+          acc[existingIndex] = current;
+        }
+        return acc;
+      }, [] as typeof effectiveCandleData);
+      
+      const sortedData = uniqueData.sort((a, b) => a.time - b.time);
+      
+      console.log(`🔄 CHART - Data deduplication: ${effectiveCandleData.length} -> ${uniqueData.length} unique points`);
       
       if (sortedData[0] && 'open' in sortedData[0]) {
         // Dados de candlestick
@@ -655,7 +756,20 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 
   return (
-    <Card className={className}>
+    <>
+      {/* Estilos CSS customizados para destacar mês no eixo de tempo */}
+      <style>{`
+        .lightweight-chart-time-axis .tv-lightweight-charts__time-axis-label {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-size: 11px;
+        }
+        /* Destacar labels que contêm mês */
+        .lightweight-chart-time-axis .tv-lightweight-charts__time-axis-label {
+          color: ${isDark ? '#9ca3af' : '#6b7280'};
+        }
+      `}</style>
+      
+      <Card className={className}>
       {/* Barra Superior TradingView-style */}
       {showToolbar && (
         <div className={`border-b ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'} px-4 py-2`}>
@@ -833,9 +947,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef} className="w-full rounded-lg overflow-hidden" style={{ height }} />
+        <div ref={containerRef} className="w-full rounded-lg overflow-hidden lightweight-chart-time-axis" style={{ height }} />
       </CardContent>
     </Card>
+    </>
   );
 };
 

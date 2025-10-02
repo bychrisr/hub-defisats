@@ -48,11 +48,13 @@ import { PnLCard } from '@/components/dashboard/PnLCard';
 import SatsIcon from '@/components/SatsIcon';
 import { useTranslation } from '@/hooks/useTranslation';
 import { RouteGuard } from '@/components/guards/RouteGuard';
+import { InfiniteHistoricalDataDemo } from '@/components/charts/InfiniteHistoricalDataDemo';
+import { HistoricalDataTest } from '@/components/charts/HistoricalDataTest';
 import { Tooltip } from '@/components/ui/tooltip';
 import TradingViewChart from '@/components/charts/TradingViewChart';
 import LightweightLiquidationChart from '@/components/charts/LightweightLiquidationChart';
 import PriceReference from '@/components/lnmarkets/PriceReference';
-import ExchangeWeightMonitor from '@/components/ExchangeWeightMonitor';
+import TradingViewMonitor from '@/components/TradingViewMonitor';
 import { marketDataService } from '@/services/marketData.service';
 
 export default function Dashboard() {
@@ -91,7 +93,7 @@ export default function Dashboard() {
     // Tentar extrair posições de múltiplas fontes (hooks/contextos)
     const candidates: any[] = [];
     if (Array.isArray(optimizedPositions) && optimizedPositions.length) candidates.push(optimizedPositions);
-    const md: any = marketData?.positions ?? marketData?.data ?? marketData;
+    const md: any = marketData?.positions ?? marketData ?? marketData;
     if (md) {
       // candidatos comuns
       const maybeArrays = [
@@ -138,7 +140,7 @@ export default function Dashboard() {
     // Tentar extrair posições de múltiplas fontes (hooks/contextos)
     const candidates: any[] = [];
     if (Array.isArray(optimizedPositions) && optimizedPositions.length) candidates.push(optimizedPositions);
-    const md: any = marketData?.positions ?? marketData?.data ?? marketData;
+    const md: any = marketData?.positions ?? marketData ?? marketData;
     if (md) {
       // candidatos comuns
       const maybeArrays = [
@@ -318,8 +320,8 @@ export default function Dashboard() {
     return 'neutral';
   };
   
-  // Dados históricos para cálculos
-  const historicalMetrics = historicalData.data;
+  // Dados históricos para cálculos (removido - não usado)
+  // const historicalMetrics = historicalData.candleData;
   
   // Debug: Log dos dados principais
   console.log('🔍 DASHBOARD - Main data sources:', {
@@ -331,10 +333,10 @@ export default function Dashboard() {
       totalInvested: estimatedBalance.data?.total_invested
     },
     historicalData: {
-      hasData: !!historicalData.data,
+      hasData: !!historicalData.candleData,
       isLoading: historicalData.isLoading,
       error: historicalData.error,
-      totalFees: historicalData.data?.totalFees
+      candleCount: historicalData.candleData?.length
     }
   });
   
@@ -373,8 +375,8 @@ export default function Dashboard() {
       return estimatedBalance.data.total_fees;
     }
     // Fallback para dados históricos se disponível
-    return historicalMetrics?.totalFees || 0;
-  }, [estimatedBalance.data?.total_fees, historicalMetrics?.totalFees]);
+    return 0 || 0;
+  }, [estimatedBalance.data?.total_fees, 0]);
   
   const calculateNetProfit = useCallback(() => {
     const totalPnl = totalPL || 0;
@@ -395,8 +397,8 @@ export default function Dashboard() {
       return estimatedBalance.data.lost_trades;
     }
     // Fallback para historicalMetrics
-    return historicalMetrics?.lostTrades || 0;
-  }, [estimatedBalance.data?.lost_trades, historicalMetrics?.lostTrades]);
+    return 0 || 0;
+  }, [estimatedBalance.data?.lost_trades, 0]);
 
   // Novas funções para os cards adicionais
   const calculateSuccessRate = () => {
@@ -1262,7 +1264,7 @@ export default function Dashboard() {
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 {(() => {
-                  const colors = getCardIconColors('net-profit', historicalMetrics?.totalProfit || 0);
+                  const colors = getCardIconColors('net-profit', 0 || 0);
                   return (
                     <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <TrendingUp className={`w-4 h-4 sm:w-6 sm:h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
@@ -1272,7 +1274,7 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                getCardColors('net-profit', historicalMetrics?.totalProfit || 0).card
+                getCardColors('net-profit', 0 || 0).card
               }`}>
                 <div className="card-content">
                   <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
@@ -1294,12 +1296,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('net-profit', historicalMetrics?.totalProfit || 0).text}`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('net-profit', 0 || 0).text}`}>
                         {formatSats(calculateNetProfit(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: getCardColors('net-profit', historicalMetrics?.totalProfit || 0).satsIcon
+                          className: getCardColors('net-profit', 0 || 0).satsIcon
                         })}
                       </div>
                     </div>
@@ -1375,13 +1377,13 @@ export default function Dashboard() {
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  (historicalMetrics?.successRate || 0) >= 50 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
-                  (historicalMetrics?.successRate || 0) >= 30 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
+                  0 >= 50 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  0 >= 30 ? 'bg-yellow-600/20 border-yellow-500/30 group-hover:shadow-yellow-500/30' :
                   'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30'
                 }`}>
                   <CheckCircle className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    (historicalMetrics?.successRate || 0) >= 50 ? 'text-green-300 group-hover:text-green-200' :
-                    (historicalMetrics?.successRate || 0) >= 30 ? 'text-yellow-300 group-hover:text-yellow-200' :
+                    0 >= 50 ? 'text-green-300 group-hover:text-green-200' :
+                    0 >= 30 ? 'text-yellow-300 group-hover:text-yellow-200' :
                     'text-red-300 group-hover:text-red-200'
                   }`} />
                 </div>
@@ -1443,11 +1445,11 @@ export default function Dashboard() {
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  ((0 || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
                   'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30'
                 }`}>
                   <PieChart className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    ((historicalMetrics?.totalProfit || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'text-green-300 group-hover:text-green-200' :
+                    ((0 || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'text-green-300 group-hover:text-green-200' :
                     'text-red-300 group-hover:text-red-200'
                   }`} />
                 </div>
@@ -2163,11 +2165,21 @@ export default function Dashboard() {
             />)}
           </div>
 
-          {/* Exchange Weight Monitor */}
+          {/* TradingView Data Service Monitor */}
           <div className="mt-6">
-            <ExchangeWeightMonitor 
-              className="w-full"
-              showDetails={true}
+            <TradingViewMonitor />
+          </div>
+
+          {/* Teste de Dados Históricos */}
+          <div className="mt-6">
+            <HistoricalDataTest />
+          </div>
+
+          {/* Demonstração de Dados Históricos Infinitos */}
+          <div className="mt-6">
+            <InfiniteHistoricalDataDemo 
+              symbol="BTCUSDT"
+              height={500}
             />
           </div>
         </div>

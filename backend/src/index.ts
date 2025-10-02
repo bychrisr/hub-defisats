@@ -48,6 +48,7 @@ import { healthRoutes } from './routes/health.routes';
 import { swCacheRoutes } from './routes/sw-cache.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
+import tradingViewRoutes from './routes/tradingview.routes';
 import { exchangeCredentialsRoutes } from './routes/exchangeCredentials.routes';
 import { versionRoutes } from './routes/version.routes';
 import { docsRoutes } from './routes/docs.routes';
@@ -583,6 +584,10 @@ async function registerRoutes() {
   // Market Data routes
   await fastify.register(marketDataRoutes, { prefix: '/api' });
   console.log('✅ Market Data routes registered');
+
+  // TradingView Proxy routes
+  await fastify.register(tradingViewRoutes, { prefix: '/api' });
+  console.log('✅ TradingView Proxy routes registered');
 
   // Coupon Admin routes
   await fastify.register(couponAdminRoutes, { prefix: '/api/admin/coupons' });
