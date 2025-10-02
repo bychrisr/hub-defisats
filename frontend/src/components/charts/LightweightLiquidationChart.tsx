@@ -211,8 +211,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         fixLeftEdge: false, // Não fixar borda esquerda
         fixRightEdge: true, // Fixar borda direita
         
-        // ✅ NOVA FUNCIONALIDADE: Eixo temporal hierárquico estilo LN Markets
-        tickMarkFormatter: (time) => {
+        // ✅ NOVA FUNCIONALIDADE: Eixo temporal hierárquico estilo LN Markets usando TickMarkType
+        tickMarkFormatter: (time, tickMarkType) => {
           const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
           const date = new Date(timestamp * 1000);
           
@@ -222,47 +222,45 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           const monthName = date.toLocaleDateString('en-US', { month: 'short' });
           const year = date.getFullYear();
           
-          // ✅ IMPLEMENTAÇÃO HIERÁRQUICA: Diferentes níveis baseados no contexto temporal
-          if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-            // Para timeframes intraday (minutos/horas) - estilo LN Markets
-            
-            // Se for meia-noite (00:00), mostrar separação de dia
-            if (date.getHours() === 0 && date.getMinutes() === 0) {
-              return `${day}`; // Mostrar apenas o dia para separação clara
-            }
-            
-            // Se for início de mês (dia 1 às 00:00), mostrar separação de mês
-            if (date.getDate() === 1 && date.getHours() === 0 && date.getMinutes() === 0) {
-              return `${monthName}`; // Mostrar apenas o mês para separação clara
-            }
-            
-            // Se for início de ano (1º de janeiro às 00:00), mostrar separação de ano
-            if (date.getMonth() === 0 && date.getDate() === 1 && date.getHours() === 0 && date.getMinutes() === 0) {
-              return `${year}`; // Mostrar apenas o ano para separação clara
-            }
-            
-            // Para outros momentos, mostrar hora:minuto
-            return `${hours}:${minutes}`;
+          // ✅ IMPLEMENTAÇÃO HIERÁRQUICA: Usando TickMarkType oficial da Lightweight Charts
+          // Baseado na documentação: https://tradingview.github.io/lightweight-charts/docs/api/enumerations/TickMarkType
+          switch (tickMarkType) {
+            case 0: // Year - Início do ano
+              return year.toString();
+              
+            case 1: // Month - Início do mês
+              return monthName;
+              
+            case 2: // DayOfMonth - Dia do mês
+              if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+                // Para timeframes intraday, mostrar dia apenas se for meia-noite
+                if (date.getHours() === 0 && date.getMinutes() === 0) {
+                  return day;
+                }
+                // Para outros momentos, não mostrar nada (será mostrado pelo Time)
+                return '';
+              }
+              // Para timeframes diários, sempre mostrar o dia
+              return day;
+              
+            case 3: // Time - Hora sem segundos
+              if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+                // Para timeframes intraday, mostrar hora:minuto
+                return `${hours}:${minutes}`;
+              }
+              // Para timeframes diários, não mostrar hora
+              return '';
+              
+            case 4: // TimeWithSeconds - Hora com segundos (não usado normalmente)
+              return `${hours}:${minutes}:${String(date.getSeconds()).padStart(2, '0')}`;
+              
+            default:
+              // Fallback para formatação padrão
+              if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+                return `${hours}:${minutes}`;
+              }
+              return `${day} • ${monthName}`;
           }
-          
-          // Para timeframes diários ou maiores
-          if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
-            // Se for início de mês, mostrar separação de mês
-            if (date.getDate() === 1) {
-              return `${monthName}`;
-            }
-            
-            // Se for início de ano, mostrar separação de ano
-            if (date.getMonth() === 0 && date.getDate() === 1) {
-              return `${year}`;
-            }
-            
-            // Para outros dias, mostrar dia
-            return day;
-          }
-          
-          // Fallback para formatação padrão
-          return `${day} • ${monthName}`;
         }
       },
       crosshair: { mode: 1 },
