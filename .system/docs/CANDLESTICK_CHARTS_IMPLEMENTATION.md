@@ -6,12 +6,13 @@
 2. [Arquitetura TradingView-First](#2-arquitetura-tradingview-first)
 3. [Hook useHistoricalData](#3-hook-usehistoricaldata)
 4. [Componente LightweightLiquidationChart](#4-componente-lightweightliquidationchart)
-5. [Sistema de Lazy Loading](#5-sistema-de-lazy-loading)
-6. [Deduplicação e Validação](#6-deduplicação-e-validação)
-7. [Configuração do Chart](#7-configuração-do-chart)
-8. [Linhas de Liquidação e Take Profit](#8-linhas-de-liquidação-e-take-profit)
-9. [Sistema de Cache Inteligente](#9-sistema-de-cache-inteligente)
-10. [Tratamento de Erros](#10-tratamento-de-erros)
+5. [Sistema de TimeframeSelector](#5-sistema-de-timeframeselector)
+6. [Sistema de Lazy Loading](#6-sistema-de-lazy-loading)
+7. [Deduplicação e Validação](#7-deduplicação-e-validação)
+8. [Configuração do Chart](#8-configuração-do-chart)
+9. [Linhas de Liquidação e Take Profit](#9-linhas-de-liquidação-e-take-profit)
+10. [Sistema de Cache Inteligente](#10-sistema-de-cache-inteligente)
+11. [Tratamento de Erros](#11-tratamento-de-erros)
 
 ---
 
@@ -26,12 +27,19 @@ O sistema de gráficos de candles foi projetado para:
 - **Performance Otimizada**: Cache inteligente e deduplicação
 - **Segurança**: Validação rigorosa e fallbacks robustos
 - **UX Superior**: Zoom inteligente e navegação fluida
+- **Interface Moderna**: Dropdown de timeframe no estilo LN Markets
+- **Design Limpo**: Eliminação de elementos redundantes da UI
 
 ### 🏗️ **Arquitetura Geral**
 
 ```mermaid
 graph TB
     A[LightweightLiquidationChart] --> B[useHistoricalData]
+    A --> T[TimeframeSelector]
+    T --> U[LN Markets Style Dropdown]
+    U --> V[Categorized Options]
+    V --> W[MINUTES/HOURS/DAYS]
+    
     B --> C[TradingViewDataService]
     C --> D[/api/tradingview/scanner]
     D --> E[Backend Proxy]
@@ -49,6 +57,10 @@ graph TB
     N[useEffect] --> O[Data Updates]
     N --> P[Zoom Management]
     N --> Q[Scroll Detection]
+    
+    X[UI Cleanup] --> Y[Removed OHLC Section]
+    X --> Z[Removed Individual Buttons]
+    X --> AA[Strategic Positioning]
 ```
 
 ---
@@ -697,7 +709,249 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
 ---
 
-## 5. **SISTEMA DE LAZY LOADING**
+## 5. **SISTEMA DE TIMEFRAMESELECTOR**
+
+### 🎯 **Componente TimeframeSelector**
+
+O `TimeframeSelector` é um componente moderno inspirado no design da LN Markets, oferecendo uma interface limpa e intuitiva para seleção de timeframes.
+
+```typescript
+// frontend/src/components/ui/timeframe-selector.tsx
+interface TimeframeSelectorProps {
+  value: string;
+  onChange: (timeframe: string) => void;
+  className?: string;
+}
+
+export const TimeframeSelector: React.FC<TimeframeSelectorProps> = ({
+  value,
+  onChange,
+  className
+}) => {
+  const [open, setOpen] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  // Categorização inteligente de timeframes
+  const timeframes = [
+    { group: 'MINUTES', options: ['1m', '3m', '5m', '10m', '15m', '30m', '45m'] },
+    { group: 'HOURS', options: ['1h', '2h', '3h', '4h'] },
+    { group: 'DAYS', options: ['1d', '1w', '1M', '3M'] },
+  ];
+
+  const displayValue = (tf: string) => {
+    return tf.toUpperCase();
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "w-[120px] justify-between h-8 text-xs",
+            isDark 
+              ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white border-purple-700 hover:from-purple-700 hover:to-blue-700" 
+              : "bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200",
+            className
+          )}
+        >
+          <Clock className="mr-1 h-3 w-3" />
+          {displayValue(value)}
+          <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      
+      <PopoverContent className={cn("w-[180px] p-0", isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200")}>
+        <Command className={isDark ? "bg-gray-800" : "bg-white"}>
+          <CommandList>
+            {timeframes.map((group) => (
+              <CommandGroup key={group.group} heading={group.group} className={isDark ? "text-gray-400" : "text-gray-600"}>
+                {group.options.map((tf) => (
+                  <CommandItem
+                    key={tf}
+                    value={tf}
+                    onSelect={(currentValue) => {
+                      onChange(currentValue);
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      "cursor-pointer text-xs",
+                      value === tf 
+                        ? (isDark ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700") 
+                        : (isDark ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-100")
+                    )}
+                  >
+                    {displayValue(tf)}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
+```
+
+### 🎨 **Características Visuais**
+
+#### **Botão Principal**
+- **Gradiente**: Roxo-azul (`from-purple-600 to-blue-600`)
+- **Ícone**: Relógio (`Clock`) para identificação visual
+- **Tamanho**: Compacto (`w-[120px] h-8`)
+- **Estados**: Hover com gradiente mais escuro
+
+#### **Dropdown Organizado**
+- **Categorias**: MINUTES, HOURS, DAYS
+- **Scroll**: Interno para navegação fluida
+- **Seleção**: Estado visual claro (azul para ativo)
+- **Click Outside**: Fecha automaticamente
+
+#### **Tema Adaptativo**
+- **Dark Mode**: Fundo cinza escuro, texto claro
+- **Light Mode**: Fundo branco, texto escuro
+- **Transições**: Suaves entre estados
+
+### 🔄 **Integração no LightweightLiquidationChart**
+
+```typescript
+// Integração no componente principal
+const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = ({
+  symbol = 'BTCUSDT',
+  timeframe = '1h',
+  useApiData = true,
+  // ... outras props
+}) => {
+  const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
+  
+  // Handler para mudança de timeframe
+  const handleTimeframeChange = useCallback((newTimeframe: string) => {
+    console.log('🔄 TIMEFRAME - Changing timeframe:', newTimeframe);
+    setCurrentTimeframe(newTimeframe);
+    onTimeframeChange?.(newTimeframe);
+  }, [onTimeframeChange]);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header com símbolo e dropdown */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-3">
+          {/* Logo e símbolo */}
+          <div className="flex items-center gap-2">
+            {logoUrl ? (
+              <img src={logoUrl} alt="logo" className="h-5 w-5 rounded-full" />
+            ) : (
+              <BarChart3 className="h-4 w-4 text-blue-500" />
+            )}
+            <div className="flex flex-col leading-tight">
+              <span className="font-semibold text-sm text-blue-400 hover:underline cursor-default">
+                {derivedDisplaySymbol}
+              </span>
+              <span className="text-[11px] opacity-70">{derivedDescription}</span>
+            </div>
+            
+            {/* Timeframe Selector - Estilo LN Markets */}
+            <TimeframeSelector
+              value={currentTimeframe}
+              onChange={handleTimeframeChange}
+              className="ml-2"
+            />
+          </div>
+        </div>
+        
+        {/* Controles adicionais */}
+        <div className="flex items-center gap-2">
+          {/* Indicadores ativos */}
+          {indicators.length > 0 && (
+            <div className="flex items-center gap-1">
+              {indicators.map((indicator) => (
+                <Badge
+                  key={indicator.id}
+                  variant="secondary"
+                  className={`text-xs cursor-pointer hover:opacity-70 ${
+                    indicator.type === 'rsi' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
+                  }`}
+                  onClick={() => removeIndicator(indicator.id)}
+                >
+                  {indicator.type.toUpperCase()}
+                </Badge>
+              ))}
+            </div>
+          )}
+          
+          {/* Botão de indicadores */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={() => setShowIndicators(true)}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Indicators
+            <ChevronDown className="h-3 w-3 ml-1" />
+          </Button>
+          
+          {/* Configurações */}
+          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      {/* Chart container */}
+      <div ref={chartContainerRef} className="flex-1" />
+    </div>
+  );
+};
+```
+
+### 🚀 **Melhorias de UX Implementadas**
+
+#### **1. Interface Limpa**
+- **Removido**: Botões individuais de timeframe (1m, 5m, 15m, 30m, 1h, 4h, 1d)
+- **Removido**: Seção OHLC redundante (Open, High, Low, Close)
+- **Resultado**: Interface mais limpa e profissional
+
+#### **2. Posicionamento Estratégico**
+- **Localização**: Próximo ao símbolo do ativo (lado esquerdo)
+- **Lógica**: Usuário encontra o seletor onde espera
+- **Consistência**: Padrão similar à LN Markets
+
+#### **3. Categorização Inteligente**
+- **MINUTES**: 1m, 3m, 5m, 10m, 15m, 30m, 45m
+- **HOURS**: 1h, 2h, 3h, 4h
+- **DAYS**: 1d, 1w, 1M, 3M
+- **Benefício**: Navegação mais intuitiva
+
+#### **4. Responsividade**
+- **Tema**: Adapta-se automaticamente ao dark/light mode
+- **Mobile**: Funciona bem em dispositivos móveis
+- **Acessibilidade**: Suporte a navegação por teclado
+
+### 🔧 **Benefícios Técnicos**
+
+#### **Manutenibilidade**
+- **Código limpo**: Menos elementos DOM desnecessários
+- **Componentização**: Lógica isolada em componente dedicado
+- **Reutilização**: Pode ser usado em outros gráficos
+
+#### **Performance**
+- **Menos DOM**: Redução de elementos visuais
+- **Renderização**: Menos re-renders desnecessários
+- **Memória**: Menor uso de memória
+
+#### **Escalabilidade**
+- **Novos timeframes**: Fácil adição de novas opções
+- **Customização**: Estilos facilmente modificáveis
+- **Extensibilidade**: Pode ser estendido para outros seletores
+
+---
+
+## 6. **SISTEMA DE LAZY LOADING**
 
 ### 🎯 **Detecção de Scroll**
 
@@ -1014,6 +1268,21 @@ throw new Error('Todas as APIs falharam - dados indisponíveis por segurança');
 6. **Zoom Inteligente**: Zoom inicial de 7 dias, preservação durante navegação
 7. **Linhas Dinâmicas**: Liquidação e take profit baseadas em posições
 8. **Performance**: Limite de dados em memória (10k pontos)
+9. **Interface Moderna**: Dropdown de timeframe no estilo LN Markets
+10. **Design Limpo**: Eliminação de elementos redundantes da UI
+
+### 🎨 **Novas Funcionalidades de Interface**
+
+#### **TimeframeSelector**
+- **Estilo LN Markets**: Gradiente roxo-azul com categorização
+- **Categorias**: MINUTES, HOURS, DAYS organizadas logicamente
+- **Posicionamento**: Estratégico próximo ao símbolo do ativo
+- **Responsividade**: Adaptação automática ao tema dark/light
+
+#### **Limpeza da Interface**
+- **Removido**: Botões individuais de timeframe redundantes
+- **Removido**: Seção OHLC desnecessária (Open, High, Low, Close)
+- **Resultado**: Interface mais limpa e profissional
 
 ### 🛡️ **Segurança**
 
@@ -1030,9 +1299,35 @@ throw new Error('Todas as APIs falharam - dados indisponíveis por segurança');
 - **Rate limiting stats**: Controle de requisições
 - **Error tracking**: Tratamento específico por tipo de erro
 
+### 🔧 **Benefícios Técnicos**
+
+#### **Manutenibilidade**
+- **Código limpo**: Menos elementos DOM desnecessários
+- **Componentização**: Lógica isolada em componentes dedicados
+- **Reutilização**: Componentes podem ser usados em outros gráficos
+
+#### **Performance**
+- **Menos DOM**: Redução significativa de elementos visuais
+- **Renderização**: Menos re-renders desnecessários
+- **Memória**: Menor uso de memória
+
+#### **Escalabilidade**
+- **Novos timeframes**: Fácil adição de novas opções
+- **Customização**: Estilos facilmente modificáveis
+- **Extensibilidade**: Pode ser estendido para outros seletores
+
+### 🎯 **Arquivos Principais**
+
+- **`frontend/src/components/ui/timeframe-selector.tsx`**: Componente de seleção de timeframe
+- **`frontend/src/components/charts/LightweightLiquidationChart.tsx`**: Gráfico principal
+- **`frontend/src/hooks/useHistoricalData.ts`**: Hook para dados históricos
+- **`frontend/src/services/tradingViewData.service.ts`**: Serviço de dados
+
+---
+
 ---
 
 **Documento**: Implementação de Gráficos de Candles  
-**Versão**: 1.0.0  
-**Última Atualização**: 2025-01-21  
+**Versão**: 1.1.0  
+**Última Atualização**: 2025-01-25  
 **Responsável**: Equipe de Desenvolvimento
