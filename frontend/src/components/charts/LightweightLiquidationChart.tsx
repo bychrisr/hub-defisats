@@ -8,6 +8,8 @@ import { useCandleData } from '@/hooks/useCandleData';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useIndicators, IndicatorType } from '@/hooks/useIndicators';
 import { TimeframeSelector } from '@/components/ui/timeframe-selector';
+import { TechnicalIndicatorsService, RSIConfig, RSIDataPoint } from '@/services/technicalIndicators.service';
+import { RSIConfigComponent } from '@/components/ui/rsi-config';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -68,6 +70,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const isInitialLoad = useRef(true); // Controle de carregamento inicial
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [showIndicators, setShowIndicators] = useState(false);
+  
+  // Estados para RSI
+  const [rsiConfig, setRsiConfig] = useState<RSIConfig>({
+    period: 14,
+    overbought: 70,
+    oversold: 30
+  });
+  const [rsiEnabled, setRsiEnabled] = useState(false);
+  const [rsiData, setRsiData] = useState<RSIDataPoint[]>([]);
 
   // Função para calcular limite baseado no timeframe (aproximadamente 7 dias)
   function getLimitForTimeframe(timeframe: string): number {
@@ -162,10 +173,16 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   }, [onTimeframeChange, useApiData]);
 
   const handleIndicatorAdd = useCallback((indicator: string) => {
+    if (indicator === 'rsi') {
+      setRsiEnabled(!rsiEnabled);
+      setShowIndicators(false);
+      return;
+    }
+    
     addIndicator(indicator as IndicatorType);
     onIndicatorAdd?.(indicator);
     setShowIndicators(false);
-  }, [addIndicator, onIndicatorAdd]);
+  }, [addIndicator, onIndicatorAdd, rsiEnabled]);
 
   // Derivar rótulos padrão estilo LN Markets
   const derivedDisplaySymbol = displaySymbol || (symbol?.includes('BTCUSDT') ? 'XBTUSD' : (symbol || ''));
@@ -842,6 +859,39 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     }
   }, [effectiveCandleData]);
 
+  // useEffect para calcular RSI quando dados ou configuração mudarem
+  useEffect(() => {
+    if (!rsiEnabled || !effectiveCandleData || effectiveCandleData.length === 0) {
+      setRsiData([]);
+      return;
+    }
+
+    try {
+      // Converter dados para formato esperado pelo serviço
+      const candleData = effectiveCandleData.map(item => ({
+        time: item.time as number,
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+        volume: 0 // Volume não é necessário para RSI
+      }));
+
+      // Calcular RSI
+      const calculatedRSI = TechnicalIndicatorsService.calculateRSIExponential(candleData, rsiConfig);
+      setRsiData(calculatedRSI);
+
+      console.log('📊 RSI - Calculated:', {
+        dataPoints: calculatedRSI.length,
+        config: rsiConfig,
+        latestValue: calculatedRSI[calculatedRSI.length - 1]?.value
+      });
+    } catch (error) {
+      console.warn('⚠️ RSI - Error calculating RSI:', error);
+      setRsiData([]);
+    }
+  }, [rsiEnabled, effectiveCandleData, rsiConfig]);
+
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 
   return (
@@ -955,18 +1005,24 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
                     <div className="py-1">
                       {availableIndicators.map((indicator) => {
                         const IconComponent = indicator.icon;
+                        const isActive = indicator.id === 'rsi' && rsiEnabled;
                         return (
                           <button
                             key={indicator.id}
                             className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 ${
-                              isDark 
-                                ? 'text-gray-300 hover:bg-gray-700' 
-                                : 'text-gray-700 hover:bg-gray-100'
+                              isActive
+                                ? isDark 
+                                  ? 'text-blue-400 bg-blue-900/20' 
+                                  : 'text-blue-600 bg-blue-50'
+                                : isDark 
+                                  ? 'text-gray-300 hover:bg-gray-700' 
+                                  : 'text-gray-700 hover:bg-gray-100'
                             }`}
                             onClick={() => handleIndicatorAdd(indicator.id)}
                           >
                             <IconComponent className="h-4 w-4" />
                             {indicator.name}
+                            {isActive && <Badge variant="secondary" className="ml-auto text-xs">ON</Badge>}
                           </button>
                         );
                       })}
@@ -998,6 +1054,18 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           </div>
         </div>
       </CardHeader>
+
+      {/* Painel de Configuração do RSI */}
+      {rsiEnabled && (
+        <div className="px-6 pb-4">
+          <RSIConfigComponent
+            config={rsiConfig}
+            enabled={rsiEnabled}
+            onConfigChange={setRsiConfig}
+            onEnabledChange={setRsiEnabled}
+          />
+        </div>
+      )}
       <CardContent>
         <div ref={containerRef} className="w-full rounded-lg overflow-hidden lightweight-chart-time-axis" style={{ height }} />
       </CardContent>
