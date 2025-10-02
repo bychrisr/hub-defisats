@@ -1256,6 +1256,93 @@ throw new Error('Todas as APIs falharam - dados indisponíveis por segurança');
 
 ---
 
+## 12. **CORREÇÃO CRÍTICA DE SINCRONIZAÇÃO DE TIMESTAMPS**
+
+### 🚨 **Problema Identificado**
+
+O eixo horizontal do gráfico estava exibindo datas completamente dessincronizadas devido a dois problemas críticos:
+
+1. **Conversão de Timestamp Incorreta**: Binance retorna timestamps em milissegundos, mas Lightweight Charts espera em segundos
+2. **Fuso Horário Incorreto**: tickMarkFormatter estava usando UTC em vez do fuso horário local do usuário
+
+### ✅ **Soluções Implementadas**
+
+#### **1. Conversão de Timestamp (TradingViewDataService)**
+```typescript
+private convertBinanceData(data: any[]): CandleData[] {
+  return data.map(candle => ({
+    // ✅ CORREÇÃO CRÍTICA: Converter timestamp de milissegundos para segundos
+    // Binance retorna timestamps em ms, mas Lightweight Charts espera em segundos
+    time: Math.floor(candle[0] / 1000),
+    open: parseFloat(candle[1]),
+    high: parseFloat(candle[2]),
+    low: parseFloat(candle[3]),
+    close: parseFloat(candle[4]),
+    volume: parseFloat(candle[5])
+  }));
+}
+```
+
+#### **2. Fuso Horário Local (LightweightLiquidationChart)**
+```typescript
+tickMarkFormatter: (time) => {
+  // ✅ CORREÇÃO CRÍTICA: Usar fuso horário local em vez de UTC
+  // Converter timestamp para Date object usando fuso horário local
+  const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
+  const date = new Date(timestamp * 1000);
+  
+  // Formatação usando fuso horário local - estilo LN Markets melhorado
+  const hours = String(date.getHours()).padStart(2, '0');        // ✅ Local em vez de UTC
+  const minutes = String(date.getMinutes()).padStart(2, '0');    // ✅ Local em vez de UTC
+  const day = String(date.getDate());                            // ✅ Local em vez de UTC
+  const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+  
+  // Para timeframes intraday (minutos/horas)
+  if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+    // Se for meia-noite local, mostrar dia + mês (formato claro)
+    if (date.getHours() === 0 && date.getMinutes() === 0) {      // ✅ Local em vez de UTC
+      return `${day} • ${monthName}`;
+    }
+    // Caso contrário, mostrar apenas hora:minuto
+    return `${hours}:${minutes}`;
+  }
+  
+  // Para timeframes diários ou maiores - mostrar dia/mês
+  return `${day} • ${monthName}`;
+}
+```
+
+### 🎯 **Resultados da Correção**
+
+#### **Antes (Problema)**
+- Datas em ordem cronológica incorreta: "6. Jan", "5. Feb", "29. Jan"
+- Horários desalinhados com dados reais da API
+- Fuso horário UTC causando confusão para usuários locais
+
+#### **Depois (Corrigido)**
+- Datas em ordem cronológica correta
+- Horários sincronizados com dados reais da API
+- Fuso horário local para melhor experiência do usuário
+
+### 🔧 **Impacto Técnico**
+
+#### **Precisão**
+- **Timestamps corretos**: Conversão ms → segundos
+- **Sincronização perfeita**: Dados da API alinhados com exibição
+- **Fuso horário local**: Experiência consistente para usuários
+
+#### **Confiabilidade**
+- **Dados precisos**: Eliminação de discrepâncias temporais
+- **Navegação correta**: Zoom e scroll funcionando corretamente
+- **Timeframes consistentes**: Todos os intervalos funcionando
+
+#### **UX Melhorada**
+- **Datas legíveis**: Formato claro e intuitivo
+- **Horários locais**: Sem confusão de fuso horário
+- **Navegação fluida**: Sem saltos temporais estranhos
+
+---
+
 ## 📝 **RESUMO DA IMPLEMENTAÇÃO**
 
 ### 🎯 **Características Principais**
@@ -1291,6 +1378,8 @@ throw new Error('Todas as APIs falharam - dados indisponíveis por segurança');
 - **Timeout**: 15 segundos por requisição
 - **Rate limiting**: Controle de requisições por API
 - **Zero dados antigos**: Erro em vez de dados desatualizados
+- **Sincronização de timestamps**: Conversão correta ms → segundos
+- **Fuso horário local**: Exibição de datas no timezone do usuário
 
 ### 📊 **Monitoramento**
 
@@ -1328,6 +1417,6 @@ throw new Error('Todas as APIs falharam - dados indisponíveis por segurança');
 ---
 
 **Documento**: Implementação de Gráficos de Candles  
-**Versão**: 1.1.0  
+**Versão**: 1.2.0  
 **Última Atualização**: 2025-01-25  
 **Responsável**: Equipe de Desenvolvimento
