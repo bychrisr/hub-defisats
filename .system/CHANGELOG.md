@@ -4,6 +4,62 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.12] - 2025-01-25
+
+### 🎨 **IMPLEMENTAÇÃO DE DROPDOWN DE TIMEFRAME NO ESTILO LN MARKETS**
+
+#### ✅ **Novo Componente TimeframeSelector**
+- **Arquivo**: `frontend/src/components/ui/timeframe-selector.tsx`
+- **Estilo**: Baseado na LN Markets com gradiente roxo-azul
+- **Funcionalidades**:
+  - Dropdown organizado por categorias (MINUTES, HOURS, DAYS)
+  - Hover effects e estados visuais
+  - Click outside para fechar
+  - Formato compacto de exibição (1M, 1H, 1D, etc.)
+  - Categorização inteligente: MINUTES (1m-45m), HOURS (1h-4h), DAYS (1d-3M)
+
+#### 🔄 **Refatoração da Interface de Gráficos**
+- **Removido**: Botões individuais de timeframe (1m, 5m, 15m, 30m, 1h, 4h, 1d)
+- **Removido**: Seção OHLC redundante (Open, High, Low, Close)
+- **Adicionado**: Dropdown único no estilo LN Markets
+- **Posicionamento**: Movido para próximo ao símbolo do ativo (lado esquerdo)
+
+#### 🎯 **Melhorias de UX**
+- **Interface mais limpa**: Eliminada redundância visual
+- **Posicionamento intuitivo**: Dropdown próximo ao símbolo do ativo
+- **Estilo LN Markets**: Visual consistente com referência
+- **Responsividade**: Adapta-se ao tema dark/light
+- **Interação melhorada**: Um único elemento de seleção
+
+#### 🛠️ **Arquivos Modificados**
+- `frontend/src/components/ui/timeframe-selector.tsx` - Novo componente
+- `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Integração do dropdown
+- `frontend/src/pages/Dashboard.tsx` - Remoção da seção TradingView Chart depreciada
+
+#### 📊 **Funcionalidades Implementadas**
+- ✅ Dropdown de timeframe com categorização
+- ✅ Remoção de botões individuais redundantes
+- ✅ Remoção de seção OHLC desnecessária
+- ✅ Posicionamento estratégico do dropdown
+- ✅ Estilo visual consistente com LN Markets
+- ✅ Interface mais limpa e profissional
+
+#### 🎨 **Características Visuais**
+- **Botão Principal**: Gradiente roxo-azul com ícone de relógio
+- **Dropdown**: Organizado por categorias com scroll interno
+- **Estados**: Hover, focus, seleção ativa
+- **Transições**: Suaves e responsivas
+- **Acessibilidade**: Navegação por teclado e leitores de tela
+
+#### 🔧 **Benefícios Técnicos**
+- **Manutenibilidade**: Código mais limpo e organizado
+- **Performance**: Menos elementos DOM desnecessários
+- **Escalabilidade**: Fácil adição de novos timeframes
+- **Consistência**: Padrão visual unificado
+- **Usabilidade**: Interface mais intuitiva
+
+---
+
 ## [v2.3.11] - 2025-01-09
 
 ### 📑 **IMPLEMENTAÇÃO DE ABAS NO MESMO ESTILO EM AUTOMATIONS**

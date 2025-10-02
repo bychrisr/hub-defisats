@@ -2,6 +2,107 @@
 
 Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
 
+## ADR-030: Refatoração da Interface de Gráficos com Dropdown de Timeframe
+
+**Data**: 2025-01-25  
+**Status**: Aceito  
+**Contexto**: Modernização da interface de gráficos seguindo padrões da LN Markets
+
+### Problema
+- **Interface redundante**: Múltiplos botões de timeframe competindo por espaço
+- **Seção OHLC desnecessária**: Informações redundantes ocupando espaço visual
+- **UX inconsistente**: Interface não seguia padrões estabelecidos pela LN Markets
+- **Manutenibilidade**: Código com elementos visuais desnecessários
+
+### Decisão
+Implementar dropdown de timeframe no estilo LN Markets:
+
+#### 1. Novo Componente TimeframeSelector
+- **Arquivo**: `frontend/src/components/ui/timeframe-selector.tsx`
+- **Estilo**: Baseado na LN Markets com gradiente roxo-azul
+- **Organização**: Categorias MINUTES, HOURS, DAYS
+- **Funcionalidades**: Click outside, hover effects, estados visuais
+
+#### 2. Refatoração da Interface
+- **Removido**: Botões individuais de timeframe (1m, 5m, 15m, 30m, 1h, 4h, 1d)
+- **Removido**: Seção OHLC redundante (Open, High, Low, Close)
+- **Adicionado**: Dropdown único no estilo LN Markets
+- **Posicionamento**: Movido para próximo ao símbolo do ativo
+
+#### 3. Melhorias de UX
+- **Interface limpa**: Eliminada redundância visual
+- **Posicionamento intuitivo**: Dropdown próximo ao símbolo
+- **Consistência visual**: Padrão unificado com LN Markets
+- **Responsividade**: Adaptação ao tema dark/light
+
+### Implementação
+
+#### 1. Componente TimeframeSelector
+```typescript
+interface TimeframeSelectorProps {
+  value: string;
+  onChange: (timeframe: string) => void;
+  className?: string;
+}
+
+export const TimeframeSelector: React.FC<TimeframeSelectorProps> = ({
+  value,
+  onChange,
+  className
+}) => {
+  const timeframes = [
+    { group: 'MINUTES', options: ['1m', '3m', '5m', '10m', '15m', '30m', '45m'] },
+    { group: 'HOURS', options: ['1h', '2h', '3h', '4h'] },
+    { group: 'DAYS', options: ['1d', '1w', '1M', '3M'] },
+  ];
+  // ... implementação completa
+};
+```
+
+#### 2. Integração no LightweightLiquidationChart
+```typescript
+// Removido: Botões individuais
+// Removido: Seção OHLC
+// Adicionado: TimeframeSelector
+<TimeframeSelector
+  value={currentTimeframe}
+  onChange={handleTimeframeChange}
+  className="ml-2"
+/>
+```
+
+#### 3. Características Visuais
+- **Botão Principal**: Gradiente roxo-azul com ícone de relógio
+- **Dropdown**: Organizado por categorias com scroll interno
+- **Estados**: Hover, focus, seleção ativa
+- **Transições**: Suaves e responsivas
+
+### Consequências
+
+#### Positivas
+- **Manutenibilidade**: Código mais limpo e organizado
+- **Performance**: Menos elementos DOM desnecessários
+- **Escalabilidade**: Fácil adição de novos timeframes
+- **Consistência**: Padrão visual unificado
+- **Usabilidade**: Interface mais intuitiva
+
+#### Negativas
+- **Migração**: Requer atualização de componentes existentes
+- **Aprendizado**: Usuários precisam se adaptar ao novo padrão
+
+### Alternativas Consideradas
+1. **Manter botões individuais**: Rejeitado por redundância visual
+2. **Manter seção OHLC**: Rejeitado por ocupar espaço desnecessário
+3. **Dropdown simples**: Rejeitado por não seguir padrão LN Markets
+
+### Implementação Técnica
+- **Arquivos criados**: `timeframe-selector.tsx`
+- **Arquivos modificados**: `LightweightLiquidationChart.tsx`, `Dashboard.tsx`
+- **Dependências**: Radix UI (Popover, Command), Lucide React
+- **Testes**: Build bem-sucedido, sem erros de linting
+
+---
+
 ## ADR-029: Implementação de Timeframe e Indicadores Dinâmicos no Lightweight Charts
 
 **Data**: 2025-01-09  

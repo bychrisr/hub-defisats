@@ -7,6 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useCandleData } from '@/hooks/useCandleData';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useIndicators, IndicatorType } from '@/hooks/useIndicators';
+import { TimeframeSelector } from '@/components/ui/timeframe-selector';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -786,32 +787,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
                 <span className="font-semibold text-sm text-blue-400 hover:underline cursor-default">{derivedDisplaySymbol}</span>
                 <span className="text-[11px] opacity-70">{derivedDescription}</span>
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {currentTimeframe.toUpperCase()}
-              </Badge>
-            </div>
               
-              {/* Informações OHLC */}
-              {effectiveCandleData && effectiveCandleData.length > 0 && (
-                <div className="flex items-center gap-4 text-xs">
-                  <div className="flex gap-2">
-                    <span className="text-gray-500">O</span>
-                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.open?.toFixed(2) || '--'}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-gray-500">H</span>
-                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.high?.toFixed(2) || '--'}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-gray-500">L</span>
-                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.low?.toFixed(2) || '--'}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-gray-500">C</span>
-                    <span className="font-mono">{effectiveCandleData[effectiveCandleData.length - 1]?.close?.toFixed(2) || '--'}</span>
-                  </div>
-                </div>
-              )}
+              {/* Timeframe Selector - Estilo LN Markets */}
+              <TimeframeSelector
+                value={currentTimeframe}
+                onChange={handleTimeframeChange}
+                className="ml-2"
+              />
+            </div>
               
               {/* Loading indicator */}
               {useApiData && candleLoading && (
@@ -839,25 +822,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
                 </div>
               )}
               
-              {/* Timeframe buttons */}
-              <div className="flex items-center gap-1">
-                {timeframes.map((tf) => (
-                  <Button
-                    key={tf.value}
-                    variant={currentTimeframe === tf.value ? "default" : "ghost"}
-                    size="sm"
-                    className={`h-7 px-2 text-xs ${
-                      currentTimeframe === tf.value 
-                        ? 'bg-blue-600 text-white' 
-                        : isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200'
-                    }`}
-                    onClick={() => handleTimeframeChange(tf.value)}
-                  >
-                    {tf.label}
-                  </Button>
-                ))}
-              </div>
-
               {/* Indicadores ativos */}
               {indicators.length > 0 && (
                 <div className="flex items-center gap-1">

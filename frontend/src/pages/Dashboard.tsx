@@ -51,7 +51,6 @@ import { RouteGuard } from '@/components/guards/RouteGuard';
 import { InfiniteHistoricalDataDemo } from '@/components/charts/InfiniteHistoricalDataDemo';
 import { HistoricalDataTest } from '@/components/charts/HistoricalDataTest';
 import { Tooltip } from '@/components/ui/tooltip';
-import TradingViewChart from '@/components/charts/TradingViewChart';
 import LightweightLiquidationChart from '@/components/charts/LightweightLiquidationChart';
 import PriceReference from '@/components/lnmarkets/PriceReference';
 import TradingViewMonitor from '@/components/TradingViewMonitor';
@@ -2125,22 +2124,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        </div>
-
-        {/* TradingView Chart - Implementação funcional com integração de dados */}
-        <div className="mt-6">
-          {!!liquidationLines && liquidationLines.length > 0 && (
-          <TradingViewChart 
-            symbol="BINANCE:BTCUSDT"
-            interval="60"
-            theme="dark"
-            height={500}
-            className="w-full"
-            liquidationPrice={undefined}
-            showLiquidationLine={true}
-          />)}
-
-          {/* Novo card: gráfico leve com linha de liquidação */}
+        {/* Gráfico leve com linha de liquidação */}
           <div className="mt-6">
             {!!liquidationLines && (
             <LightweightLiquidationChart
@@ -2182,7 +2166,7 @@ export default function Dashboard() {
               height={500}
             />
           </div>
-        </div>
+      </div>
     </RouteGuard>
   );
 }
