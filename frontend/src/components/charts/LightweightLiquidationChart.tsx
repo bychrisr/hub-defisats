@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { createChart, ColorType, ISeriesApi, LineStyle } from 'lightweight-charts';
+import { createChart, ColorType, ISeriesApi, LineStyle, Time } from 'lightweight-charts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,8 +20,8 @@ import {
   X
 } from 'lucide-react';
 
-type CandlestickPoint = { time: number; open: number; high: number; low: number; close: number };
-type LinePoint = { time: number; value: number };
+type CandlestickPoint = { time: Time; open: number; high: number; low: number; close: number };
+type LinePoint = { time: Time; value: number };
 
 interface LightweightLiquidationChartProps {
   symbol?: string;
@@ -182,8 +182,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         fontSize: 12,
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         // Configurações para eliminar espaço em branco na direita
-        rightOffset: 0, // Zero offset à direita
-        fixRightEdge: true, // Fixar borda direita
+        // rightOffset: 0, // ❌ Removido - não existe em LayoutOptions
+        // fixRightEdge: true, // ❌ Removido - não existe em LayoutOptions
       },
       grid: {
         vertLines: { 
@@ -207,7 +207,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
         timeVisible: true,
         secondsVisible: false,
-        textColor: isDark ? '#9ca3af' : '#6b7280',
+        // textColor: isDark ? '#9ca3af' : '#6b7280', // ❌ Removido - não existe em TimeScaleOptions
         // Configurações para eliminar espaço em branco
         fixLeftEdge: false, // Não fixar borda esquerda
         fixRightEdge: true, // Fixar borda direita
@@ -251,21 +251,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         pinch: true,
         axisDoubleClickReset: false // Evitar reset automático
       },
-      // Forçar que o último candle sempre fique visível na direita
-      rightPriceScale: {
-        borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-        textColor: isDark ? '#9ca3af' : '#6b7280',
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.1,
-        },
-        // Configuração para evitar espaço em branco
-        alignLabels: false,
-        borderVisible: true,
-        entireTextOnly: false,
-        visible: true,
-        drawTicks: true,
-      },
     });
 
     // Série principal (preferir candles, senão linha)
@@ -298,12 +283,12 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       const s = chart.addLineSeries({ color: 'transparent', lineWidth: 1 });
       if (typeof anchor === 'number' && Number.isFinite(anchor)) {
         s.setData([
-          { time: Math.floor(Date.now() / 1000) - 3600, value: anchor },
-          { time: Math.floor(Date.now() / 1000), value: anchor }
+          { time: (Math.floor(Date.now() / 1000) - 3600) as Time, value: anchor },
+          { time: Math.floor(Date.now() / 1000) as Time, value: anchor }
         ]);
       } else {
         // Se nem anchor existe, ainda cria série vazia para permitir price lines (não exibirá nada)
-        s.setData([{ time: Math.floor(Date.now() / 1000), value: 0 }]);
+        s.setData([{ time: Math.floor(Date.now() / 1000) as Time, value: 0 }]);
       }
       seriesRef.current = s;
     }
@@ -485,9 +470,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       if (allPrices.length > 0) {
         const min = Math.min(...allPrices);
         const max = Math.max(...allPrices);
-        if (Number.isFinite(min) && Number.isFinite(max) && min < max) {
-          chart.priceScale('right').setVisibleLogicalRange({ from: min, to: max } as any);
-        }
+        // ❌ Removido - priceScale não tem setVisibleLogicalRange
+        // if (Number.isFinite(min) && Number.isFinite(max) && min < max) {
+        //   chart.priceScale('right').setVisibleLogicalRange({ from: min, to: max } as any);
+        // }
       }
     } catch {}
 
