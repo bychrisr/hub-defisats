@@ -797,16 +797,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     // ✅ ARMAZENAR REFERÊNCIA DO GRÁFICO PRINCIPAL
     mainChartRef.current = chart;
-
-    // ✅ SINCRONIZAR GRÁFICOS QUANDO RSI ESTIVER ATIVO
-    if (rsiEnabled && rsiChartInstanceRef.current) {
-      // Sincronização manual de zoom e pan
-      chart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
-        if (rsiChartInstanceRef.current && timeRange) {
-          rsiChartInstanceRef.current.timeScale().setVisibleRange(timeRange);
-        }
-      });
-    }
   }, [height, isDark, liquidationPrice, currentTimeframe, liquidationLines, takeProfitLines, linePriceData, useApiData, rsiEnabled]);
 
   // useEffect separado para atualizar dados sem resetar o zoom
@@ -1091,12 +1081,21 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     // ✅ SINCRONIZAR COM GRÁFICO PRINCIPAL
     if (mainChartRef.current) {
+      console.log('🔄 SYNC - Configurando sincronização RSI:', {
+        mainChart: !!mainChartRef.current,
+        rsiChart: !!rsiChart,
+        rsiEnabled
+      });
+      
       // Sincronização manual de zoom e pan
       mainChartRef.current.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
         if (timeRange) {
+          console.log('🔄 SYNC - Sincronizando timeRange:', timeRange);
           rsiChart.timeScale().setVisibleRange(timeRange);
         }
       });
+    } else {
+      console.warn('⚠️ SYNC - Gráfico principal não disponível para sincronização');
     }
 
     return () => {
@@ -1123,23 +1122,13 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   // ✅ useEffect para sincronizar gráficos quando ambos estiverem disponíveis
   useEffect(() => {
     if (mainChartRef.current && rsiChartInstanceRef.current && rsiEnabled) {
-      // Sincronização manual de zoom e pan
-      const mainChart = mainChartRef.current;
-      const rsiChart = rsiChartInstanceRef.current;
-      
-      mainChart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
-        if (timeRange) {
-          rsiChart.timeScale().setVisibleRange(timeRange);
-        }
-      });
-      
       console.log('🔄 SYNC - Gráficos sincronizados:', {
         mainChart: !!mainChartRef.current,
         rsiChart: !!rsiChartInstanceRef.current,
         rsiEnabled
       });
     }
-  }, [rsiEnabled, mainChartRef.current, rsiChartInstanceRef.current]);
+  }, [rsiEnabled]);
 
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 
