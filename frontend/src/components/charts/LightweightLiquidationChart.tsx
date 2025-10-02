@@ -66,7 +66,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   useApiData = false
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const rsiContainerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
+  const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const isInitialLoad = useRef(true); // Controle de carregamento inicial
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [showIndicators, setShowIndicators] = useState(false);
@@ -892,6 +894,133 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     }
   }, [rsiEnabled, effectiveCandleData, rsiConfig]);
 
+  // useEffect para criar gráfico do RSI
+  useEffect(() => {
+    if (!rsiEnabled || !rsiContainerRef.current) {
+      if (rsiSeriesRef.current) {
+        rsiSeriesRef.current = null;
+      }
+      return;
+    }
+
+    const rsiChart = createChart(rsiContainerRef.current, {
+      height: 120, // Altura fixa para o RSI
+      layout: {
+        textColor: isDark ? '#d1d5db' : '#374151',
+        background: { type: ColorType.Solid, color: 'transparent' },
+        fontSize: 10,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      },
+      grid: {
+        vertLines: { 
+          color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+          style: 0
+        },
+        horzLines: { 
+          color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+          style: 0
+        },
+      },
+      rightPriceScale: { 
+        borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+        textColor: isDark ? '#9ca3af' : '#6b7280',
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
+        // Configurar escala do RSI (0-100)
+        mode: 1, // PriceScaleMode.Percentage
+      },
+      timeScale: {
+        borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+        timeVisible: false, // Ocultar eixo de tempo no RSI
+        secondsVisible: false,
+        fixRightEdge: true,
+      },
+      crosshair: {
+        mode: 1, // CrosshairMode.Normal
+        vertLine: {
+          color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+          width: 1,
+          style: 0,
+        },
+        horzLine: {
+          color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+          width: 1,
+          style: 0,
+        },
+      },
+    });
+
+    // Criar série de linha para RSI
+    const rsiSeries = rsiChart.addLineSeries({
+      color: '#8b5cf6', // Cor roxa para RSI
+      lineWidth: 2,
+      priceFormat: {
+        type: 'percent' as const,
+        precision: 2,
+        minMove: 0.01,
+      },
+    });
+
+    rsiSeriesRef.current = rsiSeries;
+
+    // Adicionar linhas de referência para overbought/oversold
+    rsiChart.addLineSeries({
+      color: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
+      lineWidth: 1,
+      lineStyle: 2, // LineStyle.Dashed
+      priceFormat: {
+        type: 'percent' as const,
+        precision: 0,
+        minMove: 1,
+      },
+    }).setData([
+      { time: 0 as Time, value: rsiConfig.overbought },
+      { time: Date.now() / 1000 as Time, value: rsiConfig.overbought },
+    ]);
+
+    rsiChart.addLineSeries({
+      color: isDark ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.5)',
+      lineWidth: 1,
+      lineStyle: 2, // LineStyle.Dashed
+      priceFormat: {
+        type: 'percent' as const,
+        precision: 0,
+        minMove: 1,
+      },
+    }).setData([
+      { time: 0 as Time, value: rsiConfig.oversold },
+      { time: Date.now() / 1000 as Time, value: rsiConfig.oversold },
+    ]);
+
+    // Atualizar dados do RSI quando disponíveis
+    if (rsiData.length > 0) {
+      const rsiChartData = rsiData.map(point => ({
+        time: point.time as Time,
+        value: point.value
+      }));
+      rsiSeries.setData(rsiChartData);
+    }
+
+    return () => {
+      rsiChart.remove();
+      rsiSeriesRef.current = null;
+    };
+  }, [rsiEnabled, isDark, rsiConfig]);
+
+  // useEffect para atualizar dados do RSI no gráfico
+  useEffect(() => {
+    if (!rsiSeriesRef.current || !rsiData.length) return;
+
+    const rsiChartData = rsiData.map(point => ({
+      time: point.time as Time,
+      value: point.value
+    }));
+
+    rsiSeriesRef.current.setData(rsiChartData);
+  }, [rsiData]);
+
   const hasAnyLine = (liquidationLines && liquidationLines.length > 0) || (typeof liquidationPrice === 'number' && liquidationPrice > 0);
 
   return (
@@ -1055,21 +1184,39 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         </div>
       </CardHeader>
 
-      {/* Painel de Configuração do RSI */}
-      {rsiEnabled && (
-        <div className="px-6 pb-4">
-          <RSIConfigComponent
-            config={rsiConfig}
-            enabled={rsiEnabled}
-            onConfigChange={setRsiConfig}
-            onEnabledChange={setRsiEnabled}
-          />
-        </div>
-      )}
       <CardContent>
         <div ref={containerRef} className="w-full rounded-lg overflow-hidden lightweight-chart-time-axis" style={{ height }} />
       </CardContent>
     </Card>
+
+    {/* Gráfico do RSI - Sub-gráfico abaixo do principal */}
+    {rsiEnabled && (
+      <Card className="mt-2">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-sm">RSI {rsiConfig.period}</CardTitle>
+              <Badge variant="outline" className="text-xs">
+                {rsiData[rsiData.length - 1]?.value?.toFixed(2) || '0.00'}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setRsiEnabled(false)}
+                className="h-6 px-2 text-xs"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div ref={rsiContainerRef} className="w-full rounded-lg overflow-hidden" style={{ height: 120 }} />
+        </CardContent>
+      </Card>
+    )}
     </>
   );
 };
