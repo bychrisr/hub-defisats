@@ -490,7 +490,9 @@ export class TradingViewDataService {
 
   private convertBinanceData(data: any[]): CandleData[] {
     return data.map(candle => ({
-      time: candle[0],
+      // ✅ CORREÇÃO CRÍTICA: Converter timestamp de milissegundos para segundos
+      // Binance retorna timestamps em ms, mas Lightweight Charts espera em segundos
+      time: Math.floor(candle[0] / 1000),
       open: parseFloat(candle[1]),
       high: parseFloat(candle[2]),
       low: parseFloat(candle[3]),

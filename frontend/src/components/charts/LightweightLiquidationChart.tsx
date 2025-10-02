@@ -212,20 +212,21 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         fixLeftEdge: false, // Não fixar borda esquerda
         fixRightEdge: true, // Fixar borda direita
         tickMarkFormatter: (time) => {
-          // Converter para timestamp UTC
+          // ✅ CORREÇÃO CRÍTICA: Usar fuso horário local em vez de UTC
+          // Converter timestamp para Date object usando fuso horário local
           const timestamp = typeof time === 'number' ? time : Date.UTC(time.year, time.month - 1, time.day) / 1000;
           const date = new Date(timestamp * 1000);
           
-          // Formatação corrigida - estilo LN Markets melhorado
-          const hours = String(date.getUTCHours()).padStart(2, '0');
-          const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-          const day = String(date.getUTCDate());
+          // Formatação usando fuso horário local - estilo LN Markets melhorado
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
+          const day = String(date.getDate());
           const monthName = date.toLocaleDateString('en-US', { month: 'short' });
           
           // Para timeframes intraday (minutos/horas)
           if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-            // Se for meia-noite UTC, mostrar dia + mês (formato claro)
-            if (date.getUTCHours() === 0 && date.getUTCMinutes() === 0) {
+            // Se for meia-noite local, mostrar dia + mês (formato claro)
+            if (date.getHours() === 0 && date.getMinutes() === 0) {
               // Formato: "30 • Oct" - usando bullet point para separar dia e mês
               return `${day} • ${monthName}`;
             }
