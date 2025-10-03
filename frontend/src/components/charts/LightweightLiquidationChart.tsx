@@ -532,10 +532,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       if (mainSeriesRef.current && effectiveCandleData && effectiveCandleData.length > 0) {
         if ('open' in effectiveCandleData[0]) {
           // Dados de candlestick
-          mainSeriesRef.current.setData(effectiveCandleData);
+          mainSeriesRef.current.setData(effectiveCandleData as any);
         } else {
           // Dados de linha
-          mainSeriesRef.current.setData(effectiveCandleData);
+          mainSeriesRef.current.setData(effectiveCandleData as any);
         }
       }
 
