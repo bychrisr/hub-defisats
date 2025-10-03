@@ -270,7 +270,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     if (!containerRef.current) return;
 
     console.count('🚀 CHART CREATION - Execução #');
-    console.log('🚀 CHART CREATION - Criando gráfico com panes nativos v5.0.3');
+    console.log('🚀 CHART CREATION - Criando gráfico com panes nativos v5.0.9');
 
     // Criar gráfico principal
     const chart = createChart(containerRef.current, chartOptions);
@@ -289,8 +289,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     console.log('✅ CHART CREATION - Chart criado com sucesso:', {
       chartType: chart.constructor.name,
-      hasAddCandlestickSeries: typeof chart.addCandlestickSeries === 'function',
-      hasAddLineSeries: typeof chart.addLineSeries === 'function',
+      hasAddSeries: typeof chart.addSeries === 'function',
+      hasAddPane: typeof chart.addPane === 'function',
       chartMethods: Object.getOwnPropertyNames(chart).filter(name => name.includes('add'))
     });
 
@@ -700,7 +700,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
               )}
               <div>
                 <CardTitle className="text-lg font-semibold">
-                  {derivedDisplaySymbol} (Lightweight Charts v4.2.3)
+                  {derivedDisplaySymbol} (Lightweight Charts v5.0.9)
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {derivedDescription}
@@ -764,7 +764,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">
-                Lightweight Charts v4.2.3
+                Lightweight Charts v5.0.9
               </Badge>
               {rsiEnabled && (
                 <Badge variant="default" className="text-xs">
