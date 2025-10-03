@@ -14,17 +14,17 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:13000', // ✅ Backend rodando na porta 13000
+        target: 'http://localhost:13010', // ✅ Backend Docker na porta 13010
         changeOrigin: true,
         secure: false,
       },
       '/api/ws': {
-        target: 'ws://localhost:13000', // ✅ WebSocket proxy usando porta 13000
+        target: 'ws://localhost:13010', // ✅ WebSocket proxy usando porta 13010
         ws: true,
         changeOrigin: true,
       },
       '/ws': {
-        target: 'ws://localhost:13000', // ✅ WebSocket proxy para /ws
+        target: 'ws://localhost:13010', // ✅ WebSocket proxy para /ws
         ws: true,
         changeOrigin: true,
       },
