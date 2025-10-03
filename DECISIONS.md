@@ -2,6 +2,55 @@
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
 
+## ADR-009: CORREÇÃO DADOS HISTÓRICOS E ESTADO INICIAL DO GRÁFICO
+
+**Data**: 2025-10-03  
+**Status**: ✅ IMPLEMENTADO COM SUCESSO  
+**Contexto**: Correção crítica do carregamento de dados históricos e estado inicial do gráfico
+
+### Problema Identificado
+- **Dados Históricos Desabilitados**: Dashboard com `useHistoricalData` configurado com `enabled: false`
+- **Estado Inicial Vazio**: Gráfico aparecia vazio na inicialização, só carregava ao mudar timeframe
+- **Logs Incorretos**: Console mostrava `enabled: false` no useHistoricalData
+- **Comportamento Inconsistente**: Gráfico não funcionava corretamente desde o início
+
+### Decisão
+**HABILITAR DADOS HISTÓRICOS E MELHORAR INICIALIZAÇÃO DO GRÁFICO**
+
+#### Implementação Escolhida:
+1. **Dashboard.tsx - Dados Históricos Habilitados**:
+   - `enabled: true` no useHistoricalData (era `false`)
+   - Carregamento automático na inicialização
+   - Logs corrigidos para mostrar estado correto
+
+2. **LightweightLiquidationChart.tsx - Inicialização Melhorada**:
+   - Logs detalhados para debugging de inicialização
+   - useEffect específico para forçar atualização quando dados históricos carregarem
+   - Detecção melhorada de condições para atualização de dados
+   - Timeout de segurança para garantir que gráfico esteja pronto
+
+### Alternativas Consideradas
+1. **Manter dados históricos desabilitados**: ❌ Falha - Gráfico fica vazio
+2. **Carregar dados apenas ao mudar timeframe**: ❌ UX ruim - Usuário precisa interagir
+3. **Habilitar dados históricos e melhorar inicialização**: ✅ Escolhido - Solução completa
+
+### Consequências Positivas
+- ✅ **Dados Históricos**: Carregam automaticamente na inicialização
+- ✅ **Estado Inicial**: Gráfico não fica mais vazio
+- ✅ **Logs Corretos**: Mostram `enabled: true` e carregamento de dados
+- ✅ **Comportamento Consistente**: Gráfico funciona corretamente desde o início
+- ✅ **UX Melhorada**: Usuário vê dados imediatamente
+
+### Consequências Negativas
+- **Nenhuma identificada**: Solução melhora a experiência do usuário
+
+### Implementação
+- **Arquivos**: `Dashboard.tsx`, `LightweightLiquidationChart.tsx`
+- **Mudança Principal**: `enabled: true` no useHistoricalData
+- **Validação**: APIs funcionando, dados históricos carregando corretamente
+
+---
+
 ## ADR-008: CORREÇÃO DEFINITIVA PROXY DOCKER COMPOSE
 
 **Data**: 2025-10-03  

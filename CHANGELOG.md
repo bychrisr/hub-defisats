@@ -6,6 +6,45 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🚀 **CORREÇÃO DADOS HISTÓRICOS E ESTADO INICIAL DO GRÁFICO - v2.6.2**
+
+#### ✨ **Problema Resolvido**
+- ✅ **Dados históricos desabilitados** no Dashboard (`enabled: false`)
+- ✅ **Estado inicial vazio do gráfico** - dados não carregavam na inicialização
+- ✅ **Logs mostravam 'enabled: false'** no useHistoricalData
+- ✅ **Gráfico só carregava dados ao mudar timeframe** (comportamento incorreto)
+
+#### 🔧 **Solução Implementada**
+
+##### **1. Dashboard.tsx - Dados Históricos Habilitados**
+- ✅ **useHistoricalData habilitado**: `enabled: true` (era `false`)
+- ✅ **Carregamento automático**: Dados históricos carregam na inicialização
+- ✅ **Logs corrigidos**: Agora mostram `enabled: true`
+
+##### **2. LightweightLiquidationChart.tsx - Inicialização Melhorada**
+- ✅ **Logs detalhados**: Adicionados para debugging de inicialização
+- ✅ **useEffect específico**: Para forçar atualização quando dados históricos carregarem
+- ✅ **Detecção melhorada**: Condições para atualização de dados aprimoradas
+- ✅ **Timeout de segurança**: Garante que gráfico esteja pronto antes de aplicar dados
+
+##### **3. Validação e Testes**
+- ✅ **API funcionando**: `/api/market/index/public` retorna dados
+- ✅ **Dados históricos**: `/api/tradingview/scanner` retorna 10 candles
+- ✅ **Hot reload**: Vite aplicou mudanças automaticamente
+- ✅ **Logs limpos**: Sem erros de carregamento
+
+#### 🎯 **Resultado**
+- **Dados históricos**: Carregam automaticamente na inicialização ✅
+- **Estado inicial**: Gráfico não fica mais vazio ✅
+- **Logs**: Mostram `enabled: true` e carregamento de dados ✅
+- **Comportamento**: Gráfico funciona corretamente desde o início ✅
+
+#### 📋 **Arquivos Modificados**
+- `frontend/src/pages/Dashboard.tsx` - Habilitado useHistoricalData
+- `frontend/src/components/charts/LightweightLiquidationChart.tsx` - Melhorada inicialização
+
+---
+
 ### 🚀 **CORREÇÃO DEFINITIVA - PROXY DOCKER COMPOSE - v2.6.1**
 
 #### ✨ **Problema Resolvido**
