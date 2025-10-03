@@ -2,6 +2,57 @@
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
 
+## ADR-010: CORREÇÃO DEFINITIVA - TIMESTAMP E ESCALA INICIAL DO GRÁFICO
+
+**Data**: 2025-10-03  
+**Status**: ✅ IMPLEMENTADO COM SUCESSO  
+**Contexto**: Correção crítica da conversão de timestamp e escala inicial do gráfico
+
+### Problema Identificado
+- **Backend retorna timestamps em milissegundos** mas frontend espera segundos
+- **Gráfico aparece vazio na inicialização** - falta `fitContent()` após `setData`
+- **Escala do eixo Y "vazando"** - apenas "2" visível no quadrado amarelo
+- **Dados históricos não carregam** devido à conversão incorreta de timestamp
+
+### Decisão
+**CORRIGIR CONVERSÃO DE TIMESTAMP E IMPLEMENTAR FITCONTENT() PARA ESCALA INICIAL**
+
+#### Implementação Escolhida:
+1. **tradingViewData.service.ts - Conversão de Timestamp**:
+   - `Math.floor(candle.time / 1000)` para converter ms → segundos
+   - Backend proxy retorna ms, mas Lightweight Charts espera segundos
+   - Conversão aplicada no `fetchFromTradingView()`
+   - Logs detalhados para debugging da conversão
+
+2. **LightweightLiquidationChart.tsx - Escala Inicial**:
+   - `chartRef.current.timeScale().fitContent()` após `setData`
+   - Resolve problema do gráfico vazio na inicialização
+   - Ajuste automático da escala para mostrar todos os dados
+   - Logs detalhados para debugging da atualização
+
+### Alternativas Consideradas
+- **Manter timestamps em ms**: Rejeitado - Lightweight Charts v5.0.9 espera segundos
+- **Conversão no backend**: Rejeitado - quebraria compatibilidade com outras APIs
+- **Usar `setVisibleRange`**: Rejeitado - `fitContent()` é mais automático e confiável
+
+### Consequências Positivas
+- ✅ **Dados históricos carregam corretamente** com timestamps válidos
+- ✅ **Estado inicial do gráfico funcional** - não aparece mais vazio
+- ✅ **Escala do eixo Y ajustada automaticamente** para mostrar dados completos
+- ✅ **UX melhorada** - usuário vê dados imediatamente sem interação
+- ✅ **Compatibilidade com v5.0.9** - API `fitContent()` funcionando corretamente
+
+### Consequências Negativas
+- **Nenhuma** - Correção resolve problemas sem introduzir novos
+
+### Validação
+- ✅ **API funcionando**: `/api/tradingview/scanner` retorna dados válidos
+- ✅ **Timestamps corretos**: Conversão ms → segundos implementada
+- ✅ **Hot reload**: Vite aplicou mudanças automaticamente
+- ✅ **Logs limpos**: Sem erros de carregamento
+
+---
+
 ## ADR-009: CORREÇÃO DADOS HISTÓRICOS E ESTADO INICIAL DO GRÁFICO
 
 **Data**: 2025-10-03  

@@ -6,6 +6,49 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🚀 **CORREÇÃO DEFINITIVA - TIMESTAMP E ESCALA INICIAL DO GRÁFICO - v2.6.3**
+
+#### ✨ **Problema Resolvido**
+- ✅ **Backend retorna timestamps em milissegundos** mas frontend espera segundos
+- ✅ **Gráfico aparece vazio na inicialização** - falta `fitContent()` após `setData`
+- ✅ **Escala do eixo Y "vazando"** - apenas "2" visível no quadrado amarelo
+- ✅ **Dados históricos não carregam** devido à conversão incorreta de timestamp
+
+#### 🔧 **Solução Implementada**
+
+##### **1. tradingViewData.service.ts - Conversão de Timestamp**
+- ✅ **Conversão corrigida**: `Math.floor(candle.time / 1000)` 
+- ✅ **Backend proxy retorna ms**, mas Lightweight Charts espera segundos
+- ✅ **Conversão aplicada** no `fetchFromTradingView()`
+- ✅ **Logs detalhados** para debugging da conversão
+
+##### **2. LightweightLiquidationChart.tsx - Escala Inicial**
+- ✅ **`fitContent()` adicionado**: `chartRef.current.timeScale().fitContent()`
+- ✅ **Após `setData`**: Resolve problema do gráfico vazio na inicialização
+- ✅ **Ajuste automático**: Escala ajustada para mostrar todos os dados
+- ✅ **Logs detalhados**: Para debugging da atualização de dados
+
+#### 🎯 **Resultado Esperado**
+- **Dados históricos**: Carregam corretamente com timestamps válidos ✅
+- **Estado inicial**: Gráfico não aparece mais vazio na inicialização ✅
+- **Escala do eixo Y**: Ajustada automaticamente para mostrar dados completos ✅
+- **Quadrado amarelo**: Mostra escala completa, não apenas "2" ✅
+- **UX melhorada**: Usuário vê dados imediatamente sem interação ✅
+
+#### 📊 **Validação**
+- ✅ **API funcionando**: `/api/tradingview/scanner` retorna dados válidos
+- ✅ **Timestamps corretos**: Conversão ms → segundos implementada
+- ✅ **Hot reload**: Vite aplicou mudanças automaticamente
+- ✅ **Logs limpos**: Sem erros de carregamento
+
+#### 🔄 **Compatibilidade**
+- ✅ **Lightweight Charts v5.0.9**: API `fitContent()` funcionando
+- ✅ **Docker Compose**: Ambiente funcionando corretamente
+- ✅ **Backend Proxy**: Cache e conversão de dados funcionando
+- ✅ **Frontend**: Conversão de timestamp implementada
+
+---
+
 ### 🚀 **CORREÇÃO DADOS HISTÓRICOS E ESTADO INICIAL DO GRÁFICO - v2.6.2**
 
 #### ✨ **Problema Resolvido**
