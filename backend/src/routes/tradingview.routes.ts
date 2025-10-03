@@ -133,8 +133,10 @@ export default async function tradingViewRoutes(fastify: any) {
       const binanceData = await binanceResponse.json();
       
       // Converter dados do Binance para formato padrão
+      // ✅ CORREÇÃO CRÍTICA: Binance retorna timestamps em milissegundos
+      // Mas o frontend espera em segundos para Lightweight Charts v5.0.9
       const convertedData = binanceData.map((kline: any[]) => ({
-        time: kline[0] as number,
+        time: Math.floor(kline[0] / 1000), // Converter ms para segundos
         open: parseFloat(kline[1]),
         high: parseFloat(kline[2]),
         low: parseFloat(kline[3]),
