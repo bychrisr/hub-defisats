@@ -41,22 +41,45 @@ if (apiFails) {
 }
 ```
 
-### **2. Cache Mínimo (30 segundos máximo)**
+### **2. Cache Diferenciado por Tipo de Dados (Implementado)**
 
 ```typescript
-// Cache apenas para evitar spam de requisições
-let marketDataCache = {
-  data: null,
-  timestamp: 0,
-  ttl: 30 * 1000 // 30 segundos - dados devem ser muito recentes
-};
+// ✅ IMPLEMENTADO - Cache diferenciado conforme ADR-006 e ADR-007
+class IntelligentCache {
+  private readonly MAX_TTL_MARKET = 30 * 1000; // 30 segundos para dados de mercado
+  private readonly MAX_TTL_HISTORICAL = 5 * 60 * 1000; // 5 minutos para dados históricos
+
+  set(key: string, data: any, customTtl?: number): void {
+    // Determinar TTL baseado no tipo de dados
+    let ttl = customTtl;
+    
+    if (!ttl) {
+      // TTL automático baseado no tipo de dados
+      if (key.includes('historical_')) {
+        ttl = this.MAX_TTL_HISTORICAL; // 5 minutos para dados históricos
+      } else {
+        ttl = this.MAX_TTL_MARKET; // 30 segundos para dados de mercado
+      }
+    }
+    
+    // Garantir que não exceda os limites de segurança
+    const maxTtl = key.includes('historical_') ? this.MAX_TTL_HISTORICAL : this.MAX_TTL_MARKET;
+    ttl = Math.min(ttl, maxTtl);
+    
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    });
+  }
+}
 ```
 
-**Por que 30 segundos?**
-- Evita spam de requisições à API
-- Dados ainda são relativamente atuais
-- Reduz latência para usuário
-- Mantém integridade dos dados
+**Por que cache diferenciado?**
+- **Dados de mercado**: Devem ser muito recentes (30s máximo)
+- **Dados históricos**: Podem ser cacheados por mais tempo (5min) sem risco
+- **Performance**: Melhora significativa em scroll/lazy loading
+- **Segurança**: Mantém princípios de segurança para dados voláteis
 
 ### **3. Nenhum Fallback com Dados Simulados**
 
@@ -135,10 +158,11 @@ if (!marketIndex || marketResponse.status === 'rejected') {
 
 ## 📊 **Métricas de Segurança**
 
-### **Tempo Máximo de Cache**
-- ✅ **30 segundos**: Aceitável para dados de mercado
-- ❌ **5 minutos**: Muito antigo para trading
-- ❌ **1 hora**: Completamente irrelevante
+### **Tempo Máximo de Cache (Implementado)**
+- ✅ **30 segundos**: Aceitável para dados de mercado (IMPLEMENTADO)
+- ✅ **5 minutos**: Aceitável para dados históricos (IMPLEMENTADO)
+- ❌ **5 minutos**: Muito antigo para dados de mercado
+- ❌ **1 hora**: Completamente irrelevante para dados de mercado
 
 ### **Validação de Dados**
 - ✅ **Timestamp obrigatório**: Todos os dados devem ter timestamp
@@ -221,16 +245,20 @@ return {
 - ✅ **Manutenibilidade**: Código claro sobre princípios de segurança
 - ✅ **Escalabilidade**: Fácil de entender e manter
 
-## 📝 **Checklist de Segurança**
+## 📝 **Checklist de Segurança (Implementado)**
 
-- [ ] Cache máximo de 30 segundos
-- [ ] Nenhum fallback com dados simulados
-- [ ] Validação de timestamp em todos os dados
-- [ ] Erro claro quando dados indisponíveis
-- [ ] Interface educativa sobre riscos
-- [ ] Retry disponível para usuário
-- [ ] Logs detalhados para debugging
-- [ ] Testes de validação de dados
+- [x] Cache máximo de 30 segundos para dados de mercado
+- [x] Cache de 5 minutos para dados históricos (conforme ADR-006)
+- [x] Cache diferenciado por tipo de dados (IMPLEMENTADO)
+- [x] Nenhum fallback com dados simulados
+- [x] Validação de timestamp em todos os dados
+- [x] Erro claro quando dados indisponíveis
+- [x] Interface educativa sobre riscos
+- [x] Retry disponível para usuário
+- [x] Logs detalhados para debugging (IMPLEMENTADO)
+- [x] Testes de validação de dados
+- [x] Limpeza automática de cache (IMPLEMENTADO)
+- [x] Monitoramento de cache hit/miss (IMPLEMENTADO)
 
 ## 🔗 **Referências**
 

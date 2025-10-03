@@ -773,15 +773,62 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   }, [effectiveCandleData, isInitialLoad]);
 ```
 
-### 🔄 **Backend Proxy TradingView**
+### 🔄 **Backend Proxy TradingView com Cache Inteligente**
 
 ```typescript
 // backend/src/routes/tradingview.routes.ts
+// Cache inteligente para dados históricos (conforme documentação)
+let historicalDataCache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+
+// Limpeza automática do cache a cada 10 minutos para evitar vazamentos de memória
+setInterval(() => {
+  const now = Date.now();
+  let cleanedCount = 0;
+  
+  for (const [key, entry] of historicalDataCache.entries()) {
+    if (now - entry.timestamp > entry.ttl) {
+      historicalDataCache.delete(key);
+      cleanedCount++;
+    }
+  }
+  
+  if (cleanedCount > 0) {
+    console.log(`🧹 TRADINGVIEW PROXY - Cache cleanup: ${cleanedCount} expired entries removed`);
+  }
+}, 10 * 60 * 1000); // 10 minutos
+
 fastify.get('/scanner', async (request, reply) => {
   try {
     const { symbol = 'BTCUSDT', timeframe = '1h', limit = '100' } = request.query as any;
     
     console.log('🔄 TRADINGVIEW PROXY - Request:', { symbol, timeframe, limit });
+
+    // Gerar chave de cache para dados históricos
+    const cacheKey = `historical_${symbol}_${timeframe}_${limit}`;
+    const now = Date.now();
+    
+    // Verificar cache para dados históricos (5 minutos conforme ADR-006)
+    const cachedEntry = historicalDataCache.get(cacheKey);
+    if (cachedEntry && (now - cachedEntry.timestamp) < cachedEntry.ttl) {
+      console.log('📦 TRADINGVIEW PROXY - Cache hit for historical data:', {
+        cacheKey: cacheKey.substring(0, 50) + '...',
+        age: (now - cachedEntry.timestamp) / 1000 + 's',
+        ttl: cachedEntry.ttl / 1000 + 's'
+      });
+      
+      return reply.send({
+        success: true,
+        data: cachedEntry.data,
+        source: 'tradingview-proxy-binance-cached',
+        timestamp: cachedEntry.timestamp,
+        cacheHit: true
+      });
+    }
+
+    console.log('📦 TRADINGVIEW PROXY - Cache miss, fetching fresh data:', {
+      cacheKey: cacheKey.substring(0, 50) + '...',
+      reason: cachedEntry ? 'expired' : 'not found'
+    });
 
     // Por enquanto, usar Binance como fonte (transparente para o frontend)
     const binanceResponse = await fetch(
@@ -809,11 +856,25 @@ fastify.get('/scanner', async (request, reply) => {
       source: 'binance-via-proxy'
     });
 
+    // Armazenar no cache com TTL de 5 minutos para dados históricos (conforme ADR-006)
+    historicalDataCache.set(cacheKey, {
+      data: tradingViewData,
+      timestamp: now,
+      ttl: 5 * 60 * 1000 // 5 minutos para dados históricos
+    });
+
+    console.log('📦 TRADINGVIEW PROXY - Data cached for historical use:', {
+      cacheKey: cacheKey.substring(0, 50) + '...',
+      ttl: '5min',
+      dataLength: tradingViewData.length
+    });
+
     return reply.status(200).send({
       success: true,
       data: tradingViewData,
       source: 'tradingview-proxy-binance',
-      timestamp: Date.now()
+      timestamp: now,
+      cacheHit: false
     });
 
   } catch (error: any) {
@@ -840,7 +901,76 @@ Seguindo o documento `_VOLATILE_MARKET_SAFETY.md`, o sistema implementa:
 3. **Nenhum fallback com dados simulados**
 4. **Validação rigorosa de timestamps**
 
-### 📦 **Implementação do Cache**
+### 📦 **Implementação do Cache Diferenciado**
+
+```typescript
+// frontend/src/services/tradingViewData.service.ts
+class IntelligentCache {
+  private cache = new Map<string, CacheEntry>();
+  private readonly MAX_TTL_MARKET = 30 * 1000; // 30 segundos para dados de mercado
+  private readonly MAX_TTL_HISTORICAL = 5 * 60 * 1000; // 5 minutos para dados históricos
+
+  set(key: string, data: any, customTtl?: number): void {
+    // Determinar TTL baseado no tipo de dados
+    let ttl = customTtl;
+    
+    if (!ttl) {
+      // TTL automático baseado no tipo de dados
+      if (key.includes('historical_')) {
+        ttl = this.MAX_TTL_HISTORICAL;
+      } else {
+        ttl = this.MAX_TTL_MARKET;
+      }
+    }
+    
+    // Garantir que não exceda os limites de segurança
+    const maxTtl = key.includes('historical_') ? this.MAX_TTL_HISTORICAL : this.MAX_TTL_MARKET;
+    ttl = Math.min(ttl, maxTtl);
+    
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    });
+    
+    // Log para monitoramento do cache diferenciado
+    const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
+    console.log(`📦 CACHE SET - ${dataType} data cached for ${ttl/1000}s:`, {
+      key: key.substring(0, 50) + '...',
+      dataType,
+      ttl: ttl/1000 + 's',
+      dataLength: Array.isArray(data) ? data.length : 'object'
+    });
+  }
+
+  get(key: string): any | null {
+    const entry = this.cache.get(key);
+    if (!entry) {
+      console.log(`📦 CACHE MISS - No entry found:`, key.substring(0, 50) + '...');
+      return null;
+    }
+
+    const age = Date.now() - entry.timestamp;
+    if (age > entry.ttl) {
+      this.cache.delete(key);
+      const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
+      console.log(`📦 CACHE EXPIRED - ${dataType} data expired after ${age/1000}s:`, key.substring(0, 50) + '...');
+      return null;
+    }
+
+    const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
+    console.log(`📦 CACHE HIT - ${dataType} data retrieved (age: ${age/1000}s):`, {
+      key: key.substring(0, 50) + '...',
+      dataType,
+      age: age/1000 + 's',
+      ttl: entry.ttl/1000 + 's'
+    });
+    return entry.data;
+  }
+}
+```
+
+### 🔍 **Validação de Dados com Cache Diferenciado**
 
 ```typescript
 // Cache para dados de mercado (30 segundos - apenas para evitar spam de requisições)
@@ -850,6 +980,9 @@ let marketDataCache = {
   ttl: 30 * 1000 // 30 segundos - dados devem ser muito recentes
 };
 
+// Cache para dados históricos (5 minutos - conforme ADR-006)
+let historicalDataCache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+
 // Verificar cache apenas para evitar spam (30 segundos máximo)
 const now = Date.now();
 if (marketDataCache.data && (now - marketDataCache.timestamp) < marketDataCache.ttl) {
@@ -857,6 +990,24 @@ if (marketDataCache.data && (now - marketDataCache.timestamp) < marketDataCache.
   return reply.status(200).send({
     success: true,
     data: marketDataCache.data
+  });
+}
+
+// Verificar cache para dados históricos (5 minutos conforme ADR-006)
+const cachedEntry = historicalDataCache.get(cacheKey);
+if (cachedEntry && (now - cachedEntry.timestamp) < cachedEntry.ttl) {
+  console.log('📦 TRADINGVIEW PROXY - Cache hit for historical data:', {
+    cacheKey: cacheKey.substring(0, 50) + '...',
+    age: (now - cachedEntry.timestamp) / 1000 + 's',
+    ttl: cachedEntry.ttl / 1000 + 's'
+  });
+  
+  return reply.send({
+    success: true,
+    data: cachedEntry.data,
+    source: 'tradingview-proxy-binance-cached',
+    timestamp: cachedEntry.timestamp,
+    cacheHit: true
   });
 }
 
