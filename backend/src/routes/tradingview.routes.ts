@@ -87,9 +87,36 @@ export default async function tradingViewRoutes(fastify: any) {
       // Fazer requisição para Binance API
       // Converter símbolo TradingView para formato Binance
       const binanceSymbol = symbol?.replace(/^BINANCE:/, '') || symbol;
-      console.log('🔄 TRADINGVIEW PROXY - Converting symbol:', { original: symbol, binance: binanceSymbol });
       
-      const binanceResponse = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${timeframe}&limit=${limit}`, {
+      // Mapear intervalos TradingView para Binance
+      const intervalMapping: { [key: string]: string } = {
+        '1m': '1m',
+        '3m': '3m', 
+        '5m': '5m',
+        '10m': '15m',  // TradingView 10m -> Binance 15m (mais próximo)
+        '15m': '15m',
+        '30m': '30m',
+        '1h': '1h',
+        '2h': '2h',
+        '4h': '4h',
+        '6h': '6h',
+        '8h': '8h',
+        '12h': '12h',
+        '1d': '1d',
+        '3d': '3d',
+        '1w': '1w',
+        '1M': '1M'
+      };
+      
+      const binanceInterval = intervalMapping[timeframe || '1h'] || '1h';
+      console.log('🔄 TRADINGVIEW PROXY - Converting symbol and interval:', { 
+        originalSymbol: symbol, 
+        binanceSymbol, 
+        originalInterval: timeframe, 
+        binanceInterval 
+      });
+      
+      const binanceResponse = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${binanceInterval}&limit=${limit}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
