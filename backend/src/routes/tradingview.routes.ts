@@ -3,7 +3,31 @@
  * 
  * Proxy para resolver problemas de CORS com TradingView Scanner API
  * Permite usar TradingView como principal sem problemas de CORS
+ * 
+ * ⚠️ IMPLEMENTAÇÃO DE CACHE CONFORME _VOLATILE_MARKET_SAFETY.md:
+ * - Dados históricos: Cache de 5 minutos (conforme ADR-006)
+ * - Dados de mercado: Cache de 30 segundos (segurança)
  */
+
+// Cache inteligente para dados históricos (conforme documentação)
+let historicalDataCache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+
+// Limpeza automática do cache a cada 10 minutos para evitar vazamentos de memória
+setInterval(() => {
+  const now = Date.now();
+  let cleanedCount = 0;
+  
+  for (const [key, entry] of historicalDataCache.entries()) {
+    if (now - entry.timestamp > entry.ttl) {
+      historicalDataCache.delete(key);
+      cleanedCount++;
+    }
+  }
+  
+  if (cleanedCount > 0) {
+    console.log(`🧹 TRADINGVIEW PROXY - Cache cleanup: ${cleanedCount} expired entries removed`);
+  }
+}, 10 * 60 * 1000); // 10 minutos
 
 export default async function tradingViewRoutes(fastify: any) {
   // Proxy para TradingView Scanner API
@@ -16,6 +40,33 @@ export default async function tradingViewRoutes(fastify: any) {
       };
 
       console.log('🔄 TRADINGVIEW PROXY - Request received:', { symbol, timeframe, limit });
+
+      // Gerar chave de cache para dados históricos
+      const cacheKey = `historical_${symbol}_${timeframe}_${limit}`;
+      const now = Date.now();
+      
+      // Verificar cache para dados históricos (5 minutos conforme ADR-006)
+      const cachedEntry = historicalDataCache.get(cacheKey);
+      if (cachedEntry && (now - cachedEntry.timestamp) < cachedEntry.ttl) {
+        console.log('📦 TRADINGVIEW PROXY - Cache hit for historical data:', {
+          cacheKey: cacheKey.substring(0, 50) + '...',
+          age: (now - cachedEntry.timestamp) / 1000 + 's',
+          ttl: cachedEntry.ttl / 1000 + 's'
+        });
+        
+        return reply.send({
+          success: true,
+          data: cachedEntry.data,
+          source: 'tradingview-proxy-binance-cached',
+          timestamp: cachedEntry.timestamp,
+          cacheHit: true
+        });
+      }
+
+      console.log('📦 TRADINGVIEW PROXY - Cache miss, fetching fresh data:', {
+        cacheKey: cacheKey.substring(0, 50) + '...',
+        reason: cachedEntry ? 'expired' : 'not found'
+      });
 
       // Configuração de símbolos TradingView (multi-exchange)
       const tradingViewSymbols = {
@@ -69,11 +120,25 @@ export default async function tradingViewRoutes(fastify: any) {
         convertedCount: convertedData.length
       });
 
+      // Armazenar no cache com TTL de 5 minutos para dados históricos (conforme ADR-006)
+      historicalDataCache.set(cacheKey, {
+        data: convertedData,
+        timestamp: now,
+        ttl: 5 * 60 * 1000 // 5 minutos para dados históricos
+      });
+
+      console.log('📦 TRADINGVIEW PROXY - Data cached for historical use:', {
+        cacheKey: cacheKey.substring(0, 50) + '...',
+        ttl: '5min',
+        dataLength: convertedData.length
+      });
+
       return reply.send({
         success: true,
         data: convertedData,
         source: 'tradingview-proxy-binance',
-        timestamp: Date.now()
+        timestamp: now,
+        cacheHit: false
       });
 
     } catch (error: any) {
