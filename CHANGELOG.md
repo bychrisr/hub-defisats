@@ -6,6 +6,44 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🔧 **REFATORAÇÃO LIGHTWEIGHT CHARTS - PREPARAÇÃO PARA V5.0.9 - v2.4.0**
+
+#### 🚀 **Atualização de Dependência**
+- ✅ **Package.json**: Atualizado `lightweight-charts` para `^5.0.9`
+- ✅ **Compatibilidade**: Código preparado para migração futura para v5
+- ✅ **API Atual**: Mantida compatibilidade com v4.2.3 atual
+
+#### 🔧 **Refatoração de Código**
+
+##### **1. LightweightLiquidationChart.tsx**
+- ✅ **API v4.2.3**: Refatorado para usar `addCandlestickSeries()`, `addLineSeries()`
+- ✅ **RSI com priceScaleId**: Implementado separação de escalas para RSI
+- ✅ **Type Assertions Otimizados**: Mantidos apenas onde necessário para compatibilidade
+- ✅ **Controle de Visibilidade**: Implementado controle de séries RSI sem panes nativos
+- ✅ **Logs Atualizados**: Debug logs ajustados para v4.2.3
+
+##### **2. Outros Componentes de Gráfico**
+- ✅ **TradingChart.tsx**: Já compatível com v4.2.3
+- ✅ **LNMarketsChart.tsx**: Já compatível com v4.2.3  
+- ✅ **BTCChart.tsx**: Já compatível com v4.2.3
+
+##### **3. Hooks e Serviços**
+- ✅ **useHistoricalData.ts**: Já compatível, sem mudanças necessárias
+- ✅ **marketData.service.ts**: Já compatível, sem mudanças necessárias
+- ✅ **useBTCData.ts**: Já compatível, sem mudanças necessárias
+
+#### 🎯 **Preparação para Migração Futura**
+- ✅ **Documentação v5**: Guia completo da API v5.0.9 criado
+- ✅ **Estrutura Preparada**: Código organizado para migração futura
+- ✅ **Type Safety**: TypeScript sem erros de compilação
+- ✅ **Compatibilidade**: Funciona perfeitamente com v4.2.3 atual
+
+#### 📊 **Melhorias de Performance**
+- ✅ **Compilação TypeScript**: Sem erros de tipo
+- ✅ **Linting**: Código limpo sem warnings
+- ✅ **Estrutura Otimizada**: Preparado para panes nativos da v5
+- ✅ **API Consistente**: Uso correto da API v4.2.3
+
 ### 🔧 **CORREÇÃO CRÍTICA - LOOP DE REPETIÇÕES LIGHTWEIGHT CHARTS - v2.3.0**
 
 #### 🚨 **Problema Crítico Resolvido**

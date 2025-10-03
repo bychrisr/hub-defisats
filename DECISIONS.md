@@ -2,6 +2,107 @@
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
 
+## ADR-005: Refatoração Lightweight Charts - Preparação para v5.0.9
+
+**Data**: 2025-01-25  
+**Status**: ✅ Aprovado  
+**Contexto**: Necessidade de preparar o código para migração futura do lightweight-charts da v4.2.3 para v5.0.9, mantendo compatibilidade atual.
+
+### Problema Identificado
+- **Dependência Desatualizada**: Package.json com versão específica v4.2.3
+- **API Inconsistente**: Uso de APIs que mudaram na v5
+- **Type Assertions Excessivos**: Uso desnecessário de `as Tipo`
+- **Preparação Futura**: Necessidade de estrutura para migração futura
+
+### Decisão
+Refatorar o código para usar a API correta da v4.2.3 atual, preparando a estrutura para migração futura para v5.0.9, mantendo compatibilidade total.
+
+### Alternativas Consideradas
+1. **Migração Imediata para v5**: Risco alto, pode quebrar funcionalidades
+2. **Manter v4.2.3**: Não prepara para futuro
+3. **Refatoração Preparatória**: Estrutura limpa + compatibilidade atual (escolhida)
+4. **Dual Support**: Suporte a ambas versões (complexidade excessiva)
+
+### Implementação Escolhida
+
+#### 1. Atualização de Dependência
+```json
+// package.json
+{
+  "dependencies": {
+    "lightweight-charts": "^5.0.9"  // Preparado para v5, mas funciona com v4.2.3
+  }
+}
+```
+
+#### 2. API v4.2.3 Correta
+```typescript
+// ✅ API correta para v4.2.3
+const candlestickSeries = chart.addCandlestickSeries({
+  upColor: '#26a69a', 
+  downColor: '#ef5350',
+  borderVisible: false,
+});
+
+const lineSeries = chart.addLineSeries({
+  color: '#2196F3',
+  lineWidth: 2,
+});
+```
+
+#### 3. RSI com priceScaleId (v4.2.3)
+```typescript
+// ✅ Separação de escalas sem panes nativos
+rsiSeriesRef.current = chart.addLineSeries({
+  color: '#8b5cf6',
+  lineWidth: 2,
+  priceFormat: {
+    type: 'percent' as const,
+    precision: 2,
+    minMove: 0.01,
+  },
+  priceScaleId: 'rsi',  // Escala separada para RSI
+});
+```
+
+#### 4. Type Assertions Otimizados
+```typescript
+// ✅ Apenas onde necessário para compatibilidade
+const rsiChartData = calculatedRSI.map(point => ({
+  time: point.time as Time,  // Necessário para compatibilidade de tipos
+  value: point.value
+}));
+```
+
+#### 5. Controle de Visibilidade (v4.2.3)
+```typescript
+// ✅ Controle de séries sem panes nativos
+if (rsiSeriesRef.current) {
+  rsiSeriesRef.current.applyOptions({
+    visible: rsiEnabled
+  });
+}
+```
+
+### Benefícios da Decisão
+- ✅ **Compatibilidade Total**: Funciona perfeitamente com v4.2.3 atual
+- ✅ **Preparação Futura**: Estrutura pronta para migração para v5
+- ✅ **Type Safety**: TypeScript sem erros de compilação
+- ✅ **Performance**: Código otimizado e limpo
+- ✅ **Manutenibilidade**: Estrutura clara e documentada
+
+### Migração Futura para v5.0.9
+Quando a migração for necessária, será necessário:
+1. Atualizar importações para incluir variáveis de série (`LineSeries`, `CandlestickSeries`)
+2. Substituir `addCandlestickSeries()` por `addSeries(CandlestickSeries)`
+3. Implementar panes nativos com `paneIndex`
+4. Remover type assertions desnecessários
+
+### Documentação
+- ✅ **Guia v5**: Documentação completa da API v5.0.9 criada
+- ✅ **CHANGELOG**: Registro detalhado das mudanças
+- ✅ **DECISIONS**: Decisão técnica documentada
+
 ## ADR-004: Correção de Loop Infinito em Lightweight Charts
 
 **Data**: 2025-01-25  

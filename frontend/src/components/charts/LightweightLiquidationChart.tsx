@@ -286,9 +286,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     console.log('✅ CHART CREATION - Chart criado com sucesso:', {
       chartType: chart.constructor.name,
-      hasAddCandlestickSeries: typeof (chart as any).addCandlestickSeries === 'function',
-      hasAddLineSeries: typeof (chart as any).addLineSeries === 'function',
-      hasAddPane: typeof (chart as any).addPane === 'function',
+      hasAddCandlestickSeries: typeof chart.addCandlestickSeries === 'function',
+      hasAddLineSeries: typeof chart.addLineSeries === 'function',
       chartMethods: Object.getOwnPropertyNames(chart).filter(name => name.includes('add'))
     });
 
@@ -296,19 +295,19 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     if (effectiveCandleData && effectiveCandleData.length > 0) {
       try {
         if ('open' in effectiveCandleData[0]) {
-          // Dados de candlestick
-              const series = (chart as any).addCandlestickSeries({
-        upColor: '#26a69a', 
-        downColor: '#ef5350',
+          // Dados de candlestick - API v4.2.3
+          const series = chart.addCandlestickSeries({
+            upColor: '#26a69a', 
+            downColor: '#ef5350',
             borderVisible: false,
-        wickUpColor: '#26a69a', 
-        wickDownColor: '#ef5350',
+            wickUpColor: '#26a69a', 
+            wickDownColor: '#ef5350',
           });
           mainSeriesRef.current = series;
           console.log('✅ MAIN SERIES - Candlestick series criada');
-    } else {
-          // Dados de linha
-              const series = (chart as any).addLineSeries({
+        } else {
+          // Dados de linha - API v4.2.3
+          const series = chart.addLineSeries({
             color: '#2196F3',
             lineWidth: 2,
           });
@@ -320,10 +319,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     }
 
-    // Criar séries para linhas de liquidação
+    // Criar séries para linhas de liquidação - API v4.2.3
     if (liquidationLines && liquidationLines.length > 0) {
       try {
-        liquidationSeriesRef.current = (chart as any).addLineSeries({
+        liquidationSeriesRef.current = chart.addLineSeries({
           color: '#ff6b6b',
           lineWidth: 1,
           lineStyle: LineStyle.Dashed,
@@ -334,10 +333,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     }
 
-    // Criar séries para linhas de take profit
+    // Criar séries para linhas de take profit - API v4.2.3
     if (takeProfitLines && takeProfitLines.length > 0) {
       try {
-        takeProfitSeriesRef.current = (chart as any).addLineSeries({
+        takeProfitSeriesRef.current = chart.addLineSeries({
           color: '#51cf66',
           lineWidth: 1,
           lineStyle: LineStyle.Dashed,
@@ -348,13 +347,11 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     }
 
-    // ✅ CRIAR SÉRIES RSI NO PANE NATIVO - API OFICIAL v5.0.9
-    // Conforme documentação: panes são criados automaticamente ao usar paneIndex
+    // ✅ CRIAR SÉRIES RSI - API v4.2.3 (sem panes nativos)
+    // Na v4.2.3, usamos priceScaleId para separar escalas
     try {
-      const paneIndex = 1; // Pane RSI será criado automaticamente
-      
-      // ✅ API OFICIAL v5.0.9 - addSeries(SeriesType, options, paneIndex)
-      rsiSeriesRef.current = (chart as any).addLineSeries({
+      // Criar série RSI principal
+      rsiSeriesRef.current = chart.addLineSeries({
         color: '#8b5cf6',
         lineWidth: 2,
         priceFormat: {
@@ -362,9 +359,11 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 2,
           minMove: 0.01,
         },
-      }, paneIndex);
+        priceScaleId: 'rsi',
+      });
 
-      overboughtSeriesRef.current = (chart as any).addLineSeries({
+      // Criar linha de overbought
+      overboughtSeriesRef.current = chart.addLineSeries({
         color: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
         lineWidth: 1,
         lineStyle: LineStyle.Dashed,
@@ -373,9 +372,11 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 0,
           minMove: 1,
         },
-      }, paneIndex);
+        priceScaleId: 'rsi',
+      });
 
-      oversoldSeriesRef.current = (chart as any).addLineSeries({
+      // Criar linha de oversold
+      oversoldSeriesRef.current = chart.addLineSeries({
         color: isDark ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.5)',
         lineWidth: 1,
         lineStyle: LineStyle.Dashed,
@@ -384,34 +385,12 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 0,
           minMove: 1,
         },
-      }, paneIndex);
-      
-      // ✅ CONFIGURAR PANE RSI - API OFICIAL
-      const rsiPane = (chart as any).panes()[paneIndex];
-      if (rsiPane) {
-        rsiPane.setHeight(150); // Altura do pane RSI
-        console.log('🚀 RSI PANE - Pane configurado:', {
-          paneIndex: rsiPane.paneIndex(),
-          height: rsiPane.getHeight(),
-          series: rsiPane.getSeries().length
-        });
-      }
-      
-      console.log('🚀 RSI SERIES - Séries RSI criadas no pane:', paneIndex);
-    } catch (error) {
-      console.warn('⚠️ RSI SERIES - Erro ao criar séries no pane:', error);
-      // Fallback: criar no gráfico principal com priceScale separado
-      rsiSeriesRef.current = (chart as any).addLineSeries({
-        color: '#8b5cf6',
-        lineWidth: 2,
-        priceFormat: {
-          type: 'percent' as const,
-          precision: 2,
-          minMove: 0.01,
-        },
-        priceScaleId: 'right',
+        priceScaleId: 'rsi',
       });
-      console.log('🚀 RSI SERIES - Fallback: série criada no gráfico principal');
+      
+      console.log('🚀 RSI SERIES - Séries RSI criadas com priceScaleId: rsi');
+    } catch (error) {
+      console.warn('⚠️ RSI SERIES - Erro ao criar séries RSI:', error);
     }
 
     console.log('🚀 SERIES CREATION - Séries criadas:', {
@@ -571,31 +550,45 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     updateSeriesData();
   }, [updateSeriesData]);
 
-  // ✅ CONTROLAR VISIBILIDADE DO PANE RSI COM useCallback
-  const updatePaneVisibility = useCallback(() => {
-    if (!chartReady || !rsiPaneRef.current) return;
+  // ✅ CONTROLAR VISIBILIDADE DAS SÉRIES RSI COM useCallback (v4.2.3)
+  const updateRSIVisibility = useCallback(() => {
+    if (!chartReady) return;
 
-    console.log('🔄 PANE VISIBILITY - Controlando visibilidade do pane RSI:', {
+    console.log('🔄 RSI VISIBILITY - Controlando visibilidade das séries RSI:', {
       rsiEnabled,
-      paneExists: !!rsiPaneRef.current
+      hasRsiSeries: !!rsiSeriesRef.current,
+      hasOverboughtSeries: !!overboughtSeriesRef.current,
+      hasOversoldSeries: !!oversoldSeriesRef.current
     });
 
-    if (rsiPaneRef.current) {
-      // Ajustar altura do pane baseado no estado do RSI
-      const paneHeight = rsiEnabled ? 100 : 0;
-      rsiPaneRef.current.setHeight(paneHeight);
-      
-      console.log('🔄 PANE HEIGHT - Altura do pane ajustada:', {
-        height: paneHeight,
-        rsiEnabled
+    // Na v4.2.3, não há panes nativos, então controlamos a visibilidade das séries
+    if (rsiSeriesRef.current) {
+      rsiSeriesRef.current.applyOptions({
+        visible: rsiEnabled
       });
     }
+    
+    if (overboughtSeriesRef.current) {
+      overboughtSeriesRef.current.applyOptions({
+        visible: rsiEnabled
+      });
+    }
+    
+    if (oversoldSeriesRef.current) {
+      oversoldSeriesRef.current.applyOptions({
+        visible: rsiEnabled
+      });
+    }
+    
+    console.log('🔄 RSI VISIBILITY - Visibilidade das séries RSI ajustada:', {
+      visible: rsiEnabled
+    });
   }, [chartReady, rsiEnabled]);
 
-  // ✅ CONTROLAR VISIBILIDADE DO PANE RSI
+  // ✅ CONTROLAR VISIBILIDADE DAS SÉRIES RSI
   useEffect(() => {
-    updatePaneVisibility();
-  }, [updatePaneVisibility]);
+    updateRSIVisibility();
+  }, [updateRSIVisibility]);
 
   const handleTimeframeChange = (newTimeframe: string) => {
     console.log('🔄 TIMEFRAME CHANGE - Mudando timeframe:', {
@@ -713,11 +706,11 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">
-                Panes Nativos v5.0.3
+                Lightweight Charts v4.2.3
               </Badge>
               {rsiEnabled && (
                 <Badge variant="default" className="text-xs">
-                  RSI Pane Active
+                  RSI Active
                 </Badge>
               )}
             </div>
