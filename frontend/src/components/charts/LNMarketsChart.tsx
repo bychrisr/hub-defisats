@@ -55,6 +55,7 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
+  const volumePaneRef = useRef<any>(null);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
   const [candles, setCandles] = useState<CandleData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -193,13 +194,18 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
       borderVisible: false,
     });
 
-    // Criar série de volume - API v5.0.9
+    // Criar pane para volume - API v5.0.9
+    const volumePane = chart.addPane();
+    volumePaneRef.current = volumePane;
+    volumePane.setHeight(80);
+    
+    // Criar série de volume no pane dedicado - API v5.0.9
     const volumeSeries = chart.addSeries(HistogramSeries, {
       color: isDark ? '#374151' : '#e5e7eb',
       priceFormat: {
         type: 'volume',
       },
-      priceScaleId: 'volume',
+      paneIndex: volumePane.index(),
     });
 
     chartRef.current = chart;
@@ -248,6 +254,27 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('themechange', handleThemeChange);
+      
+      // Cleanup das séries e panes - API v5.0.9
+      if (seriesRef.current) {
+        chart.removeSeries(seriesRef.current);
+        seriesRef.current = null;
+      }
+      
+      if (volumeSeriesRef.current) {
+        chart.removeSeries(volumeSeriesRef.current);
+        volumeSeriesRef.current = null;
+      }
+      
+      if (volumePaneRef.current) {
+        chart.removePane(volumePaneRef.current);
+        volumePaneRef.current = null;
+      }
+      
+      if (chartRef.current) {
+        chartRef.current.remove();
+        chartRef.current = null;
+      }
     };
   };
 
