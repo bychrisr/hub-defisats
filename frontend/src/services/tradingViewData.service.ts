@@ -379,7 +379,17 @@ export class TradingViewDataService {
       throw new Error(result.message || 'TradingView Proxy failed');
     }
 
-    return result.data || [];
+    // ✅ CORREÇÃO CRÍTICA: Converter timestamps de milissegundos para segundos
+    // O backend proxy retorna timestamps em ms, mas Lightweight Charts espera em segundos
+    const rawData = result.data || [];
+    return rawData.map((candle: any) => ({
+      time: Math.floor(candle.time / 1000), // Converter ms para segundos
+      open: candle.open,
+      high: candle.high,
+      low: candle.low,
+      close: candle.close,
+      volume: candle.volume
+    }));
   }
 
   /**

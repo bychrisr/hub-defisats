@@ -564,6 +564,12 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           // Dados de linha
           mainSeriesRef.current.setData(effectiveCandleData as any);
         }
+        
+        // ✅ CORREÇÃO CRÍTICA: Chamar fitContent() após setData para ajustar escala inicial
+        // Isso resolve o problema do gráfico aparecer vazio na inicialização
+        chartRef.current.timeScale().fitContent();
+        
+        console.log('✅ DATA UPDATE - Dados aplicados à série principal e escala ajustada com fitContent()');
       }
 
       // Atualizar linhas de liquidação
