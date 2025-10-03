@@ -205,8 +205,7 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
       priceFormat: {
         type: 'volume',
       },
-      paneIndex: volumePane.index(),
-    });
+    }, 1);
 
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;

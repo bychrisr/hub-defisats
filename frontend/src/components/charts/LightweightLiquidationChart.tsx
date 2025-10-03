@@ -366,8 +366,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 2,
           minMove: 0.01,
         },
-        paneIndex: rsiPane.index(),
-      });
+      }, 1);
 
       // Criar linha de overbought no mesmo pane - API v5.0.9
       overboughtSeriesRef.current = chart.addSeries(LineSeries, {
@@ -379,8 +378,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 0,
           minMove: 1,
         },
-        paneIndex: rsiPane.index(),
-      });
+      }, 1);
 
       // Criar linha de oversold no mesmo pane - API v5.0.9
       oversoldSeriesRef.current = chart.addSeries(LineSeries, {
@@ -392,8 +390,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 0,
           minMove: 1,
         },
-        paneIndex: rsiPane.index(),
-      });
+      }, 1);
       
       // Configurar altura do pane RSI - API v5.0.9
       rsiPane.setHeight(100);
@@ -496,7 +493,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       
       // Converter para formato Lightweight Charts
       const rsiChartData = calculatedRSI.map(point => ({
-        time: point.time,
+        time: point.time as Time,
         value: point.value
       }));
       
@@ -545,7 +542,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       // Atualizar linhas de liquidação
       if (liquidationSeriesRef.current && liquidationLines && liquidationLines.length > 0) {
         const liquidationData = liquidationLines.map(line => ({
-          time: Math.floor(Date.now() / 1000) - 3600,
+          time: (Math.floor(Date.now() / 1000) - 3600) as Time,
           value: line.price
         }));
         liquidationSeriesRef.current.setData(liquidationData);
@@ -554,7 +551,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       // Atualizar linhas de take profit
       if (takeProfitSeriesRef.current && takeProfitLines && takeProfitLines.length > 0) {
         const takeProfitData = takeProfitLines.map(line => ({
-          time: Math.floor(Date.now() / 1000) - 3600,
+          time: (Math.floor(Date.now() / 1000) - 3600) as Time,
           value: line.price
         }));
         takeProfitSeriesRef.current.setData(takeProfitData);
@@ -571,8 +568,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
         // Atualizar linhas de referência
         if (overboughtSeriesRef.current && oversoldSeriesRef.current && effectiveCandleData && effectiveCandleData.length > 0) {
-          const firstTime = effectiveCandleData[0].time;
-          const lastTime = effectiveCandleData[effectiveCandleData.length - 1].time;
+          const firstTime = effectiveCandleData[0].time as Time;
+          const lastTime = effectiveCandleData[effectiveCandleData.length - 1].time as Time;
 
           overboughtSeriesRef.current.setData([
             { time: firstTime, value: rsiConfig.overbought },

@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies and FORCE lightweight-charts v5.0.9
-RUN npm ci && \
+RUN npm install && \
     npm install lightweight-charts@5.0.9 --save --force
 
 # Copy source code
@@ -18,5 +18,3 @@ EXPOSE 3001
 
 # Start development server
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3001"]
-
-
