@@ -357,9 +357,9 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
             {symbol} - {timeframe} (Lightweight Charts v5.0.9)
           </h2>
           <div className="flex items-center space-x-3 text-sm">
-            <span className="text-muted-foreground">O{stats?.open?.toFixed(1) || '0'}</span>
-            <span className="text-muted-foreground">H{stats?.high?.toFixed(1) || '0'}</span>
-            <span className="text-muted-foreground">L{stats?.low?.toFixed(1) || '0'}</span>
+            <span className="text-muted-foreground">O{stats?.avgPrice?.toFixed(1) || '0'}</span>
+            <span className="text-muted-foreground">H{stats?.maxPrice?.toFixed(1) || '0'}</span>
+            <span className="text-muted-foreground">L{stats?.minPrice?.toFixed(1) || '0'}</span>
             <span className="text-muted-foreground">C{currentPrice.toFixed(1)}</span>
             <span className={`font-medium ${priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
               {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(1)} ({priceChangePercent.toFixed(2)}%)
@@ -451,7 +451,7 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <Volume2 className="h-3 w-3" />
-            Volume {stats?.volume?.toFixed(2) || '0'} M
+            Volume {stats?.totalVolume?.toFixed(2) || '0'} M
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">

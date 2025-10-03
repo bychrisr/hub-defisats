@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface WebSocketMessage {
-  type: string;
+  type: 'price_update' | 'candle_update' | 'market_data' | 'error';
   data: any;
   timestamp: number;
 }
