@@ -1,4 +1,110 @@
-# TradingView Chart - Guia de Solução de Problemas
+# TradingView Chart - Guia de Solução de Problemas v5.0.9
+
+## 🚨 **ERROS COMUNS E SOLUÇÕES**
+
+### **🔧 PROBLEMAS ESPECÍFICOS DA v5.0.9**
+
+#### 1. **Erro: "LineSeries is not exported from lightweight-charts"**
+
+**Causa**: Versão incorreta da biblioteca instalada
+**Soluções**:
+```bash
+# ✅ SOLUÇÃO 1: Verificar versão instalada
+npm ls lightweight-charts
+
+# ✅ SOLUÇÃO 2: Forçar instalação da v5.0.9
+npm install lightweight-charts@5.0.9 --save --force
+
+# ✅ SOLUÇÃO 3: Limpar cache e reinstalar
+rm -rf node_modules package-lock.json
+npm install
+npm install lightweight-charts@5.0.9 --save --force
+```
+
+#### 2. **Erro: "chart.addSeries is not a function"**
+
+**Causa**: Usando API v4.2.3 com código v5.0.9
+**Soluções**:
+```typescript
+// ❌ ERRO: API v4.2.3
+const series = chart.addCandlestickSeries({...});
+
+// ✅ CORREÇÃO: API v5.0.9
+import { CandlestickSeries } from 'lightweight-charts';
+const series = chart.addSeries(CandlestickSeries, {...});
+```
+
+#### 3. **Erro: "chart.addPane is not a function"**
+
+**Causa**: Tentando usar panes nativos com versão incorreta
+**Soluções**:
+```typescript
+// ❌ ERRO: Panes não disponíveis na v4.2.3
+const pane = chart.addPane();
+
+// ✅ CORREÇÃO: Verificar versão e usar API correta
+if (typeof chart.addPane === 'function') {
+  const pane = chart.addPane();
+} else {
+  // Fallback para v4.2.3
+  const series = chart.addLineSeries({ priceScaleId: 'rsi' });
+}
+```
+
+#### 4. **Erro: "Type 'number' is not assignable to type 'Time'"**
+
+**Causa**: Type assertions desnecessários na v5.0.9
+**Soluções**:
+```typescript
+// ❌ ERRO: Type assertion desnecessário
+const data = [{ time: Date.now() as Time, value: 100 }];
+
+// ✅ CORREÇÃO: Remover type assertion
+const data = [{ time: Date.now(), value: 100 }];
+```
+
+#### 5. **Erro: "Cannot read property 'index' of undefined"**
+
+**Causa**: Tentando usar `pane.index()` antes de criar o pane
+**Soluções**:
+```typescript
+// ❌ ERRO: Usar index antes de criar
+const series = chart.addSeries(LineSeries, {
+  paneIndex: pane.index() // ERRO!
+});
+
+// ✅ CORREÇÃO: Criar pane primeiro
+const pane = chart.addPane();
+const series = chart.addSeries(LineSeries, {
+  paneIndex: pane.index() // OK!
+});
+```
+
+#### 6. **Erro: "chart.removePane is not a function"**
+
+**Causa**: Tentando usar cleanup da v5.0.9 com versão incorreta
+**Soluções**:
+```typescript
+// ✅ CORREÇÃO: Cleanup compatível
+return () => {
+  try {
+    // Remover séries
+    if (seriesRef.current) {
+      chart.removeSeries(seriesRef.current);
+    }
+    
+    // Remover pane (apenas se disponível)
+    if (paneRef.current && typeof chart.removePane === 'function') {
+      chart.removePane(paneRef.current);
+    }
+    
+    // Remover chart
+    chart.remove();
+  } catch (error) {
+    console.error('Cleanup error:', error);
+  }
+};
+```
 
 ## 🚨 **ERROS COMUNS E SOLUÇÕES**
 
@@ -259,3 +365,109 @@ const addLiquidationLine = (price: number) => {
 3. **Implementar melhorias unitariamente**
 4. **Adicionar linhas personalizadas gradualmente**
 5. **Testar cada adição isoladamente**
+
+## 🚀 **TROUBLESHOOTING ESPECÍFICO DA v5.0.9**
+
+### **Verificação de Versão**
+```bash
+# Verificar versão instalada
+npm ls lightweight-charts
+
+# Verificar no container Docker
+docker compose -f config/docker/docker-compose.dev.yml exec frontend npm ls lightweight-charts
+
+# Verificar versão no runtime
+node -e "console.log('Lightweight Charts version:', require('lightweight-charts/package.json').version)"
+```
+
+### **Migração de v4.2.3 para v5.0.9**
+```typescript
+// ❌ v4.2.3 (antigo)
+const candlestickSeries = chart.addCandlestickSeries({...});
+const lineSeries = chart.addLineSeries({...});
+const histogramSeries = chart.addHistogramSeries({...});
+
+// ✅ v5.0.9 (novo)
+import { CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
+const candlestickSeries = chart.addSeries(CandlestickSeries, {...});
+const lineSeries = chart.addSeries(LineSeries, {...});
+const histogramSeries = chart.addSeries(HistogramSeries, {...});
+```
+
+### **Panes Nativos v5.0.9**
+```typescript
+// ✅ Criar pane para RSI
+const rsiPane = chart.addPane();
+rsiPane.setHeight(100);
+
+// ✅ Criar série no pane
+const rsiSeries = chart.addSeries(LineSeries, {
+  color: '#8b5cf6',
+  paneIndex: rsiPane.index(),
+  priceFormat: { type: 'percent' as const, precision: 2 }
+});
+
+// ✅ Controle de visibilidade
+const toggleRSI = (visible: boolean) => {
+  if (rsiPane) {
+    rsiPane.setHeight(visible ? 100 : 0);
+  }
+};
+
+// ✅ Cleanup
+if (rsiPane) {
+  chart.removePane(rsiPane);
+}
+```
+
+### **Type Safety v5.0.9**
+```typescript
+// ❌ v4.2.3 - Type assertions necessários
+const data = [{ time: Date.now() as Time, value: 100 }];
+const series = chart.addCandlestickSeries({...}) as ISeriesApi;
+
+// ✅ v5.0.9 - Type safety melhorado
+const data = [{ time: Date.now(), value: 100 }];
+const series = chart.addSeries(CandlestickSeries, {...});
+```
+
+### **Docker e Build v5.0.9**
+```dockerfile
+# Dockerfile.dev - Forçar instalação da v5.0.9
+RUN npm ci && \
+    npm install lightweight-charts@5.0.9 --save --force
+```
+
+### **Logs de Debugging v5.0.9**
+```typescript
+// ✅ Logs específicos da v5.0.9
+console.log('✅ MAIN SERIES - Candlestick series criada com API v5.0.9');
+console.log('🚀 RSI SERIES - Séries RSI criadas com API v5.0.9 e pane nativo');
+console.log('🧹 CHART CLEANUP - Limpando gráfico com API v5.0.9');
+console.log('✅ CHART CLEANUP - Chart removido com sucesso usando API v5.0.9');
+```
+
+### **Checklist de Migração v5.0.9**
+- [ ] **Dependência**: `lightweight-charts@5.0.9` instalada
+- [ ] **Importações**: `CandlestickSeries`, `LineSeries`, `HistogramSeries` importados
+- [ ] **API**: `chart.addSeries()` substitui métodos específicos
+- [ ] **Panes**: `chart.addPane()` para RSI e indicadores
+- [ ] **Type assertions**: Removidos `as Time`, `as ISeriesApi`, etc.
+- [ ] **Cleanup**: `chart.removePane()` adicionado
+- [ ] **Compilação**: TypeScript sem erros
+- [ ] **Build**: Compilação bem-sucedida
+- [ ] **Runtime**: Gráficos funcionando corretamente
+
+### **Fallback para v4.2.3**
+```typescript
+// ✅ Detecção de versão e fallback
+const isV5 = typeof chart.addSeries === 'function';
+
+if (isV5) {
+  // API v5.0.9
+  const series = chart.addSeries(CandlestickSeries, {...});
+} else {
+  // API v4.2.3
+  const series = chart.addCandlestickSeries({...});
+}
+```

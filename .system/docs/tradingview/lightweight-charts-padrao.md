@@ -1,17 +1,21 @@
-# Padrão de Gráfico Lightweight Charts - Hub DeFiSats
+# Padrão de Gráfico Lightweight Charts v5.0.9 - Hub DeFiSats
 
-Este documento define o padrão oficial do componente `LightweightLiquidationChart` para futuras implementações no projeto Hub DeFiSats.
+Este documento define o padrão oficial do componente `LightweightLiquidationChart` para futuras implementações no projeto Hub DeFiSats usando a API v5.0.9.
 
 ## 📋 Visão Geral
 
-O `LightweightLiquidationChart` é o componente padrão para visualização de dados financeiros com linhas personalizadas, indicadores técnicos e dados em tempo real.
+O `LightweightLiquidationChart` é o componente padrão para visualização de dados financeiros com linhas personalizadas, indicadores técnicos e dados em tempo real usando a **API v5.0.9** do Lightweight Charts.
+
+**Versão da Biblioteca**: 5.0.9
+**API**: Unificada com `addSeries()` e panes nativos
 
 ## 🏗️ Arquitetura Padrão
 
 ### Componente Principal
 - **Arquivo**: `frontend/src/components/charts/LightweightLiquidationChart.tsx`
-- **Biblioteca**: `lightweight-charts`
+- **Biblioteca**: `lightweight-charts@5.0.9`
 - **Tema**: Transparente com adaptação automática (dark/light)
+- **API**: v5.0.9 com panes nativos e `addSeries()` unificado
 
 ### Hooks Padrão
 - **useCandleData**: Para dados de candles da API
@@ -61,9 +65,73 @@ symbolDescription?: string;        // Ex: 'BTCUSD: LNM FUTURES'
 logoUrl?: string;                  // Ex: '/lnm-logo.svg'
 ```
 
-## 🎯 Padrões de Implementação
+## 🎯 Padrões de Implementação v5.0.9
 
-### 1. Toolbar TradingView-style
+### 1. Importações Padrão v5.0.9
+```typescript
+import { 
+  createChart, 
+  IChartApi, 
+  ISeriesApi, 
+  ColorType, 
+  Time, 
+  LineStyle,
+  TickMarkType,
+  LineSeries,        // ← Novo na v5.0.9
+  CandlestickSeries, // ← Novo na v5.0.9
+  HistogramSeries    // ← Novo na v5.0.9
+} from 'lightweight-charts';
+```
+
+### 2. Criação de Séries com API v5.0.9
+```typescript
+// ✅ v5.0.9 - API unificada
+const candlestickSeries = chart.addSeries(CandlestickSeries, {
+  upColor: '#26a69a', 
+  downColor: '#ef5350',
+  borderVisible: false,
+  wickUpColor: '#26a69a', 
+  wickDownColor: '#ef5350',
+});
+
+const lineSeries = chart.addSeries(LineSeries, {
+  color: '#2196F3',
+  lineWidth: 2,
+});
+
+const volumeSeries = chart.addSeries(HistogramSeries, {
+  color: '#374151',
+  priceFormat: { type: 'volume' },
+  priceScaleId: 'volume',
+});
+```
+
+### 3. Panes Nativos para RSI
+```typescript
+// ✅ v5.0.9 - Panes nativos para separação de escalas
+const rsiPane = chart.addPane();
+rsiPane.setHeight(100);
+
+const rsiSeries = chart.addSeries(LineSeries, {
+  color: '#8b5cf6',
+  lineWidth: 2,
+  priceFormat: { type: 'percent' as const, precision: 2, minMove: 0.01 },
+  paneIndex: rsiPane.index(),
+});
+
+// Controle de visibilidade do pane
+const updateRSIVisibility = useCallback(() => {
+  if (rsiPane) {
+    if (rsiEnabled) {
+      rsiPane.setHeight(100);
+    } else {
+      rsiPane.setHeight(0);
+    }
+  }
+}, [rsiEnabled]);
+```
+
+### 4. Toolbar TradingView-style
 ```typescript
 // Timeframes padrão
 const timeframes = [
@@ -84,7 +152,7 @@ const availableIndicators = [
 ];
 ```
 
-### 2. Configuração do Gráfico
+### 5. Configuração do Gráfico v5.0.9
 ```typescript
 const chart = createChart(containerRef.current, {
   height,
@@ -118,63 +186,81 @@ const chart = createChart(containerRef.current, {
 });
 ```
 
-### 3. Renderização de Linhas Personalizadas
+### 6. Renderização de Linhas Personalizadas v5.0.9
 ```typescript
-// Padrão para linhas de liquidação
-for (const [idx, ln] of liquidationLinesData.entries()) {
-  const price = Number(ln.price);
-  if (!Number.isFinite(price) || price <= 0) continue;
-  
-  const color = ln.color || '#ff4444';
-  const label = ln.label || `Liquidação${liquidationLinesData.length > 1 ? ` #${idx+1}` : ''}: $${price.toLocaleString()}`;
-  
-  const pl = series?.createPriceLine({
-    price,
-    color,
-    lineStyle: LineStyle.Solid,
-    lineWidth: 2,
-    axisLabelVisible: true,
-    title: label,
-  });
-  if (pl) createdLines.push(pl);
+// Padrão para linhas de liquidação com API v5.0.9
+if (liquidationLines && liquidationLines.length > 0) {
+  try {
+    liquidationSeriesRef.current = chart.addSeries(LineSeries, {
+      color: '#ff6b6b',
+      lineWidth: 1,
+      lineStyle: LineStyle.Dashed,
+    });
+    console.log('✅ LIQUIDATION SERIES - Série criada com API v5.0.9');
+  } catch (error) {
+    console.error('❌ LIQUIDATION SERIES - Erro ao criar série:', error);
+  }
 }
 
-// Padrão para linhas de Take Profit
-for (const [idx, tp] of takeProfitLinesData.entries()) {
-  const price = Number(tp.price);
-  if (!Number.isFinite(price) || price <= 0) continue;
-  
-  const color = tp.color || '#22c55e';
-  const label = tp.label || `Take Profit #${idx+1}: $${price.toLocaleString()}`;
-  
-  const pl = series?.createPriceLine({
-    price,
-    color,
-    lineStyle: LineStyle.Solid,
-    lineWidth: 2,
-    axisLabelVisible: true,
-    title: label,
-  });
-  if (pl) createdLines.push(pl);
+// Padrão para linhas de Take Profit com API v5.0.9
+if (takeProfitLines && takeProfitLines.length > 0) {
+  try {
+    takeProfitSeriesRef.current = chart.addSeries(LineSeries, {
+      color: '#51cf66',
+      lineWidth: 1,
+      lineStyle: LineStyle.Dashed,
+    });
+    console.log('✅ TAKE PROFIT SERIES - Série criada com API v5.0.9');
+  } catch (error) {
+    console.error('❌ TAKE PROFIT SERIES - Erro ao criar série:', error);
+  }
 }
 ```
 
-### 4. Auto-range Inteligente
+### 7. Cleanup com API v5.0.9
 ```typescript
-// Auto-range para incluir todas as priceLines
-try {
-  const allPrices = [
-    ...liquidationLinesData.map(l => l.price),
-    ...takeProfitLinesData.map(tp => tp.price)
-  ];
-  if (allPrices.length > 0) {
-    const min = Math.min(...allPrices);
-    const max = Math.max(...allPrices);
-    if (Number.isFinite(min) && Number.isFinite(max) && min < max) {
-      chart.priceScale('right').setVisibleLogicalRange({ from: min, to: max } as any);
+// ✅ v5.0.9 - Cleanup otimizado com panes nativos
+return () => {
+  console.log('🧹 CHART CLEANUP - Limpando gráfico com API v5.0.9');
+  setChartReady(false);
+  
+  try {
+    // Remover todas as séries - API v5.0.9
+    if (mainSeriesRef.current) {
+      chart.removeSeries(mainSeriesRef.current);
+      mainSeriesRef.current = null;
     }
+    
+    if (liquidationSeriesRef.current) {
+      chart.removeSeries(liquidationSeriesRef.current);
+      liquidationSeriesRef.current = null;
+    }
+    
+    if (takeProfitSeriesRef.current) {
+      chart.removeSeries(takeProfitSeriesRef.current);
+      takeProfitSeriesRef.current = null;
+    }
+    
+    if (rsiSeriesRef.current) {
+      chart.removeSeries(rsiSeriesRef.current);
+      rsiSeriesRef.current = null;
+    }
+    
+    // Remover pane RSI - API v5.0.9
+    if (rsiPaneRef.current) {
+      chart.removePane(rsiPaneRef.current);
+      rsiPaneRef.current = null;
+    }
+    
+    // Remover chart - API v5.0.9
+    chart.remove();
+    chartRef.current = null;
+    
+    console.log('✅ CHART CLEANUP - Chart removido com sucesso usando API v5.0.9');
+  } catch (error) {
+    console.error('❌ CHART CLEANUP - Erro ao remover chart:', error);
   }
-} catch {}
+};
 ```
 
 ## 🎨 Padrões Visuais
@@ -184,11 +270,12 @@ try {
 - **Take Profit**: `#22c55e` (verde)
 - **Stop Loss**: `#f59e0b` (laranja) - futuro
 - **Entrada**: `#3b82f6` (azul) - futuro
+- **RSI**: `#8b5cf6` (roxo)
 - **Indicadores**: Cores específicas por tipo
 
 ### Estilos de Linha
-- **Espessura**: 2px
-- **Estilo**: `LineStyle.Solid`
+- **Espessura**: 2px para séries principais, 1px para linhas auxiliares
+- **Estilo**: `LineStyle.Solid` para séries, `LineStyle.Dashed` para linhas auxiliares
 - **Visibilidade do eixo**: `axisLabelVisible: true`
 - **Título**: Label personalizado
 
@@ -286,7 +373,7 @@ const takeProfitLines = useMemo(() => {
 - **Documentação**: `.system/docs/tradingview/lightweight-charts-padrao.md`
 - **Linhas**: `.system/docs/tradingview/linhas-customizadas.md`
 
-### Logs Padrão
+### Logs Padrão v5.0.9
 ```typescript
 console.log('📊 DASHBOARD - liquidationLines calculadas:', {
   positionsCount: src?.length ?? 0,
@@ -295,11 +382,17 @@ console.log('📊 DASHBOARD - liquidationLines calculadas:', {
   fromMarketDataKeys: marketData ? Object.keys(marketData as any) : 'n/a',
   lines
 });
+
+console.log('✅ MAIN SERIES - Candlestick series criada com API v5.0.9');
+console.log('🚀 RSI SERIES - Séries RSI criadas com API v5.0.9 e pane nativo');
 ```
 
 ## 🚀 Roadmap de Extensões
 
 ### Próximas Implementações
+- [x] **Migração para v5.0.9**: Concluída
+- [x] **Panes nativos para RSI**: Concluída
+- [x] **API unificada addSeries()**: Concluída
 - [ ] **Stop Loss**: Linhas laranjas (`#f59e0b`)
 - [ ] **Entrada**: Linhas azuis (`#3b82f6`)
 - [ ] **Marcações de PnL**: Linhas pontilhadas
@@ -308,17 +401,19 @@ console.log('📊 DASHBOARD - liquidationLines calculadas:', {
 - [ ] **Agrupamento**: Colapso de linhas por ativo
 - [ ] **Tooltips**: Metadados detalhados
 
-### Padrões para Novas Linhas
-1. **Cor única** por tipo de linha
-2. **Label informativo** com contexto
-3. **Validação** de valores numéricos
-4. **Auto-range** incluindo todas as linhas
-5. **Cleanup** adequado no useEffect
+### Padrões para Novas Linhas v5.0.9
+1. **Usar `chart.addSeries(LineSeries, {...})`** para novas séries
+2. **Cor única** por tipo de linha
+3. **Label informativo** com contexto
+4. **Validação** de valores numéricos
+5. **Panes nativos** para separação de escalas
+6. **Cleanup** adequado com `chart.removeSeries()` e `chart.removePane()`
 
-## ✅ Checklist de Implementação
+## ✅ Checklist de Implementação v5.0.9
 
 ### Para Novas Funcionalidades
 - [ ] Seguir padrão de props definido
+- [ ] Usar API v5.0.9 (`addSeries()` unificado)
 - [ ] Implementar validação de dados
 - [ ] Adicionar logs de debugging
 - [ ] Atualizar documentação
@@ -328,6 +423,7 @@ console.log('📊 DASHBOARD - liquidationLines calculadas:', {
 - [ ] Commit com Conventional Commits
 
 ### Para Novas Linhas
+- [ ] Usar `chart.addSeries(LineSeries, {...})`
 - [ ] Definir cor padrão única
 - [ ] Criar label informativo
 - [ ] Implementar renderização
@@ -336,9 +432,15 @@ console.log('📊 DASHBOARD - liquidationLines calculadas:', {
 - [ ] Atualizar roadmap
 - [ ] Testar com múltiplas linhas
 
+### Para Novos Indicadores
+- [ ] Usar panes nativos (`chart.addPane()`)
+- [ ] Configurar `paneIndex` nas séries
+- [ ] Implementar controle de visibilidade (`setHeight()`)
+- [ ] Adicionar cleanup com `chart.removePane()`
+
 ---
 
-**Versão**: 1.0  
-**Data**: 2025-01-09  
-**Status**: Padrão Oficial  
-**Última Atualização**: Implementação de Take Profit (v2.3.9)
+**Versão**: 2.0  
+**Data**: 2025-10-03  
+**Status**: Padrão Oficial v5.0.9  
+**Última Atualização**: Migração completa para lightweight-charts v5.0.9

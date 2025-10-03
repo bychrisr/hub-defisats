@@ -1,6 +1,6 @@
-# Guia do Plugin Lightweight Charts (Frontend)
+# Guia do Plugin Lightweight Charts v5.0.9 (Frontend)
 
-Este guia documenta como usamos o Lightweight Charts na plataforma: instalação, integração, opções de customização, endpoints remotos e boas práticas.
+Este guia documenta como usamos o Lightweight Charts v5.0.9 na plataforma: instalação, integração, opções de customização, endpoints remotos e boas práticas.
 
 ## Sumário
 - Visão geral
@@ -11,17 +11,21 @@ Este guia documenta como usamos o Lightweight Charts na plataforma: instalação
 - Serviço de controle (frontend)
 - Theming e transparência
 - Performance (memoização, lazy e resize)
+- API v5.0.9 - Novidades e Migração
 - Troubleshooting comum
 - Roadmap
 
 ## Visão geral
-Usamos o Lightweight Charts para renderizar gráficos leves, altamente customizáveis e responsivos. Escolhemos esta lib para contornar limitações do widget avançado do TradingView ao desenhar elementos customizados (linhas de liquidação, etc.).
+Usamos o Lightweight Charts v5.0.9 para renderizar gráficos leves, altamente customizáveis e responsivos. Escolhemos esta lib para contornar limitações do widget avançado do TradingView ao desenhar elementos customizados (linhas de liquidação, etc.).
 
-Referência da API: https://tradingview.github.io/lightweight-charts/docs/api
+**Versão atual**: 5.0.9
+**Referência da API**: https://tradingview.github.io/lightweight-charts/docs/api
 
 ## Instalação e dependências
-```
-npm i lightweight-charts
+```json
+{
+  "lightweight-charts": "5.0.9"
+}
 ```
 
 O componente principal fica em `frontend/src/components/charts/LightweightLiquidationChart.tsx`.
@@ -45,7 +49,7 @@ Dados de candles aceitam `{ time: number(UTC s), open, high, low, close }`.
 - symbol: string (ex.: `BINANCE:BTCUSDT`)
 - timeframe: string (ex.: `1m`, `15m`, `1h`, `4h`, `1d`)
 - height: number (px)
-- showToolbar: boolean (exibe “símbolo • timeframe” no header do card)
+- showToolbar: boolean (exibe "símbolo • timeframe" no header do card)
 - candleData: CandlestickPoint[] (série principal)
 - linePriceData: LinePoint[] (fallback caso não existam candles)
 - liquidationLines: `{ price, label?, color? }[]` (renderiza múltiplas priceLines)
@@ -55,6 +59,138 @@ Opções internas do chart:
 - layout transparente e tema dinâmico (contexto de tema da aplicação)
 - grid em baixo contraste
 - timeScale: `timeVisible: true`, `secondsVisible: false` e `tickMarkFormatter` intraday (HH:mm, e dd/MM na virada do dia)
+
+## API v5.0.9 - Novidades e Migração
+
+### Principais Mudanças da v5.0.9
+
+#### 1. API Unificada para Séries
+```typescript
+// ❌ v4.2.3 (antigo)
+const candlestickSeries = chart.addCandlestickSeries({...});
+const lineSeries = chart.addLineSeries({...});
+const histogramSeries = chart.addHistogramSeries({...});
+
+// ✅ v5.0.9 (novo)
+import { CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
+
+const candlestickSeries = chart.addSeries(CandlestickSeries, {...});
+const lineSeries = chart.addSeries(LineSeries, {...});
+const histogramSeries = chart.addSeries(HistogramSeries, {...});
+```
+
+#### 2. Panes Nativos
+```typescript
+// ✅ v5.0.9 - Panes nativos para separação de escalas
+const rsiPane = chart.addPane();
+rsiPane.setHeight(100);
+
+const rsiSeries = chart.addSeries(LineSeries, {
+  color: '#8b5cf6',
+  paneIndex: rsiPane.index(),
+  priceFormat: { type: 'percent', precision: 2, minMove: 0.01 }
+});
+```
+
+#### 3. Importações Diretas
+```typescript
+// ✅ v5.0.9 - Importações diretas dos tipos de série
+import { 
+  createChart, 
+  IChartApi, 
+  ISeriesApi, 
+  ColorType, 
+  Time, 
+  LineStyle,
+  TickMarkType,
+  LineSeries,        // ← Novo na v5.0.9
+  CandlestickSeries, // ← Novo na v5.0.9
+  HistogramSeries    // ← Novo na v5.0.9
+} from 'lightweight-charts';
+```
+
+#### 4. Controle de Panes
+```typescript
+// ✅ v5.0.9 - Controle granular de panes
+const pane = chart.addPane();
+pane.setHeight(100);  // Mostrar
+pane.setHeight(0);    // Ocultar
+
+// Cleanup
+chart.removePane(pane);
+```
+
+### Implementação Atual
+
+#### LightweightLiquidationChart.tsx
+```typescript
+// Criação de séries com API v5.0.9
+const series = chart.addSeries(CandlestickSeries, {
+  upColor: '#26a69a', 
+  downColor: '#ef5350',
+  borderVisible: false,
+  wickUpColor: '#26a69a', 
+  wickDownColor: '#ef5350',
+});
+
+// RSI com pane nativo
+const rsiPane = chart.addPane();
+rsiSeriesRef.current = chart.addSeries(LineSeries, {
+  color: '#8b5cf6',
+  lineWidth: 2,
+  priceFormat: { type: 'percent' as const, precision: 2, minMove: 0.01 },
+  paneIndex: rsiPane.index(),
+});
+```
+
+#### TradingChart.tsx
+```typescript
+// Série de candlesticks com API v5.0.9
+const candlestickSeries = chart.addSeries(CandlestickSeries, {
+  upColor: isDark ? '#10b981' : '#059669',
+  downColor: isDark ? '#ef4444' : '#dc2626',
+  borderDownColor: isDark ? '#ef4444' : '#dc2626',
+  borderUpColor: isDark ? '#10b981' : '#059669',
+  wickDownColor: isDark ? '#ef4444' : '#dc2626',
+  wickUpColor: isDark ? '#10b981' : '#059669',
+});
+```
+
+#### LNMarketsChart.tsx
+```typescript
+// Séries de candlestick e volume com API v5.0.9
+const candlestickSeries = chart.addSeries(CandlestickSeries, {
+  upColor: '#00d4aa',
+  downColor: '#ff6b6b',
+  borderVisible: false,
+});
+
+const volumeSeries = chart.addSeries(HistogramSeries, {
+  color: isDark ? '#374151' : '#e5e7eb',
+  priceFormat: { type: 'volume' },
+  priceScaleId: 'volume',
+});
+```
+
+#### BTCChart.tsx
+```typescript
+// Série de candlesticks com API v5.0.9
+const candlestickSeries = chart.addSeries(CandlestickSeries, {
+  upColor: '#26a69a',
+  downColor: '#ef5350',
+  borderVisible: false,
+  wickUpColor: '#26a69a',
+  wickDownColor: '#ef5350',
+});
+```
+
+### Benefícios da v5.0.9
+
+1. **Performance Melhorada**: Renderização mais eficiente e responsiva
+2. **Panes Nativos**: Separação de escalas sem workarounds
+3. **API Unificada**: `addSeries()` para todos os tipos
+4. **Type Safety**: Tipos TypeScript mais precisos
+5. **Flexibilidade**: Controle granular de panes e séries
 
 ## Endpoints de configuração (backend)
 Arquivo: `backend/src/routes/market-data.routes.ts`
@@ -90,15 +226,27 @@ Integração típica: ao trocar timeframe pela UI, fazer PUT e re-renderizar o g
 - Memoização de dados e props mais pesadas.
 - `ResizeObserver` para recalcular `width/height` e `timeScale().fitContent()` após resize.
 - Carregar candles apenas quando necessário; fallback direto para Binance se `/api/market/historical` falhar (401, etc.).
+- **v5.0.9**: Panes nativos melhoram performance de renderização
 
 ## Troubleshooting
-- Eixo mostrando dias no intraday: garantimos `timeScale.timeVisible = true` e `tickMarkFormatter` custom.
-- Linhas não aparecem: verifique se há ao menos uma série ancorando o eixo. Criamos uma série transparente quando não há candles.
-- Histórico curto: aumentar `limit` ao buscar (até 1000 no Binance) e refazer `fitContent()`.
+
+### Problemas Comuns
+- **Eixo mostrando dias no intraday**: garantimos `timeScale.timeVisible = true` e `tickMarkFormatter` custom.
+- **Linhas não aparecem**: verifique se há ao menos uma série ancorando o eixo. Criamos uma série transparente quando não há candles.
+- **Histórico curto**: aumentar `limit` ao buscar (até 1000 no Binance) e refazer `fitContent()`.
+
+### Problemas Específicos da v5.0.9
+- **Erro de importação**: Certifique-se de que está usando `lightweight-charts@5.0.9`
+- **Panes não funcionam**: Use `chart.addPane()` e `paneIndex` nas séries
+- **Type assertions**: A v5.0.9 tem melhor type safety, evite `as Tipo` desnecessários
 
 ## Roadmap
-- Toolbar com botões 1m/15m/1h/4h/1d.
-- Modo multi-séries (comparação de símbolos).
-- Plugins de marcações/indicadores próprios.
+- ✅ **Concluído**: Migração para v5.0.9
+- ✅ **Concluído**: Panes nativos para RSI
+- ✅ **Concluído**: API unificada `addSeries()`
+- 🔄 **Em andamento**: Toolbar com botões 1m/15m/1h/4h/1d
+- 📋 **Planejado**: Modo multi-séries (comparação de símbolos)
+- 📋 **Planejado**: Plugins de marcações/indicadores próprios
+- 📋 **Planejado**: Indicadores técnicos avançados (MACD, Bollinger Bands)
 
 
