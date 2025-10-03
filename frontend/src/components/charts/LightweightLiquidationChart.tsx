@@ -536,14 +536,22 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   // ✅ ATUALIZAR DADOS DAS SÉRIES COM useCallback PARA EVITAR LOOPS
   const updateSeriesData = useCallback(() => {
     console.count('🔄 DATA UPDATE - Execução #');
-    if (!chartReady || !chartRef.current) return;
+    if (!chartReady || !chartRef.current) {
+      console.log('🔄 DATA UPDATE - Condições não atendidas:', {
+        chartReady,
+        hasChart: !!chartRef.current
+      });
+      return;
+    }
 
     console.log('🔄 DATA UPDATE - Atualizando dados das séries:', {
       hasMainSeries: !!mainSeriesRef.current,
       hasEffectiveData: !!effectiveCandleData,
       dataLength: effectiveCandleData?.length || 0,
       rsiEnabled,
-      rsiDataLength: rsiData.length
+      rsiDataLength: rsiData.length,
+      chartReady,
+      hasChart: !!chartRef.current
     });
 
     try {
@@ -611,6 +619,24 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   useEffect(() => {
     updateSeriesData();
   }, [updateSeriesData]);
+
+  // ✅ FORÇAR ATUALIZAÇÃO QUANDO DADOS HISTÓRICOS CARREGAREM
+  useEffect(() => {
+    if (chartReady && effectiveCandleData && effectiveCandleData.length > 0) {
+      console.log('🚀 FORCE UPDATE - Dados históricos carregados, forçando atualização:', {
+        dataLength: effectiveCandleData.length,
+        chartReady,
+        hasMainSeries: !!mainSeriesRef.current
+      });
+      
+      // Pequeno delay para garantir que o gráfico esteja totalmente pronto
+      const timeoutId = setTimeout(() => {
+        updateSeriesData();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [chartReady, effectiveCandleData, updateSeriesData]);
 
   // ✅ CONTROLAR VISIBILIDADE DAS SÉRIES RSI COM useCallback (v5.0.9)
   const updateRSIVisibility = useCallback(() => {

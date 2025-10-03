@@ -191,12 +191,12 @@ export default function Dashboard() {
   // Dados de mercado otimizados (agora via contexto centralizado)
   const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
   
-  // Dados históricos (mantido para compatibilidade)
+  // Dados históricos (habilitado para carregamento automático)
   const historicalData = useHistoricalData({
     symbol: 'BTCUSDT',
     timeframe: '1h',
     initialLimit: 168,
-    enabled: false // Desabilitado por enquanto
+    enabled: true // ✅ Habilitado para carregar dados históricos
   });
 
   // Função para resetar dados históricos
