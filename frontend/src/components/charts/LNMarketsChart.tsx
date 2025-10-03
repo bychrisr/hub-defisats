@@ -161,14 +161,16 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
         borderColor: borderColor,
         timeVisible: true,
         secondsVisible: false,
-        rightOffset: 12,
+        // ✅ CONFIGURAÇÕES PARA EVITAR "SAMBANDO" - TRAVAR À DIREITA
+        rightOffset: 12, // Margem em barras da borda direita
         barSpacing: 6,
         minBarSpacing: 0.5,
         fixLeftEdge: false,
-        fixRightEdge: false,
-        lockVisibleTimeRangeOnResize: true,
-        rightBarStaysOnScroll: true,
-        shiftVisibleRangeOnNewBar: true,
+        fixRightEdge: true, // ✅ CORRIGIDO: Prevenir scroll além da barra mais recente
+        lockVisibleTimeRangeOnResize: true, // Manter range visível ao redimensionar
+        rightBarStaysOnScroll: true, // Manter barra hovered fixa durante scroll
+        shiftVisibleRangeOnNewBar: true, // Shift automático quando nova barra é adicionada
+        allowShiftVisibleRangeOnWhitespaceReplacement: true, // Permitir shift em espaços vazios
       },
       handleScroll: {
         mouseWheel: true,

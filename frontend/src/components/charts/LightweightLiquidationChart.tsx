@@ -176,6 +176,13 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
       timeVisible: true,
       secondsVisible: false,
+      // ✅ CONFIGURAÇÕES PARA EVITAR "SAMBANDO" - TRAVAR À DIREITA
+      rightOffset: 12, // Margem em barras da borda direita
+      fixRightEdge: true, // Prevenir scroll além da barra mais recente
+      rightBarStaysOnScroll: true, // Manter barra hovered fixa durante scroll
+      lockVisibleTimeRangeOnResize: true, // Manter range visível ao redimensionar
+      shiftVisibleRangeOnNewBar: true, // Shift automático quando nova barra é adicionada
+      allowShiftVisibleRangeOnWhitespaceReplacement: true, // Permitir shift em espaços vazios
       tickMarkFormatter: (time: any, tickMarkType: any) => {
         let timestamp: number;
         if (typeof time === 'number') {
