@@ -6,6 +6,58 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🎉 **MIGRAÇÃO COMPLETA PARA LIGHTWEIGHT-CHARTS v5.0.9 - v2.5.0**
+
+#### ✅ **MIGRAÇÃO 100% COMPLETA**
+- 🚀 **Versão Instalada**: `lightweight-charts` 5.0.9 confirmada e funcionando
+- 🚀 **API Completamente Migrada**: Todos os componentes usando API v5.0.9
+- 🚀 **Type Assertions Eliminados**: Removidos todos os `as Tipo` desnecessários
+- 🚀 **Compilação TypeScript**: 100% funcional sem erros
+- 🚀 **Docker Atualizado**: Dockerfile.dev modificado para forçar v5.0.9
+
+#### 🔧 **Componentes Migrados para API v5.0.9**
+
+##### **1. LightweightLiquidationChart.tsx**
+- ✅ **Séries Principais**: `chart.addSeries(CandlestickSeries, ...)` e `chart.addSeries(LineSeries, ...)`
+- ✅ **Panes Nativos**: RSI usando `chart.addPane()` e `paneIndex` para separação de escalas
+- ✅ **Controle de Visibilidade**: `rsiPane.setHeight()` para mostrar/ocultar panes
+- ✅ **Cleanup Otimizado**: `chart.removePane()` e `chart.removeSeries()` para limpeza completa
+- ✅ **Type Safety**: Sem type assertions, tipos TypeScript corretos
+
+##### **2. TradingChart.tsx**
+- ✅ **Candlestick Series**: `chart.addSeries(CandlestickSeries, ...)`
+- ✅ **Título Atualizado**: Inclui "(Lightweight Charts v5.0.9)"
+
+##### **3. LNMarketsChart.tsx**
+- ✅ **Candlestick Series**: `chart.addSeries(CandlestickSeries, ...)`
+- ✅ **Volume Series**: `chart.addSeries(HistogramSeries, ...)`
+- ✅ **Título Atualizado**: Inclui "(Lightweight Charts v5.0.9)"
+
+##### **4. BTCChart.tsx**
+- ✅ **Candlestick Series**: `chart.addSeries(CandlestickSeries, ...)`
+- ✅ **Título Atualizado**: Inclui "(Lightweight Charts v5.0.9)"
+
+#### 🚀 **Melhorias da API v5.0.9**
+- ✅ **Panes Nativos**: Separação de escalas com `chart.addPane()` e `paneIndex`
+- ✅ **API Unificada**: `chart.addSeries()` substitui métodos específicos
+- ✅ **Tipos TypeScript**: Importação direta de `CandlestickSeries`, `LineSeries`, `HistogramSeries`
+- ✅ **Performance**: Renderização mais eficiente e responsiva
+- ✅ **Flexibilidade**: Controle granular de panes e séries
+
+#### 🐳 **Docker e Build**
+- ✅ **Dockerfile.dev**: Modificado para `npm install lightweight-charts@5.0.9 --save --force`
+- ✅ **Build Bem-sucedido**: Compilação funcionando perfeitamente
+- ✅ **Containers Funcionais**: Frontend rodando com v5.0.9
+- ✅ **Verificação de Versão**: `5.0.9` confirmada no container
+
+#### 📊 **Status Final**
+- ✅ **Versão**: 5.0.9 instalada e funcionando
+- ✅ **Compilação**: Sem erros TypeScript
+- ✅ **API**: 100% migrada para v5.0.9
+- ✅ **Type Assertions**: Eliminados
+- ✅ **Funcionamento**: Containers rodando perfeitamente
+- ✅ **Performance**: Melhorada com panes nativos
+
 ### 🔧 **REFATORAÇÃO LIGHTWEIGHT CHARTS - PREPARAÇÃO PARA V5.0.9 - v2.4.0**
 
 #### 🚀 **Atualização de Dependência**

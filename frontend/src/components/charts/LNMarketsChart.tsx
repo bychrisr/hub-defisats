@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi, CandlestickData, Time } from 'lightweight-charts';
+import { 
+  createChart, 
+  IChartApi, 
+  ISeriesApi, 
+  CandlestickData, 
+  Time,
+  LineSeries,
+  CandlestickSeries,
+  HistogramSeries
+} from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -174,8 +182,8 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
       },
     });
 
-    // Criar série de candlesticks com cores da LN Markets
-    const candlestickSeries = chart.addCandlestickSeries({
+    // Criar série de candlesticks com cores da LN Markets - API v5.0.9
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#00d4aa', // Verde da LN Markets
       downColor: '#ff6b6b', // Vermelho da LN Markets
       borderDownColor: '#ff6b6b',
@@ -185,8 +193,8 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
       borderVisible: false,
     });
 
-    // Criar série de volume
-    const volumeSeries = chart.addHistogramSeries({
+    // Criar série de volume - API v5.0.9
+    const volumeSeries = chart.addSeries(HistogramSeries, {
       color: isDark ? '#374151' : '#e5e7eb',
       priceFormat: {
         type: 'volume',
@@ -320,7 +328,7 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
       <div className="flex items-center justify-between px-4 py-3 border-b bg-background">
         <div className="flex items-center space-x-4">
           <h2 className="text-lg font-semibold text-foreground">
-            {symbol} - {timeframe}
+            {symbol} - {timeframe} (Lightweight Charts v5.0.9)
           </h2>
           <div className="flex items-center space-x-3 text-sm">
             <span className="text-muted-foreground">O{stats?.open?.toFixed(1) || '0'}</span>

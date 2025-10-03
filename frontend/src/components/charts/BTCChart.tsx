@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, IChartApi, ISeriesApi, CandlestickData, Time } from 'lightweight-charts';
+import { 
+  createChart, 
+  IChartApi, 
+  ISeriesApi, 
+  CandlestickData, 
+  Time,
+  LineSeries,
+  CandlestickSeries,
+  HistogramSeries
+} from 'lightweight-charts';
 import { useBTCData } from '@/hooks/useBTCData';
 
 interface BTCChartProps {
@@ -57,7 +66,7 @@ export const BTCChart: React.FC<BTCChartProps> = ({
       },
     });
 
-    const candlestickSeries = chart.addCandlestickSeries({
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#26a69a',
       downColor: '#ef5350',
       borderVisible: false,
@@ -101,7 +110,7 @@ export const BTCChart: React.FC<BTCChartProps> = ({
       {/* Header do gráfico */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center space-x-4">
-          <h3 className="text-lg font-semibold text-vibrant">BTCUSD: LNM Futures</h3>
+          <h3 className="text-lg font-semibold text-vibrant">BTCUSD: LNM Futures (Lightweight Charts v5.0.9)</h3>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-vibrant-secondary">1h</span>
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>

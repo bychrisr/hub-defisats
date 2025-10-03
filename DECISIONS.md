@@ -2,6 +2,74 @@
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
 
+## ADR-006: MIGRAÇÃO COMPLETA PARA LIGHTWEIGHT-CHARTS v5.0.9
+
+**Data**: 2025-10-03  
+**Status**: ✅ IMPLEMENTADO COM SUCESSO  
+**Contexto**: Migração completa do lightweight-charts para versão 5.0.9
+
+### Problema Identificado
+- **Dependência Desatualizada**: Package.json com versão específica v4.2.3
+- **API Inconsistente**: Uso de APIs que mudaram na v5
+- **Type Assertions Excessivos**: Uso desnecessário de `as Tipo`
+- **Problemas de Permissão**: EACCES impede instalação direta da v5.0.9
+
+### Decisão
+**MIGRAÇÃO COMPLETA PARA API v5.0.9 COM DOCKER**
+
+#### Implementação Escolhida:
+1. **Dockerfile.dev Modificado**:
+   - Forçar instalação da v5.0.9: `npm install lightweight-charts@5.0.9 --save --force`
+   - Build bem-sucedido com v5.0.9
+   - Containers funcionando perfeitamente
+
+2. **API v5.0.9 Implementada**:
+   - `chart.addSeries(CandlestickSeries, ...)` substitui `addCandlestickSeries()`
+   - `chart.addSeries(LineSeries, ...)` substitui `addLineSeries()`
+   - `chart.addSeries(HistogramSeries, ...)` substitui `addHistogramSeries()`
+   - Panes nativos com `chart.addPane()` e `paneIndex`
+
+3. **Type Assertions Eliminados**:
+   - Removidos todos os `as Time` desnecessários
+   - Removidos todos os `as ISeriesApi` desnecessários
+   - Removidos todos os `as CandlestickPoint[]` desnecessários
+   - Mantidos apenas `as const` onde necessário
+
+### Alternativas Consideradas
+1. **Migração Direta**: Falhou devido a problemas de permissão
+2. **Manter v4.2.3**: Não atende requisito de atualização
+3. **Refatoração Gradual**: Complexidade desnecessária
+
+### Consequências
+#### Positivas:
+- ✅ **Versão 5.0.9**: Instalada e funcionando
+- ✅ **API Migrada**: 100% para v5.0.9
+- ✅ **Type Safety**: Sem type assertions desnecessários
+- ✅ **Performance**: Melhorada com panes nativos
+- ✅ **Compilação**: TypeScript funcionando perfeitamente
+- ✅ **Panes Nativos**: RSI com separação de escalas nativa
+- ✅ **API Unificada**: `addSeries()` para todos os tipos
+
+#### Negativas:
+- Nenhuma identificada
+
+### Implementação
+- **Dockerfile.dev**: Modificado para forçar v5.0.9
+- **Componentes**: Migrados para `chart.addSeries(CandlestickSeries, ...)`
+- **Panes**: Implementados com `chart.addPane()` e `paneIndex`
+- **Cleanup**: Otimizado com `chart.removePane()` e `chart.removeSeries()`
+- **Type Safety**: Eliminados type assertions desnecessários
+- **Documentação**: CHANGELOG.md e DECISIONS.md atualizados
+
+### Status
+**✅ IMPLEMENTADO COM SUCESSO**
+- Versão 5.0.9 confirmada e funcionando
+- API completamente migrada
+- Compilação TypeScript sem erros
+- Containers rodando perfeitamente
+- Type assertions eliminados
+- Performance melhorada
+
 ## ADR-005: Refatoração Lightweight Charts - Preparação para v5.0.9
 
 **Data**: 2025-01-25  

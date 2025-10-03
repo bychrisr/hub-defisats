@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi, CandlestickData, Time } from 'lightweight-charts';
+import { 
+  createChart, 
+  IChartApi, 
+  ISeriesApi, 
+  CandlestickData, 
+  Time,
+  LineSeries,
+  CandlestickSeries,
+  HistogramSeries
+} from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
@@ -83,8 +91,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
       },
     });
 
-    // Criar série de candlesticks
-    const candlestickSeries = chart.addCandlestickSeries({
+    // Criar série de candlesticks - API v5.0.9
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: isDark ? '#10b981' : '#059669', // Verde para alta
       downColor: isDark ? '#ef4444' : '#dc2626', // Vermelho para baixa
       borderDownColor: isDark ? '#ef4444' : '#dc2626',
@@ -194,7 +202,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">
-          {symbol} - Gráfico de Preços
+          {symbol} - Gráfico de Preços (Lightweight Charts v5.0.9)
         </CardTitle>
         <div className="flex items-center gap-2">
           <Button
