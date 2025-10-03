@@ -34,7 +34,11 @@ export default async function tradingViewRoutes(fastify: any) {
       console.log('🔄 TRADINGVIEW PROXY - Using Binance as primary source (TradingView interface)');
       
       // Fazer requisição para Binance API
-      const binanceResponse = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${timeframe}&limit=${limit}`, {
+      // Converter símbolo TradingView para formato Binance
+      const binanceSymbol = symbol?.replace(/^BINANCE:/, '') || symbol;
+      console.log('🔄 TRADINGVIEW PROXY - Converting symbol:', { original: symbol, binance: binanceSymbol });
+      
+      const binanceResponse = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${timeframe}&limit=${limit}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
@@ -91,7 +95,8 @@ export default async function tradingViewRoutes(fastify: any) {
 
       // Por enquanto, retornar dados do Binance como fallback
       // TODO: Implementar dados de mercado do TradingView quando necessário
-      const binanceResponse = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`, {
+      const binanceSymbol = symbol.replace(/^BINANCE:/, '');
+      const binanceResponse = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
