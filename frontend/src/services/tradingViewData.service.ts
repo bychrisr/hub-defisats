@@ -54,32 +54,69 @@ const API_CONFIG = {
 interface CacheEntry {
   data: any;
   timestamp: number;
-  ttl: number; // 30 segundos máximo
+  ttl: number; // TTL diferenciado: 30s para mercado, 5min para históricos
 }
 
 class IntelligentCache {
   private cache = new Map<string, CacheEntry>();
-  private readonly MAX_TTL = 30 * 1000; // 30 segundos - conforme segurança
+  private readonly MAX_TTL_MARKET = 30 * 1000; // 30 segundos para dados de mercado
+  private readonly MAX_TTL_HISTORICAL = 5 * 60 * 1000; // 5 minutos para dados históricos
 
   set(key: string, data: any, customTtl?: number): void {
-    const ttl = Math.min(customTtl || this.MAX_TTL, this.MAX_TTL);
+    // Determinar TTL baseado no tipo de dados
+    let ttl = customTtl;
+    
+    if (!ttl) {
+      // TTL automático baseado no tipo de dados
+      if (key.includes('historical_')) {
+        ttl = this.MAX_TTL_HISTORICAL;
+      } else {
+        ttl = this.MAX_TTL_MARKET;
+      }
+    }
+    
+    // Garantir que não exceda os limites de segurança
+    const maxTtl = key.includes('historical_') ? this.MAX_TTL_HISTORICAL : this.MAX_TTL_MARKET;
+    ttl = Math.min(ttl, maxTtl);
+    
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
       ttl
     });
+    
+    // Log para monitoramento do cache diferenciado
+    const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
+    console.log(`📦 CACHE SET - ${dataType} data cached for ${ttl/1000}s:`, {
+      key: key.substring(0, 50) + '...',
+      dataType,
+      ttl: ttl/1000 + 's',
+      dataLength: Array.isArray(data) ? data.length : 'object'
+    });
   }
 
   get(key: string): any | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (!entry) {
+      console.log(`📦 CACHE MISS - No entry found:`, key.substring(0, 50) + '...');
+      return null;
+    }
 
     const age = Date.now() - entry.timestamp;
     if (age > entry.ttl) {
       this.cache.delete(key);
+      const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
+      console.log(`📦 CACHE EXPIRED - ${dataType} data expired after ${age/1000}s:`, key.substring(0, 50) + '...');
       return null;
     }
 
+    const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
+    console.log(`📦 CACHE HIT - ${dataType} data retrieved (age: ${age/1000}s):`, {
+      key: key.substring(0, 50) + '...',
+      dataType,
+      age: age/1000 + 's',
+      ttl: entry.ttl/1000 + 's'
+    });
     return entry.data;
   }
 
