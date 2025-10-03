@@ -115,8 +115,20 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
   // ✅ MEMOIZAR DADOS EFETIVOS PARA EVITAR RECRIAÇÃO CONSTANTE
   const effectiveCandleData = useMemo(() => {
-    return useApiData ? historicalData : (candleData || linePriceData);
-  }, [useApiData, historicalData, candleData, linePriceData]);
+    const data = useApiData ? historicalData : (candleData || linePriceData);
+    
+    console.log('🔄 EFFECTIVE DATA - Dados efetivos calculados:', {
+      useApiData,
+      historicalDataLength: historicalData?.length || 0,
+      candleDataLength: candleData?.length || 0,
+      linePriceDataLength: linePriceData?.length || 0,
+      effectiveDataLength: data?.length || 0,
+      historicalLoading,
+      historicalError
+    });
+    
+    return data;
+  }, [useApiData, historicalData, candleData, linePriceData, historicalLoading, historicalError]);
 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -399,8 +411,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         },
       }, 1);
       
-      // Configurar altura do pane RSI - API v5.0.9
-      rsiPane.setHeight(100);
+      // Configurar altura do pane RSI baseado no estado inicial - API v5.0.9
+      rsiPane.setHeight(rsiEnabled ? 100 : 0);
       
       console.log('🚀 RSI SERIES - Séries RSI criadas com API v5.0.9 e pane nativo');
     } catch (error) {
