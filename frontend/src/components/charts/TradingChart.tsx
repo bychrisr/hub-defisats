@@ -91,8 +91,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
       },
     });
 
-    // Criar série de candlesticks - API v5.0.9
-    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+    // Criar série de candlesticks - API v4.2.3
+    const candlestickSeries = chart.addCandlestickSeries({
       upColor: isDark ? '#10b981' : '#059669', // Verde para alta
       downColor: isDark ? '#ef4444' : '#dc2626', // Vermelho para baixa
       borderDownColor: isDark ? '#ef4444' : '#dc2626',

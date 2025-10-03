@@ -700,7 +700,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
               )}
               <div>
                 <CardTitle className="text-lg font-semibold">
-                  {derivedDisplaySymbol} (Lightweight Charts v5.0.9)
+                  {derivedDisplaySymbol} (Lightweight Charts v4.2.3)
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {derivedDescription}
