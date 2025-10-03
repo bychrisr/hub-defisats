@@ -2,6 +2,55 @@
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
 
+## ADR-008: CORREÇÃO DEFINITIVA PROXY DOCKER COMPOSE
+
+**Data**: 2025-10-03  
+**Status**: ✅ IMPLEMENTADO COM SUCESSO  
+**Contexto**: Correção crítica da comunicação entre containers Docker
+
+### Problema Identificado
+- **Proxy Incorreto**: Frontend configurado para `localhost:13010` (host externo)
+- **ECONNREFUSED Errors**: Containers não conseguiam se comunicar
+- **Comunicação Interna Falhando**: Serviços isolados na rede Docker
+- **Configuração Host vs Container**: Confusão entre portas externas e internas
+
+### Decisão
+**USAR NOME DO SERVIÇO DOCKER PARA COMUNICAÇÃO INTERNA**
+
+#### Implementação Escolhida:
+1. **Proxy Vite Corrigido**:
+   - `/api` → `http://backend:3010` (nome do serviço)
+   - `/api/ws` → `ws://backend:3010` (WebSocket)
+   - `/ws` → `ws://backend:3010` (WebSocket alternativo)
+   - `/test` → `http://backend:3010` (testes)
+   - `/version` → `http://backend:3010` (versão)
+
+2. **Rede Docker Funcionando**:
+   - Containers na mesma rede `hub-defisats-network`
+   - Comunicação via nome do serviço (não localhost)
+   - Porta interna 3010 (não porta externa 13010)
+
+### Alternativas Consideradas
+1. **Manter localhost:13010**: ❌ Falha - localhost dentro do container refere-se ao próprio container
+2. **Usar IP da rede Docker**: ❌ Complexo - IPs podem mudar
+3. **Usar nome do serviço**: ✅ Escolhido - Simples e confiável
+
+### Consequências Positivas
+- ✅ **Comunicação Restaurada**: Frontend ↔ Backend funcionando
+- ✅ **APIs Respondendo**: `/version`, `/market/index/public` OK
+- ✅ **Logs Limpos**: Sem erros ECONNREFUSED
+- ✅ **Docker Compose Estável**: Todos os serviços comunicando
+
+### Consequências Negativas
+- **Nenhuma identificada**: Solução limpa e eficaz
+
+### Implementação
+- **Arquivo**: `frontend/vite.config.ts`
+- **Mudança**: Proxy targets atualizados para usar nome do serviço
+- **Validação**: Testes de API confirmaram funcionamento
+
+---
+
 ## ADR-006: MIGRAÇÃO COMPLETA PARA LIGHTWEIGHT-CHARTS v5.0.9
 
 **Data**: 2025-10-03  

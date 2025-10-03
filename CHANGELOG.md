@@ -6,6 +6,46 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🚀 **CORREÇÃO DEFINITIVA - PROXY DOCKER COMPOSE - v2.6.1**
+
+#### ✨ **Problema Resolvido**
+- ✅ **Frontend tentando conectar via localhost:13010** (host externo)
+- ✅ **ECONNREFUSED errors** na comunicação entre containers
+- ✅ **Proxy configurado incorretamente** para ambiente Docker Compose
+- ✅ **Comunicação interna falhando** entre serviços
+
+#### 🔧 **Solução Implementada**
+
+##### **1. Correção do Proxy Vite**
+- ✅ **Proxy Atualizado para Rede Docker**:
+  - `/api` → `http://backend:3010` (nome do serviço)
+  - `/api/ws` → `ws://backend:3010` (WebSocket)
+  - `/ws` → `ws://backend:3010` (WebSocket alternativo)
+  - `/test` → `http://backend:3010` (testes)
+  - `/version` → `http://backend:3010` (versão)
+
+- ✅ **Comunicação Interna Corrigida**:
+  - Containers se comunicam via nome do serviço
+  - Porta interna 3010 (não porta externa 13010)
+  - Rede Docker `hub-defisats-network` funcionando
+
+##### **2. Validação e Testes**
+- ✅ **API /version respondendo**: `{"version":"1.5.0",...}`
+- ✅ **API /market/index/public funcionando**: dados de mercado OK
+- ✅ **Container frontend reiniciado** com sucesso
+- ✅ **Logs limpos** sem erros ECONNREFUSED
+
+#### 🎯 **Resultado**
+- **Frontend**: http://localhost:13000 (porta externa)
+- **Backend**: http://localhost:13010 (porta externa)  
+- **Comunicação interna**: frontend → backend:3010 (rede Docker)
+- **Status**: ✅ Comunicação entre containers restaurada
+
+#### 📋 **Arquivos Modificados**
+- `frontend/vite.config.ts` - Proxy corrigido para Docker Compose
+
+---
+
 ### 🚀 **CORREÇÃO CRÍTICA - CACHE DIFERENCIADO PARA DADOS HISTÓRICOS - v2.6.0**
 
 #### ✨ **Problema Resolvido**
