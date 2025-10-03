@@ -2,6 +2,62 @@
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
 
+## ADR-011: CORREÇÃO DEFINITIVA - DUPLA CONVERSÃO TIMESTAMPS
+
+**Data**: 2025-01-03  
+**Status**: ✅ IMPLEMENTADO COM SUCESSO  
+**Contexto**: Correção crítica da dupla conversão de timestamps que causava dados inválidos
+
+### Problema Identificado
+- **Dupla conversão de timestamps** - Backend e frontend convertiam ms→segundos
+- **Timestamps inválidos** - Anos como `57724` em vez de `2025-10-03`
+- **Gráfico vazio na inicialização** - Dados com timestamps incorretos
+- **Escala do eixo Y incorreta** - Valores inválidos causavam problemas de escala
+
+### Decisão
+**ELIMINAR DUPLA CONVERSÃO - MANTER CONVERSÃO APENAS NO BACKEND**
+
+#### Implementação Escolhida:
+1. **Análise Completa (TIMESTAMP_ANALYSIS_REPORT.md)**:
+   - Branch de comparação `analysis-timestamp-before-v5`
+   - Identificação da dupla conversão ms→segundos→segundos/1000
+   - Diagnóstico: Backend convertia + Frontend convertia novamente
+   - Resultado: Timestamps divididos por 1000 duas vezes
+
+2. **Backend - Conversão Única**:
+   - Manter conversão `Math.floor(kline[0] / 1000)` (ms→segundos)
+   - Centralizar lógica de conversão no backend
+   - Manter consistência com arquitetura TradingView-first
+
+3. **Frontend - Dados Diretos**:
+   - Remover conversão duplicada: `return result.data || []`
+   - Usar dados do backend já convertidos
+   - Eliminar type assertions desnecessárias
+
+### Alternativas Consideradas
+- **Manter conversão apenas no frontend**: Rejeitado - quebraria arquitetura TradingView-first
+- **Manter dupla conversão**: Rejeitado - causava timestamps inválidos
+- **Usar timestamps em ms**: Rejeitado - Lightweight Charts v5.0.9 espera segundos
+
+### Consequências Positivas
+- ✅ **Timestamps corretos** - `2025-10-03 01:00:00` em vez de `57724-11-07`
+- ✅ **Dados históricos carregam corretamente** com timestamps válidos
+- ✅ **Estado inicial do gráfico funcional** - não aparece mais vazio
+- ✅ **Escala do eixo Y ajustada automaticamente** para mostrar dados completos
+- ✅ **UX melhorada** - usuário vê dados imediatamente sem interação
+- ✅ **Arquitetura limpa** - conversão centralizada no backend
+
+### Consequências Negativas
+- **Nenhuma** - Correção resolve problemas sem introduzir novos
+
+### Validação
+- ✅ **API funcionando**: `/api/tradingview/scanner` retorna timestamps corretos
+- ✅ **Conversão única**: Backend converte ms→segundos uma vez
+- ✅ **Frontend limpo**: Usa dados diretos sem conversão adicional
+- ✅ **Logs limpos**: Sem erros de carregamento
+
+---
+
 ## ADR-010: CORREÇÃO DEFINITIVA - TIMESTAMP E ESCALA INICIAL DO GRÁFICO
 
 **Data**: 2025-10-03  

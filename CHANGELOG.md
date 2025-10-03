@@ -6,6 +6,53 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🚀 **CORREÇÃO DEFINITIVA - DUPLA CONVERSÃO TIMESTAMPS - v2.6.4**
+
+#### ✨ **Problema Resolvido**
+- ✅ **Dupla conversão de timestamps** - Backend e frontend convertiam ms→segundos
+- ✅ **Timestamps inválidos** - Anos como `57724` em vez de `2025-10-03`
+- ✅ **Gráfico vazio na inicialização** - Dados com timestamps incorretos
+- ✅ **Escala do eixo Y incorreta** - Valores inválidos causavam problemas de escala
+
+#### 🔧 **Solução Implementada**
+
+##### **1. Análise Completa (TIMESTAMP_ANALYSIS_REPORT.md)**
+- ✅ **Branch de comparação**: `analysis-timestamp-before-v5`
+- ✅ **Identificação**: Dupla conversão ms→segundos→segundos/1000
+- ✅ **Diagnóstico**: Backend convertia + Frontend convertia novamente
+- ✅ **Resultado**: Timestamps divididos por 1000 duas vezes
+
+##### **2. Backend - Conversão Única**
+- ✅ **Mantém conversão**: `Math.floor(kline[0] / 1000)` (ms→segundos)
+- ✅ **Centraliza lógica**: Conversão única no backend
+- ✅ **Consistência**: Arquitetura TradingView-first mantida
+
+##### **3. Frontend - Dados Diretos**
+- ✅ **Remove conversão duplicada**: `return result.data || []`
+- ✅ **Usa dados do backend**: Timestamps já convertidos
+- ✅ **Elimina type assertions**: Dados diretos sem conversão
+
+#### 🎯 **Resultado Esperado**
+- **Timestamps corretos**: `2025-10-03 01:00:00` em vez de `57724-11-07` ✅
+- **Dados históricos**: Carregam corretamente com timestamps válidos ✅
+- **Estado inicial**: Gráfico não aparece mais vazio na inicialização ✅
+- **Escala do eixo Y**: Ajustada automaticamente para mostrar dados completos ✅
+- **UX melhorada**: Usuário vê dados imediatamente sem interação ✅
+
+#### 📊 **Validação**
+- ✅ **API funcionando**: `/api/tradingview/scanner` retorna timestamps corretos
+- ✅ **Conversão única**: Backend converte ms→segundos uma vez
+- ✅ **Frontend limpo**: Usa dados diretos sem conversão adicional
+- ✅ **Logs limpos**: Sem erros de carregamento
+
+#### 🔄 **Compatibilidade**
+- ✅ **Lightweight Charts v5.0.9**: Timestamps em segundos funcionando
+- ✅ **Docker Compose**: Backend reiniciado com correção
+- ✅ **Cache limpo**: Dados antigos removidos automaticamente
+- ✅ **Arquitetura**: TradingView-first mantida
+
+---
+
 ### 🚀 **CORREÇÃO DEFINITIVA - TIMESTAMP E ESCALA INICIAL DO GRÁFICO - v2.6.3**
 
 #### ✨ **Problema Resolvido**
