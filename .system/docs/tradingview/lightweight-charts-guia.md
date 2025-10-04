@@ -3,6 +3,7 @@
 Este guia documenta como usamos o Lightweight Charts v5.0.9 na plataforma: instalação, integração, opções de customização, endpoints remotos e boas práticas.
 
 ## Sumário
+- ⚠️ **CRÍTICO**: Diretrizes de Inicialização
 - Visão geral
 - Instalação e dependências
 - Integração rápida
@@ -20,6 +21,142 @@ Usamos o Lightweight Charts v5.0.9 para renderizar gráficos leves, altamente cu
 
 **Versão atual**: 5.0.9
 **Referência da API**: https://tradingview.github.io/lightweight-charts/docs/api
+
+## ⚠️ **CRÍTICO**: Diretrizes de Inicialização
+
+### 🚨 **PROBLEMAS CRÍTICOS RESOLVIDOS (v2.3.13)**
+
+**NUNCA** crie gráficos sem dados válidos. Isso causa:
+- ❌ Gráfico vazio na inicialização
+- ❌ Reset do gráfico ao mudar timeframe
+- ❌ Instabilidade e bugs de renderização
+- ❌ Má experiência do usuário
+
+### ✅ **IMPLEMENTAÇÃO CORRETA OBRIGATÓRIA**
+
+#### 1. **Validação de Dados ANTES da Criação**
+```typescript
+// ✅ OBRIGATÓRIO: Validar dados antes de criar gráfico
+const hasValidData = useMemo(() => {
+  if (!effectiveCandleData || effectiveCandleData.length === 0) {
+    return false;
+  }
+  
+  const firstDataPoint = effectiveCandleData[0];
+  if (!firstDataPoint || !firstDataPoint.time) {
+    return false;
+  }
+  
+  // Validação específica por tipo
+  if ('open' in firstDataPoint) {
+    return firstDataPoint.open !== undefined && 
+           firstDataPoint.high !== undefined && 
+           firstDataPoint.low !== undefined && 
+           firstDataPoint.close !== undefined;
+  }
+  
+  return true;
+}, [effectiveCandleData]);
+```
+
+#### 2. **Estado de Prontidão OBRIGATÓRIO**
+```typescript
+// ✅ OBRIGATÓRIO: Aguardar dados antes de criar
+const isChartReady = useMemo(() => {
+  if (useApiData) {
+    return !historicalLoading && !historicalError && hasValidData;
+  } else {
+    return hasValidData;
+  }
+}, [useApiData, historicalLoading, historicalError, hasValidData]);
+```
+
+#### 3. **Criação Condicional do Gráfico**
+```typescript
+// ✅ OBRIGATÓRIO: Só criar quando dados estão prontos
+useEffect(() => {
+  if (!containerRef.current) return;
+  
+  // 🚨 CRÍTICO: NUNCA criar sem dados válidos
+  if (!isChartReady) {
+    console.log('⏳ CHART CREATION - Aguardando dados válidos');
+    return;
+  }
+  
+  // Criar gráfico apenas quando dados estão prontos
+  const chart = createChart(containerRef.current, chartOptions);
+  // ... resto da implementação
+}, [chartOptions, isChartReady, effectiveCandleData]);
+```
+
+#### 4. **Mudança de Timeframe SEM Recriação**
+```typescript
+// ✅ OBRIGATÓRIO: NUNCA recriar gráfico ao mudar timeframe
+const handleTimeframeChange = (newTimeframe: string) => {
+  // Apenas atualizar estado - dados serão buscados automaticamente
+  setCurrentTimeframe(newTimeframe);
+  
+  // Gráfico será atualizado via useEffect que monitora effectiveCandleData
+};
+```
+
+### 🎯 **Estados de Carregamento OBRIGATÓRIOS**
+
+```typescript
+// ✅ OBRIGATÓRIO: Feedback visual claro
+{(historicalLoading || !isChartReady) && (
+  <div className="chart-loading">
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+      {historicalLoading ? 'Loading chart data...' : 'Preparing chart...'}
+    </div>
+  </div>
+)}
+```
+
+### 📋 **Checklist de Implementação**
+
+- [ ] ✅ Validar dados antes de criar gráfico
+- [ ] ✅ Implementar `isChartReady` state
+- [ ] ✅ Aguardar dados válidos na criação
+- [ ] ✅ NUNCA recriar gráfico ao mudar timeframe
+- [ ] ✅ Implementar estados de carregamento visuais
+- [ ] ✅ Validar estrutura dos dados (candlestick/line)
+- [ ] ✅ Tratar erros de carregamento
+- [ ] ✅ Feedback visual para usuário
+
+### 🚫 **ANTI-PADRÕES PROIBIDOS**
+
+```typescript
+// ❌ PROIBIDO: Criar gráfico sem dados
+useEffect(() => {
+  const chart = createChart(containerRef.current, options); // SEM VALIDAÇÃO
+}, []);
+
+// ❌ PROIBIDO: Recriar gráfico ao mudar timeframe
+const handleTimeframeChange = (newTimeframe: string) => {
+  setCurrentTimeframe(newTimeframe);
+  // ❌ NUNCA fazer isso:
+  // chart.remove();
+  // chart = createChart(...);
+};
+
+// ❌ PROIBIDO: Não validar dados
+if (data) { // ❌ Validação insuficiente
+  chart.setData(data);
+}
+```
+
+### 🔧 **Troubleshooting Rápido**
+
+| Problema | Causa | Solução |
+|----------|-------|---------|
+| Gráfico vazio | Dados não carregaram | Implementar `isChartReady` |
+| Reset ao mudar timeframe | Recriação do gráfico | Usar `setData()` em vez de recriar |
+| Loading infinito | Dados inválidos | Validar estrutura dos dados |
+| Erro de renderização | Dados malformados | Verificar `open, high, low, close` |
+
+---
 
 ## Instalação e dependências
 ```json

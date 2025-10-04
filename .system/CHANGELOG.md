@@ -4,6 +4,41 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.13] - 2025-01-26
+
+### 🐛 **CORREÇÕES CRÍTICAS - LIGHTWEIGHT CHARTS**
+
+#### 🚨 **Problemas Críticos Resolvidos**
+- ✅ **Chart Initialization**: Corrigido timing de inicialização - agora aguarda dados válidos
+- ✅ **Timeframe Change**: Corrigido problema de reset ao mudar timeframe
+- ✅ **Loading States**: Implementados estados de carregamento adequados
+- ✅ **Data Validation**: Adicionada validação rigorosa antes da criação do gráfico
+- ✅ **Performance**: Eliminadas recriações desnecessárias do gráfico
+- ✅ **UX**: Melhorada experiência do usuário com feedback visual claro
+
+#### 🔧 **Implementações Técnicas**
+- ✅ **hasValidData**: Validação rigorosa de estrutura dos dados
+- ✅ **isChartReady**: Estado de prontidão que aguarda dados válidos
+- ✅ **Criação Condicional**: Gráfico só é criado quando dados estão prontos
+- ✅ **Timeframe Optimization**: Mudança de timeframe sem recriação do gráfico
+- ✅ **Loading Feedback**: Estados visuais claros (Loading, Preparing, Ready, Error)
+- ✅ **Badge Fixes**: Corrigidos problemas de tipos nos componentes Badge
+
+#### 📚 **Documentação Atualizada**
+- ✅ **CRITICAL-GUIDELINES.md**: Diretrizes críticas para futuros desenvolvedores
+- ✅ **lightweight-charts-guia.md**: Seção crítica de inicialização adicionada
+- ✅ **Anti-padrões**: Documentados padrões proibidos e soluções
+- ✅ **Troubleshooting**: Guia rápido de resolução de problemas
+
+#### 🎯 **Impacto**
+- ✅ **Estabilidade**: Gráfico não quebra mais na inicialização
+- ✅ **Performance**: Eliminadas recriações desnecessárias
+- ✅ **UX**: Feedback visual claro para o usuário
+- ✅ **Confiabilidade**: Validação rigorosa de dados
+- ✅ **Manutenibilidade**: Código mais limpo e organizado
+
+---
+
 ## [v2.3.12] - 2025-01-25
 
 ### 🎨 **IMPLEMENTAÇÃO DE DROPDOWN DE TIMEFRAME NO ESTILO LN MARKETS**

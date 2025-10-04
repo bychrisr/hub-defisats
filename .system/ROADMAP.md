@@ -4,11 +4,11 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.3.12 ✅ COMPLETA
+## Status Atual: v2.3.13 ✅ COMPLETA
 
-**Versão**: v2.3.12  
-**Status**: Sistema 100% Funcional com Interface Modernizada  
-**Data**: 2025-01-25
+**Versão**: v2.3.13  
+**Status**: Sistema 100% Funcional com Correções Críticas  
+**Data**: 2025-01-26
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -73,6 +73,11 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **NOVO**: Dropdown de Timeframe no Estilo LN Markets
 - ✅ **NOVO**: Interface de Gráficos Modernizada e Limpa
 - ✅ **NOVO**: Remoção de Elementos Redundantes da UI
+- ✅ **CRÍTICO**: Lightweight Charts - Correções de Inicialização
+- ✅ **CRÍTICO**: Lightweight Charts - Correções de Timeframe Change
+- ✅ **CRÍTICO**: Lightweight Charts - Estados de Carregamento Adequados
+- ✅ **CRÍTICO**: Lightweight Charts - Validação de Dados Rigorosa
+- ✅ **CRÍTICO**: Lightweight Charts - Performance Otimizada
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
