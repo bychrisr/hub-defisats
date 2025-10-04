@@ -130,6 +130,45 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     return data;
   }, [useApiData, historicalData, candleData, linePriceData, historicalLoading, historicalError]);
 
+  // ✅ VERIFICAR SE TEMOS DADOS SUFICIENTES PARA CRIAR O GRÁFICO
+  const hasValidData = useMemo(() => {
+    if (!effectiveCandleData || effectiveCandleData.length === 0) {
+      return false;
+    }
+    
+    // Verificar se os dados têm estrutura válida
+    const firstDataPoint = effectiveCandleData[0];
+    if (!firstDataPoint || !firstDataPoint.time) {
+      return false;
+    }
+    
+    // Para dados de candlestick, verificar se tem open, high, low, close
+    if ('open' in firstDataPoint) {
+      return firstDataPoint.open !== undefined && 
+             firstDataPoint.high !== undefined && 
+             firstDataPoint.low !== undefined && 
+             firstDataPoint.close !== undefined;
+    }
+    
+    // Para dados de linha, verificar se tem value
+    if ('value' in firstDataPoint) {
+      return firstDataPoint.value !== undefined;
+    }
+    
+    return true;
+  }, [effectiveCandleData]);
+
+  // ✅ ESTADO DE CARREGAMENTO ADEQUADO
+  const isChartReady = useMemo(() => {
+    if (useApiData) {
+      // Para dados da API, aguardar carregamento completo
+      return !historicalLoading && !historicalError && hasValidData;
+    } else {
+      // Para dados estáticos, verificar se existem
+      return hasValidData;
+    }
+  }, [useApiData, historicalLoading, historicalError, hasValidData]);
+
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -287,9 +326,21 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   // ✅ CRIAR GRÁFICO PRINCIPAL COM PANES NATIVOS - OTIMIZADO
   useEffect(() => {
     if (!containerRef.current) return;
+    
+    // ✅ CRÍTICO: Só criar gráfico quando tivermos dados válidos
+    if (!isChartReady) {
+      console.log('⏳ CHART CREATION - Aguardando dados válidos:', {
+        isChartReady,
+        hasValidData,
+        historicalLoading,
+        historicalError,
+        effectiveDataLength: effectiveCandleData?.length || 0
+      });
+      return;
+    }
 
     console.count('🚀 CHART CREATION - Execução #');
-    console.log('🚀 CHART CREATION - Criando gráfico com panes nativos v5.0.9');
+    console.log('🚀 CHART CREATION - Criando gráfico com panes nativos v5.0.9 - DADOS VÁLIDOS CONFIRMADOS');
 
     // Criar gráfico principal
     const chart = createChart(containerRef.current, chartOptions);
@@ -482,7 +533,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         console.error('❌ CHART CLEANUP - Erro ao remover chart:', error);
       }
     };
-  }, [chartOptions]); // ✅ DEPENDÊNCIA ESTÁVEL - chartOptions é memoizado
+  }, [chartOptions, isChartReady, effectiveCandleData]); // ✅ DEPENDÊNCIAS ATUALIZADAS - incluir isChartReady e dados
 
   // ✅ CALCULAR RSI COM useCallback PARA EVITAR LOOPS
   const calculateRSI = useCallback(() => {
@@ -701,7 +752,13 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       from: currentTimeframe,
       to: newTimeframe
     });
+    
+    // ✅ CRÍTICO: Não recriar gráfico ao mudar timeframe
+    // Apenas atualizar o estado - o hook useHistoricalData vai buscar novos dados
     setCurrentTimeframe(newTimeframe);
+    
+    // ✅ O gráfico será atualizado automaticamente quando os novos dados chegarem
+    // via useEffect que monitora effectiveCandleData
   };
 
   return (
@@ -795,29 +852,39 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           {/* Status Info */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
                 {useApiData ? 'API Data' : 'Static Data'}
-              </Badge>
+              </span>
               {historicalLoading && (
-                <Badge variant="secondary" className="text-xs">
+                <span className="inline-flex items-center rounded-full border border-transparent bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
                   Loading...
-                </Badge>
+                </span>
+              )}
+              {!isChartReady && !historicalLoading && (
+                <span className="inline-flex items-center rounded-full border border-transparent bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
+                  Preparing...
+                </span>
               )}
               {historicalError && (
-                <Badge variant="destructive" className="text-xs">
+                <span className="inline-flex items-center rounded-full border border-transparent bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800">
                   Error
-                </Badge>
-                )}
-              </div>
+                </span>
+              )}
+              {isChartReady && !historicalLoading && !historicalError && (
+                <span className="inline-flex items-center rounded-full border border-transparent bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+                  Ready
+                </span>
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
                 Lightweight Charts v5.0.9
-              </Badge>
+              </span>
               {rsiEnabled && (
-                <Badge variant="default" className="text-xs">
+                <span className="inline-flex items-center rounded-full border border-transparent bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
                   RSI Active
-                </Badge>
+                </span>
               )}
             </div>
           </div>
@@ -828,14 +895,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
             <div ref={containerRef} className="w-full h-full" />
             
             {/* Loading Overlay */}
-            {historicalLoading && (
+            {(historicalLoading || !isChartReady) && (
               <div className="chart-loading">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                  Loading chart data...
-          </div>
-        </div>
-      )}
+                  {historicalLoading ? 'Loading chart data...' : 'Preparing chart...'}
+                </div>
+              </div>
+            )}
 
             {/* RSI Indicator */}
             {rsiEnabled && rsiData.length > 0 && (
