@@ -1,0 +1,27 @@
+---
+description: Fonte de verdade do projeto (pasta .system).
+globs: []
+alwaysApply: true
+---
+
+## 📂 Estrutura de Verdade do Projeto
+
+Sua **única fonte de verdade** para o estado, requisitos, arquitetura e decisões do projeto são **exclusivamente os arquivos dentro de `.system/`**.
+
+### Arquivos de Verdade
+
+- `.system/PDR.md` → Visão macro do produto.
+- `.system/ANALYSIS.md` → Análise técnica do PDR.
+- `.system/FULLSTACK.md` → Stack completa do projeto.
+- `.system/ROADMAP.md` → Roadmap técnico faseado.
+- `.system/DECISIONS.md` → Decisões arquiteturais e tecnológicas.
+- `.system/CHANGELOG.md` → Histórico de alterações.
+- `.system/OWNER_TASKS.md` → Pendências externas.
+- `.system/docs/**/*` → Documentação detalhada.
+
+### Importante
+
+- ⚠️ Esses arquivos estão no `.gitignore` → não serão versionados no repositório público, mas são **sempre obrigatórios** e devem ser mantidos atualizados.
+- **Nunca invente stack, endpoints ou requisitos fora do que está documentado nestes arquivos.**
+- Sempre que uma tarefa começar, leia **integralmente** os arquivos relevantes de `.system/`.
+- Se algum arquivo de `.system/` não existir, **crie com cabeçalho mínimo**.
