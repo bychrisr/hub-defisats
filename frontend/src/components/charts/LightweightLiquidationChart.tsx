@@ -260,51 +260,37 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         const year = date.getFullYear();
         
         if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-          const hour = date.getHours();
-          const minute = date.getMinutes();
-          
-          let temporalScore = 0;
-          
-          if (date.getMonth() === 0 && date.getDate() === 1) {
-            return year.toString();
+          // ✅ CORREÇÃO: Formatação simplificada para timeframes intraday
+          if (date.getDate() === 1 && date.getMonth() === 0) {
+            return year.toString(); // Ano novo
           }
           
           if (date.getDate() === 1) {
-            return monthName;
+            return monthName; // Primeiro dia do mês
           }
           
-          if (hour === 0) temporalScore += 100;
-          if (hour === 6) temporalScore += 80;
-          if (hour === 12) temporalScore += 80;
-          if (hour === 18) temporalScore += 80;
-          if (hour === 21) temporalScore += 60;
-          
-          if (minute === 0) temporalScore += 20;
-          
-          if (temporalScore >= 80) {
-            return day;
+          if (date.getHours() === 0 && date.getMinutes() === 0) {
+            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`; // Meia-noite
           }
           
-          if (temporalScore >= 40) {
-            return `${day} ${hours}:${minutes}`;
-          }
-          
-          return `${hours}:${minutes}`;
+          return `${hours}:${minutes}`; // Horário normal
         }
         
         if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
+          // ✅ CORREÇÃO: Formatação simplificada para timeframes diários
           if (date.getMonth() === 0 && date.getDate() === 1) {
-            return year.toString();
+            return year.toString(); // Ano novo
           }
           
           if (date.getDate() === 1) {
-            return monthName;
+            return monthName; // Primeiro dia do mês
           }
           
-          return day;
+          return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`; // Dia/mês
         }
         
-        return `${day} • ${monthName}`;
+        // Fallback
+        return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
       }
     },
     crosshair: { mode: 1 },
@@ -427,7 +413,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       rsiPaneRef.current = rsiPane;
       
       // ✅ CORREÇÃO: Usar o índice correto do pane RSI
-      const rsiPaneIndex = rsiPane.index();
+      // Na v5.0.9, o pane é criado automaticamente e o índice é 1 (pane principal é 0)
+      const rsiPaneIndex = 1;
       
       // Criar série RSI principal no pane dedicado - API v5.0.9
       rsiSeriesRef.current = chart.addSeries(LineSeries, {
@@ -577,9 +564,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       });
       
       // Converter para formato Lightweight Charts
+      // ✅ CORREÇÃO: RSI deve ser convertido de percentual (0-100) para decimal (0-1)
       const rsiChartData = calculatedRSI.map(point => ({
         time: point.time as Time,
-        value: point.value
+        value: point.value / 100 // Converter de 0-100 para 0-1
       }));
       
       setRsiData(rsiChartData);
@@ -670,14 +658,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           const firstTime = effectiveCandleData[0].time as Time;
           const lastTime = effectiveCandleData[effectiveCandleData.length - 1].time as Time;
 
+          // ✅ CORREÇÃO: Converter overbought/oversold de percentual para decimal
           overboughtSeriesRef.current.setData([
-            { time: firstTime, value: rsiConfig.overbought },
-            { time: lastTime, value: rsiConfig.overbought },
+            { time: firstTime, value: rsiConfig.overbought / 100 },
+            { time: lastTime, value: rsiConfig.overbought / 100 },
           ]);
 
           oversoldSeriesRef.current.setData([
-            { time: firstTime, value: rsiConfig.oversold },
-            { time: lastTime, value: rsiConfig.oversold },
+            { time: firstTime, value: rsiConfig.oversold / 100 },
+            { time: lastTime, value: rsiConfig.oversold / 100 },
           ]);
         }
       }
