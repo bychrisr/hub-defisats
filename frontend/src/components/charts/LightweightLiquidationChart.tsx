@@ -220,6 +220,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       lockVisibleTimeRangeOnResize: true, // Manter range visível ao redimensionar
       shiftVisibleRangeOnNewBar: true, // Shift automático quando nova barra é adicionada
       allowShiftVisibleRangeOnWhitespaceReplacement: true, // Permitir shift em espaços vazios
+      // ✅ CONFIGURAÇÕES ROBUSTAS PARA TIMESTAMP IDÊNTICO À LN MARKETS
+      tickMarkMaxCharacterLength: 8, // Limitar tamanho dos labels
+      barSpacing: 6, // Espaçamento entre barras
+      minBarSpacing: 0.5, // Espaçamento mínimo
       tickMarkFormatter: (time: any, tickMarkType: any) => {
         let timestamp: number;
         if (typeof time === 'number') {
@@ -245,38 +249,45 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         const monthName = date.toLocaleDateString('en-US', { month: 'short' });
         const year = date.getFullYear();
         
+        // ✅ SOLUÇÃO ROBUSTA BASEADA NA REFERÊNCIA LN MARKETS
+        // Formatação idêntica: dias grandes centralizados + horários HH:MM
+        
         if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-          // ✅ CORREÇÃO: Formatação simplificada para timeframes intraday
-          if (date.getDate() === 1 && date.getMonth() === 0) {
-            return year.toString(); // Ano novo
-          }
+          // Para timeframes intraday (minutos/horas) - como na referência LN Markets
           
-          if (date.getDate() === 1) {
-            return monthName; // Primeiro dia do mês
-          }
-          
+          // 1. Meia-noite (00:00) - mostrar dia do mês (números grandes centralizados)
           if (date.getHours() === 0 && date.getMinutes() === 0) {
-            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`; // Meia-noite
+            return date.getDate().toString();
           }
           
-          return `${hours}:${minutes}`; // Horário normal
+          // 2. Horários específicos (06:00, 12:00, 18:00) - mostrar HH:MM
+          if ((date.getHours() === 6 || date.getHours() === 12 || date.getHours() === 18) && date.getMinutes() === 0) {
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+          }
+          
+          // 3. Outros horários - mostrar HH:MM
+          return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
         }
         
         if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
-          // ✅ CORREÇÃO: Formatação simplificada para timeframes diários
+          // Para timeframes diários/semanais
+          
+          // 1. Primeiro dia do ano - mostrar ano
           if (date.getMonth() === 0 && date.getDate() === 1) {
-            return year.toString(); // Ano novo
+            return date.getFullYear().toString();
           }
           
+          // 2. Primeiro dia do mês - mostrar nome do mês
           if (date.getDate() === 1) {
-            return monthName; // Primeiro dia do mês
+            return date.toLocaleDateString('en-US', { month: 'short' });
           }
           
-          return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`; // Dia/mês
+          // 3. Outros dias - mostrar dia do mês
+          return date.getDate().toString();
         }
         
-        // Fallback
-        return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+        // Fallback para outros timeframes
+        return date.getDate().toString();
       }
     },
     crosshair: { mode: 1 },
