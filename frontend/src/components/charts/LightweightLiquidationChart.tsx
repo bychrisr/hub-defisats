@@ -237,15 +237,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       tickMarkFormatter: (time: any, tickMarkType: any) => {
         let timestamp: number;
         if (typeof time === 'number') {
-          if (time > 0 && time < 4102444800) {
-            timestamp = time;
-          } else {
-            timestamp = Math.floor(time / 1000);
-          }
+          // ✅ CORREÇÃO: Lightweight Charts já recebe timestamp em segundos
+          // A conversão de ms para s deve ser feita ANTES de chegar aqui
+          timestamp = time;
         } else {
           timestamp = Date.UTC(time.year, time.month - 1, time.day) / 1000;
         }
         
+        // ✅ CORREÇÃO: Timestamp já está em segundos, não precisa multiplicar por 1000
         const date = new Date(timestamp * 1000);
         
         if (isNaN(date.getTime()) || date.getFullYear() < 1970 || date.getFullYear() > 2100) {
@@ -427,6 +426,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       const rsiPane = chart.addPane();
       rsiPaneRef.current = rsiPane;
       
+      // ✅ CORREÇÃO: Usar o índice correto do pane RSI
+      const rsiPaneIndex = rsiPane.index();
+      
       // Criar série RSI principal no pane dedicado - API v5.0.9
       rsiSeriesRef.current = chart.addSeries(LineSeries, {
         color: '#8b5cf6',
@@ -436,7 +438,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 2,
           minMove: 0.01,
         },
-      }, 1);
+      }, rsiPaneIndex);
 
       // Criar linha de overbought no mesmo pane - API v5.0.9
       overboughtSeriesRef.current = chart.addSeries(LineSeries, {
@@ -448,7 +450,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 0,
           minMove: 1,
         },
-      }, 1);
+      }, rsiPaneIndex);
 
       // Criar linha de oversold no mesmo pane - API v5.0.9
       oversoldSeriesRef.current = chart.addSeries(LineSeries, {
@@ -460,7 +462,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           precision: 0,
           minMove: 1,
         },
-      }, 1);
+      }, rsiPaneIndex);
       
       // Configurar altura do pane RSI baseado no estado inicial - API v5.0.9
       rsiPane.setHeight(rsiEnabled ? 100 : 0);
@@ -559,7 +561,20 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         volume: 0
       }));
 
+      console.log('📊 RSI CALCULATION - Dados de entrada:', {
+        candleDataLength: candleData.length,
+        firstCandle: candleData[0],
+        lastCandle: candleData[candleData.length - 1],
+        rsiConfig
+      });
+
       const calculatedRSI = TechnicalIndicatorsService.calculateRSIExponential(candleData, rsiConfig);
+      
+      console.log('📊 RSI CALCULATION - RSI calculado:', {
+        rsiLength: calculatedRSI.length,
+        firstRSI: calculatedRSI[0],
+        lastRSI: calculatedRSI[calculatedRSI.length - 1]
+      });
       
       // Converter para formato Lightweight Charts
       const rsiChartData = calculatedRSI.map(point => ({
