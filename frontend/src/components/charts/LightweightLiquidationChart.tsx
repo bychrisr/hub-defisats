@@ -76,7 +76,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const mainSeriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
-  // ✅ CORREÇÃO: Remover refs desnecessárias - priceLines são criadas na série principal
+  // ✅ CORREÇÃO: Refs para controlar priceLines e evitar duplicatas
+  const priceLinesRef = useRef<Array<{ id: string; priceLine: any }>>([]);
   
 
   // Estados
@@ -142,6 +143,23 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     
     return true;
   }, [effectiveCandleData]);
+
+  // ✅ FUNÇÃO PARA LIMPAR PRICELINES EXISTENTES
+  const clearPriceLines = useCallback(() => {
+    if (priceLinesRef.current.length > 0) {
+      console.log('🧹 CLEAR PRICELINES - Removendo priceLines existentes:', priceLinesRef.current.length);
+      priceLinesRef.current.forEach(({ priceLine }) => {
+        try {
+          if (priceLine && typeof priceLine.remove === 'function') {
+            priceLine.remove();
+          }
+        } catch (error) {
+          console.warn('⚠️ CLEAR PRICELINES - Erro ao remover priceLine:', error);
+        }
+      });
+      priceLinesRef.current = [];
+    }
+  }, []);
 
   // ✅ ESTADO DE CARREGAMENTO ADEQUADO
   const isChartReady = useMemo(() => {
@@ -382,7 +400,8 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           mainSeriesRef.current = null;
         }
         
-        // ✅ CORREÇÃO: PriceLines são automaticamente removidas quando a série é removida
+        // ✅ CORREÇÃO: Limpar priceLines antes de remover a série
+        clearPriceLines();
         
         
         // Remover chart - API v5.0.9
@@ -434,6 +453,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         console.log('✅ DATA UPDATE - Dados aplicados à série principal e escala ajustada com fitContent()');
       }
 
+      // ✅ CORREÇÃO: Limpar priceLines existentes antes de criar novas
+      clearPriceLines();
+
       // ✅ CORREÇÃO: Criar priceLines na série principal para linhas de liquidação
       if (mainSeriesRef.current && liquidationLines && liquidationLines.length > 0) {
         console.log('🔴 LIQUIDATION LINES - Criando priceLines:', liquidationLines);
@@ -446,8 +468,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
               lineStyle: LineStyle.Solid,
               lineWidth: 2,
               axisLabelVisible: true,
-              title: line.label || `Liquidação #${index + 1}: $${line.price.toLocaleString()}`
+              title: line.label || `Pos #${index + 1}: $${line.price.toLocaleString()}`
             });
+            
+            // Armazenar referência para controle
+            priceLinesRef.current.push({
+              id: `liquidation_${index}`,
+              priceLine
+            });
+            
             console.log(`✅ LIQUIDATION LINE #${index + 1} - PriceLine criada:`, {
               price: line.price,
               label: line.label,
@@ -460,6 +489,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
 
       // ✅ CORREÇÃO: Criar priceLines na série principal para linhas de take profit
+      // SÓ criar se existir take profit definido
       if (mainSeriesRef.current && takeProfitLines && takeProfitLines.length > 0) {
         console.log('🟢 TAKE PROFIT LINES - Criando priceLines:', takeProfitLines);
         
@@ -471,8 +501,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
               lineStyle: LineStyle.Solid,
               lineWidth: 2,
               axisLabelVisible: true,
-              title: line.label || `Take Profit #${index + 1}: $${line.price.toLocaleString()}`
+              title: line.label || `TP Pos #${index + 1}: $${line.price.toLocaleString()}`
             });
+            
+            // Armazenar referência para controle
+            priceLinesRef.current.push({
+              id: `takeprofit_${index}`,
+              priceLine
+            });
+            
             console.log(`✅ TAKE PROFIT LINE #${index + 1} - PriceLine criada:`, {
               price: line.price,
               label: line.label,
