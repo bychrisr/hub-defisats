@@ -224,70 +224,59 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       tickMarkMaxCharacterLength: 8, // Limitar tamanho dos labels
       barSpacing: 6, // Espaçamento entre barras
       minBarSpacing: 0.5, // Espaçamento mínimo
+      // ✅ CONFIGURAÇÕES CRÍTICAS PARA EVITAR MÊS NO ZOOM NORMAL
+      secondsVisible: false, // Não mostrar segundos por padrão
       tickMarkFormatter: (time: any, tickMarkType: any) => {
+        // ✅ SOLUÇÃO ROBUSTA: Formatação baseada no tipo de tick (zoom-aware)
+        // tickMarkType: Year=0, Month=1, DayOfMonth=2, Time=3, TimeWithSeconds=4
+        
         let timestamp: number;
         if (typeof time === 'number') {
-          // ✅ CORREÇÃO: Lightweight Charts já recebe timestamp em segundos
-          // A conversão de ms para s deve ser feita ANTES de chegar aqui
           timestamp = time;
         } else {
           timestamp = Date.UTC(time.year, time.month - 1, time.day) / 1000;
         }
         
-        // ✅ CORREÇÃO: Timestamp já está em segundos, não precisa multiplicar por 1000
         const date = new Date(timestamp * 1000);
         
         if (isNaN(date.getTime()) || date.getFullYear() < 1970 || date.getFullYear() > 2100) {
-          const fallbackHours = String(new Date().getHours()).padStart(2, '0');
-          const fallbackMinutes = String(new Date().getMinutes()).padStart(2, '0');
-          return `${fallbackHours}:${fallbackMinutes}`;
+          return 'Invalid';
         }
         
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const day = String(date.getDate());
-        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-        const year = date.getFullYear();
+        // ✅ CORREÇÃO CRÍTICA: Usar tickMarkType para decidir formato
+        // Isso resolve o problema do mês aparecer no zoom normal
         
-        // ✅ SOLUÇÃO ROBUSTA BASEADA NA REFERÊNCIA LN MARKETS
-        // Formatação idêntica: dias grandes centralizados + horários HH:MM
-        
-        if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-          // Para timeframes intraday (minutos/horas) - como na referência LN Markets
-          
-          // 1. Meia-noite (00:00) - mostrar dia do mês (números grandes centralizados)
-          if (date.getHours() === 0 && date.getMinutes() === 0) {
-            return date.getDate().toString();
-          }
-          
-          // 2. Horários específicos (06:00, 12:00, 18:00) - mostrar HH:MM
-          if ((date.getHours() === 6 || date.getHours() === 12 || date.getHours() === 18) && date.getMinutes() === 0) {
-            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-          }
-          
-          // 3. Outros horários - mostrar HH:MM
-          return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-        }
-        
-        if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
-          // Para timeframes diários/semanais
-          
-          // 1. Primeiro dia do ano - mostrar ano
-          if (date.getMonth() === 0 && date.getDate() === 1) {
+        switch (tickMarkType) {
+          case 0: // Year
             return date.getFullYear().toString();
-          }
-          
-          // 2. Primeiro dia do mês - mostrar nome do mês
-          if (date.getDate() === 1) {
+            
+          case 1: // Month - SÓ mostrar quando zoom muito afastado
             return date.toLocaleDateString('en-US', { month: 'short' });
-          }
-          
-          // 3. Outros dias - mostrar dia do mês
-          return date.getDate().toString();
+            
+          case 2: // DayOfMonth - SÓ mostrar quando zoom afastado
+            return date.getDate().toString();
+            
+          case 3: // Time - formato HH:MM (zoom normal)
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            
+          case 4: // TimeWithSeconds - formato HH:MM:SS (zoom muito próximo)
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+            
+          default:
+            // Fallback baseado no timeframe
+            if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+              // Para timeframes intraday - sempre HH:MM no zoom normal
+              return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            }
+            
+            if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
+              // Para timeframes diários - dia do mês
+              return date.getDate().toString();
+            }
+            
+            // Fallback final
+            return date.getDate().toString();
         }
-        
-        // Fallback para outros timeframes
-        return date.getDate().toString();
       }
     },
     crosshair: { mode: 1 },
