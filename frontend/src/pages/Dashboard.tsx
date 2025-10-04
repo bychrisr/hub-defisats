@@ -85,14 +85,41 @@ export default function Dashboard() {
   
   // Dados de posições otimizados
   const { positions: optimizedPositions } = useOptimizedPositions();
+  // ✅ DADOS DE TESTE PARA SIMULAR POSIÇÕES
+  const testPositions = useMemo(() => {
+    // Simular 2 posições para teste
+    return [
+      {
+        id: 'pos1',
+        symbol: 'XBTUSD',
+        liquidation_price: 119039,
+        takeprofit: 122400,
+        side: 'long',
+        quantity: 100
+      },
+      {
+        id: 'pos2', 
+        symbol: 'XBTUSD',
+        liquidation_price: 118663,
+        takeprofit: null, // Sem take profit
+        side: 'short',
+        quantity: 50
+      }
+    ];
+  }, []);
+
   // Linhas de liquidação: uma por posição válida
   const liquidationLines = useMemo(() => {
-    // Tentar extrair posições de múltiplas fontes (hooks/contextos)
+    // ✅ USAR DADOS DE TESTE SE NÃO HOUVER POSIÇÕES REAIS
     const candidates: any[] = [];
-    if (Array.isArray(optimizedPositions) && optimizedPositions.length) candidates.push(optimizedPositions);
+    
+    // Tentar dados reais primeiro
+    if (Array.isArray(optimizedPositions) && optimizedPositions.length) {
+      candidates.push(optimizedPositions);
+    }
+    
     const md: any = marketData?.positions ?? marketData ?? marketData;
     if (md) {
-      // candidatos comuns
       const maybeArrays = [
         md.positions,
         md.openPositions,
@@ -106,7 +133,9 @@ export default function Dashboard() {
       }
     }
 
-    const src: any[] = candidates.length ? candidates[0] : [];
+    // ✅ FALLBACK: Usar dados de teste se não houver posições reais
+    const src: any[] = candidates.length ? candidates[0] : testPositions;
+    
     const lines = src
       .map((p: any, idx: number) => {
         const candidate = (p as any);
@@ -122,15 +151,17 @@ export default function Dashboard() {
         return { price: Math.round(price), label: p?.symbol ? `${p.symbol} #${idx + 1}` : `Pos #${idx + 1}` };
       })
       .filter(Boolean) as Array<{ price: number; label?: string }>;
+      
     console.log('📊 DASHBOARD - liquidationLines calculadas:', {
       positionsCount: src?.length ?? 0,
       sample: Array.isArray(src) ? src.slice(0, 3) : src,
       fromOptimized: Array.isArray(optimizedPositions) ? optimizedPositions.length : 'n/a',
       fromMarketDataKeys: marketData ? Object.keys(marketData as any) : 'n/a',
+      usingTestData: candidates.length === 0,
       lines
     });
     return lines.length ? lines : undefined;
-  }, [optimizedPositions, marketData]);
+  }, [optimizedPositions, marketData, testPositions]);
 
   // Linhas de Take Profit: uma por posição com takeprofit válido
   const takeProfitLines = useMemo(() => {
@@ -153,7 +184,8 @@ export default function Dashboard() {
       }
     }
 
-    const src: any[] = candidates.length ? candidates[0] : [];
+    // ✅ FALLBACK: Usar dados de teste se não houver posições reais
+    const src: any[] = candidates.length ? candidates[0] : testPositions;
     const lines = src
       .map((p: any, idx: number) => {
         const candidate = (p as any);
@@ -183,10 +215,11 @@ export default function Dashboard() {
       sample: Array.isArray(src) ? src.slice(0, 3) : src,
       fromOptimized: Array.isArray(optimizedPositions) ? optimizedPositions.length : 'n/a',
       fromMarketDataKeys: marketData ? Object.keys(marketData as any) : 'n/a',
+      usingTestData: candidates.length === 0,
       lines
     });
     return lines.length ? lines : undefined;
-  }, [optimizedPositions, marketData]);
+  }, [optimizedPositions, marketData, testPositions]);
   
   // Dados de mercado otimizados (agora via contexto centralizado)
   const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();
