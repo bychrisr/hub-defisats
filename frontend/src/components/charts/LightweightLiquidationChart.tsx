@@ -78,6 +78,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const mainSeriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
   // ✅ CORREÇÃO: Refs para controlar priceLines e evitar duplicatas
   const priceLinesRef = useRef<Array<{ id: string; priceLine: any }>>([]);
+  const isUpdatingRef = useRef(false); // Controle de execução
   
 
   // Estados
@@ -437,6 +438,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   // ✅ ATUALIZAR DADOS DAS SÉRIES COM useCallback PARA EVITAR LOOPS
   const updateSeriesData = useCallback(() => {
     console.count('🔄 DATA UPDATE - Execução #');
+    
+    // ✅ CORREÇÃO: Evitar execuções múltiplas simultâneas
+    if (isUpdatingRef.current) {
+      console.log('🔄 DATA UPDATE - Já está executando, pulando...');
+      return;
+    }
+    
+    isUpdatingRef.current = true;
+    
     console.log('🔄 DATA UPDATE - Estado atual:', {
       chartReady,
       hasChart: !!chartRef.current,
@@ -451,6 +461,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         chartReady,
         hasChart: !!chartRef.current
       });
+      isUpdatingRef.current = false;
       return;
     }
 
@@ -478,6 +489,25 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         chartRef.current.timeScale().fitContent();
         
         console.log('✅ DATA UPDATE - Dados aplicados à série principal e escala ajustada com fitContent()');
+      }
+
+      // ✅ CORREÇÃO: Verificar se já existem priceLines para os mesmos dados
+      const expectedLiquidationCount = liquidationLines?.length || 0;
+      const expectedTakeProfitCount = takeProfitLines?.length || 0;
+      const currentLiquidationCount = priceLinesRef.current.filter(p => p.id.startsWith('liquidation_')).length;
+      const currentTakeProfitCount = priceLinesRef.current.filter(p => p.id.startsWith('takeprofit_')).length;
+      
+      if (currentLiquidationCount === expectedLiquidationCount && 
+          currentTakeProfitCount === expectedTakeProfitCount &&
+          priceLinesRef.current.length > 0) {
+        console.log('🔄 DATA UPDATE - PriceLines já existem, pulando criação:', {
+          expectedLiquidationCount,
+          expectedTakeProfitCount,
+          currentLiquidationCount,
+          currentTakeProfitCount,
+          totalPriceLines: priceLinesRef.current.length
+        });
+        return;
       }
 
       // ✅ CORREÇÃO: Limpar priceLines existentes antes de criar novas
@@ -551,6 +581,10 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
 
     } catch (error) {
       console.warn('⚠️ DATA UPDATE - Erro ao atualizar dados:', error);
+    } finally {
+      // ✅ CORREÇÃO: Reset do flag de controle
+      isUpdatingRef.current = false;
+      console.log('✅ DATA UPDATE - Execução finalizada');
     }
   }, [chartReady, effectiveCandleData, liquidationLines, takeProfitLines, clearPriceLines]);
 
