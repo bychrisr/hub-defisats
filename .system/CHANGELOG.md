@@ -4,6 +4,30 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.14] - 2025-01-26
+
+### 🐛 **CORREÇÕES DE TIMESTAMP E RSI - LIGHTWEIGHT CHARTS**
+
+#### 🚨 **Problemas Específicos Resolvidos**
+- ✅ **Timestamp Display**: Corrigido formato de timestamp no eixo X
+- ✅ **RSI Lines**: Corrigida exibição das linhas RSI no pane dedicado
+- ✅ **Pane Index**: Corrigido uso do índice dinâmico do pane RSI
+- ✅ **Debug Logs**: Adicionados logs detalhados para troubleshooting
+
+#### 🔧 **Implementações Técnicas**
+- ✅ **Timestamp Fix**: tickMarkFormatter corrigido para timestamps em segundos
+- ✅ **RSI Pane Fix**: Uso de `rsiPane.index()` em vez de índice hardcoded
+- ✅ **Debug Enhancement**: Logs detalhados para cálculo do RSI
+- ✅ **Data Validation**: Validação aprimorada de dados de entrada
+
+#### 🎯 **Impacto**
+- ✅ **Timestamp**: Eixo X agora exibe timestamps corretos
+- ✅ **RSI Visualization**: Linhas RSI agora visíveis no pane dedicado
+- ✅ **Debugging**: Melhor troubleshooting com logs detalhados
+- ✅ **Stability**: Gráfico mais estável e confiável
+
+---
+
 ## [v2.3.13] - 2025-01-26
 
 ### 🐛 **CORREÇÕES CRÍTICAS - LIGHTWEIGHT CHARTS**

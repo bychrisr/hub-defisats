@@ -155,6 +155,33 @@ if (data) { // ❌ Validação insuficiente
 | Reset ao mudar timeframe | Recriação do gráfico | Usar `setData()` em vez de recriar |
 | Loading infinito | Dados inválidos | Validar estrutura dos dados |
 | Erro de renderização | Dados malformados | Verificar `open, high, low, close` |
+| **Timestamp incorreto** | **Binance ms vs Charts s** | **Conversão já feita nos services** |
+| **RSI não aparece** | **Pane index incorreto** | **Usar `rsiPane.index()` em vez de 1** |
+
+### 🐛 **Problemas Específicos Corrigidos (v2.3.14)**
+
+#### **1. Timestamp Display Issue**
+- **Problema**: Timestamps apareciam incorretamente no eixo X
+- **Causa**: Confusão entre milissegundos (Binance) e segundos (Lightweight Charts)
+- **Solução**: Conversão já implementada nos services, tickMarkFormatter corrigido
+
+#### **2. RSI Lines Not Displayed**
+- **Problema**: Pane RSI criado mas linhas não apareciam
+- **Causa**: Uso incorreto do `paneIndex` (hardcoded como 1)
+- **Solução**: Usar `rsiPane.index()` para obter índice correto do pane
+
+```typescript
+// ✅ CORREÇÃO: Usar índice correto do pane
+const rsiPaneIndex = rsiPane.index();
+rsiSeriesRef.current = chart.addSeries(LineSeries, {
+  // ... configurações
+}, rsiPaneIndex); // ← Usar índice dinâmico
+```
+
+#### **3. Debug Logs Adicionados**
+- Logs detalhados para troubleshooting do RSI
+- Validação de dados de entrada e saída
+- Monitoramento do processo de cálculo
 
 ---
 
