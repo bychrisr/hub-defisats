@@ -76,8 +76,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const mainSeriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
-  const liquidationSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const takeProfitSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  // ✅ CORREÇÃO: Remover refs desnecessárias - priceLines são criadas na série principal
   
 
   // Estados
@@ -225,7 +224,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       barSpacing: 6, // Espaçamento entre barras
       minBarSpacing: 0.5, // Espaçamento mínimo
       // ✅ CONFIGURAÇÕES CRÍTICAS PARA EVITAR MÊS NO ZOOM NORMAL
-      secondsVisible: false, // Não mostrar segundos por padrão
       tickMarkFormatter: (time: any, tickMarkType: any) => {
         // ✅ SOLUÇÃO ROBUSTA: Formatação baseada no tipo de tick (zoom-aware)
         // tickMarkType: Year=0, Month=1, DayOfMonth=2, Time=3, TimeWithSeconds=4
@@ -360,39 +358,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     }
 
-    // Criar séries para linhas de liquidação - API v5.0.9
-    if (liquidationLines && liquidationLines.length > 0) {
-      try {
-        liquidationSeriesRef.current = chart.addSeries(LineSeries, {
-          color: '#ff6b6b',
-          lineWidth: 1,
-          lineStyle: LineStyle.Dashed,
-        });
-        console.log('✅ LIQUIDATION SERIES - Série criada com API v5.0.9');
-      } catch (error) {
-        console.error('❌ LIQUIDATION SERIES - Erro ao criar série:', error);
-      }
-    }
-
-    // Criar séries para linhas de take profit - API v5.0.9
-    if (takeProfitLines && takeProfitLines.length > 0) {
-      try {
-        takeProfitSeriesRef.current = chart.addSeries(LineSeries, {
-          color: '#51cf66',
-          lineWidth: 1,
-          lineStyle: LineStyle.Dashed,
-        });
-        console.log('✅ TAKE PROFIT SERIES - Série criada com API v5.0.9');
-      } catch (error) {
-        console.error('❌ TAKE PROFIT SERIES - Erro ao criar série:', error);
-      }
-    }
+    // ✅ CORREÇÃO: Não criar séries separadas para linhas de liquidação
+    // As linhas serão criadas como priceLine na série principal
+    console.log('✅ LIQUIDATION LINES - Preparando para criar priceLines na série principal');
 
 
     console.log('🚀 SERIES CREATION - Séries criadas:', {
       mainSeries: !!mainSeriesRef.current,
-      liquidationSeries: !!liquidationSeriesRef.current,
-      takeProfitSeries: !!takeProfitSeriesRef.current
+      liquidationLinesCount: liquidationLines?.length || 0,
+      takeProfitLinesCount: takeProfitLines?.length || 0
     });
 
     setChartReady(true);
@@ -408,15 +382,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           mainSeriesRef.current = null;
         }
         
-        if (liquidationSeriesRef.current) {
-          chart.removeSeries(liquidationSeriesRef.current);
-          liquidationSeriesRef.current = null;
-        }
-        
-        if (takeProfitSeriesRef.current) {
-          chart.removeSeries(takeProfitSeriesRef.current);
-          takeProfitSeriesRef.current = null;
-        }
+        // ✅ CORREÇÃO: PriceLines são automaticamente removidas quando a série é removida
         
         
         // Remover chart - API v5.0.9
@@ -468,22 +434,54 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         console.log('✅ DATA UPDATE - Dados aplicados à série principal e escala ajustada com fitContent()');
       }
 
-      // Atualizar linhas de liquidação
-      if (liquidationSeriesRef.current && liquidationLines && liquidationLines.length > 0) {
-        const liquidationData = liquidationLines.map(line => ({
-          time: (Math.floor(Date.now() / 1000) - 3600) as Time,
-          value: line.price
-        }));
-        liquidationSeriesRef.current.setData(liquidationData);
+      // ✅ CORREÇÃO: Criar priceLines na série principal para linhas de liquidação
+      if (mainSeriesRef.current && liquidationLines && liquidationLines.length > 0) {
+        console.log('🔴 LIQUIDATION LINES - Criando priceLines:', liquidationLines);
+        
+        liquidationLines.forEach((line, index) => {
+          try {
+            const priceLine = mainSeriesRef.current!.createPriceLine({
+              price: line.price,
+              color: line.color || '#ff4444',
+              lineStyle: LineStyle.Solid,
+              lineWidth: 2,
+              axisLabelVisible: true,
+              title: line.label || `Liquidação #${index + 1}: $${line.price.toLocaleString()}`
+            });
+            console.log(`✅ LIQUIDATION LINE #${index + 1} - PriceLine criada:`, {
+              price: line.price,
+              label: line.label,
+              color: line.color
+            });
+          } catch (error) {
+            console.error(`❌ LIQUIDATION LINE #${index + 1} - Erro ao criar priceLine:`, error);
+          }
+        });
       }
 
-      // Atualizar linhas de take profit
-      if (takeProfitSeriesRef.current && takeProfitLines && takeProfitLines.length > 0) {
-        const takeProfitData = takeProfitLines.map(line => ({
-          time: (Math.floor(Date.now() / 1000) - 3600) as Time,
-          value: line.price
-        }));
-        takeProfitSeriesRef.current.setData(takeProfitData);
+      // ✅ CORREÇÃO: Criar priceLines na série principal para linhas de take profit
+      if (mainSeriesRef.current && takeProfitLines && takeProfitLines.length > 0) {
+        console.log('🟢 TAKE PROFIT LINES - Criando priceLines:', takeProfitLines);
+        
+        takeProfitLines.forEach((line, index) => {
+          try {
+            const priceLine = mainSeriesRef.current!.createPriceLine({
+              price: line.price,
+              color: line.color || '#22c55e',
+              lineStyle: LineStyle.Solid,
+              lineWidth: 2,
+              axisLabelVisible: true,
+              title: line.label || `Take Profit #${index + 1}: $${line.price.toLocaleString()}`
+            });
+            console.log(`✅ TAKE PROFIT LINE #${index + 1} - PriceLine criada:`, {
+              price: line.price,
+              label: line.label,
+              color: line.color
+            });
+          } catch (error) {
+            console.error(`❌ TAKE PROFIT LINE #${index + 1} - Erro ao criar priceLine:`, error);
+          }
+        });
       }
 
 
