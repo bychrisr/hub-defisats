@@ -148,16 +148,22 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const clearPriceLines = useCallback(() => {
     if (priceLinesRef.current.length > 0) {
       console.log('🧹 CLEAR PRICELINES - Removendo priceLines existentes:', priceLinesRef.current.length);
-      priceLinesRef.current.forEach(({ priceLine }) => {
+      console.log('🧹 CLEAR PRICELINES - IDs das priceLines:', priceLinesRef.current.map(p => p.id));
+      
+      priceLinesRef.current.forEach(({ id, priceLine }) => {
         try {
           if (priceLine && typeof priceLine.remove === 'function') {
+            console.log(`🧹 CLEAR PRICELINES - Removendo ${id}`);
             priceLine.remove();
           }
         } catch (error) {
-          console.warn('⚠️ CLEAR PRICELINES - Erro ao remover priceLine:', error);
+          console.warn(`⚠️ CLEAR PRICELINES - Erro ao remover ${id}:`, error);
         }
       });
       priceLinesRef.current = [];
+      console.log('✅ CLEAR PRICELINES - Todas as priceLines foram removidas');
+    } else {
+      console.log('🧹 CLEAR PRICELINES - Nenhuma priceLine para remover');
     }
   }, []);
 
@@ -262,18 +268,30 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         // ✅ CORREÇÃO CRÍTICA: Usar tickMarkType para decidir formato
         // Isso resolve o problema do mês aparecer no zoom normal
         
+        // ✅ CORREÇÃO CRÍTICA: Formato idêntico à referência LN Markets
+        // Padrão: dias grandes centralizados + horários HH:MM
+        
         switch (tickMarkType) {
-          case 0: // Year
+          case 0: // Year - só quando zoom muito afastado
             return date.getFullYear().toString();
             
-          case 1: // Month - SÓ mostrar quando zoom muito afastado
+          case 1: // Month - só quando zoom muito afastado
             return date.toLocaleDateString('en-US', { month: 'short' });
             
-          case 2: // DayOfMonth - SÓ mostrar quando zoom afastado
+          case 2: // DayOfMonth - dias grandes centralizados
             return date.getDate().toString();
             
-          case 3: // Time - formato HH:MM (zoom normal)
-            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+          case 3: // Time - horários HH:MM (zoom normal)
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            
+            // Horários específicos (06:00, 12:00, 18:00) - mostrar HH:MM
+            if ((hours === 6 || hours === 12 || hours === 18) && minutes === 0) {
+              return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            }
+            
+            // Outros horários - mostrar HH:MM
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
             
           case 4: // TimeWithSeconds - formato HH:MM:SS (zoom muito próximo)
             return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
@@ -419,6 +437,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   // ✅ ATUALIZAR DADOS DAS SÉRIES COM useCallback PARA EVITAR LOOPS
   const updateSeriesData = useCallback(() => {
     console.count('🔄 DATA UPDATE - Execução #');
+    console.log('🔄 DATA UPDATE - Estado atual:', {
+      chartReady,
+      hasChart: !!chartRef.current,
+      hasMainSeries: !!mainSeriesRef.current,
+      liquidationLinesCount: liquidationLines?.length || 0,
+      takeProfitLinesCount: takeProfitLines?.length || 0,
+      priceLinesCount: priceLinesRef.current.length
+    });
+    
     if (!chartReady || !chartRef.current) {
       console.log('🔄 DATA UPDATE - Condições não atendidas:', {
         chartReady,
@@ -525,7 +552,7 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     } catch (error) {
       console.warn('⚠️ DATA UPDATE - Erro ao atualizar dados:', error);
     }
-  }, [chartReady, effectiveCandleData, liquidationLines, takeProfitLines]);
+  }, [chartReady, effectiveCandleData, liquidationLines, takeProfitLines, clearPriceLines]);
 
   // ✅ ATUALIZAR DADOS DAS SÉRIES
   useEffect(() => {
