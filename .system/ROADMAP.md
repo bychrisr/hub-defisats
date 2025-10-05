@@ -4,10 +4,10 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.3.13 ✅ COMPLETA
+## Status Atual: v2.3.15 ✅ COMPLETA
 
-**Versão**: v2.3.13  
-**Status**: Sistema 100% Funcional com Correções Críticas  
+**Versão**: v2.3.15  
+**Status**: Sistema 100% Funcional com Dados Públicos  
 **Data**: 2025-01-26
 
 ### Funcionalidades Implementadas
@@ -815,7 +815,33 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
 
 ---
 
+## 🎯 **v2.3.15 - DASHBOARD PUBLIC DATA SOLUTION** ✅ COMPLETA
+
+### **Problema Resolvido**
+- **Header "Index: Error"**: Corrigido exibição de dados de mercado
+- **400 Bad Request**: Resolvido para usuários sem credenciais LN Markets
+- **UX Quebrada**: Header sempre exibe dados de mercado agora
+
+### **Implementações Técnicas**
+- ✅ **Public Endpoints**: `/api/public/dashboard` e `/api/public/market/index`
+- ✅ **Robust Endpoint Fix**: Retorna dados públicos quando sem credenciais
+- ✅ **Frontend Hook**: `usePublicMarketData` para dados públicos
+- ✅ **Smart Header**: Lógica inteligente de fallback
+- ✅ **Database Scripts**: Configuração automática
+
+### **Cenários Cobertos**
+- ✅ **Usuário não autenticado**: Dados públicos
+- ✅ **Usuário autenticado com credenciais**: Dados da LN Markets
+- ✅ **Usuário autenticado sem credenciais**: Dados públicos
+
+### **Resultado**
+- ✅ **Header sempre funcional**: Nunca mais "Index: Error"
+- ✅ **Dados reais**: Index $122,850, Trading Fees 0.1%, etc.
+- ✅ **UX melhorada**: Experiência consistente para todos os usuários
+
+---
+
 **Documento**: Roadmap Técnico  
-**Versão**: 1.8.0  
-**Última Atualização**: 2025-01-15  
+**Versão**: 1.9.0  
+**Última Atualização**: 2025-01-26  
 **Responsável**: Equipe de Desenvolvimento

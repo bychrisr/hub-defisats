@@ -10,6 +10,101 @@ Esta documentação fornece uma visão completa de todos os endpoints da API do 
 - **Staging**: `https://staging.defisats.site/api`
 - **Produção**: `https://api.defisats.site`
 
+## 🌐 Dashboard Public Data Solution
+
+### Visão Geral
+
+Solução implementada para resolver o problema de dados de mercado não carregarem no header do dashboard para usuários sem credenciais LN Markets.
+
+### Problema Identificado
+
+- **Usuários autenticados sem credenciais LN Markets**: Recebiam erro 400 (Bad Request)
+- **Usuários não autenticados**: Não conseguiam ver dados de mercado no header
+- **Header exibia "Index: Error"**: Em vez de dados reais de mercado
+
+### Solução Implementada
+
+#### 1. **Endpoints Públicos Criados**
+
+##### `/api/public/dashboard`
+- **Descrição**: Dashboard completo com dados públicos (sem autenticação)
+- **Dados retornados**:
+  - `marketIndex`: Dados de mercado (index, trading fees, next funding, rate)
+  - `systemStatus`: Status do sistema (uptime, version)
+
+##### `/api/public/market/index`
+- **Descrição**: Dados de mercado públicos (sem autenticação)
+- **Dados retornados**:
+  - `index`: Preço atual do Bitcoin
+  - `index24hChange`: Variação de 24h
+  - `tradingFees`: Taxas de trading
+  - `nextFunding`: Próximo funding
+  - `rate`: Taxa atual
+
+#### 2. **Correção do Endpoint Robusto**
+
+##### `/api/lnmarkets-robust/dashboard`
+- **Antes**: Retornava erro 400 quando usuário não tinha credenciais
+- **Depois**: Retorna dados públicos quando usuário não tem credenciais
+- **Status**: 200 (sucesso) em vez de 400 (erro)
+
+```json
+{
+  "success": true,
+  "data": {
+    "marketIndex": {
+      "index": 122850,
+      "index24hChange": 0.856,
+      "tradingFees": 0.1,
+      "nextFunding": "1m 36s",
+      "rate": 0.00006,
+      "source": "lnmarkets"
+    },
+    "credentialsConfigured": false,
+    "message": "LN Markets credentials not configured..."
+  }
+}
+```
+
+#### 3. **Frontend Atualizado**
+
+##### Hook `usePublicMarketData`
+- Busca dados públicos quando usuário não está autenticado
+- Gerencia estado de loading e erro
+- Fornece função `refetch` para atualizar dados
+
+##### Componente `LNMarketsHeader`
+- **Lógica inteligente**:
+  - Usuário não autenticado → Dados públicos
+  - Usuário autenticado com credenciais → Dados da LN Markets
+  - Usuário autenticado sem credenciais → Dados públicos
+- **Fallback automático**: Sempre exibe dados de mercado
+
+### Fluxo de Dados
+
+#### Cenário 1: Usuário Não Autenticado
+```
+Frontend → /api/public/market/index → Dados públicos → Header
+```
+
+#### Cenário 2: Usuário Autenticado com Credenciais
+```
+Frontend → /api/lnmarkets-robust/dashboard → Dados da LN Markets → Header
+```
+
+#### Cenário 3: Usuário Autenticado sem Credenciais
+```
+Frontend → /api/lnmarkets-robust/dashboard → Dados públicos → Header
+```
+
+### Benefícios
+
+1. **✅ Sempre exibe dados**: Header nunca fica vazio ou com erro
+2. **✅ Experiência consistente**: Dados de mercado sempre disponíveis
+3. **✅ Fallback inteligente**: Usa dados públicos quando credenciais não disponíveis
+4. **✅ Performance**: Dados públicos são mais rápidos de carregar
+5. **✅ UX melhorada**: Usuário vê dados reais em vez de "Error"
+
 ## Autenticação
 
 A API utiliza JWT (JSON Web Tokens) para autenticação. Inclua o token no header `Authorization`:

@@ -4,6 +4,39 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.3.15] - 2025-01-26
+
+### 🌐 **DASHBOARD PUBLIC DATA SOLUTION**
+
+#### 🚨 **Problema Resolvido**
+- ✅ **Header "Index: Error"**: Corrigido exibição de dados de mercado no header
+- ✅ **400 Bad Request**: Resolvido erro para usuários sem credenciais LN Markets
+- ✅ **Dados Públicos**: Implementado fallback para dados de mercado públicos
+
+#### 🔧 **Implementações Técnicas**
+- ✅ **Public Endpoints**: Criados `/api/public/dashboard` e `/api/public/market/index`
+- ✅ **Robust Endpoint Fix**: `/api/lnmarkets-robust/dashboard` retorna dados públicos quando sem credenciais
+- ✅ **Frontend Hook**: Criado `usePublicMarketData` para dados públicos
+- ✅ **Smart Header**: `LNMarketsHeader` usa dados públicos quando necessário
+- ✅ **Database Scripts**: Criados scripts para garantir configuração correta
+
+#### 📊 **Dados de Mercado Funcionando**
+- ✅ **Index**: $122,850 (dados públicos)
+- ✅ **Trading Fees**: 0.1% (dados públicos)
+- ✅ **Next Funding**: 1m 36s (dados públicos)
+- ✅ **Rate**: 0.00006% (dados públicos)
+
+#### 🎯 **Cenários Cobertos**
+- ✅ **Usuário não autenticado**: Dados públicos via `/api/public/market/index`
+- ✅ **Usuário autenticado com credenciais**: Dados da LN Markets via `/api/lnmarkets-robust/dashboard`
+- ✅ **Usuário autenticado sem credenciais**: Dados públicos via `/api/lnmarkets-robust/dashboard`
+
+#### 📁 **Arquivos Criados/Modificados**
+- ✅ `backend/src/routes/public-dashboard.routes.ts` - Endpoints públicos
+- ✅ `frontend/src/hooks/usePublicMarketData.ts` - Hook para dados públicos
+- ✅ `scripts/dev/ensure-proper-setup.sh` - Script de configuração
+- ✅ `.system/docs/api/DASHBOARD-PUBLIC-DATA-SOLUTION.md` - Documentação completa
+
 ## [v2.3.14] - 2025-01-26
 
 ### 🐛 **CORREÇÕES DE TIMESTAMP E RSI - LIGHTWEIGHT CHARTS**
