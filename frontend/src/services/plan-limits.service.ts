@@ -84,6 +84,13 @@ export class PlanLimitsService {
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Updated plan limits:', response.data.data);
+        console.log('🔍 PlanLimitsService - Full response:', response.data);
+        console.log('🔍 PlanLimitsService - Response data type:', typeof response.data.data);
+        console.log('🔍 PlanLimitsService - Response data keys:', Object.keys(response.data.data || {}));
+        console.log('🔍 PlanLimitsService - Response data stringified:', JSON.stringify(response.data.data, null, 2));
+        console.log('🔍 PlanLimitsService - Response data parsed:', JSON.parse(JSON.stringify(response.data.data)));
+        console.log('🔍 PlanLimitsService - Response data plan:', response.data.data?.plan);
+        console.log('🔍 PlanLimitsService - Response data plan name:', response.data.data?.plan?.name);
         return response.data.data;
       } else {
         throw new Error(response.data.message || 'Failed to update plan limits');
@@ -125,7 +132,7 @@ export class PlanLimitsService {
       const response = await api.get('/api/plan-limits');
       
       if (response.data.success) {
-        console.log('✅ PlanLimitsService - Retrieved all plan limits:', response.data.count);
+        console.log('✅ PlanLimitsService - Retrieved all plan limits:', response.data.data);
         return response.data.data;
       } else {
         throw new Error(response.data.message || 'Failed to get all plan limits');
@@ -204,7 +211,7 @@ export class PlanLimitsService {
    */
   async getUsageStatistics(): Promise<UsageStatistics> {
     try {
-      const response = await api.get('/api/plan-limits/statistics');
+      const response = await api.get('/api/plan-limits/stats');
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Retrieved usage statistics:', response.data.data);

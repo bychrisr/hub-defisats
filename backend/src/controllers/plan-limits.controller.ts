@@ -61,6 +61,10 @@ export class PlanLimitsController {
    * Atualizar limites de um plano
    */
   async updatePlanLimits(request: FastifyRequest, reply: FastifyReply) {
+    console.log('🔍 PlanLimitsController - updatePlanLimits - METHOD CALLED!');
+    console.log('🔍 PlanLimitsController - updatePlanLimits - Request params:', request.params);
+    console.log('🔍 PlanLimitsController - updatePlanLimits - Request body:', request.body);
+    
     try {
       const { id } = request.params as { id: string };
       const data = request.body as UpdatePlanLimitsRequest;
@@ -92,11 +96,22 @@ export class PlanLimitsController {
 
       const planLimits = await planLimitsService.updatePlanLimits({ id, ...data });
       
-      return reply.status(200).send({
+      console.log('🔍 PlanLimitsController - updatePlanLimits - planLimits received:', planLimits);
+      console.log('🔍 PlanLimitsController - updatePlanLimits - planLimits type:', typeof planLimits);
+      console.log('🔍 PlanLimitsController - updatePlanLimits - planLimits keys:', Object.keys(planLimits || {}));
+      console.log('🔍 PlanLimitsController - updatePlanLimits - planLimits stringified:', JSON.stringify(planLimits, null, 2));
+      
+      const response = {
         success: true,
         data: planLimits,
         message: 'Plan limits updated successfully'
-      });
+      };
+      
+      console.log('🔍 PlanLimitsController - updatePlanLimits - Response object:', response);
+      console.log('🔍 PlanLimitsController - updatePlanLimits - Response data:', response.data);
+      console.log('🔍 PlanLimitsController - updatePlanLimits - Response stringified:', JSON.stringify(response, null, 2));
+      
+      return reply.status(200).send(response);
 
     } catch (error: any) {
       console.error('❌ PlanLimitsController - Error updating plan limits:', error);
@@ -308,6 +323,8 @@ export class PlanLimitsController {
   async getUsageStatistics(request: FastifyRequest, reply: FastifyReply) {
     try {
       console.log('📊 PlanLimitsController - Getting usage statistics...');
+      console.log('📊 PlanLimitsController - Request received:', request.url);
+      
       const statistics = await planLimitsService.getUsageStatistics();
       console.log('📊 PlanLimitsController - Statistics received:', statistics);
       
@@ -326,3 +343,5 @@ export class PlanLimitsController {
     }
   }
 }
+
+export const planLimitsController = new PlanLimitsController();

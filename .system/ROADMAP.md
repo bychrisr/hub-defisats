@@ -4,10 +4,10 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.5.0 ✅ COMPLETA
+## Status Atual: v2.5.1 ✅ COMPLETA
 
-**Versão**: v2.5.0  
-**Status**: Sistema Multi-Account 100% Funcional  
+**Versão**: v2.5.1  
+**Status**: Plan Limits Management 100% Funcional  
 **Data**: 2025-01-09
 
 ### Funcionalidades Implementadas
@@ -91,6 +91,11 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **NOVO**: Sistema de Gerenciamento de Planos Administrativo
 - ✅ **NOVO**: Remoção de confirm() nativo por Modal Adequado
 - ✅ **NOVO**: Design Consistente com Padrões do Projeto
+- ✅ **CORRIGIDO**: Plan Limits Management - Serialização JSON
+- ✅ **CORRIGIDO**: Fastify Schema - additionalProperties: true
+- ✅ **CORRIGIDO**: TypeScript Interface - Date → string
+- ✅ **CORRIGIDO**: Frontend State Updates - Interface responsiva
+- ✅ **NOVO**: Badge "done" para Plan Limits no sidebar
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real

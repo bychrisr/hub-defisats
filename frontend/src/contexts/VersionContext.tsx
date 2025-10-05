@@ -80,8 +80,15 @@ export const VersionProvider: React.FC<VersionProviderProps> = ({
     if (autoCheck) {
       versionService.startVersionCheck();
       
-      // Verifica imediatamente
-      checkForUpdates();
+      // Verifica imediatamente sem usar checkForUpdates para evitar loop
+      versionService.checkForUpdates().then(result => {
+        setVersionInfo(result);
+        if (result.hasUpdate) {
+          console.log('🆕 VERSION CONTEXT - Update available!', result);
+        }
+      }).catch(error => {
+        console.error('❌ VERSION CONTEXT - Error checking for updates:', error);
+      });
     }
 
     // Cleanup ao desmontar
@@ -90,7 +97,7 @@ export const VersionProvider: React.FC<VersionProviderProps> = ({
         versionService.stopVersionCheck();
       }
     };
-  }, [autoCheck, checkForUpdates]);
+  }, [autoCheck]); // Removido checkForUpdates da dependência
 
   // Verifica se há atualização disponível
   const hasUpdate = versionInfo?.hasUpdate || false;

@@ -4,6 +4,32 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.1] - 2025-01-09
+
+### 🔧 **PLAN LIMITS MANAGEMENT FIXES**
+
+#### 🐛 **Correções Críticas**
+- ✅ **Serialização JSON**: Corrigido problema de serialização no Fastify schema
+- ✅ **TypeScript Types**: Corrigida interface PlanLimits (Date → string)
+- ✅ **Frontend Updates**: Interface agora atualiza corretamente após edição
+- ✅ **Badge Completion**: Adicionado badge "done" ao item Plan Limits no sidebar
+
+#### 🔧 **Implementações Backend**
+- ✅ **Fastify Schema Fix**: Adicionado `additionalProperties: true` no schema de resposta
+- ✅ **TypeScript Interface**: Atualizada interface PlanLimits para usar string em vez de Date
+- ✅ **Serialization Fix**: Corrigida serialização de objetos Date para string ISO
+
+#### 🎨 **Implementações Frontend**
+- ✅ **UI Updates**: Interface agora reflete mudanças imediatamente após edição
+- ✅ **Badge Addition**: Badge "done" adicionado ao sidebar administrativo
+- ✅ **Error Resolution**: Resolvido problema de "Unknown Plan" na interface
+
+#### 📊 **Problemas Resolvidos**
+- ✅ **Backend Response**: Backend agora retorna dados completos em vez de `{}`
+- ✅ **Frontend State**: Estado do frontend atualiza corretamente após mudanças
+- ✅ **Type Safety**: Eliminados erros de TypeScript relacionados a tipos Date/string
+- ✅ **User Experience**: Interface responsiva e funcional para gerenciamento de limites
+
 ## [v2.5.0] - 2025-01-09
 
 ### 🚀 **MULTI-ACCOUNT SYSTEM IMPLEMENTATION**

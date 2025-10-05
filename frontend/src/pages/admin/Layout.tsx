@@ -49,7 +49,7 @@ const navigation = [
   { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
   { name: 'Route Redirects', href: '/admin/route-redirects', icon: ArrowRightLeft },
   { name: 'Plans', href: '/admin/plans', icon: CreditCard, badge: { text: 'done', color: 'green' } },
-  { name: 'Plan Limits', href: '/admin/plan-limits', icon: Settings },
+  { name: 'Plan Limits', href: '/admin/plan-limits', icon: Settings, badge: { text: 'done', color: 'green' } },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Coupons', href: '/admin/coupons', icon: Gift, badge: { text: 'done', color: 'green' } },
   { name: 'Menus', href: '/admin/menus', icon: MenuIcon },

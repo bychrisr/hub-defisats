@@ -83,12 +83,38 @@ export default function PlanLimitsManagement() {
     loadStatistics();
   }, []);
 
+  // Log state changes
+  useEffect(() => {
+    console.log('🔍 PlanLimitsManagement - State changed:', {
+      planLimits: planLimits,
+      planLimitsLength: planLimits.length,
+      planLimitsStringified: JSON.stringify(planLimits, null, 2)
+    });
+  }, [planLimits]);
+
   const loadPlanLimits = async () => {
     try {
       setLoading(true);
       setError(null);
       
       const data = await planLimitsService.getAllPlanLimits();
+      
+      console.log('🔍 PlanLimitsManagement - Loaded plan limits:', data);
+      console.log('🔍 PlanLimitsManagement - Loaded plan limits type:', typeof data);
+      console.log('🔍 PlanLimitsManagement - Loaded plan limits length:', data.length);
+      console.log('🔍 PlanLimitsManagement - Loaded plan limits stringified:', JSON.stringify(data, null, 2));
+      
+      data.forEach((pl, index) => {
+        console.log(`🔍 PlanLimitsManagement - Loaded plan limit ${index + 1}:`, {
+          id: pl.id,
+          planId: pl.planId,
+          plan: pl.plan,
+          planName: pl.plan?.name,
+          planSlug: pl.plan?.slug,
+          allKeys: Object.keys(pl)
+        });
+      });
+      
       setPlanLimits(data);
       
       console.log('✅ Loaded plan limits:', data.length);
@@ -143,7 +169,30 @@ export default function PlanLimitsManagement() {
       setLoading(true);
       
       const updatedPlanLimits = await planLimitsService.updatePlanLimits({ id, ...data });
-      setPlanLimits(prev => prev.map(pl => pl.id === id ? updatedPlanLimits : pl));
+      
+      console.log('🔍 PlanLimitsManagement - Updated plan limits received:', updatedPlanLimits);
+      console.log('🔍 PlanLimitsManagement - Updated plan limits type:', typeof updatedPlanLimits);
+      console.log('🔍 PlanLimitsService - Updated plan limits keys:', Object.keys(updatedPlanLimits || {}));
+      console.log('🔍 PlanLimitsManagement - Updated plan limits plan:', updatedPlanLimits?.plan);
+      console.log('🔍 PlanLimitsManagement - Updated plan limits plan name:', updatedPlanLimits?.plan?.name);
+      
+      setPlanLimits(prev => {
+        console.log('🔍 PlanLimitsManagement - Previous state:', prev);
+        const newState = prev.map(pl => {
+          if (pl.id === id) {
+            const merged = { ...pl, ...updatedPlanLimits };
+            console.log('🔍 PlanLimitsManagement - Merging plan limit:', {
+              original: pl,
+              updated: updatedPlanLimits,
+              merged: merged
+            });
+            return merged;
+          }
+          return pl;
+        });
+        console.log('🔍 PlanLimitsManagement - New state:', newState);
+        return newState;
+      });
       
       setShowEditDialog(false);
       setEditingPlan(null);
@@ -192,7 +241,8 @@ export default function PlanLimitsManagement() {
     setShowEditDialog(true);
   };
 
-  const getLimitColor = (current: number, max: number) => {
+  const getLimitColor = (current: number, max: number | undefined) => {
+    if (max === undefined || max === null) return 'text-gray-500';
     if (max === -1) return 'text-blue-600'; // Unlimited
     const percentage = (current / max) * 100;
     if (percentage >= 90) return 'text-red-600';
@@ -200,7 +250,8 @@ export default function PlanLimitsManagement() {
     return 'text-gray-600'; // Neutral color for display
   };
 
-  const formatLimit = (limit: number) => {
+  const formatLimit = (limit: number | undefined) => {
+    if (limit === undefined || limit === null) return 'N/A';
     return limit === -1 ? 'Unlimited' : limit.toString();
   };
 
@@ -248,8 +299,8 @@ export default function PlanLimitsManagement() {
                     <SelectValue placeholder="Select a plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availablePlans.map(plan => (
-                      <SelectItem key={plan.id} value={plan.id}>
+                    {availablePlans.map((plan, index) => (
+                      <SelectItem key={plan.id || `plan-${index}`} value={plan.id}>
                         {plan.name}
                       </SelectItem>
                     ))}
@@ -414,11 +465,24 @@ export default function PlanLimitsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {planLimits.map((planLimit) => (
-                <TableRow key={planLimit.id}>
+              {planLimits.map((planLimit, index) => (
+                <TableRow key={planLimit.id || `plan-limit-${index}`}>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Badge variant="outline">{planLimit.plan.name}</Badge>
+                      <Badge variant="outline">
+                        {(() => {
+                          console.log('🔍 PlanLimitsManagement - Rendering plan limit:', {
+                            id: planLimit.id,
+                            planId: planLimit.planId,
+                            plan: planLimit.plan,
+                            planName: planLimit.plan?.name,
+                            planSlug: planLimit.plan?.slug,
+                            allKeys: Object.keys(planLimit),
+                            planLimitStringified: JSON.stringify(planLimit, null, 2)
+                          });
+                          return planLimit.plan?.name || 'Unknown Plan';
+                        })()}
+                      </Badge>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -451,14 +515,14 @@ export default function PlanLimitsManagement() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => openEditDialog(planLimit)}
+                        onClick={() => planLimit.id && openEditDialog(planLimit)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDeletePlanLimits(planLimit.id)}
+                        onClick={() => planLimit.id && handleDeletePlanLimits(planLimit.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

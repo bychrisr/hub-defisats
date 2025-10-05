@@ -16,7 +16,8 @@ interface VersionCheckResult {
 class VersionService {
   private currentVersion: string | null = null;
   private checkInterval: NodeJS.Timeout | null = null;
-  private readonly CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutos
+  private isChecking: boolean = false;
+  private readonly CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutos
   private readonly STORAGE_KEY = 'app_version_info';
   private readonly VERSION_KEY = 'app_current_version';
 
@@ -40,12 +41,16 @@ class VersionService {
   startVersionCheck(): void {
     console.log('🔄 VERSION SERVICE - Starting periodic version check');
     
-    // Verifica imediatamente
-    this.checkForUpdates();
+    // Verifica imediatamente apenas se não estiver verificando
+    if (!this.isChecking) {
+      this.checkForUpdates();
+    }
     
     // Configura verificação periódica
     this.checkInterval = setInterval(() => {
-      this.checkForUpdates();
+      if (!this.isChecking) {
+        this.checkForUpdates();
+      }
     }, this.CHECK_INTERVAL);
   }
 
@@ -64,6 +69,20 @@ class VersionService {
    * Verifica se há uma nova versão disponível
    */
   async checkForUpdates(): Promise<VersionCheckResult> {
+    // Proteção contra múltiplas verificações simultâneas
+    if (this.isChecking) {
+      console.log('⏳ VERSION SERVICE - Already checking for updates, skipping...');
+      return this.getStoredVersionInfo() || {
+        hasUpdate: false,
+        currentVersion: this.currentVersion!,
+        latestVersion: this.currentVersion!,
+        buildTime: new Date().toISOString(),
+        features: []
+      };
+    }
+
+    this.isChecking = true;
+    
     try {
       console.log('🔍 VERSION SERVICE - Checking for updates...');
       
@@ -118,6 +137,8 @@ class VersionService {
         buildTime: new Date().toISOString(),
         features: []
       };
+    } finally {
+      this.isChecking = false;
     }
   }
 

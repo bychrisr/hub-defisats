@@ -38,8 +38,8 @@ interface PlanLimits {
   maxIndicators: number;
   maxSimulations: number;
   maxBacktests: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;  // ✅ Corrigido: string em vez de Date para serialização JSON
+  updatedAt: string;  // ✅ Corrigido: string em vez de Date para serialização JSON
   plan: Plan;
 }
 
@@ -643,15 +643,56 @@ class LimitAlertService {
 }
 ```
 
+## Correções Implementadas (v2.5.1)
+
+### Problema de Serialização JSON ✅
+**Problema:** O backend estava retornando dados corretos nos logs, mas o frontend recebia `data: {}` vazio.
+
+**Causa:** O schema de validação do Fastify estava filtrando propriedades não explicitamente definidas na resposta.
+
+**Solução:** Adicionado `additionalProperties: true` no schema de resposta:
+```typescript
+response: {
+  200: {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean' },
+      data: { 
+        type: 'object',
+        additionalProperties: true  // ✅ Permite todas as propriedades
+      },
+      message: { type: 'string' }
+    }
+  }
+}
+```
+
+### Correção de Tipos TypeScript ✅
+**Problema:** Incompatibilidade entre `Date` e `string` na interface `PlanLimits`.
+
+**Solução:** Atualizada interface para usar `string` em vez de `Date`:
+```typescript
+interface PlanLimits {
+  // ... outras propriedades
+  createdAt: string;  // ✅ Corrigido
+  updatedAt: string;  // ✅ Corrigido
+}
+```
+
+### Badge de Conclusão ✅
+Adicionado badge "done" em verde ao item "Plan Limits" no sidebar administrativo.
+
 ## Roadmap
 
 ### Fase 1 ✅
 - [x] Estrutura de dados
 - [x] Serviços de validação
 - [x] Middleware de validação
+- [x] Interface de gerenciamento
+- [x] Correções de serialização
+- [x] Correções de TypeScript
 
 ### Fase 2 🔄
-- [ ] Interface de gerenciamento
 - [ ] Validação no frontend
 - [ ] Alertas de limite
 

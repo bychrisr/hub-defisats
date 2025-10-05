@@ -8,8 +8,8 @@ export interface PlanLimits {
   maxIndicators: number;
   maxSimulations: number;
   maxBacktests: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;  // ✅ Mudado de Date para string
+  updatedAt: string;  // ✅ Mudado de Date para string
   plan: {
     id: string;
     name: string;
@@ -45,7 +45,12 @@ export interface LimitValidationResult {
 
 export class PlanLimitsService {
   private async getPrisma() {
-    return await getPrisma();
+    try {
+      return await getPrisma();
+    } catch (error) {
+      console.error('❌ PlanLimitsService - Error getting Prisma client:', error);
+      throw error;
+    }
   }
 
   /**
@@ -101,8 +106,8 @@ export class PlanLimitsService {
         maxIndicators: planLimits.max_indicators,
         maxSimulations: planLimits.max_simulations,
         maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at,
-        updatedAt: planLimits.updated_at,
+        createdAt: planLimits.created_at.toISOString(),
+        updatedAt: planLimits.updated_at.toISOString(),
         plan: planLimits.plan
       };
 
@@ -140,7 +145,8 @@ export class PlanLimitsService {
       });
 
       console.log(`✅ PlanLimitsService - Updated limits for plan: ${planLimits.plan.name}`);
-      return {
+      
+      const result = {
         id: planLimits.id,
         planId: planLimits.plan_id,
         maxExchangeAccounts: planLimits.max_exchange_accounts,
@@ -148,10 +154,15 @@ export class PlanLimitsService {
         maxIndicators: planLimits.max_indicators,
         maxSimulations: planLimits.max_simulations,
         maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at,
-        updatedAt: planLimits.updated_at,
+        createdAt: planLimits.created_at.toISOString(),
+        updatedAt: planLimits.updated_at.toISOString(),
         plan: planLimits.plan
       };
+      
+      console.log('🔍 PlanLimitsService - updatePlanLimits - Result object:', result);
+      console.log('🔍 PlanLimitsService - updatePlanLimits - Result stringified:', JSON.stringify(result, null, 2));
+      
+      return result;
 
     } catch (error: any) {
       console.error('❌ PlanLimitsService - Error updating plan limits:', error);
@@ -188,8 +199,8 @@ export class PlanLimitsService {
         maxIndicators: planLimits.max_indicators,
         maxSimulations: planLimits.max_simulations,
         maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at,
-        updatedAt: planLimits.updated_at,
+        createdAt: planLimits.created_at.toISOString(),
+        updatedAt: planLimits.updated_at.toISOString(),
         plan: planLimits.plan
       };
 
@@ -231,8 +242,8 @@ export class PlanLimitsService {
         maxIndicators: pl.max_indicators,
         maxSimulations: pl.max_simulations,
         maxBacktests: pl.max_backtests,
-        createdAt: pl.created_at,
-        updatedAt: pl.updated_at,
+        createdAt: pl.created_at.toISOString(),
+        updatedAt: pl.updated_at.toISOString(),
         plan: pl.plan
       }));
 
@@ -291,8 +302,8 @@ export class PlanLimitsService {
         maxIndicators: planLimits.max_indicators,
         maxSimulations: planLimits.max_simulations,
         maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at,
-        updatedAt: planLimits.updated_at,
+        createdAt: planLimits.created_at.toISOString(),
+        updatedAt: planLimits.updated_at.toISOString(),
         plan: planLimits.plan
       };
 

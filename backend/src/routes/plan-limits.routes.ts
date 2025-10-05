@@ -77,7 +77,10 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            data: { type: 'object' },
+            data: { 
+              type: 'object',
+              additionalProperties: true  // ✅ ISSO PERMITE PASSAR TODAS AS PROPRIEDADES
+            },
             message: { type: 'string' }
           }
         },
@@ -209,7 +212,7 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
 
   // Obter estatísticas de uso
   fastify.get('/plan-limits/statistics', {
-    // preHandler: [adminAuthMiddleware], // Temporarily disabled for testing
+    preHandler: [adminAuthMiddleware],
     schema: {
       description: 'Get plan limits usage statistics',
       tags: ['Plan Limits'],
@@ -224,6 +227,31 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
       }
     }
   }, planLimitsController.getUsageStatistics.bind(planLimitsController));
+
+  // Test route for statistics
+  fastify.get('/plan-limits/stats', {
+    preHandler: [adminAuthMiddleware],
+  }, async (request, reply) => {
+    try {
+      console.log('📊 STATS ROUTE - Getting usage statistics...');
+      
+      const { planLimitsService } = await import('../services/plan-limits.service');
+      const statistics = await planLimitsService.getUsageStatistics();
+      
+      console.log('📊 STATS ROUTE - Statistics received:', statistics);
+      
+      return reply.status(200).send({
+        success: true,
+        data: statistics
+      });
+    } catch (error: any) {
+      console.error('❌ STATS ROUTE - Error:', error);
+      return reply.status(500).send({
+        error: 'INTERNAL_ERROR',
+        message: error.message
+      });
+    }
+  });
 
   // Deletar limites de um plano
   fastify.delete('/plan-limits/:id', {
