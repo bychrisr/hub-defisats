@@ -90,6 +90,8 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
   // Refs para indicadores
   const rsiPaneRef = useRef<any>(null);
   const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const emaPaneRef = useRef<any>(null);
+  const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
 
   // Estados
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
@@ -434,6 +436,97 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     }
   }, [enabledIndicators, indicators.rsi, indicatorConfigs.rsi, isChartReady, barsData]);
 
+  // Gerenciar pane EMA
+  useEffect(() => {
+    if (!isChartReady || !chartRef.current) return;
+
+    const emaEnabled = enabledIndicators.includes('ema');
+    const emaData = indicators.ema;
+
+    console.log('🔄 EMA PANE - Atualizando pane EMA:', {
+      enabled: emaEnabled,
+      enabledIndicators: enabledIndicators,
+      hasData: !!emaData,
+      dataValid: emaData?.valid,
+      dataLength: emaData?.data ? (Array.isArray(emaData.data) ? emaData.data.length : 'complex') : 0,
+      chartReady: isChartReady,
+      barsLength: barsData?.length || 0
+    });
+
+    // Remover pane existente se desabilitado
+    if (!emaEnabled || !emaData || !emaData.valid) {
+      if (emaPaneRef.current) {
+        try {
+          chartRef.current.removePane(emaPaneRef.current);
+          emaPaneRef.current = null;
+          emaSeriesRef.current = null;
+          console.log('✅ EMA PANE - Pane EMA removido');
+        } catch (error) {
+          console.warn('⚠️ EMA PANE - Erro ao remover pane EMA:', error);
+        }
+      }
+      return;
+    }
+
+    // Criar novo pane se não existir
+    if (!emaPaneRef.current) {
+      try {
+        emaPaneRef.current = chartRef.current.addPane();
+        // Usar setStretchFactor() para controlar altura do pane
+        emaPaneRef.current.setStretchFactor(0.3); // 30% da altura total
+        console.log('✅ EMA PANE - Pane EMA criado com stretchFactor: 0.3');
+      } catch (error) {
+        console.error('❌ EMA PANE - Erro ao criar pane EMA:', error);
+        return;
+      }
+    }
+
+    // Criar série EMA se não existir
+    if (!emaSeriesRef.current && emaPaneRef.current) {
+      try {
+        emaSeriesRef.current = emaPaneRef.current.addSeries(LineSeries, {
+          color: indicatorConfigs.ema.color || '#f59e0b',
+          lineWidth: indicatorConfigs.ema.lineWidth || 2,
+          priceFormat: { 
+            type: 'price' as const, 
+            precision: 2, 
+            minMove: 0.01 
+          }
+        });
+        console.log('✅ EMA SERIES - Série EMA criada no pane EMA');
+      } catch (error) {
+        console.error('❌ EMA SERIES - Erro ao criar série EMA:', error);
+        return;
+      }
+    }
+
+    // Atualizar dados da série EMA
+    if (emaSeriesRef.current && emaData.data && Array.isArray(emaData.data)) {
+      try {
+        emaSeriesRef.current.setData(emaData.data as any);
+        console.log('✅ EMA DATA - Dados EMA aplicados:', {
+          dataPoints: emaData.data.length,
+          color: indicatorConfigs.ema.color
+        });
+      } catch (error) {
+        console.error('❌ EMA DATA - Erro ao aplicar dados EMA:', error);
+      }
+    }
+
+    // Atualizar cor da série EMA se mudou
+    if (emaSeriesRef.current) {
+      try {
+        emaSeriesRef.current.applyOptions({
+          color: indicatorConfigs.ema.color || '#f59e0b',
+          lineWidth: indicatorConfigs.ema.lineWidth || 2
+        });
+        console.log('✅ EMA COLOR - Cor EMA atualizada:', indicatorConfigs.ema.color);
+      } catch (error) {
+        console.error('❌ EMA COLOR - Erro ao atualizar cor EMA:', error);
+      }
+    }
+  }, [enabledIndicators, indicators.ema, indicatorConfigs.ema, isChartReady, barsData]);
+
   // Criar gráfico principal
   useEffect(() => {
     if (!containerRef.current) return;
@@ -507,6 +600,16 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
         if (rsiPaneRef.current) {
           chart.removePane(rsiPaneRef.current);
           rsiPaneRef.current = null;
+        }
+
+        if (emaSeriesRef.current) {
+          chart.removeSeries(emaSeriesRef.current);
+          emaSeriesRef.current = null;
+        }
+        
+        if (emaPaneRef.current) {
+          chart.removePane(emaPaneRef.current);
+          emaPaneRef.current = null;
         }
         
         clearPriceLines();
