@@ -4,10 +4,10 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.4.0 ✅ COMPLETA
+## Status Atual: v2.5.0 ✅ COMPLETA
 
-**Versão**: v2.4.0  
-**Status**: Sistema Multi-Exchange 100% Funcional  
+**Versão**: v2.5.0  
+**Status**: Sistema Multi-Account 100% Funcional  
 **Data**: 2025-01-09
 
 ### Funcionalidades Implementadas

@@ -4,6 +4,51 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.0] - 2025-01-09
+
+### 🚀 **MULTI-ACCOUNT SYSTEM IMPLEMENTATION**
+
+#### 🎯 **Sistema de Múltiplas Contas**
+- ✅ **UserExchangeAccounts Table**: Nova tabela para múltiplas contas por usuário
+- ✅ **PlanLimits Table**: Sistema de limites por plano de assinatura
+- ✅ **Automation Integration**: Automações vinculadas a contas específicas
+- ✅ **Unified Persistence**: Sistema de persistência unificado para conta ativa
+- ✅ **Active Account Management**: Gerenciamento de conta ativa com sincronização
+
+#### 🔧 **Implementações Backend**
+- ✅ **Database Schema**: Novas tabelas UserExchangeAccounts e PlanLimits
+- ✅ **Automation Updates**: Campo user_exchange_account_id adicionado
+- ✅ **Migration Support**: Migração automática de dados existentes
+- ✅ **Data Validation**: Validação de integridade dos dados
+
+#### 🎨 **Implementações Frontend**
+- ✅ **Unified Persistence Service**: Extensão do IndicatorPersistenceService
+- ✅ **Active Account Hook**: Hook useActiveAccount para gerenciamento de estado
+- ✅ **User Preferences**: Sistema de preferências do usuário
+- ✅ **Cross-tab Sync**: Sincronização entre abas do navegador
+- ✅ **Data Migration**: Migração automática de dados antigos
+
+#### 📊 **Estrutura de Dados**
+- ✅ **UserExchangeAccounts**: id, user_id, exchange_id, account_name, credentials, is_active, is_verified
+- ✅ **PlanLimits**: max_exchange_accounts, max_automations, max_indicators, max_simulations, max_backtests
+- ✅ **Automation Updates**: user_exchange_account_id para vinculação de automações
+- ✅ **Persistence Structure**: activeAccountId, dashboardPreferences, uiSettings
+
+#### 🔄 **Sistema de Persistência**
+- ✅ **Unified Data Structure**: Estrutura unificada para indicadores e preferências
+- ✅ **Active Account Management**: setActiveAccount, getActiveAccount, clearActiveAccount
+- ✅ **User Preferences**: updateUserPreferences, getUserPreferences
+- ✅ **Data Migration**: Migração automática de estrutura antiga para nova
+- ✅ **Error Handling**: Tratamento robusto de erros e fallbacks
+
+#### 🧪 **Testes e Validação**
+- ✅ **Database Tests**: Testes de criação e integridade das tabelas
+- ✅ **Persistence Tests**: Testes do sistema de persistência unificado
+- ✅ **Migration Tests**: Validação de migração de dados existentes
+- ✅ **Service Tests**: Testes dos serviços backend e frontend
+
+---
+
 ## [v2.4.0] - 2025-01-09
 
 ### 🚀 **MULTI-EXCHANGE ARCHITECTURE IMPLEMENTATION**
