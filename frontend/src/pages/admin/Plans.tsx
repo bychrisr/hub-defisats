@@ -7,14 +7,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -37,11 +29,8 @@ import {
   Gem,
   Gift,
   Check,
-  X,
   Loader2,
   RefreshCw,
-  Filter,
-  Search,
   BarChart3,
   Settings
 } from 'lucide-react';
@@ -54,10 +43,6 @@ export const Plans = () => {
   const [plans, setPlans] = useState<PlanWithUsers[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [filters, setFilters] = useState({
-    search: '',
-    status: 'all',
-  });
 
   useEffect(() => {
     fetchPlans();
@@ -98,7 +83,9 @@ export const Plans = () => {
   };
 
   const getPlanIcon = (planId: string) => {
-    switch (planId.toLowerCase()) {
+    if (!planId) return <Settings className="h-4 w-4" />;
+    const id = planId.toLowerCase();
+    switch (id) {
       case 'free':
         return <Gift className="h-4 w-4" />;
       case 'basic':
@@ -112,6 +99,20 @@ export const Plans = () => {
       default:
         return <Crown className="h-4 w-4" />;
     }
+  };
+
+  const formatPlanPrice = (plan: any) => {
+    if (plan.price_sats === 0) return 'Free';
+    if (plan.price_lifetime && plan.price_lifetime > 0) {
+      return `${plan.price_lifetime.toLocaleString()} sats (lifetime)`;
+    }
+    if (plan.price_yearly && plan.price_yearly > 0) {
+      return `${plan.price_yearly.toLocaleString()} sats/year`;
+    }
+    if (plan.price_monthly && plan.price_monthly > 0) {
+      return `${plan.price_monthly.toLocaleString()} sats/month`;
+    }
+    return 'Free';
   };
 
   const handleEdit = (plan: Plan) => {
@@ -128,14 +129,6 @@ export const Plans = () => {
     }
   };
 
-  const filteredPlans = plans.filter(plan => {
-    const matchesSearch = (plan.name?.toLowerCase() || '').includes(filters.search.toLowerCase()) ||
-                         (plan.description?.toLowerCase() || '').includes(filters.search.toLowerCase());
-    const matchesStatus = filters.status === 'all' || 
-                         (filters.status === 'active' && plan.is_active) ||
-                         (filters.status === 'inactive' && !plan.is_active);
-    return matchesSearch && matchesStatus;
-  });
 
   const stats = getPlanStats();
 
@@ -269,46 +262,6 @@ export const Plans = () => {
             </Card>
           </div>
 
-          {/* Filters */}
-          <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                  <Filter className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-text-primary">Filtros</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar planos..."
-                    value={filters.search}
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="pl-10 backdrop-blur-sm bg-background/50 border-border/50"
-                  />
-                </div>
-                <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
-                  <SelectTrigger className="backdrop-blur-sm bg-background/50 border-border/50">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="active">Ativos</SelectItem>
-                    <SelectItem value="inactive">Inativos</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="outline"
-                  onClick={() => setFilters({ search: '', status: 'all' })}
-                  className="backdrop-blur-sm bg-background/50 border-border/50"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Limpar
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Plans Table */}
           <Card className="profile-sidebar-glow backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
@@ -356,9 +309,9 @@ export const Plans = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPlans.map((plan, index) => (
+                    {plans.map((plan, index) => (
                       <TableRow 
-                        key={plan.id}
+                        key={plan.id || plan.slug || plan.name || `plan-${index}`}
                         className={cn(
                           "hover:bg-background/50 transition-colors",
                           index % 2 === 0 ? "bg-background/20" : "bg-background/10"
@@ -367,7 +320,7 @@ export const Plans = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                              {getPlanIcon(plan.id)}
+                              {getPlanIcon(plan.id || plan.slug || plan.name || '')}
                             </div>
                             <div>
                               <div className="font-medium text-text-primary">{plan.name || 'Sem nome'}</div>

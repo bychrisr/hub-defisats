@@ -32,7 +32,7 @@ export class PlansService {
    */
   async getAllPlans(): Promise<Plan[]> {
     try {
-      const response = await api.get('/api/plans');
+      const response = await api.get('/api/plans-public');
       
       if (response.data.success) {
         console.log('✅ PlansService - Retrieved all plans:', response.data.data?.length || 0);
