@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import { CacheService } from './strategic-cache.service';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
+import { StrategicCacheService } from './strategic-cache.service';
 
 export interface IndicatorConfig {
   enabled: boolean;
@@ -19,12 +17,12 @@ export interface UserIndicatorPreferences {
 }
 
 export class UserPreferencesService {
-  private cacheService: CacheService;
+  private cacheService: StrategicCacheService;
   private readonly CACHE_TTL = 5 * 60; // 5 minutos
   private readonly CACHE_PREFIX = 'user_preferences:';
 
   constructor() {
-    this.cacheService = new CacheService();
+    this.cacheService = new StrategicCacheService();
   }
 
   /**
