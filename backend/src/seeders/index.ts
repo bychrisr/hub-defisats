@@ -10,6 +10,7 @@ import { rateLimitConfigSeeder } from './rate-limit-config.seeder';
 import { adminUserSeeder } from './admin-user.seeder';
 import { testUserSeeder } from './test-user.seeder';
 import { plansSeeder } from './plans.seeder';
+import { planLimitsSeeder } from './plan-limits.seeder';
 import { healthCheckSeeder } from './health-check.seeder';
 import { exchangesSeeder } from './exchanges.seeder';
 
@@ -36,6 +37,7 @@ export class DatabaseSeeder {
       adminUserSeeder,
       testUserSeeder,
       plansSeeder,
+      planLimitsSeeder,
       healthCheckSeeder,
       exchangesSeeder,
     ];
