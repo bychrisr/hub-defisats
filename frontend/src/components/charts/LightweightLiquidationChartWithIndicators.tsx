@@ -174,9 +174,10 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     updateInterval: 5000
   });
 
-  // CORREÇÃO: Usar indicadores externos quando disponíveis
+  // CORREÇÃO: Usar indicadores externos quando disponíveis, mas permitir override local
   const indicators = externalIndicators || internalIndicators;
-  const finalEnabledIndicators = externalEnabledIndicators || enabledIndicators;
+  // CORREÇÃO: Priorizar estado interno quando há mudanças locais
+  const finalEnabledIndicators = enabledIndicators.length > 0 ? enabledIndicators : (externalEnabledIndicators || []);
   const finalIndicatorConfigs = externalIndicatorConfigs || { rsi: { enabled: true, period: 14, color: '#8b5cf6', lineWidth: 2 } };
 
   // Dados efetivos para o gráfico
