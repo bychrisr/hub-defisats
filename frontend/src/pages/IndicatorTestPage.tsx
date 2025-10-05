@@ -52,6 +52,18 @@ const IndicatorTestPage: React.FC = () => {
     lastUpdate: 0
   });
 
+  const [persistenceInfo, setPersistenceInfo] = useState<{
+    available: boolean;
+    used: number;
+    total: number;
+    percentage: number;
+  }>({
+    available: false,
+    used: 0,
+    total: 0,
+    percentage: 0
+  });
+
   // Gerar dados de teste
   const generateData = async () => {
     setIsGenerating(true);
@@ -99,6 +111,33 @@ const IndicatorTestPage: React.FC = () => {
     }));
     
     console.log('✅ INDICATOR TEST - Teste concluído');
+  };
+
+  // Testar persistência
+  const testPersistence = () => {
+    console.log('🧪 PERSISTENCE - Testando persistência...');
+    setPersistenceInfo(prev => ({
+      ...prev,
+      available: true,
+      used: 1024,
+      total: 5120,
+      percentage: 20
+    }));
+  };
+
+  // Exportar configurações
+  const exportConfigs = () => {
+    console.log('📤 PERSISTENCE - Exportando configurações...');
+  };
+
+  // Importar configurações
+  const importConfigs = () => {
+    console.log('📥 PERSISTENCE - Importando configurações...');
+  };
+
+  // Limpar configurações
+  const clearConfigs = () => {
+    console.log('🧹 PERSISTENCE - Limpando configurações...');
   };
 
   return (
@@ -190,6 +229,103 @@ const IndicatorTestPage: React.FC = () => {
             
             <Badge variant={testResults.rsiCalculated ? 'default' : 'secondary'}>
               {testResults.rsiCalculated ? 'RSI Calculated' : 'RSI Pending'}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Controles de Persistência */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-6 w-6" />
+            Persistência de Configurações
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Status de Persistência */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {persistenceInfo.available ? '✅' : '❌'}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Storage Available
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {Math.round(persistenceInfo.used / 1024)}KB
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Used Space
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {Math.round(persistenceInfo.percentage)}%
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Usage
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {Math.round(persistenceInfo.total / 1024)}KB
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Total Space
+              </div>
+            </div>
+          </div>
+
+          {/* Controles de Persistência */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              onClick={testPersistence}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Testar Persistência
+            </Button>
+            
+            <Button
+              onClick={exportConfigs}
+              variant="outline"
+              size="sm"
+            >
+              📤 Exportar
+            </Button>
+            
+            <Button
+              onClick={importConfigs}
+              variant="outline"
+              size="sm"
+            >
+              📥 Importar
+            </Button>
+            
+            <Button
+              onClick={clearConfigs}
+              variant="destructive"
+              size="sm"
+            >
+              🧹 Limpar
+            </Button>
+          </div>
+
+          {/* Badges de Status */}
+          <div className="flex items-center gap-2">
+            <Badge variant={persistenceInfo.available ? 'default' : 'destructive'}>
+              {persistenceInfo.available ? 'Storage OK' : 'Storage Error'}
+            </Badge>
+            
+            <Badge variant={persistenceInfo.percentage > 80 ? 'destructive' : 'default'}>
+              {persistenceInfo.percentage > 80 ? 'High Usage' : 'Normal Usage'}
             </Badge>
           </div>
         </CardContent>

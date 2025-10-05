@@ -146,7 +146,16 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     calculateIndicator,
     calculateAllIndicators,
     clearCache,
-    refreshIndicator
+    refreshIndicator,
+    // Persistência
+    saveConfig,
+    loadConfig,
+    saveAllConfigs,
+    loadAllConfigs,
+    exportConfigs,
+    importConfigs,
+    clearAllConfigs,
+    getStorageInfo
   } = useIndicatorManager({
     bars: barsData,
     enabledIndicators,
@@ -619,6 +628,39 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     updateRSIPane();
   }, [indicators.rsi, updateRSIPane]);
 
+  // Carregar configurações salvas na inicialização
+  useEffect(() => {
+    console.log('📦 PERSISTENCE - Loading saved configurations on mount');
+    
+    // Carregar configuração do RSI
+    const savedRSIConfig = loadConfig('rsi');
+    if (savedRSIConfig) {
+      console.log('📦 PERSISTENCE - Loaded RSI config from storage:', savedRSIConfig);
+      
+      // Atualizar estado com configuração salva
+      setIndicatorConfigs(prev => ({
+        ...prev,
+        rsi: {
+          ...prev.rsi,
+          enabled: savedRSIConfig.enabled,
+          period: savedRSIConfig.period,
+          color: savedRSIConfig.color,
+          lineWidth: savedRSIConfig.lineWidth,
+          height: savedRSIConfig.height
+        }
+      }));
+      
+      // Atualizar indicadores ativos
+      setEnabledIndicators(prev => {
+        const newIndicators = savedRSIConfig.enabled 
+          ? [...prev.filter(t => t !== 'rsi'), 'rsi']
+          : prev.filter(t => t !== 'rsi');
+        console.log('📦 PERSISTENCE - Updated enabled indicators:', newIndicators);
+        return newIndicators;
+      });
+    }
+  }, [loadConfig]);
+
   // Handlers para indicadores
   const handleToggleIndicator = useCallback((type: IndicatorType, enabled: boolean) => {
     console.log(`🔄 INDICATOR TOGGLE - ${type}: ${enabled ? 'enabled' : 'disabled'}`);
@@ -633,20 +675,52 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     });
     
     // Atualizar config também
-    setIndicatorConfigs(prev => ({
-      ...prev,
-      [type]: { ...prev[type], enabled }
-    }));
-  }, []);
+    setIndicatorConfigs(prev => {
+      const newConfigs = {
+        ...prev,
+        [type]: { ...prev[type], enabled }
+      };
+      
+      // Salvar configuração automaticamente
+      const configToSave = {
+        enabled,
+        period: newConfigs[type].period,
+        color: newConfigs[type].color,
+        lineWidth: newConfigs[type].lineWidth,
+        height: newConfigs[type].height
+      };
+      
+      saveConfig(type, configToSave);
+      console.log(`💾 PERSISTENCE - Auto-saved ${type} config:`, configToSave);
+      
+      return newConfigs;
+    });
+  }, [saveConfig]);
 
   const handleUpdateConfig = useCallback((type: IndicatorType, config: Partial<IndicatorConfig>) => {
     console.log(`🔄 INDICATOR CONFIG - Atualizando ${type}:`, config);
     
-    setIndicatorConfigs(prev => ({
-      ...prev,
-      [type]: { ...prev[type], ...config }
-    }));
-  }, []);
+    setIndicatorConfigs(prev => {
+      const newConfigs = {
+        ...prev,
+        [type]: { ...prev[type], ...config }
+      };
+      
+      // Salvar configuração automaticamente
+      const configToSave = {
+        enabled: newConfigs[type].enabled,
+        period: newConfigs[type].period,
+        color: newConfigs[type].color,
+        lineWidth: newConfigs[type].lineWidth,
+        height: newConfigs[type].height
+      };
+      
+      saveConfig(type, configToSave);
+      console.log(`💾 PERSISTENCE - Auto-saved ${type} config update:`, configToSave);
+      
+      return newConfigs;
+    });
+  }, [saveConfig]);
 
   const handleTimeframeChange = (newTimeframe: string) => {
     console.log('🔄 TIMEFRAME CHANGE - Mudando timeframe:', {

@@ -7,6 +7,10 @@ import {
   IndicatorConfig, 
   IndicatorResult 
 } from '@/services/indicatorManager.service';
+import { 
+  indicatorPersistenceService, 
+  PersistedIndicatorConfig 
+} from '@/services/indicatorPersistence.service';
 
 export interface UseIndicatorManagerProps {
   bars: LwcBar[];
@@ -35,6 +39,20 @@ export interface UseIndicatorManagerReturn {
   calculateAllIndicators: () => Promise<void>;
   clearCache: () => void;
   refreshIndicator: (type: IndicatorType) => Promise<void>;
+  // Persistência
+  saveConfig: (type: IndicatorType, config: PersistedIndicatorConfig) => boolean;
+  loadConfig: (type: IndicatorType) => PersistedIndicatorConfig | null;
+  saveAllConfigs: (configs: Record<IndicatorType, PersistedIndicatorConfig>) => boolean;
+  loadAllConfigs: () => Record<IndicatorType, PersistedIndicatorConfig>;
+  exportConfigs: () => string | null;
+  importConfigs: (jsonData: string) => boolean;
+  clearAllConfigs: () => boolean;
+  getStorageInfo: () => {
+    available: boolean;
+    used: number;
+    total: number;
+    percentage: number;
+  };
 }
 
 export const useIndicatorManager = ({
@@ -218,6 +236,47 @@ export const useIndicatorManager = ({
     entries: []
   };
 
+  // Funções de persistência
+  const saveConfig = useCallback((type: IndicatorType, config: PersistedIndicatorConfig): boolean => {
+    console.log(`💾 PERSISTENCE - Saving ${type} config:`, config);
+    return indicatorPersistenceService.saveIndicatorConfig(type, config);
+  }, []);
+
+  const loadConfig = useCallback((type: IndicatorType): PersistedIndicatorConfig | null => {
+    console.log(`📦 PERSISTENCE - Loading ${type} config`);
+    return indicatorPersistenceService.loadIndicatorConfig(type);
+  }, []);
+
+  const saveAllConfigs = useCallback((configs: Record<IndicatorType, PersistedIndicatorConfig>): boolean => {
+    console.log('💾 PERSISTENCE - Saving all configs:', Object.keys(configs));
+    return indicatorPersistenceService.saveAllConfigs(configs);
+  }, []);
+
+  const loadAllConfigs = useCallback((): Record<IndicatorType, PersistedIndicatorConfig> => {
+    console.log('📦 PERSISTENCE - Loading all configs');
+    const data = indicatorPersistenceService.loadAllConfigs();
+    return data.state;
+  }, []);
+
+  const exportConfigs = useCallback((): string | null => {
+    console.log('📤 PERSISTENCE - Exporting configs');
+    return indicatorPersistenceService.exportConfigs();
+  }, []);
+
+  const importConfigs = useCallback((jsonData: string): boolean => {
+    console.log('📥 PERSISTENCE - Importing configs');
+    return indicatorPersistenceService.importConfigs(jsonData);
+  }, []);
+
+  const clearAllConfigs = useCallback((): boolean => {
+    console.log('🧹 PERSISTENCE - Clearing all configs');
+    return indicatorPersistenceService.clearAllConfigs();
+  }, []);
+
+  const getStorageInfo = useCallback(() => {
+    return indicatorPersistenceService.getStorageInfo();
+  }, []);
+
   return {
     indicators,
     isLoading,
@@ -227,6 +286,15 @@ export const useIndicatorManager = ({
     calculateIndicator,
     calculateAllIndicators,
     clearCache,
-    refreshIndicator
+    refreshIndicator,
+    // Persistência
+    saveConfig,
+    loadConfig,
+    saveAllConfigs,
+    loadAllConfigs,
+    exportConfigs,
+    importConfigs,
+    clearAllConfigs,
+    getStorageInfo
   };
 };
