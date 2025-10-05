@@ -67,6 +67,9 @@ const IndicatorTestPage: React.FC = () => {
     calculateAllIndicators,
     clearCache,
     refreshIndicator,
+    // CORREÇÃO: Adicionar enabledIndicators e indicatorConfigs
+    enabledIndicators,
+    indicatorConfigs,
     // Persistência
     saveConfig,
     loadConfig,

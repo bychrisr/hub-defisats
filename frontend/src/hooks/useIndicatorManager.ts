@@ -474,6 +474,9 @@ export const useIndicatorManager = ({
     calculateAllIndicators,
     clearCache,
     refreshIndicator,
+    // CORREÇÃO: Adicionar enabledIndicators e indicatorConfigs ao retorno
+    enabledIndicators,
+    indicatorConfigs,
     // Persistência
     saveConfig,
     loadConfig,
