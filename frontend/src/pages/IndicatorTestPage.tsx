@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import LightweightLiquidationChartWithIndicators from '@/components/charts/LightweightLiquidationChartWithIndicators';
 import { useIndicatorManager } from '@/hooks/useIndicatorManager';
 import { useAuthStore } from '@/stores/auth';
+import EMATestComponent from '@/components/EMATestComponent';
 import { Activity, BarChart3, TrendingUp, Settings, RefreshCw } from 'lucide-react';
 
 // Dados de teste simulados
@@ -85,9 +86,10 @@ const IndicatorTestPage: React.FC = () => {
     getBackendStats
   } = useIndicatorManager({
     bars: testData,
-    enabledIndicators: ['rsi'],
+    enabledIndicators: ['rsi', 'ema'],
     configs: {
-      rsi: { period: 14, color: '#8b5cf6', lineWidth: 2 }
+      rsi: { period: 14, color: '#8b5cf6', lineWidth: 2 },
+      ema: { period: 20, color: '#f59e0b', lineWidth: 2 }
     },
     autoUpdate: true,
     updateInterval: 1000
@@ -688,6 +690,14 @@ const IndicatorTestPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Componente de Teste EMA */}
+      <EMATestComponent 
+        data={testData}
+        onEMAResult={(result) => {
+          console.log('📊 EMA RESULT - Received from component:', result);
+        }}
+      />
     </div>
   );
 };

@@ -82,6 +82,7 @@ import LoadTest from '@/pages/admin/LoadTest';
 import TestAuth from '@/pages/TestAuth';
 import TestRedirect from '@/pages/TestRedirect';
 import IndicatorTestPage from '@/pages/IndicatorTestPage';
+import EMATestPage from '@/pages/EMATestPage';
 
 const queryClient = new QueryClient();
 
@@ -467,6 +468,16 @@ const App = () => {
                 <ProtectedRoute>
                   <ResponsiveLayout>
                     <IndicatorTestPage />
+                  </ResponsiveLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ema-test"
+              element={
+                <ProtectedRoute>
+                  <ResponsiveLayout>
+                    <EMATestPage />
                   </ResponsiveLayout>
                 </ProtectedRoute>
               }
