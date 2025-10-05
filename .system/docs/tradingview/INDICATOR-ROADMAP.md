@@ -411,3 +411,67 @@ Este roadmap fornece uma visão completa e estruturada do projeto de implementa�
 **Status Atual**: Pronto para completar a validação do RSI e prosseguir com a expansão de indicadores.
 
 **Próximo Marco**: Completar Fase 1 e iniciar implementação do EMA.
+
+---
+
+## 📋 **FASE 10: Web Workers para Performance Avançada** 🚀 **FUTURO**
+
+### **10.1 Arquitetura de Workers**
+- [ ] **10.1.1** Implementar Web Worker para cálculos de indicadores
+- [ ] **10.1.2** Criar sistema de message passing otimizado
+- [ ] **10.1.3** Implementar pool de workers para múltiplos indicadores
+- [ ] **10.1.4** Implementar cache compartilhado entre workers
+- [ ] **10.1.5** Implementar fallback para browsers sem suporte
+
+### **10.2 Indicadores em Background**
+- [ ] **10.2.1** Mover cálculos pesados para workers
+- [ ] **10.2.2** Implementar indicadores sempre calculados (ocultar/exibir)
+- [ ] **10.2.3** Implementar pré-cálculo de indicadores complexos
+- [ ] **10.2.4** Implementar indicadores em tempo real via workers
+- [ ] **10.2.5** Implementar análise técnica avançada em background
+
+### **10.3 Performance e Escalabilidade**
+- [ ] **10.3.1** Implementar lazy loading de indicadores
+- [ ] **10.3.2** Implementar virtualização de panes
+- [ ] **10.3.3** Implementar otimização de memória
+- [ ] **10.3.4** Implementar indicadores ML/AI em workers
+- [ ] **10.3.5** Implementar indicadores customizados via workers
+
+### **10.4 Integração com Sistema Existente**
+- [ ] **10.4.1** Migrar indicadores existentes para workers
+- [ ] **10.4.2** Manter compatibilidade com arquitetura atual
+- [ ] **10.4.3** Implementar toggle entre workers e cálculo direto
+- [ ] **10.4.4** Implementar métricas de performance de workers
+- [ ] **10.4.5** Implementar debugging avançado para workers
+
+---
+
+## 🎯 **Estratégia de Implementação**
+
+### **📈 Abordagem Gradual**
+1. **Estabilizar Sistema Atual** - Completar fases 1-9
+2. **Avaliar Necessidade** - Medir performance com indicadores complexos
+3. **Implementar Workers** - Migração gradual quando necessário
+4. **Otimizar Continuamente** - Melhorias baseadas em métricas reais
+
+### **🔍 Critérios para Workers**
+- **Performance**: > 200ms para cálculos complexos
+- **Escalabilidade**: > 10 indicadores simultâneos
+- **Complexidade**: Indicadores ML/AI
+- **Usuários**: > 1000 usuários simultâneos
+
+---
+
+## 🚀 **Visão de Futuro**
+
+**FASE 10** será implementada quando:
+- ✅ Sistema atual estiver 100% estável
+- ✅ Todas as fases 1-9 estiverem completas
+- ✅ Necessidade real de performance for identificada
+- ✅ Recursos disponíveis para refatoração
+
+**Benefícios dos Workers:**
+- 🚀 **Performance**: Cálculos em background thread
+- 🎯 **Responsividade**: UI nunca trava
+- 📈 **Escalabilidade**: Suporte a indicadores complexos
+- 🔮 **Futuro**: Preparado para ML/AI indicators

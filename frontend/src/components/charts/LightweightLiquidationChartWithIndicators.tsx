@@ -889,6 +889,12 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
   const handleToggleIndicator = useCallback((type: IndicatorType, enabled: boolean) => {
     console.log(`🔄 INDICATOR TOGGLE - ${type}: ${enabled ? 'enabled' : 'disabled'}`);
     
+    // CORREÇÃO: Se indicadores externos estão sendo usados, não podemos alterar diretamente
+    if (externalEnabledIndicators) {
+      console.log('⚠️ INDICATOR TOGGLE - Indicadores externos em uso, toggle não disponível');
+      return;
+    }
+    
     setEnabledIndicators(prev => {
       const newIndicators = enabled 
         ? [...prev.filter(t => t !== type), type]  // Adicionar se não existir
