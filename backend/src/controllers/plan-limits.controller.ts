@@ -307,7 +307,9 @@ export class PlanLimitsController {
    */
   async getUsageStatistics(request: FastifyRequest, reply: FastifyReply) {
     try {
+      console.log('📊 PlanLimitsController - Getting usage statistics...');
       const statistics = await planLimitsService.getUsageStatistics();
+      console.log('📊 PlanLimitsController - Statistics received:', statistics);
       
       return reply.status(200).send({
         success: true,

@@ -9,49 +9,45 @@ datasource db {
 }
 
 model User {
-  id                         String               @id @default(dbgenerated("(gen_random_uuid())::text"))
-  email                      String               @unique
-  username                   String               @unique
-  first_name                 String?              // Campo separado para nome
-  last_name                  String?              // Campo separado para sobrenome
+  id                         String                    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  email                      String                    @unique
+  username                   String                    @unique
+  first_name                 String?
+  last_name                  String?
   password_hash              String?
   social_provider            String?
   social_id                  String?
   ln_markets_api_key         String?
   ln_markets_api_secret      String?
-  last_activity_at           DateTime?            @db.Timestamp(6)
-  created_at                 DateTime             @default(now()) @db.Timestamp(6)
-  updated_at                 DateTime             @default(now()) @db.Timestamp(6)
-  is_active                  Boolean              @default(true)
-  session_expires_at         DateTime?            @db.Timestamp(6)
-  email_verified             Boolean?             @default(false)
+  last_activity_at           DateTime?                 @db.Timestamp(6)
+  created_at                 DateTime                  @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime                  @default(now()) @db.Timestamp(6)
+  is_active                  Boolean                   @default(true)
+  session_expires_at         DateTime?                 @db.Timestamp(6)
+  email_verified             Boolean?                  @default(false)
   email_verification_token   String?
-  email_verification_expires DateTime?            @db.Timestamp(6)
+  email_verification_expires DateTime?                 @db.Timestamp(6)
   password_reset_token       String?
-  password_reset_expires     DateTime?            @db.Timestamp(6)
-  two_factor_enabled         Boolean?             @default(false)
+  password_reset_expires     DateTime?                 @db.Timestamp(6)
+  two_factor_enabled         Boolean?                  @default(false)
   two_factor_secret          String?
   two_factor_backup_codes    Json?
-  login_attempts             Int?                 @default(0)
-  locked_until               DateTime?            @db.Timestamp(6)
+  login_attempts             Int?                      @default(0)
+  locked_until               DateTime?                 @db.Timestamp(6)
   last_login_ip              String?
   last_login_user_agent      String?
-  last_login_at              DateTime?            @db.Timestamp(6)
-  ln_markets_passphrase      String?              @db.VarChar(255)
-  plan_type                  PlanType             @default(free)
+  last_login_at              DateTime?                 @db.Timestamp(6)
+  ln_markets_passphrase      String?                   @db.VarChar(255)
+  plan_type                  PlanType                  @default(free)
   preferences                Json?
   bio                        String?
-  birthday                   DateTime?            @db.Date
-  website                    String?              @db.VarChar(255)
+  birthday                   DateTime?                 @db.Date
+  website                    String?                   @db.VarChar(255)
   risk_limits                Json?
-  risk_profile               String?              @default("moderate") @db.VarChar(50)
-  // Campos para email marketing
-  email_marketing_consent    Boolean?             @default(false) // Consentimento para email marketing
-  email_marketing_consent_at DateTime?            @db.Timestamp(6) // Data do consentimento
-  
-  // Relacionamentos
-  userPreferences            UserPreferences?
-  marketing_preferences       Json?                // Preferências de marketing (JSON)
+  risk_profile               String?                   @default("moderate") @db.VarChar(50)
+  email_marketing_consent    Boolean?                  @default(false)
+  email_marketing_consent_at DateTime?                 @db.Timestamp(6)
+  marketing_preferences      Json?
   admin_user                 AdminUser?
   automations                Automation[]
   backtest_reports           BacktestReport[]
@@ -59,19 +55,20 @@ model User {
   payments                   Payment[]
   refresh_tokens             RefreshToken[]
   security_audit_logs        SecurityAuditLog[]
-  security_configs_updated   SecurityConfig[]     @relation("SecurityConfigUpdatedBy")
+  security_configs_updated   SecurityConfig[]          @relation("SecurityConfigUpdatedBy")
   trade_logs                 TradeLog[]
-  user_coupons               UserCoupon[]         @relation("UserCouponRelation")
+  user_coupons               UserCoupon[]              @relation("UserCouponRelation")
   audit_logs                 AuditLog[]
   notification_logs          NotificationLog[]
   order_confirmations        OrderConfirmation[]
+  registration_progress      RegistrationProgress?
   simulations                Simulation[]
   trading_logs               TradingLog[]
-  upgrades_made              UserUpgradeHistory[] @relation("AdminUpgradeHistory")
-  upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
-  registration_progress      RegistrationProgress?
+  exchange_accounts          UserExchangeAccounts[]
   exchange_credentials       UserExchangeCredentials[]
-  exchange_accounts         UserExchangeAccounts[]
+  userPreferences            UserPreferences?
+  upgrades_made              UserUpgradeHistory[]      @relation("AdminUpgradeHistory")
+  upgrade_history            UserUpgradeHistory[]      @relation("UserUpgradeHistory")
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -79,20 +76,20 @@ model User {
 }
 
 model Automation {
-  id                      String               @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id                 String
+  id                       String                @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id                  String
   user_exchange_account_id String?
-  type                    String
-  config                  Json
-  is_active               Boolean              @default(true)
-  status                  String               @default("active")
-  risk_level             String?
-  plan_type              PlanType?
-  created_at             DateTime             @default(now()) @db.Timestamp(6)
-  updated_at             DateTime             @default(now()) @db.Timestamp(6)
-  user                   User                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user_exchange_account  UserExchangeAccounts? @relation(fields: [user_exchange_account_id], references: [id], onDelete: SetNull)
-  trade_logs             TradeLog[]
+  type                     String
+  config                   Json
+  is_active                Boolean               @default(true)
+  status                   String                @default("active")
+  risk_level               String?
+  plan_type                PlanType?
+  created_at               DateTime              @default(now()) @db.Timestamp(6)
+  updated_at               DateTime              @default(now()) @db.Timestamp(6)
+  user_exchange_account    UserExchangeAccounts? @relation(fields: [user_exchange_account_id], references: [id])
+  user                     User                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  trade_logs               TradeLog[]
 
   @@index([user_id], map: "idx_automation_user_id")
   @@index([user_exchange_account_id], map: "idx_automation_account_id")
@@ -372,36 +369,34 @@ model TooltipConfig {
 }
 
 model Plan {
-  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  name              String   @unique
-  slug              String   @unique
+  id                String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name              String      @unique
+  slug              String      @unique
   description       String?
-  price_sats        Int      @default(0)
+  price_sats        Int         @default(0)
   price_monthly     Int?
   price_yearly      Int?
   features          Json?
-  is_active         Boolean  @default(true)
-  order             Int      @default(0)
+  is_active         Boolean     @default(true)
+  sort_order        Int         @default(0)
   stripe_price_id   String?
-  has_api_access    Boolean  @default(false)
-  has_advanced      Boolean  @default(false)
-  has_priority      Boolean  @default(false)
-  max_notifications Int      @default(0)
-  created_at        DateTime @default(now()) @db.Timestamp(6)
-  updated_at        DateTime @default(now()) @db.Timestamp(6)
-  
-  // Relacionamentos
-  plan_limits PlanLimits[]
+  has_api_access    Boolean     @default(false)
+  has_advanced      Boolean     @default(false)
+  has_priority      Boolean     @default(false)
+  max_notifications Int         @default(0)
+  created_at        DateTime    @default(now()) @db.Timestamp(6)
+  updated_at        DateTime    @default(now()) @db.Timestamp(6)
+  plan_limits       PlanLimits[]
 
   @@index([slug])
   @@index([is_active])
-  @@index([order])
+  @@index([sort_order])
   @@map("plans")
 }
 
 model PlanLimits {
   id                    String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  plan_id               String
+  plan_id               String   @unique
   max_exchange_accounts Int      @default(1)
   max_automations       Int      @default(5)
   max_indicators        Int      @default(10)
@@ -409,11 +404,8 @@ model PlanLimits {
   max_backtests         Int      @default(5)
   created_at            DateTime @default(now()) @db.Timestamp(6)
   updated_at            DateTime @default(now()) @db.Timestamp(6)
-  
-  // Relacionamentos
-  plan Plan @relation(fields: [plan_id], references: [id], onDelete: Cascade)
-  
-  @@unique([plan_id])
+  plan                  Plan     @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+
   @@index([plan_id])
   @@map("plan_limits")
 }
@@ -687,20 +679,20 @@ model RateLimitConfig {
 }
 
 model RegistrationProgress {
-  id              String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id         String   @unique
-  current_step    String   @default("personal_data") // personal_data, plan_selection, payment, credentials, completed
-  completed_steps Json     @default("[]") // Array of completed steps
-  personal_data   Json?    // Store personal data from step 1
-  selected_plan   String? // Store selected plan from step 2
-  payment_data    Json?    // Store payment information from step 3
-  credentials_data Json?   // Store LN Markets credentials from step 4
-  coupon_code     String?  // Store coupon code if used
-  session_token   String?  // Temporary token for unauthenticated users
-  expires_at      DateTime? @db.Timestamp(6) // For session-based progress
-  created_at      DateTime @default(now()) @db.Timestamp(6)
-  updated_at      DateTime @default(now()) @db.Timestamp(6)
-  user            User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id               String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id          String    @unique
+  current_step     String    @default("personal_data")
+  completed_steps  Json      @default("[]")
+  personal_data    Json?
+  selected_plan    String?
+  payment_data     Json?
+  credentials_data Json?
+  coupon_code      String?
+  session_token    String?
+  expires_at       DateTime? @db.Timestamp(6)
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime  @default(now()) @db.Timestamp(6)
+  user             User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([current_step])
@@ -710,22 +702,20 @@ model RegistrationProgress {
 }
 
 model Exchange {
-  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  name        String   @unique
-  slug        String   @unique
-  description String?
-  website     String?
-  logo_url    String?
-  is_active   Boolean  @default(true)
-  api_version String?
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-  
-  // Relacionamentos
+  id               String                    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name             String                    @unique
+  slug             String                    @unique
+  description      String?
+  website          String?
+  logo_url         String?
+  is_active        Boolean                   @default(true)
+  api_version      String?
+  created_at       DateTime                  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime                  @default(now()) @db.Timestamp(6)
   credential_types ExchangeCredentialType[]
-  user_credentials UserExchangeCredentials[]
   user_accounts    UserExchangeAccounts[]
-  
+  user_credentials UserExchangeCredentials[]
+
   @@index([slug])
   @@index([is_active])
   @@map("exchanges")
@@ -742,10 +732,8 @@ model ExchangeCredentialType {
   order       Int      @default(0)
   created_at  DateTime @default(now()) @db.Timestamp(6)
   updated_at  DateTime @default(now()) @db.Timestamp(6)
-  
-  // Relacionamentos
-  exchange Exchange @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
-  
+  exchange    Exchange @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
+
   @@unique([exchange_id, field_name])
   @@index([exchange_id])
   @@index([is_required])
@@ -753,20 +741,18 @@ model ExchangeCredentialType {
 }
 
 model UserExchangeCredentials {
-  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id     String
   exchange_id String
   credentials Json
-  is_active   Boolean  @default(true)
-  is_verified Boolean  @default(false)
+  is_active   Boolean   @default(true)
+  is_verified Boolean   @default(false)
   last_test   DateTime? @db.Timestamp(6)
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-  
-  // Relacionamentos
-  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  exchange Exchange @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
-  
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime  @default(now()) @db.Timestamp(6)
+  exchange    Exchange  @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
   @@unique([user_id, exchange_id])
   @@index([user_id])
   @@index([exchange_id])
@@ -776,22 +762,20 @@ model UserExchangeCredentials {
 }
 
 model UserExchangeAccounts {
-  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id       String
-  exchange_id   String
-  account_name  String   @default("Account 01")
-  credentials   Json     // Credenciais criptografadas
-  is_active     Boolean  @default(false) // Apenas uma conta ativa por usuário
-  is_verified   Boolean  @default(false)
-  last_test     DateTime? @db.Timestamp(6)
-  created_at    DateTime @default(now()) @db.Timestamp(6)
-  updated_at    DateTime @default(now()) @db.Timestamp(6)
-  
-  // Relacionamentos
-  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  exchange   Exchange   @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
-  automations Automation[]
-  
+  id           String       @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id      String
+  exchange_id  String
+  account_name String       @default("Account 01")
+  credentials  Json
+  is_active    Boolean      @default(false)
+  is_verified  Boolean      @default(false)
+  last_test    DateTime?    @db.Timestamp(6)
+  created_at   DateTime     @default(now()) @db.Timestamp(6)
+  updated_at   DateTime     @default(now()) @db.Timestamp(6)
+  automations  Automation[]
+  exchange     Exchange     @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
   @@index([user_id])
   @@index([exchange_id])
   @@index([is_active])
@@ -800,17 +784,15 @@ model UserExchangeAccounts {
 }
 
 model UserPreferences {
-  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
-  userId            String   @unique
-  indicatorConfigs  String   // JSON string das configurações dos indicadores
-  lastUpdated       DateTime @default(now()) @db.Timestamp(6)
-  version           String   @default("1.0.0")
-  created_at        DateTime @default(now()) @db.Timestamp(6)
-  updated_at        DateTime @default(now()) @db.Timestamp(6)
-  
-  // Relacionamentos
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id               String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId           String   @unique
+  indicatorConfigs String
+  lastUpdated      DateTime @default(now()) @db.Timestamp(6)
+  version          String   @default("1.0.0")
+  created_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @default(now()) @db.Timestamp(6)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([lastUpdated])
   @@map("user_preferences")

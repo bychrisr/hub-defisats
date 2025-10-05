@@ -193,11 +193,11 @@ export default function PlanLimitsManagement() {
   };
 
   const getLimitColor = (current: number, max: number) => {
-    if (max === -1) return 'text-green-600'; // Unlimited
+    if (max === -1) return 'text-blue-600'; // Unlimited
     const percentage = (current / max) * 100;
     if (percentage >= 90) return 'text-red-600';
     if (percentage >= 70) return 'text-yellow-600';
-    return 'text-green-600';
+    return 'text-gray-600'; // Neutral color for display
   };
 
   const formatLimit = (limit: number) => {

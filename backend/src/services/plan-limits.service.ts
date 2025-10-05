@@ -432,21 +432,30 @@ export class PlanLimitsService {
       const totalPlans = await prisma.plan.count();
       const plansWithLimits = await prisma.planLimits.count();
       
+      console.log('📊 Statistics - Total plans:', totalPlans);
+      console.log('📊 Statistics - Plans with limits:', plansWithLimits);
+      
       const limits = await prisma.planLimits.findMany();
+      console.log('📊 Statistics - Limits found:', limits.length);
       
       const averageLimits = {
-        exchangeAccounts: limits.reduce((sum, l) => sum + l.max_exchange_accounts, 0) / limits.length,
-        automations: limits.reduce((sum, l) => sum + l.max_automations, 0) / limits.length,
-        indicators: limits.reduce((sum, l) => sum + l.max_indicators, 0) / limits.length,
-        simulations: limits.reduce((sum, l) => sum + l.max_simulations, 0) / limits.length,
-        backtests: limits.reduce((sum, l) => sum + l.max_backtests, 0) / limits.length
+        exchangeAccounts: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_exchange_accounts, 0) / limits.length : 0,
+        automations: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_automations, 0) / limits.length : 0,
+        indicators: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_indicators, 0) / limits.length : 0,
+        simulations: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_simulations, 0) / limits.length : 0,
+        backtests: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_backtests, 0) / limits.length : 0
       };
 
-      return {
+      console.log('📊 Statistics - Average limits:', averageLimits);
+
+      const result = {
         totalPlans,
         plansWithLimits,
         averageLimits
       };
+
+      console.log('📊 Statistics - Final result:', result);
+      return result;
 
     } catch (error: any) {
       console.error('❌ PlanLimitsService - Error getting usage statistics:', error);
