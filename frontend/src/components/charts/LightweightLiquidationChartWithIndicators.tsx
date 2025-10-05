@@ -176,8 +176,8 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
 
   // CORREÇÃO: Usar indicadores externos quando disponíveis
   const indicators = externalIndicators || internalIndicators;
-  const enabledIndicators = externalEnabledIndicators || ['rsi'];
-  const indicatorConfigs = externalIndicatorConfigs || { rsi: { enabled: true, period: 14, color: '#8b5cf6', lineWidth: 2 } };
+  const finalEnabledIndicators = externalEnabledIndicators || enabledIndicators;
+  const finalIndicatorConfigs = externalIndicatorConfigs || { rsi: { enabled: true, period: 14, color: '#8b5cf6', lineWidth: 2 } };
 
   // Dados efetivos para o gráfico
   const effectiveCandleData = useMemo(() => {
@@ -359,12 +359,12 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
       return;
     }
 
-    const rsiEnabled = enabledIndicators.includes('rsi');
+    const rsiEnabled = finalEnabledIndicators.includes('rsi');
     const rsiData = indicators.rsi;
 
     console.log('🔄 RSI PANE - Atualizando pane RSI:', {
       enabled: rsiEnabled,
-      enabledIndicators: enabledIndicators,
+      enabledIndicators: finalEnabledIndicators,
       hasData: !!rsiData,
       dataValid: rsiData?.valid,
       dataLength: rsiData?.data ? (Array.isArray(rsiData.data) ? rsiData.data.length : 'complex') : 0,
@@ -447,7 +447,7 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
         console.error('❌ RSI COLOR - Erro ao atualizar cor RSI:', error);
       }
     }
-  }, [enabledIndicators, indicators.rsi, indicatorConfigs.rsi, isChartReady, barsData]);
+  }, [finalEnabledIndicators, indicators.rsi, finalIndicatorConfigs.rsi, isChartReady, barsData]);
 
   // Função para criar/remover pane EMA
   const updateEMAPane = useCallback(() => {
@@ -462,12 +462,12 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
       return;
     }
 
-    const emaEnabled = enabledIndicators.includes('ema');
+    const emaEnabled = finalEnabledIndicators.includes('ema');
     const emaData = indicators.ema;
 
     console.log('🔄 EMA PANE - Atualizando pane EMA:', {
       enabled: emaEnabled,
-      enabledIndicators: enabledIndicators,
+      enabledIndicators: finalEnabledIndicators,
       hasData: !!emaData,
       dataValid: emaData?.valid,
       dataLength: emaData?.data ? (Array.isArray(emaData.data) ? emaData.data.length : 'complex') : 0,
@@ -608,7 +608,7 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     } catch (error) {
       console.warn('⚠️ EMA RENDER - Erro ao forçar re-renderização:', error);
     }
-  }, [enabledIndicators, indicators.ema, indicatorConfigs.ema, isChartReady, barsData]);
+  }, [finalEnabledIndicators, indicators.ema, finalIndicatorConfigs.ema, isChartReady, barsData]);
 
   // Criar gráfico principal
   useEffect(() => {
@@ -805,12 +805,12 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
 
   // Forçar atualização quando enabledIndicators mudar
   useEffect(() => {
-    console.log('🔄 INDICATOR CHANGE - enabledIndicators changed:', enabledIndicators);
+    console.log('🔄 INDICATOR CHANGE - enabledIndicators changed:', finalEnabledIndicators);
     console.log('🔄 INDICATOR CHANGE - Calling updateRSIPane...');
     updateRSIPane();
     console.log('🔄 INDICATOR CHANGE - Calling updateEMAPane...');
     updateEMAPane();
-  }, [enabledIndicators, updateRSIPane, updateEMAPane]);
+  }, [finalEnabledIndicators, updateRSIPane, updateEMAPane]);
 
   // Forçar atualização quando indicators mudar
   useEffect(() => {
@@ -821,7 +821,7 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
       ema: indicators.ema ? 'has data' : 'no data',
       emaValid: indicators.ema?.valid,
       emaDataLength: indicators.ema?.data?.length || 0,
-      emaEnabled: enabledIndicators.includes('ema')
+      emaEnabled: finalEnabledIndicators.includes('ema')
     });
     
     console.log('🔄 INDICATOR DATA - Calling updateRSIPane...');
@@ -829,11 +829,11 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     
     console.log('🔄 INDICATOR DATA - Calling updateEMAPane...');
     updateEMAPane();
-  }, [indicators.rsi, indicators.ema, updateRSIPane, updateEMAPane, enabledIndicators]);
+  }, [indicators.rsi, indicators.ema, updateRSIPane, updateEMAPane, finalEnabledIndicators]);
 
   // CORREÇÃO: Forçar atualização da EMA quando habilitada
   useEffect(() => {
-    const emaEnabled = enabledIndicators.includes('ema');
+    const emaEnabled = finalEnabledIndicators.includes('ema');
     const emaHasData = indicators.ema && indicators.ema.valid && indicators.ema.data;
     
     if (emaEnabled && emaHasData) {
@@ -850,7 +850,7 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
       
       return () => clearTimeout(timeoutId);
     }
-  }, [enabledIndicators, indicators.ema, updateEMAPane]);
+  }, [finalEnabledIndicators, indicators.ema, updateEMAPane]);
 
   // Carregar configurações salvas na inicialização
   useEffect(() => {
@@ -978,7 +978,7 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
         {showIndicatorControls && showControls && (
           <div className="mb-4">
             <IndicatorControls
-              enabledIndicators={enabledIndicators}
+              enabledIndicators={finalEnabledIndicators}
               configs={indicatorConfigs}
               onToggleIndicator={handleToggleIndicator}
               onUpdateConfig={handleUpdateConfig}
@@ -1086,9 +1086,9 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
                 <Badge variant="outline">
                   Lightweight Charts v5.0.9
                 </Badge>
-                {enabledIndicators.length > 0 && (
+                {finalEnabledIndicators.length > 0 && (
                   <Badge variant="outline">
-                    {enabledIndicators.length} Indicators
+                    {finalEnabledIndicators.length} Indicators
                   </Badge>
                 )}
               </div>
