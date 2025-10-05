@@ -591,6 +591,11 @@ async function registerRoutes() {
   await fastify.register(tradingViewRoutes, { prefix: '/api' });
   console.log('✅ TradingView Proxy routes registered');
 
+  // Public Dashboard routes (no authentication required)
+  const { publicDashboardRoutes } = await import('./routes/public-dashboard.routes');
+  await fastify.register(publicDashboardRoutes);
+  console.log('✅ Public Dashboard routes registered');
+
   // Coupon Admin routes
   await fastify.register(couponAdminRoutes, { prefix: '/api/admin/coupons' });
   console.log('✅ Coupon Admin routes registered');

@@ -10,6 +10,8 @@ import {
   Activity
 } from 'lucide-react';
 import { usePositions } from '@/contexts/PositionsContext';
+import { usePublicMarketData } from '@/hooks/usePublicMarketData';
+import { useAuthStore } from '@/stores/auth';
 
 interface LNMarketsData {
   index: number;
@@ -23,7 +25,10 @@ interface LNMarketsData {
 }
 
 const LNMarketsHeader: React.FC = () => {
+  const { isAuthenticated } = useAuthStore();
   const { data } = usePositions();
+  const { data: publicData, isLoading: publicLoading, error: publicError } = usePublicMarketData();
+  
   const lnMarketsData = data.marketIndex;
   const lnMarketsError = data.marketIndexError;
   
@@ -33,7 +38,23 @@ const LNMarketsHeader: React.FC = () => {
 
   // Memoizar dados do mercado para evitar re-renders desnecessários
   const memoizedMarketData = useMemo(() => {
-    if (lnMarketsData) {
+    // Se não estiver autenticado, usar dados públicos
+    if (!isAuthenticated && publicData) {
+      const newMarketData = {
+        index: publicData.index,
+        index24hChange: publicData.index24hChange,
+        tradingFees: publicData.tradingFees,
+        nextFunding: publicData.nextFunding,
+        rate: publicData.rate,
+        rateChange: 0, // Dados públicos não têm rateChange
+        lastUpdate: new Date(publicData.timestamp),
+        source: publicData.source
+      };
+      return newMarketData;
+    }
+    
+    // Se autenticado, usar dados da LN Markets
+    if (isAuthenticated && lnMarketsData) {
       const newMarketData = {
         index: lnMarketsData.index,
         index24hChange: lnMarketsData.index24hChange,
@@ -46,8 +67,9 @@ const LNMarketsHeader: React.FC = () => {
       };
       return newMarketData;
     }
+    
     return null;
-  }, [lnMarketsData]);
+  }, [isAuthenticated, publicData, lnMarketsData]);
 
   // Atualizar dados quando os dados da LN Markets mudarem
   useEffect(() => {
@@ -207,7 +229,7 @@ const LNMarketsHeader: React.FC = () => {
             <div className="flex items-center space-x-2 w-1/2">
               <div className="flex flex-col items-start space-y-1">
                 <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
-                {lnMarketsError ? (
+                {(isAuthenticated && lnMarketsError) || (!isAuthenticated && publicError) ? (
                   <div className="flex items-center space-x-1">
                     <span className="text-red-400 text-sm">Error</span>
                   </div>
