@@ -71,6 +71,7 @@ model User {
   upgrade_history            UserUpgradeHistory[] @relation("UserUpgradeHistory")
   registration_progress      RegistrationProgress?
   exchange_credentials       UserExchangeCredentials[]
+  exchange_accounts         UserExchangeAccounts[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -78,20 +79,23 @@ model User {
 }
 
 model Automation {
-  id         String     @id @default(dbgenerated("(gen_random_uuid())::text"))
-  user_id    String
-  type       String
-  config     Json
-  is_active  Boolean    @default(true)
-  status     String     @default("active")
-  risk_level String?
-  plan_type  PlanType?
-  created_at DateTime   @default(now()) @db.Timestamp(6)
-  updated_at DateTime   @default(now()) @db.Timestamp(6)
-  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  trade_logs TradeLog[]
+  id                      String               @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id                 String
+  user_exchange_account_id String?
+  type                    String
+  config                  Json
+  is_active               Boolean              @default(true)
+  status                  String               @default("active")
+  risk_level             String?
+  plan_type              PlanType?
+  created_at             DateTime             @default(now()) @db.Timestamp(6)
+  updated_at             DateTime             @default(now()) @db.Timestamp(6)
+  user                   User                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_exchange_account  UserExchangeAccounts? @relation(fields: [user_exchange_account_id], references: [id], onDelete: SetNull)
+  trade_logs             TradeLog[]
 
   @@index([user_id], map: "idx_automation_user_id")
+  @@index([user_exchange_account_id], map: "idx_automation_account_id")
   @@index([type])
   @@index([status])
   @@index([risk_level])
@@ -385,11 +389,33 @@ model Plan {
   max_notifications Int      @default(0)
   created_at        DateTime @default(now()) @db.Timestamp(6)
   updated_at        DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relacionamentos
+  plan_limits PlanLimits[]
 
   @@index([slug])
   @@index([is_active])
   @@index([order])
   @@map("plans")
+}
+
+model PlanLimits {
+  id                    String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  plan_id               String
+  max_exchange_accounts Int      @default(1)
+  max_automations       Int      @default(5)
+  max_indicators        Int      @default(10)
+  max_simulations       Int      @default(3)
+  max_backtests         Int      @default(5)
+  created_at            DateTime @default(now()) @db.Timestamp(6)
+  updated_at            DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relacionamentos
+  plan Plan @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  
+  @@unique([plan_id])
+  @@index([plan_id])
+  @@map("plan_limits")
 }
 
 model Simulation {
@@ -698,6 +724,7 @@ model Exchange {
   // Relacionamentos
   credential_types ExchangeCredentialType[]
   user_credentials UserExchangeCredentials[]
+  user_accounts    UserExchangeAccounts[]
   
   @@index([slug])
   @@index([is_active])
@@ -746,6 +773,30 @@ model UserExchangeCredentials {
   @@index([is_active])
   @@index([is_verified])
   @@map("user_exchange_credentials")
+}
+
+model UserExchangeAccounts {
+  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id       String
+  exchange_id   String
+  account_name  String   @default("Account 01")
+  credentials   Json     // Credenciais criptografadas
+  is_active     Boolean  @default(false) // Apenas uma conta ativa por usuário
+  is_verified   Boolean  @default(false)
+  last_test     DateTime? @db.Timestamp(6)
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relacionamentos
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  exchange   Exchange   @relation(fields: [exchange_id], references: [id], onDelete: Cascade)
+  automations Automation[]
+  
+  @@index([user_id])
+  @@index([exchange_id])
+  @@index([is_active])
+  @@index([is_verified])
+  @@map("user_exchange_accounts")
 }
 
 model UserPreferences {

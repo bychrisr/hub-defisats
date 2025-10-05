@@ -23,6 +23,26 @@ export interface PersistenceMetadata {
   deviceId: string;
 }
 
+export interface UserPreferences {
+  activeAccountId: string | null;
+  dashboardPreferences: {
+    layout: string;
+    cards: string[];
+    theme: string;
+  };
+  uiSettings: {
+    language: string;
+    timezone: string;
+    notifications: boolean;
+  };
+}
+
+export interface UnifiedPersistenceData {
+  indicators: PersistedIndicatorState;
+  userPreferences: UserPreferences;
+  metadata: PersistenceMetadata;
+}
+
 class IndicatorPersistenceService {
   private readonly STORAGE_KEY = 'hub-defisats-indicator-configs';
   private readonly VERSION = '1.0.0';
@@ -77,6 +97,22 @@ class IndicatorPersistenceService {
       macd: { ...this.DEFAULT_MACD_CONFIG },
       bollinger: { ...this.DEFAULT_BOLLINGER_CONFIG },
       volume: { ...this.DEFAULT_VOLUME_CONFIG }
+    };
+  }
+
+  private getDefaultUserPreferences(): UserPreferences {
+    return {
+      activeAccountId: null,
+      dashboardPreferences: {
+        layout: 'default',
+        cards: ['balance', 'positions', 'automations'],
+        theme: 'light'
+      },
+      uiSettings: {
+        language: 'pt-BR',
+        timezone: 'America/Sao_Paulo',
+        notifications: true
+      }
     };
   }
 
@@ -352,6 +388,203 @@ class IndicatorPersistenceService {
     } catch (error) {
       console.error('❌ PERSISTENCE - Error getting storage info:', error);
       return { available: true, used: 0, total: 0, percentage: 0 };
+    }
+  }
+
+  // ===== MÉTODOS PARA CONTA ATIVA =====
+
+  public setActiveAccount(accountId: string | null): boolean {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot save active account, localStorage not available');
+      return false;
+    }
+
+    try {
+      const currentData = this.loadUnifiedData();
+      currentData.userPreferences.activeAccountId = accountId;
+      currentData.metadata.lastUpdated = Date.now();
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(currentData));
+      
+      console.log(`✅ PERSISTENCE - Set active account:`, accountId);
+      return true;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error setting active account:', error);
+      return false;
+    }
+  }
+
+  public getActiveAccount(): string | null {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot load active account, localStorage not available');
+      return null;
+    }
+
+    try {
+      const data = this.loadUnifiedData();
+      console.log(`✅ PERSISTENCE - Active account:`, data.userPreferences.activeAccountId);
+      return data.userPreferences.activeAccountId;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error getting active account:', error);
+      return null;
+    }
+  }
+
+  public clearActiveAccount(): boolean {
+    return this.setActiveAccount(null);
+  }
+
+  // ===== MÉTODOS PARA PREFERÊNCIAS DO USUÁRIO =====
+
+  public updateUserPreferences(preferences: Partial<UserPreferences>): boolean {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot save user preferences, localStorage not available');
+      return false;
+    }
+
+    try {
+      const currentData = this.loadUnifiedData();
+      currentData.userPreferences = { ...currentData.userPreferences, ...preferences };
+      currentData.metadata.lastUpdated = Date.now();
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(currentData));
+      
+      console.log(`✅ PERSISTENCE - Updated user preferences:`, preferences);
+      return true;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error updating user preferences:', error);
+      return false;
+    }
+  }
+
+  public getUserPreferences(): UserPreferences {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot load user preferences, localStorage not available');
+      return this.getDefaultUserPreferences();
+    }
+
+    try {
+      const data = this.loadUnifiedData();
+      console.log(`✅ PERSISTENCE - User preferences:`, data.userPreferences);
+      return data.userPreferences;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error getting user preferences:', error);
+      return this.getDefaultUserPreferences();
+    }
+  }
+
+  // ===== MÉTODOS UNIFICADOS =====
+
+  public loadUnifiedData(): UnifiedPersistenceData {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot load unified data, localStorage not available');
+      return {
+        indicators: this.getDefaultState(),
+        userPreferences: this.getDefaultUserPreferences(),
+        metadata: {
+          version: this.VERSION,
+          lastUpdated: Date.now(),
+          deviceId: this.generateDeviceId()
+        }
+      };
+    }
+
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (!stored) {
+        console.log('📦 PERSISTENCE - No stored data found, creating new unified data');
+        return {
+          indicators: this.getDefaultState(),
+          userPreferences: this.getDefaultUserPreferences(),
+          metadata: {
+            version: this.VERSION,
+            lastUpdated: Date.now(),
+            deviceId: this.generateDeviceId()
+          }
+        };
+      }
+
+      const data = JSON.parse(stored);
+      
+      // Migrar dados antigos para nova estrutura
+      if (data.state && !data.indicators) {
+        console.log('🔄 PERSISTENCE - Migrating old data structure to unified format');
+        return {
+          indicators: data.state,
+          userPreferences: data.userPreferences || this.getDefaultUserPreferences(),
+          metadata: {
+            version: this.VERSION,
+            lastUpdated: Date.now(),
+            deviceId: this.generateDeviceId()
+          }
+        };
+      }
+
+      if (!this.validateStoredData(data)) {
+        console.log('🧹 PERSISTENCE - Invalid stored data, creating new unified data');
+        return {
+          indicators: this.getDefaultState(),
+          userPreferences: this.getDefaultUserPreferences(),
+          metadata: {
+            version: this.VERSION,
+            lastUpdated: Date.now(),
+            deviceId: this.generateDeviceId()
+          }
+        };
+      }
+
+      console.log('✅ PERSISTENCE - Loaded unified data:', {
+        version: data.metadata.version,
+        lastUpdated: new Date(data.metadata.lastUpdated).toISOString(),
+        deviceId: data.metadata.deviceId,
+        activeAccount: data.userPreferences?.activeAccountId,
+        indicators: Object.keys(data.indicators || data.state || {})
+      });
+
+      return data;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error loading unified data:', error);
+      return {
+        indicators: this.getDefaultState(),
+        userPreferences: this.getDefaultUserPreferences(),
+        metadata: {
+          version: this.VERSION,
+          lastUpdated: Date.now(),
+          deviceId: this.generateDeviceId()
+        }
+      };
+    }
+  }
+
+  public saveUnifiedData(data: UnifiedPersistenceData): boolean {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot save unified data, localStorage not available');
+      return false;
+    }
+
+    try {
+      const dataToSave = {
+        ...data,
+        metadata: {
+          ...data.metadata,
+          lastUpdated: Date.now()
+        }
+      };
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataToSave));
+      
+      console.log('✅ PERSISTENCE - Saved unified data:', {
+        version: dataToSave.metadata.version,
+        lastUpdated: new Date(dataToSave.metadata.lastUpdated).toISOString(),
+        deviceId: dataToSave.metadata.deviceId,
+        activeAccount: dataToSave.userPreferences.activeAccountId,
+        indicators: Object.keys(dataToSave.indicators)
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error saving unified data:', error);
+      return false;
     }
   }
 }
