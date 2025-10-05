@@ -4,8 +4,8 @@
 
 Este documento detalha a implementação completa do indicador RSI (Relative Strength Index) integrado com Lightweight Charts v5.0.9, incluindo panes dinâmicos, configurações em tempo real e sistema de cache inteligente.
 
-**Status**: ✅ **100% Funcional com Dados de Teste**
-**Versão**: v1.0.0 (Stable)
+**Status**: ✅ **100% Funcional com Dados de Teste + Persistência**
+**Versão**: v1.1.0 (Stable)
 **Data**: 2025-01-26
 
 ---
@@ -20,7 +20,8 @@ RSI Implementation Architecture
 ├── useIndicatorManager (React Hook)
 ├── IndicatorControls (UI Component)
 ├── LightweightLiquidationChartWithIndicators (Chart Integration)
-└── IndicatorTestPage (Testing Environment)
+├── IndicatorTestPage (Testing Environment)
+└── IndicatorPersistenceService (Local Storage)
 ```
 
 ### **Fluxo de Dados**
@@ -29,6 +30,8 @@ RSI Implementation Architecture
 Candle Data → IndicatorManager → RSI Calculation → Dynamic Pane → Lightweight Charts
      ↓              ↓                ↓                ↓              ↓
   OHLC Data    Cache System    RSI Algorithm    Pane Creation    Visual Rendering
+     ↓              ↓                ↓                ↓              ↓
+Persistence ← Local Storage ← Configuration ← User Settings ← UI Controls
 ```
 
 ---
@@ -134,6 +137,109 @@ if (!rsiSeriesRef.current && rsiPaneRef.current) {
     console.error('❌ RSI SERIES - Erro ao criar série RSI:', error);
   }
 }
+```
+
+---
+
+## 💾 **Sistema de Persistência**
+
+### **IndicatorPersistenceService**
+
+**Localização**: `frontend/src/services/indicatorPersistence.service.ts`
+
+**Características**:
+- ✅ **LocalStorage**: Persistência local com TTL de 30 dias
+- ✅ **Validação**: Verificação de dados antes de salvar/carregar
+- ✅ **Versionamento**: Controle de versão das configurações
+- ✅ **Error Handling**: Tratamento robusto de erros
+- ✅ **Export/Import**: Backup e restore de configurações
+
+**Implementação**:
+```typescript
+export interface PersistedIndicatorConfig {
+  enabled: boolean;
+  period: number;
+  color: string;
+  lineWidth: number;
+  height?: number;
+}
+
+class IndicatorPersistenceService {
+  private isLocalStorageAvailable: boolean;
+  private TTL_DAYS = 30;
+
+  public saveIndicatorConfig(type: IndicatorType, config: PersistedIndicatorConfig): boolean {
+    if (!this.isLocalStorageAvailable) return false;
+    const state = this.loadState() || { version: '1.0.0', timestamp: Date.now(), state: {} };
+    state.state[type] = config;
+    state.timestamp = Date.now();
+    return this.saveState(state);
+  }
+
+  public loadIndicatorConfig(type: IndicatorType): PersistedIndicatorConfig | null {
+    if (!this.isLocalStorageAvailable) return null;
+    const state = this.loadState();
+    return state?.state[type] || null;
+  }
+}
+```
+
+### **Integração com useIndicatorManager**
+
+**Funcionalidades de Persistência**:
+- ✅ **Auto-save**: Salva automaticamente ao alterar configurações
+- ✅ **Auto-load**: Carrega configurações salvas ao inicializar
+- ✅ **Export/Import**: Backup e restore de configurações
+- ✅ **Storage Info**: Monitoramento de uso do localStorage
+
+**Interface**:
+```typescript
+const {
+  // ... outras funções
+  saveConfig,
+  loadConfig,
+  saveAllConfigs,
+  loadAllConfigs,
+  exportConfigs,
+  importConfigs,
+  clearAllConfigs,
+  getStorageInfo
+} = useIndicatorManager({
+  bars: barsData,
+  timeframe: currentTimeframe,
+  initialConfigs: {
+    rsi: { enabled: true, period: 14, color: '#8b5cf6', lineWidth: 2 },
+  },
+});
+```
+
+### **Integração com Chart Component**
+
+**Auto-load no Mount**:
+```typescript
+useEffect(() => {
+  console.log('📦 PERSISTENCE - Loading saved configurations on mount');
+  const savedConfigs = loadAllConfigs();
+  if (savedConfigs.state && Object.keys(savedConfigs.state).length > 0) {
+    setIndicatorConfigs(savedConfigs.state);
+    setEnabledIndicators(
+      Object.entries(savedConfigs.state)
+        .filter(([_, config]) => config.enabled)
+        .map(([type, _]) => type as IndicatorType)
+    );
+  }
+}, []);
+```
+
+**Auto-save on Change**:
+```typescript
+const handleUpdateConfig = (type: IndicatorType, config: Partial<IndicatorConfig>) => {
+  const newConfig = { ...indicatorConfigs[type], ...config };
+  setIndicatorConfigs(prev => ({ ...prev, [type]: newConfig }));
+  
+  // Auto-save
+  saveConfig(type, newConfig);
+};
 ```
 
 ---
