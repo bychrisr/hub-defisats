@@ -23,6 +23,9 @@
 - ✅ **Cache System**: Funcionando com TTL adequado
 - ✅ **Dados Históricos**: 168 candles carregados
 - ✅ **Deduplicação**: Dados únicos processados
+- ✅ **Sistema de Indicadores**: RSI 100% funcional
+- ✅ **Persistência Local**: localStorage com TTL de 30 dias
+- ✅ **Auto-save/Load**: Configurações salvas/carregadas automaticamente
 
 ---
 
