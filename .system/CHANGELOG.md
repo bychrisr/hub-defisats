@@ -28,6 +28,9 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **User Preferences**: Sistema de preferências do usuário
 - ✅ **Cross-tab Sync**: Sincronização entre abas do navegador
 - ✅ **Data Migration**: Migração automática de dados antigos
+- ✅ **CRUD Plans Modal**: Modal de confirmação com AlertDialog
+- ✅ **UI/UX Improvements**: Remoção de confirm() nativo por modal adequado
+- ✅ **Admin Panel Plans**: Gerenciamento completo de planos
 
 #### 📊 **Estrutura de Dados**
 - ✅ **UserExchangeAccounts**: id, user_id, exchange_id, account_name, credentials, is_active, is_verified
