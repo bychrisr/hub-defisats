@@ -35,6 +35,7 @@ Testar a implementação do sistema de indicadores técnicos com panes dinâmico
 - ✅ Dados simulados para teste
 - ✅ Controles de validação
 - ✅ Instruções detalhadas
+- ✅ Controles de persistência (export/import/clear)
 
 ## 🧪 **Como Testar**
 
@@ -91,6 +92,24 @@ http://localhost:3000/indicator-test
    - Compare performance com dados estáticos
    - Verifique se indicadores são recalculados
 
+### **Passo 5: Teste de Persistência**
+1. **Testar Auto-save**
+   - Configure o RSI (período, cor, altura)
+   - Recarregue a página (F5)
+   - Verifique se as configurações foram mantidas
+
+2. **Testar Export/Import**
+   - Clique em "Exportar Configurações"
+   - Copie o JSON gerado
+   - Altere algumas configurações
+   - Cole o JSON em "Importar Configurações"
+   - Verifique se as configurações voltaram ao estado original
+
+3. **Testar Limpeza**
+   - Clique em "Limpar Todas as Configurações"
+   - Recarregue a página
+   - Verifique se as configurações voltaram ao padrão
+
 ## 🔍 **Validações Esperadas**
 
 ### **✅ Funcionalidades Básicas**
@@ -117,6 +136,13 @@ http://localhost:3000/indicator-test
 - [ ] Mudança de timeframe recalcula RSI
 - [ ] Dados da API funcionam se disponível
 - [ ] Não quebra funcionalidade existente
+
+### **✅ Persistência**
+- [ ] Configurações são salvas automaticamente
+- [ ] Configurações são carregadas ao inicializar
+- [ ] Export/import funciona corretamente
+- [ ] Limpeza remove todas as configurações
+- [ ] TTL de 30 dias funciona corretamente
 
 ## 🐛 **Troubleshooting**
 
