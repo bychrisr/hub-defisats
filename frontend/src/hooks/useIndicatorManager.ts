@@ -229,6 +229,17 @@ export const useIndicatorManager = ({
     const indicatorsChanged = enabledIndicators.length !== lastEnabledIndicatorsRef.current.length ||
       enabledIndicators.some((indicator, index) => indicator !== lastEnabledIndicatorsRef.current[index]);
 
+    // LOGS ESPECÍFICOS PARA DEBUG DOS CONTROLES
+    if (indicatorsChanged) {
+      console.log(`🔍 INDICATOR MANAGER DEBUG - enabledIndicators changed:`, {
+        current: enabledIndicators,
+        previous: lastEnabledIndicatorsRef.current,
+        lengthChanged: enabledIndicators.length !== lastEnabledIndicatorsRef.current.length,
+        contentChanged: enabledIndicators.some((indicator, index) => indicator !== lastEnabledIndicatorsRef.current[index]),
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // CORREÇÃO: Forçar atualização se EMA estiver habilitada mas não calculada
     const emaEnabled = enabledIndicators.includes('ema');
     const emaNotCalculated = !indicators.ema || !indicators.ema.valid;

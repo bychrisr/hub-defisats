@@ -888,10 +888,23 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
   // Handlers para indicadores
   const handleToggleIndicator = useCallback((type: IndicatorType, enabled: boolean) => {
     console.log(`🔄 INDICATOR TOGGLE - ${type}: ${enabled ? 'enabled' : 'disabled'}`);
+    console.log(`🔍 TOGGLE DEBUG - Estado atual:`, {
+      type,
+      enabled,
+      externalEnabledIndicators: !!externalEnabledIndicators,
+      currentEnabledIndicators: finalEnabledIndicators,
+      hasExternalIndicators: !!externalIndicators,
+      timestamp: new Date().toISOString()
+    });
     
     // CORREÇÃO: Se indicadores externos estão sendo usados, não podemos alterar diretamente
     if (externalEnabledIndicators) {
       console.log('⚠️ INDICATOR TOGGLE - Indicadores externos em uso, toggle não disponível');
+      console.log('🔍 EXTERNAL INDICATORS DEBUG:', {
+        externalEnabledIndicators,
+        externalIndicators: !!externalIndicators,
+        externalIndicatorConfigs: !!externalIndicatorConfigs
+      });
       return;
     }
     

@@ -104,8 +104,15 @@ export default function IndicatorControls({
 
   const handleToggleIndicator = useCallback((type: IndicatorType) => {
     const currentEnabled = enabledIndicators.includes(type);
+    console.log(`🔘 TOGGLE CONTROL - ${type}:`, {
+      currentEnabled,
+      newState: !currentEnabled,
+      enabledIndicators,
+      configs: configs[type],
+      timestamp: new Date().toISOString()
+    });
     onToggleIndicator(type, !currentEnabled);
-  }, [enabledIndicators, onToggleIndicator]);
+  }, [enabledIndicators, onToggleIndicator, configs]);
 
   const handlePeriodChange = useCallback((type: IndicatorType, period: number) => {
     onUpdateConfig(type, { period });
