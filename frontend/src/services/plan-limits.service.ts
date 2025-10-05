@@ -61,7 +61,7 @@ export class PlanLimitsService {
    */
   async createPlanLimits(data: CreatePlanLimitsRequest): Promise<PlanLimits> {
     try {
-      const response = await api.post('/plan-limits', data);
+      const response = await api.post('/api/plan-limits', data);
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Created plan limits:', response.data.data);
@@ -80,7 +80,7 @@ export class PlanLimitsService {
    */
   async updatePlanLimits(data: UpdatePlanLimitsRequest): Promise<PlanLimits> {
     try {
-      const response = await api.put(`/plan-limits/${data.id}`, data);
+      const response = await api.put(`/api/plan-limits/${data.id}`, data);
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Updated plan limits:', response.data.data);
@@ -99,7 +99,7 @@ export class PlanLimitsService {
    */
   async getPlanLimits(planId: string): Promise<PlanLimits | null> {
     try {
-      const response = await api.get(`/plan-limits/plan/${planId}`);
+      const response = await api.get(`/api/plan-limits/plan/${planId}`);
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Retrieved plan limits:', response.data.data);
@@ -122,7 +122,7 @@ export class PlanLimitsService {
    */
   async getAllPlanLimits(): Promise<PlanLimits[]> {
     try {
-      const response = await api.get('/plan-limits');
+      const response = await api.get('/api/plan-limits');
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Retrieved all plan limits:', response.data.count);
@@ -141,7 +141,7 @@ export class PlanLimitsService {
    */
   async getUserLimits(userId: string): Promise<PlanLimits | null> {
     try {
-      const response = await api.get(`/plan-limits/user/${userId}`);
+      const response = await api.get(`/api/plan-limits/user/${userId}`);
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Retrieved user limits:', response.data.data);
@@ -167,7 +167,7 @@ export class PlanLimitsService {
     limitType: 'EXCHANGE_ACCOUNTS' | 'AUTOMATIONS' | 'INDICATORS' | 'SIMULATIONS' | 'BACKTESTS'
   ): Promise<LimitValidationResult> {
     try {
-      const response = await api.get(`/plan-limits/validate/${userId}?limitType=${limitType}`);
+      const response = await api.get(`/api/plan-limits/validate/${userId}?limitType=${limitType}`);
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Validated limit:', response.data.data);
@@ -186,7 +186,7 @@ export class PlanLimitsService {
    */
   async deletePlanLimits(id: string): Promise<void> {
     try {
-      const response = await api.delete(`/plan-limits/${id}`);
+      const response = await api.delete(`/api/plan-limits/${id}`);
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Deleted plan limits:', id);
@@ -204,7 +204,7 @@ export class PlanLimitsService {
    */
   async getUsageStatistics(): Promise<UsageStatistics> {
     try {
-      const response = await api.get('/plan-limits/statistics');
+      const response = await api.get('/api/plan-limits/statistics');
       
       if (response.data.success) {
         console.log('✅ PlanLimitsService - Retrieved usage statistics:', response.data.data);
