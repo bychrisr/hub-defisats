@@ -104,7 +104,7 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
   // Estados
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [chartReady, setChartReady] = useState(false);
-  const [showControls, setShowControls] = useState(false);
+  const [showControls, setShowControls] = useState(true); // CORREÇÃO: Mostrar controles por padrão
 
   // Estados para indicadores
   const [enabledIndicators, setEnabledIndicators] = useState<IndicatorType[]>([]);
