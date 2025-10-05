@@ -1,0 +1,128 @@
+/* src/styles/chart.css */
+
+/* Lightweight Charts custom styles */
+.trading-chart {
+  @apply w-full bg-gray-900 rounded-lg overflow-hidden;
+}
+
+.trading-chart .chart-container {
+  @apply relative;
+}
+
+.trading-chart .chart-main {
+  @apply border border-gray-700 rounded;
+}
+
+.trading-chart .chart-volume {
+  @apply border border-gray-700 rounded mt-1;
+}
+
+.trading-chart .chart-indicators {
+  @apply space-y-1;
+}
+
+.trading-chart .chart-indicators > div {
+  @apply border border-gray-700 rounded;
+}
+
+/* Indicator controls styling */
+.indicator-controls {
+  @apply flex flex-wrap gap-3 items-center p-3 bg-gray-800 rounded-lg mb-4;
+}
+
+.indicator-controls label {
+  @apply flex items-center gap-2 text-sm text-white cursor-pointer hover:text-blue-300 transition-colors;
+}
+
+.indicator-controls input[type="checkbox"] {
+  @apply w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2;
+}
+
+/* Loading states */
+.chart-loading {
+  @apply absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-lg;
+}
+
+.chart-loading .spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500;
+}
+
+/* Error states */
+.chart-error {
+  @apply flex items-center justify-center h-64 bg-red-900/20 border border-red-500 rounded-lg;
+}
+
+.chart-error .error-content {
+  @apply text-center text-red-400;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .indicator-controls {
+    @apply flex-col items-start gap-2;
+  }
+  
+  .indicator-controls label {
+    @apply text-xs;
+  }
+}
+
+/* Chart-specific overrides for Lightweight Charts */
+.trading-chart .tv-lightweight-charts {
+  @apply w-full;
+}
+
+/* Custom scrollbar for chart containers */
+.chart-container::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.chart-container::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.chart-container::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded;
+}
+
+.chart-container::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Animation for chart updates */
+@keyframes chart-update {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.chart-updating {
+  animation: chart-update 0.5s ease-in-out;
+}
+
+/* Focus states for accessibility */
+.indicator-controls input[type="checkbox"]:focus {
+  @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-800;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .trading-chart {
+    @apply border-2 border-white;
+  }
+  
+  .indicator-controls {
+    @apply border border-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .chart-updating {
+    animation: none;
+  }
+  
+  .spinner {
+    @apply animate-none;
+  }
+}
