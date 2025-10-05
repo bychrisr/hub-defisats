@@ -52,6 +52,7 @@ import userPreferencesRoutes from './routes/userPreferences.routes';
 import userPreferencesTestRoutes from './routes/userPreferencesTest.routes';
 import tradingViewRoutes from './routes/tradingview.routes';
 import { exchangeCredentialsRoutes } from './routes/exchangeCredentials.routes';
+import { planLimitsRoutes } from './routes/plan-limits.routes';
 import { versionRoutes } from './routes/version.routes';
 import { docsRoutes } from './routes/docs.routes';
 import { routeRedirectsRoutes } from './routes/route-redirects.routes';
@@ -567,6 +568,7 @@ async function registerRoutes() {
 
   // Exchange Credentials routes
   await fastify.register(exchangeCredentialsRoutes, { prefix: '/api' });
+  await fastify.register(planLimitsRoutes, { prefix: '/api' });
   console.log('✅ Exchange Credentials routes registered');
 
   // LN Markets Dashboard Optimized (ÚNICO ENDPOINT OTIMIZADO)

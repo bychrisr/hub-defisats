@@ -636,14 +636,14 @@ export default function Profile() {
 
     if (isLoadingExchanges) {
       return (
-        <div className="space-y-6">
+    <div className="space-y-6">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
               <span className="text-muted-foreground">Loading exchanges...</span>
+              </div>
+              </div>
             </div>
-          </div>
-        </div>
       );
     }
 
@@ -654,9 +654,9 @@ export default function Profile() {
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               Failed to load exchanges: {exchangesError}
-            </AlertDescription>
-          </Alert>
-        </div>
+              </AlertDescription>
+            </Alert>
+                </div>
       );
     }
 
@@ -668,7 +668,7 @@ export default function Profile() {
           <p className="text-muted-foreground mt-2">
             Configure your API credentials for automated trading across multiple exchanges
           </p>
-        </div>
+                  </div>
 
         {/* Available Exchanges */}
         {exchanges.map((exchange) => {
@@ -698,20 +698,20 @@ export default function Profile() {
         {exchanges.length === 0 && (
           <Card className="border-gray-200 dark:border-gray-700">
             <CardContent className="text-center py-12">
-              <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <Key className="h-8 w-8 text-gray-400" />
-              </div>
+            </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                 No Exchanges Available
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 No exchanges are currently configured in the system.
               </p>
-            </CardContent>
-          </Card>
+        </CardContent>
+      </Card>
         )}
-      </div>
-    );
+    </div>
+  );
   };
 
   const renderNotificationsSection = () => (
