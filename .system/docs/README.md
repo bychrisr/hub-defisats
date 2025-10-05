@@ -15,6 +15,13 @@ Esta documentação técnica fornece informações detalhadas sobre o desenvolvi
 - **[CHANGELOG.md](../CHANGELOG.md)** - Histórico de alterações
 - **[OWNER_TASKS.md](../OWNER_TASKS.md)** - Pendências externas
 
+### 🏗️ **Sistema Multi-Account (v2.5.0)**
+- **[MULTI-ACCOUNT-SYSTEM-INDEX.md](MULTI-ACCOUNT-SYSTEM-INDEX.md)** - Índice completo do sistema multi-account
+- **[multi-account-system.md](architecture/multi-account-system.md)** - Arquitetura do sistema multi-account
+- **[unified-persistence-system.md](architecture/unified-persistence-system.md)** - Sistema de persistência unificado
+- **[automation-multi-account-integration.md](features/automation-multi-account-integration.md)** - Integração de automações
+- **[plan-limits-system.md](features/plan-limits-system.md)** - Sistema de limites por plano
+
 ### 🔧 **Desenvolvimento**
 - **[environment-config.md](development/environment-config.md)** - Configuração de ambiente
 - **[github-setup.md](development/github-setup.md)** - Configuração do GitHub

@@ -4,11 +4,12 @@
 
 Documentação da arquitetura implementada para suportar múltiplas exchanges no Hub-defisats. A arquitetura foi completamente implementada e está funcionando em produção.
 
-## Status: ✅ IMPLEMENTADO (v2.4.0)
+## Status: ✅ IMPLEMENTADO (v2.5.0)
 
 **Data de Implementação**: 2025-01-09  
-**Status**: 100% Funcional  
-**Exchanges Suportadas**: LN Markets (com suporte para futuras expansões)
+**Status**: 100% Funcional + Sistema Multi-Account  
+**Exchanges Suportadas**: LN Markets (com suporte para futuras expansões)  
+**Multi-Account**: ✅ Implementado - Múltiplas contas por usuário
 
 ## Situação Atual
 
