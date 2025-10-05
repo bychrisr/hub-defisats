@@ -11,6 +11,10 @@ import {
   indicatorPersistenceService, 
   PersistedIndicatorConfig 
 } from '@/services/indicatorPersistence.service';
+import { 
+  userPreferencesService, 
+  UserIndicatorPreferences 
+} from '@/services/userPreferences.service';
 
 export interface UseIndicatorManagerProps {
   bars: LwcBar[];
@@ -53,6 +57,14 @@ export interface UseIndicatorManagerReturn {
     total: number;
     percentage: number;
   };
+  // Backend sync
+  syncWithBackend: () => Promise<boolean>;
+  saveToBackend: () => Promise<boolean>;
+  loadFromBackend: () => Promise<boolean>;
+  clearFromBackend: () => Promise<boolean>;
+  exportFromBackend: () => Promise<string | null>;
+  importToBackend: (jsonData: string) => Promise<boolean>;
+  getBackendStats: () => Promise<any>;
 }
 
 export const useIndicatorManager = ({
@@ -277,6 +289,127 @@ export const useIndicatorManager = ({
     return indicatorPersistenceService.getStorageInfo();
   }, []);
 
+  // Backend sync functions
+  const syncWithBackend = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log('🔄 BACKEND SYNC - Syncing with backend');
+      const deviceId = userPreferencesService.generateDeviceId();
+      const preferences = await userPreferencesService.syncPreferences(deviceId);
+      
+      if (preferences) {
+        console.log('✅ BACKEND SYNC - Preferences synced from backend:', preferences);
+        return true;
+      }
+      
+      console.log('📦 BACKEND SYNC - No preferences to sync from backend');
+      return false;
+    } catch (error) {
+      console.error('❌ BACKEND SYNC - Error syncing with backend:', error);
+      return false;
+    }
+  }, []);
+
+  const saveToBackend = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log('💾 BACKEND SYNC - Saving to backend');
+      const localConfigs = loadAllConfigs();
+      const success = await userPreferencesService.saveIndicatorPreferences(localConfigs);
+      
+      if (success) {
+        console.log('✅ BACKEND SYNC - Preferences saved to backend successfully');
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('❌ BACKEND SYNC - Error saving to backend:', error);
+      return false;
+    }
+  }, [loadAllConfigs]);
+
+  const loadFromBackend = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log('📦 BACKEND SYNC - Loading from backend');
+      const preferences = await userPreferencesService.loadIndicatorPreferences();
+      
+      if (preferences) {
+        console.log('✅ BACKEND SYNC - Preferences loaded from backend:', preferences);
+        // Aplicar configurações carregadas
+        saveAllConfigs(preferences.indicatorConfigs);
+        return true;
+      }
+      
+      console.log('📦 BACKEND SYNC - No preferences found in backend');
+      return false;
+    } catch (error) {
+      console.error('❌ BACKEND SYNC - Error loading from backend:', error);
+      return false;
+    }
+  }, [saveAllConfigs]);
+
+  const clearFromBackend = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log('🗑️ BACKEND SYNC - Clearing from backend');
+      const success = await userPreferencesService.clearIndicatorPreferences();
+      
+      if (success) {
+        console.log('✅ BACKEND SYNC - Preferences cleared from backend successfully');
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('❌ BACKEND SYNC - Error clearing from backend:', error);
+      return false;
+    }
+  }, []);
+
+  const exportFromBackend = useCallback(async (): Promise<string | null> => {
+    try {
+      console.log('📤 BACKEND SYNC - Exporting from backend');
+      const jsonData = await userPreferencesService.exportPreferences();
+      
+      if (jsonData) {
+        console.log('✅ BACKEND SYNC - Preferences exported from backend successfully');
+      }
+      
+      return jsonData;
+    } catch (error) {
+      console.error('❌ BACKEND SYNC - Error exporting from backend:', error);
+      return null;
+    }
+  }, []);
+
+  const importToBackend = useCallback(async (jsonData: string): Promise<boolean> => {
+    try {
+      console.log('📥 BACKEND SYNC - Importing to backend');
+      const success = await userPreferencesService.importPreferences(jsonData);
+      
+      if (success) {
+        console.log('✅ BACKEND SYNC - Preferences imported to backend successfully');
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('❌ BACKEND SYNC - Error importing to backend:', error);
+      return false;
+    }
+  }, []);
+
+  const getBackendStats = useCallback(async () => {
+    try {
+      console.log('📊 BACKEND SYNC - Getting backend stats');
+      const stats = await userPreferencesService.getPreferencesStats();
+      
+      if (stats) {
+        console.log('✅ BACKEND SYNC - Backend stats retrieved:', stats);
+      }
+      
+      return stats;
+    } catch (error) {
+      console.error('❌ BACKEND SYNC - Error getting backend stats:', error);
+      return null;
+    }
+  }, []);
+
   return {
     indicators,
     isLoading,
@@ -295,6 +428,14 @@ export const useIndicatorManager = ({
     exportConfigs,
     importConfigs,
     clearAllConfigs,
-    getStorageInfo
+    getStorageInfo,
+    // Backend sync
+    syncWithBackend,
+    saveToBackend,
+    loadFromBackend,
+    clearFromBackend,
+    exportFromBackend,
+    importToBackend,
+    getBackendStats
   };
 };

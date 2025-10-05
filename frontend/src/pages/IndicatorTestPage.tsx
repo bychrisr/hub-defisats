@@ -64,6 +64,18 @@ const IndicatorTestPage: React.FC = () => {
     percentage: 0
   });
 
+  const [backendInfo, setBackendInfo] = useState<{
+    connected: boolean;
+    lastSync: Date | null;
+    totalConfigs: number;
+    version: string | null;
+  }>({
+    connected: false,
+    lastSync: null,
+    totalConfigs: 0,
+    version: null
+  });
+
   // Gerar dados de teste
   const generateData = async () => {
     setIsGenerating(true);
@@ -138,6 +150,108 @@ const IndicatorTestPage: React.FC = () => {
   // Limpar configurações
   const clearConfigs = () => {
     console.log('🧹 PERSISTENCE - Limpando configurações...');
+  };
+
+  // Testar backend
+  const testBackendConnection = async () => {
+    try {
+      console.log('🔄 BACKEND TEST - Testing backend connection');
+      const success = await syncWithBackend();
+      setBackendInfo(prev => ({ ...prev, connected: success }));
+      console.log('✅ BACKEND TEST - Backend connection test completed:', success);
+    } catch (error) {
+      console.error('❌ BACKEND TEST - Backend connection test failed:', error);
+      setBackendInfo(prev => ({ ...prev, connected: false }));
+    }
+  };
+
+  const saveToBackend = async () => {
+    try {
+      console.log('💾 BACKEND TEST - Saving to backend');
+      const success = await saveToBackend();
+      if (success) {
+        setBackendInfo(prev => ({ ...prev, lastSync: new Date() }));
+        console.log('✅ BACKEND TEST - Successfully saved to backend');
+      }
+    } catch (error) {
+      console.error('❌ BACKEND TEST - Failed to save to backend:', error);
+    }
+  };
+
+  const loadFromBackend = async () => {
+    try {
+      console.log('📦 BACKEND TEST - Loading from backend');
+      const success = await loadFromBackend();
+      if (success) {
+        setBackendInfo(prev => ({ ...prev, lastSync: new Date() }));
+        console.log('✅ BACKEND TEST - Successfully loaded from backend');
+        // Recarregar página para aplicar configurações
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('❌ BACKEND TEST - Failed to load from backend:', error);
+    }
+  };
+
+  const clearFromBackend = async () => {
+    try {
+      console.log('🗑️ BACKEND TEST - Clearing from backend');
+      const success = await clearFromBackend();
+      if (success) {
+        setBackendInfo(prev => ({ ...prev, lastSync: new Date(), totalConfigs: 0 }));
+        console.log('✅ BACKEND TEST - Successfully cleared from backend');
+        // Recarregar página
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('❌ BACKEND TEST - Failed to clear from backend:', error);
+    }
+  };
+
+  const exportFromBackend = async () => {
+    try {
+      console.log('📤 BACKEND TEST - Exporting from backend');
+      const jsonData = await exportFromBackend();
+      if (jsonData) {
+        navigator.clipboard.writeText(jsonData);
+        console.log('✅ BACKEND TEST - Successfully exported from backend');
+      }
+    } catch (error) {
+      console.error('❌ BACKEND TEST - Failed to export from backend:', error);
+    }
+  };
+
+  const importToBackend = async (jsonData: string) => {
+    try {
+      console.log('📥 BACKEND TEST - Importing to backend');
+      const success = await importToBackend(jsonData);
+      if (success) {
+        setBackendInfo(prev => ({ ...prev, lastSync: new Date() }));
+        console.log('✅ BACKEND TEST - Successfully imported to backend');
+        // Recarregar página
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('❌ BACKEND TEST - Failed to import to backend:', error);
+    }
+  };
+
+  const getBackendStats = async () => {
+    try {
+      console.log('📊 BACKEND TEST - Getting backend stats');
+      const stats = await getBackendStats();
+      if (stats) {
+        setBackendInfo(prev => ({
+          ...prev,
+          totalConfigs: stats.totalConfigs,
+          version: stats.version,
+          lastSync: stats.lastUpdated ? new Date(stats.lastUpdated) : null
+        }));
+        console.log('✅ BACKEND TEST - Backend stats retrieved:', stats);
+      }
+    } catch (error) {
+      console.error('❌ BACKEND TEST - Failed to get backend stats:', error);
+    }
   };
 
   return (
@@ -328,6 +442,120 @@ const IndicatorTestPage: React.FC = () => {
               {persistenceInfo.percentage > 80 ? 'High Usage' : 'Normal Usage'}
             </Badge>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Controles de Backend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-6 w-6" />
+            Sincronização com Backend
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Status do Backend */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {backendInfo.connected ? '✅' : '❌'}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Backend Connected
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {backendInfo.totalConfigs}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Total Configs
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {backendInfo.version || 'N/A'}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Version
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {backendInfo.lastSync ? '🕐' : '⏰'}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Last Sync
+              </div>
+            </div>
+          </div>
+
+          {/* Controles de Backend */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={testBackendConnection}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Test Connection
+            </Button>
+            
+            <Button
+              onClick={saveToBackend}
+              variant="default"
+              size="sm"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Save to Backend
+            </Button>
+            
+            <Button
+              onClick={loadFromBackend}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Load from Backend
+            </Button>
+            
+            <Button
+              onClick={clearFromBackend}
+              variant="destructive"
+              size="sm"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Clear Backend
+            </Button>
+            
+            <Button
+              onClick={exportFromBackend}
+              variant="outline"
+              size="sm"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Export Backend
+            </Button>
+            
+            <Button
+              onClick={getBackendStats}
+              variant="outline"
+              size="sm"
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Get Stats
+            </Button>
+          </div>
+
+          {/* Status do Backend */}
+          {backendInfo.lastSync && (
+            <div className="text-sm text-muted-foreground">
+              Last sync: {backendInfo.lastSync.toLocaleString()}
+            </div>
+          )}
         </CardContent>
       </Card>
 
