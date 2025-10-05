@@ -12,6 +12,7 @@ alwaysApply: true
 - [ ] Documentação em `.system/` sempre sincronizada.
 - [ ] Pendências externas registradas em `.system/OWNER_TASKS.md`.
 - [ ] Tags SemVer aplicadas em milestones internos e releases (se aplicável).
+- [ ] **Logging adequado** para debugging avançado implementado (veja `.cursor/rules/codestyle.mdc`).
 - [ ] **NUNCA PARE ATÉ TERMINAR O `.system/ROADMAP.md`.**
 - [ ] **AUTO-RECUPERAÇÃO SE TRAVAR.**
 - [ ] **NÃO PEÇA CONFIRMAÇÃO — CONTINUE AUTOMATICAMENTE.**
