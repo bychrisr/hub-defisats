@@ -82,10 +82,10 @@ export const Plans = () => {
   const getPlanStats = () => {
     const totalPlans = plans.length;
     const activePlans = plans.filter(plan => plan.is_active).length;
-    const totalUsers = plans.reduce((sum, plan) => sum + plan.users, 0);
+    const totalUsers = plans.reduce((sum, plan) => sum + (plan.users || 0), 0);
     const totalRevenue = plans.reduce((sum, plan) => {
       // Calcular receita baseada no preço mensal (em sats)
-      const monthlyRevenue = (plan.price_monthly || 0) * plan.users;
+      const monthlyRevenue = (plan.price_monthly || 0) * (plan.users || 0);
       return sum + monthlyRevenue;
     }, 0);
 
@@ -129,8 +129,8 @@ export const Plans = () => {
   };
 
   const filteredPlans = plans.filter(plan => {
-    const matchesSearch = plan.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-                         plan.description.toLowerCase().includes(filters.search.toLowerCase());
+    const matchesSearch = (plan.name?.toLowerCase() || '').includes(filters.search.toLowerCase()) ||
+                         (plan.description?.toLowerCase() || '').includes(filters.search.toLowerCase());
     const matchesStatus = filters.status === 'all' || 
                          (filters.status === 'active' && plan.is_active) ||
                          (filters.status === 'inactive' && !plan.is_active);
@@ -370,8 +370,8 @@ export const Plans = () => {
                               {getPlanIcon(plan.id)}
                             </div>
                             <div>
-                              <div className="font-medium text-text-primary">{plan.name}</div>
-                              <div className="text-sm text-text-secondary">{plan.description}</div>
+                              <div className="font-medium text-text-primary">{plan.name || 'Sem nome'}</div>
+                              <div className="text-sm text-text-secondary">{plan.description || 'Sem descrição'}</div>
                             </div>
                           </div>
                         </TableCell>
@@ -380,12 +380,12 @@ export const Plans = () => {
                             <div className="text-sm text-text-primary font-medium">
                               {formatPlanPrice(plan)}
                             </div>
-                            {plan.price_monthly > 0 && plan.price_yearly > 0 && (
+                            {plan.price_monthly && plan.price_monthly > 0 && plan.price_yearly && plan.price_yearly > 0 && (
                               <div className="text-xs text-text-secondary">
                                 {plan.price_yearly.toLocaleString()} sats/year
                               </div>
                             )}
-                            {plan.price_lifetime > 0 && (
+                            {plan.price_lifetime && plan.price_lifetime > 0 && (
                               <div className="text-xs text-text-secondary">
                                 One-time payment
                               </div>
@@ -394,7 +394,7 @@ export const Plans = () => {
                         </TableCell>
                         <TableCell>
                           <div className="text-sm text-text-primary">
-                            {plan.users.toLocaleString()} usuários
+                            {(plan.users || 0).toLocaleString()} usuários
                           </div>
                         </TableCell>
                         <TableCell>
