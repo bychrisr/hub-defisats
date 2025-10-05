@@ -47,11 +47,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { PLANS_CONFIG, Plan, getActivePlans, formatPlanPrice } from '@/constants/plans';
+import { plansService, Plan, PlanWithUsers } from '@/services/plans.service';
 
-interface PlanWithUsers extends Plan {
-  users: number;
-}
 
 export const Plans = () => {
   const [plans, setPlans] = useState<PlanWithUsers[]>([]);
@@ -69,35 +66,18 @@ export const Plans = () => {
   const fetchPlans = async () => {
     setRefreshing(true);
     try {
-      // Usar os planos das constantes e adicionar dados de usuários mockados
-      const activePlans = getActivePlans();
-      const plansWithUsers: PlanWithUsers[] = activePlans.map(plan => ({
-        ...plan,
-        users: getMockUserCount(plan.id),
-      }));
-
-      setTimeout(() => {
-        setPlans(plansWithUsers);
-        setLoading(false);
-        setRefreshing(false);
-      }, 1000);
+      const plansWithUsers = await plansService.getPlansWithUsers();
+      setPlans(plansWithUsers);
+      setLoading(false);
+      setRefreshing(false);
     } catch (error) {
       console.error('Error fetching plans:', error);
+      toast.error('Failed to fetch plans');
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const getMockUserCount = (planId: string): number => {
-    const userCounts: Record<string, number> = {
-      'free': 1250,
-      'basic': 320,
-      'advanced': 180,
-      'pro': 85,
-      'lifetime': 45,
-    };
-    return userCounts[planId] || 0;
-  };
 
   const getPlanStats = () => {
     const totalPlans = plans.length;
