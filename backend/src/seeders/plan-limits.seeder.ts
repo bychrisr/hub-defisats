@@ -79,7 +79,7 @@ export const planLimitsSeeder: Seeder = {
         return {
           success: true,
           message: `Plan limits already exist (${existingLimits} records). Skipping seeding.`,
-          created: 0,
+          count: 0,
           errors: []
         };
       }
@@ -129,7 +129,7 @@ export const planLimitsSeeder: Seeder = {
       return {
         success: true,
         message: `Created ${createdLimits.length} plan limits`,
-        created: createdLimits.length,
+        count: createdLimits.length,
         errors
       };
 
@@ -138,7 +138,7 @@ export const planLimitsSeeder: Seeder = {
       return {
         success: false,
         message: `Failed to seed plan limits: ${error.message}`,
-        created: 0,
+        count: 0,
         errors: [error.message]
       };
     }

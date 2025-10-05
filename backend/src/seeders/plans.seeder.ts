@@ -155,7 +155,7 @@ export const plansSeeder: Seeder = {
         return {
           success: true,
           message: `Plans already exist (${existingPlans} records). Skipping seeding.`,
-          created: 0,
+          count: 0,
           errors: []
         };
       }
@@ -196,7 +196,7 @@ export const plansSeeder: Seeder = {
       return {
         success: true,
         message: `Created ${createdPlans.length} plans`,
-        created: createdPlans.length,
+        count: createdPlans.length,
         errors
       };
 
@@ -205,7 +205,7 @@ export const plansSeeder: Seeder = {
       return {
         success: false,
         message: `Failed to seed plans: ${error.message}`,
-        created: 0,
+        count: 0,
         errors: [error.message]
       };
     }
