@@ -81,6 +81,7 @@ import RateLimiting from '@/pages/admin/RateLimiting';
 import LoadTest from '@/pages/admin/LoadTest';
 import TestAuth from '@/pages/TestAuth';
 import TestRedirect from '@/pages/TestRedirect';
+import IndicatorTestPage from '@/pages/IndicatorTestPage';
 
 const queryClient = new QueryClient();
 
@@ -456,6 +457,16 @@ const App = () => {
                 <ProtectedRoute>
                   <ResponsiveLayout>
                     <TestRedirect />
+                  </ResponsiveLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/indicator-test"
+              element={
+                <ProtectedRoute>
+                  <ResponsiveLayout>
+                    <IndicatorTestPage />
                   </ResponsiveLayout>
                 </ProtectedRoute>
               }
