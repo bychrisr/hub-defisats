@@ -804,12 +804,40 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     console.log('🔄 INDICATOR DATA - indicators changed:', {
       rsi: indicators.rsi ? 'has data' : 'no data',
       rsiValid: indicators.rsi?.valid,
+      rsiDataLength: indicators.rsi?.data?.length || 0,
       ema: indicators.ema ? 'has data' : 'no data',
-      emaValid: indicators.ema?.valid
+      emaValid: indicators.ema?.valid,
+      emaDataLength: indicators.ema?.data?.length || 0,
+      emaEnabled: enabledIndicators.includes('ema')
     });
+    
+    console.log('🔄 INDICATOR DATA - Calling updateRSIPane...');
     updateRSIPane();
+    
+    console.log('🔄 INDICATOR DATA - Calling updateEMAPane...');
     updateEMAPane();
-  }, [indicators.rsi, indicators.ema, updateRSIPane, updateEMAPane]);
+  }, [indicators.rsi, indicators.ema, updateRSIPane, updateEMAPane, enabledIndicators]);
+
+  // CORREÇÃO: Forçar atualização da EMA quando habilitada
+  useEffect(() => {
+    const emaEnabled = enabledIndicators.includes('ema');
+    const emaHasData = indicators.ema && indicators.ema.valid && indicators.ema.data;
+    
+    if (emaEnabled && emaHasData) {
+      console.log('🔄 EMA FORCE UPDATE - EMA habilitada e com dados, forçando atualização do pane');
+      
+      // Forçar atualização imediata
+      updateEMAPane();
+      
+      // Forçar atualização com delay para garantir que funcione
+      const timeoutId = setTimeout(() => {
+        console.log('🔄 EMA FORCE UPDATE DELAY - Forçando atualização da EMA com delay');
+        updateEMAPane();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [enabledIndicators, indicators.ema, updateEMAPane]);
 
   // Carregar configurações salvas na inicialização
   useEffect(() => {
