@@ -12,19 +12,25 @@ export async function plansRoutes(fastify: FastifyInstance) {
   });
 
   // Criar novo plano
-  fastify.post('/plans-public', async (request, reply) => {
+  fastify.post('/plans-public', {
+    preHandler: [adminAuthMiddleware]
+  }, async (request, reply) => {
     console.log('🚀 CREATE PLAN ROUTE CALLED!');
     return plansController.createPlan(request, reply);
   });
 
   // Atualizar plano
-  fastify.put('/plans-public/:id', async (request, reply) => {
+  fastify.put('/plans-public/:id', {
+    preHandler: [adminAuthMiddleware]
+  }, async (request, reply) => {
     console.log('🚀 UPDATE PLAN ROUTE CALLED!');
     return plansController.updatePlan(request, reply);
   });
 
   // Deletar plano
-  fastify.delete('/plans-public/:id', async (request, reply) => {
+  fastify.delete('/plans-public/:id', {
+    preHandler: [adminAuthMiddleware]
+  }, async (request, reply) => {
     console.log('🚀 DELETE PLAN ROUTE CALLED!');
     return plansController.deletePlan(request, reply);
   });

@@ -6,14 +6,15 @@ export class PlansController {
    * Listar todos os planos
    */
   async getAllPlans(request: FastifyRequest, reply: FastifyReply) {
+    console.log('🚀 PLANS CONTROLLER CALLED!');
     try {
       const prisma = await getPrisma();
       
-      const plans = await prisma.plan.findMany({
-        orderBy: { order: 'asc' }
-      });
+      console.log('🔍 PlansController - Fetching plans from database...');
+      const plans = await prisma.plan.findMany();
 
       console.log('✅ PlansController - Retrieved all plans:', plans.length);
+      console.log('🔍 PlansController - First plan:', plans[0]);
       
       return reply.send({
         success: true,
@@ -127,7 +128,7 @@ export class PlansController {
           has_advanced: planData.has_advanced || false,
           has_priority: planData.has_priority || false,
           max_notifications: planData.max_notifications || 0,
-          order: planData.order || 0
+          sort_order: planData.sort_order || 0
         }
       });
 
