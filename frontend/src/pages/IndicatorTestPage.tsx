@@ -649,6 +649,10 @@ const IndicatorTestPage: React.FC = () => {
               { price: 52000, label: 'Take Profit 1', color: '#10b981' },
               { price: 53000, label: 'Take Profit 2', color: '#10b981' }
             ]}
+            // CORREÇÃO: Passar indicadores calculados para o gráfico
+            indicators={indicators}
+            enabledIndicators={enabledIndicators}
+            indicatorConfigs={indicatorConfigs}
           />
         </CardContent>
       </Card>

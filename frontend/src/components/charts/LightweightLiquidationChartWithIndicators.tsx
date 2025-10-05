@@ -61,6 +61,10 @@ interface LightweightLiquidationChartWithIndicatorsProps {
   useApiData?: boolean;
   timeframe?: string;
   showIndicatorControls?: boolean;
+  // CORREÇÃO: Adicionar props para indicadores
+  indicators?: any;
+  enabledIndicators?: string[];
+  indicatorConfigs?: any;
 }
 
 const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidationChartWithIndicatorsProps> = React.memo(({
@@ -78,7 +82,11 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
   logoUrl,
   useApiData = false,
   timeframe = '1h',
-  showIndicatorControls = true
+  showIndicatorControls = true,
+  // CORREÇÃO: Adicionar props para indicadores
+  indicators: externalIndicators,
+  enabledIndicators: externalEnabledIndicators,
+  indicatorConfigs: externalIndicatorConfigs
 }) => {
   // Referências
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -140,7 +148,7 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
 
   // Hook para gerenciar indicadores
   const {
-    indicators,
+    indicators: internalIndicators,
     isLoading: indicatorsLoading,
     error: indicatorsError,
     lastUpdate,
@@ -160,11 +168,16 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     getStorageInfo
   } = useIndicatorManager({
     bars: barsData,
-    enabledIndicators,
-    configs: indicatorConfigs,
+    enabledIndicators: externalEnabledIndicators || ['rsi'],
+    configs: externalIndicatorConfigs || { rsi: { enabled: true, period: 14, color: '#8b5cf6', lineWidth: 2 } },
     autoUpdate: true,
     updateInterval: 5000
   });
+
+  // CORREÇÃO: Usar indicadores externos quando disponíveis
+  const indicators = externalIndicators || internalIndicators;
+  const enabledIndicators = externalEnabledIndicators || ['rsi'];
+  const indicatorConfigs = externalIndicatorConfigs || { rsi: { enabled: true, period: 14, color: '#8b5cf6', lineWidth: 2 } };
 
   // Dados efetivos para o gráfico
   const effectiveCandleData = useMemo(() => {
