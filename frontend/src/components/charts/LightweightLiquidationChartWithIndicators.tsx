@@ -380,8 +380,8 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
         rsiPaneRef.current = chartRef.current.addPane();
         // CORREÇÃO: setHeight() não existe na API v5.0.9
         // Usar setStretchFactor() para controlar altura do pane
-        rsiPaneRef.current.setStretchFactor(0.3); // 30% da altura total
-        console.log('✅ RSI PANE - Pane RSI criado com stretchFactor: 0.3');
+        rsiPaneRef.current.setStretchFactor(0.2); // 20% da altura total (reduzido para dar espaço à EMA)
+        console.log('✅ RSI PANE - Pane RSI criado com stretchFactor: 0.2');
       } catch (error) {
         console.error('❌ RSI PANE - Erro ao criar pane RSI:', error);
         return;
@@ -480,10 +480,29 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     // Criar novo pane se não existir
     if (!emaPaneRef.current) {
       try {
+        console.log('🔍 [DEBUG EMA] Criando novo pane EMA...', {
+          chartExists: !!chartRef.current,
+          existingPanes: chartRef.current?.panes?.()?.length || 0,
+          rsiPaneExists: !!rsiPaneRef.current
+        });
+        
         emaPaneRef.current = chartRef.current.addPane();
+        
+        console.log('🔍 [DEBUG EMA] Pane EMA criado:', {
+          pane: emaPaneRef.current,
+          paneIndex: emaPaneRef.current?.paneIndex?.(),
+          totalPanes: chartRef.current?.panes?.()?.length || 0
+        });
+        
         // Usar setStretchFactor() para controlar altura do pane
-        emaPaneRef.current.setStretchFactor(0.3); // 30% da altura total
-        console.log('✅ EMA PANE - Pane EMA criado com stretchFactor: 0.3');
+        emaPaneRef.current.setStretchFactor(0.2); // 20% da altura total (reduzido para coexistir com RSI)
+        
+        console.log('🔍 [DEBUG EMA] StretchFactor definido para EMA:', {
+          stretchFactor: 0.2,
+          rsiStretchFactor: rsiPaneRef.current?.getStretchFactor?.() || 'N/A'
+        });
+        
+        console.log('✅ EMA PANE - Pane EMA criado com stretchFactor: 0.2');
       } catch (error) {
         console.error('❌ EMA PANE - Erro ao criar pane EMA:', error);
         return;
@@ -493,15 +512,30 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     // Criar série EMA se não existir
     if (!emaSeriesRef.current && emaPaneRef.current) {
       try {
+        console.log('🔍 [DEBUG EMA] Tentando criar série da EMA...', {
+          paneExists: !!emaPaneRef.current,
+          seriesExists: !!emaSeriesRef.current,
+          config: indicatorConfigs.ema
+        });
+        
         emaSeriesRef.current = emaPaneRef.current.addSeries(LineSeries, {
-          color: indicatorConfigs.ema.color || '#f59e0b',
-          lineWidth: indicatorConfigs.ema.lineWidth || 2,
+          color: '#FF5733', // Cor laranja bem visível (forçada para debug)
+          lineWidth: 3, // Largura maior para visibilidade
+          lineType: 0, // LineType.Simple
+          priceScaleId: 'right', // Escala à direita
           priceFormat: { 
             type: 'price' as const, 
             precision: 2, 
             minMove: 0.01 
           }
         });
+        
+        console.log('🔍 [DEBUG EMA] Série da EMA criada:', {
+          series: emaSeriesRef.current,
+          pane: emaPaneRef.current,
+          config: indicatorConfigs.ema
+        });
+        
         console.log('✅ EMA SERIES - Série EMA criada no pane EMA');
       } catch (error) {
         console.error('❌ EMA SERIES - Erro ao criar série EMA:', error);
@@ -512,7 +546,22 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     // Atualizar dados da série EMA
     if (emaSeriesRef.current && emaData.data && Array.isArray(emaData.data)) {
       try {
+        console.log('🔍 [DEBUG EMA] Dados da EMA a serem definidos:', {
+          dataLength: emaData.data.length,
+          firstDataPoint: emaData.data[0],
+          lastDataPoint: emaData.data[emaData.data.length - 1],
+          dataType: typeof emaData.data[0],
+          seriesExists: !!emaSeriesRef.current
+        });
+        
         emaSeriesRef.current.setData(emaData.data as any);
+        
+        console.log('🔍 [DEBUG EMA] Dados definidos na série:', {
+          dataPoints: emaData.data.length,
+          color: indicatorConfigs.ema.color,
+          series: emaSeriesRef.current
+        });
+        
         console.log('✅ EMA DATA - Dados EMA aplicados:', {
           dataPoints: emaData.data.length,
           color: indicatorConfigs.ema.color
@@ -526,13 +575,25 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     if (emaSeriesRef.current) {
       try {
         emaSeriesRef.current.applyOptions({
-          color: indicatorConfigs.ema.color || '#f59e0b',
-          lineWidth: indicatorConfigs.ema.lineWidth || 2
+          color: '#FF5733', // Cor laranja bem visível (forçada para debug)
+          lineWidth: 3, // Largura maior para visibilidade
+          lineType: 0 // LineType.Simple
         });
         console.log('✅ EMA COLOR - Cor EMA atualizada:', indicatorConfigs.ema.color);
       } catch (error) {
         console.error('❌ EMA COLOR - Erro ao atualizar cor EMA:', error);
       }
+    }
+
+    // Forçar re-renderização do gráfico após criar/atualizar panes
+    try {
+      if (chartRef.current) {
+        console.log('🔍 [DEBUG EMA] Forçando re-renderização do gráfico...');
+        chartRef.current.timeScale().fitContent();
+        console.log('✅ EMA RENDER - Re-renderização forçada');
+      }
+    } catch (error) {
+      console.warn('⚠️ EMA RENDER - Erro ao forçar re-renderização:', error);
     }
   }, [enabledIndicators, indicators.ema, indicatorConfigs.ema, isChartReady, barsData]);
 
