@@ -436,9 +436,18 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     }
   }, [enabledIndicators, indicators.rsi, indicatorConfigs.rsi, isChartReady, barsData]);
 
-  // Gerenciar pane EMA
-  useEffect(() => {
-    if (!isChartReady || !chartRef.current) return;
+  // Função para criar/remover pane EMA
+  const updateEMAPane = useCallback(() => {
+    console.log('🚀 EMA PANE - updateEMAPane chamada!', {
+      chartExists: !!chartRef.current,
+      enabledIndicators,
+      indicatorsEma: indicators.ema ? 'exists' : 'null'
+    });
+    
+    if (!chartRef.current) {
+      console.log('❌ EMA PANE - Chart não está disponível');
+      return;
+    }
 
     const emaEnabled = enabledIndicators.includes('ema');
     const emaData = indicators.ema;
@@ -715,21 +724,31 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
     updateRSIPane();
   }, [updateRSIPane]);
 
+  // Atualizar pane EMA quando indicadores mudam
+  useEffect(() => {
+    updateEMAPane();
+  }, [updateEMAPane]);
+
   // Forçar atualização quando enabledIndicators mudar
   useEffect(() => {
     console.log('🔄 INDICATOR CHANGE - enabledIndicators changed:', enabledIndicators);
     console.log('🔄 INDICATOR CHANGE - Calling updateRSIPane...');
     updateRSIPane();
-  }, [enabledIndicators, updateRSIPane]);
+    console.log('🔄 INDICATOR CHANGE - Calling updateEMAPane...');
+    updateEMAPane();
+  }, [enabledIndicators, updateRSIPane, updateEMAPane]);
 
   // Forçar atualização quando indicators mudar
   useEffect(() => {
     console.log('🔄 INDICATOR DATA - indicators changed:', {
       rsi: indicators.rsi ? 'has data' : 'no data',
-      rsiValid: indicators.rsi?.valid
+      rsiValid: indicators.rsi?.valid,
+      ema: indicators.ema ? 'has data' : 'no data',
+      emaValid: indicators.ema?.valid
     });
     updateRSIPane();
-  }, [indicators.rsi, updateRSIPane]);
+    updateEMAPane();
+  }, [indicators.rsi, indicators.ema, updateRSIPane, updateEMAPane]);
 
   // Carregar configurações salvas na inicialização
   useEffect(() => {
