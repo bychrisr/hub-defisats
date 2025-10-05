@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChartStore } from '@/store/chartStore';
 import { marketDataService } from '@/services/marketData.service';
-import TradingChart from './TradingChart';
+import LightweightLiquidationChartWithIndicators from './LightweightLiquidationChartWithIndicators';
 
 interface TestResult {
   endpoint: string;
@@ -128,7 +128,11 @@ export default function TradingChartTest() {
         </div>
       </div>
       
-      <TradingChart />
+      <LightweightLiquidationChartWithIndicators 
+        symbol="BTC/USD" 
+        height={400}
+        showIndicatorControls={true}
+      />
       
       <div className="mt-4 text-sm text-gray-500">
         <p>Proxy Endpoints:</p>

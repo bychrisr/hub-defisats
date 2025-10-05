@@ -1,7 +1,7 @@
 // src/components/charts/TradingChartDemo.tsx
 import React, { useEffect } from 'react';
 import { useChartStore } from '@/store/chartStore';
-import TradingChart from './TradingChart';
+import LightweightLiquidationChartWithIndicators from './LightweightLiquidationChartWithIndicators';
 
 // Demo component with sample data
 export default function TradingChartDemo() {
@@ -52,7 +52,11 @@ export default function TradingChartDemo() {
         </p>
       </div>
       
-      <TradingChart />
+      <LightweightLiquidationChartWithIndicators 
+        symbol="BTC/USD" 
+        height={400}
+        showIndicatorControls={true}
+      />
       
       <div className="mt-4 text-sm text-gray-500">
         <p>Features:</p>

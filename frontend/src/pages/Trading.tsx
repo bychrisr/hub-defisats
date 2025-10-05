@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import TradingChart from '@/components/charts/TradingChart';
+import LightweightLiquidationChartWithIndicators from '@/components/charts/LightweightLiquidationChartWithIndicators';
 import { TrendingUp, TrendingDown, Activity, DollarSign } from 'lucide-react';
 
 const Trading: React.FC = () => {
@@ -91,9 +91,10 @@ const Trading: React.FC = () => {
       </Card>
 
       {/* Gráfico Principal */}
-      <TradingChart 
+      <LightweightLiquidationChartWithIndicators 
         symbol={selectedSymbol} 
         height={500}
+        showIndicatorControls={true}
       />
 
       {/* Informações Adicionais */}

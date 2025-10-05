@@ -330,7 +330,7 @@ export default function IndicatorControls({
               <Info className="h-4 w-4" />
               <span>Cache: {cacheStats.size} entradas ativas</span>
             </div>
-          </div>
+    </div>
         )}
       </CardContent>
     </Card>

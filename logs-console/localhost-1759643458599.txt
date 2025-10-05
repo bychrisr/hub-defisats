@@ -1,0 +1,1050 @@
+chunk-WERSD76P.js?v=bc6cf977:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+auth.ts:278 🔄 onRehydrateStorage - Token from localStorage: EXISTS
+auth.ts:292 ✅ onRehydrateStorage: Token exists, validating...
+currency.service.ts:56 Updating currency rates...
+index.ts:20 i18next: languageChanged pt-BR
+index.ts:20 i18next: initialized {debug: true, initAsync: true, ns: Array(1), defaultNS: Array(1), fallbackLng: Array(1), …}
+api.ts:16 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+api.ts:17 📊 Request details: {method: 'get', url: '/api/market/index/public', baseURL: '', fullURL: '/api/market/index/public', headers: AxiosHeaders, …}
+api.ts:28 🔑 Token from localStorage: EXISTS
+api.ts:29 🔑 Token value: [REDACTED]
+api.ts:30 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+api.ts:34 🔑 Authorization header set: [REDACTED]
+api.ts:35 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+RealtimeDataContext.tsx:178 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+RealtimeDataContext.tsx:179 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+PositionsContext.tsx:113 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+VersionContext.tsx:130 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: false, versionInfo: null, shouldShowNotification: false, hasBeenNotified: 'no version info', currentVersion: '0.0.4'}
+usePositions.ts:15 📊 useTotalPL - Current totalPL: 0
+usePositions.ts:15 📊 useTotalPL - Current totalPL: 0
+SimpleAuthGuard.tsx:78 🛡️ SIMPLE AUTH GUARD - State: {path: '/indicator-test', isAuthenticated: false, isLoading: false, isInitialized: false, hasUser: true, …}
+SimpleAuthGuard.tsx:90 ⏳ SIMPLE AUTH GUARD - Not initialized, showing loading...
+usePageTitle.ts:22 🏷️ PAGE TITLE - Updating title: {totalPL: 0, showPL: true, customTitle: undefined, baseTitle: 'defiSATS', isAuthenticated: false, …}
+usePageTitle.ts:47 🏷️ PAGE TITLE - Using base title (not authenticated, no PL, or admin): defiSATS
+usePageTitle.ts:52 🏷️ PAGE TITLE - Document title set to: defiSATS
+useDynamicFavicon.ts:116 🎨 FAVICON - useEffect triggered: {isAuthenticated: false, totalPL: 0}
+useDynamicFavicon.ts:120 🎨 FAVICON - User not authenticated, using default favicon
+useDynamicFavicon.ts:27 🎨 FAVICON - Starting update with href: /favicon.svg
+useDynamicFavicon.ts:33 🎨 FAVICON - Removing existing favicon: http://localhost:13000/favicon.ico
+useDynamicFavicon.ts:45 🎨 FAVICON - Added new favicon to head: /favicon.svg
+useDynamicFavicon.ts:59 🎨 FAVICON - Successfully updated favicon
+SimpleAuthGuard.tsx:31 🔄 SIMPLE AUTH GUARD - Initializing...
+SimpleAuthGuard.tsx:35 🔍 SIMPLE AUTH GUARD - Token check: EXISTS
+SimpleAuthGuard.tsx:51 🔄 SIMPLE AUTH GUARD - Token exists, loading user...
+auth.ts:194 🔄 AUTH STORE - Starting getProfile...
+auth.ts:198 🔍 AUTH STORE - Token before getProfile request: EXISTS
+auth.ts:199 🔍 AUTH STORE - Token preview: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiO...
+auth.ts:204 🔄 AUTH STORE - Calling authAPI.getProfile...
+PositionsContext.tsx:514 📊 POSITIONS - useEffect triggered: {userPositions: Array(0), length: 0}
+PositionsContext.tsx:517 📊 POSITIONS - No userPositions data or empty array
+PositionsContext.tsx:774 🔍 POSITIONS CONTEXT - User not authenticated, clearing positions...
+RealtimeDataContext.tsx:358 🔄 REALTIME - Verificando conexão: {isAuthenticated: false, userId: '373d9132-3af7-4f80-bd43-d21b6425ab39', isAdmin: false, timestamp: '2025-10-05T05:49:56.022Z'}
+RealtimeDataContext.tsx:378 🔄 REALTIME - Desconectando - usuário não autenticado
+VersionContext.tsx:70 🚀 VERSION CONTEXT - Initializing version service
+VersionContext.tsx:76 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+version.service.ts:41 🔄 VERSION SERVICE - Starting periodic version check
+version.service.ts:68 🔍 VERSION SERVICE - Checking for updates...
+VersionContext.tsx:34 🔄 VERSION CONTEXT - Checking for updates...
+version.service.ts:68 🔍 VERSION SERVICE - Checking for updates...
+ThemeContext.tsx:46 🎨 AXISOR THEME - Applying theme: dark
+RealtimeDataContext.tsx:178 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+RealtimeDataContext.tsx:179 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+PositionsContext.tsx:113 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+usePositions.ts:15 📊 useTotalPL - Current totalPL: 0
+usePositions.ts:15 📊 useTotalPL - Current totalPL: 0
+SimpleAuthGuard.tsx:78 🛡️ SIMPLE AUTH GUARD - State: {path: '/indicator-test', isAuthenticated: false, isLoading: true, isInitialized: false, hasUser: true, …}
+SimpleAuthGuard.tsx:90 ⏳ SIMPLE AUTH GUARD - Not initialized, showing loading...
+api.ts:16 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+api.ts:17 📊 Request details: {method: 'get', url: '/api/auth/me', baseURL: '', fullURL: '/api/auth/me', headers: AxiosHeaders, …}
+api.ts:28 🔑 Token from localStorage: EXISTS
+api.ts:29 🔑 Token value: [REDACTED]
+api.ts:30 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+api.ts:34 🔑 Authorization header set: [REDACTED]
+api.ts:35 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+RealtimeDataContext.tsx:178 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+RealtimeDataContext.tsx:179 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+PositionsContext.tsx:113 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+VersionContext.tsx:130 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+usePositions.ts:15 📊 useTotalPL - Current totalPL: 0
+usePositions.ts:15 📊 useTotalPL - Current totalPL: 0
+version.service.ts:56 ⏹️ VERSION SERVICE - Stopping version check
+VersionContext.tsx:70 🚀 VERSION CONTEXT - Initializing version service
+VersionContext.tsx:76 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+version.service.ts:41 🔄 VERSION SERVICE - Starting periodic version check
+version.service.ts:68 🔍 VERSION SERVICE - Checking for updates...
+api.ts:63 ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+api.ts:64 📊 Response details: {status: 200, statusText: 'OK', url: '/api/auth/me', data: {…}, headers: AxiosHeaders, …}
+auth.ts:207 ✅ AUTH STORE - Profile received: {id: '373d9132-3af7-4f80-bd43-d21b6425ab39', email: 'brainoschris@gmail.com', plan_type: 'lifetime', created_at: '2025-09-25T23:52:51.544Z', last_activity_at: '2025-10-05T05:23:08.042Z', …}
+ 🔍 AUTH STORE - Is admin: false for email: brainoschris@gmail.com from backend: false
+ ✅ AUTH STORE - Profile set successfully
+ 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+ 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 useTotalPL - Current totalPL: 0
+ 🛡️ SIMPLE AUTH GUARD - State: {path: '/indicator-test', isAuthenticated: true, isLoading: false, isInitialized: false, hasUser: true, …}
+ ⏳ SIMPLE AUTH GUARD - Not initialized, showing loading...
+ 🏷️ PAGE TITLE - Updating title: {totalPL: 0, showPL: true, customTitle: undefined, baseTitle: 'defiSATS', isAuthenticated: true, …}
+ 💰 PAGE TITLE - Positions data: {totalPL: 0}
+ 🏷️ PAGE TITLE - Final title with positions PL: +0 sats | defiSATS
+ 🏷️ PAGE TITLE - Document title set to: +0 sats | defiSATS
+ 🎨 FAVICON - useEffect triggered: {isAuthenticated: true, totalPL: 0}
+ 🎨 FAVICON - Updating based on PL: {totalPL: 0, isPositive: false, isNegative: false, isZero: true}
+ 🎨 FAVICON - generateFaviconWithValue called with: 0
+ 🎨 FAVICON - Generated values: {color: '#666', originalPL: 0}
+ 🎨 FAVICON - Generated SVG: data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2...
+ 🎨 FAVICON - Generated favicon URL: data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%...
+ 🎨 FAVICON - Starting update with href: data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2215%22%20fill%3D%22%23666%22%2F%3E%3C%2Fsvg%3E
+ 🎨 FAVICON - Removing existing favicon: http://localhost:13000/favicon.svg
+ 🎨 FAVICON - Added new favicon to head: data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2215%22%20fill%3D%22%23666%22%2F%3E%3C%2Fsvg%3E
+ 🎨 FAVICON - Successfully updated favicon
+ 🔍 POSITIONS CONTEXT - User authenticated, fetching real positions...
+ 🔍 POSITIONS CONTEXT - Fetching real positions, market index and menu from LN Markets...
+ 🔄 REALTIME - Verificando conexão: {isAuthenticated: true, userId: '373d9132-3af7-4f80-bd43-d21b6425ab39', isAdmin: false, timestamp: '2025-10-05T05:49:56.188Z'}
+ 🔄 REALTIME - Conectando para usuário: 373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - URL do WebSocket: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - VITE_WS_URL env var: ws://localhost:13010
+ 🔌 WEBSOCKET - Tentando conectar: {url: 'ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39', currentState: undefined, timestamp: '2025-10-05T05:49:56.188Z'}
+ 🔌 WEBSOCKET - Criando nova conexão WebSocket
+ 🔌 WEBSOCKET - URL completa: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🚀 MARKET DATA - Initial load...
+ 🔍 MARKET DATA - fetchAllMarketData called: {isAuthenticated: true, userId: '373d9132-3af7-4f80-bd43-d21b6425ab39', isAdmin: false, hasToken: true}
+ 🔄 MARKET DATA - Fetching all market data...
+ ✅ SIMPLE AUTH GUARD - User loaded successfully
+ 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+ 📊 Request details: {method: 'get', url: '/api/lnmarkets-robust/dashboard', baseURL: '', fullURL: '/api/lnmarkets-robust/dashboard', headers: AxiosHeaders, …}
+ 🔑 Token from localStorage: EXISTS
+ 🔑 Token value: [REDACTED]
+ 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+ 🔑 Authorization header set: [REDACTED]
+ 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+ 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+ 📊 Request details: {method: 'get', url: '/api/market/index/public', baseURL: '', fullURL: '/api/market/index/public', headers: AxiosHeaders, …}
+ 🔑 Token from localStorage: EXISTS
+ 🔑 Token value: [REDACTED]
+ 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+ 🔑 Authorization header set: [REDACTED]
+ 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+ 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+ 📊 Request details: {method: 'get', url: '/api/menu', baseURL: '', fullURL: '/api/menu', headers: AxiosHeaders, …}
+ 🔑 Token from localStorage: EXISTS
+ 🔑 Token value: [REDACTED]
+ 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+ 🔑 Authorization header set: [REDACTED]
+ 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+ 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+ 📊 Request details: {method: 'get', url: '/api/lnmarkets-robust/dashboard', baseURL: '', fullURL: '/api/lnmarkets-robust/dashboard', headers: AxiosHeaders, …}
+ 🔑 Token from localStorage: EXISTS
+ 🔑 Token value: [REDACTED]
+ 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+ 🔑 Authorization header set: [REDACTED]
+ 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+ 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+ 📊 Request details: {method: 'get', url: '/api/lnmarkets-robust/dashboard', baseURL: '', fullURL: '/api/lnmarkets-robust/dashboard', headers: AxiosHeaders, …}
+ 🔑 Token from localStorage: EXISTS
+ 🔑 Token value: [REDACTED]
+ 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+ 🔑 Authorization header set: [REDACTED]
+ 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+ 🔍 AXIOS REQUEST INTERCEPTOR - Request being sent
+ 📊 Request details: {method: 'get', url: '/api/market/index/public', baseURL: '', fullURL: '/api/market/index/public', headers: AxiosHeaders, …}
+ 🔑 Token from localStorage: EXISTS
+ 🔑 Token value: [REDACTED]
+ 🔑 Token preview: eyJhbGciOiJIUzI1NiIs...
+ 🔑 Authorization header set: [REDACTED]
+ 🔑 Final headers: {Accept: 'application/json, text/plain, */*', Content-Type: 'application/json', Authorization: '[REDACTED]'}
+ 🎨 FAVICON - Force updated favicon with cache busting: /favicon.svg?t=1759643396205
+ 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+ 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 useTotalPL - Current totalPL: 0
+ 🛡️ SIMPLE AUTH GUARD - State: {path: '/indicator-test', isAuthenticated: true, isLoading: false, isInitialized: true, hasUser: true, …}
+ ✅ SIMPLE AUTH GUARD - Authentication successful, rendering children
+ 🔄 EFFECTIVE DATA - Dados efetivos calculados: {useApiData: false, historicalDataLength: 0, candleDataLength: 0, linePriceDataLength: 0, effectiveDataLength: 0, …}
+ ⏳ CHART CREATION - Aguardando dados válidos: {isChartReady: false, hasValidData: false, historicalLoading: false, historicalError: null, effectiveDataLength: 0}
+ 🔄 DATA UPDATE - Condições não atendidas
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: false, enabledIndicators: Array(0), indicatorsRsi: 'null'}
+ ❌ RSI PANE - Chart não está disponível
+ 🔄 INDICATOR CHANGE - enabledIndicators changed: []
+ 🔄 INDICATOR CHANGE - Calling updateRSIPane...
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: false, enabledIndicators: Array(0), indicatorsRsi: 'null'}
+ ❌ RSI PANE - Chart não está disponível
+ 🔄 INDICATOR DATA - indicators changed: {rsi: 'no data', rsiValid: undefined}
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: false, enabledIndicators: Array(0), indicatorsRsi: 'null'}
+ ❌ RSI PANE - Chart não está disponível
+ 📦 PERSISTENCE - Loading saved configurations on mount
+ 📦 PERSISTENCE - Loading rsi config
+ ✅ PERSISTENCE - Loaded rsi config: {enabled: true, period: 28, color: '#10b981', height: 50, age: '600s'}
+ 📦 PERSISTENCE - Loaded RSI config from storage: {enabled: true, period: 28, color: '#10b981', lineWidth: 2, height: 50}
+ [PWA] Service Worker temporariamente desabilitado
+ ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+ 📊 Response details: {status: 200, statusText: 'OK', url: '/api/menu', data: {…}, headers: AxiosHeaders, …}
+ 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+ 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 useTotalPL - Current totalPL: 0
+ 📦 PERSISTENCE - Updated enabled indicators: ['rsi']
+ 🔄 DATA UPDATE - Condições não atendidas
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: false, enabledIndicators: Array(1), indicatorsRsi: 'null'}
+ ❌ RSI PANE - Chart não está disponível
+ 🔄 INDICATOR CHANGE - enabledIndicators changed: ['rsi']
+ 🔄 INDICATOR CHANGE - Calling updateRSIPane...
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: false, enabledIndicators: Array(1), indicatorsRsi: 'null'}
+ ❌ RSI PANE - Chart não está disponível
+ 🔄 INDICATOR DATA - indicators changed: {rsi: 'no data', rsiValid: undefined}
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: false, enabledIndicators: Array(1), indicatorsRsi: 'null'}
+ ❌ RSI PANE - Chart não está disponível
+ 🎨 FAVICON - Force updated favicon with cache busting: data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2215%22%20fill%3D%22%23666%22%2F%3E%3C%2Fsvg%3E?t=1759643396664
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔌 WEBSOCKET - Conectado com sucesso: {url: 'ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39', timestamp: '2025-10-05T05:49:56.677Z', readyState: 1}
+ 🔌 REALTIME - WebSocket conectado
+ ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+ 📊 Response details: {status: 200, statusText: 'OK', url: '/api/lnmarkets-robust/dashboard', data: {…}, headers: AxiosHeaders, …}
+ 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+ 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 useTotalPL - Current totalPL: 0
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔌 WEBSOCKET - Desconectado: 1006 
+ 🔌 REALTIME - WebSocket desconectado
+ 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+ 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 useTotalPL - Current totalPL: 0
+ ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+ 📊 Response details: {status: 200, statusText: 'OK', url: '/api/lnmarkets-robust/dashboard', data: {…}, headers: AxiosHeaders, …}
+ 🔗 REALTIME - URL do WebSocket gerada: ws://localhost:13000/ws?userId=373d9132-3af7-4f80-bd43-d21b6425ab39
+ 🔗 REALTIME - window.location: {protocol: 'http:', hostname: 'localhost', port: '13000', host: 'localhost:13000'}
+ 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 useTotalPL - Current totalPL: 0
+ ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+ 📊 Response details: {status: 200, statusText: 'OK', url: '/api/lnmarkets-robust/dashboard', data: {…}, headers: AxiosHeaders, …}
+ ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+ 📊 Response details: {status: 200, statusText: 'OK', url: '/api/market/index/public', data: {…}, headers: AxiosHeaders, …}
+ ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+ 📊 Response details: {status: 200, statusText: 'OK', url: '/api/market/index/public', data: {…}, headers: AxiosHeaders, …}
+ ✅ POSITIONS CONTEXT - Received real positions: {success: true, data: {…}, message: 'LN Markets dashboard data fetched successfully with robust service', requestId: 'robust-1759643396232-4yy5yomxv', timestamp: '2025-10-05T05:49:56.462Z', …}
+ ✅ POSITIONS CONTEXT - Received market index: {success: true, data: {…}}
+ ✅ POSITIONS CONTEXT - Received menu data: {success: true, data: {…}}
+ 🔄 POSITIONS CONTEXT - Invalidating menu cache...
+ 📝 POSITIONS CONTEXT - No positions data, using empty array
+ 🔄 POSITIONS CONTEXT - Invalidating menu cache (no positions)...
+ ✅ AXIOS RESPONSE INTERCEPTOR - Response received
+ 📊 Response details: {status: 200, statusText: 'OK', url: '/api/market/index/public', data: {…}, headers: AxiosHeaders, …}
+ 📊 MARKET DATA - Data received: {dashboardSuccess: true, marketSuccess: true, positionsCount: 2, hasBalance: false, btcPrice: 125144, …}
+ ✅ MARKET DATA - All data consolidated successfully: {positionsCount: 2, btcPrice: 125144, hasBalance: false, timestamp: '2025-10-05T05:49:57.634Z'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 📊 POSITIONS - Provider render: {userPositions: Array(0), length: 0, isAdmin: false, userEmail: 'brainoschris@gmail.com'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 useTotalPL - Current totalPL: 0
+ 📊 TEST DATA - Dados de teste gerados: {count: 168, firstTime: '2025-09-28T05:49:57.754Z', lastTime: '2025-10-05T04:49:57.754Z', priceRange: {…}}
+ 🔄 EFFECTIVE DATA - Dados efetivos calculados: {useApiData: false, historicalDataLength: 0, candleDataLength: 168, linePriceDataLength: 0, effectiveDataLength: 168, …}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔄 USE INDICATOR MANAGER - Auto-update triggered: {barsCount: 168, enabledIndicators: Array(1), autoUpdate: true, barsChanged: true, indicatorsChanged: true}
+ 🔄 USE INDICATOR MANAGER - Calculating all indicators: {enabledIndicators: Array(1), barsCount: 168, configs: Array(5)}
+ 🔄 INDICATOR MANAGER - Calculating rsi (cache miss): {barsCount: 168, period: 28, enabled: true}
+ ✅ INDICATOR MANAGER - rsi calculated successfully: {dataPoints: 140, valid: true, cached: true}
+ 🚀 CHART CREATION - Criando gráfico com indicadores - DADOS VÁLIDOS CONFIRMADOS
+ ✅ CHART CREATION - Chart criado com sucesso
+ ✅ MAIN SERIES - Candlestick series criada
+ 🔄 DATA UPDATE - Condições não atendidas
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'null'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: false, dataValid: undefined, dataLength: 0, …}
+ 🔄 INDICATOR CHANGE - enabledIndicators changed: ['rsi']
+ 🔄 INDICATOR CHANGE - Calling updateRSIPane...
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'null'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: false, dataValid: undefined, dataLength: 0, …}
+ 🔄 INDICATOR DATA - indicators changed: {rsi: 'no data', rsiValid: undefined}
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'null'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: false, dataValid: undefined, dataLength: 0, …}
+ 🔄 USE INDICATOR MANAGER - Auto-update triggered: {barsCount: 168, enabledIndicators: Array(1), autoUpdate: true, barsChanged: true, indicatorsChanged: true}
+ 🔄 USE INDICATOR MANAGER - Calculating all indicators: {enabledIndicators: Array(1), barsCount: 168, configs: Array(1)}
+ 📊 INDICATOR MANAGER - rsi disabled, skipping calculation
+ ✅ INDICATOR MANAGER - Multiple indicators calculated: {types: Array(1), total: 1, successful: 1}
+ ✅ INDICATOR MANAGER - Multiple indicators calculated: {types: Array(0), total: 1, successful: 0}
+ ✅ USE INDICATOR MANAGER - All indicators calculated: {successful: 1, total: 1, types: Array(1)}
+ ✅ USE INDICATOR MANAGER - All indicators calculated: {successful: 0, total: 1, types: Array(0)}
+ Currency rates updated successfully
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ ✅ DATA UPDATE - Dados aplicados à série principal
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'exists'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: true, dataValid: true, dataLength: 140, …}
+ ✅ RSI PANE - Pane RSI criado com stretchFactor: 0.3
+ ✅ RSI SERIES - Série RSI criada no pane RSI
+ ✅ RSI DATA - Dados RSI aplicados: {dataPoints: 140, color: '#10b981'}
+ ✅ RSI COLOR - Cor RSI atualizada: #10b981
+ 🔄 INDICATOR CHANGE - enabledIndicators changed: ['rsi']
+ 🔄 INDICATOR CHANGE - Calling updateRSIPane...
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'exists'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: true, dataValid: true, dataLength: 140, …}
+ ✅ RSI DATA - Dados RSI aplicados: {dataPoints: 140, color: '#10b981'}
+ ✅ RSI COLOR - Cor RSI atualizada: #10b981
+ 🔄 INDICATOR DATA - indicators changed: {rsi: 'has data', rsiValid: true}
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'exists'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: true, dataValid: true, dataLength: 140, …}
+ ✅ RSI DATA - Dados RSI aplicados: {dataPoints: 140, color: '#10b981'}
+ ✅ RSI COLOR - Cor RSI atualizada: #10b981
+ 🔄 USE INDICATOR MANAGER - No changes detected, skipping update
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ ⏰ USE INDICATOR MANAGER - Periodic update triggered
+ 🔄 USE INDICATOR MANAGER - Calculating all indicators: {enabledIndicators: Array(1), barsCount: 168, configs: Array(1)}
+ 📊 INDICATOR MANAGER - rsi disabled, skipping calculation
+ ✅ INDICATOR MANAGER - Multiple indicators calculated: {types: Array(0), total: 1, successful: 0}
+ ✅ USE INDICATOR MANAGER - All indicators calculated: {successful: 0, total: 1, types: Array(0)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ ✅ DATA UPDATE - Dados aplicados à série principal
+ 🧹 CLEAR PRICELINES - Removendo priceLines existentes: 4
+ ✅ CLEAR PRICELINES - Todas as priceLines foram removidas
+ 🔄 USE INDICATOR MANAGER - No changes detected, skipping update
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ ✅ DATA UPDATE - Dados aplicados à série principal
+ 🧹 CLEAR PRICELINES - Removendo priceLines existentes: 4
+ ✅ CLEAR PRICELINES - Todas as priceLines foram removidas
+ 🔄 USE INDICATOR MANAGER - No changes detected, skipping update
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏰ USE INDICATOR MANAGER - Periodic update triggered
+ 🔄 USE INDICATOR MANAGER - Calculating all indicators: {enabledIndicators: Array(1), barsCount: 168, configs: Array(1)}
+ 📊 INDICATOR MANAGER - rsi disabled, skipping calculation
+ ✅ INDICATOR MANAGER - Multiple indicators calculated: {types: Array(0), total: 1, successful: 0}
+ ✅ USE INDICATOR MANAGER - All indicators calculated: {successful: 0, total: 1, types: Array(0)}
+ ✅ DATA UPDATE - Dados aplicados à série principal
+ 🧹 CLEAR PRICELINES - Removendo priceLines existentes: 4
+ ✅ CLEAR PRICELINES - Todas as priceLines foram removidas
+ 🔄 USE INDICATOR MANAGER - No changes detected, skipping update
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📊 TEST DATA - Dados de teste gerados: {count: 168, firstTime: '2025-09-28T05:50:00.311Z', lastTime: '2025-10-05T04:50:00.311Z', priceRange: {…}}
+ 🔄 EFFECTIVE DATA - Dados efetivos calculados: {useApiData: false, historicalDataLength: 0, candleDataLength: 168, linePriceDataLength: 0, effectiveDataLength: 168, …}
+ 🧹 CHART CLEANUP - Limpando gráfico
+ 🧹 CLEAR PRICELINES - Removendo priceLines existentes: 4
+ ✅ CLEAR PRICELINES - Todas as priceLines foram removidas
+ ✅ CHART CLEANUP - Chart removido com sucesso
+ 🔄 USE INDICATOR MANAGER - Auto-update triggered: {barsCount: 168, enabledIndicators: Array(1), autoUpdate: true, barsChanged: true, indicatorsChanged: false}
+ 🔄 USE INDICATOR MANAGER - Same data, skipping calculation
+ 🚀 CHART CREATION - Criando gráfico com indicadores - DADOS VÁLIDOS CONFIRMADOS
+ ✅ CHART CREATION - Chart criado com sucesso
+ ✅ MAIN SERIES - Candlestick series criada
+ ✅ DATA UPDATE - Dados aplicados à série principal
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'exists'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: true, dataValid: true, dataLength: 140, …}
+ ✅ RSI PANE - Pane RSI criado com stretchFactor: 0.3
+ ✅ RSI SERIES - Série RSI criada no pane RSI
+ ✅ RSI DATA - Dados RSI aplicados: {dataPoints: 140, color: '#10b981'}
+ ✅ RSI COLOR - Cor RSI atualizada: #10b981
+ 🔄 INDICATOR CHANGE - enabledIndicators changed: ['rsi']
+ 🔄 INDICATOR CHANGE - Calling updateRSIPane...
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'exists'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: true, dataValid: true, dataLength: 140, …}
+ ✅ RSI DATA - Dados RSI aplicados: {dataPoints: 140, color: '#10b981'}
+ ✅ RSI COLOR - Cor RSI atualizada: #10b981
+ 🔄 INDICATOR DATA - indicators changed: {rsi: 'has data', rsiValid: true}
+ 🚀 RSI PANE - updateRSIPane chamada! {chartExists: true, enabledIndicators: Array(1), indicatorsRsi: 'exists'}
+ 🔄 RSI PANE - Atualizando pane RSI: {enabled: true, enabledIndicators: Array(1), hasData: true, dataValid: true, dataLength: 140, …}
+ ✅ RSI DATA - Dados RSI aplicados: {dataPoints: 140, color: '#10b981'}
+ ✅ RSI COLOR - Cor RSI atualizada: #10b981
+ 🔄 USE INDICATOR MANAGER - Auto-update triggered: {barsCount: 168, enabledIndicators: Array(1), autoUpdate: true, barsChanged: true, indicatorsChanged: false}
+ 🔄 USE INDICATOR MANAGER - Same data, skipping calculation
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔄 VERSION CONTEXT - Checking for updates...
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ ⏹️ VERSION SERVICE - Stopping version check
+ 🚀 VERSION CONTEXT - Initializing version service
+ 📦 VERSION CONTEXT - Loaded stored version info: {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}
+ 🔄 VERSION SERVICE - Starting periodic version check
+ 🔍 VERSION SERVICE - Checking for updates...
+ 🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, versionInfo: {…}, shouldShowNotification: true, hasBeenNotified: false, currentVersion: '0.0.4'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 📦 VERSION SERVICE - Server version info: {version: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', environment: 'development', features: Array(8)}
+ 🆕 VERSION SERVICE - New version available! {current: '0.0.4', latest: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z'}
+ 🆕 VERSION CONTEXT - Update available! {hasUpdate: true, currentVersion: '0.0.4', latestVersion: '1.5.0', buildTime: '2025-01-09T03:45:00.000Z', features: Array(8)}

@@ -82,6 +82,8 @@ export const useIndicatorManager = ({
   const indicatorManagerRef = useRef<IndicatorManagerService | null>(null);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isCalculatingRef = useRef(false);
+  const lastBarsRef = useRef<LwcBar[]>([]);
+  const lastEnabledIndicatorsRef = useRef<IndicatorType[]>([]);
 
   // Inicializar IndicatorManager
   useEffect(() => {
@@ -144,6 +146,15 @@ export const useIndicatorManager = ({
       return;
     }
 
+    // Verificar se já temos os mesmos dados
+    const currentBarsKey = bars.map(b => `${b.time}-${b.close}`).join('|');
+    const lastBarsKey = lastBarsRef.current.map(b => `${b.time}-${b.close}`).join('|');
+    
+    if (currentBarsKey === lastBarsKey && Object.keys(indicators).length > 0) {
+      console.log('🔄 USE INDICATOR MANAGER - Same data, skipping calculation');
+      return;
+    }
+
     isCalculatingRef.current = true;
     setIsLoading(true);
     setError(null);
@@ -177,7 +188,7 @@ export const useIndicatorManager = ({
       setIsLoading(false);
       isCalculatingRef.current = false;
     }
-  }, [bars, enabledIndicators, configs]);
+  }, [bars, enabledIndicators]);
 
   // Função para atualizar um indicador específico
   const refreshIndicator = useCallback(async (type: IndicatorType) => {
@@ -206,14 +217,35 @@ export const useIndicatorManager = ({
   useEffect(() => {
     if (!autoUpdate || !bars.length) return;
 
+    // Verificar se os dados realmente mudaram
+    const barsChanged = bars.length !== lastBarsRef.current.length || 
+      bars.some((bar, index) => {
+        const lastBar = lastBarsRef.current[index];
+        return !lastBar || bar.time !== lastBar.time || bar.close !== lastBar.close;
+      });
+    
+    const indicatorsChanged = enabledIndicators.length !== lastEnabledIndicatorsRef.current.length ||
+      enabledIndicators.some((indicator, index) => indicator !== lastEnabledIndicatorsRef.current[index]);
+
+    if (!barsChanged && !indicatorsChanged) {
+      console.log('🔄 USE INDICATOR MANAGER - No changes detected, skipping update');
+      return;
+    }
+
     console.log('🔄 USE INDICATOR MANAGER - Auto-update triggered:', {
       barsCount: bars.length,
       enabledIndicators,
-      autoUpdate
+      autoUpdate,
+      barsChanged,
+      indicatorsChanged
     });
 
+    // Atualizar referências
+    lastBarsRef.current = [...bars];
+    lastEnabledIndicatorsRef.current = [...enabledIndicators];
+
     calculateAllIndicators();
-  }, [bars, enabledIndicators, autoUpdate, calculateAllIndicators]);
+  }, [bars, enabledIndicators, autoUpdate]);
 
   // Auto-update periódico
   useEffect(() => {
@@ -240,7 +272,7 @@ export const useIndicatorManager = ({
         clearTimeout(updateTimeoutRef.current);
       }
     };
-  }, [autoUpdate, updateInterval, bars.length, calculateAllIndicators]);
+  }, [autoUpdate, updateInterval, bars.length]);
 
   // Obter estatísticas do cache
   const cacheStats = indicatorManagerRef.current?.getCacheStats() || {
@@ -324,7 +356,7 @@ export const useIndicatorManager = ({
       console.error('❌ BACKEND SYNC - Error saving to backend:', error);
       return false;
     }
-  }, [loadAllConfigs]);
+  }, []);
 
   const loadFromBackend = useCallback(async (): Promise<boolean> => {
     try {
@@ -344,7 +376,7 @@ export const useIndicatorManager = ({
       console.error('❌ BACKEND SYNC - Error loading from backend:', error);
       return false;
     }
-  }, [saveAllConfigs]);
+  }, []);
 
   const clearFromBackend = useCallback(async (): Promise<boolean> => {
     try {

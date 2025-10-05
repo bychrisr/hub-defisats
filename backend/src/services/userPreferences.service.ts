@@ -43,21 +43,34 @@ export class UserPreferencesService {
         version: '1.0.0'
       };
 
-      // Salvar no banco de dados
-      await prisma.userPreferences.upsert({
-        where: { userId },
-        update: {
-          indicatorConfigs: preferencesData.indicatorConfigs,
-          lastUpdated: preferencesData.lastUpdated,
-          version: preferencesData.version
-        },
-        create: {
-          userId,
-          indicatorConfigs: preferencesData.indicatorConfigs,
-          lastUpdated: preferencesData.lastUpdated,
-          version: preferencesData.version
-        }
+      // Verificar se já existe
+      const existing = await prisma.userPreferences.findUnique({
+        where: { userId }
       });
+
+      if (existing) {
+        // Atualizar existente
+        await prisma.userPreferences.update({
+          where: { userId },
+          data: {
+            indicatorConfigs: preferencesData.indicatorConfigs,
+            lastUpdated: preferencesData.lastUpdated,
+            version: preferencesData.version
+          }
+        });
+        console.log(`✅ USER PREFERENCES - Updated existing preferences for user: ${userId}`);
+      } else {
+        // Criar novo
+        await prisma.userPreferences.create({
+          data: {
+            userId,
+            indicatorConfigs: preferencesData.indicatorConfigs,
+            lastUpdated: preferencesData.lastUpdated,
+            version: preferencesData.version
+          }
+        });
+        console.log(`✅ USER PREFERENCES - Created new preferences for user: ${userId}`);
+      }
 
       // Atualizar cache
       const cacheKey = `${this.CACHE_PREFIX}${userId}`;

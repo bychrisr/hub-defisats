@@ -49,6 +49,7 @@ import { swCacheRoutes } from './routes/sw-cache.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
 import userPreferencesRoutes from './routes/userPreferences.routes';
+import userPreferencesTestRoutes from './routes/userPreferencesTest.routes';
 import tradingViewRoutes from './routes/tradingview.routes';
 import { exchangeCredentialsRoutes } from './routes/exchangeCredentials.routes';
 import { versionRoutes } from './routes/version.routes';
@@ -699,6 +700,9 @@ async function registerRoutes() {
 
   await fastify.register(userPreferencesRoutes, { prefix: '/api/user-preferences' });
   console.log('✅ User preferences routes registered');
+
+  await fastify.register(userPreferencesTestRoutes, { prefix: '/api/user-preferences-test' });
+  console.log('✅ User preferences test routes registered');
 
   // Version routes (public)
   await fastify.register(versionRoutes, { prefix: '/api' });

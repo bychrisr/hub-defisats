@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import LightweightLiquidationChartWithIndicators from '@/components/charts/LightweightLiquidationChartWithIndicators';
+import { useIndicatorManager } from '@/hooks/useIndicatorManager';
+import { useAuthStore } from '@/stores/auth';
 import { Activity, BarChart3, TrendingUp, Settings, RefreshCw } from 'lucide-react';
 
 // Dados de teste simulados
@@ -37,6 +39,7 @@ const generateTestData = (count: number = 100) => {
 };
 
 const IndicatorTestPage: React.FC = () => {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuthStore();
   const [testData, setTestData] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [useApiData, setUseApiData] = useState(false);
@@ -50,6 +53,44 @@ const IndicatorTestPage: React.FC = () => {
     rsiDataPoints: 0,
     cacheHits: 0,
     lastUpdate: 0
+  });
+
+  // Hook para gerenciar indicadores
+  const {
+    indicators,
+    isLoading,
+    error,
+    lastUpdate,
+    cacheStats,
+    calculateIndicator,
+    calculateAllIndicators,
+    clearCache,
+    refreshIndicator,
+    // Persistência
+    saveConfig,
+    loadConfig,
+    saveAllConfigs,
+    loadAllConfigs,
+    exportConfigs,
+    importConfigs,
+    clearAllConfigs,
+    getStorageInfo,
+    // Backend sync
+    syncWithBackend,
+    saveToBackend,
+    loadFromBackend,
+    clearFromBackend,
+    exportFromBackend,
+    importToBackend,
+    getBackendStats
+  } = useIndicatorManager({
+    bars: testData,
+    enabledIndicators: ['rsi'],
+    configs: {
+      rsi: { period: 14, color: '#8b5cf6', lineWidth: 2 }
+    },
+    autoUpdate: true,
+    updateInterval: 1000
   });
 
   const [persistenceInfo, setPersistenceInfo] = useState<{
@@ -137,20 +178,11 @@ const IndicatorTestPage: React.FC = () => {
     }));
   };
 
-  // Exportar configurações
-  const exportConfigs = () => {
-    console.log('📤 PERSISTENCE - Exportando configurações...');
-  };
+  // Exportar configurações (função do hook)
 
-  // Importar configurações
-  const importConfigs = () => {
-    console.log('📥 PERSISTENCE - Importando configurações...');
-  };
+  // Importar configurações (função do hook)
 
-  // Limpar configurações
-  const clearConfigs = () => {
-    console.log('🧹 PERSISTENCE - Limpando configurações...');
-  };
+  // Limpar configurações (usando clearAllConfigs do hook)
 
   // Testar backend
   const testBackendConnection = async () => {
@@ -165,7 +197,7 @@ const IndicatorTestPage: React.FC = () => {
     }
   };
 
-  const saveToBackend = async () => {
+  const saveToBackendTest = async () => {
     try {
       console.log('💾 BACKEND TEST - Saving to backend');
       const success = await saveToBackend();
@@ -178,7 +210,7 @@ const IndicatorTestPage: React.FC = () => {
     }
   };
 
-  const loadFromBackend = async () => {
+  const loadFromBackendTest = async () => {
     try {
       console.log('📦 BACKEND TEST - Loading from backend');
       const success = await loadFromBackend();
@@ -193,7 +225,7 @@ const IndicatorTestPage: React.FC = () => {
     }
   };
 
-  const clearFromBackend = async () => {
+  const clearFromBackendTest = async () => {
     try {
       console.log('🗑️ BACKEND TEST - Clearing from backend');
       const success = await clearFromBackend();
@@ -208,7 +240,7 @@ const IndicatorTestPage: React.FC = () => {
     }
   };
 
-  const exportFromBackend = async () => {
+  const exportFromBackendTest = async () => {
     try {
       console.log('📤 BACKEND TEST - Exporting from backend');
       const jsonData = await exportFromBackend();
@@ -221,7 +253,7 @@ const IndicatorTestPage: React.FC = () => {
     }
   };
 
-  const importToBackend = async (jsonData: string) => {
+  const importToBackendTest = async (jsonData: string) => {
     try {
       console.log('📥 BACKEND TEST - Importing to backend');
       const success = await importToBackend(jsonData);
@@ -236,7 +268,7 @@ const IndicatorTestPage: React.FC = () => {
     }
   };
 
-  const getBackendStats = async () => {
+  const getBackendStatsTest = async () => {
     try {
       console.log('📊 BACKEND TEST - Getting backend stats');
       const stats = await getBackendStats();
@@ -424,7 +456,7 @@ const IndicatorTestPage: React.FC = () => {
             </Button>
             
             <Button
-              onClick={clearConfigs}
+              onClick={clearAllConfigs}
               variant="destructive"
               size="sm"
             >
@@ -505,7 +537,7 @@ const IndicatorTestPage: React.FC = () => {
             </Button>
             
             <Button
-              onClick={saveToBackend}
+              onClick={saveToBackendTest}
               variant="default"
               size="sm"
             >
@@ -514,7 +546,7 @@ const IndicatorTestPage: React.FC = () => {
             </Button>
             
             <Button
-              onClick={loadFromBackend}
+              onClick={loadFromBackendTest}
               variant="outline"
               size="sm"
             >
@@ -523,7 +555,7 @@ const IndicatorTestPage: React.FC = () => {
             </Button>
             
             <Button
-              onClick={clearFromBackend}
+              onClick={clearFromBackendTest}
               variant="destructive"
               size="sm"
             >
@@ -532,7 +564,7 @@ const IndicatorTestPage: React.FC = () => {
             </Button>
             
             <Button
-              onClick={exportFromBackend}
+              onClick={exportFromBackendTest}
               variant="outline"
               size="sm"
             >
@@ -541,7 +573,7 @@ const IndicatorTestPage: React.FC = () => {
             </Button>
             
             <Button
-              onClick={getBackendStats}
+              onClick={getBackendStatsTest}
               variant="outline"
               size="sm"
             >
@@ -556,6 +588,35 @@ const IndicatorTestPage: React.FC = () => {
               Last sync: {backendInfo.lastSync.toLocaleString()}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Status de Autenticação */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Status de Autenticação
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant={isAuthenticated ? "default" : "destructive"}>
+                {isAuthenticated ? "Logado" : "Não Logado"}
+              </Badge>
+              {user && (
+                <span className="text-sm text-muted-foreground">
+                  {user.email}
+                </span>
+              )}
+            </div>
+            {!isAuthenticated && (
+              <div className="text-sm text-muted-foreground">
+                ⚠️ Para usar as funções de backend, você precisa estar logado.
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

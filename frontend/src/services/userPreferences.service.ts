@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { api } from '@/lib/api';
 
 export interface IndicatorConfig {
   enabled: boolean;
@@ -23,11 +23,6 @@ export interface PreferencesStats {
 }
 
 class UserPreferencesService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:13000';
-  }
 
   /**
    * Carrega as preferências de indicadores do usuário
@@ -36,11 +31,7 @@ class UserPreferencesService {
     try {
       console.log('📦 USER PREFERENCES - Loading preferences from backend');
       
-      const response = await axios.get(`${this.baseUrl}/api/user-preferences/indicators`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await api.get('/api/user-preferences/indicators');
 
       if (response.data.success && response.data.data) {
         console.log('✅ USER PREFERENCES - Preferences loaded from backend:', response.data.data);
@@ -62,14 +53,16 @@ class UserPreferencesService {
   async saveIndicatorPreferences(indicatorConfigs: Record<string, IndicatorConfig>): Promise<boolean> {
     try {
       console.log('💾 USER PREFERENCES - Saving preferences to backend');
+      console.log('💾 USER PREFERENCES - Indicator configs to save:', JSON.stringify(indicatorConfigs, null, 2));
+      console.log('💾 USER PREFERENCES - Request payload:', JSON.stringify({ indicatorConfigs }, null, 2));
       
-      const response = await axios.post(`${this.baseUrl}/api/user-preferences/indicators`, {
+      const response = await api.post('/api/user-preferences/indicators', {
         indicatorConfigs
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
       });
+
+      console.log('💾 USER PREFERENCES - Response status:', response.status);
+      console.log('💾 USER PREFERENCES - Response data:', JSON.stringify(response.data, null, 2));
+      console.log('💾 USER PREFERENCES - Response headers:', response.headers);
 
       if (response.data.success) {
         console.log('✅ USER PREFERENCES - Preferences saved to backend successfully');
@@ -77,10 +70,14 @@ class UserPreferencesService {
       }
 
       console.error('❌ USER PREFERENCES - Failed to save preferences to backend');
+      console.error('❌ USER PREFERENCES - Response data:', response.data);
       return false;
 
     } catch (error) {
       console.error('❌ USER PREFERENCES - Error saving preferences to backend:', error);
+      console.error('❌ USER PREFERENCES - Error response:', error.response?.data);
+      console.error('❌ USER PREFERENCES - Error status:', error.response?.status);
+      console.error('❌ USER PREFERENCES - Error headers:', error.response?.headers);
       return false;
     }
   }
@@ -92,11 +89,7 @@ class UserPreferencesService {
     try {
       console.log('🗑️ USER PREFERENCES - Clearing preferences from backend');
       
-      const response = await axios.delete(`${this.baseUrl}/api/user-preferences/indicators`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await api.delete('/api/user-preferences/indicators');
 
       if (response.data.success) {
         console.log('✅ USER PREFERENCES - Preferences cleared from backend successfully');
@@ -119,12 +112,7 @@ class UserPreferencesService {
     try {
       console.log('🔄 USER PREFERENCES - Syncing preferences with backend, device:', deviceId);
       
-      const response = await axios.get(`${this.baseUrl}/api/user-preferences/sync`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'X-Device-ID': deviceId
-        }
-      });
+      const response = await api.get(`/api/user-preferences/sync?deviceId=${deviceId}`);
 
       if (response.data.success && response.data.data) {
         console.log('✅ USER PREFERENCES - Preferences synced from backend:', response.data.data);
@@ -147,12 +135,7 @@ class UserPreferencesService {
     try {
       console.log('📤 USER PREFERENCES - Exporting preferences from backend');
       
-      const response = await axios.get(`${this.baseUrl}/api/user-preferences/export`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        responseType: 'text'
-      });
+      const response = await api.get('/api/user-preferences/export');
 
       if (response.data) {
         console.log('✅ USER PREFERENCES - Preferences exported from backend successfully');
@@ -175,12 +158,8 @@ class UserPreferencesService {
     try {
       console.log('📥 USER PREFERENCES - Importing preferences to backend');
       
-      const response = await axios.post(`${this.baseUrl}/api/user-preferences/import`, {
+      const response = await api.post('/api/user-preferences/import', {
         jsonData
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
       });
 
       if (response.data.success) {
@@ -204,11 +183,7 @@ class UserPreferencesService {
     try {
       console.log('📊 USER PREFERENCES - Getting preferences stats from backend');
       
-      const response = await axios.get(`${this.baseUrl}/api/user-preferences/stats`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await api.get('/api/user-preferences/stats');
 
       if (response.data.success) {
         console.log('✅ USER PREFERENCES - Stats retrieved from backend:', response.data.data);
