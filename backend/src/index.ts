@@ -48,6 +48,7 @@ import { healthRoutes } from './routes/health.routes';
 import { swCacheRoutes } from './routes/sw-cache.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
+import userPreferencesRoutes from './routes/userPreferences.routes';
 import tradingViewRoutes from './routes/tradingview.routes';
 import { exchangeCredentialsRoutes } from './routes/exchangeCredentials.routes';
 import { versionRoutes } from './routes/version.routes';
@@ -695,6 +696,9 @@ async function registerRoutes() {
   
   await fastify.register(uploadRoutes);
   console.log('✅ Upload routes registered');
+
+  await fastify.register(userPreferencesRoutes, { prefix: '/api/user-preferences' });
+  console.log('✅ User preferences routes registered');
 
   // Version routes (public)
   await fastify.register(versionRoutes, { prefix: '/api' });

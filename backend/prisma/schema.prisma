@@ -48,6 +48,9 @@ model User {
   // Campos para email marketing
   email_marketing_consent    Boolean?             @default(false) // Consentimento para email marketing
   email_marketing_consent_at DateTime?            @db.Timestamp(6) // Data do consentimento
+  
+  // Relacionamentos
+  userPreferences            UserPreferences?
   marketing_preferences       Json?                // Preferências de marketing (JSON)
   admin_user                 AdminUser?
   automations                Automation[]
@@ -743,6 +746,23 @@ model UserExchangeCredentials {
   @@index([is_active])
   @@index([is_verified])
   @@map("user_exchange_credentials")
+}
+
+model UserPreferences {
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId            String   @unique
+  indicatorConfigs  String   // JSON string das configurações dos indicadores
+  lastUpdated       DateTime @default(now()) @db.Timestamp(6)
+  version           String   @default("1.0.0")
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relacionamentos
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([lastUpdated])
+  @@map("user_preferences")
 }
 
 enum PlanType {
