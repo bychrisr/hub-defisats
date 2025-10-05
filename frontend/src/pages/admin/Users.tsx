@@ -74,7 +74,7 @@ export default function Users() {
   const isInitialLoad = useRef(true);
   const lastFilters = useRef(filters);
 
-  const fetchUsers = async (page = 1, limit = 20) => {
+  const fetchUsers = useCallback(async (page = 1, limit = 20) => {
     try {
       console.log('🔍 USERS COMPONENT - Starting fetchUsers', { page, limit, filters });
       setRefreshing(true);
@@ -101,7 +101,7 @@ export default function Users() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [filters.search, filters.plan_type, filters.is_active]);
 
   // Apenas carrega uma vez no início
   useEffect(() => {
@@ -114,24 +114,15 @@ export default function Users() {
   useEffect(() => {
     console.log('🔍 USERS COMPONENT - Filter change useEffect triggered', { 
       isInitialLoad: isInitialLoad.current,
-      filters: { search: filters.search, plan_type: filters.plan_type, is_active: filters.is_active },
-      lastFilters: lastFilters.current
+      filters: { search: filters.search, plan_type: filters.plan_type, is_active: filters.is_active }
     });
     
-    // Só executa se não for o carregamento inicial e se os filtros realmente mudaram
+    // Só executa se não for o carregamento inicial
     if (!isInitialLoad.current) {
-      const filtersChanged = 
-        lastFilters.current.search !== filters.search ||
-        lastFilters.current.plan_type !== filters.plan_type ||
-        lastFilters.current.is_active !== filters.is_active;
-      
-      if (filtersChanged) {
-        console.log('🔍 USERS COMPONENT - Filters changed, executing fetchUsers');
-        lastFilters.current = { ...filters };
-        fetchUsers();
-      }
+      console.log('🔍 USERS COMPONENT - Filters changed, executing fetchUsers');
+      fetchUsers();
     }
-  }, [filters.search, filters.plan_type, filters.is_active]);
+  }, [filters.search, filters.plan_type, filters.is_active, fetchUsers]);
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
