@@ -20,6 +20,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **Automation Updates**: Campo user_exchange_account_id adicionado
 - ✅ **Migration Support**: Migração automática de dados existentes
 - ✅ **Data Validation**: Validação de integridade dos dados
+- ✅ **Middleware Fix**: Correção de middleware de autenticação nas rotas plan-limits
 
 #### 🎨 **Implementações Frontend**
 - ✅ **Unified Persistence Service**: Extensão do IndicatorPersistenceService
