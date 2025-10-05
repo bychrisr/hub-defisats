@@ -178,7 +178,9 @@ export const useIndicatorManager = ({
       console.log('✅ USE INDICATOR MANAGER - All indicators calculated:', {
         successful: Object.values(results).filter(r => r !== null).length,
         total: enabledIndicators.length,
-        types: Object.keys(results).filter(k => results[k as IndicatorType] !== null)
+        types: Object.keys(results).filter(k => results[k as IndicatorType] !== null),
+        emaResult: results.ema ? 'calculated' : 'null',
+        rsiResult: results.rsi ? 'calculated' : 'null'
       });
 
     } catch (err: any) {
@@ -227,7 +229,12 @@ export const useIndicatorManager = ({
     const indicatorsChanged = enabledIndicators.length !== lastEnabledIndicatorsRef.current.length ||
       enabledIndicators.some((indicator, index) => indicator !== lastEnabledIndicatorsRef.current[index]);
 
-    if (!barsChanged && !indicatorsChanged) {
+    // CORREÇÃO: Forçar atualização se EMA estiver habilitada mas não calculada
+    const emaEnabled = enabledIndicators.includes('ema');
+    const emaNotCalculated = !indicators.ema || !indicators.ema.valid;
+    const forceEmaUpdate = emaEnabled && emaNotCalculated;
+
+    if (!barsChanged && !indicatorsChanged && !forceEmaUpdate) {
       console.log('🔄 USE INDICATOR MANAGER - No changes detected, skipping update');
       return;
     }
@@ -237,7 +244,11 @@ export const useIndicatorManager = ({
       enabledIndicators,
       autoUpdate,
       barsChanged,
-      indicatorsChanged
+      indicatorsChanged,
+      emaEnabled: enabledIndicators.includes('ema'),
+      rsiEnabled: enabledIndicators.includes('rsi'),
+      forceEmaUpdate,
+      emaNotCalculated: !indicators.ema || !indicators.ema.valid
     });
 
     // Atualizar referências
@@ -245,7 +256,18 @@ export const useIndicatorManager = ({
     lastEnabledIndicatorsRef.current = [...enabledIndicators];
 
     calculateAllIndicators();
-  }, [bars, enabledIndicators, autoUpdate]);
+  }, [bars, enabledIndicators, autoUpdate, indicators.ema]);
+
+  // CORREÇÃO: Forçar cálculo da EMA quando habilitada
+  useEffect(() => {
+    const emaEnabled = enabledIndicators.includes('ema');
+    const emaNotCalculated = !indicators.ema || !indicators.ema.valid;
+    
+    if (emaEnabled && emaNotCalculated && bars.length > 0) {
+      console.log('🔄 USE INDICATOR MANAGER - Forçando cálculo da EMA (habilitada mas não calculada)');
+      calculateIndicator('ema');
+    }
+  }, [enabledIndicators, indicators.ema, bars.length, calculateIndicator]);
 
   // Auto-update periódico
   useEffect(() => {
