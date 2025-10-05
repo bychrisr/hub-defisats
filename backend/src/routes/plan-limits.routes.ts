@@ -1,37 +1,13 @@
 import { FastifyInstance } from 'fastify';
 import { PlanLimitsController } from '../controllers/plan-limits.controller';
+import { adminAuthMiddleware } from '../middleware/auth.middleware';
 
 const planLimitsController = new PlanLimitsController();
 
 export async function planLimitsRoutes(fastify: FastifyInstance) {
-  // Middleware de autenticação para todas as rotas
-  fastify.addHook('preHandler', async (request, reply) => {
-    try {
-      // Verificar se o usuário está autenticado
-      if (!request.user) {
-        return reply.status(401).send({
-          error: 'UNAUTHORIZED',
-          message: 'Authentication required'
-        });
-      }
-
-      // Verificar se o usuário é admin
-      if (request.user.role !== 'admin' && request.user.role !== 'superadmin') {
-        return reply.status(403).send({
-          error: 'FORBIDDEN',
-          message: 'Admin access required'
-        });
-      }
-    } catch (error) {
-      return reply.status(401).send({
-        error: 'UNAUTHORIZED',
-        message: 'Invalid authentication'
-      });
-    }
-  });
-
   // Criar limites para um plano
   fastify.post('/plan-limits', {
+    preHandler: [adminAuthMiddleware],
     schema: {
       description: 'Create plan limits',
       tags: ['Plan Limits'],
@@ -76,6 +52,7 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
 
   // Atualizar limites de um plano
   fastify.put('/plan-limits/:id', {
+    preHandler: [adminAuthMiddleware],
     schema: {
       description: 'Update plan limits',
       tags: ['Plan Limits'],
@@ -104,6 +81,13 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
             message: { type: 'string' }
           }
         },
+        400: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
         404: {
           type: 'object',
           properties: {
@@ -115,15 +99,16 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
     }
   }, planLimitsController.updatePlanLimits.bind(planLimitsController));
 
-  // Obter limites de um plano
-  fastify.get('/plan-limits/plan/:planId', {
+  // Obter limites de um plano específico
+  fastify.get('/plan-limits/:id', {
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Get plan limits by plan ID',
+      description: 'Get plan limits by ID',
       tags: ['Plan Limits'],
       params: {
         type: 'object',
         properties: {
-          planId: { type: 'string' }
+          id: { type: 'string' }
         }
       },
       response: {
@@ -147,6 +132,7 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
 
   // Listar todos os limites de planos
   fastify.get('/plan-limits', {
+    preHandler: [adminAuthMiddleware],
     schema: {
       description: 'Get all plan limits',
       tags: ['Plan Limits'],
@@ -155,16 +141,16 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            data: { type: 'array' },
-            count: { type: 'number' }
+            data: { type: 'array' }
           }
         }
       }
     }
   }, planLimitsController.getAllPlanLimits.bind(planLimitsController));
 
-  // Obter limites de um usuário
+  // Obter limites de um usuário específico
   fastify.get('/plan-limits/user/:userId', {
+    preHandler: [adminAuthMiddleware],
     schema: {
       description: 'Get user plan limits',
       tags: ['Plan Limits'],
@@ -193,26 +179,40 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
     }
   }, planLimitsController.getUserLimits.bind(planLimitsController));
 
-  // Validar limite específico
-  fastify.get('/plan-limits/validate/:userId', {
+  // Verificar se usuário pode criar recurso
+  fastify.post('/plan-limits/check', {
+    preHandler: [adminAuthMiddleware],
     schema: {
-      description: 'Validate specific limit for user',
+      description: 'Check if user can create resource',
       tags: ['Plan Limits'],
-      params: {
+      body: {
         type: 'object',
+        required: ['userId', 'resourceType'],
         properties: {
-          userId: { type: 'string' }
+          userId: { type: 'string' },
+          resourceType: { type: 'string', enum: ['exchange_account', 'automation', 'indicator', 'simulation', 'backtest'] }
         }
       },
-      querystring: {
-        type: 'object',
-        properties: {
-          limitType: { 
-            type: 'string',
-            enum: ['EXCHANGE_ACCOUNTS', 'AUTOMATIONS', 'INDICATORS', 'SIMULATIONS', 'BACKTESTS']
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            canCreate: { type: 'boolean' },
+            currentUsage: { type: 'number' },
+            limit: { type: 'number' }
           }
         }
-      },
+      }
+    }
+  }, planLimitsController.validateLimit.bind(planLimitsController));
+
+  // Obter estatísticas de uso
+  fastify.get('/plan-limits/statistics', {
+    preHandler: [adminAuthMiddleware],
+    schema: {
+      description: 'Get plan limits usage statistics',
+      tags: ['Plan Limits'],
       response: {
         200: {
           type: 'object',
@@ -223,10 +223,11 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, planLimitsController.validateLimit.bind(planLimitsController));
+  }, planLimitsController.getUsageStatistics.bind(planLimitsController));
 
   // Deletar limites de um plano
   fastify.delete('/plan-limits/:id', {
+    preHandler: [adminAuthMiddleware],
     schema: {
       description: 'Delete plan limits',
       tags: ['Plan Limits'],
@@ -254,21 +255,4 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
       }
     }
   }, planLimitsController.deletePlanLimits.bind(planLimitsController));
-
-  // Obter estatísticas de uso
-  fastify.get('/plan-limits/statistics', {
-    schema: {
-      description: 'Get plan limits usage statistics',
-      tags: ['Plan Limits'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' }
-          }
-        }
-      }
-    }
-  }, planLimitsController.getUsageStatistics.bind(planLimitsController));
 }
