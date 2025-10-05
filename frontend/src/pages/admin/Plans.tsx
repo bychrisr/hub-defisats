@@ -17,6 +17,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Plus,
   Edit,
   Trash2,
@@ -47,6 +58,8 @@ export const Plans = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
 
   useEffect(() => {
     fetchPlans();
@@ -157,15 +170,20 @@ export const Plans = () => {
     }
   };
 
-  const handleDeletePlan = async (planId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este plano?')) {
-      return;
-    }
+  const handleDeletePlan = (plan: Plan) => {
+    setPlanToDelete(plan);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePlan = async () => {
+    if (!planToDelete) return;
 
     try {
-      await plansService.deletePlan(planId);
-      setPlans(plans.filter(plan => plan.id !== planId));
+      await plansService.deletePlan(planToDelete.id);
+      setPlans(plans.filter(plan => plan.id !== planToDelete.id));
       toast.success('Plano excluído com sucesso!');
+      setDeleteDialogOpen(false);
+      setPlanToDelete(null);
     } catch (error: any) {
       console.error('Error deleting plan:', error);
       toast.error(error.message || 'Erro ao excluir plano');
@@ -424,7 +442,7 @@ export const Plans = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeletePlan(plan.id)}
+                              onClick={() => handleDeletePlan(plan)}
                               className="hover:bg-destructive hover:text-destructive-foreground cursor-pointer transition-colors text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -449,6 +467,30 @@ export const Plans = () => {
         plan={editingPlan}
         loading={modalLoading}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o plano <strong>"{planToDelete?.name}"</strong>?
+              <br />
+              <br />
+              Esta ação não pode ser desfeita. Todos os dados relacionados a este plano serão permanentemente removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeletePlan}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir Plano
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
