@@ -88,6 +88,81 @@ export class PlansService {
       throw new Error(error.message || 'Failed to get plans with users');
     }
   }
+
+  /**
+   * Criar novo plano
+   */
+  async createPlan(planData: any): Promise<Plan> {
+    try {
+      const response = await api.post('/api/plans-public', planData);
+      
+      if (response.data.success) {
+        console.log('✅ PlansService - Created plan:', response.data.data);
+        return response.data.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to create plan');
+      }
+    } catch (error: any) {
+      console.error('❌ PlansService - Error creating plan:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create plan');
+    }
+  }
+
+  /**
+   * Atualizar plano
+   */
+  async updatePlan(planId: string, planData: any): Promise<Plan> {
+    try {
+      const response = await api.put(`/api/plans-public/${planId}`, planData);
+      
+      if (response.data.success) {
+        console.log('✅ PlansService - Updated plan:', response.data.data);
+        return response.data.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to update plan');
+      }
+    } catch (error: any) {
+      console.error('❌ PlansService - Error updating plan:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to update plan');
+    }
+  }
+
+  /**
+   * Deletar plano
+   */
+  async deletePlan(planId: string): Promise<void> {
+    try {
+      const response = await api.delete(`/api/plans-public/${planId}`);
+      
+      if (response.data.success) {
+        console.log('✅ PlansService - Deleted plan:', planId);
+      } else {
+        throw new Error(response.data.message || 'Failed to delete plan');
+      }
+    } catch (error: any) {
+      console.error('❌ PlansService - Error deleting plan:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to delete plan');
+    }
+  }
+
+  /**
+   * Obter plano por ID
+   */
+  async getPlanById(planId: string): Promise<Plan> {
+    try {
+      const response = await api.get(`/api/plans-public/${planId}`);
+      
+      if (response.data.success) {
+        console.log('✅ PlansService - Retrieved plan by ID:', response.data.data);
+        return response.data.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to get plan by ID');
+      }
+    } catch (error: any) {
+      console.error('❌ PlansService - Error getting plan by ID:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get plan by ID');
+    }
+  }
 }
 
 export const plansService = new PlansService();

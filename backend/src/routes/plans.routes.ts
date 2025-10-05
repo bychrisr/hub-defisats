@@ -6,30 +6,34 @@ const plansController = new PlansController();
 
 export async function plansRoutes(fastify: FastifyInstance) {
   // Listar todos os planos
-  fastify.get('/plans', {
-    schema: {
-      description: 'Get all plans',
-      tags: ['Plans'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'array', items: { type: 'object' } },
-            count: { type: 'number' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, plansController.getAllPlans.bind(plansController));
+  fastify.get('/plans-public', async (request, reply) => {
+    console.log('🚀 DIRECT ROUTE CALLED!');
+    return plansController.getAllPlans(request, reply);
+  });
+
+  // Criar novo plano
+  fastify.post('/plans-public', async (request, reply) => {
+    console.log('🚀 CREATE PLAN ROUTE CALLED!');
+    return plansController.createPlan(request, reply);
+  });
+
+  // Atualizar plano
+  fastify.put('/plans-public/:id', async (request, reply) => {
+    console.log('🚀 UPDATE PLAN ROUTE CALLED!');
+    return plansController.updatePlan(request, reply);
+  });
+
+  // Deletar plano
+  fastify.delete('/plans-public/:id', async (request, reply) => {
+    console.log('🚀 DELETE PLAN ROUTE CALLED!');
+    return plansController.deletePlan(request, reply);
+  });
+
+  // Obter plano por ID
+  fastify.get('/plans-public/:id', async (request, reply) => {
+    console.log('🚀 GET PLAN BY ID ROUTE CALLED!');
+    return plansController.getPlanById(request, reply);
+  });
 
   // Obter estatísticas de usuários por plano
   fastify.get('/plans/user-stats', {

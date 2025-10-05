@@ -37,12 +37,16 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { plansService, Plan, PlanWithUsers } from '@/services/plans.service';
+import { PlanModal, PlanFormData } from '@/components/modals/PlanModal';
 
 
 export const Plans = () => {
   const [plans, setPlans] = useState<PlanWithUsers[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
     fetchPlans();
@@ -115,18 +119,62 @@ export const Plans = () => {
     return 'Free';
   };
 
-  const handleEdit = (plan: Plan) => {
-    toast.info('Funcionalidade de edição em desenvolvimento');
+  const handleCreatePlan = () => {
+    setEditingPlan(null);
+    setIsModalOpen(true);
   };
 
-  const handleDelete = async (planId: string) => {
+  const handleEditPlan = (plan: Plan) => {
+    setEditingPlan(plan);
+    setIsModalOpen(true);
+  };
+
+  const handleSavePlan = async (planData: PlanFormData) => {
+    setModalLoading(true);
     try {
+      if (editingPlan) {
+        // Atualizar plano existente
+        const updatedPlan = await plansService.updatePlan(editingPlan.id, planData);
+        setPlans(plans.map(plan => 
+          plan.id === editingPlan.id 
+            ? { ...plan, ...updatedPlan }
+            : plan
+        ));
+        toast.success('Plano atualizado com sucesso!');
+      } else {
+        // Criar novo plano
+        const newPlan = await plansService.createPlan(planData);
+        setPlans([...plans, { ...newPlan, users: 0 }]);
+        toast.success('Plano criado com sucesso!');
+      }
+      setIsModalOpen(false);
+      setEditingPlan(null);
+    } catch (error: any) {
+      console.error('Error saving plan:', error);
+      toast.error(error.message || 'Erro ao salvar plano');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleDeletePlan = async (planId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este plano?')) {
+      return;
+    }
+
+    try {
+      await plansService.deletePlan(planId);
       setPlans(plans.filter(plan => plan.id !== planId));
       toast.success('Plano excluído com sucesso!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting plan:', error);
-      toast.error('Erro ao excluir plano');
+      toast.error(error.message || 'Erro ao excluir plano');
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingPlan(null);
   };
 
 
@@ -191,7 +239,7 @@ export const Plans = () => {
                       Refresh
                     </Button>
                     <Button
-                      onClick={() => toast.info('Funcionalidade em desenvolvimento')}
+                      onClick={handleCreatePlan}
                       className="backdrop-blur-sm bg-primary/90 hover:bg-primary text-white shadow-lg shadow-primary/25"
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -368,7 +416,7 @@ export const Plans = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(plan)}
+                              onClick={() => handleEditPlan(plan)}
                               className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                             >
                               <Edit className="h-4 w-4" />
@@ -376,7 +424,7 @@ export const Plans = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(plan.id)}
+                              onClick={() => handleDeletePlan(plan.id)}
                               className="hover:bg-destructive hover:text-destructive-foreground cursor-pointer transition-colors text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -392,6 +440,15 @@ export const Plans = () => {
           </Card>
         </div>
       </div>
+
+      {/* Modal de Criação/Edição */}
+      <PlanModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSavePlan}
+        plan={editingPlan}
+        loading={modalLoading}
+      />
     </div>
   );
 };
