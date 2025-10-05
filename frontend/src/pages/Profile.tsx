@@ -52,9 +52,11 @@ import { useAuthStore } from '@/stores/auth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { useLNMarketsConnectionStatus } from '@/hooks/useLNMarketsConnectionStatus';
+import { useExchangeCredentials } from '@/hooks/useExchangeCredentials';
 import { api } from '@/lib/api';
 import ImageUpload from '@/components/ui/ImageUpload';
-import { ExchangeCredentialsService, UserExchangeCredentials } from '@/services/exchangeCredentials.service';
+import { ExchangeService, UserExchangeCredentials } from '@/services/exchange.service';
+import { ExchangeCredentialsForm } from '@/components/ExchangeCredentialsForm';
 
 const profileSchema = z.object({
   // Profile Information
@@ -191,6 +193,19 @@ export default function Profile() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { user, getProfile, isLoading: authLoading } = useAuthStore();
   const { theme } = useTheme();
+  
+  // ✅ NOVA ESTRUTURA DE EXCHANGES
+  const { 
+    exchanges, 
+    userCredentials, 
+    isLoading: isLoadingExchanges, 
+    error: exchangesError,
+    getCredentialsForExchange,
+    hasCredentialsForExchange,
+    updateCredentials,
+    deleteCredentials,
+    testCredentials
+  } = useExchangeCredentials();
 
   const {
     register,
@@ -215,7 +230,8 @@ export default function Profile() {
         console.log('🔄 PROFILE - Loading LN Markets credentials from new structure...');
         setIsLoadingCredentials(true);
         try {
-          const credentials = await ExchangeCredentialsService.getLNMarketsCredentials();
+          const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
+          const credentials = await ExchangeService.getUserCredentialsForExchange(lnMarketsExchange.id);
           setLnMarketsCredentials(credentials);
           console.log('✅ PROFILE - LN Markets credentials loaded:', credentials ? 'Found' : 'Not found');
         } catch (error) {
@@ -275,7 +291,8 @@ export default function Profile() {
       // ✅ SALVAR CREDENCIAIS NA NOVA ESTRUTURA DE EXCHANGES
       if (data.ln_markets_api_key || data.ln_markets_api_secret || data.ln_markets_passphrase) {
         console.log('🔄 PROFILE - Saving LN Markets credentials to new structure...');
-        await ExchangeCredentialsService.updateLNMarketsCredentials({
+        const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
+        await ExchangeService.updateUserCredentials(lnMarketsExchange.id, {
           api_key: data.ln_markets_api_key,
           api_secret: data.ln_markets_api_secret,
           passphrase: data.ln_markets_passphrase,
@@ -301,7 +318,8 @@ export default function Profile() {
         
         // Refresh user data and credentials
         await getProfile();
-        const credentials = await ExchangeCredentialsService.getLNMarketsCredentials();
+        const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
+        const credentials = await ExchangeService.getUserCredentialsForExchange(lnMarketsExchange.id);
         setLnMarketsCredentials(credentials);
         
         // Auto-dismiss success message after 3 seconds
@@ -614,233 +632,87 @@ export default function Profile() {
     </div>
   );
 
-  const renderSecuritySection = () => (
-    <div className="space-y-6">
-      {/* LN Markets API Credentials Card */}
-      <Card className="border-blue-200 dark:border-blue-800">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
+  const renderSecuritySection = () => {
+
+    if (isLoadingExchanges) {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-center py-12">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                <Key className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">LN Markets API Credentials</CardTitle>
-                <CardDescription className="text-sm">
-                  Configure your API credentials for automated trading
-                </CardDescription>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {isCheckingConnection ? (
-                <>
-                  <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
-                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                    Checking...
-                  </span>
-                </>
-              ) : isConnected ? (
-                <>
-                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                    Connected
-                  </span>
-                </>
-              ) : (
-                <>
-                  <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                  <span className="text-xs text-red-600 dark:text-red-400 font-medium">
-                    {hasCredentials ? 'Invalid Credentials' : 'Not Configured'}
-                  </span>
-                </>
-              )}
+              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+              <span className="text-muted-foreground">Loading exchanges...</span>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          {/* Connection Error Alert */}
-          {!isConnected && hasCredentials && connectionError && (
-            <Alert className="mb-4 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-              <AlertDescription className="text-red-800 dark:text-red-200">
-                {connectionError}
-              </AlertDescription>
-            </Alert>
-          )}
-          
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* API Key Card */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-                  <Label htmlFor="ln_markets_api_key" className="text-sm font-medium">
-                    API Key
-                  </Label>
-                </div>
-                    <div className="relative">
-                      <Input
-                        id="ln_markets_api_key"
-                        type={showApiKey ? 'text' : 'password'}
-                        {...register('ln_markets_api_key')}
-                    className={cn(
-                      "pr-10 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
-                      errors.ln_markets_api_key ? 'border-red-500' : ''
-                    )}
-                    placeholder="Enter your API key"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        onClick={() => setShowApiKey(!showApiKey)}
-                      >
-                        {showApiKey ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    {errors.ln_markets_api_key && (
-                  <p className="text-xs text-red-500">{errors.ln_markets_api_key.message}</p>
-                    )}
-                  </div>
+        </div>
+      );
+    }
 
-              {/* API Secret Card */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
-                  <Label htmlFor="ln_markets_api_secret" className="text-sm font-medium">
-                    API Secret
-                  </Label>
-                </div>
-                    <div className="relative">
-                      <Input
-                        id="ln_markets_api_secret"
-                        type={showApiSecret ? 'text' : 'password'}
-                        {...register('ln_markets_api_secret')}
-                    className={cn(
-                      "pr-10 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
-                      errors.ln_markets_api_secret ? 'border-red-500' : ''
-                    )}
-                    placeholder="Enter your API secret"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        onClick={() => setShowApiSecret(!showApiSecret)}
-                      >
-                        {showApiSecret ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    {errors.ln_markets_api_secret && (
-                  <p className="text-xs text-red-500">{errors.ln_markets_api_secret.message}</p>
-                    )}
-              </div>
-                  </div>
+    if (exchangesError) {
+      return (
+        <div className="space-y-6">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load exchanges: {exchangesError}
+            </AlertDescription>
+          </Alert>
+        </div>
+      );
+    }
 
-            {/* Passphrase Card - Full Width */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-orange-500"></div>
-                <Label htmlFor="ln_markets_passphrase" className="text-sm font-medium">
-                  Passphrase
-                </Label>
-              </div>
-                    <div className="relative">
-                      <Input
-                        id="ln_markets_passphrase"
-                        type={showPassphrase ? 'text' : 'password'}
-                        {...register('ln_markets_passphrase')}
-                  className={cn(
-                    "pr-10 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
-                    errors.ln_markets_passphrase ? 'border-red-500' : ''
-                  )}
-                  placeholder="Enter your passphrase"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        onClick={() => setShowPassphrase(!showPassphrase)}
-                      >
-                        {showPassphrase ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    {errors.ln_markets_passphrase && (
-                <p className="text-xs text-red-500">{errors.ln_markets_passphrase.message}</p>
-                    )}
-                </div>
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-foreground">Exchange Credentials</h2>
+          <p className="text-muted-foreground mt-2">
+            Configure your API credentials for automated trading across multiple exchanges
+          </p>
+        </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <ShieldIcon className="h-4 w-4" />
-                <span>Your credentials are encrypted and stored securely</span>
+        {/* Available Exchanges */}
+        {exchanges.map((exchange) => {
+          const existingCredentials = getCredentialsForExchange(exchange.id);
+          const hasCredentials = hasCredentialsForExchange(exchange.id);
+
+          return (
+            <ExchangeCredentialsForm
+              key={exchange.id}
+              exchange={exchange}
+              existingCredentials={existingCredentials}
+              onSave={async (credentials) => {
+                await updateCredentials(exchange.id, credentials);
+              }}
+              onDelete={existingCredentials ? async () => {
+                await deleteCredentials(exchange.id);
+              } : undefined}
+              onTest={hasCredentials ? async () => {
+                return await testCredentials(exchange.id);
+              } : undefined}
+              isLoading={isLoading}
+            />
+          );
+        })}
+
+        {/* No Exchanges Available */}
+        {exchanges.length === 0 && (
+          <Card className="border-gray-200 dark:border-gray-700">
+            <CardContent className="text-center py-12">
+              <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Key className="h-8 w-8 text-gray-400" />
               </div>
-              <div className="flex gap-3">
-                <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Credentials
-                    </>
-                  )}
-                </Button>
-              </div>
-                </div>
-              </form>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                No Exchanges Available
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No exchanges are currently configured in the system.
+              </p>
             </CardContent>
           </Card>
-
-      {/* Future: Account Information Card */}
-      <Card className="border-gray-200 dark:border-gray-700 opacity-60">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-              <UserIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <div>
-              <CardTitle className="text-lg text-gray-500 dark:text-gray-400">
-                Account Information
-              </CardTitle>
-              <CardDescription className="text-sm text-gray-400">
-                Coming soon - View your LN Markets account details
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <UserIcon className="h-8 w-8 text-gray-400" />
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              Account information will be displayed here
-            </p>
-            <p className="text-xs text-gray-400">
-              Balance, trading history, and account settings
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+        )}
+      </div>
+    );
+  };
 
   const renderNotificationsSection = () => (
     <div className="space-y-6">

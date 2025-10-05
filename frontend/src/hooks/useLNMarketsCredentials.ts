@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { ExchangeCredentialsService } from '@/services/exchangeCredentials.service';
 
 export function useLNMarketsCredentials() {
   const [hasCredentials, setHasCredentials] = useState<boolean | null>(null);
@@ -7,31 +8,43 @@ export function useLNMarketsCredentials() {
   const { user } = useAuthStore();
 
   useEffect(() => {
-    if (user) {
-      const hasApiKey = !!(user.ln_markets_api_key && user.ln_markets_api_key.length > 0);
-      const hasApiSecret = !!(user.ln_markets_api_secret && user.ln_markets_api_secret.length > 0);
-      const hasPassphrase = !!(user.ln_markets_passphrase && user.ln_markets_passphrase.length > 0);
-      
-      const allCredentials = hasApiKey && hasApiSecret && hasPassphrase;
-      
-      // ✅ DEBUG: Verificar credenciais do usuário
-      console.log('🔍 LN MARKETS CREDENTIALS DEBUG:', {
-        userId: user.id,
-        hasApiKey,
-        hasApiSecret,
-        hasPassphrase,
-        allCredentials,
-        apiKeyLength: user.ln_markets_api_key?.length || 0,
-        apiSecretLength: user.ln_markets_api_secret?.length || 0,
-        passphraseLength: user.ln_markets_passphrase?.length || 0
-      });
-      
-      setHasCredentials(allCredentials);
-      setIsLoading(false);
-    } else {
-      setHasCredentials(false);
-      setIsLoading(false);
-    }
+    const checkCredentials = async () => {
+      if (user) {
+        try {
+          setIsLoading(true);
+          
+          // ✅ NOVA ESTRUTURA: Buscar credenciais da nova estrutura de exchanges
+          const lnMarketsCredentials = await ExchangeCredentialsService.getLNMarketsCredentials();
+          
+          const hasCredentials = !!(lnMarketsCredentials && lnMarketsCredentials.is_active);
+          
+          console.log('🔍 LN MARKETS CREDENTIALS DEBUG (NEW STRUCTURE):', {
+            userId: user.id,
+            hasCredentials,
+            credentials: lnMarketsCredentials ? {
+              id: lnMarketsCredentials.id,
+              is_active: lnMarketsCredentials.is_active,
+              is_verified: lnMarketsCredentials.is_verified,
+              hasApiKey: !!(lnMarketsCredentials.credentials?.api_key),
+              hasApiSecret: !!(lnMarketsCredentials.credentials?.api_secret),
+              hasPassphrase: !!(lnMarketsCredentials.credentials?.passphrase)
+            } : null
+          });
+          
+          setHasCredentials(hasCredentials);
+        } catch (error) {
+          console.error('❌ LN MARKETS CREDENTIALS - Error checking credentials:', error);
+          setHasCredentials(false);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setHasCredentials(false);
+        setIsLoading(false);
+      }
+    };
+
+    checkCredentials();
   }, [user]);
 
   return {
