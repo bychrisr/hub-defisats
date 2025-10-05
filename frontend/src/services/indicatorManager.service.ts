@@ -57,13 +57,21 @@ export class IndicatorManagerService {
     try {
       switch (type) {
         case 'rsi':
-        case 'ema':
           return Array.isArray(data) && data.every(point => 
             point && 
             typeof point.time !== 'undefined' && 
             typeof point.value === 'number' && 
             !isNaN(point.value) &&
             point.value >= 0 && point.value <= 100 // RSI específico
+          );
+
+        case 'ema':
+          return Array.isArray(data) && data.every(point => 
+            point && 
+            typeof point.time !== 'undefined' && 
+            typeof point.value === 'number' && 
+            !isNaN(point.value) &&
+            point.value > 0 // EMA pode ter valores altos
           );
 
         case 'macd':

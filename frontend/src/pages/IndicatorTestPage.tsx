@@ -88,8 +88,8 @@ const IndicatorTestPage: React.FC = () => {
     bars: testData,
     enabledIndicators: ['rsi', 'ema'],
     configs: {
-      rsi: { period: 14, color: '#8b5cf6', lineWidth: 2 },
-      ema: { period: 20, color: '#f59e0b', lineWidth: 2 }
+      rsi: { enabled: true, period: 14, color: '#8b5cf6', lineWidth: 2 },
+      ema: { enabled: true, period: 20, color: '#f59e0b', lineWidth: 2 }
     },
     autoUpdate: true,
     updateInterval: 1000
