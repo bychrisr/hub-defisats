@@ -4,11 +4,11 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.3.15 ✅ COMPLETA
+## Status Atual: v2.4.0 ✅ COMPLETA
 
-**Versão**: v2.3.15  
-**Status**: Sistema 100% Funcional com Dados Públicos  
-**Data**: 2025-01-26
+**Versão**: v2.4.0  
+**Status**: Sistema Multi-Exchange 100% Funcional  
+**Data**: 2025-01-09
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -78,6 +78,14 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **CRÍTICO**: Lightweight Charts - Estados de Carregamento Adequados
 - ✅ **CRÍTICO**: Lightweight Charts - Validação de Dados Rigorosa
 - ✅ **CRÍTICO**: Lightweight Charts - Performance Otimizada
+- ✅ **NOVO**: Arquitetura Multi-Exchange Genérica
+- ✅ **NOVO**: Sistema de Credenciais Dinâmicas
+- ✅ **NOVO**: Formulários de Credenciais por Exchange
+- ✅ **NOVO**: Teste de Credenciais Genérico
+- ✅ **NOVO**: Interface Admin para Gerenciar Exchanges
+- ✅ **NOVO**: Bloqueio Avançado de Gerenciadores de Senha
+- ✅ **NOVO**: Sistema de Seeders para Usuários de Teste
+- ✅ **NOVO**: Suporte Completo a Plano Vitalício
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real

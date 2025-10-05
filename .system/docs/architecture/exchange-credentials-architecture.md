@@ -2,7 +2,13 @@
 
 ## Visão Geral
 
-Documentação da arquitetura proposta para suportar múltiplas exchanges no Hub-defisats, começando com LN Markets e expandindo para outras exchanges no futuro.
+Documentação da arquitetura implementada para suportar múltiplas exchanges no Hub-defisats. A arquitetura foi completamente implementada e está funcionando em produção.
+
+## Status: ✅ IMPLEMENTADO (v2.4.0)
+
+**Data de Implementação**: 2025-01-09  
+**Status**: 100% Funcional  
+**Exchanges Suportadas**: LN Markets (com suporte para futuras expansões)
 
 ## Situação Atual
 
