@@ -4,6 +4,149 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.4.0] - 2025-01-09
+
+### 🚀 **MULTI-EXCHANGE ARCHITECTURE IMPLEMENTATION**
+
+#### 🎯 **Nova Arquitetura de Exchanges**
+- ✅ **Generic Exchange System**: Implementado sistema genérico para múltiplas exchanges
+- ✅ **Dynamic Credential Forms**: Formulários dinâmicos baseados em tipos de credenciais
+- ✅ **Exchange Management**: Sistema completo de gerenciamento de exchanges
+- ✅ **Credential Testing**: Teste de credenciais genérico para qualquer exchange
+- ✅ **Admin Interface**: Interface administrativa para gerenciar exchanges
+
+#### 🔧 **Implementações Backend**
+- ✅ **ExchangeService**: Serviço genérico para gerenciar exchanges e credenciais
+- ✅ **CredentialTestService**: Serviço para testar credenciais de exchanges
+- ✅ **ExchangeCredentialsController**: Controller atualizado para nova arquitetura
+- ✅ **Database Schema**: Novas tabelas Exchange, ExchangeCredentialType, UserExchangeCredentials
+- ✅ **Migration Support**: Scripts para migrar credenciais existentes
+
+#### 🎨 **Implementações Frontend**
+- ✅ **ExchangeCredentialsForm**: Componente dinâmico para credenciais
+- ✅ **useExchangeCredentials**: Hook para gerenciar dados de exchanges
+- ✅ **ExchangesManagement**: Página admin para gerenciar exchanges
+- ✅ **Profile Integration**: Página de perfil atualizada para múltiplas exchanges
+- ✅ **Advanced Security**: Bloqueio avançado de autocomplete e gerenciadores de senha
+
+#### 🛡️ **Segurança e UX**
+- ✅ **Password Manager Blocking**: CSS e JavaScript para bloquear gerenciadores de senha
+- ✅ **Autocomplete Prevention**: Múltiplas estratégias para prevenir autocomplete
+- ✅ **Field Type Security**: Campos de senha ocultos com type="password"
+- ✅ **Dynamic Form Generation**: Formulários gerados dinamicamente por exchange
+
+#### 👤 **Sistema de Usuários**
+- ✅ **Test User Seeder**: Seeder para usuários de teste com plano vitalício
+- ✅ **Lifetime Plan Support**: Suporte completo para plano vitalício
+- ✅ **User Management**: Melhorias no sistema de gerenciamento de usuários
+
+#### 📊 **Dados e Seeders**
+- ✅ **Exchange Seeder**: Seeder para exchanges padrão (LN Markets)
+- ✅ **Credential Types**: Tipos de credenciais dinâmicos por exchange
+- ✅ **Test Data**: Dados de teste para desenvolvimento
+- ✅ **Database Initialization**: Scripts de inicialização do banco
+
+#### 🔄 **Arquivos Criados/Modificados**
+- ✅ `backend/src/services/exchange.service.ts` - Serviço de exchanges
+- ✅ `backend/src/services/credential-test.service.ts` - Teste de credenciais
+- ✅ `frontend/src/components/ExchangeCredentialsForm.tsx` - Formulário dinâmico
+- ✅ `frontend/src/hooks/useExchangeCredentials.ts` - Hook de exchanges
+- ✅ `frontend/src/pages/admin/ExchangesManagement.tsx` - Admin de exchanges
+- ✅ `backend/src/seeders/test-user.seeder.ts` - Seeder de usuários de teste
+- ✅ `frontend/src/styles/block-password-managers.css` - CSS de segurança
+
+## [v2.3.15] - 2025-01-26
+
+### 🌐 **DASHBOARD PUBLIC DATA SOLUTION**
+
+#### 🚨 **Problema Resolvido**
+- ✅ **Header "Index: Error"**: Corrigido exibição de dados de mercado no header
+- ✅ **400 Bad Request**: Resolvido erro para usuários sem credenciais LN Markets
+- ✅ **Dados Públicos**: Implementado fallback para dados de mercado públicos
+
+#### 🔧 **Implementações Técnicas**
+- ✅ **Public Endpoints**: Criados `/api/public/dashboard` e `/api/public/market/index`
+- ✅ **Robust Endpoint Fix**: `/api/lnmarkets-robust/dashboard` retorna dados públicos quando sem credenciais
+- ✅ **Frontend Hook**: Criado `usePublicMarketData` para dados públicos
+- ✅ **Smart Header**: `LNMarketsHeader` usa dados públicos quando necessário
+- ✅ **Database Scripts**: Criados scripts para garantir configuração correta
+
+#### 📊 **Dados de Mercado Funcionando**
+- ✅ **Index**: $122,850 (dados públicos)
+- ✅ **Trading Fees**: 0.1% (dados públicos)
+- ✅ **Next Funding**: 1m 36s (dados públicos)
+- ✅ **Rate**: 0.00006% (dados públicos)
+
+#### 🎯 **Cenários Cobertos**
+- ✅ **Usuário não autenticado**: Dados públicos via `/api/public/market/index`
+- ✅ **Usuário autenticado com credenciais**: Dados da LN Markets via `/api/lnmarkets-robust/dashboard`
+- ✅ **Usuário autenticado sem credenciais**: Dados públicos via `/api/lnmarkets-robust/dashboard`
+
+#### 📁 **Arquivos Criados/Modificados**
+- ✅ `backend/src/routes/public-dashboard.routes.ts` - Endpoints públicos
+- ✅ `frontend/src/hooks/usePublicMarketData.ts` - Hook para dados públicos
+- ✅ `scripts/dev/ensure-proper-setup.sh` - Script de configuração
+- ✅ `.system/docs/api/DASHBOARD-PUBLIC-DATA-SOLUTION.md` - Documentação completa
+
+## [v2.3.14] - 2025-01-26
+
+### 🐛 **CORREÇÕES DE TIMESTAMP E RSI - LIGHTWEIGHT CHARTS**
+
+#### 🚨 **Problemas Específicos Resolvidos**
+- ✅ **Timestamp Display**: Corrigido formato de timestamp no eixo X
+- ✅ **RSI Lines**: Corrigida exibição das linhas RSI no pane dedicado
+- ✅ **Pane Index**: Corrigido uso do índice dinâmico do pane RSI
+- ✅ **Debug Logs**: Adicionados logs detalhados para troubleshooting
+
+#### 🔧 **Implementações Técnicas**
+- ✅ **Timestamp Fix**: tickMarkFormatter corrigido para timestamps em segundos
+- ✅ **RSI Pane Fix**: Uso de `rsiPane.index()` em vez de índice hardcoded
+- ✅ **Debug Enhancement**: Logs detalhados para cálculo do RSI
+- ✅ **Data Validation**: Validação aprimorada de dados de entrada
+
+#### 🎯 **Impacto**
+- ✅ **Timestamp**: Eixo X agora exibe timestamps corretos
+- ✅ **RSI Visualization**: Linhas RSI agora visíveis no pane dedicado
+- ✅ **Debugging**: Melhor troubleshooting com logs detalhados
+- ✅ **Stability**: Gráfico mais estável e confiável
+
+---
+
+## [v2.3.13] - 2025-01-26
+
+### 🐛 **CORREÇÕES CRÍTICAS - LIGHTWEIGHT CHARTS**
+
+#### 🚨 **Problemas Críticos Resolvidos**
+- ✅ **Chart Initialization**: Corrigido timing de inicialização - agora aguarda dados válidos
+- ✅ **Timeframe Change**: Corrigido problema de reset ao mudar timeframe
+- ✅ **Loading States**: Implementados estados de carregamento adequados
+- ✅ **Data Validation**: Adicionada validação rigorosa antes da criação do gráfico
+- ✅ **Performance**: Eliminadas recriações desnecessárias do gráfico
+- ✅ **UX**: Melhorada experiência do usuário com feedback visual claro
+
+#### 🔧 **Implementações Técnicas**
+- ✅ **hasValidData**: Validação rigorosa de estrutura dos dados
+- ✅ **isChartReady**: Estado de prontidão que aguarda dados válidos
+- ✅ **Criação Condicional**: Gráfico só é criado quando dados estão prontos
+- ✅ **Timeframe Optimization**: Mudança de timeframe sem recriação do gráfico
+- ✅ **Loading Feedback**: Estados visuais claros (Loading, Preparing, Ready, Error)
+- ✅ **Badge Fixes**: Corrigidos problemas de tipos nos componentes Badge
+
+#### 📚 **Documentação Atualizada**
+- ✅ **CRITICAL-GUIDELINES.md**: Diretrizes críticas para futuros desenvolvedores
+- ✅ **lightweight-charts-guia.md**: Seção crítica de inicialização adicionada
+- ✅ **Anti-padrões**: Documentados padrões proibidos e soluções
+- ✅ **Troubleshooting**: Guia rápido de resolução de problemas
+
+#### 🎯 **Impacto**
+- ✅ **Estabilidade**: Gráfico não quebra mais na inicialização
+- ✅ **Performance**: Eliminadas recriações desnecessárias
+- ✅ **UX**: Feedback visual claro para o usuário
+- ✅ **Confiabilidade**: Validação rigorosa de dados
+- ✅ **Manutenibilidade**: Código mais limpo e organizado
+
+---
+
 ## [v2.3.12] - 2025-01-25
 
 ### 🎨 **IMPLEMENTAÇÃO DE DROPDOWN DE TIMEFRAME NO ESTILO LN MARKETS**

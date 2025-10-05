@@ -79,12 +79,7 @@ export const adminUserSeeder: Seeder = {
             data: {
               user_id: user.id,
               role: userData.role,
-              permissions: userData.role === 'superadmin' 
-                ? ['all'] 
-                : ['read', 'write', 'manage_users'],
-              is_active: userData.isActive,
-              created_at: new Date(),
-              updated_at: new Date()
+              created_at: new Date()
             }
           });
 

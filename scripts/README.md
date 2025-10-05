@@ -53,6 +53,55 @@ Configura o ambiente de desenvolvimento completo.
 ./scripts/dev/setup-dev.sh
 ```
 
+### `setup-database.sh`
+**NOVO** - Configuração completa do banco de dados (migrações + população).
+
+```bash
+./scripts/dev/setup-database.sh
+```
+
+### `fix-migration-order.sh`
+**NOVO** - Corrige problemas de ordem de migrações do Prisma.
+
+```bash
+./scripts/dev/fix-migration-order.sh
+```
+
+### `populate-database.sh`
+**NOVO** - Popula banco de dados com dados padrão (seeders).
+
+```bash
+./scripts/dev/populate-database.sh
+```
+
+### `fix-admin-users.sh`
+**NOVO** - Corrige usuários administrativos que não têm registro de admin.
+
+```bash
+./scripts/dev/fix-admin-users.sh
+```
+
+### `create-user-with-hash.sh`
+**NOVO** - Cria usuários com hash de senha correto e plano específico.
+
+```bash
+./scripts/dev/create-user-with-hash.sh
+```
+
+### `run-essential-seeders.sh`
+**NOVO** - Executa apenas os seeders essenciais que funcionam.
+
+```bash
+./scripts/dev/run-essential-seeders.sh
+```
+
+### `ensure-proper-setup.sh`
+**NOVO** - Garante que configurações essenciais estejam corretas.
+
+```bash
+./scripts/dev/ensure-proper-setup.sh
+```
+
 ### `create-dev-user.sh`
 Cria usuários de teste para desenvolvimento.
 

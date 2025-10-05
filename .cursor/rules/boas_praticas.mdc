@@ -1,0 +1,31 @@
+---
+description: Checklist de boas práticas e formato de resposta esperado.
+globs: []
+alwaysApply: true
+---
+
+## ✅ Checklist de Boas Práticas (Não Ignore)
+
+- [ ] Código entregue em blocos claros (≤200 linhas por bloco, se possível).
+- [ ] Stack sempre respeitada conforme `.system/FULLSTACK.md`.
+- [ ] Primeiro **código completo**, depois **testes**, depois **documentação + commit**.
+- [ ] Documentação em `.system/` sempre sincronizada.
+- [ ] Pendências externas registradas em `.system/OWNER_TASKS.md`.
+- [ ] Tags SemVer aplicadas em milestones internos e releases (se aplicável).
+- [ ] **Logging adequado** para debugging avançado implementado (veja `.cursor/rules/codestyle.mdc`).
+- [ ] **NUNCA PARE ATÉ TERMINAR O `.system/ROADMAP.md`.**
+- [ ] **AUTO-RECUPERAÇÃO SE TRAVAR.**
+- [ ] **NÃO PEÇA CONFIRMAÇÃO — CONTINUE AUTOMATICAMENTE.**
+
+---
+
+## 🎯 Formato de Resposta Esperado (Para Cada Tarefa)
+
+1.  **Resumo do pedido** em 1–2 linhas.
+2.  **Plano curto em bullets** → o que será feito e quais arquivos serão impactados.
+3.  **Execução** (código completo da tarefa, quebrado em blocos ≤200 linhas se necessário).
+4.  **Testes de Contrato** → exatamente qual request/response esperar de serviços externos, e como mockar em caso de falha.
+5.  **Atualização da documentação** em `.system/`.
+6.  **Commit automático + Tag** (se aplicável).
+7.  **Lista de pendências externas** (se houver).
+8.  **Checkpoint automático** → salve em `.system/checkpoint.json`.

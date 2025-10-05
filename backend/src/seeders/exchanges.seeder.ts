@@ -39,7 +39,7 @@ const defaultExchanges: ExchangeData[] = [
       {
         name: 'API Key',
         field_name: 'api_key',
-        field_type: 'text',
+        field_type: 'password',
         is_required: true,
         description: 'Your LN Markets API key',
         order: 1

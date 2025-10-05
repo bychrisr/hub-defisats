@@ -148,6 +148,7 @@ export const plansSeeder: Seeder = {
       const createdPlans = await prisma.plan.createMany({
         data: defaultPlans.map(plan => ({
           name: plan.name,
+          slug: plan.name.toLowerCase().replace(/\s+/g, '-'),
           description: plan.description,
           price: plan.price,
           currency: plan.currency,

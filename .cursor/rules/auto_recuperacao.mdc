@@ -1,0 +1,37 @@
+---
+description: Auto-recuperação em caso de travamento ou perda de contexto.
+globs: []
+alwaysApply: true
+---
+
+## 🔄 Auto-Recuperação (Se Travar, Perder Contexto ou Esquecer)
+
+### 1. Checkpoint Automático
+
+- A cada subtarefa concluída com sucesso (código, testes, documentação, commit), salve um novo checkpoint em `.system/checkpoint.json`:
+
+```json
+{
+  "last_task": "caminho/do/arquivo/completo.ts",
+  "status": "completed",
+  "timestamp": "YYYY-MM-DDTHH:MM:SSZ",
+  "next_task": "caminho/da/proxima/subtarefa.ts"
+}
+ ```
+
+ ### 2. Recuperação Automática
+
+- Se o Cursor travar, perder contexto ou esquecer:
+  1.  Leia `.system/checkpoint.json`.
+  2.  Continue da `next_task`.
+  3.  Não repita tarefas já concluídas (verifique o `last_task`).
+  4.  Não peça confirmação — continue automaticamente.
+
+### 3. Validação de Integridade
+
+- A cada subtarefa, verifique se os arquivos gerados existem e estão corretos.
+- Se faltar algo, recrie automaticamente — **não pare, não peça confirmação**.
+
+```
+
+---

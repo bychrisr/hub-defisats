@@ -43,6 +43,9 @@
 - **MetricsHistoryService**: Histórico de métricas e performance
 - **WebSocketService**: Comunicação em tempo real com LN Markets
 - **AdminMiddleware**: Middleware para verificação de permissões administrativas
+- **ExchangeService**: Gerenciamento genérico de exchanges e credenciais
+- **CredentialTestService**: Teste de credenciais para múltiplas exchanges
+- **TestUserSeeder**: Seeder para usuários de teste com plano vitalício
 
 ## 2. Frontend
 

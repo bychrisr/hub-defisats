@@ -4,11 +4,11 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.3.12 ✅ COMPLETA
+## Status Atual: v2.4.0 ✅ COMPLETA
 
-**Versão**: v2.3.12  
-**Status**: Sistema 100% Funcional com Interface Modernizada  
-**Data**: 2025-01-25
+**Versão**: v2.4.0  
+**Status**: Sistema Multi-Exchange 100% Funcional  
+**Data**: 2025-01-09
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -73,6 +73,19 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **NOVO**: Dropdown de Timeframe no Estilo LN Markets
 - ✅ **NOVO**: Interface de Gráficos Modernizada e Limpa
 - ✅ **NOVO**: Remoção de Elementos Redundantes da UI
+- ✅ **CRÍTICO**: Lightweight Charts - Correções de Inicialização
+- ✅ **CRÍTICO**: Lightweight Charts - Correções de Timeframe Change
+- ✅ **CRÍTICO**: Lightweight Charts - Estados de Carregamento Adequados
+- ✅ **CRÍTICO**: Lightweight Charts - Validação de Dados Rigorosa
+- ✅ **CRÍTICO**: Lightweight Charts - Performance Otimizada
+- ✅ **NOVO**: Arquitetura Multi-Exchange Genérica
+- ✅ **NOVO**: Sistema de Credenciais Dinâmicas
+- ✅ **NOVO**: Formulários de Credenciais por Exchange
+- ✅ **NOVO**: Teste de Credenciais Genérico
+- ✅ **NOVO**: Interface Admin para Gerenciar Exchanges
+- ✅ **NOVO**: Bloqueio Avançado de Gerenciadores de Senha
+- ✅ **NOVO**: Sistema de Seeders para Usuários de Teste
+- ✅ **NOVO**: Suporte Completo a Plano Vitalício
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -810,7 +823,33 @@ Ter **entradas automáticas + Take Profit/Stop Loss** funcionando.
 
 ---
 
+## 🎯 **v2.3.15 - DASHBOARD PUBLIC DATA SOLUTION** ✅ COMPLETA
+
+### **Problema Resolvido**
+- **Header "Index: Error"**: Corrigido exibição de dados de mercado
+- **400 Bad Request**: Resolvido para usuários sem credenciais LN Markets
+- **UX Quebrada**: Header sempre exibe dados de mercado agora
+
+### **Implementações Técnicas**
+- ✅ **Public Endpoints**: `/api/public/dashboard` e `/api/public/market/index`
+- ✅ **Robust Endpoint Fix**: Retorna dados públicos quando sem credenciais
+- ✅ **Frontend Hook**: `usePublicMarketData` para dados públicos
+- ✅ **Smart Header**: Lógica inteligente de fallback
+- ✅ **Database Scripts**: Configuração automática
+
+### **Cenários Cobertos**
+- ✅ **Usuário não autenticado**: Dados públicos
+- ✅ **Usuário autenticado com credenciais**: Dados da LN Markets
+- ✅ **Usuário autenticado sem credenciais**: Dados públicos
+
+### **Resultado**
+- ✅ **Header sempre funcional**: Nunca mais "Index: Error"
+- ✅ **Dados reais**: Index $122,850, Trading Fees 0.1%, etc.
+- ✅ **UX melhorada**: Experiência consistente para todos os usuários
+
+---
+
 **Documento**: Roadmap Técnico  
-**Versão**: 1.8.0  
-**Última Atualização**: 2025-01-15  
+**Versão**: 1.9.0  
+**Última Atualização**: 2025-01-26  
 **Responsável**: Equipe de Desenvolvimento

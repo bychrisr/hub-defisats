@@ -1,0 +1,35 @@
+---
+description: Fluxo rígido de execução contínua para tarefas.
+globs: []
+alwaysApply: true
+---
+
+## 🔁 Regras de Execução Contínua (Não Pare)
+
+### 1. Leitura Inicial (Só Uma Vez por Tarefa Maior)
+
+- Leia **integralmente** todos os arquivos de `.system/` relevantes para a tarefa solicitada.
+- Se algum arquivo de `.system/` não existir, **crie com cabeçalho mínimo**.
+- **Nunca invente stack, endpoints ou requisitos fora do que está documentado.**
+
+### 2. Execução de Tarefas (Fluxo Rígido + Contínuo)
+
+Para cada **tarefa maior**, quebre em subtarefas lógicas.
+**Implemente todas as subtarefas primeiro (código completo)** — mas **NÃO PARE AQUI**.
+
+#### ➤ Fluxo Obrigatório (Não Pule Etapas, Não Pare Até Terminar)
+
+1. **Desenvolve** → Escreva o código completo da subtarefa.
+2. **Testa** → Escreva e execute testes de contrato, unitários e de integração.
+3. **Corrige** → Se falhar, refatore até passar em **todos os testes**.
+4. **Documenta** → Atualize `.system/ROADMAP.md`, `.system/CHANGELOG.md`, `.system/DECISIONS.md`, `.system/OWNER_TASKS.md` e docs relacionados.
+5. **Commita** → Crie commit automático no padrão Conventional Commits.
+6. **Tagueia** → Se for milestone, crie tag SemVer (`v0.1.0`, `v0.2.0-alpha`, etc).
+7. **Continue** → Vá para a próxima subtarefa **sem pedir confirmação, sem parar, sem interromper**.
+
+#### ⚠️ Regras Importantes
+
+- **NÃO COMMITA ANTES DE PASSAR NOS TESTES.**
+- **NÃO DOCUMENTA ANTES DE COMMITAR.**
+- **NÃO AVANÇA PARA PRÓXIMA TAREFA SEM VALIDAR ESTA.**
+- **NÃO PARE ATÉ TERMINAR O ROADMAP.md.**

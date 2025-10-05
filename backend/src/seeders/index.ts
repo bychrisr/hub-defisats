@@ -8,6 +8,7 @@
 import { getPrisma } from '../lib/prisma';
 import { rateLimitConfigSeeder } from './rate-limit-config.seeder';
 import { adminUserSeeder } from './admin-user.seeder';
+import { testUserSeeder } from './test-user.seeder';
 import { plansSeeder } from './plans.seeder';
 import { healthCheckSeeder } from './health-check.seeder';
 import { exchangesSeeder } from './exchanges.seeder';
@@ -33,6 +34,7 @@ export class DatabaseSeeder {
     this.seeders = [
       rateLimitConfigSeeder,
       adminUserSeeder,
+      testUserSeeder,
       plansSeeder,
       healthCheckSeeder,
       exchangesSeeder,

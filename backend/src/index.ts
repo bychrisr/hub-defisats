@@ -48,6 +48,8 @@ import { healthRoutes } from './routes/health.routes';
 import { swCacheRoutes } from './routes/sw-cache.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
+import userPreferencesRoutes from './routes/userPreferences.routes';
+import userPreferencesTestRoutes from './routes/userPreferencesTest.routes';
 import tradingViewRoutes from './routes/tradingview.routes';
 import { exchangeCredentialsRoutes } from './routes/exchangeCredentials.routes';
 import { versionRoutes } from './routes/version.routes';
@@ -589,6 +591,11 @@ async function registerRoutes() {
   await fastify.register(tradingViewRoutes, { prefix: '/api' });
   console.log('✅ TradingView Proxy routes registered');
 
+  // Public Dashboard routes (no authentication required)
+  const { publicDashboardRoutes } = await import('./routes/public-dashboard.routes');
+  await fastify.register(publicDashboardRoutes);
+  console.log('✅ Public Dashboard routes registered');
+
   // Coupon Admin routes
   await fastify.register(couponAdminRoutes, { prefix: '/api/admin/coupons' });
   console.log('✅ Coupon Admin routes registered');
@@ -695,6 +702,12 @@ async function registerRoutes() {
   
   await fastify.register(uploadRoutes);
   console.log('✅ Upload routes registered');
+
+  await fastify.register(userPreferencesRoutes, { prefix: '/api/user-preferences' });
+  console.log('✅ User preferences routes registered');
+
+  await fastify.register(userPreferencesTestRoutes, { prefix: '/api/user-preferences-test' });
+  console.log('✅ User preferences test routes registered');
 
   // Version routes (public)
   await fastify.register(versionRoutes, { prefix: '/api' });

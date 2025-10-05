@@ -1,14 +1,20 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { AuthService } from '../services/auth.service';
+import { ExchangeService } from '../services/exchange.service';
+import { CredentialTestService } from '../services/credential-test.service';
 
 export class ExchangeCredentialsController {
   private prisma: PrismaClient;
   private authService: AuthService;
+  private exchangeService: ExchangeService;
+  private credentialTestService: CredentialTestService;
 
   constructor(prisma?: PrismaClient, authService?: AuthService) {
     this.prisma = prisma || new PrismaClient();
     this.authService = authService || new AuthService(this.prisma, null as any);
+    this.exchangeService = new ExchangeService(this.prisma);
+    this.credentialTestService = new CredentialTestService(this.prisma, this.exchangeService);
   }
 
   private async getPrisma() {
@@ -25,16 +31,7 @@ export class ExchangeCredentialsController {
     try {
       console.log('🔍 EXCHANGE CREDENTIALS - Fetching exchanges...');
 
-      const prisma = await this.getPrisma();
-      const exchanges = await prisma.exchange.findMany({
-        where: { is_active: true },
-        include: {
-          credential_types: {
-            orderBy: { order: 'asc' }
-          }
-        },
-        orderBy: { name: 'asc' }
-      });
+      const exchanges = await this.exchangeService.getActiveExchanges();
 
       console.log('✅ EXCHANGE CREDENTIALS - Exchanges fetched successfully:', exchanges.length);
 
@@ -63,20 +60,7 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Fetching user credentials for:', user?.id);
 
-      const prisma = await this.getPrisma();
-      const userCredentials = await prisma.userExchangeCredentials.findMany({
-        where: { user_id: user.id },
-        include: {
-          exchange: {
-            include: {
-              credential_types: {
-                orderBy: { order: 'asc' }
-              }
-            }
-          }
-        },
-        orderBy: { created_at: 'desc' }
-      });
+      const userCredentials = await this.exchangeService.getUserCredentials(user.id);
 
       // Descriptografar credenciais para exibição
       const decryptedCredentials = userCredentials.map(cred => {
@@ -216,13 +200,8 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Updating credentials for exchange:', exchange_id, 'user:', user?.id);
 
-      const prisma = await this.getPrisma();
       // Verificar se a exchange existe
-      const exchange = await prisma.exchange.findUnique({
-        where: { id: exchange_id },
-        include: { credential_types: true }
-      });
-
+      const exchange = await this.exchangeService.getExchangeById(exchange_id);
       if (!exchange) {
         return reply.status(404).send({
           success: false,
@@ -240,39 +219,12 @@ export class ExchangeCredentialsController {
         }
       });
 
-      // Upsert credenciais do usuário
-      const userCredentials = await prisma.userExchangeCredentials.upsert({
-        where: {
-          user_id_exchange_id: {
-            user_id: user.id,
-            exchange_id: exchange_id
-          }
-        },
-        update: {
-          credentials: encryptedCredentials,
-          is_active: true,
-          is_verified: false, // Re-verify after update
-          updated_at: new Date()
-        },
-        create: {
-          user_id: user.id,
-          exchange_id: exchange_id,
-          credentials: encryptedCredentials,
-          is_active: true,
-          is_verified: false,
-          created_at: new Date(),
-          updated_at: new Date()
-        },
-        include: {
-          exchange: {
-            include: {
-              credential_types: {
-                orderBy: { order: 'asc' }
-              }
-            }
-          }
-        }
-      });
+      // Usar o novo serviço para upsert credenciais
+      const userCredentials = await this.exchangeService.upsertUserCredentials(
+        user.id,
+        exchange_id,
+        encryptedCredentials
+      );
 
       // Descriptografar para resposta
       const decryptedCreds: Record<string, string> = {};
@@ -319,59 +271,10 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Testing credentials for exchange:', exchangeId, 'user:', user?.id);
 
-      const prisma = await this.getPrisma();
-      // Buscar credenciais do usuário
-      const userCredentials = await prisma.userExchangeCredentials.findUnique({
-        where: {
-          user_id_exchange_id: {
-            user_id: user.id,
-            exchange_id: exchangeId
-          }
-        },
-        include: { exchange: true }
-      });
+      // Usar o novo serviço de teste de credenciais
+      const testResult = await this.credentialTestService.testUserCredentials(user.id, exchangeId);
 
-      if (!userCredentials) {
-        return reply.status(404).send({
-          success: false,
-          error: 'CREDENTIALS_NOT_FOUND',
-          message: 'Credentials not found for this exchange'
-        });
-      }
-
-      // Descriptografar credenciais para teste
-      const decryptedCreds: Record<string, string> = {};
-      
-      Object.entries(userCredentials.credentials as Record<string, string>).forEach(([key, value]) => {
-        try {
-          decryptedCreds[key] = this.authService.decryptData(value);
-        } catch (decryptError) {
-          console.warn(`⚠️ EXCHANGE CREDENTIALS - Failed to decrypt ${key}:`, decryptError);
-          return reply.status(500).send({
-            success: false,
-            error: 'DECRYPT_FAILED',
-            message: 'Failed to decrypt credentials for testing'
-          });
-        }
-      });
-
-      // Aqui você implementaria a lógica de teste específica para cada exchange
-      // Por enquanto, vamos simular um teste bem-sucedido
-      const testResult = {
-        success: true,
-        message: `Credentials for ${userCredentials.exchange.name} are valid`
-      };
-
-      // Atualizar status de verificação
-      await prisma.userExchangeCredentials.update({
-        where: { id: userCredentials.id },
-        data: {
-          is_verified: testResult.success,
-          last_test: new Date()
-        }
-      });
-
-      console.log('✅ EXCHANGE CREDENTIALS - Credentials tested successfully');
+      console.log('✅ EXCHANGE CREDENTIALS - Credentials tested:', testResult);
 
       return reply.status(200).send(testResult);
 
@@ -395,15 +298,10 @@ export class ExchangeCredentialsController {
 
       console.log('🔍 EXCHANGE CREDENTIALS - Deleting credentials for exchange:', exchangeId, 'user:', user?.id);
 
-      const prisma = await this.getPrisma();
-      const deletedCredentials = await prisma.userExchangeCredentials.deleteMany({
-        where: {
-          user_id: user.id,
-          exchange_id: exchangeId
-        }
-      });
+      // Usar o novo serviço para deletar credenciais
+      await this.exchangeService.deleteUserCredentials(user.id, exchangeId);
 
-      console.log('✅ EXCHANGE CREDENTIALS - Credentials deleted successfully:', deletedCredentials.count);
+      console.log('✅ EXCHANGE CREDENTIALS - Credentials deleted successfully');
 
       return reply.status(200).send({
         success: true,

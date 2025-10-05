@@ -1,22 +1,19 @@
-import { tradingViewDataService } from './tradingViewData.service';
-import { CandleData } from '../types/market';
+// src/services/marketData.service.ts
+import axios from 'axios';
 
-// CandleData já importado de types/market
-
-interface MarketData {
-  symbol: string;
-  price: number;
-  change24h: number;
-  changePercent24h: number;
-  volume24h: number;
-  high24h: number;
-  low24h: number;
-  candles: CandleData[];
+export interface CandleData {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
 }
 
-interface WebSocketMessage {
-  type: 'price_update' | 'candle_update' | 'market_data' | 'error';
-  data: any;
+export interface MarketData {
+  price: number;
+  change24h: number;
+  volume: number;
   timestamp: number;
 }
 
@@ -25,294 +22,227 @@ class MarketDataService {
   private wsUrl: string;
 
   constructor() {
-    // ✅ Usar caminho relativo para funcionar com proxy do Vite
-    this.baseUrl = '';
-    this.wsUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:13000';
+    this.wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:13000';
   }
 
-  // Obter dados históricos usando TradingView Data Service (nova arquitetura)
-  async getHistoricalDataFromBinance(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
-    console.log('🔄 MARKET DATA - Using TradingView Data Service for historical data');
+  // Generate sample data for development
+  private generateSampleData(symbol: string, timeframe: string, limit: number): CandleData[] {
+    console.log('📊 MARKET DATA - Generating sample data for development');
     
-    try {
-      const data = await tradingViewDataService.getHistoricalData(symbol, timeframe, limit, startTime);
-      
-      console.log(`✅ MARKET DATA - Data fetched successfully:`, {
-        symbol,
-        timeframe,
-        count: data.length,
-        source: 'TradingView-first with fallbacks'
-      });
-      
-      return data;
-    } catch (error: any) {
-      console.error('❌ MARKET DATA - TradingView Data Service failed:', error);
-      throw error;
-    }
-  }
-
-  // Método legado mantido para compatibilidade (agora usa Exchange Weight Service)
-  async getHistoricalDataFromBinanceLegacy(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
-    const mapTf = (tf: string) => {
-      // Normalizar para intervalos do Binance
-      const m = String(tf).toLowerCase();
-      if (m === '1h' || m === '60' || m === '60m') return '1h';
-      if (m === '4h' || m === '240' || m === '240m') return '4h';
-      if (m === '1d' || m === 'd' || m === '1D') return '1d';
-      if (m === '15m' || m === '15') return '15m';
-      if (m === '5m' || m === '5') return '5m';
-      return '1m';
-    };
-
-    try {
-      const interval = mapTf(timeframe);
-      let url = `https://api.binance.com/api/v3/klines?symbol=${symbol.replace(':','')}&interval=${interval}&limit=${Math.min(limit || 500, 1000)}`;
-      
-      // Adicionar startTime se fornecido
-      if (startTime) {
-        url += `&startTime=${startTime * 1000}`; // Binance usa milissegundos
-      }
-      
-      const r = await fetch(url);
-      if (!r.ok) throw new Error(`Binance HTTP ${r.status}`);
-      const arr: any[] = await r.json();
-      return arr.map((k: any[]) => ({
-        time: Math.floor(k[0] / 1000),
-        open: parseFloat(k[1]),
-        high: parseFloat(k[2]),
-        low: parseFloat(k[3]),
-        close: parseFloat(k[4]),
-        volume: parseFloat(k[5])
-      }));
-    } catch (e) {
-      console.error('❌ MARKET DATA - Binance API failed:', e);
-      return this.generateSampleData();
-    }
-  }
-
-  // Obter dados históricos via REST API
-  async getHistoricalData(symbol: string, timeframe: string = '1m', limit: number = 100, startTime?: number): Promise<CandleData[]> {
-    const mapTf = (tf: string) => {
-      // Normalizar para intervalos do Binance
-      const m = String(tf).toLowerCase();
-      if (m === '1h' || m === '60' || m === '60m') return '1h';
-      if (m === '4h' || m === '240' || m === '240m') return '4h';
-      if (m === '1d' || m === 'd' || m === '1D') return '1d';
-      if (m === '15m' || m === '15') return '15m';
-      if (m === '5m' || m === '5') return '5m';
-      return '1m';
-    };
-
-    const req = async (): Promise<CandleData[]> => {
-      let url = `${this.baseUrl}/api/market/historical?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`;
-      if (startTime) {
-        url += `&startTime=${startTime}`;
-      }
-      
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error(String(response.status));
-      }
-      const data = await response.json();
-      return data.data?.candles || [];
-    };
-
-    const fallbackBinance = async (): Promise<CandleData[]> => {
-      try {
-        const interval = mapTf(timeframe);
-        let url = `https://api.binance.com/api/v3/klines?symbol=${symbol.replace(':','')}&interval=${interval}&limit=${Math.min(limit || 500, 1000)}`;
-        
-        // Adicionar startTime se fornecido
-        if (startTime) {
-          url += `&startTime=${startTime * 1000}`; // Binance usa milissegundos
-        }
-        
-        const r = await fetch(url);
-        if (!r.ok) throw new Error(`Binance HTTP ${r.status}`);
-        const arr: any[] = await r.json();
-        return arr.map((k: any[]) => ({
-          time: Math.floor(k[0] / 1000),
-          open: parseFloat(k[1]),
-          high: parseFloat(k[2]),
-          low: parseFloat(k[3]),
-          close: parseFloat(k[4]),
-          volume: parseFloat(k[5])
-        }));
-      } catch (e) {
-        console.error('❌ MARKET DATA - Binance fallback failed:', e);
-        return this.generateSampleData();
-      }
-    };
-
-    try {
-      const candles = await req();
-      console.log('✅ MARKET DATA - Historical data received:', { count: candles.length });
-      return candles;
-    } catch (error) {
-      console.warn('⚠️ MARKET DATA - Primary historical endpoint failed, using Binance fallback:', error);
-      return fallbackBinance();
-    }
-  }
-
-  // Obter dados de mercado atuais
-  async getMarketData(symbol: string): Promise<MarketData> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/market/data?symbol=${symbol}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('✅ MARKET DATA - Current market data received:', data);
-      return data.data || this.generateSampleMarketData(symbol);
-    } catch (error) {
-      console.error('❌ MARKET DATA - Erro ao obter dados de mercado:', error);
-      return this.generateSampleMarketData(symbol);
-    }
-  }
-
-  // Gerar dados de exemplo para demonstração
-  private generateSampleData(): CandleData[] {
-    const data: CandleData[] = [];
-    const now = Date.now();
-    let price = 50000; // Preço inicial em USD
-
-    for (let i = 100; i >= 0; i--) {
-      const time = (now - i * 60000) / 1000; // 1 minuto atrás
-      const change = (Math.random() - 0.5) * 100; // Mudança menor e mais realista
-      price += change;
-      
+    const bars: CandleData[] = [];
+    let price = 50000; // Starting BTC price
+    const now = Date.now() / 1000;
+    
+    // Calculate interval in seconds based on timeframe
+    const intervalSeconds = this.getIntervalSeconds(timeframe);
+    
+    for (let i = 0; i < limit; i++) {
+      const time = now - (limit - i) * intervalSeconds;
+      const change = (Math.random() - 0.5) * 1000; // Random price change
       const open = price;
-      const close = price + (Math.random() - 0.5) * 50; // Variação menor
-      const high = Math.max(open, close) + Math.random() * 25;
-      const low = Math.min(open, close) - Math.random() * 25;
+      const close = price + change;
+      const high = Math.max(open, close) + Math.random() * 200;
+      const low = Math.min(open, close) - Math.random() * 200;
       const volume = Math.random() * 1000000;
-
-      data.push({
-        time,
-        open: Math.max(0, open),
-        high: Math.max(0, high),
-        low: Math.max(0, low),
-        close: Math.max(0, close),
+      
+      bars.push({
+        time: Math.floor(time),
+        open,
+        high,
+        low,
+        close,
         volume
       });
+      
+      price = close;
+    }
+    
+    return bars;
+  }
+
+  private getIntervalSeconds(timeframe: string): number {
+    const tf = timeframe.toLowerCase();
+    if (tf.includes('1m')) return 60;
+    if (tf.includes('5m')) return 300;
+    if (tf.includes('15m')) return 900;
+    if (tf.includes('30m')) return 1800;
+    if (tf.includes('1h')) return 3600;
+    if (tf.includes('4h')) return 14400;
+    if (tf.includes('1d')) return 86400;
+    return 3600; // Default 1h
+  }
+
+  // Map timeframe to Binance interval
+  private mapTimeframeToBinance(timeframe: string): string {
+    const tf = timeframe.toLowerCase();
+    if (tf.includes('1m')) return '1m';
+    if (tf.includes('5m')) return '5m';
+    if (tf.includes('15m')) return '15m';
+    if (tf.includes('30m')) return '30m';
+    if (tf.includes('1h')) return '1h';
+    if (tf.includes('4h')) return '4h';
+    if (tf.includes('1d')) return '1d';
+    return '1h'; // Default
+  }
+
+  // Clean symbol for Binance API
+  private cleanSymbolForBinance(symbol: string): string {
+    return symbol
+      .replace('BINANCE:', '')
+      .replace(':', '')
+      .toUpperCase();
+  }
+
+  // Get historical data through TradingView proxy
+  async getHistoricalData(symbol: string, timeframe: string = '1h', limit: number = 100, startTime?: number): Promise<CandleData[]> {
+    console.log('🔄 MARKET DATA - Fetching historical data via TradingView proxy:', { symbol, timeframe, limit, startTime });
+
+    // Try TradingView proxy first (recommended)
+    try {
+      const response = await axios.get(`${this.baseUrl}/api/tradingview/scanner`, {
+        params: {
+          symbol: symbol.replace('BINANCE:', ''),
+          timeframe,
+          limit
+        },
+        timeout: 15000
+      });
+
+      if (response.data && response.data.success && response.data.data) {
+        console.log('✅ MARKET DATA - TradingView proxy success:', {
+          count: response.data.data.length,
+          source: response.data.source,
+          cacheHit: response.data.cacheHit
+        });
+        
+        return response.data.data.map((candle: any) => ({
+          time: candle.time,
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+          volume: candle.volume || 0
+        }));
+      }
+    } catch (error: any) {
+      console.warn('⚠️ MARKET DATA - TradingView proxy failed:', error.message);
     }
 
-    return data;
-  }
-
-  private generateSampleMarketData(symbol: string): MarketData {
-    const candles = this.generateSampleData();
-    const latestCandle = candles[candles.length - 1];
-    const firstCandle = candles[0];
-    
-    const change24h = latestCandle.close - firstCandle.open;
-    const changePercent24h = (change24h / firstCandle.open) * 100;
-
-    return {
-      symbol,
-      price: latestCandle.close,
-      change24h,
-      changePercent24h,
-      volume24h: candles.reduce((sum, candle) => sum + candle.volume, 0),
-      high24h: Math.max(...candles.map(c => c.high)),
-      low24h: Math.min(...candles.map(c => c.low)),
-      candles
-    };
-  }
-
-  // Processar mensagem WebSocket
-  processWebSocketMessage(message: WebSocketMessage): CandleData | null {
+    // Try legacy market endpoint as fallback
     try {
-      switch (message.type) {
-        case 'price_update':
-          return {
-            time: message.timestamp,
-            open: message.data.price,
-            high: message.data.price,
-            low: message.data.price,
-            close: message.data.price,
-            volume: message.data.volume || 0
-          };
-        
-        case 'candle_update':
-          return {
-            time: message.data.time,
-            open: message.data.open,
-            high: message.data.high,
-            low: message.data.low,
-            close: message.data.close,
-            volume: message.data.volume
-          };
-        
-        case 'market_data':
-          return {
-            time: message.timestamp,
-            open: message.data.open,
-            high: message.data.high,
-            low: message.data.low,
-            close: message.data.close,
-            volume: message.data.volume
-          };
-        
-        default:
-          console.warn('⚠️ MARKET DATA - Tipo de mensagem desconhecido:', message.type);
-          return null;
+      const response = await axios.get(`${this.baseUrl}/api/market/historical`, {
+        params: {
+          symbol: symbol.replace('BINANCE:', ''),
+          timeframe,
+          limit,
+          startTime
+        },
+        timeout: 10000
+      });
+
+      if (response.data && response.data.data) {
+        console.log('✅ MARKET DATA - Legacy endpoint success:', response.data.data.length, 'candles');
+        return response.data.data.map((candle: any) => ({
+          time: candle.time,
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+          volume: candle.volume || 0
+        }));
+      }
+    } catch (error: any) {
+      console.warn('⚠️ MARKET DATA - Legacy endpoint failed:', error.message);
+    }
+
+    // Fallback to sample data for development
+    console.log('📊 MARKET DATA - Using sample data for development');
+    return this.generateSampleData(symbol, timeframe, limit);
+  }
+
+  // Get current market data through TradingView proxy
+  async getMarketData(symbol: string): Promise<MarketData> {
+    // Try TradingView proxy first
+    try {
+      const response = await axios.get(`${this.baseUrl}/api/tradingview/market/${symbol.replace('BINANCE:', '')}`, {
+        timeout: 5000
+      });
+
+      if (response.data && response.data.success && response.data.data) {
+        console.log('✅ MARKET DATA - TradingView market data success:', response.data.data);
+        return {
+          price: response.data.data.price,
+          change24h: response.data.data.change24h,
+          volume: response.data.data.volume,
+          timestamp: response.data.data.timestamp || Date.now()
+        };
+      }
+    } catch (error: any) {
+      console.warn('⚠️ MARKET DATA - TradingView market proxy failed:', error.message);
+    }
+
+    // Try legacy ticker endpoint as fallback
+    try {
+      const response = await axios.get(`${this.baseUrl}/api/market/ticker`, {
+        params: { symbol: symbol.replace('BINANCE:', '') },
+        timeout: 5000
+      });
+
+      if (response.data && response.data.data) {
+        return {
+          price: response.data.data.price,
+          change24h: response.data.data.change24h,
+          volume: response.data.data.volume,
+          timestamp: Date.now()
+        };
       }
     } catch (error) {
-      console.error('❌ MARKET DATA - Erro ao processar mensagem WebSocket:', error);
+      console.warn('⚠️ MARKET DATA - Legacy ticker endpoint failed, using sample data');
+    }
+
+    // Fallback to sample data
+    const samplePrice = 50000 + (Math.random() - 0.5) * 2000;
+    return {
+      price: samplePrice,
+      change24h: (Math.random() - 0.5) * 10,
+      volume: Math.random() * 1000000,
+      timestamp: Date.now()
+    };
+  }
+
+  // WebSocket connection for real-time data
+  connectWebSocket(symbol: string, onMessage: (data: any) => void): WebSocket | null {
+    try {
+      const ws = new WebSocket(`${this.wsUrl}/ws/market?symbol=${encodeURIComponent(symbol)}`);
+      
+      ws.onopen = () => {
+        console.log('📡 MARKET DATA - WebSocket connected for', symbol);
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          onMessage(data);
+        } catch (error) {
+          console.error('❌ MARKET DATA - WebSocket message parse error:', error);
+        }
+      };
+      
+      ws.onclose = () => {
+        console.log('📡 MARKET DATA - WebSocket disconnected');
+      };
+      
+      ws.onerror = (error) => {
+        console.error('❌ MARKET DATA - WebSocket error:', error);
+      };
+      
+      return ws;
+    } catch (error) {
+      console.error('❌ MARKET DATA - WebSocket connection failed:', error);
       return null;
     }
-  }
-
-  // Formatar dados para o gráfico
-  formatCandleData(candle: CandleData) {
-    return {
-      time: candle.time,
-      open: candle.open,
-      high: candle.high,
-      low: candle.low,
-      close: candle.close,
-    };
-  }
-
-  // Calcular estatísticas
-  calculateStats(candles: CandleData[]) {
-    if (candles.length === 0) return null;
-
-    const prices = candles.map(c => c.close);
-    const volumes = candles.map(c => c.volume);
-    
-    const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
-    const maxPrice = Math.max(...prices);
-    const minPrice = Math.min(...prices);
-    const totalVolume = volumes.reduce((sum, vol) => sum + vol, 0);
-    
-    const priceChange = prices[prices.length - 1] - prices[0];
-    const priceChangePercent = (priceChange / prices[0]) * 100;
-
-    return {
-      avgPrice,
-      maxPrice,
-      minPrice,
-      totalVolume,
-      priceChange,
-      priceChangePercent,
-      candleCount: candles.length
-    };
   }
 }
 
 export const marketDataService = new MarketDataService();
-export type { CandleData, MarketData, WebSocketMessage };

@@ -1,0 +1,79 @@
+---
+description: Padrões de estilo de código e logging para o projeto, baseados no padrão existente.
+globs: []
+alwaysApply: true
+---
+
+## ✍️ Estilo de Código e Logging
+
+### Logging para Debugging Avançado (Padrão Atual)
+
+Este projeto utiliza um padrão específico de logging para facilitar o diagnóstico e rastreamento. A IA deve **seguir este padrão** ao adicionar novos logs.
+
+#### Formato Geral
+
+- **Estrutura:** `[Emoji] NOME_DO_COMPONENTE/SERVICE - Descrição da ação ou estado`
+- **Emoji:** Usado para categorizar o tipo de log (ver abaixo).
+- **Nome do Componente/Serviço:** Nome curto e descritivo da parte do código que está gerando o log (ex: `VERSION SERVICE`, `UPDATE NOTIFICATION`, `CHART CREATION`, `INDICATOR MANAGER`).
+- **Mensagem:** Descrição clara e concisa da ação, estado ou evento. Inclua **dados relevantes** em formato `{chave: valor}` sempre que útil para debug, como objetos de estado, resultados de operações, parâmetros ou IDs.
+
+#### Emojis Padrão e Seus Significados
+
+- **`🚀` (Foguete):** Inicialização, início de processos ou ações principais. Ex: `🚀 VERSION CONTEXT - Initializing version service`
+- **`🔄` (Setas Circulares):** Atualizações contínuas, ciclos, mudanças de estado, re-execuções. Ex: `🔄 EFFECTIVE DATA - Dados efetivos calculados: {useApiData: false, ...}`
+- **`🔍` (Lupa):** Informações detalhadas para debug, verificações internas. Ex: `🔍 UPDATE NOTIFICATION DEBUG: {hasUpdate: true, ...}`
+- **`📊` (Gráfico):** Logs relacionados a dados, métricas, cálculos. Ex: `📊 useTotalPL - Current totalPL: 0`
+- **`✅` (Check):** Conclusão bem-sucedida de uma operação ou etapa. Ex: `✅ CLEAR PRICELINES - Todas as priceLines foram removidas`
+- **`❌` (X):** Erros, falhas ou situações de erro esperadas. Ex: `❌ RSI PANE - Chart não está disponível`
+- **`🆕` (Novo):** Novas versões, atualizações disponíveis, notificações. Ex: `🆕 VERSION SERVICE - New version available!`
+- **`📦` (Pacote):** Informações sobre versões, builds, configurações carregadas. Ex: `📦 VERSION SERVICE - Server version info: {...}`
+- **`⏳` (Ampulheta):** Espera, aguardo de dados ou condições. Ex: `⏳ CHART CREATION - Aguardando dados válidos: {...}`
+- **`🧹` (Vassoura):** Limpeza de recursos, remoção de dados ou reset. Ex: `🧹 CHART CLEANUP - Limpando gráfico`
+- **`🎨` (Paleta):** Alterações ou atualizações na UI. Ex: `🎨 FAVICON - Force updated favicon with cache busting: ...`
+- **`🔗` (Link):** Conexões, chamadas de API ou interações com serviços externos (embora não explícito nos logs atuais, é um uso comum e útil).
+- **`⏰` (Relógio):** Eventos acionados por tempo, como updates periódicos. Ex: `⏰ USE INDICATOR MANAGER - Periodic update triggered`
+- **`🛡️` (Escudo):** Autenticação, autorização, estado de segurança. Ex: `🛡️ SIMPLE AUTH GUARD - State: {...}`
+
+#### Boas Práticas para Logs
+
+- **Seja Descritivo:** A mensagem deve informar claramente *o quê* está acontecendo.
+- **Inclua Contexto:** Sempre que possível, adicione um objeto JSON `{...}` com os dados relevantes no momento do log (estado, parâmetros, resultados, flags).
+- **Use o Nome do Componente:** Prefixe com o nome do serviço, hook, componente ou função que está gerando o log para fácil identificação.
+- **Consistência de Emoji:** Use o emoji apropriado conforme a lista acima para manter a consistência visual e semântica.
+- **Evite `console.log` Puro:** Prefira `console.debug`, `console.info`, `console.warn`, `console.error` quando apropriado, embutidos com o padrão de emoji e componente (ex: `console.debug("🔍 ...")`).
+- **Quando Logar:**
+  - No início e fim de funções críticas.
+  - Após chamadas de API ou operações externas (sucesso ou falha).
+  - Quando decisões condicionais importantes forem tomadas.
+  - Sempre que o estado de um componente ou serviço for alterado significativamente.
+  - Em erros ou exceções, incluindo o objeto de erro se possível.
+
+#### Exemplo (baseado no padrão atual)
+
+```javascript
+// Exemplo de log de inicialização
+console.debug("🚀 VERSION CONTEXT - Initializing version service");
+
+// Exemplo de log de estado carregado
+console.log("📦 VERSION CONTEXT - Loaded stored version info:", {
+  hasUpdate: true,
+  currentVersion: '0.0.4',
+  latestVersion: '1.5.0',
+  buildTime: '2025-01-09T03:45:00.000Z',
+  features: featuresArray
+});
+
+// Exemplo de log de verificação/debug
+console.debug("🔍 UPDATE NOTIFICATION DEBUG:", {
+  hasUpdate: true,
+  versionInfo: versionInfoObject,
+  shouldShowNotification: true,
+  hasBeenNotified: false,
+  currentVersion: '0.0.4'
+});
+
+// Exemplo de log de sucesso
+console.log("✅ CLEAR PRICELINES - Todas as priceLines foram removidas");
+
+// Exemplo de log de erro
+console.error("❌ RSI PANE - Chart não está disponível", { chartExists: false });

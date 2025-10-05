@@ -17,13 +17,11 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { TimeframeSelector } from '@/components/ui/timeframe-selector';
-import { TechnicalIndicatorsService, RSIConfig } from '@/services/technicalIndicators.service';
 import { 
   BarChart3, 
   TrendingUp, 
   Settings, 
-  X,
-  Activity
+  X
 } from 'lucide-react';
 
 // Tipos para dados de candlestick
@@ -78,25 +76,14 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const mainSeriesRef = useRef<ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null>(null);
-  const liquidationSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const takeProfitSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  // ✅ CORREÇÃO: Refs para controlar priceLines e evitar duplicatas
+  const priceLinesRef = useRef<Array<{ id: string; priceLine: any }>>([]);
+  const isUpdatingRef = useRef(false); // Controle de execução
   
-  // Referências para RSI
-  const rsiPaneRef = useRef<any>(null);
-  const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const overboughtSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const oversoldSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
 
   // Estados
   const [currentTimeframe, setCurrentTimeframe] = useState(timeframe);
   const [chartReady, setChartReady] = useState(false);
-  const [rsiEnabled, setRsiEnabled] = useState(false);
-  const [rsiConfig, setRsiConfig] = useState<RSIConfig>({
-    period: 14,
-    overbought: 70,
-    oversold: 30
-  });
-  const [rsiData, setRsiData] = useState<Array<{ time: Time; value: number }>>([]);
 
   // Hook para dados históricos
   const { 
@@ -129,6 +116,68 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     
     return data;
   }, [useApiData, historicalData, candleData, linePriceData, historicalLoading, historicalError]);
+
+  // ✅ VERIFICAR SE TEMOS DADOS SUFICIENTES PARA CRIAR O GRÁFICO
+  const hasValidData = useMemo(() => {
+    if (!effectiveCandleData || effectiveCandleData.length === 0) {
+      return false;
+    }
+    
+    // Verificar se os dados têm estrutura válida
+    const firstDataPoint = effectiveCandleData[0];
+    if (!firstDataPoint || !firstDataPoint.time) {
+      return false;
+    }
+    
+    // Para dados de candlestick, verificar se tem open, high, low, close
+    if ('open' in firstDataPoint) {
+      return firstDataPoint.open !== undefined && 
+             firstDataPoint.high !== undefined && 
+             firstDataPoint.low !== undefined && 
+             firstDataPoint.close !== undefined;
+    }
+    
+    // Para dados de linha, verificar se tem value
+    if ('value' in firstDataPoint) {
+      return firstDataPoint.value !== undefined;
+    }
+    
+    return true;
+  }, [effectiveCandleData]);
+
+  // ✅ FUNÇÃO PARA LIMPAR PRICELINES EXISTENTES
+  const clearPriceLines = useCallback(() => {
+    if (priceLinesRef.current.length > 0) {
+      console.log('🧹 CLEAR PRICELINES - Removendo priceLines existentes:', priceLinesRef.current.length);
+      console.log('🧹 CLEAR PRICELINES - IDs das priceLines:', priceLinesRef.current.map(p => p.id));
+      
+      priceLinesRef.current.forEach(({ id, priceLine }) => {
+        try {
+          if (priceLine && typeof priceLine.remove === 'function') {
+            console.log(`🧹 CLEAR PRICELINES - Removendo ${id}`);
+            priceLine.remove();
+          }
+        } catch (error) {
+          console.warn(`⚠️ CLEAR PRICELINES - Erro ao remover ${id}:`, error);
+        }
+      });
+      priceLinesRef.current = [];
+      console.log('✅ CLEAR PRICELINES - Todas as priceLines foram removidas');
+    } else {
+      console.log('🧹 CLEAR PRICELINES - Nenhuma priceLine para remover');
+    }
+  }, []);
+
+  // ✅ ESTADO DE CARREGAMENTO ADEQUADO
+  const isChartReady = useMemo(() => {
+    if (useApiData) {
+      // Para dados da API, aguardar carregamento completo
+      return !historicalLoading && !historicalError && hasValidData;
+    } else {
+      // Para dados estáticos, verificar se existem
+      return hasValidData;
+    }
+  }, [useApiData, historicalLoading, historicalError, hasValidData]);
 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -195,14 +244,18 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       lockVisibleTimeRangeOnResize: true, // Manter range visível ao redimensionar
       shiftVisibleRangeOnNewBar: true, // Shift automático quando nova barra é adicionada
       allowShiftVisibleRangeOnWhitespaceReplacement: true, // Permitir shift em espaços vazios
+      // ✅ CONFIGURAÇÕES ROBUSTAS PARA TIMESTAMP IDÊNTICO À LN MARKETS
+      tickMarkMaxCharacterLength: 8, // Limitar tamanho dos labels
+      barSpacing: 6, // Espaçamento entre barras
+      minBarSpacing: 0.5, // Espaçamento mínimo
+      // ✅ CONFIGURAÇÕES CRÍTICAS PARA EVITAR MÊS NO ZOOM NORMAL
       tickMarkFormatter: (time: any, tickMarkType: any) => {
+        // ✅ SOLUÇÃO ROBUSTA: Formatação baseada no tipo de tick (zoom-aware)
+        // tickMarkType: Year=0, Month=1, DayOfMonth=2, Time=3, TimeWithSeconds=4
+        
         let timestamp: number;
         if (typeof time === 'number') {
-          if (time > 0 && time < 4102444800) {
-            timestamp = time;
-          } else {
-            timestamp = Math.floor(time / 1000);
-          }
+          timestamp = time;
         } else {
           timestamp = Date.UTC(time.year, time.month - 1, time.day) / 1000;
         }
@@ -210,63 +263,55 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         const date = new Date(timestamp * 1000);
         
         if (isNaN(date.getTime()) || date.getFullYear() < 1970 || date.getFullYear() > 2100) {
-          const fallbackHours = String(new Date().getHours()).padStart(2, '0');
-          const fallbackMinutes = String(new Date().getMinutes()).padStart(2, '0');
-          return `${fallbackHours}:${fallbackMinutes}`;
+          return 'Invalid';
         }
         
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const day = String(date.getDate());
-        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-        const year = date.getFullYear();
+        // ✅ CORREÇÃO CRÍTICA: Usar tickMarkType para decidir formato
+        // Isso resolve o problema do mês aparecer no zoom normal
         
-        if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
-          const hour = date.getHours();
-          const minute = date.getMinutes();
-          
-          let temporalScore = 0;
-          
-          if (date.getMonth() === 0 && date.getDate() === 1) {
-            return year.toString();
-          }
-          
-          if (date.getDate() === 1) {
-            return monthName;
-          }
-          
-          if (hour === 0) temporalScore += 100;
-          if (hour === 6) temporalScore += 80;
-          if (hour === 12) temporalScore += 80;
-          if (hour === 18) temporalScore += 80;
-          if (hour === 21) temporalScore += 60;
-          
-          if (minute === 0) temporalScore += 20;
-          
-          if (temporalScore >= 80) {
-            return day;
-          }
-          
-          if (temporalScore >= 40) {
-            return `${day} ${hours}:${minutes}`;
-          }
-          
-          return `${hours}:${minutes}`;
+        // ✅ CORREÇÃO CRÍTICA: Formato idêntico à referência LN Markets
+        // Padrão: dias grandes centralizados + horários HH:MM
+        
+        switch (tickMarkType) {
+          case 0: // Year - só quando zoom muito afastado
+            return date.getFullYear().toString();
+            
+          case 1: // Month - só quando zoom muito afastado
+            return date.toLocaleDateString('en-US', { month: 'short' });
+            
+          case 2: // DayOfMonth - dias grandes centralizados
+            return date.getDate().toString();
+            
+          case 3: // Time - horários HH:MM (zoom normal)
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            
+            // Horários específicos (06:00, 12:00, 18:00) - mostrar HH:MM
+            if ((hours === 6 || hours === 12 || hours === 18) && minutes === 0) {
+              return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            }
+            
+            // Outros horários - mostrar HH:MM
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            
+          case 4: // TimeWithSeconds - formato HH:MM:SS (zoom muito próximo)
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+            
+          default:
+            // Fallback baseado no timeframe
+            if (currentTimeframe && /m|h/i.test(currentTimeframe)) {
+              // Para timeframes intraday - sempre HH:MM no zoom normal
+              return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            }
+            
+            if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
+              // Para timeframes diários - dia do mês
+              return date.getDate().toString();
+            }
+            
+            // Fallback final
+            return date.getDate().toString();
         }
-        
-        if (currentTimeframe && /d|w/i.test(currentTimeframe)) {
-          if (date.getMonth() === 0 && date.getDate() === 1) {
-            return year.toString();
-          }
-          
-          if (date.getDate() === 1) {
-            return monthName;
-          }
-          
-          return day;
-        }
-        
-        return `${day} • ${monthName}`;
       }
     },
     crosshair: { mode: 1 },
@@ -287,18 +332,27 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
   // ✅ CRIAR GRÁFICO PRINCIPAL COM PANES NATIVOS - OTIMIZADO
   useEffect(() => {
     if (!containerRef.current) return;
+    
+    // ✅ CRÍTICO: Só criar gráfico quando tivermos dados válidos
+    if (!isChartReady) {
+      console.log('⏳ CHART CREATION - Aguardando dados válidos:', {
+        isChartReady,
+        hasValidData,
+        historicalLoading,
+        historicalError,
+        effectiveDataLength: effectiveCandleData?.length || 0
+      });
+      return;
+    }
 
     console.count('🚀 CHART CREATION - Execução #');
-    console.log('🚀 CHART CREATION - Criando gráfico com panes nativos v5.0.9');
+    console.log('🚀 CHART CREATION - Criando gráfico com panes nativos v5.0.9 - DADOS VÁLIDOS CONFIRMADOS');
 
     // Criar gráfico principal
     const chart = createChart(containerRef.current, chartOptions);
 
     chartRef.current = chart;
 
-        // ✅ CRIAR PANE RSI NATIVO v5.0.9 - API OFICIAL
-        // Conforme documentação: panes são criados automaticamente ao usar paneIndex
-        console.log('🚀 PANE CREATION - Preparando para criar pane RSI com paneIndex=1');
 
     // ✅ VERIFICAR SE CHART FOI CRIADO CORRETAMENTE
     if (!chart) {
@@ -341,92 +395,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       }
     }
 
-    // Criar séries para linhas de liquidação - API v5.0.9
-    if (liquidationLines && liquidationLines.length > 0) {
-      try {
-        liquidationSeriesRef.current = chart.addSeries(LineSeries, {
-          color: '#ff6b6b',
-          lineWidth: 1,
-          lineStyle: LineStyle.Dashed,
-        });
-        console.log('✅ LIQUIDATION SERIES - Série criada com API v5.0.9');
-      } catch (error) {
-        console.error('❌ LIQUIDATION SERIES - Erro ao criar série:', error);
-      }
-    }
+    // ✅ CORREÇÃO: Não criar séries separadas para linhas de liquidação
+    // As linhas serão criadas como priceLine na série principal
+    console.log('✅ LIQUIDATION LINES - Preparando para criar priceLines na série principal');
 
-    // Criar séries para linhas de take profit - API v5.0.9
-    if (takeProfitLines && takeProfitLines.length > 0) {
-      try {
-        takeProfitSeriesRef.current = chart.addSeries(LineSeries, {
-          color: '#51cf66',
-          lineWidth: 1,
-          lineStyle: LineStyle.Dashed,
-        });
-        console.log('✅ TAKE PROFIT SERIES - Série criada com API v5.0.9');
-      } catch (error) {
-        console.error('❌ TAKE PROFIT SERIES - Erro ao criar série:', error);
-      }
-    }
-
-    // ✅ CRIAR SÉRIES RSI - API v5.0.9 (com panes nativos)
-    // Na v5.0.9, usamos panes nativos para separar escalas
-    try {
-      // Criar pane para RSI - API v5.0.9
-      const rsiPane = chart.addPane();
-      rsiPaneRef.current = rsiPane;
-      
-      // Criar série RSI principal no pane dedicado - API v5.0.9
-      rsiSeriesRef.current = chart.addSeries(LineSeries, {
-        color: '#8b5cf6',
-        lineWidth: 2,
-        priceFormat: {
-          type: 'percent' as const,
-          precision: 2,
-          minMove: 0.01,
-        },
-      }, 1);
-
-      // Criar linha de overbought no mesmo pane - API v5.0.9
-      overboughtSeriesRef.current = chart.addSeries(LineSeries, {
-        color: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
-        lineWidth: 1,
-        lineStyle: LineStyle.Dashed,
-        priceFormat: {
-          type: 'percent' as const,
-          precision: 0,
-          minMove: 1,
-        },
-      }, 1);
-
-      // Criar linha de oversold no mesmo pane - API v5.0.9
-      oversoldSeriesRef.current = chart.addSeries(LineSeries, {
-        color: isDark ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.5)',
-        lineWidth: 1,
-        lineStyle: LineStyle.Dashed,
-        priceFormat: {
-          type: 'percent' as const,
-          precision: 0,
-          minMove: 1,
-        },
-      }, 1);
-      
-      // Configurar altura do pane RSI baseado no estado inicial - API v5.0.9
-      rsiPane.setHeight(rsiEnabled ? 100 : 0);
-      
-      console.log('🚀 RSI SERIES - Séries RSI criadas com API v5.0.9 e pane nativo');
-    } catch (error) {
-      console.warn('⚠️ RSI SERIES - Erro ao criar séries RSI:', error);
-    }
 
     console.log('🚀 SERIES CREATION - Séries criadas:', {
       mainSeries: !!mainSeriesRef.current,
-      liquidationSeries: !!liquidationSeriesRef.current,
-      takeProfitSeries: !!takeProfitSeriesRef.current,
-      rsiSeries: !!rsiSeriesRef.current,
-      overboughtSeries: !!overboughtSeriesRef.current,
-      oversoldSeries: !!oversoldSeriesRef.current,
-      rsiPaneIndex: 1
+      liquidationLinesCount: liquidationLines?.length || 0,
+      takeProfitLinesCount: takeProfitLines?.length || 0
     });
 
     setChartReady(true);
@@ -442,36 +419,9 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           mainSeriesRef.current = null;
         }
         
-        if (liquidationSeriesRef.current) {
-          chart.removeSeries(liquidationSeriesRef.current);
-          liquidationSeriesRef.current = null;
-        }
+        // ✅ CORREÇÃO: Limpar priceLines antes de remover a série
+        clearPriceLines();
         
-        if (takeProfitSeriesRef.current) {
-          chart.removeSeries(takeProfitSeriesRef.current);
-          takeProfitSeriesRef.current = null;
-        }
-        
-        if (rsiSeriesRef.current) {
-          chart.removeSeries(rsiSeriesRef.current);
-          rsiSeriesRef.current = null;
-        }
-        
-        if (overboughtSeriesRef.current) {
-          chart.removeSeries(overboughtSeriesRef.current);
-          overboughtSeriesRef.current = null;
-        }
-        
-        if (oversoldSeriesRef.current) {
-          chart.removeSeries(oversoldSeriesRef.current);
-          oversoldSeriesRef.current = null;
-        }
-        
-        // Remover pane RSI - API v5.0.9
-        if (rsiPaneRef.current) {
-          chart.removePane(rsiPaneRef.current);
-          rsiPaneRef.current = null;
-        }
         
         // Remover chart - API v5.0.9
         chart.remove();
@@ -482,65 +432,36 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         console.error('❌ CHART CLEANUP - Erro ao remover chart:', error);
       }
     };
-  }, [chartOptions]); // ✅ DEPENDÊNCIA ESTÁVEL - chartOptions é memoizado
+  }, [chartOptions, isChartReady, effectiveCandleData]); // ✅ DEPENDÊNCIAS ATUALIZADAS - incluir isChartReady e dados
 
-  // ✅ CALCULAR RSI COM useCallback PARA EVITAR LOOPS
-  const calculateRSI = useCallback(() => {
-    console.count('📊 RSI CALCULATION - Execução #');
-    if (!rsiEnabled || !effectiveCandleData || effectiveCandleData.length === 0) {
-      setRsiData([]);
-      return;
-    }
-      
-    try {
-      console.log('📊 RSI CALCULATION - Calculando RSI:', {
-        candleDataLength: effectiveCandleData.length,
-        rsiConfig
-      });
-
-      // Converter dados para formato esperado pelo serviço
-      const candleData = effectiveCandleData.map(item => ({
-        time: item.time as number,
-        open: item.open,
-        high: item.high,
-        low: item.low,
-        close: item.close,
-        volume: 0
-      }));
-
-      const calculatedRSI = TechnicalIndicatorsService.calculateRSIExponential(candleData, rsiConfig);
-      
-      // Converter para formato Lightweight Charts
-      const rsiChartData = calculatedRSI.map(point => ({
-        time: point.time as Time,
-        value: point.value
-      }));
-      
-      setRsiData(rsiChartData);
-
-      console.log('📊 RSI CALCULATION - RSI calculado:', {
-        dataPoints: calculatedRSI.length,
-        latestValue: calculatedRSI[calculatedRSI.length - 1]?.value
-      });
-    } catch (error) {
-      console.warn('⚠️ RSI CALCULATION - Erro ao calcular RSI:', error);
-      setRsiData([]);
-    }
-  }, [rsiEnabled, effectiveCandleData, rsiConfig]);
-
-  // ✅ CALCULAR RSI QUANDO DADOS MUDAREM
-  useEffect(() => {
-    calculateRSI();
-  }, [calculateRSI]);
 
   // ✅ ATUALIZAR DADOS DAS SÉRIES COM useCallback PARA EVITAR LOOPS
   const updateSeriesData = useCallback(() => {
     console.count('🔄 DATA UPDATE - Execução #');
+    
+    // ✅ CORREÇÃO: Evitar execuções múltiplas simultâneas
+    if (isUpdatingRef.current) {
+      console.log('🔄 DATA UPDATE - Já está executando, pulando...');
+      return;
+    }
+    
+    isUpdatingRef.current = true;
+    
+    console.log('🔄 DATA UPDATE - Estado atual:', {
+      chartReady,
+      hasChart: !!chartRef.current,
+      hasMainSeries: !!mainSeriesRef.current,
+      liquidationLinesCount: liquidationLines?.length || 0,
+      takeProfitLinesCount: takeProfitLines?.length || 0,
+      priceLinesCount: priceLinesRef.current.length
+    });
+    
     if (!chartReady || !chartRef.current) {
       console.log('🔄 DATA UPDATE - Condições não atendidas:', {
         chartReady,
         hasChart: !!chartRef.current
       });
+      isUpdatingRef.current = false;
       return;
     }
 
@@ -548,8 +469,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
       hasMainSeries: !!mainSeriesRef.current,
       hasEffectiveData: !!effectiveCandleData,
       dataLength: effectiveCandleData?.length || 0,
-      rsiEnabled,
-      rsiDataLength: rsiData.length,
       chartReady,
       hasChart: !!chartRef.current
     });
@@ -572,54 +491,102 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
         console.log('✅ DATA UPDATE - Dados aplicados à série principal e escala ajustada com fitContent()');
       }
 
-      // Atualizar linhas de liquidação
-      if (liquidationSeriesRef.current && liquidationLines && liquidationLines.length > 0) {
-        const liquidationData = liquidationLines.map(line => ({
-          time: (Math.floor(Date.now() / 1000) - 3600) as Time,
-          value: line.price
-        }));
-        liquidationSeriesRef.current.setData(liquidationData);
-      }
-
-      // Atualizar linhas de take profit
-      if (takeProfitSeriesRef.current && takeProfitLines && takeProfitLines.length > 0) {
-        const takeProfitData = takeProfitLines.map(line => ({
-          time: (Math.floor(Date.now() / 1000) - 3600) as Time,
-          value: line.price
-        }));
-        takeProfitSeriesRef.current.setData(takeProfitData);
-      }
-
-      // ✅ ATUALIZAR DADOS RSI NO PANE NATIVO
-      if (rsiEnabled && rsiSeriesRef.current && rsiData.length > 0) {
-        console.log('🔄 RSI UPDATE - Atualizando dados RSI no pane:', {
-          rsiDataLength: rsiData.length,
-          latestValue: rsiData[rsiData.length - 1]?.value
+      // ✅ CORREÇÃO: Verificar se já existem priceLines para os mesmos dados
+      const expectedLiquidationCount = liquidationLines?.length || 0;
+      const expectedTakeProfitCount = takeProfitLines?.length || 0;
+      const currentLiquidationCount = priceLinesRef.current.filter(p => p.id.startsWith('liquidation_')).length;
+      const currentTakeProfitCount = priceLinesRef.current.filter(p => p.id.startsWith('takeprofit_')).length;
+      
+      if (currentLiquidationCount === expectedLiquidationCount && 
+          currentTakeProfitCount === expectedTakeProfitCount &&
+          priceLinesRef.current.length > 0) {
+        console.log('🔄 DATA UPDATE - PriceLines já existem, pulando criação:', {
+          expectedLiquidationCount,
+          expectedTakeProfitCount,
+          currentLiquidationCount,
+          currentTakeProfitCount,
+          totalPriceLines: priceLinesRef.current.length
         });
-
-        rsiSeriesRef.current.setData(rsiData);
-
-        // Atualizar linhas de referência
-        if (overboughtSeriesRef.current && oversoldSeriesRef.current && effectiveCandleData && effectiveCandleData.length > 0) {
-          const firstTime = effectiveCandleData[0].time as Time;
-          const lastTime = effectiveCandleData[effectiveCandleData.length - 1].time as Time;
-
-          overboughtSeriesRef.current.setData([
-            { time: firstTime, value: rsiConfig.overbought },
-            { time: lastTime, value: rsiConfig.overbought },
-          ]);
-
-          oversoldSeriesRef.current.setData([
-            { time: firstTime, value: rsiConfig.oversold },
-            { time: lastTime, value: rsiConfig.oversold },
-          ]);
-        }
+        return;
       }
+
+      // ✅ CORREÇÃO: Limpar priceLines existentes antes de criar novas
+      clearPriceLines();
+
+      // ✅ CORREÇÃO: Criar priceLines na série principal para linhas de liquidação
+      if (mainSeriesRef.current && liquidationLines && liquidationLines.length > 0) {
+        console.log('🔴 LIQUIDATION LINES - Criando priceLines:', liquidationLines);
+        
+        liquidationLines.forEach((line, index) => {
+          try {
+            const priceLine = mainSeriesRef.current!.createPriceLine({
+              price: line.price,
+              color: line.color || '#ff4444',
+              lineStyle: LineStyle.Solid,
+              lineWidth: 2,
+              axisLabelVisible: true,
+              title: line.label || `Pos #${index + 1}: $${line.price.toLocaleString()}`
+            });
+            
+            // Armazenar referência para controle
+            priceLinesRef.current.push({
+              id: `liquidation_${index}`,
+              priceLine
+            });
+            
+            console.log(`✅ LIQUIDATION LINE #${index + 1} - PriceLine criada:`, {
+              price: line.price,
+              label: line.label,
+              color: line.color
+            });
+          } catch (error) {
+            console.error(`❌ LIQUIDATION LINE #${index + 1} - Erro ao criar priceLine:`, error);
+          }
+        });
+      }
+
+      // ✅ CORREÇÃO: Criar priceLines na série principal para linhas de take profit
+      // SÓ criar se existir take profit definido
+      if (mainSeriesRef.current && takeProfitLines && takeProfitLines.length > 0) {
+        console.log('🟢 TAKE PROFIT LINES - Criando priceLines:', takeProfitLines);
+        
+        takeProfitLines.forEach((line, index) => {
+          try {
+            const priceLine = mainSeriesRef.current!.createPriceLine({
+              price: line.price,
+              color: line.color || '#22c55e',
+              lineStyle: LineStyle.Solid,
+              lineWidth: 2,
+              axisLabelVisible: true,
+              title: line.label || `TP Pos #${index + 1}: $${line.price.toLocaleString()}`
+            });
+            
+            // Armazenar referência para controle
+            priceLinesRef.current.push({
+              id: `takeprofit_${index}`,
+              priceLine
+            });
+            
+            console.log(`✅ TAKE PROFIT LINE #${index + 1} - PriceLine criada:`, {
+              price: line.price,
+              label: line.label,
+              color: line.color
+            });
+          } catch (error) {
+            console.error(`❌ TAKE PROFIT LINE #${index + 1} - Erro ao criar priceLine:`, error);
+          }
+        });
+      }
+
 
     } catch (error) {
       console.warn('⚠️ DATA UPDATE - Erro ao atualizar dados:', error);
+    } finally {
+      // ✅ CORREÇÃO: Reset do flag de controle
+      isUpdatingRef.current = false;
+      console.log('✅ DATA UPDATE - Execução finalizada');
     }
-  }, [chartReady, effectiveCandleData, liquidationLines, takeProfitLines, rsiEnabled, rsiData, rsiConfig]);
+  }, [chartReady, effectiveCandleData, liquidationLines, takeProfitLines, clearPriceLines]);
 
   // ✅ ATUALIZAR DADOS DAS SÉRIES
   useEffect(() => {
@@ -644,64 +611,19 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
     }
   }, [chartReady, effectiveCandleData, updateSeriesData]);
 
-  // ✅ CONTROLAR VISIBILIDADE DAS SÉRIES RSI COM useCallback (v5.0.9)
-  const updateRSIVisibility = useCallback(() => {
-    if (!chartReady) return;
-
-    console.log('🔄 RSI VISIBILITY - Controlando visibilidade das séries RSI:', {
-      rsiEnabled,
-      hasRsiSeries: !!rsiSeriesRef.current,
-      hasOverboughtSeries: !!overboughtSeriesRef.current,
-      hasOversoldSeries: !!oversoldSeriesRef.current,
-      hasRsiPane: !!rsiPaneRef.current
-    });
-
-    // Na v5.0.9, controlamos tanto a visibilidade das séries quanto do pane
-    if (rsiSeriesRef.current) {
-      rsiSeriesRef.current.applyOptions({
-        visible: rsiEnabled
-      });
-    }
-    
-    if (overboughtSeriesRef.current) {
-      overboughtSeriesRef.current.applyOptions({
-        visible: rsiEnabled
-      });
-    }
-    
-    if (oversoldSeriesRef.current) {
-      oversoldSeriesRef.current.applyOptions({
-        visible: rsiEnabled
-      });
-    }
-    
-    // Na v5.0.9, também controlamos a altura do pane
-    if (rsiPaneRef.current) {
-      if (rsiEnabled) {
-        rsiPaneRef.current.setHeight(100);
-        console.log('✅ RSI VISIBILITY - Pane RSI visível (altura: 100px)');
-      } else {
-        rsiPaneRef.current.setHeight(0);
-        console.log('✅ RSI VISIBILITY - Pane RSI oculto (altura: 0px)');
-      }
-    }
-    
-    console.log('🔄 RSI VISIBILITY - Visibilidade das séries RSI ajustada:', {
-      visible: rsiEnabled
-    });
-  }, [chartReady, rsiEnabled]);
-
-  // ✅ CONTROLAR VISIBILIDADE DAS SÉRIES RSI
-  useEffect(() => {
-    updateRSIVisibility();
-  }, [updateRSIVisibility]);
 
   const handleTimeframeChange = (newTimeframe: string) => {
     console.log('🔄 TIMEFRAME CHANGE - Mudando timeframe:', {
       from: currentTimeframe,
       to: newTimeframe
     });
+    
+    // ✅ CRÍTICO: Não recriar gráfico ao mudar timeframe
+    // Apenas atualizar o estado - o hook useHistoricalData vai buscar novos dados
     setCurrentTimeframe(newTimeframe);
+    
+    // ✅ O gráfico será atualizado automaticamente quando os novos dados chegarem
+    // via useEffect que monitora effectiveCandleData
   };
 
   return (
@@ -764,16 +686,6 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
                 className="h-8"
               />
               
-              {/* RSI Toggle */}
-                  <Button
-                variant={rsiEnabled ? "default" : "outline"}
-                    size="sm"
-                onClick={() => setRsiEnabled(!rsiEnabled)}
-                className="h-8 px-3 text-xs"
-              >
-                <Activity className="w-3 h-3 mr-1" />
-                RSI {rsiEnabled ? 'ON' : 'OFF'}
-                  </Button>
 
               {/* Toolbar */}
               {showToolbar && (
@@ -795,30 +707,35 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
           {/* Status Info */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
                 {useApiData ? 'API Data' : 'Static Data'}
-              </Badge>
+              </span>
               {historicalLoading && (
-                <Badge variant="secondary" className="text-xs">
+                <span className="inline-flex items-center rounded-full border border-transparent bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
                   Loading...
-                </Badge>
+                </span>
+              )}
+              {!isChartReady && !historicalLoading && (
+                <span className="inline-flex items-center rounded-full border border-transparent bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
+                  Preparing...
+                </span>
               )}
               {historicalError && (
-                <Badge variant="destructive" className="text-xs">
+                <span className="inline-flex items-center rounded-full border border-transparent bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800">
                   Error
-                </Badge>
-                )}
-              </div>
+                </span>
+              )}
+              {isChartReady && !historicalLoading && !historicalError && (
+                <span className="inline-flex items-center rounded-full border border-transparent bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+                  Ready
+                </span>
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
                 Lightweight Charts v5.0.9
-              </Badge>
-              {rsiEnabled && (
-                <Badge variant="default" className="text-xs">
-                  RSI Active
-                </Badge>
-              )}
+              </span>
             </div>
           </div>
         </CardHeader>
@@ -828,21 +745,15 @@ const LightweightLiquidationChart: React.FC<LightweightLiquidationChartProps> = 
             <div ref={containerRef} className="w-full h-full" />
             
             {/* Loading Overlay */}
-            {historicalLoading && (
+            {(historicalLoading || !isChartReady) && (
               <div className="chart-loading">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                  Loading chart data...
-          </div>
-        </div>
-      )}
-
-            {/* RSI Indicator */}
-            {rsiEnabled && rsiData.length > 0 && (
-              <div className="rsi-indicator">
-                RSI {rsiConfig.period}: {rsiData[rsiData.length - 1]?.value?.toFixed(2)}%
-          </div>
+                  {historicalLoading ? 'Loading chart data...' : 'Preparing chart...'}
+                </div>
+              </div>
             )}
+
         </div>
       </CardContent>
     </Card>
