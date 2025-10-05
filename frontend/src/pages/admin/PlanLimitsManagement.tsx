@@ -347,7 +347,7 @@ export default function PlanLimitsManagement() {
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.totalPlans}</div>
+              <div className="text-2xl font-bold">{statistics.totalPlans || 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -356,7 +356,7 @@ export default function PlanLimitsManagement() {
               <Shield className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.plansWithLimits}</div>
+              <div className="text-2xl font-bold">{statistics.plansWithLimits || 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -366,7 +366,7 @@ export default function PlanLimitsManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {Math.round(statistics.averageLimits.exchangeAccounts)}
+                {Math.round(statistics.averageLimits?.exchangeAccounts || 0)}
               </div>
             </CardContent>
           </Card>
@@ -377,7 +377,7 @@ export default function PlanLimitsManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {Math.round(statistics.averageLimits.automations)}
+                {Math.round(statistics.averageLimits?.automations || 0)}
               </div>
             </CardContent>
           </Card>
