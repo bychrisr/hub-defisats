@@ -897,16 +897,13 @@ const LightweightLiquidationChartWithIndicators: React.FC<LightweightLiquidation
       timestamp: new Date().toISOString()
     });
     
-    // CORREÇÃO: Se indicadores externos estão sendo usados, não podemos alterar diretamente
-    if (externalEnabledIndicators) {
-      console.log('⚠️ INDICATOR TOGGLE - Indicadores externos em uso, toggle não disponível');
-      console.log('🔍 EXTERNAL INDICATORS DEBUG:', {
-        externalEnabledIndicators,
-        externalIndicators: !!externalIndicators,
-        externalIndicatorConfigs: !!externalIndicatorConfigs
-      });
-      return;
-    }
+    // CORREÇÃO: Permitir toggle mesmo com indicadores externos
+    console.log('🔍 EXTERNAL INDICATORS DEBUG:', {
+      externalEnabledIndicators,
+      externalIndicators: !!externalIndicators,
+      externalIndicatorConfigs: !!externalIndicatorConfigs,
+      willUseExternal: !!externalEnabledIndicators
+    });
     
     setEnabledIndicators(prev => {
       const newIndicators = enabled 
