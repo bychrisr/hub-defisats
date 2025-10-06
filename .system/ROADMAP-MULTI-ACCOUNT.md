@@ -159,7 +159,7 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 
 ---
 
-## 🎯 **FASE 6: INTEGRAÇÃO COM AUTOMAÇÕES**
+## 🎯 **FASE 6: INTEGRAÇÃO COM AUTOMAÇÕES** ⏳ **EM PROGRESSO**
 
 ### **6.1 Vinculação de Automações**
 - [ ] **6.1.1** Atualizar `AutomationService`
@@ -167,17 +167,131 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - Migração de automações existentes
   - Validação de credenciais
 
+- [ ] **6.1.2** Modificar `Automation` model
+  - Adicionar campo `user_exchange_account_id` (FK)
+  - Manter compatibilidade com dados existentes
+  - Criar migration para campo obrigatório
+
+- [ ] **6.1.3** Atualizar `AutomationController`
+  - Filtrar automações por conta ativa
+  - Validar permissões por conta
+  - Retornar dados da conta associada
+
+- [ ] **6.1.4** Criar `AutomationAccountService`
+  - Lógica de vinculação automática
+  - Migração de automações existentes
+  - Validação de limites por conta
+
 ### **6.2 Workers e Execução**
 - [ ] **6.2.1** Atualizar `automation-executor.ts`
   - Filtros por conta ativa
   - Uso de credenciais corretas
   - Logs de execução por conta
 
+- [ ] **6.2.2** Modificar `automation-worker.ts`
+  - Buscar credenciais da conta ativa
+  - Executar automações por conta
+  - Logs detalhados por conta
+
+- [ ] **6.2.3** Atualizar `automation-scheduler.ts`
+  - Agendar execuções por conta
+  - Gerenciar timeouts por conta
+  - Retry logic por conta
+
+- [ ] **6.2.4** Criar `AccountCredentialsService`
+  - Buscar credenciais da conta ativa
+  - Cache de credenciais por conta
+  - Validação de credenciais antes da execução
+
 ### **6.3 Dashboard de Automações**
 - [ ] **6.3.1** Atualizar interface de automações
   - Filtros por conta
   - Indicadores visuais de conta
   - Estatísticas por conta
+
+- [ ] **6.3.2** Criar `AutomationAccountFilter.tsx`
+  - Dropdown de seleção de conta
+  - Filtros por status e conta
+  - Indicadores visuais de conta ativa
+
+- [ ] **6.3.3** Atualizar `AutomationCard.tsx`
+  - Exibir conta associada
+  - Indicador visual da conta
+  - Ações por conta
+
+- [ ] **6.3.4** Criar `AutomationAccountStats.tsx`
+  - Estatísticas por conta
+  - Performance por conta
+  - Métricas de execução
+
+### **6.4 Integração com Sistema de Contas**
+- [ ] **6.4.1** Atualizar `useAutomations` hook
+  - Filtrar por conta ativa
+  - Refresh automático ao trocar conta
+  - Estados de loading por conta
+
+- [ ] **6.4.2** Modificar `AutomationContext`
+  - Contexto de conta ativa
+  - Sincronização com AccountContext
+  - Eventos de mudança de conta
+
+- [ ] **6.4.3** Atualizar `AutomationForm`
+  - Seleção de conta para nova automação
+  - Validação de conta ativa
+  - Preenchimento automático de credenciais
+
+- [ ] **6.4.4** Criar `AutomationAccountManager`
+  - Gerenciar automações por conta
+  - Migração de automações existentes
+  - Validação de limites por conta
+
+### **6.5 Persistência e Sincronização**
+- [ ] **6.5.1** Atualizar `indicatorPersistenceService`
+  - Persistir conta ativa para automações
+  - Sincronização cross-tab
+  - Eventos de mudança de conta
+
+- [ ] **6.5.2** Modificar `useActiveAccount` hook
+  - Integração com automações
+  - Eventos de mudança
+  - Sincronização com workers
+
+- [ ] **6.5.3** Criar `AutomationAccountSync`
+  - Sincronização de conta ativa
+  - Eventos de mudança
+  - Persistência de estado
+
+### **6.6 Validação e Segurança**
+- [ ] **6.6.1** Validar credenciais por conta
+  - Teste de credenciais antes da execução
+  - Validação de permissões
+  - Logs de segurança
+
+- [ ] **6.6.2** Implementar rate limiting por conta
+  - Limites de execução por conta
+  - Throttling por conta
+  - Monitoramento de uso
+
+- [ ] **6.6.3** Criar `AutomationAccountValidator`
+  - Validação de conta ativa
+  - Verificação de credenciais
+  - Validação de limites
+
+### **6.7 Monitoramento e Logs**
+- [ ] **6.7.1** Atualizar sistema de logs
+  - Logs por conta
+  - Rastreamento de execução
+  - Métricas por conta
+
+- [ ] **6.7.2** Criar `AutomationAccountMonitor`
+  - Monitoramento de execução
+  - Alertas por conta
+  - Dashboard de métricas
+
+- [ ] **6.7.3** Implementar `AutomationAccountMetrics`
+  - Métricas de performance
+  - Estatísticas de uso
+  - Relatórios por conta
 
 ---
 
