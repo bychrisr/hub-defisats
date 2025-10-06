@@ -12,15 +12,21 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useUserExchangeAccounts } from '@/hooks/useUserExchangeAccounts';
 import { useTheme } from '@/contexts/ThemeContext';
+import { CreateAccountModal } from '@/components/modals/CreateAccountModal';
+import { AccountActionsModal } from '@/components/modals/AccountActionsModal';
+import { UserExchangeAccount } from '@/services/userExchangeAccount.service';
 import { cn } from '@/lib/utils';
 
 export const AccountSelector = () => {
-  const { accounts, getActiveAccount, setActiveAccount, isLoading } = useUserExchangeAccounts();
+  const { accounts, getActiveAccount, setActiveAccount, isLoading, loadAccounts } = useUserExchangeAccounts();
   const activeAccount = getActiveAccount();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<UserExchangeAccount | null>(null);
 
   const filteredAccounts = accounts.filter(account =>
     account.account_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,6 +40,21 @@ export const AccountSelector = () => {
     } catch (error) {
       console.error('❌ ACCOUNT SELECTOR - Error changing account:', error);
     }
+  };
+
+  const handleCreateAccount = () => {
+    setIsCreateModalOpen(true);
+    setIsOpen(false);
+  };
+
+  const handleAccountActions = (account: UserExchangeAccount) => {
+    setSelectedAccount(account);
+    setIsActionsModalOpen(true);
+    setIsOpen(false);
+  };
+
+  const handleModalSuccess = () => {
+    loadAccounts(); // Refresh accounts list
   };
 
   return (
@@ -134,7 +155,7 @@ export const AccountSelector = () => {
                           className="h-6 w-6 p-0 hover:bg-primary/10"
                           onClick={(e) => {
                             e.stopPropagation();
-                            // TODO: Implement account options menu
+                            handleAccountActions(account);
                           }}
                         >
                           <MoreVertical className="h-3 w-3" />
@@ -163,10 +184,7 @@ export const AccountSelector = () => {
           <Button
             variant="outline"
             className="w-full justify-center space-x-2 hover:bg-primary/10"
-            onClick={() => {
-              navigate('/profile');
-              setIsOpen(false);
-            }}
+            onClick={handleCreateAccount}
           >
             <Plus className="h-4 w-4" />
             <span>Add Exchange Account</span>
@@ -174,5 +192,19 @@ export const AccountSelector = () => {
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    {/* Modals */}
+    <CreateAccountModal
+      isOpen={isCreateModalOpen}
+      onClose={() => setIsCreateModalOpen(false)}
+      onSuccess={handleModalSuccess}
+    />
+
+    <AccountActionsModal
+      isOpen={isActionsModalOpen}
+      onClose={() => setIsActionsModalOpen(false)}
+      account={selectedAccount}
+      onSuccess={handleModalSuccess}
+    />
   );
 };
