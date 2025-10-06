@@ -295,21 +295,27 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ Interface completa de gerenciamento
   - ✅ Estatísticas e filtros por conta
 
-### **6.5 Persistência e Sincronização**
-- [ ] **6.5.1** Atualizar `indicatorPersistenceService`
-  - Persistir conta ativa para automações
-  - Sincronização cross-tab
-  - Eventos de mudança de conta
+### **6.5 Persistência e Sincronização** ✅ **COMPLETA**
+- [x] **6.5.1** Atualizar `indicatorPersistenceService` ✅
+  - ✅ Persistir conta ativa para automações
+  - ✅ Sincronização cross-tab
+  - ✅ Eventos de mudança de conta
+  - ✅ Preferências de automação
+  - ✅ Métodos para gerenciar conta padrão
 
-- [ ] **6.5.2** Modificar `useActiveAccount` hook
-  - Integração com automações
-  - Eventos de mudança
-  - Sincronização com workers
+- [x] **6.5.2** Modificar `useActiveAccount` hook ✅
+  - ✅ Integração com automações
+  - ✅ Eventos de mudança
+  - ✅ Sincronização com workers
+  - ✅ Métodos para preferências de automação
+  - ✅ Eventos customizados
 
-- [ ] **6.5.3** Criar `AutomationAccountSync`
-  - Sincronização de conta ativa
-  - Eventos de mudança
-  - Persistência de estado
+- [x] **6.5.3** Criar `AutomationAccountSync` ✅
+  - ✅ Sincronização de conta ativa
+  - ✅ Eventos de mudança
+  - ✅ Persistência de estado
+  - ✅ Sincronização cross-tab
+  - ✅ Sistema de eventos completo
 
 ### **6.6 Validação e Segurança**
 - [ ] **6.6.1** Validar credenciais por conta

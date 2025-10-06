@@ -4,6 +4,38 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.13] - 2025-01-10
+
+### 🔗 **FASE 6.5 - PERSISTÊNCIA E SINCRONIZAÇÃO COMPLETA**
+
+#### 🎯 **Sistema de Persistência Multi-Account 100% Funcional**
+- ✅ **indicatorPersistenceService**: Atualizado com preferências de automação
+- ✅ **useActiveAccount Hook**: Integração completa com automações
+- ✅ **AutomationAccountSync**: Serviço de sincronização cross-tab
+- ✅ **Sistema de Eventos**: Comunicação entre componentes
+- ✅ **Persistência Avançada**: Configurações e estado sincronizados
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **Preferências de Automação**: Configurações específicas por conta
+- ✅ **Sincronização Cross-Tab**: Mudanças sincronizadas entre abas
+- ✅ **Eventos Customizados**: Comunicação em tempo real
+- ✅ **Retry Logic**: Sistema robusto de retry
+- ✅ **Online/Offline**: Detecção de conectividade
+- ✅ **Configurações Personalizáveis**: Intervalos e notificações
+
+#### 📊 **Componentes Criados/Atualizados**
+- ✅ **indicatorPersistenceService**: Métodos para automações
+- ✅ **useActiveAccount**: Integração com automações
+- ✅ **AutomationAccountSync**: Serviço de sincronização
+- ✅ **Sistema de Eventos**: Eventos customizados
+- ✅ **Gerenciamento de Estado**: Estado persistente
+
+#### 🔍 **Validação e Testes**
+- ✅ **Linting**: Sem erros de linting
+- ✅ **Integração**: Todos os serviços funcionando
+- ✅ **Sincronização**: Cross-tab e eventos testados
+- ✅ **Persistência**: Configurações salvas corretamente
+
 ## [v2.6.12] - 2025-01-10
 
 ### 🔗 **FASE 6.4 - INTEGRAÇÃO COM SISTEMA DE CONTAS COMPLETA**
