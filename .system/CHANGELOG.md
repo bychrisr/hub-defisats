@@ -4,6 +4,37 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.6] - 2025-01-09
+
+### 🔗 **FASE 6.2.1 - AUTOMATION EXECUTOR MULTI-ACCOUNT**
+
+#### 🎯 **Automation Executor Atualizado**
+- ✅ **Integração Multi-Account**: Integração completa com UserExchangeAccountService
+- ✅ **Credenciais por Conta**: Uso de credenciais específicas da conta ativa
+- ✅ **Logs Detalhados**: Logs com informações da conta em todas as operações
+- ✅ **Validação Robusta**: Validação de credenciais por conta
+- ✅ **Cache Inteligente**: Cache de credenciais por conta específica
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **getUserCredentials**: Atualizado para usar contas específicas
+- ✅ **getAutomationConfig**: Inclui dados da conta associada
+- ✅ **executeMarginGuardAction**: Logs detalhados por conta
+- ✅ **executeAutoEntryAction**: Logs detalhados por conta
+- ✅ **executeTpSlAction**: Logs detalhados por conta
+- ✅ **Worker Principal**: Processamento por conta ativa
+
+#### 📊 **Melhorias de Logging**
+- ✅ **Logs Estruturados**: Todos os logs incluem informações da conta
+- ✅ **Identificação Clara**: Logs com prefixo "AUTOMATION EXECUTOR"
+- ✅ **Informações da Conta**: Nome da conta e exchange em todos os logs
+- ✅ **Cache por Conta**: Cache específico para cada conta
+
+#### 🔍 **Validações Implementadas**
+- ✅ **Conta Específica**: Busca credenciais da conta vinculada à automação
+- ✅ **Credenciais Válidas**: Validação de credenciais não vazias
+- ✅ **Conta Ativa**: Verificação de conta ativa quando necessário
+- ✅ **Tratamento de Erros**: Logs de erro com informações da conta
+
 ## [v2.6.5] - 2025-01-09
 
 ### 🔗 **FASE 6.1.4 - AUTOMATION ACCOUNT SERVICE E TIPOS DE AUTOMAÇÃO**

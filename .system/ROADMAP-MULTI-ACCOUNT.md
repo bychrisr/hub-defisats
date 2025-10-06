@@ -185,11 +185,14 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ **BONUS**: Criar modelo AutomationType no banco
   - ✅ **BONUS**: Seeder para popular tipos de automação
 
-### **6.2 Workers e Execução**
-- [ ] **6.2.1** Atualizar `automation-executor.ts`
-  - Filtros por conta ativa
-  - Uso de credenciais corretas
-  - Logs de execução por conta
+### **6.2 Workers e Execução** 🔄 **EM PROGRESSO**
+- [x] **6.2.1** Atualizar `automation-executor.ts` ✅
+  - ✅ Filtros por conta ativa
+  - ✅ Uso de credenciais corretas
+  - ✅ Logs de execução por conta
+  - ✅ Integração com UserExchangeAccountService
+  - ✅ Validação de credenciais por conta
+  - ✅ Logs detalhados com informações da conta
 
 - [ ] **6.2.2** Modificar `automation-worker.ts`
   - Buscar credenciais da conta ativa
