@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, Search, Plus, MoreVertical } from 'lucide-react';
+import { ChevronDown, Search, Plus, MoreVertical, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,23 +10,30 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useAccounts } from '@/contexts/AccountContext';
+import { useUserExchangeAccounts } from '@/hooks/useUserExchangeAccounts';
 import { useTheme } from '@/contexts/ThemeContext';
-import { ACCOUNT_PROVIDERS } from '@/types/account';
 import { cn } from '@/lib/utils';
 
 export const AccountSelector = () => {
-  const { accounts, activeAccount, setActiveAccount } = useAccounts();
+  const { accounts, activeAccount, setActiveAccount, isLoading } = useUserExchangeAccounts();
   const { theme } = useTheme();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
   const filteredAccounts = accounts.filter(account =>
-    account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    account.provider.toLowerCase().includes(searchTerm.toLowerCase())
+    account.account_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    account.exchange.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const activeProvider = activeAccount ? ACCOUNT_PROVIDERS[activeAccount.provider] : null;
+  const handleAccountChange = async (accountId: string) => {
+    try {
+      await setActiveAccount(accountId);
+      setIsOpen(false);
+    } catch (error) {
+      console.error('❌ ACCOUNT SELECTOR - Error changing account:', error);
+    }
+  };
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -40,10 +48,10 @@ export const AccountSelector = () => {
           {/* Account Info */}
           <div className="flex flex-col items-start min-w-0">
             <span className="text-sm font-medium text-text-primary truncate">
-              {activeAccount?.name || 'No Account'}
+              {activeAccount?.account_name || 'No Account'}
             </span>
             <span className="text-xs text-text-secondary truncate">
-              {activeProvider?.name || 'Unknown Provider'}
+              {activeAccount?.exchange.name || 'Unknown Exchange'}
             </span>
           </div>
           <ChevronDown className="h-4 w-4 text-text-secondary" />
@@ -92,16 +100,12 @@ export const AccountSelector = () => {
             </div>
           ) : (
             filteredAccounts.map((account) => {
-              const provider = ACCOUNT_PROVIDERS[account.provider];
               const isActive = account.id === activeAccount?.id;
               
               return (
                 <DropdownMenuItem
                   key={account.id}
-                  onClick={() => {
-                    setActiveAccount(account);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => handleAccountChange(account.id)}
                   className={cn(
                     "flex items-center space-x-3 p-4 cursor-pointer",
                     "hover:bg-primary/5 transition-colors duration-200",
@@ -117,12 +121,12 @@ export const AccountSelector = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-text-primary truncate">
-                        {account.name}
+                        {account.account_name}
                       </span>
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs text-text-secondary">
-                          {account.balance ? `$${account.balance.toFixed(2)} ${account.currency}` : '$0.00 USD'}
-                        </span>
+                        {isActive && (
+                          <Check className="h-4 w-4 text-primary" />
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -136,9 +140,16 @@ export const AccountSelector = () => {
                         </Button>
                       </div>
                     </div>
-                    <span className="text-xs text-text-secondary">
-                      {provider.name}
-                    </span>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-xs text-text-secondary">
+                        {account.exchange.name}
+                      </span>
+                      {account.is_active && (
+                        <span className="text-xs text-success bg-success/10 px-2 py-0.5 rounded-full">
+                          Active
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </DropdownMenuItem>
               );
@@ -152,12 +163,12 @@ export const AccountSelector = () => {
             variant="outline"
             className="w-full justify-center space-x-2 hover:bg-primary/10"
             onClick={() => {
-              // TODO: Implement add account functionality
-              console.log('Add account clicked');
+              navigate('/profile');
+              setIsOpen(false);
             }}
           >
             <Plus className="h-4 w-4" />
-            <span>Add account or wallet</span>
+            <span>Add Exchange Account</span>
           </Button>
         </div>
       </DropdownMenuContent>
