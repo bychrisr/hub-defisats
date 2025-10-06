@@ -30,281 +30,31 @@ const ExchangeIdParamSchema = z.object({
 export async function exchangesRoutes(fastify: FastifyInstance) {
   // Get all exchanges
   fastify.get('/api/admin/exchanges', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string', format: 'uuid' },
-                  name: { type: 'string' },
-                  slug: { type: 'string' },
-                  description: { type: 'string', nullable: true },
-                  website: { type: 'string', nullable: true },
-                  logo_url: { type: 'string', nullable: true },
-                  api_version: { type: 'string', nullable: true },
-                  is_active: { type: 'boolean' },
-                  created_at: { type: 'string', format: 'date-time' },
-                  updated_at: { type: 'string', format: 'date-time' },
-                  credential_types: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'string', format: 'uuid' },
-                        exchange_id: { type: 'string', format: 'uuid' },
-                        name: { type: 'string' },
-                        field_name: { type: 'string' },
-                        field_type: { type: 'string', enum: ['text', 'password', 'email', 'url'] },
-                        is_required: { type: 'boolean' },
-                        description: { type: 'string', nullable: true },
-                        order: { type: 'number' },
-                        created_at: { type: 'string', format: 'date-time' },
-                        updated_at: { type: 'string', format: 'date-time' }
-                      }
-                    }
-                  },
-                  _count: {
-                    type: 'object',
-                    properties: {
-                      user_accounts: { type: 'number' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    preHandler: [adminAuthMiddleware]
   }, exchangesController.getAllExchanges.bind(exchangesController));
 
   // Get exchange by ID
   fastify.get('/api/admin/exchanges/:id', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      params: ExchangeIdParamSchema,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', format: 'uuid' },
-                name: { type: 'string' },
-                slug: { type: 'string' },
-                description: { type: 'string', nullable: true },
-                website: { type: 'string', nullable: true },
-                logo_url: { type: 'string', nullable: true },
-                api_version: { type: 'string', nullable: true },
-                is_active: { type: 'boolean' },
-                created_at: { type: 'string', format: 'date-time' },
-                updated_at: { type: 'string', format: 'date-time' },
-                credential_types: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string', format: 'uuid' },
-                      exchange_id: { type: 'string', format: 'uuid' },
-                      name: { type: 'string' },
-                      field_name: { type: 'string' },
-                      field_type: { type: 'string', enum: ['text', 'password', 'email', 'url'] },
-                      is_required: { type: 'boolean' },
-                      description: { type: 'string', nullable: true },
-                      order: { type: 'number' },
-                      created_at: { type: 'string', format: 'date-time' },
-                      updated_at: { type: 'string', format: 'date-time' }
-                    }
-                  }
-                },
-                _count: {
-                  type: 'object',
-                  properties: {
-                    user_accounts: { type: 'number' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    preHandler: [adminAuthMiddleware]
   }, exchangesController.getExchangeById.bind(exchangesController));
 
   // Create exchange
   fastify.post('/api/admin/exchanges', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      body: CreateExchangeSchema,
-      response: {
-        201: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', format: 'uuid' },
-                name: { type: 'string' },
-                slug: { type: 'string' },
-                description: { type: 'string', nullable: true },
-                website: { type: 'string', nullable: true },
-                logo_url: { type: 'string', nullable: true },
-                api_version: { type: 'string', nullable: true },
-                is_active: { type: 'boolean' },
-                created_at: { type: 'string', format: 'date-time' },
-                updated_at: { type: 'string', format: 'date-time' },
-                credential_types: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string', format: 'uuid' },
-                      exchange_id: { type: 'string', format: 'uuid' },
-                      name: { type: 'string' },
-                      field_name: { type: 'string' },
-                      field_type: { type: 'string', enum: ['text', 'password', 'email', 'url'] },
-                      is_required: { type: 'boolean' },
-                      description: { type: 'string', nullable: true },
-                      order: { type: 'number' },
-                      created_at: { type: 'string', format: 'date-time' },
-                      updated_at: { type: 'string', format: 'date-time' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    preHandler: [adminAuthMiddleware]
   }, exchangesController.createExchange.bind(exchangesController));
 
   // Update exchange
   fastify.put('/api/admin/exchanges/:id', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      params: ExchangeIdParamSchema,
-      body: UpdateExchangeSchema,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', format: 'uuid' },
-                name: { type: 'string' },
-                slug: { type: 'string' },
-                description: { type: 'string', nullable: true },
-                website: { type: 'string', nullable: true },
-                logo_url: { type: 'string', nullable: true },
-                api_version: { type: 'string', nullable: true },
-                is_active: { type: 'boolean' },
-                created_at: { type: 'string', format: 'date-time' },
-                updated_at: { type: 'string', format: 'date-time' },
-                credential_types: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string', format: 'uuid' },
-                      exchange_id: { type: 'string', format: 'uuid' },
-                      name: { type: 'string' },
-                      field_name: { type: 'string' },
-                      field_type: { type: 'string', enum: ['text', 'password', 'email', 'url'] },
-                      is_required: { type: 'boolean' },
-                      description: { type: 'string', nullable: true },
-                      order: { type: 'number' },
-                      created_at: { type: 'string', format: 'date-time' },
-                      updated_at: { type: 'string', format: 'date-time' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    preHandler: [adminAuthMiddleware]
   }, exchangesController.updateExchange.bind(exchangesController));
 
   // Delete exchange
   fastify.delete('/api/admin/exchanges/:id', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      params: ExchangeIdParamSchema,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
+    preHandler: [adminAuthMiddleware]
   }, exchangesController.deleteExchange.bind(exchangesController));
 
   // Toggle exchange status
   fastify.patch('/api/admin/exchanges/:id/toggle', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      params: ExchangeIdParamSchema,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', format: 'uuid' },
-                name: { type: 'string' },
-                slug: { type: 'string' },
-                description: { type: 'string', nullable: true },
-                website: { type: 'string', nullable: true },
-                logo_url: { type: 'string', nullable: true },
-                api_version: { type: 'string', nullable: true },
-                is_active: { type: 'boolean' },
-                created_at: { type: 'string', format: 'date-time' },
-                updated_at: { type: 'string', format: 'date-time' },
-                credential_types: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string', format: 'uuid' },
-                      exchange_id: { type: 'string', format: 'uuid' },
-                      name: { type: 'string' },
-                      field_name: { type: 'string' },
-                      field_type: { type: 'string', enum: ['text', 'password', 'email', 'url'] },
-                      is_required: { type: 'boolean' },
-                      description: { type: 'string', nullable: true },
-                      order: { type: 'number' },
-                      created_at: { type: 'string', format: 'date-time' },
-                      updated_at: { type: 'string', format: 'date-time' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    preHandler: [adminAuthMiddleware]
   }, exchangesController.toggleExchangeStatus.bind(exchangesController));
 }
