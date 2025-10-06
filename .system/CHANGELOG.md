@@ -4,6 +4,29 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.7] - 2025-01-09
+
+### 🐛 **CORREÇÕES CRÍTICAS - PLANOS ILIMITADOS**
+
+#### 🔧 **Correções de Bugs**
+- ✅ **Lógica de Planos Ilimitados**: Corrigida lógica para planos lifetime (-1 = ilimitado)
+- ✅ **Backend Controller**: `is_unlimited` agora verifica `max_exchange_accounts === -1`
+- ✅ **Frontend Hook**: Tratamento correto de valores `-1` e flag `is_unlimited`
+- ✅ **404 Errors**: Desabilitado código legado que causava erros 404
+- ✅ **Account Limit Display**: Corrigido display "1 / -1" para "1 / ∞"
+
+#### 🎯 **Melhorias de UX**
+- ✅ **Símbolo de Infinito**: Exibição correta do ∞ para planos lifetime
+- ✅ **Limite de Contas**: Remoção do banner "Account Limit Reached" para planos ilimitados
+- ✅ **Validação de Criação**: Usuários lifetime podem criar contas ilimitadas
+- ✅ **Interface Consistente**: Display uniforme de limites por tipo de plano
+
+#### 🔧 **Correções Técnicas**
+- ✅ **Plan Limits API**: Rotas corrigidas (removido prefixo duplicado /api)
+- ✅ **Exchange Credentials**: Desabilitado carregamento legado que causava 404
+- ✅ **Multi-Account Interface**: Sistema unificado funcionando corretamente
+- ✅ **Error Handling**: Tratamento robusto de erros de API
+
 ## [v2.5.6] - 2025-01-09
 
 ### 🚀 **FASE 4: MULTI-ACCOUNT INTERFACE - ENHANCED FEATURES**
