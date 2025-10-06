@@ -57,6 +57,7 @@ import { api } from '@/lib/api';
 import ImageUpload from '@/components/ui/ImageUpload';
 import { ExchangeService, UserExchangeCredentials } from '@/services/exchange.service';
 import { ExchangeCredentialsForm } from '@/components/ExchangeCredentialsForm';
+import { MultiAccountInterface } from '@/components/MultiAccountInterface';
 
 const profileSchema = z.object({
   // Profile Information
@@ -633,85 +634,20 @@ export default function Profile() {
   );
 
   const renderSecuritySection = () => {
-
-    if (isLoadingExchanges) {
-      return (
-    <div className="space-y-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-3">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
-              <span className="text-muted-foreground">Loading exchanges...</span>
-              </div>
-              </div>
-            </div>
-      );
-    }
-
-    if (exchangesError) {
-      return (
-        <div className="space-y-6">
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load exchanges: {exchangesError}
-              </AlertDescription>
-            </Alert>
-                </div>
-      );
-    }
-
     return (
       <div className="space-y-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Exchange Credentials</h2>
+          <h2 className="text-2xl font-bold text-foreground">Multi-Account Exchange Management</h2>
           <p className="text-muted-foreground mt-2">
-            Configure your API credentials for automated trading across multiple exchanges
+            Manage multiple exchange accounts for automated trading across different exchanges
           </p>
-                  </div>
+        </div>
 
-        {/* Available Exchanges */}
-        {exchanges.map((exchange) => {
-          const existingCredentials = getCredentialsForExchange(exchange.id);
-          const hasCredentials = hasCredentialsForExchange(exchange.id);
-
-          return (
-            <ExchangeCredentialsForm
-              key={exchange.id}
-              exchange={exchange}
-              existingCredentials={existingCredentials}
-              onSave={async (credentials) => {
-                await updateCredentials(exchange.id, credentials);
-              }}
-              onDelete={existingCredentials ? async () => {
-                await deleteCredentials(exchange.id);
-              } : undefined}
-              onTest={hasCredentials ? async () => {
-                return await testCredentials(exchange.id);
-              } : undefined}
-              isLoading={isLoading}
-            />
-          );
-        })}
-
-        {/* No Exchanges Available */}
-        {exchanges.length === 0 && (
-          <Card className="border-gray-200 dark:border-gray-700">
-            <CardContent className="text-center py-12">
-            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Key className="h-8 w-8 text-gray-400" />
-            </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                No Exchanges Available
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No exchanges are currently configured in the system.
-              </p>
-        </CardContent>
-      </Card>
-        )}
-    </div>
-  );
+        {/* Multi-Account Interface */}
+        <MultiAccountInterface />
+      </div>
+    );
   };
 
   const renderNotificationsSection = () => (
