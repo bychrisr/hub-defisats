@@ -58,7 +58,8 @@ export const AccountSelector = () => {
   };
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -200,11 +201,12 @@ export const AccountSelector = () => {
       onSuccess={handleModalSuccess}
     />
 
-    <AccountActionsModal
-      isOpen={isActionsModalOpen}
-      onClose={() => setIsActionsModalOpen(false)}
-      account={selectedAccount}
-      onSuccess={handleModalSuccess}
-    />
+      <AccountActionsModal
+        isOpen={isActionsModalOpen}
+        onClose={() => setIsActionsModalOpen(false)}
+        account={selectedAccount}
+        onSuccess={handleModalSuccess}
+      />
+    </>
   );
 };
