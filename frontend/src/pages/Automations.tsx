@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Bot, Plus, Edit, Trash2, Play, Pause, CheckCircle, BarChart3, Building2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserExchangeAccounts } from '@/hooks/useUserExchangeAccounts';
-import { useActiveAccountContext } from '@/hooks/useActiveAccountContext';
 import { useAccountCredentials } from '@/hooks/useAccountCredentials';
 
 // Mock data para demonstração
@@ -56,8 +55,7 @@ export const Automations = () => {
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   
   // Hooks para contas
-  const { accounts, loading: accountsLoading } = useUserExchangeAccounts();
-  const { activeAccount } = useActiveAccountContext();
+  const { accounts, loading: accountsLoading, getActiveAccount } = useUserExchangeAccounts();
   const { 
     loading: credentialsLoading, 
     error: credentialsError,
@@ -68,10 +66,11 @@ export const Automations = () => {
 
   // Atualizar conta selecionada quando conta ativa mudar
   useEffect(() => {
+    const activeAccount = getActiveAccount();
     if (activeAccount) {
       setSelectedAccount(activeAccount.id);
     }
-  }, [activeAccount]);
+  }, [getActiveAccount]);
 
   const getFilteredAutomations = () => {
     let filtered = mockAutomations;
@@ -166,10 +165,10 @@ export const Automations = () => {
                     })}
                   </SelectContent>
                 </Select>
-                {activeAccount && (
+                {getActiveAccount() && (
                   <Badge variant="secondary" className="ml-2">
                     <CheckCircle className="w-3 h-3 mr-1" />
-                    Conta Ativa: {activeAccount.account_name}
+                    Conta Ativa: {getActiveAccount()?.account_name}
                   </Badge>
                 )}
               </div>
@@ -178,7 +177,7 @@ export const Automations = () => {
         </div>
 
         {/* Account Status Card */}
-        {activeAccount && (
+        {getActiveAccount() && (
           <div className="mb-6">
             <Card className="gradient-card-green backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl">
               <CardContent className="p-6">
@@ -190,7 +189,7 @@ export const Automations = () => {
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">Conta Ativa</h3>
                       <p className="text-muted-foreground">
-                        {activeAccount.account_name} ({activeAccount.exchange.name})
+                        {getActiveAccount()?.account_name} ({getActiveAccount()?.exchange.name})
                       </p>
                       {credentialsError && (
                         <p className="text-red-500 text-sm mt-1">
@@ -201,7 +200,7 @@ export const Automations = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-green-500">
-                      {getFilteredAutomations().filter(a => a.account_id === activeAccount.id).length}
+                      {getFilteredAutomations().filter(a => a.account_id === getActiveAccount()?.id).length}
                     </div>
                     <div className="text-sm text-muted-foreground">Automações</div>
                     {credentialsLoading && (
@@ -362,6 +361,7 @@ export const Automations = () => {
                     </TableHeader>
                     <TableBody>
                       {getFilteredAutomations().map((automation, index) => {
+                        const activeAccount = getActiveAccount();
                         const isActiveAccount = activeAccount && automation.account_id === activeAccount.id;
                         return (
                           <TableRow 
