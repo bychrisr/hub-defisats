@@ -4,6 +4,39 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.10] - 2025-01-10
+
+### 🔗 **FASE 6.3 - DASHBOARD DE AUTOMAÇÕES MULTI-ACCOUNT**
+
+#### 🎯 **Dashboard de Automações Multi-Account Implementado**
+- ✅ **Interface Atualizada**: Dashboard de automações com filtros por conta
+- ✅ **Indicadores Visuais**: Indicadores visuais de conta ativa
+- ✅ **Integração Credenciais**: Integração com AccountCredentialsService
+- ✅ **Status por Conta**: Status de automações por conta
+- ✅ **Hook Personalizado**: useAccountCredentials para gerenciamento de credenciais
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **Filtros por Conta**: Seletor de conta com opções dinâmicas
+- ✅ **Card de Status**: Card de status da conta ativa com estatísticas
+- ✅ **Indicadores Visuais**: Ring verde para automações da conta ativa
+- ✅ **Badge de Conta Ativa**: Badge "Ativa" para conta ativa
+- ✅ **Estatísticas por Conta**: Card de estatísticas da conta selecionada
+- ✅ **Status Detalhado**: Status detalhado por automação (running, paused, etc.)
+
+#### 📊 **Interface e UX**
+- ✅ **Seletor de Conta**: Dropdown com todas as contas do usuário
+- ✅ **Badge de Conta Ativa**: Indicador visual da conta ativa
+- ✅ **Card de Status**: Card destacado para conta ativa
+- ✅ **Ring Verde**: Destaque visual para automações da conta ativa
+- ✅ **Estatísticas**: Métricas por conta selecionada
+
+#### 🔍 **Integração e Validação**
+- ✅ **useAccountCredentials**: Hook para gerenciamento de credenciais
+- ✅ **Validação de Credenciais**: Integração com validação de credenciais
+- ✅ **Indicadores de Erro**: Exibição de erros de credenciais
+- ✅ **Loading States**: Estados de carregamento para validação
+- ✅ **Cache Stats**: Estatísticas de cache de credenciais
+
 ## [v2.6.9] - 2025-01-10
 
 ### 🔗 **FASE 6.2.4 - ACCOUNT CREDENTIALS SERVICE MULTI-ACCOUNT**

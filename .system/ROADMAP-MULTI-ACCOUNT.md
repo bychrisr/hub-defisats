@@ -221,10 +221,32 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ Estatísticas de cache e performance
   - ✅ Cleanup automático de validações expiradas
 
-### **6.3 Dashboard de Automações**
-- [ ] **6.3.1** Atualizar interface de automações
-  - Filtros por conta
-  - Indicadores visuais de conta
+### **6.3 Dashboard de Automações** ✅
+- [x] **6.3.1** Atualizar interface de automações ✅
+  - ✅ Filtros por conta
+  - ✅ Indicadores visuais de conta
+  - ✅ Seletor de conta com opções dinâmicas
+  - ✅ Badge de conta ativa
+  - ✅ Card de status da conta ativa
+- [x] **6.3.2** Implementar indicadores visuais de conta ativa ✅
+  - ✅ Card de status da conta ativa
+  - ✅ Indicadores visuais nas linhas da tabela
+  - ✅ Badge "Ativa" para conta ativa
+  - ✅ Ring verde para automações da conta ativa
+- [x] **6.3.3** Integrar com AccountCredentialsService ✅
+  - ✅ Hook useAccountCredentials implementado
+  - ✅ Integração com validação de credenciais
+  - ✅ Indicadores de erro de credenciais
+  - ✅ Loading states para validação
+- [x] **6.3.4** Implementar status de automações por conta ✅
+  - ✅ Status detalhado por automação
+  - ✅ Estatísticas por conta selecionada
+  - ✅ Badge de status (running, paused, etc.)
+  - ✅ Card de estatísticas da conta
+- [x] **6.3.5** Testar e validar implementação ✅
+  - ✅ Testes de linting passando
+  - ✅ Interface responsiva
+  - ✅ Integração com hooks funcionando
   - Estatísticas por conta
 
 - [ ] **6.3.2** Criar `AutomationAccountFilter.tsx`
