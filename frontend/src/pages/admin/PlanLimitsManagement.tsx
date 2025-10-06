@@ -229,14 +229,14 @@ export default function PlanLimitsManagement() {
   };
 
   const openEditDialog = (planLimits: PlanLimits) => {
-    setEditingPlan(planLimits.id);
+    setEditingPlan(planLimits.plan_id);
     setFormData({
-      planId: planLimits.planId,
-      maxExchangeAccounts: planLimits.maxExchangeAccounts,
-      maxAutomations: planLimits.maxAutomations,
-      maxIndicators: planLimits.maxIndicators,
-      maxSimulations: planLimits.maxSimulations,
-      maxBacktests: planLimits.maxBacktests
+      planId: planLimits.plan_id,
+      maxExchangeAccounts: planLimits.max_exchange_accounts,
+      maxAutomations: planLimits.max_automations,
+      maxIndicators: planLimits.max_indicators,
+      maxSimulations: planLimits.max_simulations,
+      maxBacktests: planLimits.max_backtests
     });
     setShowEditDialog(true);
   };
@@ -466,48 +466,46 @@ export default function PlanLimitsManagement() {
             </TableHeader>
             <TableBody>
               {planLimits.map((planLimit, index) => (
-                <TableRow key={planLimit.id || `plan-limit-${index}`}>
+                <TableRow key={planLimit.plan_id || `plan-limit-${index}`}>
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline">
                         {(() => {
                           console.log('🔍 PlanLimitsManagement - Rendering plan limit:', {
-                            id: planLimit.id,
-                            planId: planLimit.planId,
-                            plan: planLimit.plan,
-                            planName: planLimit.plan?.name,
-                            planSlug: planLimit.plan?.slug,
+                            plan_id: planLimit.plan_id,
+                            plan_type: planLimit.plan_type,
+                            plan_name: planLimit.plan_name,
                             allKeys: Object.keys(planLimit),
                             planLimitStringified: JSON.stringify(planLimit, null, 2)
                           });
-                          return planLimit.plan?.name || 'Unknown Plan';
+                          return planLimit.plan_name || 'Unknown Plan';
                         })()}
                       </Badge>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={getLimitColor(0, planLimit.maxExchangeAccounts)}>
-                      {formatLimit(planLimit.maxExchangeAccounts)}
+                    <span className={getLimitColor(0, planLimit.max_exchange_accounts)}>
+                      {formatLimit(planLimit.max_exchange_accounts)}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className={getLimitColor(0, planLimit.maxAutomations)}>
-                      {formatLimit(planLimit.maxAutomations)}
+                    <span className={getLimitColor(0, planLimit.max_automations)}>
+                      {formatLimit(planLimit.max_automations)}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className={getLimitColor(0, planLimit.maxIndicators)}>
-                      {formatLimit(planLimit.maxIndicators)}
+                    <span className={getLimitColor(0, planLimit.max_indicators)}>
+                      {formatLimit(planLimit.max_indicators)}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className={getLimitColor(0, planLimit.maxSimulations)}>
-                      {formatLimit(planLimit.maxSimulations)}
+                    <span className={getLimitColor(0, planLimit.max_simulations)}>
+                      {formatLimit(planLimit.max_simulations)}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className={getLimitColor(0, planLimit.maxBacktests)}>
-                      {formatLimit(planLimit.maxBacktests)}
+                    <span className={getLimitColor(0, planLimit.max_backtests)}>
+                      {formatLimit(planLimit.max_backtests)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -515,14 +513,14 @@ export default function PlanLimitsManagement() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => planLimit.id && openEditDialog(planLimit)}
+                        onClick={() => planLimit.plan_id && openEditDialog(planLimit)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => planLimit.id && handleDeletePlanLimits(planLimit.id)}
+                        onClick={() => planLimit.plan_id && handleDeletePlanLimits(planLimit.plan_id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

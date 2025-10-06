@@ -1,20 +1,15 @@
 import { api } from '@/lib/api';
 
 export interface PlanLimits {
-  id: string;
-  planId: string;
-  maxExchangeAccounts: number;
-  maxAutomations: number;
-  maxIndicators: number;
-  maxSimulations: number;
-  maxBacktests: number;
-  createdAt: string;
-  updatedAt: string;
-  plan: {
-    id: string;
-    name: string;
-    slug: string;
-  };
+  plan_id: string;
+  plan_type: string;
+  plan_name: string;
+  max_exchange_accounts: number;
+  max_automations: number;
+  max_indicators: number;
+  max_simulations: number;
+  max_backtests: number;
+  is_unlimited: boolean;
 }
 
 export interface CreatePlanLimitsRequest {
