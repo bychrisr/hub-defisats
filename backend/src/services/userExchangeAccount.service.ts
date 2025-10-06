@@ -22,6 +22,31 @@ export class UserExchangeAccountService {
   constructor(private prisma: PrismaClient) {}
 
   /**
+   * Descriptografar credenciais de uma conta
+   */
+  private decryptCredentials(credentials: any): Record<string, string> {
+    const authService = new AuthService(this.prisma, {} as any);
+    const decryptedCredentials: Record<string, string> = {};
+    
+    if (credentials && typeof credentials === 'object') {
+      Object.entries(credentials).forEach(([key, value]) => {
+        if (value && typeof value === 'string') {
+          try {
+            decryptedCredentials[key] = authService.decryptData(value);
+          } catch (error) {
+            console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to decrypt credential ${key}:`, error);
+            decryptedCredentials[key] = ''; // Fallback para string vazia
+          }
+        } else {
+          decryptedCredentials[key] = '';
+        }
+      });
+    }
+    
+    return decryptedCredentials;
+  }
+
+  /**
    * Get all user exchange accounts for a user
    */
   async getUserExchangeAccounts(userId: string): Promise<UserExchangeAccountWithExchange[]> {
@@ -39,9 +64,15 @@ export class UserExchangeAccountService {
       }
     });
 
+    // Descriptografar credenciais para cada conta
+    const accountsWithDecryptedCredentials = accounts.map(account => ({
+      ...account,
+      credentials: this.decryptCredentials(account.credentials)
+    }));
+
     console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Accounts found:', {
-      count: accounts.length,
-      accounts: accounts.map(acc => ({ 
+      count: accountsWithDecryptedCredentials.length,
+      accounts: accountsWithDecryptedCredentials.map(acc => ({ 
         id: acc.id,
         exchangeName: acc.exchange.name,
         accountName: acc.account_name,
@@ -50,7 +81,7 @@ export class UserExchangeAccountService {
       }))
     });
 
-    return accounts;
+    return accountsWithDecryptedCredentials;
   }
 
   /**
@@ -70,18 +101,25 @@ export class UserExchangeAccountService {
     });
 
     if (account) {
+      // Descriptografar credenciais
+      const accountWithDecryptedCredentials = {
+        ...account,
+        credentials: this.decryptCredentials(account.credentials)
+      };
+
       console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account found:', {
-        id: account.id,
-        exchangeName: account.exchange.name,
-        accountName: account.account_name,
-        isActive: account.is_active,
-        isVerified: account.is_verified
+        id: accountWithDecryptedCredentials.id,
+        exchangeName: accountWithDecryptedCredentials.exchange.name,
+        accountName: accountWithDecryptedCredentials.account_name,
+        isActive: accountWithDecryptedCredentials.is_active,
+        isVerified: accountWithDecryptedCredentials.is_verified
       });
+
+      return accountWithDecryptedCredentials;
     } else {
       console.log('❌ USER EXCHANGE ACCOUNT SERVICE - Account not found');
+      return null;
     }
-
-    return account;
   }
 
   /**
@@ -216,15 +254,21 @@ export class UserExchangeAccountService {
       }
     });
 
+    // Descriptografar credenciais para retorno
+    const accountWithDecryptedCredentials = {
+      ...account,
+      credentials: this.decryptCredentials(account.credentials)
+    };
+
     console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account updated:', {
-      id: account.id,
-      exchangeName: account.exchange.name,
-      accountName: account.account_name,
-      isActive: account.is_active,
-      isVerified: account.is_verified
+      id: accountWithDecryptedCredentials.id,
+      exchangeName: accountWithDecryptedCredentials.exchange.name,
+      accountName: accountWithDecryptedCredentials.account_name,
+      isActive: accountWithDecryptedCredentials.is_active,
+      isVerified: accountWithDecryptedCredentials.is_verified
     });
 
-    return account;
+    return accountWithDecryptedCredentials;
   }
 
   /**
@@ -306,13 +350,19 @@ export class UserExchangeAccountService {
       }
     });
 
+    // Descriptografar credenciais para retorno
+    const accountWithDecryptedCredentials = {
+      ...updatedAccount,
+      credentials: this.decryptCredentials(updatedAccount.credentials)
+    };
+
     console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Active account set:', {
-      id: updatedAccount.id,
-      exchangeName: updatedAccount.exchange.name,
-      accountName: updatedAccount.account_name
+      id: accountWithDecryptedCredentials.id,
+      exchangeName: accountWithDecryptedCredentials.exchange.name,
+      accountName: accountWithDecryptedCredentials.account_name
     });
 
-    return updatedAccount;
+    return accountWithDecryptedCredentials;
   }
 
   /**
@@ -333,16 +383,23 @@ export class UserExchangeAccountService {
     });
 
     if (account) {
+      // Descriptografar credenciais
+      const accountWithDecryptedCredentials = {
+        ...account,
+        credentials: this.decryptCredentials(account.credentials)
+      };
+
       console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Active account found:', {
-        id: account.id,
-        exchangeName: account.exchange.name,
-        accountName: account.account_name
+        id: accountWithDecryptedCredentials.id,
+        exchangeName: accountWithDecryptedCredentials.exchange.name,
+        accountName: accountWithDecryptedCredentials.account_name
       });
+
+      return accountWithDecryptedCredentials;
     } else {
       console.log('❌ USER EXCHANGE ACCOUNT SERVICE - No active account found');
+      return null;
     }
-
-    return account;
   }
 
   /**
