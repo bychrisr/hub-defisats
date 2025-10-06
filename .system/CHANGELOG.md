@@ -4,6 +4,38 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.14] - 2025-01-10
+
+### 🔗 **FASE 6.6 - VALIDAÇÃO E SEGURANÇA COMPLETA**
+
+#### 🎯 **Sistema de Segurança Multi-Account 100% Funcional**
+- ✅ **AutomationCredentialValidatorService**: Validação completa de credenciais
+- ✅ **AutomationRateLimiterService**: Rate limiting e throttling por conta
+- ✅ **AutomationAccountValidatorService**: Validação de segurança e compliance
+- ✅ **Sistema de Auditoria**: Logs de segurança e rastreamento
+- ✅ **Bloqueio Automático**: Proteção contra alto risco
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **Validação de Credenciais**: Teste antes da execução
+- ✅ **Rate Limiting**: Limites personalizáveis por exchange
+- ✅ **Throttling**: Sistema de throttling inteligente
+- ✅ **Validação de Segurança**: Scoring de segurança e risco
+- ✅ **Compliance**: Validação GDPR e regulamentações
+- ✅ **Auditoria**: Logs completos de segurança
+
+#### 📊 **Componentes Criados**
+- ✅ **AutomationCredentialValidatorService**: Validação de credenciais
+- ✅ **AutomationRateLimiterService**: Rate limiting e throttling
+- ✅ **AutomationAccountValidatorService**: Validação completa
+- ✅ **Sistema de Cache**: Cache inteligente de validações
+- ✅ **Relatórios de Segurança**: Métricas e relatórios
+
+#### 🔍 **Validação e Testes**
+- ✅ **Linting**: Sem erros de linting
+- ✅ **Integração**: Todos os serviços funcionando
+- ✅ **Segurança**: Validações de segurança testadas
+- ✅ **Rate Limiting**: Sistema de rate limiting testado
+
 ## [v2.6.13] - 2025-01-10
 
 ### 🔗 **FASE 6.5 - PERSISTÊNCIA E SINCRONIZAÇÃO COMPLETA**
