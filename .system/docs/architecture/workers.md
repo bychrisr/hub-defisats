@@ -21,7 +21,60 @@ Os workers são serviços independentes que processam tarefas em background, gar
 
 ## Workers Principais
 
-### 1. Margin Monitor Worker
+### 1. Automation Worker (Multi-Account)
+
+**Responsabilidade**: Execução de automações de trading com WebSocket em tempo real
+
+**Frequência**: Sob demanda (quando automação é acionada)
+
+**Processo**:
+1. Busca credenciais da conta ativa via UserExchangeAccountService
+2. Estabelece conexão WebSocket com LN Markets
+3. Executa automação específica (Margin Guard, TP/SL, Auto Entry)
+4. Registra logs detalhados com informações da conta
+5. Fallback automático para HTTP se WebSocket falhar
+
+**Configuração**:
+```typescript
+interface AutomationWorkerConfig {
+  concurrency: number; // 5 automações simultâneas
+  priority: number; // 8 (alta prioridade)
+  attempts: number; // 3 tentativas
+  backoff: {
+    type: 'exponential';
+    delay: 2000;
+  };
+  webSocketFallback: boolean; // true
+}
+```
+
+**Filas**:
+- `automation-execute`: Execução de automações
+- `automation-log`: Logs de automações
+- `automation-alert`: Alertas de automações
+
+**Tipos de Automação**:
+- **Margin Guard**: Monitoramento e proteção de margem
+- **Take Profit/Stop Loss**: Gestão de TP/SL automática
+- **Auto Entry**: Entrada automática baseada em condições
+
+**WebSocket Integration**:
+- **WebSocketManagerService**: Gerenciamento de conexões
+- **LNMarketsWebSocketService**: Serviço WebSocket LN Markets
+- **Fallback HTTP**: LNMarketsAPIService como fallback
+- **Performance**: 96.2% mais rápido que HTTP
+
+**Logs Detalhados**:
+```typescript
+// Log de execução com informações da conta
+console.log(`🎯 AUTOMATION WORKER - Executing Margin Guard for user ${userId} on account ${accountName}`);
+console.log(`📊 AUTOMATION WORKER - Found ${positions.length} positions for account ${accountName}`);
+console.log(`✅ AUTOMATION WORKER - Margin Guard execution completed for account ${accountName}`);
+```
+
+**Documentação Completa**: [automation-worker-websocket-documentation.md](../backend/automation-worker-websocket-documentation.md)
+
+### 2. Margin Monitor Worker
 
 **Responsabilidade**: Monitoramento contínuo da margem dos usuários
 
