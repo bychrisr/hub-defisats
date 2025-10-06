@@ -2437,6 +2437,62 @@ const signature = crypto
 
 ## [Unreleased]
 
+### v2.6.15 - FASE 6.7 - MONITORAMENTO E LOGS COMPLETA
+**Data:** 2025-01-10T02:05:00Z
+
+#### 🚀 **FASE 6.7.1 - Sistema de Logs para Automações**
+- ✅ **AutomationLogsService**: Serviço completo de logging de automações
+- ✅ **Interface AutomationLog**: Estrutura completa de logs com performance
+- ✅ **Sistema de Filtros**: Busca, filtros por status, ação, plano, data
+- ✅ **Paginação**: Sistema de paginação para grandes volumes de logs
+- ✅ **Exportação**: Suporte a CSV, JSON e XLSX
+- ✅ **Estatísticas**: Métricas detalhadas por automação e conta
+- ✅ **Performance**: Métricas de CPU, memória, tempo de execução
+
+#### 🚨 **FASE 6.7.2 - Sistema de Alertas para Automações**
+- ✅ **AutomationAlertService**: Serviço completo de alertas
+- ✅ **Tipos de Alertas**: Execution failed, performance degraded, rate limit exceeded
+- ✅ **Sistema de Cooldown**: Prevenção de spam de alertas
+- ✅ **Limites Configuráveis**: Máximo de alertas por usuário/automação
+- ✅ **Severidade**: Low, medium, high, critical
+- ✅ **Configuração**: Thresholds de performance e rate limiting
+- ✅ **Notificações**: Sistema de notificações integrado
+
+#### 📊 **FASE 6.7.3 - Dashboard de Monitoramento**
+- ✅ **Tab Automations**: Nova aba no Monitoring.tsx
+- ✅ **Cards de Estatísticas**: Total logs, success rate, execution time, error rate
+- ✅ **Logs Recentes**: Visualização dos últimos logs de automações
+- ✅ **Alertas Recentes**: Visualização dos alertas ativos
+- ✅ **Métricas de Performance**: Gráficos de CPU e memória
+- ✅ **Integração**: Reutilização de 80% das estruturas existentes
+
+#### 🔧 **FASE 6.7.4 - Integração Completa**
+- ✅ **Reutilização**: Aproveitamento máximo das estruturas existentes
+- ✅ **Consistência**: Manutenção dos padrões estabelecidos
+- ✅ **Performance**: Sistema otimizado para grandes volumes
+- ✅ **Escalabilidade**: Arquitetura preparada para crescimento
+- ✅ **Manutenibilidade**: Código limpo e bem documentado
+
+#### 📁 **Arquivos Criados/Modificados**
+- ✅ `backend/src/services/automation-logs.service.ts` - Serviço de logs
+- ✅ `backend/src/controllers/admin/automation-logs.controller.ts` - Controlador
+- ✅ `backend/src/routes/admin/automation-logs.routes.ts` - Rotas
+- ✅ `backend/src/services/automation-alert.service.ts` - Serviço de alertas
+- ✅ `frontend/src/pages/admin/AutomationLogs.tsx` - Página de logs
+- ✅ `frontend/src/pages/admin/Monitoring.tsx` - Dashboard estendido
+
+#### 🎯 **Benefícios Implementados**
+- ✅ **Monitoramento Completo**: Visibilidade total das automações
+- ✅ **Alertas Inteligentes**: Detecção proativa de problemas
+- ✅ **Métricas Detalhadas**: Performance e uso por conta
+- ✅ **Interface Familiar**: Reutilização do painel admin existente
+- ✅ **Escalabilidade**: Preparado para múltiplas contas
+- ✅ **Manutenibilidade**: Código limpo e bem estruturado
+
+**FASE 6.7: Sistema completo de monitoramento e logs para automações multi-account!** 🚀
+
+## [Unreleased]
+
 ### 📚 **DOCUMENTAÇÃO TÉCNICA COMPLETA - v2.2.0**
 
 #### ✅ **Documentação de Fluxo de Dados de API**
