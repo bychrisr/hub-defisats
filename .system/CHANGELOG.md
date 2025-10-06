@@ -4,6 +4,70 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.5] - 2025-01-09
+
+### 🚀 **FASE 4: MULTI-ACCOUNT INTERFACE - COMPLETE IMPLEMENTATION**
+
+#### 🎯 **Nova Implementação Multi-Account**
+- ✅ **Backend Completo**: UserExchangeAccountService com CRUD completo
+- ✅ **API Endpoints**: Rotas para gerenciar contas de exchange
+- ✅ **Frontend Interface**: MultiAccountInterface moderna e responsiva
+- ✅ **Sistema de Contas Ativas**: Uma conta ativa por exchange
+- ✅ **Segurança**: Criptografia de credenciais e autenticação
+
+#### 📊 **Funcionalidades Implementadas**
+- ✅ **Múltiplas Contas**: Usuários podem ter várias contas por exchange
+- ✅ **Conta Ativa**: Sistema de conta ativa por exchange
+- ✅ **CRUD Completo**: Criar, editar, deletar, ativar contas
+- ✅ **Teste de Credenciais**: Verificação de credenciais em tempo real
+- ✅ **Interface Moderna**: Design responsivo com shadcn/ui
+
+#### 🔧 **Backend Services**
+- ✅ **UserExchangeAccountService**: Serviço completo para gerenciar contas
+- ✅ **UserExchangeAccountController**: Controller com todos os endpoints
+- ✅ **Rotas Registradas**: API endpoints funcionais
+- ✅ **Criptografia**: Credenciais criptografadas com AuthService
+- ✅ **Validação**: Validação de dados e regras de negócio
+
+#### 🎨 **Frontend Components**
+- ✅ **MultiAccountInterface**: Componente principal da interface
+- ✅ **useUserExchangeAccounts**: Hook para gerenciamento de estado
+- ✅ **UserExchangeAccountService**: Serviço frontend para API
+- ✅ **Loading States**: Estados de carregamento para todas as operações
+- ✅ **Error Handling**: Tratamento robusto de erros
+
+#### 🛠️ **API Endpoints**
+- ✅ **GET /api/user/exchange-accounts**: Listar contas do usuário
+- ✅ **POST /api/user/exchange-accounts**: Criar nova conta
+- ✅ **PUT /api/user/exchange-accounts/:id**: Atualizar conta
+- ✅ **DELETE /api/user/exchange-accounts/:id**: Deletar conta
+- ✅ **POST /api/user/exchange-accounts/:id/set-active**: Definir conta ativa
+- ✅ **POST /api/user/exchange-accounts/:id/test**: Testar credenciais
+
+#### 🎯 **Integração com Profile**
+- ✅ **Seção Security**: Integrada na página de perfil
+- ✅ **Interface Unificada**: Substitui sistema antigo de credenciais
+- ✅ **Navegação**: Acessível através do sidebar do perfil
+- ✅ **Responsividade**: Funciona em mobile e desktop
+
+#### 🔒 **Segurança e Validação**
+- ✅ **Criptografia**: Credenciais criptografadas no banco
+- ✅ **Autenticação**: Middleware de autenticação em todas as rotas
+- ✅ **Validação**: Validação de dados e regras de negócio
+- ✅ **Autorização**: Usuários só podem gerenciar suas próprias contas
+
+#### 📈 **Progresso do Sistema Multi-Account**
+- ✅ **FASE 1**: Estrutura de Dados e Backend - 100%
+- ✅ **FASE 2**: Sistema de Persistência Unificado - 100%
+- ✅ **FASE 3**: Admin Panel - 100%
+- ✅ **FASE 4**: Profile Page Multi-Account Interface - 100%
+- ⏳ **FASE 5**: Header Menu com Dropdown de Contas - 0%
+- ⏳ **FASE 6**: Integração com Automações por Conta - 0%
+
+**Progresso Geral: 60% Concluído**
+
+---
+
 ## [v2.5.4] - 2025-01-09
 
 ### 🚀 **EXCHANGES MANAGEMENT - COMPLETE CRUD IMPLEMENTATION**
