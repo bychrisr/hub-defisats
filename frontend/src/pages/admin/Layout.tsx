@@ -50,7 +50,7 @@ const navigation = [
   { name: 'Route Redirects', href: '/admin/route-redirects', icon: ArrowRightLeft },
   { name: 'Plans', href: '/admin/plans', icon: CreditCard, badge: { text: 'done', color: 'green' } },
   { name: 'Plan Limits', href: '/admin/plan-limits', icon: Settings, badge: { text: 'done', color: 'green' } },
-  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Users', href: '/admin/users', icon: Users, badge: { text: 'done', color: 'green' } },
   { name: 'Coupons', href: '/admin/coupons', icon: Gift, badge: { text: 'done', color: 'green' } },
   { name: 'Menus', href: '/admin/menus', icon: MenuIcon },
   { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
