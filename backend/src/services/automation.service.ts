@@ -2,6 +2,7 @@ import { PrismaClient, Automation } from '@prisma/client';
 import { z } from 'zod';
 import { AutomationType } from '../types/api-contracts';
 import { AutomationLoggerService } from './automation-logger.service';
+import { UserExchangeAccountService } from './userExchangeAccount.service';
 
 // Configuration schemas for each automation type
 const MarginGuardConfigSchema = z.object({
@@ -80,10 +81,12 @@ export interface ToggleAutomationData {
 export class AutomationService {
   private prisma: PrismaClient;
   private automationLogger: AutomationLoggerService;
+  private userExchangeAccountService: UserExchangeAccountService;
 
   constructor(prisma: PrismaClient, automationLogger: AutomationLoggerService) {
     this.prisma = prisma;
     this.automationLogger = automationLogger;
+    this.userExchangeAccountService = new UserExchangeAccountService(prisma);
   }
 
   /**
@@ -116,27 +119,76 @@ export class AutomationService {
     );
     console.log('🔍 AUTOMATION SERVICE - validated config:', validatedConfig);
 
-    // Check if user already has an automation of this type
+    // 🔗 FASE 6.1.1.1: Detectar conta ativa do usuário
+    console.log('🔍 AUTOMATION SERVICE - Detecting active account for user:', data.userId);
+    
+    const userAccounts = await this.userExchangeAccountService.getUserExchangeAccounts(data.userId);
+    const activeAccount = userAccounts.find(account => account.is_active);
+    
+    if (!activeAccount) {
+      throw new Error('User must have an active exchange account to create automations');
+    }
+    
+    console.log('✅ AUTOMATION SERVICE - Active account found:', {
+      accountId: activeAccount.id,
+      accountName: activeAccount.account_name,
+      exchangeName: activeAccount.exchange.name
+    });
+
+    // 🔗 FASE 6.1.1.3: Validar se conta tem credenciais válidas
+    console.log('🔍 AUTOMATION SERVICE - Validating account credentials:', {
+      accountId: activeAccount.id,
+      accountName: activeAccount.account_name
+    });
+
+    if (!activeAccount.credentials || Object.keys(activeAccount.credentials).length === 0) {
+      throw new Error(`Account ${activeAccount.account_name} does not have valid credentials configured`);
+    }
+
+    // Verificar se as credenciais não estão vazias
+    const hasValidCredentials = Object.values(activeAccount.credentials).some(value => 
+      value && value.trim() !== ''
+    );
+
+    if (!hasValidCredentials) {
+      throw new Error(`Account ${activeAccount.account_name} has empty or invalid credentials`);
+    }
+
+    console.log('✅ AUTOMATION SERVICE - Account credentials validated:', {
+      accountId: activeAccount.id,
+      accountName: activeAccount.account_name,
+      hasCredentials: true
+    });
+
+    // Check if user already has an automation of this type for the active account
     const existingAutomation = await this.prisma.automation.findFirst({
       where: {
         user_id: data.userId,
+        user_exchange_account_id: activeAccount.id,
         type: data.type,
         is_active: true,
       },
     });
 
     if (existingAutomation) {
-      throw new Error(`User already has an active ${data.type} automation`);
+      throw new Error(`User already has an active ${data.type} automation for account ${activeAccount.account_name}`);
     }
 
-    // Create automation
+    // Create automation with active account association
     const automation = await this.prisma.automation.create({
       data: {
         user_id: data.userId,
+        user_exchange_account_id: activeAccount.id,
         type: data.type,
         config: validatedConfig,
         is_active: data.isActive ?? true,
       },
+    });
+
+    console.log('✅ AUTOMATION SERVICE - Automation created with active account:', {
+      automationId: automation.id,
+      accountId: activeAccount.id,
+      accountName: activeAccount.account_name
     });
 
     return automation;
