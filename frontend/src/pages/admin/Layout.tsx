@@ -420,14 +420,25 @@ export default function AdminLayout() {
             >
               <Menu className="h-6 w-6" />
             </Button>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
-                <Shield className="h-5 w-5 text-primary" />
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
-                Admin Panel
-              </h1>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+              <Shield className="h-5 w-5 text-primary" />
             </div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+              Admin Panel
+            </h1>
+          </div>
+          
+          {/* Botão para expandir/colapsar sidebar */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden lg:flex"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+          >
+            {sidebarCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+          </Button>
           </div>
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
