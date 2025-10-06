@@ -43,7 +43,7 @@ export class UserExchangeAccountService {
     console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Fetching user accounts...');
     
     try {
-      const response = await api.get('/user/exchange-accounts');
+      const response = await api.get('/api/user/exchange-accounts');
       
       if (response.data.success) {
         console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Accounts fetched:', {
@@ -73,7 +73,7 @@ export class UserExchangeAccountService {
     console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Fetching account:', accountId);
     
     try {
-      const response = await api.get(`/user/exchange-accounts/${accountId}`);
+      const response = await api.get(`/api/user/exchange-accounts/${accountId}`);
       
       if (response.data.success) {
         console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account fetched:', {
@@ -103,7 +103,7 @@ export class UserExchangeAccountService {
     });
     
     try {
-      const response = await api.post('/user/exchange-accounts', data);
+      const response = await api.post('/api/user/exchange-accounts', data);
       
       if (response.data.success) {
         console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account created:', {
@@ -136,7 +136,7 @@ export class UserExchangeAccountService {
     });
     
     try {
-      const response = await api.put(`/user/exchange-accounts/${accountId}`, data);
+      const response = await api.put(`/api/user/exchange-accounts/${accountId}`, data);
       
       if (response.data.success) {
         console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account updated:', {
@@ -163,7 +163,7 @@ export class UserExchangeAccountService {
     console.log('🗑️ USER EXCHANGE ACCOUNT SERVICE - Deleting account:', accountId);
     
     try {
-      const response = await api.delete(`/user/exchange-accounts/${accountId}`);
+      const response = await api.delete(`/api/user/exchange-accounts/${accountId}`);
       
       if (response.data.success) {
         console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account deleted');
@@ -183,7 +183,7 @@ export class UserExchangeAccountService {
     console.log('🔄 USER EXCHANGE ACCOUNT SERVICE - Setting active account:', accountId);
     
     try {
-      const response = await api.post(`/user/exchange-accounts/${accountId}/set-active`);
+      const response = await api.post(`/api/user/exchange-accounts/${accountId}/set-active`);
       
       if (response.data.success) {
         console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Active account set:', {
@@ -209,7 +209,7 @@ export class UserExchangeAccountService {
     console.log('🧪 USER EXCHANGE ACCOUNT SERVICE - Testing credentials:', accountId);
     
     try {
-      const response = await api.post(`/user/exchange-accounts/${accountId}/test`);
+      const response = await api.post(`/api/user/exchange-accounts/${accountId}/test`);
       
       if (response.data.success) {
         console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Credentials test result:', response.data.data);
