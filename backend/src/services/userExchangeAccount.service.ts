@@ -187,6 +187,44 @@ export class UserExchangeAccountService {
       }
     });
 
+    // VALIDAÇÃO DE SEGURANÇA FINAL: Verificar se apenas uma conta está ativa
+    const finalActiveCount = await this.prisma.userExchangeAccounts.count({
+      where: {
+        user_id: userId,
+        is_active: true
+      }
+    });
+
+    if (finalActiveCount > 1) {
+      console.error('🚨 USER EXCHANGE ACCOUNT SERVICE - Security violation after creation: Multiple active accounts detected:', finalActiveCount);
+      
+      // EMERGENCY FIX: Manter apenas a primeira conta ativa
+      const firstActiveAccount = await this.prisma.userExchangeAccounts.findFirst({
+        where: {
+          user_id: userId,
+          is_active: true
+        },
+        orderBy: {
+          created_at: 'asc'
+        }
+      });
+
+      if (firstActiveAccount) {
+        await this.prisma.userExchangeAccounts.updateMany({
+          where: {
+            user_id: userId,
+            is_active: true,
+            id: { not: firstActiveAccount.id }
+          },
+          data: {
+            is_active: false
+          }
+        });
+
+        console.log('🔧 USER EXCHANGE ACCOUNT SERVICE - Emergency fix applied: Only first account remains active');
+      }
+    }
+
     console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account created:', {
       id: account.id,
       exchangeName: account.exchange.name,
@@ -240,18 +278,20 @@ export class UserExchangeAccountService {
       updateData.credentials = encryptedCredentials;
     }
 
-    // Se ativando esta conta, desativar outras contas da mesma exchange
+    // VALIDAÇÃO DE SEGURANÇA: Se ativando esta conta, desativar TODAS as outras contas do usuário
     if (data.is_active === true) {
       await this.prisma.userExchangeAccounts.updateMany({
         where: {
           user_id: userId,
-          exchange_id: existingAccount.exchange_id,
+          is_active: true,
           id: { not: accountId }
         },
         data: {
           is_active: false
         }
       });
+
+      console.log('🔒 USER EXCHANGE ACCOUNT SERVICE - Security validation: All other user accounts deactivated');
     }
 
     // Atualizar conta
@@ -262,6 +302,44 @@ export class UserExchangeAccountService {
         exchange: true
       }
     });
+
+    // VALIDAÇÃO DE SEGURANÇA FINAL: Verificar se apenas uma conta está ativa
+    const finalActiveCount = await this.prisma.userExchangeAccounts.count({
+      where: {
+        user_id: userId,
+        is_active: true
+      }
+    });
+
+    if (finalActiveCount > 1) {
+      console.error('🚨 USER EXCHANGE ACCOUNT SERVICE - Security violation after update: Multiple active accounts detected:', finalActiveCount);
+      
+      // EMERGENCY FIX: Manter apenas a primeira conta ativa
+      const firstActiveAccount = await this.prisma.userExchangeAccounts.findFirst({
+        where: {
+          user_id: userId,
+          is_active: true
+        },
+        orderBy: {
+          created_at: 'asc'
+        }
+      });
+
+      if (firstActiveAccount) {
+        await this.prisma.userExchangeAccounts.updateMany({
+          where: {
+            user_id: userId,
+            is_active: true,
+            id: { not: firstActiveAccount.id }
+          },
+          data: {
+            is_active: false
+          }
+        });
+
+        console.log('🔧 USER EXCHANGE ACCOUNT SERVICE - Emergency fix applied: Only first account remains active');
+      }
+    }
 
     // Descriptografar credenciais para retorno
     const accountWithDecryptedCredentials = {
@@ -338,19 +416,20 @@ export class UserExchangeAccountService {
       throw new Error('Account not found');
     }
 
-    // Desativar todas as outras contas da mesma exchange
+    // VALIDAÇÃO DE SEGURANÇA: Desativar TODAS as contas ativas do usuário primeiro
     await this.prisma.userExchangeAccounts.updateMany({
       where: {
         user_id: userId,
-        exchange_id: account.exchange_id,
-        id: { not: accountId }
+        is_active: true
       },
       data: {
         is_active: false
       }
     });
 
-    // Ativar a conta selecionada
+    console.log('🔒 USER EXCHANGE ACCOUNT SERVICE - Security validation: All user accounts deactivated');
+
+    // Ativar APENAS a conta selecionada
     const updatedAccount = await this.prisma.userExchangeAccounts.update({
       where: { id: accountId },
       data: { is_active: true },
@@ -358,6 +437,36 @@ export class UserExchangeAccountService {
         exchange: true
       }
     });
+
+    // VALIDAÇÃO DE SEGURANÇA REDUNDANTE: Verificar se apenas uma conta está ativa
+    const activeAccountsCount = await this.prisma.userExchangeAccounts.count({
+      where: {
+        user_id: userId,
+        is_active: true
+      }
+    });
+
+    if (activeAccountsCount !== 1) {
+      console.error('🚨 USER EXCHANGE ACCOUNT SERVICE - Security violation: Multiple active accounts detected:', activeAccountsCount);
+      
+      // EMERGENCY FIX: Desativar todas e ativar apenas a selecionada
+      await this.prisma.userExchangeAccounts.updateMany({
+        where: {
+          user_id: userId,
+          is_active: true
+        },
+        data: {
+          is_active: false
+        }
+      });
+
+      await this.prisma.userExchangeAccounts.update({
+        where: { id: accountId },
+        data: { is_active: true }
+      });
+
+      console.log('🔧 USER EXCHANGE ACCOUNT SERVICE - Emergency fix applied: Only one account active');
+    }
 
     // Descriptografar credenciais para retorno
     const accountWithDecryptedCredentials = {
@@ -372,6 +481,51 @@ export class UserExchangeAccountService {
     });
 
     return accountWithDecryptedCredentials;
+  }
+
+  /**
+   * VALIDAÇÃO DE SEGURANÇA: Verificar e corrigir múltiplas contas ativas
+   */
+  async validateAndFixActiveAccounts(userId: string): Promise<void> {
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Security validation: Checking for multiple active accounts');
+    
+    const activeAccounts = await this.prisma.userExchangeAccounts.findMany({
+      where: {
+        user_id: userId,
+        is_active: true
+      },
+      orderBy: {
+        created_at: 'asc'
+      }
+    });
+
+    if (activeAccounts.length > 1) {
+      console.error('🚨 USER EXCHANGE ACCOUNT SERVICE - Security violation detected: Multiple active accounts:', activeAccounts.length);
+      
+      // Manter apenas a primeira conta ativa (mais antiga)
+      const firstAccount = activeAccounts[0];
+      const otherAccounts = activeAccounts.slice(1);
+
+      // Desativar todas as outras contas
+      await this.prisma.userExchangeAccounts.updateMany({
+        where: {
+          user_id: userId,
+          is_active: true,
+          id: { not: firstAccount.id }
+        },
+        data: {
+          is_active: false
+        }
+      });
+
+      console.log('🔧 USER EXCHANGE ACCOUNT SERVICE - Security fix applied:', {
+        keptActive: firstAccount.account_name,
+        deactivatedCount: otherAccounts.length,
+        deactivatedAccounts: otherAccounts.map(acc => acc.account_name)
+      });
+    } else {
+      console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Security validation passed: Only one active account');
+    }
   }
 
   /**
