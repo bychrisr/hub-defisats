@@ -4,10 +4,10 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.5.1 ✅ COMPLETA
+## Status Atual: v2.5.2 ✅ COMPLETA
 
-**Versão**: v2.5.1  
-**Status**: Plan Limits Management 100% Funcional  
+**Versão**: v2.5.2  
+**Status**: Users Admin Page 100% Funcional  
 **Data**: 2025-01-09
 
 ### Funcionalidades Implementadas
@@ -96,6 +96,16 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **CORRIGIDO**: TypeScript Interface - Date → string
 - ✅ **CORRIGIDO**: Frontend State Updates - Interface responsiva
 - ✅ **NOVO**: Badge "done" para Plan Limits no sidebar
+- ✅ **NOVO**: Users Admin Page - Página completa recriada do zero
+- ✅ **NOVO**: Dashboard Statistics - Cards de estatísticas em tempo real
+- ✅ **NOVO**: Advanced Filtering - Sistema de filtros avançado
+- ✅ **NOVO**: Responsive Table - Tabela responsiva com ações contextuais
+- ✅ **NOVO**: Modern UI - Interface moderna com shadcn/ui
+- ✅ **CORRIGIDO**: Zero Loops - Eliminado problema de loop infinito
+- ✅ **NOVO**: Error Handling - Tratamento robusto de erros da API
+- ✅ **NOVO**: Pagination System - Sistema completo de paginação
+- ✅ **NOVO**: Modal System - Modais informativos para detalhes e edição
+- ✅ **NOVO**: Badge "done" para Users no sidebar
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real

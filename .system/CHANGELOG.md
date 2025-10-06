@@ -4,6 +4,69 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.2] - 2025-01-09
+
+### 🚀 **USERS ADMIN PAGE - COMPLETE REBUILD**
+
+#### 🎯 **Nova Implementação Completa**
+- ✅ **Página Recriada**: Users Admin completamente recriada do zero
+- ✅ **CRUD Completo**: Listar, visualizar, editar, excluir usuários
+- ✅ **Interface Moderna**: Design responsivo com shadcn/ui
+- ✅ **Zero Loops**: Eliminado problema de loop infinito definitivamente
+
+#### 📊 **Dashboard e Estatísticas**
+- ✅ **Cards de Estatísticas**: Total, Free, Pro, Lifetime users com percentuais
+- ✅ **Métricas Visuais**: Ícones e cores para cada tipo de plano
+- ✅ **Dados em Tempo Real**: Atualização automática das estatísticas
+
+#### 🔍 **Sistema de Filtros Avançado**
+- ✅ **Search**: Busca por username/email em tempo real
+- ✅ **Plan Type Filter**: Filtro por tipo de plano (Free, Basic, Advanced, Pro, Lifetime)
+- ✅ **Status Filter**: Filtro por status (Active/Inactive)
+- ✅ **Sort Options**: Ordenação por data, atividade, email, plano
+
+#### 📋 **Tabela Completa e Responsiva**
+- ✅ **User Information**: Username, email, avatar
+- ✅ **Plan Badges**: Badges coloridos com ícones para cada plano
+- ✅ **Status Indicators**: Badges visuais para status ativo/inativo
+- ✅ **Date Formatting**: Created date e Last Activity formatados
+- ✅ **Action Buttons**: View, Edit, Toggle Status, Delete
+
+#### 🎨 **Interface e UX**
+- ✅ **Responsive Design**: Layout adaptativo para mobile e desktop
+- ✅ **Modern UI**: Interface limpa e profissional com shadcn/ui
+- ✅ **Interactive Modals**: Modais informativos para detalhes e edição
+- ✅ **Confirmation Dialogs**: AlertDialog para confirmações de exclusão
+- ✅ **Loading States**: Indicadores de carregamento e refresh
+
+#### 🔧 **Funcionalidades Técnicas**
+- ✅ **useCallback Optimization**: fetchUsers memoizado para evitar re-renders
+- ✅ **Error Handling**: Tratamento robusto de erros da API
+- ✅ **Response Validation**: Verificação de estrutura de dados da API
+- ✅ **Pagination**: Sistema completo de paginação
+- ✅ **State Management**: Gerenciamento eficiente de estados
+
+#### 🛠️ **Backend Integration**
+- ✅ **API Routes**: Integração com rotas /api/admin/users
+- ✅ **Authentication**: Proteção com adminAuthMiddleware
+- ✅ **Data Validation**: Validação de parâmetros e respostas
+- ✅ **Error Responses**: Tratamento adequado de erros de autenticação
+
+#### 📱 **Responsividade**
+- ✅ **Mobile First**: Design otimizado para dispositivos móveis
+- ✅ **Grid Layout**: Sistema de grid responsivo
+- ✅ **Touch Friendly**: Botões e interações otimizadas para touch
+- ✅ **Modal Optimization**: Modais funcionam perfeitamente em todas as telas
+
+#### 🎯 **Resultado Final**
+- ✅ **Zero Bugs**: Eliminado completamente o loop infinito
+- ✅ **Performance**: Interface rápida e responsiva
+- ✅ **User Experience**: Interface intuitiva e fácil de usar
+- ✅ **Admin Ready**: Pronto para uso em produção
+- ✅ **Badge "Done"**: Adicionado ao sidebar administrativo
+
+---
+
 ## [v2.5.1] - 2025-01-09
 
 ### 🔧 **PLAN LIMITS MANAGEMENT FIXES**
