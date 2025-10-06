@@ -2491,6 +2491,56 @@ const signature = crypto
 
 **FASE 6.7: Sistema completo de monitoramento e logs para automações multi-account!** 🚀
 
+### v2.6.16 - MELHORIAS DE UX DO SIDEBAR ADMINISTRATIVO
+**Data:** 2025-01-10T02:32:00Z
+
+#### 🎨 **Reorganização do Sidebar em Grupos Lógicos**
+- ✅ **Core**: Dashboard, Users, Exchanges
+- ✅ **Analytics & Reports**: Trading Analytics, Trade Logs, Payment Analytics, Backtest Reports, Simulation Analytics, System Reports
+- ✅ **Automation & Monitoring**: Automation Management, Monitoring, Alerts, Rate Limiting
+- ✅ **Content Management**: Menus, Dynamic Pages, Tooltips
+- ✅ **Business**: Plans, Plan Limits, Coupons
+- ✅ **System**: Notification Management, Audit Logs, Route Redirects, Load Testing, Documentation, Settings
+- ✅ **Configurações**: Modo Escuro/Claro, Logout (separado com separador visual)
+
+#### 🔧 **Funcionalidade de Colapsar Sidebar**
+- ✅ **Botão Toggle**: Botão no header para expandir/colapsar sidebar
+- ✅ **Transições Suaves**: Animações fluidas entre estados (transition-all duration-300)
+- ✅ **Layout Responsivo**: Conteúdo se ajusta automaticamente ao tamanho do sidebar
+- ✅ **Modo Colapsado**: Mostra apenas ícones com tooltips
+- ✅ **Modo Expandido**: Mostra ícones + texto + títulos de grupos
+
+#### 🎯 **Correções de Design**
+- ✅ **Conteúdo Adaptativo**: Padding dinâmico (lg:pl-16 colapsado, lg:pl-64 expandido)
+- ✅ **Header Organizado**: Logo + título + botão toggle agrupados
+- ✅ **Separadores Visuais**: Linhas divisórias entre grupos
+- ✅ **Configurações Separadas**: Logout e tema em grupo próprio no final
+
+#### 📱 **Responsividade e UX**
+- ✅ **Mobile**: Sidebar overlay com grupos organizados
+- ✅ **Desktop**: Sidebar fixo com funcionalidade de colapsar
+- ✅ **Tooltips**: Aparecem quando sidebar colapsado
+- ✅ **Badges**: Status "done" preservados
+- ✅ **Títulos de Grupos**: Visíveis apenas quando expandido
+
+#### 🔧 **Correções Técnicas**
+- ✅ **Erro navigation.map**: Corrigido em mobile e desktop
+- ✅ **Layout Responsivo**: Conteúdo se adapta ao sidebar
+- ✅ **Ícone Solto**: Hamburger menu agrupado com logo
+- ✅ **Botão Toggle**: Funcionalidade completa para expandir/colapsar
+
+#### 📁 **Arquivos Modificados**
+- ✅ `frontend/src/pages/admin/Layout.tsx` - Reorganização completa do sidebar
+
+#### 🎯 **Benefícios Implementados**
+- ✅ **Navegação Intuitiva**: Grupos lógicos facilitam localização de funcionalidades
+- ✅ **Economia de Espaço**: Modo colapsado para telas menores
+- ✅ **UX Profissional**: Layout limpo e organizado
+- ✅ **Manutenibilidade**: Estrutura organizada para futuras adições
+- ✅ **Consistência**: Padrões visuais uniformes
+
+**Sidebar do painel administrativo completamente reorganizado e otimizado!** 🎨
+
 ## [Unreleased]
 
 ### 📚 **DOCUMENTAÇÃO TÉCNICA COMPLETA - v2.2.0**
