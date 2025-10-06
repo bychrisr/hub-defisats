@@ -4,6 +4,30 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.9] - 2025-01-09
+
+### 🚀 **FASE 5: HEADER MENU E NAVEGAÇÃO - COMPLETA**
+
+#### 🎯 **Dropdown de Contas Ativas**
+- ✅ **AccountSelector Atualizado**: Integrado com sistema multi-account
+- ✅ **Hook useUserExchangeAccounts**: Substituído contexto legado
+- ✅ **Indicador Visual**: Check icon para conta ativa
+- ✅ **Troca de Conta**: Sistema funcional de mudança de conta ativa
+- ✅ **Navegação**: Botão "Add Exchange Account" redireciona para Profile
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **Busca de Contas**: Filtro por nome da conta e exchange
+- ✅ **Indicador Ativo**: Barra lateral e ícone de check
+- ✅ **Status Visual**: Badge "Active" para contas ativas
+- ✅ **Integração Completa**: Conectado com MultiAccountInterface
+- ✅ **UX Consistente**: Mantém design system da aplicação
+
+#### 📊 **Melhorias de UX**
+- ✅ **Header Integrado**: Dropdown funcional no header principal
+- ✅ **Troca Rápida**: Mudança de conta com um clique
+- ✅ **Feedback Visual**: Indicadores claros de conta ativa
+- ✅ **Navegação Intuitiva**: Acesso fácil para adicionar contas
+
 ## [v2.5.8] - 2025-01-09
 
 ### 🧹 **REFATORAÇÃO - LIMPEZA DE CÓDIGO LEGADO**

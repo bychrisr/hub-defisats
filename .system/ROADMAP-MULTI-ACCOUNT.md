@@ -318,10 +318,10 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 - ✅ **Símbolo de infinito (∞) para plano vitalício**
 - ✅ **Visualização de credenciais com ícone de olho**
 
-#### **FASE 5: HEADER MENU E NAVEGAÇÃO** ⏳ PENDENTE
-- ⏳ Dropdown de contas ativas
-- ⏳ Indicador visual da conta ativa
-- ⏳ Sistema de troca de conta
+#### **FASE 5: HEADER MENU E NAVEGAÇÃO** ✅ CONCLUÍDO
+- ✅ Dropdown de contas ativas
+- ✅ Indicador visual da conta ativa
+- ✅ Sistema de troca de conta
 
 #### **FASE 6: INTEGRAÇÃO COM AUTOMAÇÕES** ⏳ PENDENTE
 - ⏳ Vinculação de automações por conta
@@ -344,7 +344,8 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 - **Interface Avançada**: 100% ✅ (Credenciais, Limites, Visualização)
 - **Correções de Bugs**: 100% ✅ (Planos Ilimitados, 404 Errors)
 - **Limpeza de Código**: 100% ✅ (Remoção de Código Legado)
+- **Header Menu**: 100% ✅ (Dropdown de Contas, Indicador Visual, Troca de Conta)
 - **Integração Automações**: 0% ⏳
 - **Testes**: 0% ⏳
 
-**Progresso Geral: 75% Concluído**
+**Progresso Geral: 80% Concluído**
