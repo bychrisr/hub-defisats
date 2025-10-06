@@ -22,9 +22,11 @@ export enum PlanType {
 // Define enums that are not in Prisma schema
 export enum AutomationType {
   MARGIN_GUARD = 'margin_guard',
-  TAKE_PROFIT = 'take_profit',
-  STOP_LOSS = 'stop_loss',
-  DCA = 'dca',
+  TP_SL = 'tp_sl', // Take Profit / Stop Loss
+  AUTO_ENTRY = 'auto_entry', // Automatic entries
+  TAKE_PROFIT = 'take_profit', // Legacy
+  STOP_LOSS = 'stop_loss', // Legacy
+  DCA = 'dca', // Legacy
 }
 
 export enum TradeStatus {

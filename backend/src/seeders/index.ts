@@ -11,6 +11,8 @@ import { adminUserSeeder } from './admin-user.seeder';
 import { testUserSeeder } from './test-user.seeder';
 import { plansSeeder } from './plans.seeder';
 import { planLimitsSeeder } from './plan-limits.seeder';
+import { planLimitsManagementSeeder } from './plan-limits-management.seeder';
+import { automationTypesSeeder } from './automation-types.seeder';
 import { healthCheckSeeder } from './health-check.seeder';
 import { exchangesSeeder } from './exchanges.seeder';
 
@@ -38,6 +40,8 @@ export class DatabaseSeeder {
       testUserSeeder,
       plansSeeder,
       planLimitsSeeder,
+      planLimitsManagementSeeder,
+      automationTypesSeeder,
       healthCheckSeeder,
       exchangesSeeder,
     ];
