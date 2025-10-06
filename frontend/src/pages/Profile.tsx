@@ -228,17 +228,17 @@ export default function Profile() {
         await getProfile();
         
         // ✅ CARREGAR CREDENCIAIS DA NOVA ESTRUTURA (TEMPORARIAMENTE DESABILITADO)
-        console.log('🔄 PROFILE - Loading LN Markets credentials from new structure...');
-        setIsLoadingCredentials(true);
-        try {
-          const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
-          const credentials = await ExchangeService.getUserCredentialsForExchange(lnMarketsExchange.id);
-          setLnMarketsCredentials(credentials);
-          console.log('✅ PROFILE - LN Markets credentials loaded:', credentials ? 'Found' : 'Not found');
-        } catch (error) {
-          console.log('⚠️ PROFILE - New structure not available, using old structure');
-          setLnMarketsCredentials(null);
-        }
+        // console.log('🔄 PROFILE - Loading LN Markets credentials from new structure...');
+        // setIsLoadingCredentials(true);
+        // try {
+        //   const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
+        //   const credentials = await ExchangeService.getUserCredentialsForExchange(lnMarketsExchange.id);
+        //   setLnMarketsCredentials(credentials);
+        //   console.log('✅ PROFILE - LN Markets credentials loaded:', credentials ? 'Found' : 'Not found');
+        // } catch (error) {
+        //   console.log('⚠️ PROFILE - New structure not available, using old structure');
+        //   setLnMarketsCredentials(null);
+        // }
       } catch (error) {
         console.error('❌ PROFILE - Error loading profile data:', error);
       } finally {
