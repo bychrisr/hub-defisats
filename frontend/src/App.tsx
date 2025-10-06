@@ -65,6 +65,7 @@ import AdminSettings from '@/pages/admin/Settings';
 import AdminTooltips from '@/pages/admin/Tooltips';
 import { Plans } from '@/pages/admin/Plans';
 import PlanLimitsManagement from '@/pages/admin/PlanLimitsManagement';
+import ExchangesManagement from '@/pages/admin/ExchangesManagement';
 import TradingAnalytics from '@/pages/admin/TradingAnalytics';
 import TradeLogs from '@/pages/admin/TradeLogs';
 import PaymentAnalytics from '@/pages/admin/PaymentAnalytics';
@@ -512,6 +513,7 @@ const App = () => {
               <Route path="alerts" element={<Alerts />} />
               <Route path="rate-limiting" element={<RateLimiting />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="exchanges" element={<ExchangesManagement />} />
               <Route path="plans" element={<Plans />} />
               <Route path="plan-limits" element={<PlanLimitsManagement />} />
               <Route path="coupons" element={<AdminCoupons />} />
