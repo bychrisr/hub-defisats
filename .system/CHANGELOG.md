@@ -4,6 +4,39 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.7] - 2025-01-09
+
+### 🔗 **FASE 6.2.2 - AUTOMATION WORKER MULTI-ACCOUNT**
+
+#### 🎯 **Automation Worker Implementado**
+- ✅ **Worker Completo**: Worker dedicado para execução de automações multi-account
+- ✅ **Integração Multi-Account**: Integração completa com UserExchangeAccountService
+- ✅ **Execução por Conta**: Execução de automações com credenciais da conta ativa
+- ✅ **Logs Detalhados**: Logs com informações da conta em todas as operações
+- ✅ **Cache Inteligente**: Cache de credenciais por conta específica
+- ✅ **Connection Pooling**: Pool de conexões para LN Markets API
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **getUserCredentials**: Busca credenciais da conta ativa ou específica
+- ✅ **getAutomationConfig**: Configuração de automação com dados da conta
+- ✅ **executeMarginGuard**: Execução de Margin Guard por conta
+- ✅ **executeTpSl**: Execução de Take Profit/Stop Loss por conta
+- ✅ **executeAutoEntry**: Execução de Auto Entry por conta
+- ✅ **Worker Principal**: Processamento concorrente de automações
+
+#### 📊 **Melhorias de Performance**
+- ✅ **Execução Concorrente**: Até 5 automações simultâneas
+- ✅ **Connection Pooling**: Reutilização de conexões LN Markets
+- ✅ **Cache por Conta**: Cache específico para cada conta
+- ✅ **Cleanup Automático**: Limpeza de serviços expirados
+- ✅ **TTL de Serviços**: Timeout de 10 minutos para serviços
+
+#### 🔍 **Validações e Segurança**
+- ✅ **Credenciais por Conta**: Validação de credenciais específicas
+- ✅ **Conta Ativa**: Verificação de conta ativa quando necessário
+- ✅ **Tratamento de Erros**: Logs de erro com informações da conta
+- ✅ **Retry Logic**: Lógica de retry com backoff exponencial
+
 ## [v2.6.6] - 2025-01-09
 
 ### 🔗 **FASE 6.2.1 - AUTOMATION EXECUTOR MULTI-ACCOUNT**

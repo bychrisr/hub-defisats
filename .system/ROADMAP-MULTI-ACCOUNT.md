@@ -194,10 +194,14 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ Validação de credenciais por conta
   - ✅ Logs detalhados com informações da conta
 
-- [ ] **6.2.2** Modificar `automation-worker.ts`
-  - Buscar credenciais da conta ativa
-  - Executar automações por conta
-  - Logs detalhados por conta
+- [x] **6.2.2** Modificar `automation-worker.ts` ✅
+  - ✅ Buscar credenciais da conta ativa
+  - ✅ Executar automações por conta
+  - ✅ Logs detalhados por conta
+  - ✅ Integração com UserExchangeAccountService
+  - ✅ Cache de credenciais por conta
+  - ✅ Connection pooling para LN Markets API
+  - ✅ Execução concorrente de automações
 
 - [ ] **6.2.3** Atualizar `automation-scheduler.ts`
   - Agendar execuções por conta
