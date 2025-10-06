@@ -71,6 +71,7 @@ export interface GetUserAutomationsData {
   userId: string;
   type?: AutomationType;
   isActive?: boolean;
+  activeAccountOnly?: boolean; // 🔗 FASE 6.1.3: Filtrar por conta ativa
 }
 
 export interface ToggleAutomationData {
@@ -212,10 +213,44 @@ export class AutomationService {
       where.is_active = data.isActive;
     }
 
+    // 🔗 FASE 6.1.3: Filtrar por conta ativa se solicitado
+    if (data.activeAccountOnly) {
+      console.log('🔍 AUTOMATION SERVICE - Filtering by active account for user:', data.userId);
+      
+      // Buscar conta ativa do usuário
+      const userAccounts = await this.userExchangeAccountService.getUserExchangeAccounts(data.userId);
+      const activeAccount = userAccounts.find(account => account.is_active);
+      
+      if (activeAccount) {
+        where.user_exchange_account_id = activeAccount.id;
+        console.log('✅ AUTOMATION SERVICE - Filtering automations for active account:', {
+          accountId: activeAccount.id,
+          accountName: activeAccount.account_name,
+          exchangeName: activeAccount.exchange.name
+        });
+      } else {
+        console.log('⚠️ AUTOMATION SERVICE - No active account found, returning empty array');
+        return [];
+      }
+    }
+
     const automations = await this.prisma.automation.findMany({
       where,
       orderBy: {
         created_at: 'desc',
+      },
+      include: {
+        user_exchange_account: {
+          include: {
+            exchange: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            }
+          }
+        }
       },
     });
 

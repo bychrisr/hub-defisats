@@ -83,12 +83,23 @@ export class AutomationController {
   async getUserAutomations(request: FastifyRequest, reply: FastifyReply) {
     try {
       const user = (request as any).user;
-      const { type, is_active } = request.query as { type?: string; is_active?: string };
+      const { type, is_active, active_account_only } = request.query as { 
+        type?: string; 
+        is_active?: string; 
+        active_account_only?: string; 
+      };
+
+      console.log('🔍 AUTOMATION CONTROLLER - Query params:', {
+        type,
+        is_active,
+        active_account_only
+      });
 
       const automations = await this.automationService.getUserAutomations({
         userId: user?.id || '',
         type: type as any,
         isActive: is_active ? is_active === 'true' : undefined,
+        activeAccountOnly: active_account_only === 'true', // 🔗 FASE 6.1.3: Filtrar por conta ativa
       } as any);
 
       console.log('🔍 AUTOMATION CONTROLLER - Raw automations from service:', JSON.stringify(automations, null, 2));
