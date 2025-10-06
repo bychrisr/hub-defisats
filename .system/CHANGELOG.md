@@ -4,6 +4,51 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.0] - 2025-01-09
+
+### 🚀 **MODAIS FUNCIONAIS - CRIAÇÃO E AÇÕES DE CONTA**
+
+#### 🎯 **CreateAccountModal**
+- ✅ **Modal Reutilizável**: Componente independente para criação de contas
+- ✅ **Seleção de Exchange**: Dropdown com todas as exchanges disponíveis
+- ✅ **Credenciais Dinâmicas**: Campos baseados no tipo de exchange selecionado
+- ✅ **Toggle de Visibilidade**: Ícone de olho para mostrar/ocultar credenciais
+- ✅ **Validação Robusta**: Campos obrigatórios e credenciais necessárias
+- ✅ **Loading States**: Indicadores visuais durante criação
+- ✅ **Toast Notifications**: Feedback de sucesso/erro
+
+#### 🎯 **AccountActionsModal**
+- ✅ **Edição de Conta**: Alterar nome e credenciais
+- ✅ **Teste de Credenciais**: Validar credenciais com a exchange
+- ✅ **Definir como Ativa**: Botão para trocar conta ativa
+- ✅ **Exclusão**: Deletar conta com confirmação
+- ✅ **Toggle de Credenciais**: Mostrar/ocultar credenciais na edição
+- ✅ **Loading States**: Estados de carregamento para cada ação
+- ✅ **Feedback Visual**: Toast notifications para todas as ações
+
+#### 🎯 **Menu de 3 Pontos Funcional**
+- ✅ **Botão Funcional**: 3 pontos em cada conta do dropdown
+- ✅ **Ações Completas**: Editar, testar, definir ativa, deletar
+- ✅ **Prevenção de Propagação**: Clique nos 3 pontos não seleciona a conta
+- ✅ **Modal Integrado**: Abre modal de ações com conta selecionada
+- ✅ **Refresh Automático**: Lista atualizada após ações
+
+#### 🔧 **Correções Técnicas**
+- ✅ **Sintaxe JSX**: Corrigido erro de Fragment React
+- ✅ **Inicialização de Form**: Corrigido useEffect para popular dados
+- ✅ **Integração Completa**: Hooks e serviços funcionando
+- ✅ **Estados de Loading**: Indicadores visuais adequados
+- ✅ **Error Handling**: Tratamento de erros robusto
+
+#### 📊 **Melhorias de UX**
+- ✅ **Contexto Mantido**: Usuário fica no header, não vai para /profile
+- ✅ **Fluxo Rápido**: Criação e edição sem navegação
+- ✅ **Feedback Imediato**: Toast notifications para todas as ações
+- ✅ **Credenciais Seguras**: Toggle de visibilidade para segurança
+- ✅ **Validação Robusta**: Verificação de campos obrigatórios
+
+---
+
 ## [v2.5.9] - 2025-01-09
 
 ### 🚀 **FASE 5: HEADER MENU E NAVEGAÇÃO - COMPLETA**
