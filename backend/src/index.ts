@@ -41,6 +41,7 @@ import { lnMarketsAdminRoutes } from './routes/admin/lnmarkets-admin.routes';
 // import { settingsRoutes } from './routes/admin/settings.routes';
 import { hardwareMonitorRoutes } from './routes/admin/hardware-monitor.routes';
 import { marginGuardIntegrationRoutes } from './routes/margin-guard-integration.routes';
+import { marginGuardUserRoutes } from './routes/margin-guard-user.routes';
 import { securityRoutes } from './routes/security.routes';
 import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
@@ -778,6 +779,10 @@ async function registerRoutes() {
   // Margin Guard Integration routes
   await fastify.register(marginGuardIntegrationRoutes, { prefix: '/api/margin-guard' });
   console.log('✅ Margin Guard Integration routes registered');
+
+  // Margin Guard User routes
+  await fastify.register(marginGuardUserRoutes, { prefix: '/api/margin-guard' });
+  console.log('✅ Margin Guard User routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler

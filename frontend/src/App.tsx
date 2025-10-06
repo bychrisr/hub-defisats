@@ -39,6 +39,7 @@ import Profile from '@/pages/Profile';
 import ProfileRefactored from '@/pages/ProfileRefactored';
 import ProfileRestored from '@/pages/ProfileRestored';
 import MarginGuard from '@/pages/MarginGuard';
+import MarginGuardUser from '@/pages/MarginGuardUser';
 import { Automation } from '@/pages/Automation';
 import { Automations } from '@/pages/Automations';
 import { Logs } from '@/pages/Logs';
@@ -309,11 +310,9 @@ const App = () => {
               path="/margin-guard"
                 element={
                 <ProtectedRoute>
-                  <RouteGuard requiredPlan="advanced">
-                    <Layout>
-                      <MarginGuard />
-                    </Layout>
-                  </RouteGuard>
+                  <Layout>
+                    <MarginGuardUser />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
