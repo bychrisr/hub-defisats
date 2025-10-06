@@ -212,10 +212,14 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ Cleanup automático de schedules
   - ✅ Mudança de conta com atualização de schedules
 
-- [ ] **6.2.4** Criar `AccountCredentialsService`
-  - Buscar credenciais da conta ativa
-  - Cache de credenciais por conta
-  - Validação de credenciais antes da execução
+- [x] **6.2.4** Criar `AccountCredentialsService` ✅
+  - ✅ Buscar credenciais da conta ativa
+  - ✅ Cache de credenciais por conta
+  - ✅ Validação de credenciais antes da execução
+  - ✅ Cache inteligente com TTL configurável
+  - ✅ Validação de estrutura e conteúdo
+  - ✅ Estatísticas de cache e performance
+  - ✅ Cleanup automático de validações expiradas
 
 ### **6.3 Dashboard de Automações**
 - [ ] **6.3.1** Atualizar interface de automações

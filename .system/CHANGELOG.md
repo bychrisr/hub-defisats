@@ -4,6 +4,40 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.9] - 2025-01-10
+
+### 🔗 **FASE 6.2.4 - ACCOUNT CREDENTIALS SERVICE MULTI-ACCOUNT**
+
+#### 🎯 **Account Credentials Service Implementado**
+- ✅ **Serviço Completo**: Serviço dedicado para gerenciamento de credenciais multi-account
+- ✅ **Cache Inteligente**: Cache de credenciais por conta com TTL configurável
+- ✅ **Validação Prévia**: Validação de credenciais antes da execução de automações
+- ✅ **Busca Multi-Account**: Busca credenciais da conta ativa e específica
+- ✅ **Monitoramento**: Estatísticas de cache e performance
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **getActiveAccountCredentials**: Busca credenciais da conta ativa
+- ✅ **getAccountCredentials**: Busca credenciais de conta específica
+- ✅ **validateCredentials**: Validação de credenciais antes da execução
+- ✅ **clearAccountCredentialsCache**: Limpeza de cache por conta
+- ✅ **clearUserCredentialsCache**: Limpeza de cache por usuário
+- ✅ **getCacheStats**: Estatísticas de cache e performance
+
+#### 📊 **Cache e Validação**
+- ✅ **Cache por Conta**: Cache específico para cada conta
+- ✅ **TTL Configurável**: 10 minutos para credenciais, 5 minutos para validações
+- ✅ **Cache Hit/Miss**: Verificação de cache antes de buscar no banco
+- ✅ **Validação Estrutural**: Verificação de existência e estrutura das credenciais
+- ✅ **Validação de Conteúdo**: Verificação de credenciais não vazias
+- ✅ **Cleanup Automático**: Limpeza de validações expiradas
+
+#### 🔍 **Integração e Monitoramento**
+- ✅ **UserExchangeAccountService**: Integração para busca de contas
+- ✅ **CredentialCacheService**: Integração para cache de credenciais
+- ✅ **Validação de Status**: Verificação de conta ativa
+- ✅ **Logs Detalhados**: Logs com informações da conta
+- ✅ **Estatísticas**: Métricas de cache e performance
+
 ## [v2.6.8] - 2025-01-10
 
 ### 🔗 **FASE 6.2.3 - AUTOMATION SCHEDULER MULTI-ACCOUNT**

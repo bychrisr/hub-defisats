@@ -141,7 +141,60 @@ console.log(`✅ AUTOMATION SCHEDULER - Automation scheduling started for user $
 
 **Documentação Completa**: [automation-scheduler-multi-account-documentation.md](../backend/automation-scheduler-multi-account-documentation.md)
 
-### 3. Margin Monitor Worker
+### 3. Account Credentials Service (Multi-Account)
+
+**Responsabilidade**: Gerenciamento de credenciais de contas de exchange com cache inteligente
+
+**Frequência**: Sob demanda (quando credenciais são necessárias)
+
+**Processo**:
+1. Busca credenciais da conta ativa via UserExchangeAccountService
+2. Verifica cache de credenciais por conta
+3. Valida estrutura e conteúdo das credenciais
+4. Armazena credenciais no cache com TTL configurável
+5. Retorna credenciais validadas para automações
+
+**Configuração**:
+```typescript
+interface AccountCredentialsConfig {
+  validationTTL: number; // 5 minutes
+  cacheTTL: number; // 10 minutes
+  cleanupInterval: number; // 5 minutes
+  redisUrl: string; // Redis connection
+}
+```
+
+**Funcionalidades**:
+- **getActiveAccountCredentials**: Busca credenciais da conta ativa
+- **getAccountCredentials**: Busca credenciais de conta específica
+- **validateCredentials**: Validação de credenciais antes da execução
+- **clearAccountCredentialsCache**: Limpeza de cache por conta
+- **clearUserCredentialsCache**: Limpeza de cache por usuário
+- **getCacheStats**: Estatísticas de cache e performance
+
+**Cache Inteligente**:
+- **Cache por Conta**: Cache específico para cada conta
+- **TTL Configurável**: 10 minutos para credenciais, 5 minutos para validações
+- **Cache Hit/Miss**: Verificação de cache antes de buscar no banco
+- **Cleanup Automático**: Limpeza de validações expiradas
+
+**Validação de Credenciais**:
+- **Estrutura**: Verificação de existência e estrutura das credenciais
+- **Conteúdo**: Verificação de credenciais não vazias
+- **Status**: Verificação de conta ativa
+- **Cache de Validação**: Cache de validações com TTL
+
+**Logs Detalhados**:
+```typescript
+// Log de busca de credenciais com informações da conta
+console.log(`🔍 ACCOUNT CREDENTIALS - Getting active account credentials for user ${userId}`);
+console.log(`✅ ACCOUNT CREDENTIALS - Found active account: ${accountName} (${exchangeName})`);
+console.log(`✅ ACCOUNT CREDENTIALS - Credentials validated successfully for account ${accountName}`);
+```
+
+**Documentação Completa**: [account-credentials-service-multi-account-documentation.md](../backend/account-credentials-service-multi-account-documentation.md)
+
+### 4. Margin Monitor Worker
 
 **Responsabilidade**: Monitoramento contínuo da margem dos usuários
 
