@@ -12,7 +12,7 @@ import {
   getAuditLogs
 } from '../controllers/admin';
 import { adminAuthMiddleware } from '../middleware/auth.middleware';
-import { marginGuardPlansRoutes } from './admin/margin-guard-plans.routes';
+// import { marginGuardPlansRoutes } from './admin/margin-guard-plans.routes';
 
 export async function adminRoutes(fastify: FastifyInstance) {
   // Test route for debugging - no auth first
@@ -704,5 +704,5 @@ export async function adminRoutes(fastify: FastifyInstance) {
   }, getAuditLogs);
 
   // Register Margin Guard Plans routes
-  await fastify.register(marginGuardPlansRoutes, { prefix: '/margin-guard' });
+  // await fastify.register(marginGuardPlansRoutes, { prefix: '/margin-guard' });
 }

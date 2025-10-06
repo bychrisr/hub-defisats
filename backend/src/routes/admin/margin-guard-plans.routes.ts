@@ -12,7 +12,7 @@ export async function marginGuardPlansRoutes(fastify: FastifyInstance) {
 
   // Get all plan configurations
   fastify.get(
-    '/margin-guard/plans',
+    '/plans',
     {
       schema: {
         description: 'Get all Margin Guard plan configurations',
@@ -45,7 +45,7 @@ export async function marginGuardPlansRoutes(fastify: FastifyInstance) {
 
   // Get specific plan configuration
   fastify.get(
-    '/margin-guard/plans/:planType',
+    '/plans/:planType',
     {
       schema: {
         description: 'Get specific Margin Guard plan configuration',
@@ -86,7 +86,7 @@ export async function marginGuardPlansRoutes(fastify: FastifyInstance) {
 
   // Update plan configuration
   fastify.put(
-    '/margin-guard/plans/:planType',
+    '/plans/:planType',
     {
       schema: {
         description: 'Update Margin Guard plan configuration',
@@ -198,7 +198,7 @@ export async function marginGuardPlansRoutes(fastify: FastifyInstance) {
 
   // Get plan statistics
   fastify.get(
-    '/margin-guard/statistics',
+    '/statistics',
     {
       schema: {
         description: 'Get Margin Guard plan statistics',
@@ -244,7 +244,7 @@ export async function marginGuardPlansRoutes(fastify: FastifyInstance) {
 
   // Reset plan to default configuration
   fastify.post(
-    '/margin-guard/plans/:planType/reset',
+    '/plans/:planType/reset',
     {
       schema: {
         description: 'Reset Margin Guard plan configuration to default',
