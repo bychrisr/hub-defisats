@@ -159,7 +159,7 @@ export function CreateAccountModal({ isOpen, onClose, onSuccess }: CreateAccount
               <Label>Credentials</Label>
               {selectedExchange.credential_types.map((credType) => (
                 <div key={credType.id} className="space-y-2">
-                  <Label htmlFor={credType.name}>{credType.label}</Label>
+                  <Label htmlFor={credType.name}>{credType.name}</Label>
                   <div className="relative">
                     <Input
                       id={credType.name}
@@ -172,7 +172,7 @@ export function CreateAccountModal({ isOpen, onClose, onSuccess }: CreateAccount
                           [credType.name]: e.target.value
                         }
                       }))}
-                      placeholder={`Enter ${credType.label.toLowerCase()}`}
+                      placeholder={`Enter ${credType.name.toLowerCase()}`}
                       className="pr-10"
                     />
                     <Button

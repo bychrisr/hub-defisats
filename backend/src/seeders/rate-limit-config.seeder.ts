@@ -78,13 +78,13 @@ export const rateLimitConfigSeeder: Seeder = {
       const createdConfigs = await prisma.rateLimitConfig.createMany({
         data: defaultConfigs.map(config => ({
           environment: config.environment,
-          endpoint_type: config.endpointType,
-          max_requests: config.maxRequests,
-          window_ms: config.windowMs,
-          is_active: config.isActive,
-          description: config.description,
-          created_at: new Date(),
-          updated_at: new Date()
+          endpointType: config.endpointType,
+          maxRequests: config.maxRequests,
+          windowMs: config.windowMs,
+          isActive: config.isActive,
+          message: config.description,
+          createdAt: new Date(),
+          updatedAt: new Date()
         })),
         skipDuplicates: true
       });

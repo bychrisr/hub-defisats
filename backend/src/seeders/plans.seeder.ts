@@ -177,7 +177,7 @@ export const plansSeeder: Seeder = {
               has_advanced: planData.has_advanced,
               has_priority: planData.has_priority,
               max_notifications: planData.max_notifications,
-              order: planData.order,
+              sort_order: planData.order,
               created_at: new Date(),
               updated_at: new Date()
             }

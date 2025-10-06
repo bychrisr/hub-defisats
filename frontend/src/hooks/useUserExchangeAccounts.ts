@@ -7,6 +7,7 @@ import {
   UpdateUserExchangeAccountData,
   CredentialTestResult 
 } from '@/services/userExchangeAccount.service';
+import { accountEventManager } from './useAccountEvents';
 
 export function useUserExchangeAccounts() {
   const [accounts, setAccounts] = useState<UserExchangeAccount[]>([]);
@@ -67,6 +68,9 @@ export function useUserExchangeAccounts() {
         accountName: newAccount.account_name
       });
 
+      // Emitir evento para notificar outros componentes
+      accountEventManager.emit('accountCreated');
+
       return newAccount;
     } catch (error: any) {
       console.error('❌ USER EXCHANGE ACCOUNTS - Error creating account:', error);
@@ -96,6 +100,9 @@ export function useUserExchangeAccounts() {
         accountName: updatedAccount.account_name,
         isActive: updatedAccount.is_active
       });
+
+      // Emitir evento para notificar outros componentes
+      accountEventManager.emit('accountUpdated');
 
       return updatedAccount;
     } catch (error: any) {
@@ -145,6 +152,9 @@ export function useUserExchangeAccounts() {
         exchangeName: activeAccount.exchange.name,
         accountName: activeAccount.account_name
       });
+
+      // Emitir evento para notificar outros componentes
+      accountEventManager.emit('accountActivated');
 
       return activeAccount;
     } catch (error: any) {

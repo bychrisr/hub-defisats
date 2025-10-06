@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, Search, Plus, MoreVertical, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useUserExchangeAccounts } from '@/hooks/useUserExchangeAccounts';
+import { useAccountEvents } from '@/hooks/useAccountEvents';
 import { useTheme } from '@/contexts/ThemeContext';
 import { CreateAccountModal } from '@/components/modals/CreateAccountModal';
 import { AccountActionsModal } from '@/components/modals/AccountActionsModal';
@@ -54,8 +55,20 @@ export const AccountSelector = () => {
   };
 
   const handleModalSuccess = () => {
+    console.log('🔄 ACCOUNT SELECTOR - Modal success, refreshing accounts...');
     loadAccounts(); // Refresh accounts list
   };
+
+  // Usar sistema de eventos para atualização automática
+  useAccountEvents(loadAccounts);
+
+  // Recarregar contas quando o modal de criação for fechado (fallback)
+  useEffect(() => {
+    if (!isCreateModalOpen && !isActionsModalOpen) {
+      console.log('🔄 ACCOUNT SELECTOR - Modals closed, refreshing accounts...');
+      loadAccounts();
+    }
+  }, [isCreateModalOpen, isActionsModalOpen, loadAccounts]);
 
   return (
     <>
