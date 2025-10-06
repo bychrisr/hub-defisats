@@ -166,37 +166,51 @@ export default function AdminLayout() {
             </Button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto min-h-0">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <Button
-                  key={item.name}
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start profile-sidebar-item",
-                    isActive ? "active text-white" : "text-muted-foreground hover:text-foreground"
-                  )}
-                  onClick={() => {
-                    navigate(item.href);
-                    setSidebarOpen(false);
-                  }}
-                >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  <span className="flex-1 text-left">{item.name}</span>
-                  {item.badge && (
-                    <Badge 
-                      variant="secondary" 
-                      className={cn(
-                        "ml-2 text-xs",
-                        item.badge.color === 'green' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      )}
-                    >
-                      {item.badge.text}
-                    </Badge>
-                  )}
-                </Button>
-              );
-            })}
+            {navigationGroups.map((group, groupIndex) => (
+              <div key={group.title}>
+                <div className="px-3 py-2">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {group.title}
+                  </h3>
+                </div>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Button
+                        key={item.name}
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start profile-sidebar-item",
+                          isActive ? "active text-white" : "text-muted-foreground hover:text-foreground"
+                        )}
+                        onClick={() => {
+                          navigate(item.href);
+                          setSidebarOpen(false);
+                        }}
+                      >
+                        <item.icon className="mr-3 h-5 w-5" />
+                        <span className="flex-1 text-left">{item.name}</span>
+                        {item.badge && (
+                          <Badge 
+                            variant="secondary" 
+                            className={cn(
+                              "ml-2 text-xs",
+                              item.badge.color === 'green' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            )}
+                          >
+                            {item.badge.text}
+                          </Badge>
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
+                {groupIndex < navigationGroups.length - 1 && (
+                  <div className="my-2 border-t border-border/50" />
+                )}
+              </div>
+            ))}
           </nav>
           <div 
             className="p-4 flex-shrink-0"
