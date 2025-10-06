@@ -51,7 +51,7 @@ export const MAIN_NAVIGATION = [
   },
   { 
     name: 'Automations', 
-    href: '/automation', 
+    href: '/automations', 
     icon: NAVIGATION_ICONS.AUTOMATIONS 
   },
   { 
