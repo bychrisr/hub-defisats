@@ -313,6 +313,10 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 - ✅ Sistema de contas ativas por exchange
 - ✅ Teste de credenciais e verificação
 - ✅ Interface moderna com shadcn/ui
+- ✅ **Campos de credenciais editáveis com visualização**
+- ✅ **Indicador de contas cadastradas vs limite do plano**
+- ✅ **Símbolo de infinito (∞) para plano vitalício**
+- ✅ **Visualização de credenciais com ícone de olho**
 
 #### **FASE 5: HEADER MENU E NAVEGAÇÃO** ⏳ PENDENTE
 - ⏳ Dropdown de contas ativas
@@ -337,7 +341,8 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 - **Admin Panel**: 100% ✅
 - **Persistência**: 100% ✅
 - **Frontend Multi-Account**: 100% ✅
+- **Interface Avançada**: 100% ✅ (Credenciais, Limites, Visualização)
 - **Integração Automações**: 0% ⏳
 - **Testes**: 0% ⏳
 
-**Progresso Geral: 60% Concluído**
+**Progresso Geral: 65% Concluído**
