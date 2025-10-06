@@ -14,6 +14,11 @@ export interface UseActiveAccountReturn {
   clearActiveAccount: () => boolean;
   isLoading: boolean;
   error: string | null;
+  // Métodos para automações
+  setAutomationDefaultAccount: (accountId: string | null) => boolean;
+  getAutomationDefaultAccount: () => string | null;
+  updateAutomationPreferences: (preferences: any) => boolean;
+  getAutomationPreferences: () => any;
 }
 
 /**
@@ -116,12 +121,84 @@ export function useActiveAccount(): UseActiveAccountReturn {
     };
   }, [activeAccountId]);
 
+  // Métodos para automações
+  const setAutomationDefaultAccount = useCallback((accountId: string | null): boolean => {
+    try {
+      setError(null);
+      
+      const success = indicatorPersistenceService.setAutomationDefaultAccount(accountId);
+      if (success) {
+        console.log('✅ ACTIVE-ACCOUNT - Set automation default account:', accountId);
+        
+        // Disparar evento customizado para notificar outros componentes
+        window.dispatchEvent(new CustomEvent('automationAccountChanged', {
+          detail: { accountId }
+        }));
+      } else {
+        setError('Failed to save automation default account');
+      }
+      
+      return success;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to set automation default account';
+      console.error('❌ ACTIVE-ACCOUNT - Error setting automation default account:', errorMsg);
+      setError(errorMsg);
+      return false;
+    }
+  }, []);
+
+  const getAutomationDefaultAccount = useCallback((): string | null => {
+    try {
+      return indicatorPersistenceService.getAutomationDefaultAccount();
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to get automation default account';
+      console.error('❌ ACTIVE-ACCOUNT - Error getting automation default account:', errorMsg);
+      setError(errorMsg);
+      return null;
+    }
+  }, []);
+
+  const updateAutomationPreferences = useCallback((preferences: any): boolean => {
+    try {
+      setError(null);
+      
+      const success = indicatorPersistenceService.updateAutomationPreferences(preferences);
+      if (success) {
+        console.log('✅ ACTIVE-ACCOUNT - Updated automation preferences:', preferences);
+      } else {
+        setError('Failed to update automation preferences');
+      }
+      
+      return success;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to update automation preferences';
+      console.error('❌ ACTIVE-ACCOUNT - Error updating automation preferences:', errorMsg);
+      setError(errorMsg);
+      return false;
+    }
+  }, []);
+
+  const getAutomationPreferences = useCallback(() => {
+    try {
+      return indicatorPersistenceService.getAutomationPreferences();
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to get automation preferences';
+      console.error('❌ ACTIVE-ACCOUNT - Error getting automation preferences:', errorMsg);
+      setError(errorMsg);
+      return null;
+    }
+  }, []);
+
   return {
     activeAccountId,
     setActiveAccount,
     clearActiveAccount,
     isLoading,
-    error
+    error,
+    setAutomationDefaultAccount,
+    getAutomationDefaultAccount,
+    updateAutomationPreferences,
+    getAutomationPreferences,
   };
 }
 

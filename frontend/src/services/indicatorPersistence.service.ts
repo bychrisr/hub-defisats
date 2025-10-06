@@ -35,6 +35,12 @@ export interface UserPreferences {
     timezone: string;
     notifications: boolean;
   };
+  automationPreferences: {
+    defaultAccountId: string | null;
+    autoRefresh: boolean;
+    syncInterval: number;
+    notifications: boolean;
+  };
 }
 
 export interface UnifiedPersistenceData {
@@ -111,6 +117,12 @@ class IndicatorPersistenceService {
       uiSettings: {
         language: 'pt-BR',
         timezone: 'America/Sao_Paulo',
+        notifications: true
+      },
+      automationPreferences: {
+        defaultAccountId: null,
+        autoRefresh: true,
+        syncInterval: 30000, // 30 segundos
         notifications: true
       }
     };
@@ -432,6 +444,85 @@ class IndicatorPersistenceService {
 
   public clearActiveAccount(): boolean {
     return this.setActiveAccount(null);
+  }
+
+  // ===== MÉTODOS PARA AUTOMAÇÕES =====
+
+  public setAutomationDefaultAccount(accountId: string | null): boolean {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot save automation default account, localStorage not available');
+      return false;
+    }
+
+    try {
+      const currentData = this.loadUnifiedData();
+      currentData.userPreferences.automationPreferences.defaultAccountId = accountId;
+      currentData.metadata.lastUpdated = Date.now();
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(currentData));
+      
+      console.log(`✅ PERSISTENCE - Set automation default account:`, accountId);
+      return true;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error setting automation default account:', error);
+      return false;
+    }
+  }
+
+  public getAutomationDefaultAccount(): string | null {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot load automation default account, localStorage not available');
+      return null;
+    }
+
+    try {
+      const data = this.loadUnifiedData();
+      console.log(`✅ PERSISTENCE - Automation default account:`, data.userPreferences.automationPreferences.defaultAccountId);
+      return data.userPreferences.automationPreferences.defaultAccountId;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error getting automation default account:', error);
+      return null;
+    }
+  }
+
+  public updateAutomationPreferences(preferences: Partial<UserPreferences['automationPreferences']>): boolean {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot save automation preferences, localStorage not available');
+      return false;
+    }
+
+    try {
+      const currentData = this.loadUnifiedData();
+      currentData.userPreferences.automationPreferences = { 
+        ...currentData.userPreferences.automationPreferences, 
+        ...preferences 
+      };
+      currentData.metadata.lastUpdated = Date.now();
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(currentData));
+      
+      console.log(`✅ PERSISTENCE - Updated automation preferences:`, preferences);
+      return true;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error updating automation preferences:', error);
+      return false;
+    }
+  }
+
+  public getAutomationPreferences(): UserPreferences['automationPreferences'] {
+    if (!this.isStorageAvailable()) {
+      console.warn('⚠️ PERSISTENCE - Cannot load automation preferences, localStorage not available');
+      return this.getDefaultUserPreferences().automationPreferences;
+    }
+
+    try {
+      const data = this.loadUnifiedData();
+      console.log(`✅ PERSISTENCE - Automation preferences:`, data.userPreferences.automationPreferences);
+      return data.userPreferences.automationPreferences;
+    } catch (error) {
+      console.error('❌ PERSISTENCE - Error getting automation preferences:', error);
+      return this.getDefaultUserPreferences().automationPreferences;
+    }
   }
 
   // ===== MÉTODOS PARA PREFERÊNCIAS DO USUÁRIO =====
