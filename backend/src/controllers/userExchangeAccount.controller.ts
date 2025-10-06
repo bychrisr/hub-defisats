@@ -189,11 +189,11 @@ export class UserExchangeAccountController {
         });
       }
 
-      if (error.message === 'User already has an active account for this exchange') {
+      if (error.message === 'User already has an account with this name for this exchange') {
         return reply.status(409).send({
           success: false,
-          error: 'ACCOUNT_EXISTS',
-          message: 'User already has an active account for this exchange'
+          error: 'ACCOUNT_NAME_EXISTS',
+          message: 'User already has an account with this name for this exchange'
         });
       }
 

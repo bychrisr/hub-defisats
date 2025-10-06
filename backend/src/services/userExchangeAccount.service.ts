@@ -140,17 +140,17 @@ export class UserExchangeAccountService {
       throw new Error('Exchange not found');
     }
 
-    // Verificar se o usuário já tem uma conta ativa para esta exchange
-    const existingActiveAccount = await this.prisma.userExchangeAccounts.findFirst({
+    // Verificar se o usuário já tem uma conta com o mesmo nome para esta exchange
+    const existingAccount = await this.prisma.userExchangeAccounts.findFirst({
       where: {
         user_id: userId,
         exchange_id: data.exchange_id,
-        is_active: true
+        account_name: data.account_name
       }
     });
 
-    if (existingActiveAccount) {
-      throw new Error('User already has an active account for this exchange');
+    if (existingAccount) {
+      throw new Error('User already has an account with this name for this exchange');
     }
 
     // Criptografar credenciais
