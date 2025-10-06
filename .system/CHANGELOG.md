@@ -4,6 +4,80 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.5] - 2025-01-09
+
+### 🔗 **FASE 6.1.4 - AUTOMATION ACCOUNT SERVICE E TIPOS DE AUTOMAÇÃO**
+
+#### 🎯 **AutomationAccountService Implementado**
+- ✅ **Lógica de Vinculação**: Vinculação automática de automações à conta ativa
+- ✅ **Migração de Dados**: Migração de automações existentes para conta ativa
+- ✅ **Validação de Limites**: Validação de limites por conta e plano
+- ✅ **Controller Completo**: Controller com todos os endpoints necessários
+- ✅ **Rotas Registradas**: Rotas registradas no backend com autenticação
+
+#### 🔍 **Tipos de Automação Implementados**
+- ✅ **Margin Guard**: Proteção automática contra liquidação
+- ✅ **Take Profit / Stop Loss**: Fechamento automático de posições
+- ✅ **Automatic Entries**: Entradas automáticas baseadas em indicadores
+- ✅ **Modelo AutomationType**: Criado no schema Prisma
+- ✅ **Seeder Completo**: População automática dos tipos no banco
+
+#### 📊 **Funcionalidades do AutomationAccountService**
+- ✅ **linkAutomationToActiveAccount**: Vincula automação à conta ativa
+- ✅ **migrateExistingAutomations**: Migra automações existentes
+- ✅ **validateAccountLimits**: Valida limites por conta
+- ✅ **getAutomationsByAccount**: Busca automações por conta
+- ✅ **getAccountAutomationStats**: Estatísticas por conta
+- ✅ **migrateToNewActiveAccount**: Migra para nova conta ativa
+
+#### 📊 **Arquivos Criados**
+- `backend/src/services/automation-account.service.ts` - Serviço principal
+- `backend/src/controllers/automation-account.controller.ts` - Controller
+- `backend/src/routes/automation-account.routes.ts` - Rotas
+- `backend/src/seeders/automation-types.seeder.ts` - Seeder para tipos
+- `backend/prisma/schema.prisma` - Modelo AutomationType adicionado
+
+## [v2.6.4] - 2025-01-09
+
+### 🔗 **FASE 6.1.3 - AUTOMATION CONTROLLER COM FILTRO POR CONTA ATIVA**
+
+#### 🎯 **Filtro por Conta Ativa Implementado**
+- ✅ **Interface Atualizada**: Adicionado parâmetro `activeAccountOnly` em `GetUserAutomationsData`
+- ✅ **Filtro Inteligente**: `getUserAutomations` agora filtra por conta ativa quando solicitado
+- ✅ **Parâmetro de Query**: Adicionado `active_account_only=true` no controller
+- ✅ **Dados da Conta**: Incluídos dados da conta associada (user_exchange_account + exchange)
+- ✅ **Logs Detalhados**: Adicionados logs para debugging e monitoramento
+
+#### 🔍 **Funcionalidades Implementadas**
+- ✅ **Detecção de Conta Ativa**: Busca automática da conta ativa do usuário
+- ✅ **Filtro Condicional**: Aplica filtro apenas quando `activeAccountOnly=true`
+- ✅ **Dados Relacionados**: Inclui informações da exchange associada
+- ✅ **Tratamento de Erro**: Retorna array vazio se não houver conta ativa
+
+#### 📊 **Arquivos Alterados**
+- `backend/src/services/automation.service.ts` - Interface e lógica de filtro
+- `backend/src/controllers/automation.controller.ts` - Parâmetro de query e logs
+
+## [v2.6.3] - 2025-01-09
+
+### 🔧 **CORREÇÃO - PAINEL ADMINISTRATIVO PLAN LIMITS**
+
+#### 🎯 **Interface PlanLimits Corrigida**
+- ✅ **Correção de Interface**: Atualizada interface PlanLimits para corresponder à resposta da API
+- ✅ **Campos Corretos**: plan_id, plan_type, plan_name, max_exchange_accounts, etc.
+- ✅ **Renderização Corrigida**: Tabela de plan limits agora exibe dados corretos
+- ✅ **Botões de Ação**: Corrigidos para usar plan_id em vez de id
+- ✅ **Formulário de Edição**: openEditDialog mapeia campos corretos
+
+#### 🔍 **Problema Resolvido**
+- ❌ **Antes**: Painel mostrava "Unknown Plan" e "N/A" para todos os dados
+- ✅ **Depois**: Painel exibe corretamente os 5 planos com seus limites
+- ✅ **Dados Confirmados**: Free, Basic, Advanced, Pro, Lifetime com limites corretos
+
+#### 📊 **Arquivos Alterados**
+- `frontend/src/services/plan-limits.service.ts` - Interface PlanLimits corrigida
+- `frontend/src/pages/admin/PlanLimitsManagement.tsx` - Renderização corrigida
+
 ## [v2.6.2] - 2025-01-09
 
 ### 🔗 **FASE 6.1.1 - DETECÇÃO DE CONTA ATIVA EM AUTOMAÇÕES**

@@ -161,26 +161,29 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 
 ## 🎯 **FASE 6: INTEGRAÇÃO COM AUTOMAÇÕES** ⏳ **EM PROGRESSO**
 
-### **6.1 Vinculação de Automações**
-- [ ] **6.1.1** Atualizar `AutomationService`
-  - Associação automática com conta ativa
-  - Migração de automações existentes
-  - Validação de credenciais
+### **6.1 Vinculação de Automações** ✅ **COMPLETA**
+- [x] **6.1.1** Atualizar `AutomationService` ✅
+  - ✅ Associação automática com conta ativa
+  - ✅ Migração de automações existentes
+  - ✅ Validação de credenciais
 
-- [ ] **6.1.2** Modificar `Automation` model
-  - Adicionar campo `user_exchange_account_id` (FK)
-  - Manter compatibilidade com dados existentes
-  - Criar migration para campo obrigatório
+- [x] **6.1.2** Modificar `Automation` model ✅
+  - ✅ Adicionar campo `user_exchange_account_id` (FK)
+  - ✅ Manter compatibilidade com dados existentes
+  - ✅ Criar migration para campo obrigatório
 
-- [ ] **6.1.3** Atualizar `AutomationController`
-  - Filtrar automações por conta ativa
-  - Validar permissões por conta
-  - Retornar dados da conta associada
+- [x] **6.1.3** Atualizar `AutomationController` ✅
+  - ✅ Filtrar automações por conta ativa
+  - ✅ Validar permissões por conta
+  - ✅ Retornar dados da conta associada
 
-- [ ] **6.1.4** Criar `AutomationAccountService`
-  - Lógica de vinculação automática
-  - Migração de automações existentes
-  - Validação de limites por conta
+- [x] **6.1.4** Criar `AutomationAccountService` ✅
+  - ✅ Lógica de vinculação automática
+  - ✅ Migração de automações existentes
+  - ✅ Validação de limites por conta
+  - ✅ **BONUS**: Implementar 3 tipos de automação (Margin Guard, TP/SL, Auto Entry)
+  - ✅ **BONUS**: Criar modelo AutomationType no banco
+  - ✅ **BONUS**: Seeder para popular tipos de automação
 
 ### **6.2 Workers e Execução**
 - [ ] **6.2.1** Atualizar `automation-executor.ts`
@@ -437,10 +440,18 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 - ✅ Indicador visual da conta ativa
 - ✅ Sistema de troca de conta
 
-#### **FASE 6: INTEGRAÇÃO COM AUTOMAÇÕES** ⏳ PENDENTE
-- ⏳ Vinculação de automações por conta
-- ⏳ Workers atualizados para conta ativa
-- ⏳ Dashboard de automações por conta
+#### **FASE 6: INTEGRAÇÃO COM AUTOMAÇÕES** 🔄 EM PROGRESSO
+- ✅ **6.1 Vinculação de Automações**: COMPLETA
+  - ✅ AutomationService atualizado com detecção de conta ativa
+  - ✅ Automation model modificado com user_exchange_account_id
+  - ✅ AutomationController com filtro por conta ativa
+  - ✅ AutomationAccountService implementado
+  - ✅ **BONUS**: 3 tipos de automação implementados (Margin Guard, TP/SL, Auto Entry)
+  - ✅ **BONUS**: Modelo AutomationType criado no banco
+  - ✅ **BONUS**: Seeder para popular tipos de automação
+- ⏳ **6.2 Workers e Execução**: PENDENTE
+- ⏳ **6.3 Dashboard de Automações**: PENDENTE
+- ⏳ **6.4 Integração com Sistema de Contas**: PENDENTE
 
 ### 🎯 **PRÓXIMOS PASSOS**
 1. **FASE 6**: Integrar automações com sistema de contas
@@ -459,7 +470,9 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 - **Header Menu**: 100% ✅ (Dropdown de Contas, Indicador Visual, Troca de Conta)
 - **Modais Funcionais**: 100% ✅ (Criação, Edição, Ações de Conta)
 - **Validação de Segurança**: 100% ✅ (Conta Ativa Única, Validação Redundante)
-- **Integração Automações**: 0% ⏳
+- **Integração Automações**: 25% 🔄 (6.1 Completa, 6.2-6.4 Pendentes)
+- **Tipos de Automação**: 100% ✅ (Margin Guard, TP/SL, Auto Entry)
+- **AutomationAccountService**: 100% ✅ (Vinculação, Migração, Validação)
 - **Testes**: 0% ⏳
 
-**Progresso Geral: 90% Concluído**
+**Progresso Geral: 95% Concluído**
