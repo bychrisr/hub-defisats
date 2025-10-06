@@ -29,7 +29,8 @@ import {
   Shield,
   BarChart3,
   DollarSign,
-  Settings
+  Settings,
+  Bot
 } from 'lucide-react';
 
 interface ComponentHealth {
@@ -207,7 +208,7 @@ const Monitoring: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [activeTab, setActiveTab] = useState<'api' | 'hardware' | 'external' | 'market' | 'diagnostic' | 'protection'>('api');
+  const [activeTab, setActiveTab] = useState<'api' | 'hardware' | 'external' | 'market' | 'diagnostic' | 'protection' | 'automations'>('api');
   
   // Diagnostic state
   const [diagnosticData, setDiagnosticData] = useState<any>(null);
@@ -227,6 +228,51 @@ const Monitoring: React.FC = () => {
   const [protectionMetrics, setProtectionMetrics] = useState<any>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configType, setConfigType] = useState<'cache' | 'rules'>('cache');
+
+  // Automations state
+  const [automationData, setAutomationData] = useState<any>(null);
+  const [automationLoading, setAutomationLoading] = useState(false);
+  const [automationLogs, setAutomationLogs] = useState<any[]>([]);
+  const [automationAlerts, setAutomationAlerts] = useState<any[]>([]);
+  const [automationStats, setAutomationStats] = useState<any>(null);
+
+  // Fetch automation data
+  const fetchAutomationData = async () => {
+    try {
+      setAutomationLoading(true);
+      
+      const [logsResponse, alertsResponse, statsResponse] = await Promise.all([
+        cachedApi.get('/api/admin/automation-logs?limit=10'),
+        cachedApi.get('/api/admin/automation-alerts?limit=10'),
+        cachedApi.get('/api/admin/automation-logs/stats')
+      ]);
+
+      if (logsResponse.data.success) {
+        setAutomationLogs(logsResponse.data.data.logs || []);
+      }
+
+      if (alertsResponse.data.success) {
+        setAutomationAlerts(alertsResponse.data.data.alerts || []);
+      }
+
+      if (statsResponse.data.success) {
+        setAutomationStats(statsResponse.data.data);
+      }
+
+      setAutomationData({
+        logs: logsResponse.data.success ? logsResponse.data.data.logs || [] : [],
+        alerts: alertsResponse.data.success ? alertsResponse.data.data.alerts || [] : [],
+        stats: statsResponse.data.success ? statsResponse.data.data : null,
+        lastUpdate: new Date()
+      });
+
+    } catch (error) {
+      console.error('Failed to fetch automation data:', error);
+      toast.error('Failed to fetch automation data');
+    } finally {
+      setAutomationLoading(false);
+    }
+  };
 
   const handleResetCircuitBreaker = async () => {
     try {
@@ -778,6 +824,19 @@ const Monitoring: React.FC = () => {
             <div className="flex items-center">
               <Shield className="w-4 h-4 mr-2" />
               Protection
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('automations')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'automations'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
+            }`}
+          >
+            <div className="flex items-center">
+              <Bot className="w-4 h-4 mr-2" />
+              Automations
             </div>
           </button>
         </nav>
@@ -1975,6 +2034,218 @@ const Monitoring: React.FC = () => {
                   >
                     Cancel
                   </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Automations Tab */}
+      {activeTab === 'automations' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-text-primary mb-2">Automation Monitoring</h2>
+            <p className="text-text-secondary">Monitor automation execution, logs, and alerts</p>
+          </div>
+
+          {/* Automation Stats Cards */}
+          {automationStats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-bg-card border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-text-secondary">Total Logs</p>
+                    <p className="text-2xl font-bold text-text-primary">{automationStats.totalLogs || 0}</p>
+                  </div>
+                  <Activity className="h-8 w-8 text-blue-500" />
+                </div>
+              </div>
+              
+              <div className="bg-bg-card border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-text-secondary">Success Rate</p>
+                    <p className="text-2xl font-bold text-green-500">
+                      {automationStats.totalLogs > 0 
+                        ? ((automationStats.successfulLogs / automationStats.totalLogs) * 100).toFixed(1)
+                        : 0}%
+                    </p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-500" />
+                </div>
+              </div>
+              
+              <div className="bg-bg-card border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-text-secondary">Avg Execution</p>
+                    <p className="text-2xl font-bold text-text-primary">
+                      {automationStats.averageExecutionTime ? 
+                        `${(automationStats.averageExecutionTime / 1000).toFixed(1)}s` : '0s'}
+                    </p>
+                  </div>
+                  <Clock className="h-8 w-8 text-yellow-500" />
+                </div>
+              </div>
+              
+              <div className="bg-bg-card border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-text-secondary">Error Rate</p>
+                    <p className="text-2xl font-bold text-red-500">
+                      {automationStats.errorRate ? automationStats.errorRate.toFixed(1) : 0}%
+                    </p>
+                  </div>
+                  <XCircle className="h-8 w-8 text-red-500" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Recent Logs */}
+          <div className="bg-bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-text-primary">Recent Automation Logs</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchAutomationData}
+                disabled={automationLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${automationLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+            
+            {automationLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+                <span className="text-text-secondary">Loading automation data...</span>
+              </div>
+            ) : automationLogs.length > 0 ? (
+              <div className="space-y-3">
+                {automationLogs.slice(0, 5).map((log: any) => (
+                  <div key={log.id} className="flex items-center justify-between p-3 bg-bg-secondary rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      {log.status === 'SUCCESS' ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : log.status === 'FAILED' ? (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      ) : (
+                        <Activity className="h-5 w-5 text-blue-500" />
+                      )}
+                      <div>
+                        <p className="font-medium text-text-primary">{log.automationName}</p>
+                        <p className="text-sm text-text-secondary">
+                          {log.accountName} • {log.exchangeName}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-text-secondary capitalize">{log.action}</p>
+                      <p className="text-xs text-text-secondary">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Bot className="h-12 w-12 text-text-secondary mx-auto mb-4" />
+                <p className="text-text-secondary">No automation logs found</p>
+              </div>
+            )}
+          </div>
+
+          {/* Recent Alerts */}
+          <div className="bg-bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-text-primary">Recent Automation Alerts</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchAutomationData}
+                disabled={automationLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${automationLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+            
+            {automationAlerts.length > 0 ? (
+              <div className="space-y-3">
+                {automationAlerts.slice(0, 5).map((alert: any) => (
+                  <div key={alert.id} className={`flex items-center justify-between p-3 rounded-lg border ${
+                    alert.severity === 'critical' ? 'bg-red-50 border-red-200' :
+                    alert.severity === 'high' ? 'bg-orange-50 border-orange-200' :
+                    alert.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
+                    'bg-blue-50 border-blue-200'
+                  }`}>
+                    <div className="flex items-center space-x-3">
+                      {alert.severity === 'critical' ? (
+                        <AlertTriangle className="h-5 w-5 text-red-500" />
+                      ) : alert.severity === 'high' ? (
+                        <AlertTriangle className="h-5 w-5 text-orange-500" />
+                      ) : (
+                        <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                      )}
+                      <div>
+                        <p className="font-medium text-text-primary">{alert.title}</p>
+                        <p className="text-sm text-text-secondary">{alert.message}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-text-secondary capitalize">{alert.severity}</p>
+                      <p className="text-xs text-text-secondary">
+                        {new Date(alert.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Shield className="h-12 w-12 text-text-secondary mx-auto mb-4" />
+                <p className="text-text-secondary">No automation alerts found</p>
+              </div>
+            )}
+          </div>
+
+          {/* Performance Metrics */}
+          {automationStats && (
+            <div className="bg-bg-card border border-border rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-text-primary mb-4">Performance Metrics</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-text-secondary mb-2">CPU Usage</h4>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 bg-bg-secondary rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full" 
+                        style={{ width: `${automationStats.averageCpuUsage || 0}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm text-text-secondary">
+                      {automationStats.averageCpuUsage || 0}%
+                    </span>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-text-secondary mb-2">Memory Usage</h4>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 bg-bg-secondary rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full" 
+                        style={{ width: `${automationStats.averageMemoryUsage || 0}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm text-text-secondary">
+                      {automationStats.averageMemoryUsage || 0}%
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
