@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PlanLimitsController } from '../controllers/planLimits.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminAuthMiddleware } from '../middleware/adminAuth.middleware';
+import { adminAuthMiddleware } from '../middleware/admin.middleware';
 
 export async function planLimitsRoutes(fastify: FastifyInstance) {
   const planLimitsController = new PlanLimitsController();
