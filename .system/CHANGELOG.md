@@ -4,6 +4,32 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.2] - 2025-01-09
+
+### 🔗 **FASE 6.1.1 - DETECÇÃO DE CONTA ATIVA EM AUTOMAÇÕES**
+
+#### 🎯 **AutomationService Integration**
+- ✅ **Detecção de Conta Ativa**: Implementada detecção automática da conta ativa do usuário
+- ✅ **Vinculação Automática**: Automações são automaticamente vinculadas à conta ativa
+- ✅ **Validação de Credenciais**: Verificação de credenciais válidas antes da criação
+- ✅ **Logs Detalhados**: Logging completo do processo de detecção e validação
+- ✅ **Prevenção de Erros**: Validação de conta ativa antes de criar automações
+
+#### 🔍 **Funcionalidades Implementadas**
+- ✅ **UserExchangeAccountService Integration**: Integração com serviço de contas
+- ✅ **Active Account Detection**: Detecção automática da conta ativa
+- ✅ **Credential Validation**: Validação de credenciais não vazias
+- ✅ **Error Handling**: Mensagens de erro específicas para cada validação
+- ✅ **Comprehensive Logging**: Logs detalhados para debugging
+
+#### 🛡️ **Validações de Segurança**
+- ✅ **Conta Ativa Obrigatória**: Usuário deve ter conta ativa para criar automações
+- ✅ **Credenciais Válidas**: Verificação de credenciais não vazias
+- ✅ **Prevenção de Duplicatas**: Verificação de automações existentes por conta
+- ✅ **Logs de Auditoria**: Registro completo de todas as operações
+
+---
+
 ## [v2.6.1] - 2025-01-09
 
 ### 🔒 **VALIDAÇÃO DE SEGURANÇA REDUNDANTE - CONTA ATIVA ÚNICA**

@@ -1,9 +1,9 @@
 {
-  "last_task": "Validação de Segurança Redundante - Conta Ativa Única",
+  "last_task": "FASE 6.1.1 - Detecção de Conta Ativa em Automações",
   "status": "completed",
-  "timestamp": "2025-01-09T23:21:00Z",
-  "next_task": "FASE 6: Integração com Automações",
-  "version": "v2.6.1",
+  "timestamp": "2025-01-09T23:26:00Z",
+  "next_task": "FASE 6.1.2 - Modificar Automation Model",
+  "version": "v2.6.2",
   "branch": "feature/multi-account-system",
   "completed_tasks": [
     "Implemented generic multi-exchange architecture",
@@ -95,7 +95,13 @@
     "Implemented validateAndFixActiveAccounts method for periodic checks",
     "Added comprehensive logging for security violations",
     "Ensured only one account can be active per user at any time",
-    "Added multiple layers of protection against data inconsistency"
+    "Added multiple layers of protection against data inconsistency",
+    "Implemented FASE 6.1.1 - Active account detection in AutomationService",
+    "Added UserExchangeAccountService integration to AutomationService",
+    "Implemented automatic linking of automations to active account",
+    "Added credential validation for active account before automation creation",
+    "Implemented comprehensive logging for account detection and validation",
+    "Added error handling for missing active accounts and invalid credentials"
   ],
   "pending_tasks": [
     "FASE 6: Integração com Automações por Conta",
