@@ -520,3 +520,5 @@ export function ExchangesManagement() {
     </div>
   );
 }
+
+export default ExchangesManagement;
