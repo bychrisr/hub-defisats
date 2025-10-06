@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useUserExchangeAccounts } from '@/hooks/useUserExchangeAccounts';
 import { useExchangeCredentials } from '@/hooks/useExchangeCredentials';
 import { useAuthStore } from '@/stores/auth';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -66,6 +67,7 @@ export function MultiAccountInterface() {
 
   const { exchanges, isLoading: isLoadingExchanges } = useExchangeCredentials();
   const { user } = useAuthStore();
+  const { planLimits, isLoading: isLoadingLimits, getAccountStats } = usePlanLimits();
 
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
@@ -85,30 +87,8 @@ export function MultiAccountInterface() {
   });
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});
 
-  // Função para obter limite de contas baseado no plano
-  const getAccountLimit = (planType: string): number | 'unlimited' => {
-    switch (planType) {
-      case 'free':
-        return 1;
-      case 'basic':
-        return 2;
-      case 'premium':
-        return 5;
-      case 'lifetime':
-        return 'unlimited';
-      default:
-        return 1;
-    }
-  };
-
-  // Calcular estatísticas de contas
-  const accountStats = {
-    total: accounts.length,
-    limit: getAccountLimit(user?.plan_type || 'free'),
-    canCreate: user?.plan_type === 'lifetime' || 
-               (typeof getAccountLimit(user?.plan_type || 'free') === 'number' && 
-                accounts.length < (getAccountLimit(user?.plan_type || 'free') as number))
-  };
+  // Calcular estatísticas de contas usando limites dinâmicos
+  const accountStats = getAccountStats(accounts.length);
 
   const handleCreateAccount = async () => {
     try {
@@ -245,7 +225,7 @@ export function MultiAccountInterface() {
     }));
   };
 
-  if (isLoading || isLoadingExchanges) {
+  if (isLoading || isLoadingExchanges || isLoadingLimits) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center gap-3">
@@ -289,13 +269,13 @@ export function MultiAccountInterface() {
             <div className="text-right">
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                  {accountStats.total}
+                  {accountStats.current}
                 </span>
                 <span className="text-blue-700 dark:text-blue-300">
                   /
                 </span>
                 <span className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                  {accountStats.limit === 'unlimited' ? (
+                  {accountStats.isUnlimited ? (
                     <Infinity className="h-6 w-6" />
                   ) : (
                     accountStats.limit
@@ -303,7 +283,7 @@ export function MultiAccountInterface() {
                 </span>
               </div>
               <p className="text-xs text-blue-600 dark:text-blue-400">
-                {accountStats.limit === 'unlimited' ? 'Unlimited' : 'accounts'}
+                {accountStats.isUnlimited ? 'Unlimited' : 'accounts'}
               </p>
             </div>
           </div>

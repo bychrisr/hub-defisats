@@ -52,7 +52,7 @@ import userPreferencesRoutes from './routes/userPreferences.routes';
 import userPreferencesTestRoutes from './routes/userPreferencesTest.routes';
 import tradingViewRoutes from './routes/tradingview.routes';
 import { exchangeCredentialsRoutes } from './routes/exchangeCredentials.routes';
-import { planLimitsRoutes } from './routes/plan-limits.routes';
+import { planLimitsRoutes } from './routes/planLimits.routes';
 import { plansRoutes } from './routes/plans.routes';
 import { userExchangeAccountRoutes } from './routes/userExchangeAccount.routes';
 import { versionRoutes } from './routes/version.routes';
@@ -574,7 +574,7 @@ async function registerRoutes() {
   await fastify.register(exchangeCredentialsRoutes, { prefix: '/api' });
   await fastify.register(planLimitsRoutes, { prefix: '/api' });
   await fastify.register(plansRoutes, { prefix: '/api' });
-  console.log('✅ Exchange Credentials routes registered');
+  console.log('✅ Exchange Credentials and Plan Limits routes registered');
 
   // User Exchange Account routes
   await fastify.register(userExchangeAccountRoutes, { prefix: '/api' });
