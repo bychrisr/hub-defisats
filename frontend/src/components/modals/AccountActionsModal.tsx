@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUserExchangeAccounts } from '@/hooks/useUserExchangeAccounts';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,14 +35,14 @@ export function AccountActionsModal({ isOpen, onClose, account, onSuccess }: Acc
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});
 
   // Initialize form when account changes
-  useState(() => {
+  useEffect(() => {
     if (account) {
       setEditForm({
         account_name: account.account_name,
         credentials: account.credentials || {}
       });
     }
-  });
+  }, [account]);
 
   const handleUpdate = async () => {
     if (!account) return;
