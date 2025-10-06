@@ -1,9 +1,9 @@
 {
-  "last_task": "FASE 6.3 - Dashboard de Automações Multi-Account FINALIZADA",
+  "last_task": "FASE 6.4 - Integração com Sistema de Contas COMPLETA",
   "status": "completed",
-  "timestamp": "2025-01-10T01:20:00Z",
-  "next_task": "FASE 6.4.1 - Integração com Sistema de Contas",
-  "version": "v2.6.11",
+  "timestamp": "2025-01-10T01:25:00Z",
+  "next_task": "FASE 6.5.1 - Atualizar indicatorPersistenceService",
+  "version": "v2.6.12",
   "branch": "feature/multi-account-system",
   "completed_tasks": [
     "Implemented generic multi-exchange architecture",

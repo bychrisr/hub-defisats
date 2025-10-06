@@ -4,6 +4,38 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.12] - 2025-01-10
+
+### 🔗 **FASE 6.4 - INTEGRAÇÃO COM SISTEMA DE CONTAS COMPLETA**
+
+#### 🎯 **Integração Multi-Account 100% Funcional**
+- ✅ **useAutomations Hook**: Hook completo com filtros por conta ativa
+- ✅ **AutomationContext**: Contexto centralizado para automações
+- ✅ **AutomationForm**: Formulário com seleção de conta e validação
+- ✅ **AutomationAccountManager**: Gerenciamento completo por conta
+- ✅ **Integração Completa**: Todos os hooks e serviços funcionando
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **Filtros por Conta Ativa**: Filtros dinâmicos por conta ativa
+- ✅ **Refresh Automático**: Atualização automática ao trocar conta
+- ✅ **Estados de Loading**: Loading states por conta
+- ✅ **Sincronização**: Sincronização com AccountContext
+- ✅ **Eventos de Mudança**: Eventos de mudança de conta
+- ✅ **Validação de Credenciais**: Validação de credenciais da conta
+
+#### 📊 **Componentes Criados**
+- ✅ **useAutomations**: Hook para gerenciamento de automações
+- ✅ **AutomationContext**: Contexto centralizado
+- ✅ **AutomationForm**: Formulário com seleção de conta
+- ✅ **AutomationAccountManager**: Gerenciador completo por conta
+- ✅ **Integração com Hooks**: useUserExchangeAccounts, useAccountCredentials, useAccountEvents
+
+#### 🔍 **Validação e Testes**
+- ✅ **Linting**: Sem erros de linting
+- ✅ **Integração**: Todos os hooks funcionando
+- ✅ **Validação**: Integração completa testada
+- ✅ **Interface**: Interface responsiva e funcional
+
 ## [v2.6.11] - 2025-01-10
 
 ### 🔗 **FASE 6.3 - DASHBOARD DE AUTOMAÇÕES MULTI-ACCOUNT FINALIZADA**

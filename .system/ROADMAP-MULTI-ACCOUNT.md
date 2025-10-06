@@ -265,26 +265,35 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - Performance por conta
   - Métricas de execução
 
-### **6.4 Integração com Sistema de Contas**
-- [ ] **6.4.1** Atualizar `useAutomations` hook
-  - Filtrar por conta ativa
-  - Refresh automático ao trocar conta
-  - Estados de loading por conta
+### **6.4 Integração com Sistema de Contas** ✅ **COMPLETA**
+- [x] **6.4.1** Atualizar `useAutomations` hook ✅
+  - ✅ Filtrar por conta ativa
+  - ✅ Refresh automático ao trocar conta
+  - ✅ Estados de loading por conta
+  - ✅ Integração com useUserExchangeAccounts
+  - ✅ Integração com useAccountCredentials
+  - ✅ Integração com useAccountEvents
 
-- [ ] **6.4.2** Modificar `AutomationContext`
-  - Contexto de conta ativa
-  - Sincronização com AccountContext
-  - Eventos de mudança de conta
+- [x] **6.4.2** Modificar `AutomationContext` ✅
+  - ✅ Contexto de conta ativa
+  - ✅ Sincronização com AccountContext
+  - ✅ Eventos de mudança de conta
+  - ✅ Filtros dinâmicos por conta e status
+  - ✅ Estatísticas por conta selecionada
 
-- [ ] **6.4.3** Atualizar `AutomationForm`
-  - Seleção de conta para nova automação
-  - Validação de conta ativa
-  - Preenchimento automático de credenciais
+- [x] **6.4.3** Atualizar `AutomationForm` ✅
+  - ✅ Seleção de conta para nova automação
+  - ✅ Validação de conta ativa
+  - ✅ Preenchimento automático de credenciais
+  - ✅ Configurações específicas por tipo
+  - ✅ Validação de credenciais da conta
 
-- [ ] **6.4.4** Criar `AutomationAccountManager`
-  - Gerenciar automações por conta
-  - Migração de automações existentes
-  - Validação de limites por conta
+- [x] **6.4.4** Criar `AutomationAccountManager` ✅
+  - ✅ Gerenciar automações por conta
+  - ✅ Migração de automações existentes
+  - ✅ Validação de limites por conta
+  - ✅ Interface completa de gerenciamento
+  - ✅ Estatísticas e filtros por conta
 
 ### **6.5 Persistência e Sincronização**
 - [ ] **6.5.1** Atualizar `indicatorPersistenceService`
