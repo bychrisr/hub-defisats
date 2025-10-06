@@ -15,7 +15,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 
 export const AccountSelector = () => {
-  const { accounts, activeAccount, setActiveAccount, isLoading } = useUserExchangeAccounts();
+  const { accounts, getActiveAccount, setActiveAccount, isLoading } = useUserExchangeAccounts();
+  const activeAccount = getActiveAccount();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,7 +68,7 @@ export const AccountSelector = () => {
         sideOffset={8}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/50">
+        <div className="flex items-center justify-between p-3 border-b border-border/50">
           <h3 className="text-lg font-semibold text-text-primary">Accounts</h3>
           <Button
             variant="ghost"
@@ -80,7 +81,7 @@ export const AccountSelector = () => {
         </div>
 
         {/* Search */}
-        <div className="p-4 border-b border-border/50">
+        <div className="p-3 border-b border-border/50">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
             <Input
@@ -107,7 +108,7 @@ export const AccountSelector = () => {
                   key={account.id}
                   onClick={() => handleAccountChange(account.id)}
                   className={cn(
-                    "flex items-center space-x-3 p-4 cursor-pointer",
+                    "flex items-center space-x-3 p-3 cursor-pointer",
                     "hover:bg-primary/5 transition-colors duration-200",
                     isActive && "bg-primary/10"
                   )}
@@ -158,7 +159,7 @@ export const AccountSelector = () => {
         </div>
 
         {/* Add Account Button */}
-        <div className="p-4 border-t border-border/50">
+        <div className="p-3 border-t border-border/50">
           <Button
             variant="outline"
             className="w-full justify-center space-x-2 hover:bg-primary/10"
