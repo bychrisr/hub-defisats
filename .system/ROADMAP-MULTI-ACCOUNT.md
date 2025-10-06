@@ -221,7 +221,7 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ Estatísticas de cache e performance
   - ✅ Cleanup automático de validações expiradas
 
-### **6.3 Dashboard de Automações** ✅
+### **6.3 Dashboard de Automações** ✅ **COMPLETA**
 - [x] **6.3.1** Atualizar interface de automações ✅
   - ✅ Filtros por conta
   - ✅ Indicadores visuais de conta
@@ -247,7 +247,8 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ Testes de linting passando
   - ✅ Interface responsiva
   - ✅ Integração com hooks funcionando
-  - Estatísticas por conta
+  - ✅ Link de navegação corrigido (/automations)
+  - ✅ Dashboard acessível via localhost:13000/automations
 
 - [ ] **6.3.2** Criar `AutomationAccountFilter.tsx`
   - Dropdown de seleção de conta

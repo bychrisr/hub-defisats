@@ -4,6 +4,32 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.11] - 2025-01-10
+
+### 🔗 **FASE 6.3 - DASHBOARD DE AUTOMAÇÕES MULTI-ACCOUNT FINALIZADA**
+
+#### 🎯 **Dashboard Multi-Account 100% Funcional**
+- ✅ **Acesso via Navegação**: Link "Automations" no menu principal
+- ✅ **URL Direta**: Acessível via localhost:13000/automations
+- ✅ **Autenticação**: Protegida por RouteGuard (plano basic+)
+- ✅ **Interface Responsiva**: Design adaptativo para mobile e desktop
+- ✅ **Integração Completa**: Todos os hooks e serviços funcionando
+
+#### 🔧 **Correções e Melhorias Finais**
+- ✅ **Link de Navegação**: Corrigido de /automation para /automations
+- ✅ **Imports Corrigidos**: useAuthStore e getActiveAccount
+- ✅ **Hooks Funcionando**: useAccountCredentials e useUserExchangeAccounts
+- ✅ **Eventos de Conta**: useAccountEvents para atualizações em tempo real
+- ✅ **Seeder Completo**: plan-limits-management.seeder.ts implementado
+
+#### 📊 **Funcionalidades Finais**
+- ✅ **Filtros por Conta**: Seletor dinâmico com todas as contas do usuário
+- ✅ **Card de Status**: Card destacado para conta ativa com estatísticas
+- ✅ **Indicadores Visuais**: Ring verde e badge "Ativa" para conta ativa
+- ✅ **Estatísticas**: Métricas por conta selecionada (ativas, inativas, executando)
+- ✅ **Tabela Completa**: Coluna de conta, status detalhado, última execução
+- ✅ **Validação de Credenciais**: Integração com AccountCredentialsService
+
 ## [v2.6.10] - 2025-01-10
 
 ### 🔗 **FASE 6.3 - DASHBOARD DE AUTOMAÇÕES MULTI-ACCOUNT**
