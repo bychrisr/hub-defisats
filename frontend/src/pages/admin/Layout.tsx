@@ -37,36 +37,68 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Trading Analytics', href: '/admin/trading-analytics', icon: BarChart3 },
-  { name: 'Trade Logs', href: '/admin/trade-logs', icon: FileText },
-  { name: 'Payment Analytics', href: '/admin/payment-analytics', icon: CreditCard },
-  { name: 'Backtest Reports', href: '/admin/backtest-reports', icon: BarChart2 },
-  { name: 'Simulation Analytics', href: '/admin/simulation-analytics', icon: Cpu },
-  { name: 'Automation Management', href: '/admin/automation-management', icon: Bot },
-  { name: 'Notification Management', href: '/admin/notification-management', icon: Bell },
-  { name: 'System Reports', href: '/admin/system-reports', icon: FileText },
-  { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
-  { name: 'Route Redirects', href: '/admin/route-redirects', icon: ArrowRightLeft },
-  { name: 'Plans', href: '/admin/plans', icon: CreditCard, badge: { text: 'done', color: 'green' } },
-  { name: 'Plan Limits', href: '/admin/plan-limits', icon: Settings, badge: { text: 'done', color: 'green' } },
-  { name: 'Users', href: '/admin/users', icon: Users, badge: { text: 'done', color: 'green' } },
-  { name: 'Exchanges', href: '/admin/exchanges', icon: Building2, badge: { text: 'done', color: 'green' } },
-  { name: 'Coupons', href: '/admin/coupons', icon: Gift, badge: { text: 'done', color: 'green' } },
-  { name: 'Menus', href: '/admin/menus', icon: MenuIcon },
-  { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
-  { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
-  { name: 'Load Testing', href: '/admin/load-test', icon: Zap },
-  { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor, badge: { text: 'done', color: 'green' } },
-  { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle, badge: { text: 'done', color: 'green' } },
-  { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield, badge: { text: 'done', color: 'green' } },
-  { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+// Navegação organizada em grupos lógicos
+const navigationGroups = [
+  {
+    title: 'Core',
+    items: [
+      { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+      { name: 'Users', href: '/admin/users', icon: Users, badge: { text: 'done', color: 'green' } },
+      { name: 'Exchanges', href: '/admin/exchanges', icon: Building2, badge: { text: 'done', color: 'green' } },
+    ]
+  },
+  {
+    title: 'Analytics & Reports',
+    items: [
+      { name: 'Trading Analytics', href: '/admin/trading-analytics', icon: BarChart3 },
+      { name: 'Trade Logs', href: '/admin/trade-logs', icon: FileText },
+      { name: 'Payment Analytics', href: '/admin/payment-analytics', icon: CreditCard },
+      { name: 'Backtest Reports', href: '/admin/backtest-reports', icon: BarChart2 },
+      { name: 'Simulation Analytics', href: '/admin/simulation-analytics', icon: Cpu },
+      { name: 'System Reports', href: '/admin/system-reports', icon: FileText },
+    ]
+  },
+  {
+    title: 'Automation & Monitoring',
+    items: [
+      { name: 'Automation Management', href: '/admin/automation-management', icon: Bot },
+      { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor, badge: { text: 'done', color: 'green' } },
+      { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle, badge: { text: 'done', color: 'green' } },
+      { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield, badge: { text: 'done', color: 'green' } },
+    ]
+  },
+  {
+    title: 'Content Management',
+    items: [
+      { name: 'Menus', href: '/admin/menus', icon: MenuIcon },
+      { name: 'Dynamic Pages', href: '/admin/dynamic-pages', icon: Palette },
+      { name: 'Tooltips', href: '/admin/tooltips', icon: Info },
+    ]
+  },
+  {
+    title: 'Business',
+    items: [
+      { name: 'Plans', href: '/admin/plans', icon: CreditCard, badge: { text: 'done', color: 'green' } },
+      { name: 'Plan Limits', href: '/admin/plan-limits', icon: Settings, badge: { text: 'done', color: 'green' } },
+      { name: 'Coupons', href: '/admin/coupons', icon: Gift, badge: { text: 'done', color: 'green' } },
+    ]
+  },
+  {
+    title: 'System',
+    items: [
+      { name: 'Notification Management', href: '/admin/notification-management', icon: Bell },
+      { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
+      { name: 'Route Redirects', href: '/admin/route-redirects', icon: ArrowRightLeft },
+      { name: 'Load Testing', href: '/admin/load-test', icon: Zap },
+      { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
+      { name: 'Settings', href: '/admin/settings', icon: Settings },
+    ]
+  }
 ];
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -197,47 +229,82 @@ export default function AdminLayout() {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+      <div className={cn(
+        "hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300",
+        sidebarCollapsed ? "lg:w-16" : "lg:w-64"
+      )}>
         <div className="flex flex-col h-full backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
           <div className="flex h-16 items-center px-4 flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
                 <Shield className="h-5 w-5 text-primary" />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
-                Admin Panel
-              </h1>
+              {!sidebarCollapsed && (
+                <h1 className="text-xl font-bold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                  Admin Panel
+                </h1>
+              )}
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              {sidebarCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            </Button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto min-h-0">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <Button
-                  key={item.name}
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start profile-sidebar-item",
-                    isActive ? "active text-white" : "text-muted-foreground hover:text-foreground"
-                  )}
-                  onClick={() => navigate(item.href)}
-                >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  <span className="flex-1 text-left">{item.name}</span>
-                  {item.badge && (
-                    <Badge 
-                      variant="secondary" 
-                      className={cn(
-                        "ml-2 text-xs",
-                        item.badge.color === 'green' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      )}
-                    >
-                      {item.badge.text}
-                    </Badge>
-                  )}
-                </Button>
-              );
-            })}
+            {navigationGroups.map((group, groupIndex) => (
+              <div key={group.title}>
+                {!sidebarCollapsed && (
+                  <div className="px-3 py-2">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {group.title}
+                    </h3>
+                  </div>
+                )}
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Button
+                        key={item.name}
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start profile-sidebar-item",
+                          isActive ? "active text-white" : "text-muted-foreground hover:text-foreground",
+                          sidebarCollapsed ? "justify-center px-2" : ""
+                        )}
+                        onClick={() => navigate(item.href)}
+                        title={sidebarCollapsed ? item.name : undefined}
+                      >
+                        <item.icon className={cn("h-5 w-5", !sidebarCollapsed && "mr-3")} />
+                        {!sidebarCollapsed && (
+                          <>
+                            <span className="flex-1 text-left">{item.name}</span>
+                            {item.badge && (
+                              <Badge 
+                                variant="secondary" 
+                                className={cn(
+                                  "ml-2 text-xs",
+                                  item.badge.color === 'green' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                )}
+                              >
+                                {item.badge.text}
+                              </Badge>
+                            )}
+                          </>
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
+                {groupIndex < navigationGroups.length - 1 && (
+                  <div className="my-2 border-t border-border/50" />
+                )}
+              </div>
+            ))}
           </nav>
           <div 
             className="p-4 flex-shrink-0"
