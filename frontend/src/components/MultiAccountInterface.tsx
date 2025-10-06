@@ -316,7 +316,7 @@ export function MultiAccountInterface() {
                 id="exchange"
                 value={createForm.exchange_id}
                 onChange={(e) => setCreateForm(prev => ({ ...prev, exchange_id: e.target.value }))}
-                className="w-full p-2 border rounded-md"
+                className="select-transparent w-full p-2 rounded-md"
               >
                 <option value="">Select an exchange</option>
                 {exchanges.map((exchange) => (
