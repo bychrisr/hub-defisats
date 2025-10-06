@@ -4,6 +4,7 @@ import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets
 import { SecureCredentials } from '../services/secure-storage.service';
 import { prisma } from '../lib/prisma';
 import { CredentialCacheService } from '../services/credential-cache.service';
+import { UserExchangeAccountService } from '../services/userExchangeAccount.service';
 
 // Create Redis connection
 const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
@@ -11,59 +12,108 @@ const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
 // Create credential cache service
 const credentialCache = new CredentialCacheService(redis);
 
-// Function to get user's LN Markets credentials
-async function getUserCredentials(userId: string): Promise<SecureCredentials | null> {
+// Create UserExchangeAccountService instance
+const userExchangeAccountService = new UserExchangeAccountService(prisma);
+
+// Function to get user's active exchange account credentials
+async function getUserCredentials(userId: string, accountId?: string): Promise<{ credentials: SecureCredentials; account: any } | null> {
   try {
-    // Try to get from cache first
-    let credentials = await credentialCache.get(userId);
-    if (credentials) {
-      console.log(`✅ Credentials found in cache for user ${userId}`);
-      return credentials;
+    console.log(`🔍 AUTOMATION EXECUTOR - Getting credentials for user ${userId}${accountId ? ` and account ${accountId}` : ''}`);
+    
+    let activeAccount;
+    
+    if (accountId) {
+      // Get specific account
+      activeAccount = await userExchangeAccountService.getUserExchangeAccount(accountId, userId);
+      if (!activeAccount) {
+        console.warn(`❌ AUTOMATION EXECUTOR - Account ${accountId} not found for user ${userId}`);
+        return null;
+      }
+    } else {
+      // Get all user accounts and find the active one
+      const userAccounts = await userExchangeAccountService.getUserExchangeAccounts(userId);
+      activeAccount = userAccounts.find(account => account.is_active);
+      if (!activeAccount) {
+        console.warn(`❌ AUTOMATION EXECUTOR - No active account found for user ${userId}`);
+        return null;
+      }
     }
 
-    console.log(`🔍 Credentials not in cache, fetching from database for user ${userId}`);
-    
-    // Get the credentials from the User table
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        ln_markets_api_key: true,
-        ln_markets_api_secret: true,
-        ln_markets_passphrase: true,
-      },
-    });
+    console.log(`✅ AUTOMATION EXECUTOR - Found account: ${activeAccount.account_name} (${activeAccount.exchange.name})`);
 
-    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret) {
-      console.warn(`No LN Markets credentials found for user ${userId}`);
+    // Check if account has credentials
+    if (!activeAccount.credentials || Object.keys(activeAccount.credentials).length === 0) {
+      console.warn(`❌ AUTOMATION EXECUTOR - Account ${activeAccount.account_name} has no credentials`);
       return null;
     }
 
-    // Import secure storage service
-    const { secureStorage } = await import('../services/secure-storage.service');
+    // Validate credentials are not empty
+    const hasValidCredentials = Object.values(activeAccount.credentials).some(value =>
+      value && typeof value === 'string' && value.trim() !== ''
+    );
+
+    if (!hasValidCredentials) {
+      console.warn(`❌ AUTOMATION EXECUTOR - Account ${activeAccount.account_name} has empty credentials`);
+      return null;
+    }
+
+    // Try to get from cache first (using account-specific key)
+    const cacheKey = `${userId}-${activeAccount.id}`;
+    let credentials = await credentialCache.get(cacheKey);
     
-    // Decrypt credentials using SecureStorageService
-    credentials = await secureStorage.decryptCredentials(user.ln_markets_api_key);
+    if (credentials) {
+      console.log(`✅ AUTOMATION EXECUTOR - Credentials found in cache for account ${activeAccount.account_name}`);
+      return { credentials, account: activeAccount };
+    }
+
+    console.log(`🔍 AUTOMATION EXECUTOR - Credentials not in cache, using account credentials for ${activeAccount.account_name}`);
+    
+    // Use credentials from the account (already decrypted by UserExchangeAccountService)
+    credentials = activeAccount.credentials as SecureCredentials;
     
     // Cache the credentials for future use
-    await credentialCache.set(userId, credentials);
-    console.log(`✅ Credentials cached for user ${userId}`);
+    await credentialCache.set(cacheKey, credentials);
+    console.log(`✅ AUTOMATION EXECUTOR - Credentials cached for account ${activeAccount.account_name}`);
     
-    return credentials;
+    return { credentials, account: activeAccount };
   } catch (error) {
-    console.error(`Failed to get credentials for user ${userId}:`, error);
+    console.error(`❌ AUTOMATION EXECUTOR - Failed to get credentials for user ${userId}:`, error);
     return null;
   }
 }
 
-// Function to get automation configuration
+// Function to get automation configuration with account data
 async function getAutomationConfig(automationId: string) {
   try {
+    console.log(`🔍 AUTOMATION EXECUTOR - Getting automation config for ${automationId}`);
+    
     const automation = await prisma.automation.findUnique({
       where: { id: automationId },
+      include: {
+        user_exchange_account: {
+          include: {
+            exchange: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            }
+          }
+        }
+      }
     });
+
+    if (!automation) {
+      console.warn(`❌ AUTOMATION EXECUTOR - Automation ${automationId} not found`);
+      return null;
+    }
+
+    console.log(`✅ AUTOMATION EXECUTOR - Found automation: ${automation.type} for account ${automation.user_exchange_account?.account_name}`);
+    
     return automation;
   } catch (error) {
-    console.error(`Failed to get automation config for ${automationId}:`, error);
+    console.error(`❌ AUTOMATION EXECUTOR - Failed to get automation config for ${automationId}:`, error);
     return null;
   }
 }
@@ -73,20 +123,21 @@ async function executeMarginGuardAction(
   lnMarkets: LNMarketsAPIService,
   automationConfig: any,
   userId: string,
+  accountName: string,
   tradeId?: string
 ) {
   try {
-    console.log(`🎯 Executing Margin Guard action for user ${userId}`);
-    console.log(`📋 Action: ${automationConfig.action}`);
+    console.log(`🎯 AUTOMATION EXECUTOR - Executing Margin Guard action for user ${userId} on account ${accountName}`);
+    console.log(`📋 AUTOMATION EXECUTOR - Action: ${automationConfig.action}`);
 
     switch (automationConfig.action) {
       case 'close_position':
         if (!tradeId) {
           throw new Error('Trade ID required for close_position action');
         }
-        console.log(`🛑 Closing position ${tradeId} for user ${userId}`);
+        console.log(`🛑 AUTOMATION EXECUTOR - Closing position ${tradeId} for user ${userId} on account ${accountName}`);
         await lnMarkets.closePosition(tradeId);
-        console.log(`✅ Successfully closed position ${tradeId}`);
+        console.log(`✅ AUTOMATION EXECUTOR - Successfully closed position ${tradeId} on account ${accountName}`);
 
         // Log the action
         await prisma.tradeLog.create({
@@ -114,10 +165,10 @@ async function executeMarginGuardAction(
         }
 
         const reduceAmount = (trade.quantity * automationConfig.reduce_percentage) / 100;
-        console.log(`📉 Reducing position ${tradeId} by ${automationConfig.reduce_percentage}% (${reduceAmount} contracts) for user ${userId}`);
+        console.log(`📉 AUTOMATION EXECUTOR - Reducing position ${tradeId} by ${automationConfig.reduce_percentage}% (${reduceAmount} contracts) for user ${userId} on account ${accountName}`);
 
         await lnMarkets.reducePosition(tradeId, reduceAmount);
-        console.log(`✅ Successfully reduced position ${tradeId}`);
+        console.log(`✅ AUTOMATION EXECUTOR - Successfully reduced position ${tradeId} on account ${accountName}`);
 
         // Log the action
         await prisma.tradeLog.create({
@@ -136,9 +187,9 @@ async function executeMarginGuardAction(
           throw new Error('Trade ID and margin amount required for add_margin action');
         }
 
-        console.log(`💰 Adding ${automationConfig.add_margin_amount} sats margin to position ${tradeId} for user ${userId}`);
+        console.log(`💰 AUTOMATION EXECUTOR - Adding ${automationConfig.add_margin_amount} sats margin to position ${tradeId} for user ${userId} on account ${accountName}`);
         await lnMarkets.addMargin(tradeId, automationConfig.add_margin_amount);
-        console.log(`✅ Successfully added margin to position ${tradeId}`);
+        console.log(`✅ AUTOMATION EXECUTOR - Successfully added margin to position ${tradeId} on account ${accountName}`);
 
         // Log the action
         await prisma.tradeLog.create({
@@ -156,7 +207,7 @@ async function executeMarginGuardAction(
         throw new Error(`Unknown Margin Guard action: ${automationConfig.action}`);
     }
   } catch (error) {
-    console.error(`❌ Failed to execute Margin Guard action:`, error);
+    console.error(`❌ AUTOMATION EXECUTOR - Failed to execute Margin Guard action for account ${accountName}:`, error);
 
     // Log the error
     await prisma.tradeLog.create({
@@ -178,10 +229,11 @@ async function executeMarginGuardAction(
 async function executeAutoEntryAction(
   lnMarkets: LNMarketsAPIService,
   automationConfig: any,
-  userId: string
+  userId: string,
+  accountName: string
 ) {
   try {
-    console.log(`🎯 Executing Auto Entry action for user ${userId}`);
+    console.log(`🎯 AUTOMATION EXECUTOR - Executing Auto Entry action for user ${userId} on account ${accountName}`);
 
     const {
       market = 'btcusd',
@@ -207,7 +259,7 @@ async function executeAutoEntryAction(
         : currentPrice >= trigger_price;
 
       if (!shouldTrigger) {
-        console.log(`⏳ Auto entry not triggered. Current price: ${currentPrice}, Trigger: ${trigger_price}`);
+        console.log(`⏳ AUTOMATION EXECUTOR - Auto entry not triggered for account ${accountName}. Current price: ${currentPrice}, Trigger: ${trigger_price}`);
         return {
           status: 'pending',
           reason: 'price_not_triggered',
@@ -217,7 +269,7 @@ async function executeAutoEntryAction(
       }
     }
 
-    console.log(`📈 Creating ${side === 'b' ? 'LONG' : 'SHORT'} position: ${quantity} contracts at ${leverage}x leverage`);
+    console.log(`📈 AUTOMATION EXECUTOR - Creating ${side === 'b' ? 'LONG' : 'SHORT'} position: ${quantity} contracts at ${leverage}x leverage for account ${accountName}`);
 
     // Create the trade
     const tradeResult = await lnMarkets.createTrade({
@@ -228,7 +280,7 @@ async function executeAutoEntryAction(
       takeprofit,
     });
 
-    console.log(`✅ Auto entry executed successfully. Trade ID: ${tradeResult.id}`);
+    console.log(`✅ AUTOMATION EXECUTOR - Auto entry executed successfully for account ${accountName}. Trade ID: ${tradeResult.id}`);
 
     // Log the action
     await prisma.tradeLog.create({
@@ -251,7 +303,7 @@ async function executeAutoEntryAction(
     };
 
   } catch (error) {
-    console.error(`❌ Failed to execute Auto Entry action:`, error);
+    console.error(`❌ AUTOMATION EXECUTOR - Failed to execute Auto Entry action for account ${accountName}:`, error);
 
     // Log the error
     await prisma.tradeLog.create({
@@ -274,10 +326,11 @@ async function executeTpSlAction(
   lnMarkets: LNMarketsAPIService,
   automationConfig: any,
   userId: string,
+  accountName: string,
   tradeId?: string
 ) {
   try {
-    console.log(`💰 Executing TP/SL action for user ${userId}`);
+    console.log(`💰 AUTOMATION EXECUTOR - Executing TP/SL action for user ${userId} on account ${accountName}`);
 
     const {
       action, // 'update_tp', 'update_sl', 'close_tp', 'close_sl'
@@ -300,7 +353,7 @@ async function executeTpSlAction(
       targetTradeId = runningTrades[0].id;
     }
 
-    console.log(`🎯 ${action} for trade ${targetTradeId}`);
+    console.log(`🎯 AUTOMATION EXECUTOR - ${action} for trade ${targetTradeId} on account ${accountName}`);
 
     let result;
 
@@ -309,7 +362,7 @@ async function executeTpSlAction(
         if (!new_takeprofit) {
           throw new Error('New take profit price required');
         }
-        console.log(`📈 Updating TP to ${new_takeprofit} for trade ${targetTradeId}`);
+        console.log(`📈 AUTOMATION EXECUTOR - Updating TP to ${new_takeprofit} for trade ${targetTradeId} on account ${accountName}`);
         result = await lnMarkets.updateTakeProfit(targetTradeId, new_takeprofit);
         break;
 
@@ -317,17 +370,17 @@ async function executeTpSlAction(
         if (!new_stoploss) {
           throw new Error('New stop loss price required');
         }
-        console.log(`📉 Updating SL to ${new_stoploss} for trade ${targetTradeId}`);
+        console.log(`📉 AUTOMATION EXECUTOR - Updating SL to ${new_stoploss} for trade ${targetTradeId} on account ${accountName}`);
         result = await lnMarkets.updateStopLoss(targetTradeId, new_stoploss);
         break;
 
       case 'close_tp':
-        console.log(`🎯 Closing position at take profit for trade ${targetTradeId}`);
+        console.log(`🎯 AUTOMATION EXECUTOR - Closing position at take profit for trade ${targetTradeId} on account ${accountName}`);
         result = await lnMarkets.closePosition(targetTradeId);
         break;
 
       case 'close_sl':
-        console.log(`🛑 Closing position at stop loss for trade ${targetTradeId}`);
+        console.log(`🛑 AUTOMATION EXECUTOR - Closing position at stop loss for trade ${targetTradeId} on account ${accountName}`);
         result = await lnMarkets.closePosition(targetTradeId);
         break;
 
@@ -335,7 +388,7 @@ async function executeTpSlAction(
         throw new Error(`Unknown TP/SL action: ${action}`);
     }
 
-    console.log(`✅ TP/SL action executed successfully for trade ${targetTradeId}`);
+    console.log(`✅ AUTOMATION EXECUTOR - TP/SL action executed successfully for trade ${targetTradeId} on account ${accountName}`);
 
     // Log the action
     await prisma.tradeLog.create({
@@ -356,7 +409,7 @@ async function executeTpSlAction(
     };
 
   } catch (error) {
-    console.error(`❌ Failed to execute TP/SL action:`, error);
+    console.error(`❌ AUTOMATION EXECUTOR - Failed to execute TP/SL action for account ${accountName}:`, error);
 
     // Log the error
     await prisma.tradeLog.create({
@@ -378,76 +431,97 @@ async function executeTpSlAction(
 const worker = new Worker(
   'automation-executor',
   async job => {
-    console.log('🤖 Automation executor job received:', job.data);
+    console.log('🤖 AUTOMATION EXECUTOR - Job received:', job.data);
 
     const { userId, automationId, action, tradeId } = job.data;
 
     try {
-      console.log(`🔄 Executing automation ${automationId} for user ${userId}`);
+      console.log(`🔄 AUTOMATION EXECUTOR - Executing automation ${automationId} for user ${userId}`);
 
-      // Get automation configuration
+      // Get automation configuration with account data
       const automation = await getAutomationConfig(automationId);
       if (!automation) {
         throw new Error(`Automation ${automationId} not found`);
       }
 
-      // Get user credentials
-      const credentials = await getUserCredentials(userId);
-      if (!credentials) {
-        throw new Error(`Credentials not found for user ${userId}`);
+      // Get account ID from automation
+      const accountId = automation.user_exchange_account_id;
+      if (!accountId) {
+        throw new Error(`Automation ${automationId} has no associated account`);
       }
+
+      console.log(`🔗 AUTOMATION EXECUTOR - Using account: ${automation.user_exchange_account?.account_name} (${automation.user_exchange_account?.exchange.name})`);
+
+      // Get user credentials for the specific account
+      const credentialsData = await getUserCredentials(userId, accountId);
+      if (!credentialsData) {
+        throw new Error(`Credentials not found for user ${userId} and account ${accountId}`);
+      }
+
+      const { credentials, account } = credentialsData;
+      console.log(`✅ AUTOMATION EXECUTOR - Using credentials for account: ${account.account_name}`);
 
       // Create LN Markets service instance
       const lnMarkets = new LNMarketsAPIService(credentials, console as any);
 
       // Execute based on automation type
+      const accountName = automation.user_exchange_account?.account_name || 'Unknown Account';
+      
       switch (automation.type) {
         case 'margin_guard':
-          await executeMarginGuardAction(lnMarkets, automation.config, userId, tradeId);
+          await executeMarginGuardAction(lnMarkets, automation.config, userId, accountName, tradeId);
           return {
             status: 'completed',
             action: action,
             timestamp: new Date().toISOString(),
             automationId,
             userId,
+            accountId,
+            accountName,
             tradeId
           };
 
         case 'tp_sl':
-          await executeTpSlAction(lnMarkets, automation.config, userId, tradeId);
+          await executeTpSlAction(lnMarkets, automation.config, userId, accountName, tradeId);
           return {
             status: 'completed',
             action: 'tp_sl_executed',
             timestamp: new Date().toISOString(),
             automationId,
             userId,
+            accountId,
+            accountName,
             tradeId
           };
 
         case 'auto_entry':
-          const entryResult = await executeAutoEntryAction(lnMarkets, automation.config, userId);
+          const entryResult = await executeAutoEntryAction(lnMarkets, automation.config, userId, accountName);
           return {
             status: entryResult.status,
             action: 'auto_entry_executed',
             timestamp: new Date().toISOString(),
             automationId,
             userId,
+            accountId,
+            accountName,
             tradeId: entryResult.tradeId,
             result: entryResult
           };
 
         default:
-          console.log(`⚠️ Unknown automation type: ${automation.type}`);
+          console.log(`⚠️ AUTOMATION EXECUTOR - Unknown automation type: ${automation.type} for account ${accountName}`);
           return {
             status: 'error',
             error: `Unknown automation type: ${automation.type}`,
             timestamp: new Date().toISOString(),
             automationId,
-            userId
+            userId,
+            accountId,
+            accountName
           };
       }
     } catch (error) {
-      console.error(`❌ Automation execution failed:`, error);
+      console.error(`❌ AUTOMATION EXECUTOR - Automation execution failed:`, error);
       return {
         status: 'error',
         error: (error as Error).message,
@@ -461,14 +535,14 @@ const worker = new Worker(
 );
 
 worker.on('completed', job => {
-  console.log(`Automation executor job ${job.id} completed`);
+  console.log(`✅ AUTOMATION EXECUTOR - Job ${job.id} completed successfully`);
 });
 
 worker.on('failed', (job, err) => {
-  console.error(`Automation executor job ${job?.id} failed:`, err);
+  console.error(`❌ AUTOMATION EXECUTOR - Job ${job?.id} failed:`, err);
 });
 
-console.log('Automation executor worker started');
+console.log('🚀 AUTOMATION EXECUTOR - Multi-account automation executor worker started');
 
 process.on('SIGTERM', async () => {
   console.log('Shutting down automation executor worker...');
