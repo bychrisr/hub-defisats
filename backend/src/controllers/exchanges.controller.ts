@@ -45,6 +45,7 @@ export class ExchangesController {
           _count: {
             select: {
               user_accounts: true
+            }
           }
         },
         orderBy: {
