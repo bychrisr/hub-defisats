@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useUserExchangeAccounts } from '@/hooks/useUserExchangeAccounts';
 import { useExchangeCredentials } from '@/hooks/useExchangeCredentials';
+import { useAuthStore } from '@/stores/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -44,7 +45,8 @@ import {
   StarOff,
   Edit,
   Eye,
-  EyeOff
+  EyeOff,
+  Infinity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -63,6 +65,7 @@ export function MultiAccountInterface() {
   } = useUserExchangeAccounts();
 
   const { exchanges, isLoading: isLoadingExchanges } = useExchangeCredentials();
+  const { user } = useAuthStore();
 
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
@@ -81,6 +84,31 @@ export function MultiAccountInterface() {
     credentials: {} as Record<string, string>
   });
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});
+
+  // Função para obter limite de contas baseado no plano
+  const getAccountLimit = (planType: string): number | 'unlimited' => {
+    switch (planType) {
+      case 'free':
+        return 1;
+      case 'basic':
+        return 2;
+      case 'premium':
+        return 5;
+      case 'lifetime':
+        return 'unlimited';
+      default:
+        return 1;
+    }
+  };
+
+  // Calcular estatísticas de contas
+  const accountStats = {
+    total: accounts.length,
+    limit: getAccountLimit(user?.plan_type || 'free'),
+    canCreate: user?.plan_type === 'lifetime' || 
+               (typeof getAccountLimit(user?.plan_type || 'free') === 'number' && 
+                accounts.length < (getAccountLimit(user?.plan_type || 'free') as number))
+  };
 
   const handleCreateAccount = async () => {
     try {
@@ -241,12 +269,56 @@ export function MultiAccountInterface() {
 
   return (
     <div className="space-y-6">
+      {/* Account Stats Header */}
+      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <Key className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100">
+                  Exchange Accounts
+                </h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Manage your exchange connections
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                  {accountStats.total}
+                </span>
+                <span className="text-blue-700 dark:text-blue-300">
+                  /
+                </span>
+                <span className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                  {accountStats.limit === 'unlimited' ? (
+                    <Infinity className="h-6 w-6" />
+                  ) : (
+                    accountStats.limit
+                  )}
+                </span>
+              </div>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                {accountStats.limit === 'unlimited' ? 'Unlimited' : 'accounts'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Create Account Dialog */}
       <Dialog>
         <DialogTrigger asChild>
-          <Button className="w-full">
+          <Button 
+            className="w-full" 
+            disabled={!accountStats.canCreate}
+          >
             <Plus className="mr-2 h-4 w-4" />
-            Add Exchange Account
+            {!accountStats.canCreate ? 'Account Limit Reached' : 'Add Exchange Account'}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl">
@@ -298,7 +370,11 @@ export function MultiAccountInterface() {
                       <div className="relative">
                         <Input
                           id={credType.field_name}
-                          type={credType.field_type === 'password' ? 'password' : 'text'}
+                          type={
+                            credType.field_type === 'password' 
+                              ? (showCredentials[`create_${credType.field_name}`] ? 'text' : 'password')
+                              : 'text'
+                          }
                           value={createForm.credentials[credType.field_name] || ''}
                           onChange={(e) => setCreateForm(prev => ({
                             ...prev,
@@ -309,6 +385,21 @@ export function MultiAccountInterface() {
                           }))}
                           placeholder={credType.description}
                         />
+                        {credType.field_type === 'password' && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => toggleCredentialsVisibility(`create_${credType.field_name}`)}
+                          >
+                            {showCredentials[`create_${credType.field_name}`] ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -427,11 +518,21 @@ export function MultiAccountInterface() {
 
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                // Reset edit form with current account data
+                                setEditForm({
+                                  account_name: account.account_name,
+                                  credentials: account.credentials || {}
+                                });
+                              }}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="max-w-2xl">
                             <DialogHeader>
                               <DialogTitle>Edit Account</DialogTitle>
                               <DialogDescription>
@@ -448,6 +549,57 @@ export function MultiAccountInterface() {
                                   onChange={(e) => setEditForm(prev => ({ ...prev, account_name: e.target.value }))}
                                   placeholder="Account name"
                                 />
+                              </div>
+
+                              {/* Credentials Section */}
+                              <div className="space-y-4">
+                                <Separator />
+                                <h4 className="font-medium">API Credentials</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Update your API credentials if needed
+                                </p>
+                                
+                                {exchanges
+                                  .find(ex => ex.id === account.exchange_id)
+                                  ?.credential_types?.map((credType) => (
+                                    <div key={credType.id} className="space-y-2">
+                                      <Label htmlFor={`edit_${credType.field_name}`}>{credType.name}</Label>
+                                      <div className="relative">
+                                        <Input
+                                          id={`edit_${credType.field_name}`}
+                                          type={
+                                            credType.field_type === 'password' 
+                                              ? (showCredentials[`edit_${credType.field_name}`] ? 'text' : 'password')
+                                              : 'text'
+                                          }
+                                          value={editForm.credentials[credType.field_name] || ''}
+                                          onChange={(e) => setEditForm(prev => ({
+                                            ...prev,
+                                            credentials: {
+                                              ...prev.credentials,
+                                              [credType.field_name]: e.target.value
+                                            }
+                                          }))}
+                                          placeholder={credType.description}
+                                        />
+                                        {credType.field_type === 'password' && (
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                            onClick={() => toggleCredentialsVisibility(`edit_${credType.field_name}`)}
+                                          >
+                                            {showCredentials[`edit_${credType.field_name}`] ? (
+                                              <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                              <Eye className="h-4 w-4" />
+                                            )}
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
                               </div>
 
                               <div className="flex justify-end gap-2">

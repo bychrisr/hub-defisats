@@ -10,6 +10,7 @@ export interface UserExchangeAccount {
     logo_url?: string;
   };
   account_name: string;
+  credentials: Record<string, string>;
   is_active: boolean;
   is_verified: boolean;
   last_test?: string;

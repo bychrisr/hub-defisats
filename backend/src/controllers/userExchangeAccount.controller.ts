@@ -44,6 +44,7 @@ export class UserExchangeAccountController {
             logo_url: account.exchange.logo_url
           },
           account_name: account.account_name,
+          credentials: account.credentials,
           is_active: account.is_active,
           is_verified: account.is_verified,
           last_test: account.last_test,
@@ -101,6 +102,7 @@ export class UserExchangeAccountController {
             logo_url: account.exchange.logo_url
           },
           account_name: account.account_name,
+          credentials: account.credentials,
           is_active: account.is_active,
           is_verified: account.is_verified,
           last_test: account.last_test,
@@ -167,6 +169,7 @@ export class UserExchangeAccountController {
             logo_url: account.exchange.logo_url
           },
           account_name: account.account_name,
+          credentials: account.credentials,
           is_active: account.is_active,
           is_verified: account.is_verified,
           last_test: account.last_test,
@@ -238,6 +241,7 @@ export class UserExchangeAccountController {
             logo_url: account.exchange.logo_url
           },
           account_name: account.account_name,
+          credentials: account.credentials,
           is_active: account.is_active,
           is_verified: account.is_verified,
           last_test: account.last_test,
@@ -347,6 +351,7 @@ export class UserExchangeAccountController {
             logo_url: account.exchange.logo_url
           },
           account_name: account.account_name,
+          credentials: account.credentials,
           is_active: account.is_active,
           is_verified: account.is_verified,
           last_test: account.last_test,
