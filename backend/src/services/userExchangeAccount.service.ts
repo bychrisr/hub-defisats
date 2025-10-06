@@ -153,6 +153,15 @@ export class UserExchangeAccountService {
       throw new Error('User already has an account with this name for this exchange');
     }
 
+    // Verificar se já existe alguma conta ativa para esta exchange
+    const hasActiveAccount = await this.prisma.userExchangeAccounts.findFirst({
+      where: {
+        user_id: userId,
+        exchange_id: data.exchange_id,
+        is_active: true
+      }
+    });
+
     // Criptografar credenciais
     const authService = new AuthService(this.prisma, {} as any);
     const encryptedCredentials: Record<string, string> = {};
@@ -170,7 +179,7 @@ export class UserExchangeAccountService {
         exchange_id: data.exchange_id,
         account_name: data.account_name,
         credentials: encryptedCredentials,
-        is_active: true, // Primeira conta é ativada automaticamente
+        is_active: !hasActiveAccount, // Apenas ativa se não houver conta ativa
         is_verified: false
       },
       include: {
