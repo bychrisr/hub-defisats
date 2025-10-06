@@ -74,7 +74,74 @@ console.log(`✅ AUTOMATION WORKER - Margin Guard execution completed for accoun
 
 **Documentação Completa**: [automation-worker-websocket-documentation.md](../backend/automation-worker-websocket-documentation.md)
 
-### 2. Margin Monitor Worker
+### 2. Automation Scheduler (Multi-Account)
+
+**Responsabilidade**: Agendamento de automações de trading com schedules por conta ativa
+
+**Frequência**: Schedules recorrentes baseados no tipo de automação
+
+**Processo**:
+1. Busca conta ativa via UserExchangeAccountService
+2. Busca automações ativas para a conta
+3. Cria schedules recorrentes por tipo de automação
+4. Gerencia timeouts específicos por conta
+5. Atualiza schedules quando conta ativa muda
+
+**Configuração**:
+```typescript
+interface AutomationSchedulerConfig {
+  margin_guard: {
+    interval: 30000; // 30 seconds
+    timeout: 60000; // 1 minute
+    retryAttempts: 3;
+    retryDelay: 5000; // 5 seconds
+  };
+  tp_sl: {
+    interval: 15000; // 15 seconds
+    timeout: 30000; // 30 seconds
+    retryAttempts: 2;
+    retryDelay: 3000; // 3 seconds
+  };
+  auto_entry: {
+    interval: 10000; // 10 seconds
+    timeout: 20000; // 20 seconds
+    retryAttempts: 2;
+    retryDelay: 2000; // 2 seconds
+  };
+}
+```
+
+**Filas**:
+- `automation-execute`: Execução de automações agendadas
+- `automation-schedule`: Agendamento de automações
+- `automation-timeout`: Timeouts de automações
+
+**Funcionalidades**:
+- **startUserAutomationScheduling**: Iniciar agendamento para usuário
+- **stopUserAutomationScheduling**: Parar agendamento para usuário
+- **updateAutomationScheduleForAccountChange**: Atualizar schedules na mudança de conta
+- **getAutomationScheduleStatus**: Status de schedules ativos
+- **handleAutomationTimeout**: Gerenciamento de timeouts
+- **clearAutomationTimeout**: Limpeza de timeouts
+
+**Schedules Recorrentes**:
+- **Margin Guard**: 30s intervalo para monitoramento de margem
+- **Take Profit/SL**: 15s intervalo para gestão de TP/SL
+- **Auto Entry**: 10s intervalo para entradas automáticas
+- **Timeouts Específicos**: Timeouts baseados na criticidade
+- **Cleanup Automático**: Limpeza de schedules expirados
+
+**Logs Detalhados**:
+```typescript
+// Log de agendamento com informações da conta
+console.log(`🚀 AUTOMATION SCHEDULER - Starting automation scheduling for user ${userId}`);
+console.log(`📅 AUTOMATION SCHEDULER - Creating schedule for automation ${automationId} (${automationType})`);
+console.log(`✅ AUTOMATION SCHEDULER - Automation scheduling started for user ${userId} with ${automations.length} automations`);
+```
+
+**Documentação Completa**: [automation-scheduler-multi-account-documentation.md](../backend/automation-scheduler-multi-account-documentation.md)
+
+### 3. Margin Monitor Worker
 
 **Responsabilidade**: Monitoramento contínuo da margem dos usuários
 
