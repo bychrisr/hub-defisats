@@ -9,6 +9,8 @@
 import { Worker, Queue } from 'bullmq';
 import { Redis } from 'ioredis';
 import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets-api.service';
+import { LNMarketsWebSocketService, LNMarketsWebSocketCredentials } from '../services/lnmarkets-websocket.service';
+import { WebSocketManagerService } from '../services/websocket-manager.service';
 import { UserExchangeAccountService } from '../services/userExchangeAccount.service';
 import { CredentialCacheService } from '../services/credential-cache.service';
 import { AutomationLoggerService } from '../services/automation-logger.service';
@@ -30,6 +32,9 @@ const userExchangeAccountService = new UserExchangeAccountService(prisma);
 // Create automation logger service
 const automationLogger = new AutomationLoggerService(prisma);
 
+// Create WebSocket manager for real-time data
+const webSocketManager = new WebSocketManagerService();
+
 // Create queue for automation jobs
 const automationQueue = new Queue('automation-execute', {
   connection: redis,
@@ -45,29 +50,33 @@ const automationQueue = new Queue('automation-execute', {
   },
 });
 
-// Store LN Markets service instances with connection pooling
-const lnMarketsServices: { [userId: string]: LNMarketsAPIService } = {};
-const serviceCreationTimes: { [userId: string]: number } = {};
-const SERVICE_TTL = 10 * 60 * 1000; // 10 minutes TTL for services
-
-// Function to create or get LN Markets service with connection pooling
-function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarketsAPIService {
-  const now = Date.now();
-  const serviceCreationTime = serviceCreationTimes[userId];
-  
-  // Check if service exists and is not expired
-  if (lnMarketsServices[userId] && serviceCreationTime && (now - serviceCreationTime) < SERVICE_TTL) {
-    console.log(`♻️  AUTOMATION WORKER - Reusing existing LN Markets service for user ${userId}`);
-    return lnMarketsServices[userId];
+// Function to create or get LN Markets WebSocket connection
+async function getOrCreateLNMarketsWebSocket(userId: string, credentials: any): Promise<LNMarketsWebSocketService> {
+  try {
+    console.log(`🔌 AUTOMATION WORKER - Getting WebSocket connection for user ${userId}`);
+    
+    // Convert credentials to WebSocket format
+    const wsCredentials: LNMarketsWebSocketCredentials = {
+      apiKey: credentials.apiKey,
+      apiSecret: credentials.apiSecret,
+      passphrase: credentials.passphrase,
+      isTestnet: credentials.isTestnet || false
+    };
+    
+    // Get or create WebSocket connection via manager
+    const wsService = await webSocketManager.createConnection(userId, wsCredentials);
+    
+    console.log(`✅ AUTOMATION WORKER - WebSocket connection established for user ${userId}`);
+    return wsService;
+    
+  } catch (error) {
+    console.error(`❌ AUTOMATION WORKER - Failed to create WebSocket connection for user ${userId}:`, error);
+    
+    // Fallback to HTTP service
+    console.log(`🔄 AUTOMATION WORKER - Falling back to HTTP service for user ${userId}`);
+    const httpService = new LNMarketsAPIService(credentials, console as any);
+    return httpService as any; // Type assertion for compatibility
   }
-  
-  // Create new service
-  console.log(`🔄 AUTOMATION WORKER - Creating new LN Markets service for user ${userId}`);
-  const service = new LNMarketsAPIService(credentials, console as any);
-  lnMarketsServices[userId] = service;
-  serviceCreationTimes[userId] = now;
-  
-  return service;
 }
 
 // Function to get user's active exchange account credentials
@@ -416,8 +425,8 @@ const worker = new Worker(
       const { credentials, account } = credentialsData;
       console.log(`✅ AUTOMATION WORKER - Using credentials for account: ${account.account_name}`);
       
-      // Create LN Markets service instance
-      const lnMarkets = getOrCreateLNMarketsService(userId, credentials);
+      // Create LN Markets WebSocket connection
+      const lnMarkets = await getOrCreateLNMarketsWebSocket(userId, credentials);
       
       // Execute based on automation type
       const accountName = automation.user_exchange_account?.account_name || 'Unknown Account';
@@ -504,18 +513,8 @@ worker.on('stalled', jobId => {
   console.warn(`⚠️ AUTOMATION WORKER - Job ${jobId} stalled`);
 });
 
-// Cleanup function for expired services
-setInterval(() => {
-  const now = Date.now();
-  Object.keys(serviceCreationTimes).forEach(userId => {
-    const creationTime = serviceCreationTimes[userId];
-    if (creationTime && (now - creationTime) > SERVICE_TTL) {
-      console.log(`🧹 AUTOMATION WORKER - Cleaning up expired service for user ${userId}`);
-      delete lnMarketsServices[userId];
-      delete serviceCreationTimes[userId];
-    }
-  });
-}, 5 * 60 * 1000); // Cleanup every 5 minutes
+// WebSocket manager handles cleanup automatically
+// No need for manual cleanup as WebSocketManagerService handles it
 
 console.log('🚀 AUTOMATION WORKER - Multi-account automation worker started');
 
