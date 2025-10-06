@@ -52,10 +52,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { useLNMarketsConnectionStatus } from '@/hooks/useLNMarketsConnectionStatus';
-import { useExchangeCredentials } from '@/hooks/useExchangeCredentials';
 import { api } from '@/lib/api';
 import ImageUpload from '@/components/ui/ImageUpload';
-import { ExchangeService, UserExchangeCredentials } from '@/services/exchange.service';
 import { ExchangeCredentialsForm } from '@/components/ExchangeCredentialsForm';
 import { MultiAccountInterface } from '@/components/MultiAccountInterface';
 
@@ -187,8 +185,6 @@ export default function Profile() {
   const [error, setError] = useState<string | null>(null);
   
   // ✅ NOVA ESTRUTURA DE EXCHANGES
-  const [lnMarketsCredentials, setLnMarketsCredentials] = useState<UserExchangeCredentials | null>(null);
-  const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -196,17 +192,6 @@ export default function Profile() {
   const { theme } = useTheme();
   
   // ✅ NOVA ESTRUTURA DE EXCHANGES
-  const { 
-    exchanges, 
-    userCredentials, 
-    isLoading: isLoadingExchanges, 
-    error: exchangesError,
-    getCredentialsForExchange,
-    hasCredentialsForExchange,
-    updateCredentials,
-    deleteCredentials,
-    testCredentials
-  } = useExchangeCredentials();
 
   const {
     register,
@@ -227,22 +212,8 @@ export default function Profile() {
         console.log('🔄 PROFILE - Loading fresh profile data...');
         await getProfile();
         
-        // ✅ CARREGAR CREDENCIAIS DA NOVA ESTRUTURA (TEMPORARIAMENTE DESABILITADO)
-        // console.log('🔄 PROFILE - Loading LN Markets credentials from new structure...');
-        // setIsLoadingCredentials(true);
-        // try {
-        //   const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
-        //   const credentials = await ExchangeService.getUserCredentialsForExchange(lnMarketsExchange.id);
-        //   setLnMarketsCredentials(credentials);
-        //   console.log('✅ PROFILE - LN Markets credentials loaded:', credentials ? 'Found' : 'Not found');
-        // } catch (error) {
-        //   console.log('⚠️ PROFILE - New structure not available, using old structure');
-        //   setLnMarketsCredentials(null);
-        // }
       } catch (error) {
         console.error('❌ PROFILE - Error loading profile data:', error);
-      } finally {
-        setIsLoadingCredentials(false);
       }
     };
 
@@ -261,9 +232,9 @@ export default function Profile() {
       });
       
       // ✅ USAR CREDENCIAIS DA NOVA ESTRUTURA SE DISPONÍVEL
-      const apiKey = lnMarketsCredentials?.credentials?.api_key || user.ln_markets_api_key || '';
-      const apiSecret = lnMarketsCredentials?.credentials?.api_secret || user.ln_markets_api_secret || '';
-      const passphrase = lnMarketsCredentials?.credentials?.passphrase || user.ln_markets_passphrase || '';
+      const apiKey = user.ln_markets_api_key || '';
+      const apiSecret = user.ln_markets_api_secret || '';
+      const passphrase = user.ln_markets_passphrase || '';
       
       reset({
         username: userData.username || user.email?.split('@')[0] || '',
@@ -289,17 +260,6 @@ export default function Profile() {
         ln_markets_passphrase: data.ln_markets_passphrase ? '***' : 'not provided',
       });
 
-      // ✅ SALVAR CREDENCIAIS NA NOVA ESTRUTURA DE EXCHANGES
-      if (data.ln_markets_api_key || data.ln_markets_api_secret || data.ln_markets_passphrase) {
-        console.log('🔄 PROFILE - Saving LN Markets credentials to new structure...');
-        const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
-        await ExchangeService.updateUserCredentials(lnMarketsExchange.id, {
-          api_key: data.ln_markets_api_key,
-          api_secret: data.ln_markets_api_secret,
-          passphrase: data.ln_markets_passphrase,
-        });
-        console.log('✅ PROFILE - LN Markets credentials saved to new structure');
-      }
 
       // Salvar dados do perfil (sem credenciais LN Markets)
       const profileData = {
@@ -317,11 +277,8 @@ export default function Profile() {
         setSuccess('Profile updated successfully!');
         setIsEditing(false);
         
-        // Refresh user data and credentials
+        // Refresh user data
         await getProfile();
-        const lnMarketsExchange = await ExchangeService.getExchangeBySlug('ln-markets');
-        const credentials = await ExchangeService.getUserCredentialsForExchange(lnMarketsExchange.id);
-        setLnMarketsCredentials(credentials);
         
         // Auto-dismiss success message after 3 seconds
         setTimeout(() => {
