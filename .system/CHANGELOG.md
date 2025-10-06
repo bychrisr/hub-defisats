@@ -4,6 +4,55 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.4] - 2025-01-09
+
+### 🚀 **EXCHANGES MANAGEMENT - COMPLETE CRUD IMPLEMENTATION**
+
+#### 🎯 **Nova Implementação Completa**
+- ✅ **CRUD Completo**: Criar, editar, deletar, toggle status de exchanges
+- ✅ **Interface Moderna**: Design responsivo com shadcn/ui
+- ✅ **Autenticação Corrigida**: Headers de autenticação em todas as requisições
+- ✅ **Zero Erros**: Eliminados erros de ícones e autenticação
+
+#### 📊 **Dashboard e Estatísticas**
+- ✅ **Cards de Estatísticas**: Total, Active, Inactive, Total Users
+- ✅ **Métricas Visuais**: Ícones e cores para cada tipo de status
+- ✅ **Dados em Tempo Real**: Atualização automática das estatísticas
+
+#### 🔧 **Sistema de Operações**
+- ✅ **Loading States**: Indicadores de carregamento para todas as operações
+- ✅ **AlertDialog**: Confirmações elegantes para exclusão
+- ✅ **Toast Notifications**: Feedback visual para todas as ações
+- ✅ **Validação de Formulário**: Validação em tempo real com mensagens de erro
+
+#### 🎨 **Interface e UX**
+- ✅ **Responsive Design**: Layout adaptativo para mobile e desktop
+- ✅ **Modern UI**: Interface limpa e profissional com shadcn/ui
+- ✅ **Interactive Modals**: Modais informativos para criação e edição
+- ✅ **Confirmation Dialogs**: AlertDialog para confirmações de exclusão
+- ✅ **Loading States**: Indicadores de carregamento e refresh
+
+#### 🔧 **Funcionalidades Técnicas**
+- ✅ **useCallback Optimization**: Operações memoizadas para evitar re-renders
+- ✅ **Error Handling**: Tratamento robusto de erros da API
+- ✅ **Response Validation**: Verificação de estrutura de dados da API
+- ✅ **State Management**: Gerenciamento eficiente de estados
+- ✅ **Authentication**: Headers de autenticação corretos
+
+#### 🛠️ **Backend Integration**
+- ✅ **API Routes**: Integração com rotas /api/admin/exchanges
+- ✅ **CRUD Operations**: GET, POST, PUT, DELETE, PATCH funcionais
+- ✅ **Authentication**: Middleware de autenticação admin
+- ✅ **Error Handling**: Tratamento de erros do backend
+
+#### 🎯 **Correções Críticas**
+- ✅ **Building2 Icon**: Corrigido erro de importação do ícone
+- ✅ **Authentication**: Corrigido uso de 'access_token' em vez de 'auth_token'
+- ✅ **401 Errors**: Eliminados erros de autenticação
+- ✅ **Loading States**: Estados de carregamento em todas as operações
+
+---
+
 ## [v2.5.2] - 2025-01-09
 
 ### 🚀 **USERS ADMIN PAGE - COMPLETE REBUILD**

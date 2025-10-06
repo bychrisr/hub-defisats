@@ -4,10 +4,10 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.5.2 ✅ COMPLETA
+## Status Atual: v2.5.4 ✅ COMPLETA
 
-**Versão**: v2.5.2  
-**Status**: Users Admin Page 100% Funcional  
+**Versão**: v2.5.4  
+**Status**: Exchanges Management 100% Funcional  
 **Data**: 2025-01-09
 
 ### Funcionalidades Implementadas
@@ -106,6 +106,13 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **NOVO**: Pagination System - Sistema completo de paginação
 - ✅ **NOVO**: Modal System - Modais informativos para detalhes e edição
 - ✅ **NOVO**: Badge "done" para Users no sidebar
+- ✅ **NOVO**: Exchanges Management - CRUD Completo com UI/UX Moderna
+- ✅ **NOVO**: Loading States e Visual Feedback para todas as operações
+- ✅ **NOVO**: AlertDialog e Toast Notifications para melhor UX
+- ✅ **NOVO**: Validação de Formulário em tempo real
+- ✅ **NOVO**: Cards de Estatísticas com métricas em tempo real
+- ✅ **NOVO**: Autenticação corrigida com headers adequados
+- ✅ **NOVO**: Badge "done" para Exchanges no sidebar
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
