@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PlanLimitsController } from '../controllers/planLimits.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminAuthMiddleware } from '../middleware/admin.middleware';
+import { adminMiddleware } from '../middleware/admin.middleware';
 
 export async function planLimitsRoutes(fastify: FastifyInstance) {
   const planLimitsController = new PlanLimitsController();
@@ -19,7 +19,7 @@ export async function planLimitsRoutes(fastify: FastifyInstance) {
 
   // PUT /api/plan-limits/:planId - Update plan limits (admin only)
   fastify.put('/api/plan-limits/:planId', {
-    preHandler: [adminAuthMiddleware],
+    preHandler: [adminMiddleware],
     handler: planLimitsController.updatePlanLimits.bind(planLimitsController)
   });
 }
