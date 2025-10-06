@@ -40,6 +40,7 @@ import { lnMarketsDiscoveryRoutes } from './routes/admin/ln-markets-discovery.ro
 import { lnMarketsAdminRoutes } from './routes/admin/lnmarkets-admin.routes';
 // import { settingsRoutes } from './routes/admin/settings.routes';
 import { hardwareMonitorRoutes } from './routes/admin/hardware-monitor.routes';
+import { marginGuardIntegrationRoutes } from './routes/margin-guard-integration.routes';
 import { securityRoutes } from './routes/security.routes';
 import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
@@ -773,6 +774,10 @@ async function registerRoutes() {
   // Load Test routes (admin only)
   await fastify.register(loadTestRoutes, { prefix: '/api/admin/load-test' });
   console.log('✅ Load Test routes registered');
+
+  // Margin Guard Integration routes
+  await fastify.register(marginGuardIntegrationRoutes, { prefix: '/api/margin-guard' });
+  console.log('✅ Margin Guard Integration routes registered');
 
   console.log('🛣️ Registering 404 handler...');
   // 404 handler

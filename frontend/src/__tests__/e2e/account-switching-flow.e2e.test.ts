@@ -784,3 +784,4 @@ describe('Account Switching Flow E2E Tests', () => {
     });
   });
 });
+

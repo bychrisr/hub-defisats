@@ -357,3 +357,4 @@ describe('useActiveAccountInfo', () => {
     expect(result.current.accountInfo).toBeNull();
   });
 });
+

@@ -76,6 +76,7 @@ import NotificationManagement from '@/pages/admin/NotificationManagement';
 import SystemReports from '@/pages/admin/SystemReports';
 import AuditLogs from '@/pages/admin/AuditLogs';
 import RouteRedirects from '@/pages/admin/RouteRedirects';
+import MarginGuardPlans from '@/pages/admin/MarginGuardPlans';
 import TestPermissions from '@/pages/TestPermissions';
 import DesignSystem from '@/pages/DesignSystem';
 import Documentation from '@/pages/admin/Documentation';
@@ -507,6 +508,7 @@ const App = () => {
               <Route path="audit-logs" element={<AuditLogs />} />
               <Route path="route-redirects" element={<RouteRedirects />} />
               <Route path="menus" element={<AdminMenuManagement />} />
+              <Route path="margin-guard-plans" element={<MarginGuardPlans />} />
               <Route path="dynamic-pages" element={<DynamicPagesConfig />} />
               <Route path="tooltips" element={<AdminTooltips />} />
               <Route path="monitoring" element={<Monitoring />} />

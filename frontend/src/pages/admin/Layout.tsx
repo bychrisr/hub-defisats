@@ -62,6 +62,7 @@ const navigationGroups = [
     title: 'Automation & Monitoring',
     items: [
       { name: 'Automation Management', href: '/admin/automation-management', icon: Bot },
+      { name: 'Margin Guard Plans', href: '/admin/margin-guard-plans', icon: Shield, badge: { text: 'new', color: 'blue' } },
       { name: 'Monitoring', href: '/admin/monitoring', icon: Monitor, badge: { text: 'done', color: 'green' } },
       { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle, badge: { text: 'done', color: 'green' } },
       { name: 'Rate Limiting', href: '/admin/rate-limiting', icon: Shield, badge: { text: 'done', color: 'green' } },
