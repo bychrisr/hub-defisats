@@ -203,10 +203,14 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
   - ✅ Connection pooling para LN Markets API
   - ✅ Execução concorrente de automações
 
-- [ ] **6.2.3** Atualizar `automation-scheduler.ts`
-  - Agendar execuções por conta
-  - Gerenciar timeouts por conta
-  - Retry logic por conta
+- [x] **6.2.3** Atualizar `automation-scheduler.ts` ✅
+  - ✅ Agendar execuções por conta
+  - ✅ Gerenciar timeouts por conta
+  - ✅ Retry logic por conta
+  - ✅ Schedules recorrentes por tipo de automação
+  - ✅ Integração com automation-worker.ts
+  - ✅ Cleanup automático de schedules
+  - ✅ Mudança de conta com atualização de schedules
 
 - [ ] **6.2.4** Criar `AccountCredentialsService`
   - Buscar credenciais da conta ativa

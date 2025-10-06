@@ -4,6 +4,39 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.8] - 2025-01-10
+
+### 🔗 **FASE 6.2.3 - AUTOMATION SCHEDULER MULTI-ACCOUNT**
+
+#### 🎯 **Automation Scheduler Implementado**
+- ✅ **Scheduler Completo**: Scheduler dedicado para agendamento de automações multi-account
+- ✅ **Agendamento por Conta**: Agendamento específico para conta ativa do usuário
+- ✅ **Timeouts por Conta**: Gerenciamento de timeouts específicos por conta
+- ✅ **Retry Logic**: Lógica de retry com backoff exponencial por conta
+- ✅ **Schedules Recorrentes**: Schedules automáticos por tipo de automação
+
+#### 🔧 **Funcionalidades Implementadas**
+- ✅ **startUserAutomationScheduling**: Iniciar agendamento para usuário
+- ✅ **stopUserAutomationScheduling**: Parar agendamento para usuário
+- ✅ **updateAutomationScheduleForAccountChange**: Atualizar schedules na mudança de conta
+- ✅ **getAutomationScheduleStatus**: Status de schedules ativos
+- ✅ **handleAutomationTimeout**: Gerenciamento de timeouts
+- ✅ **clearAutomationTimeout**: Limpeza de timeouts
+
+#### 📊 **Configurações por Tipo de Automação**
+- ✅ **Margin Guard**: 30s intervalo, 60s timeout, 3 retries
+- ✅ **Take Profit/SL**: 15s intervalo, 30s timeout, 2 retries
+- ✅ **Auto Entry**: 10s intervalo, 20s timeout, 2 retries
+- ✅ **Retry Logic**: Backoff exponencial configurável
+- ✅ **Cleanup Automático**: Limpeza de schedules expirados
+
+#### 🔍 **Integração e Monitoramento**
+- ✅ **Integração com automation-worker.ts**: Via BullMQ queue
+- ✅ **UserExchangeAccountService**: Busca de conta ativa
+- ✅ **AutomationService**: Busca de automações ativas
+- ✅ **AutomationLoggerService**: Logs detalhados de scheduling
+- ✅ **Status Monitoring**: Monitoramento de schedules ativos
+
 ## [v2.6.7] - 2025-01-09
 
 ### 🔗 **FASE 6.2.2 - AUTOMATION WORKER MULTI-ACCOUNT**
