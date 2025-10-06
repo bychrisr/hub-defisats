@@ -45,8 +45,21 @@ import {
   Key,
   Settings,
   Users,
-  Activity
+  Activity,
+  Building2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 import { ExchangeService, Exchange, ExchangeCredentialType } from '@/services/exchange.service';
 
 interface ExchangeFormData {
@@ -74,6 +87,10 @@ export function ExchangesManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingExchange, setEditingExchange] = useState<Exchange | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isToggling, setIsToggling] = useState<string | null>(null);
   const [formData, setFormData] = useState<ExchangeFormData>({
     name: '',
     slug: '',
@@ -94,8 +111,26 @@ export function ExchangesManagement() {
       setIsLoading(true);
       setError(null);
       
-      const data = await ExchangeService.getExchanges();
-      setExchanges(data);
+      // Get token from localStorage
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      const response = await fetch('/api/admin/exchanges', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to load exchanges');
+      }
+
+      const result = await response.json();
+      setExchanges(result.data);
     } catch (error: any) {
       console.error('❌ EXCHANGES MANAGEMENT - Error loading exchanges:', error);
       setError(error.message || 'Failed to load exchanges');
@@ -104,32 +139,101 @@ export function ExchangesManagement() {
     }
   };
 
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      toast.error('Exchange name is required');
+      return false;
+    }
+    if (!formData.slug.trim()) {
+      toast.error('Exchange slug is required');
+      return false;
+    }
+    if (formData.website && !formData.website.startsWith('http')) {
+      toast.error('Website must be a valid URL starting with http:// or https://');
+      return false;
+    }
+    if (formData.logo_url && !formData.logo_url.startsWith('http')) {
+      toast.error('Logo URL must be a valid URL starting with http:// or https://');
+      return false;
+    }
+    return true;
+  };
+
   const handleCreateExchange = async () => {
+    if (!validateForm()) return;
+    
     try {
+      setIsCreating(true);
+      setError(null);
       console.log('🔄 EXCHANGES MANAGEMENT - Creating exchange:', formData.name);
       
-      // Here you would call the API to create the exchange
-      // For now, we'll just show a success message
-      console.log('✅ EXCHANGES MANAGEMENT - Exchange created successfully');
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
       
+      const response = await fetch('/api/admin/exchanges', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create exchange');
+      }
+
+      const result = await response.json();
+      console.log('✅ EXCHANGES MANAGEMENT - Exchange created successfully:', result.data.name);
+      
+      toast.success(`Exchange "${result.data.name}" created successfully!`);
       setIsCreateDialogOpen(false);
       resetForm();
       await loadExchanges();
     } catch (error: any) {
       console.error('❌ EXCHANGES MANAGEMENT - Error creating exchange:', error);
       setError(error.message || 'Failed to create exchange');
+      toast.error(error.message || 'Failed to create exchange');
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const handleEditExchange = async () => {
     if (!editingExchange) return;
+    if (!validateForm()) return;
     
     try {
+      setIsUpdating(true);
+      setError(null);
       console.log('🔄 EXCHANGES MANAGEMENT - Updating exchange:', editingExchange.id);
       
-      // Here you would call the API to update the exchange
-      console.log('✅ EXCHANGES MANAGEMENT - Exchange updated successfully');
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
       
+      const response = await fetch(`/api/admin/exchanges/${editingExchange.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update exchange');
+      }
+
+      const result = await response.json();
+      console.log('✅ EXCHANGES MANAGEMENT - Exchange updated successfully:', result.data.name);
+      
+      toast.success(`Exchange "${result.data.name}" updated successfully!`);
       setIsEditDialogOpen(false);
       setEditingExchange(null);
       resetForm();
@@ -137,24 +241,46 @@ export function ExchangesManagement() {
     } catch (error: any) {
       console.error('❌ EXCHANGES MANAGEMENT - Error updating exchange:', error);
       setError(error.message || 'Failed to update exchange');
+      toast.error(error.message || 'Failed to update exchange');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleDeleteExchange = async (exchangeId: string) => {
-    if (!confirm('Are you sure you want to delete this exchange? This action cannot be undone.')) {
-      return;
-    }
-    
     try {
+      setIsDeleting(exchangeId);
+      setError(null);
       console.log('🗑️ EXCHANGES MANAGEMENT - Deleting exchange:', exchangeId);
       
-      // Here you would call the API to delete the exchange
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      const response = await fetch(`/api/admin/exchanges/${exchangeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete exchange');
+      }
+
       console.log('✅ EXCHANGES MANAGEMENT - Exchange deleted successfully');
+      toast.success('Exchange deleted successfully!');
       
       await loadExchanges();
     } catch (error: any) {
       console.error('❌ EXCHANGES MANAGEMENT - Error deleting exchange:', error);
       setError(error.message || 'Failed to delete exchange');
+      toast.error(error.message || 'Failed to delete exchange');
+    } finally {
+      setIsDeleting(null);
     }
   };
 
@@ -224,6 +350,44 @@ export function ExchangesManagement() {
         i === index ? { ...ct, [field]: value } : ct
       )
     }));
+  };
+
+  const handleToggleStatus = async (exchangeId: string) => {
+    try {
+      setIsToggling(exchangeId);
+      setError(null);
+      console.log('🔄 EXCHANGES MANAGEMENT - Toggling status for exchange:', exchangeId);
+      
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      const response = await fetch(`/api/admin/exchanges/${exchangeId}/toggle`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to toggle exchange status');
+      }
+
+      const result = await response.json();
+      console.log('✅ EXCHANGES MANAGEMENT - Exchange status toggled successfully');
+      toast.success(result.message || 'Exchange status updated successfully!');
+      
+      await loadExchanges();
+    } catch (error: any) {
+      console.error('❌ EXCHANGES MANAGEMENT - Error toggling exchange status:', error);
+      setError(error.message || 'Failed to toggle exchange status');
+      toast.error(error.message || 'Failed to toggle exchange status');
+    } finally {
+      setIsToggling(null);
+    }
   };
 
   if (isLoading) {
@@ -426,15 +590,270 @@ export function ExchangesManagement() {
             </div>
             
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} disabled={isCreating}>
                 Cancel
               </Button>
-              <Button onClick={handleCreateExchange}>
-                Create Exchange
+              <Button onClick={handleCreateExchange} disabled={isCreating}>
+                {isCreating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Exchange'
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Exchange</DialogTitle>
+            <DialogDescription>
+              Update exchange configuration and credential requirements
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-name">Exchange Name</Label>
+                <Input
+                  id="edit-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Binance"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-slug">Slug</Label>
+                <Input
+                  id="edit-slug"
+                  value={formData.slug}
+                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                  placeholder="e.g., binance"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Brief description of the exchange"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-website">Website</Label>
+                <Input
+                  id="edit-website"
+                  value={formData.website}
+                  onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                  placeholder="https://binance.com"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-logo_url">Logo URL</Label>
+                <Input
+                  id="edit-logo_url"
+                  value={formData.logo_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, logo_url: e.target.value }))}
+                  placeholder="https://binance.com/favicon.ico"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-api_version">API Version</Label>
+                <Input
+                  id="edit-api_version"
+                  value={formData.api_version}
+                  onChange={(e) => setFormData(prev => ({ ...prev, api_version: e.target.value }))}
+                  placeholder="v3"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-is_active"
+                  checked={formData.is_active}
+                  onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
+                />
+                <Label htmlFor="edit-is_active">Active</Label>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <Label>Credential Types</Label>
+                <Button type="button" variant="outline" size="sm" onClick={addCredentialType}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Credential Type
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                {formData.credential_types.map((credType, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-medium">Credential Type {index + 1}</h4>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeCredentialType(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Name</Label>
+                          <Input
+                            value={credType.name}
+                            onChange={(e) => updateCredentialType(index, 'name', e.target.value)}
+                            placeholder="e.g., API Key"
+                          />
+                        </div>
+                        <div>
+                          <Label>Field Name</Label>
+                          <Input
+                            value={credType.field_name}
+                            onChange={(e) => updateCredentialType(index, 'field_name', e.target.value)}
+                            placeholder="e.g., api_key"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <Label>Field Type</Label>
+                          <Select
+                            value={credType.field_type}
+                            onValueChange={(value) => updateCredentialType(index, 'field_type', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text">Text</SelectItem>
+                              <SelectItem value="password">Password</SelectItem>
+                              <SelectItem value="email">Email</SelectItem>
+                              <SelectItem value="url">URL</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={credType.is_required}
+                            onChange={(e) => updateCredentialType(index, 'is_required', e.target.checked)}
+                          />
+                          <Label>Required</Label>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4">
+                        <Label>Description</Label>
+                        <Input
+                          value={credType.description}
+                          onChange={(e) => updateCredentialType(index, 'description', e.target.value)}
+                          placeholder="Description for this credential type"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isUpdating}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditExchange} disabled={isUpdating}>
+              {isUpdating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Exchange'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Exchanges</p>
+                <p className="text-2xl font-bold">{exchanges.length}</p>
+              </div>
+              <Building2 className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {exchanges.filter(e => e.is_active).length}
+                </p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Inactive</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {exchanges.filter(e => !e.is_active).length}
+                </p>
+              </div>
+              <EyeOff className="h-8 w-8 text-red-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                <p className="text-2xl font-bold">
+                  {exchanges.reduce((sum, e) => sum + (e._count?.user_accounts || 0), 0)}
+                </p>
+              </div>
+              <Users className="h-8 w-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Error Alert */}
@@ -499,16 +918,65 @@ export function ExchangesManagement() {
                         variant="ghost"
                         size="sm"
                         onClick={() => openEditDialog(exchange)}
+                        title="Edit Exchange"
+                        disabled={isUpdating || isDeleting === exchange.id || isToggling === exchange.id}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDeleteExchange(exchange.id)}
+                        onClick={() => handleToggleStatus(exchange.id)}
+                        title={exchange.is_active ? "Deactivate" : "Activate"}
+                        disabled={isUpdating || isDeleting === exchange.id || isToggling === exchange.id}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {isToggling === exchange.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : exchange.is_active ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Delete Exchange"
+                            disabled={isUpdating || isDeleting === exchange.id || isToggling === exchange.id}
+                          >
+                            {isDeleting === exchange.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Exchange</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{exchange.name}"? This action cannot be undone.
+                              {exchange._count?.user_accounts > 0 && (
+                                <span className="block mt-2 text-red-600 font-medium">
+                                  ⚠️ This exchange has {exchange._count.user_accounts} user account(s) and cannot be deleted.
+                                </span>
+                              )}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteExchange(exchange.id)}
+                              disabled={exchange._count?.user_accounts > 0}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete Exchange
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>
