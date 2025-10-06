@@ -3,15 +3,44 @@ import { z } from 'zod';
 import { AutomationType } from '../types/api-contracts';
 import { AutomationLoggerService } from './automation-logger.service';
 import { UserExchangeAccountService } from './userExchangeAccount.service';
+import { MarginGuardPlanService, MarginGuardPlanData } from './margin-guard-plan.service';
 
 // Configuration schemas for each automation type
 const MarginGuardConfigSchema = z.object({
-  margin_threshold: z.number().min(0.1).max(100), // Percentage
+  // Core configuration
+  margin_threshold: z.number().min(0.1).max(100), // Percentage (e.g., 85 for 85%)
   action: z.enum(['close_position', 'reduce_position', 'add_margin', 'increase_liquidation_distance']),
-  reduce_percentage: z.number().min(1).max(100).optional(), // For reduce_position
-  add_margin_amount: z.number().min(0).optional(), // For add_margin
+  reduce_percentage: z.number().min(1).max(100).optional(), // For reduce_position (e.g., 50 for 50%)
+  add_margin_amount: z.number().min(0).optional(), // For add_margin (in sats)
   new_liquidation_distance: z.number().min(0.1).max(100).optional(), // For increase_liquidation_distance
   enabled: z.boolean().optional().default(true),
+  
+  // Plan-specific configuration
+  plan_type: z.enum(['free', 'basic', 'advanced', 'pro', 'lifetime']),
+  
+  // Free Plan: 2 positions limit
+  selected_positions: z.array(z.string()).max(2).optional(), // For Free plan - specific position IDs
+  
+  // Advanced Plan: Unitário + Total modes
+  protection_mode: z.enum(['unitario', 'total', 'both']).optional(), // For Advanced/Pro plans
+  
+  // Pro Plan: Individual position configuration
+  individual_configs: z.record(z.string(), z.object({
+    margin_threshold: z.number().min(0.1).max(100),
+    action: z.enum(['close_position', 'reduce_position', 'add_margin', 'increase_liquidation_distance']),
+    reduce_percentage: z.number().min(1).max(100).optional(),
+    add_margin_amount: z.number().min(0).optional(),
+    new_liquidation_distance: z.number().min(0.1).max(100).optional(),
+  })).optional(), // For Pro plan - individual position settings
+  
+  // Notification settings
+  notifications: z.object({
+    push: z.boolean().default(true),
+    email: z.boolean().default(false),
+    telegram: z.boolean().default(false),
+    whatsapp: z.boolean().default(false),
+    webhook: z.boolean().default(false),
+  }).optional(),
 });
 
 const TPSLConfigSchema = z.object({
@@ -83,19 +112,40 @@ export class AutomationService {
   private prisma: PrismaClient;
   private automationLogger: AutomationLoggerService;
   private userExchangeAccountService: UserExchangeAccountService;
+  private marginGuardPlanService: MarginGuardPlanService;
 
   constructor(prisma: PrismaClient, automationLogger: AutomationLoggerService) {
     this.prisma = prisma;
     this.automationLogger = automationLogger;
     this.userExchangeAccountService = new UserExchangeAccountService(prisma);
+    this.marginGuardPlanService = new MarginGuardPlanService(prisma);
   }
 
   /**
    * Validate automation configuration based on type
    */
-  private validateAutomationConfig(type: AutomationType, config: any): any {
+  private async validateAutomationConfig(type: AutomationType, config: any, userId: string): Promise<any> {
     try {
       const validation = AutomationConfigSchema.parse({ type, config });
+      
+      // Additional validation for Margin Guard based on user's plan
+      if (type === 'margin_guard') {
+        const planValidation = await this.marginGuardPlanService.validatePlanConfiguration(
+          userId,
+          config as MarginGuardPlanData
+        );
+        
+        if (!planValidation.valid) {
+          throw new Error(
+            `Margin Guard plan validation failed: ${planValidation.errors.join(', ')}`
+          );
+        }
+        
+        if (planValidation.warnings.length > 0) {
+          console.warn(`Margin Guard plan warnings: ${planValidation.warnings.join(', ')}`);
+        }
+      }
+      
       return validation.config;
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -114,9 +164,10 @@ export class AutomationService {
     console.log('🔍 AUTOMATION SERVICE - createAutomation called with:', data);
     
     // Restore validation
-    const validatedConfig = this.validateAutomationConfig(
+    const validatedConfig = await this.validateAutomationConfig(
       data.type,
-      data.config
+      data.config,
+      data.userId
     );
     console.log('🔍 AUTOMATION SERVICE - validated config:', validatedConfig);
 
@@ -309,9 +360,10 @@ export class AutomationService {
     console.log('🔍 AUTOMATION SERVICE - Raw config from data.updates.config:', JSON.stringify(data.updates.config, null, 2));
     if (data.updates.config) {
       // Restore validation
-      validatedConfig = this.validateAutomationConfig(
+      validatedConfig = await this.validateAutomationConfig(
         existingAutomation.type as AutomationType,
-        data.updates.config
+        data.updates.config,
+        data.userId
       );
     }
     console.log('🔍 AUTOMATION SERVICE - Final validatedConfig:', JSON.stringify(validatedConfig, null, 2));
@@ -508,5 +560,131 @@ export class AutomationService {
       }
       return { valid: false, errors: ['Unknown validation error'] };
     }
+  }
+
+  /**
+   * Get Margin Guard plan features for a user
+   */
+  async getMarginGuardPlanFeatures(userId: string): Promise<{
+    planType: string;
+    features: any;
+    limitations: any;
+    defaultConfig: any;
+  }> {
+    try {
+      // Get actual user plan from database
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { 
+          id: true,
+          email: true,
+          plan_type: true,
+          created_at: true
+        }
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      console.log('🔍 AUTOMATION SERVICE - User plan data:', {
+        userId: user.id,
+        email: user.email,
+        planType: user.plan_type,
+        createdAt: user.created_at
+      });
+
+      const planType = user.plan_type || 'basic';
+      
+      const features = this.marginGuardPlanService.getPlanFeatures(planType as any);
+      const limitations = this.marginGuardPlanService.getPlanLimitations(planType as any);
+      const defaultConfig = this.marginGuardPlanService.createDefaultConfig(planType as any);
+      
+      return {
+        planType,
+        features,
+        limitations,
+        defaultConfig
+      };
+    } catch (error) {
+      console.error('Error getting Margin Guard plan features:', error);
+      // Fallback to basic plan
+      const planType = 'basic';
+      const features = this.marginGuardPlanService.getPlanFeatures(planType as any);
+      const limitations = this.marginGuardPlanService.getPlanLimitations(planType as any);
+      const defaultConfig = this.marginGuardPlanService.createDefaultConfig(planType as any);
+      
+      return {
+        planType,
+        features,
+        limitations,
+        defaultConfig
+      };
+    }
+  }
+
+  /**
+   * Create Margin Guard automation with plan-specific validation
+   */
+  async createMarginGuardAutomation(
+    userId: string,
+    config: MarginGuardPlanData
+  ): Promise<Automation> {
+    console.log('🔍 AUTOMATION SERVICE - Creating Margin Guard automation with plan validation');
+    
+    // Validate plan configuration
+    const planValidation = this.marginGuardPlanService.validatePlanConfiguration(userId, config);
+    
+    if (!planValidation.valid) {
+      throw new Error(
+        `Margin Guard plan validation failed: ${planValidation.errors.join(', ')}`
+      );
+    }
+    
+    if (planValidation.warnings.length > 0) {
+      console.warn(`Margin Guard plan warnings: ${planValidation.warnings.join(', ')}`);
+    }
+    
+    // Create automation using standard flow
+    return this.createAutomation({
+      userId,
+      type: 'margin_guard',
+      config,
+      isActive: config.enabled
+    });
+  }
+
+  /**
+   * Update Margin Guard automation with plan-specific validation
+   */
+  async updateMarginGuardAutomation(
+    automationId: string,
+    userId: string,
+    config: MarginGuardPlanData
+  ): Promise<Automation | null> {
+    console.log('🔍 AUTOMATION SERVICE - Updating Margin Guard automation with plan validation');
+    
+    // Validate plan configuration
+    const planValidation = this.marginGuardPlanService.validatePlanConfiguration(userId, config);
+    
+    if (!planValidation.valid) {
+      throw new Error(
+        `Margin Guard plan validation failed: ${planValidation.errors.join(', ')}`
+      );
+    }
+    
+    if (planValidation.warnings.length > 0) {
+      console.warn(`Margin Guard plan warnings: ${planValidation.warnings.join(', ')}`);
+    }
+    
+    // Update automation using standard flow
+    return this.updateAutomation({
+      automationId,
+      userId,
+      updates: {
+        config,
+        is_active: config.enabled
+      }
+    });
   }
 }

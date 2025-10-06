@@ -4,6 +4,7 @@ import { AutomationService } from '../services/automation.service';
 import { AutomationLoggerService } from '../services/automation-logger.service';
 import { PrismaClient } from '@prisma/client';
 import { AutomationType } from '../types/api-contracts';
+import { MarginGuardPlanData } from '../services/margin-guard-plan.service';
 
 // Interface for authenticated requests - user is declared globally in auth.middleware.ts
 // interface AuthenticatedRequest extends FastifyRequest {
@@ -563,6 +564,99 @@ export class AutomationController {
         success: false,
         error: 'INTERNAL_ERROR',
         message: 'Failed to get automation statistics',
+      });
+    }
+  }
+
+  /**
+   * Get Margin Guard plan features for user
+   */
+  async getMarginGuardPlanFeatures(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const user = (request as any).user;
+
+      const planFeatures = await this.automationService.getMarginGuardPlanFeatures(user?.id || '');
+
+      return reply.send({
+        success: true,
+        data: planFeatures,
+      });
+    } catch (error) {
+      console.error('Get Margin Guard plan features error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to get Margin Guard plan features',
+      });
+    }
+  }
+
+  /**
+   * Create Margin Guard automation with plan validation
+   */
+  async createMarginGuardAutomation(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const user = (request as any).user;
+      const body = request.body as MarginGuardPlanData;
+
+      console.log('🔍 AUTOMATION CONTROLLER - Creating Margin Guard automation:', JSON.stringify(body, null, 2));
+
+      const automation = await this.automationService.createMarginGuardAutomation(
+        user?.id || '',
+        body
+      );
+
+      return reply.send({
+        success: true,
+        data: automation,
+        message: 'Margin Guard automation created successfully',
+      });
+    } catch (error) {
+      console.error('Create Margin Guard automation error:', error);
+      return reply.status(400).send({
+        success: false,
+        error: 'VALIDATION_ERROR',
+        message: error instanceof Error ? error.message : 'Failed to create Margin Guard automation',
+      });
+    }
+  }
+
+  /**
+   * Update Margin Guard automation with plan validation
+   */
+  async updateMarginGuardAutomation(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const user = (request as any).user;
+      const { id } = AutomationParamsSchema.parse(request.params);
+      const body = request.body as MarginGuardPlanData;
+
+      console.log('🔍 AUTOMATION CONTROLLER - Updating Margin Guard automation:', JSON.stringify(body, null, 2));
+
+      const automation = await this.automationService.updateMarginGuardAutomation(
+        id,
+        user?.id || '',
+        body
+      );
+
+      if (!automation) {
+        return reply.status(404).send({
+          success: false,
+          error: 'NOT_FOUND',
+          message: 'Margin Guard automation not found',
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: automation,
+        message: 'Margin Guard automation updated successfully',
+      });
+    } catch (error) {
+      console.error('Update Margin Guard automation error:', error);
+      return reply.status(400).send({
+        success: false,
+        error: 'VALIDATION_ERROR',
+        message: error instanceof Error ? error.message : 'Failed to update Margin Guard automation',
       });
     }
   }
