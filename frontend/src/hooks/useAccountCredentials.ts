@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from './useAuth';
+import { useAuthStore } from '@/stores/auth';
 
 interface AccountCredentials {
   userId: string;
@@ -30,7 +30,7 @@ interface CredentialCacheStats {
 }
 
 export const useAccountCredentials = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
