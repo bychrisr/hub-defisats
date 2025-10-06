@@ -4,6 +4,37 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.6.1] - 2025-01-09
+
+### 🔒 **VALIDAÇÃO DE SEGURANÇA REDUNDANTE - CONTA ATIVA ÚNICA**
+
+#### 🛡️ **Proteção Multi-Camada**
+- ✅ **Validação em `setActiveAccount`**: Desativa todas as contas antes de ativar uma
+- ✅ **Validação em `createUserExchangeAccount`**: Verifica contas ativas existentes
+- ✅ **Validação em `updateUserExchangeAccount`**: Previne múltiplas ativações
+- ✅ **Emergency Fix**: Correção automática de violações detectadas
+- ✅ **Método de Validação Periódica**: `validateAndFixActiveAccounts()` para verificações
+
+#### 🔍 **Detecção de Violações**
+- ✅ **Contagem de Contas Ativas**: Verifica se há mais de uma conta ativa por usuário
+- ✅ **Logs de Segurança**: Registra todas as violações com detalhes
+- ✅ **Alertas de Emergência**: Identifica problemas de integridade automaticamente
+- ✅ **Correção Automática**: Resolve violações sem intervenção manual
+
+#### 🎯 **Garantias de Integridade**
+- ✅ **Uma Conta Ativa**: Apenas uma conta pode estar ativa por usuário
+- ✅ **Prevenção Proativa**: Desativação prévia de todas as contas
+- ✅ **Priorização por Idade**: Mantém a conta mais antiga em caso de conflito
+- ✅ **Auditoria Completa**: Logs detalhados de todas as operações de segurança
+
+#### 🚀 **Benefícios Implementados**
+- ✅ **Segurança Redundante**: Múltiplas camadas de validação
+- ✅ **Tolerância a Falhas**: Sistema se auto-corrige
+- ✅ **Consistência de Dados**: Previne estados inconsistentes
+- ✅ **Monitoramento Avançado**: Logs permitem acompanhar o sistema
+
+---
+
 ## [v2.6.0] - 2025-01-09
 
 ### 🚀 **MODAIS FUNCIONAIS - CRIAÇÃO E AÇÕES DE CONTA**
