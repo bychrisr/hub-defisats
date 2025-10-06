@@ -4,6 +4,28 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.5.8] - 2025-01-09
+
+### 🧹 **REFATORAÇÃO - LIMPEZA DE CÓDIGO LEGADO**
+
+#### 🗑️ **Remoção de Código Obsoleto**
+- ✅ **Profile.tsx Limpo**: Removido código legado de exchange credentials
+- ✅ **Imports Não Utilizados**: Removidos imports desnecessários
+- ✅ **State Variables**: Removidas variáveis de estado não utilizadas
+- ✅ **API Calls Legadas**: Removidas chamadas para endpoints antigos
+- ✅ **Hooks Obsoletos**: Removido useExchangeCredentials não utilizado
+
+#### 🔧 **Melhorias de Código**
+- ✅ **Código Mais Limpo**: Profile.tsx focado apenas no MultiAccountInterface
+- ✅ **Sem Conflitos**: Eliminados conflitos entre sistemas antigo e novo
+- ✅ **Manutenibilidade**: Código mais fácil de manter e entender
+- ✅ **Performance**: Removidas chamadas de API desnecessárias
+
+#### 📊 **Impacto**
+- ✅ **Zero 404 Errors**: Eliminados erros de endpoints não encontrados
+- ✅ **Sistema Unificado**: Apenas MultiAccountInterface gerencia exchanges
+- ✅ **Futuro-Proof**: Código preparado para próximas fases do roadmap
+
 ## [v2.5.7] - 2025-01-09
 
 ### 🐛 **CORREÇÕES CRÍTICAS - PLANOS ILIMITADOS**
