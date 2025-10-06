@@ -46,7 +46,7 @@ export class PlanLimitsController {
           max_indicators: planLimits.max_indicators,
           max_simulations: planLimits.max_simulations,
           max_backtests: planLimits.max_backtests,
-          is_unlimited: planLimits.max_exchange_accounts === 0,
+          is_unlimited: planLimits.max_exchange_accounts === -1,
           is_default: false
         }
       });

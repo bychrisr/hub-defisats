@@ -48,7 +48,7 @@ export function usePlanLimits() {
   const getAccountLimit = useCallback((): number | 'unlimited' => {
     if (!planLimits) return 1;
     
-    if (planLimits.is_unlimited) {
+    if (planLimits.is_unlimited || planLimits.max_exchange_accounts === -1) {
       return 'unlimited';
     }
     
@@ -58,7 +58,7 @@ export function usePlanLimits() {
   const canCreateAccount = useCallback((currentAccountCount: number): boolean => {
     if (!planLimits) return false;
     
-    if (planLimits.is_unlimited) {
+    if (planLimits.is_unlimited || planLimits.max_exchange_accounts === -1) {
       return true;
     }
     
@@ -75,11 +75,13 @@ export function usePlanLimits() {
       };
     }
 
+    const isUnlimited = planLimits.is_unlimited || planLimits.max_exchange_accounts === -1;
+    
     return {
       current: currentAccountCount,
-      limit: planLimits.is_unlimited ? 'unlimited' : planLimits.max_exchange_accounts,
+      limit: isUnlimited ? 'unlimited' : planLimits.max_exchange_accounts,
       canCreate: canCreateAccount(currentAccountCount),
-      isUnlimited: planLimits.is_unlimited
+      isUnlimited: isUnlimited
     };
   }, [planLimits, canCreateAccount]);
 
