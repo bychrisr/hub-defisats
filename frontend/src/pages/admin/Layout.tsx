@@ -96,6 +96,12 @@ const navigationGroups = [
   }
 ];
 
+// Configurações de usuário (separadas do sistema)
+const userSettings = [
+  { name: 'Modo Escuro', action: 'theme', icon: Moon },
+  { name: 'Logout', action: 'logout', icon: LogOut },
+];
+
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -216,27 +222,51 @@ export default function AdminLayout() {
             className="p-4 flex-shrink-0"
             style={{ borderTop: '1px solid hsl(var(--border))' }}
           >
+            {!sidebarCollapsed && (
+              <div className="px-3 py-2 mb-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Configurações
+                </h3>
+              </div>
+            )}
             <div className="space-y-2">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={toggleTheme}
-              >
-                {theme === 'light' ? (
-                  <Moon className="mr-3 h-5 w-5" />
-                ) : (
-                  <Sun className="mr-3 h-5 w-5" />
-                )}
-                {theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-red-600 hover:text-red-700"
-                onClick={handleLogout}
-              >
-                <LogOut className="mr-3 h-5 w-5" />
-                Logout
-              </Button>
+              {userSettings.map((setting) => (
+                <Button
+                  key={setting.name}
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start",
+                    sidebarCollapsed ? "justify-center px-2" : "",
+                    setting.action === 'logout' && "text-red-600 hover:text-red-700"
+                  )}
+                  onClick={() => {
+                    if (setting.action === 'theme') {
+                      toggleTheme();
+                    } else if (setting.action === 'logout') {
+                      handleLogout();
+                    }
+                  }}
+                  title={sidebarCollapsed ? setting.name : undefined}
+                >
+                  {setting.action === 'theme' ? (
+                    theme === 'light' ? (
+                      <Moon className={cn("h-5 w-5", !sidebarCollapsed && "mr-3")} />
+                    ) : (
+                      <Sun className={cn("h-5 w-5", !sidebarCollapsed && "mr-3")} />
+                    )
+                  ) : (
+                    <setting.icon className={cn("h-5 w-5", !sidebarCollapsed && "mr-3")} />
+                  )}
+                  {!sidebarCollapsed && (
+                    <span>
+                      {setting.action === 'theme' 
+                        ? (theme === 'light' ? 'Modo Escuro' : 'Modo Claro')
+                        : setting.name
+                      }
+                    </span>
+                  )}
+                </Button>
+              ))}
             </div>
           </div>
         </div>
@@ -324,27 +354,51 @@ export default function AdminLayout() {
             className="p-4 flex-shrink-0"
             style={{ borderTop: '1px solid hsl(var(--border))' }}
           >
+            {!sidebarCollapsed && (
+              <div className="px-3 py-2 mb-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Configurações
+                </h3>
+              </div>
+            )}
             <div className="space-y-2">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={toggleTheme}
-              >
-                {theme === 'light' ? (
-                  <Moon className="mr-3 h-5 w-5" />
-                ) : (
-                  <Sun className="mr-3 h-5 w-5" />
-                )}
-                {theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-red-600 hover:text-red-700"
-                onClick={handleLogout}
-              >
-                <LogOut className="mr-3 h-5 w-5" />
-                Logout
-              </Button>
+              {userSettings.map((setting) => (
+                <Button
+                  key={setting.name}
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start",
+                    sidebarCollapsed ? "justify-center px-2" : "",
+                    setting.action === 'logout' && "text-red-600 hover:text-red-700"
+                  )}
+                  onClick={() => {
+                    if (setting.action === 'theme') {
+                      toggleTheme();
+                    } else if (setting.action === 'logout') {
+                      handleLogout();
+                    }
+                  }}
+                  title={sidebarCollapsed ? setting.name : undefined}
+                >
+                  {setting.action === 'theme' ? (
+                    theme === 'light' ? (
+                      <Moon className={cn("h-5 w-5", !sidebarCollapsed && "mr-3")} />
+                    ) : (
+                      <Sun className={cn("h-5 w-5", !sidebarCollapsed && "mr-3")} />
+                    )
+                  ) : (
+                    <setting.icon className={cn("h-5 w-5", !sidebarCollapsed && "mr-3")} />
+                  )}
+                  {!sidebarCollapsed && (
+                    <span>
+                      {setting.action === 'theme' 
+                        ? (theme === 'light' ? 'Modo Escuro' : 'Modo Claro')
+                        : setting.name
+                      }
+                    </span>
+                  )}
+                </Button>
+              ))}
             </div>
           </div>
         </div>
