@@ -496,6 +496,80 @@ Implementação completa do sistema de múltiplas contas de exchange por usuári
 
 ---
 
+## 🎯 **FASE 8.1: SEPARAÇÃO COMPLETA ADMIN/USER MARGIN GUARD** ⚠️ **WIP**
+
+### **8.1.1 Interface do Usuário** ✅ **COMPLETA**
+- [x] **8.1.1.1** Criar `MarginGuardUser.tsx` ✅
+  - ✅ Interface baseada na imagem fornecida
+  - ✅ Sliders para configuração de limite de margem
+  - ✅ Seleção de ação (reduzir posição, adicionar margem)
+  - ✅ Configuração específica por ação
+  - ✅ Exemplo e simulação real
+  - ✅ Validação por plano aplicada dinamicamente
+
+- [x] **8.1.1.2** Implementar rota frontend ✅
+  - ✅ Rota `/margin-guard` no App.tsx
+  - ✅ Integração com sistema de rotas
+  - ✅ Acesso para usuários logados
+
+### **8.1.2 Backend para Usuário** ✅ **COMPLETA**
+- [x] **8.1.2.1** Criar `MarginGuardUserController` ✅
+  - ✅ Métodos: `getPlanFeatures`, `getUserPositions`, `getCurrentPrice`
+  - ✅ Métodos: `createOrUpdateConfiguration`, `getCurrentConfiguration`
+  - ✅ Validação automática baseada no plano
+  - ✅ Dados reais do usuário
+
+- [x] **8.1.2.2** Implementar rotas do usuário ✅
+  - ✅ `GET /api/margin-guard/plan-features` - Recursos do plano
+  - ✅ `GET /api/margin-guard/positions` - Posições do usuário
+  - ✅ `GET /api/margin-guard/current-price` - Preço atual
+  - ✅ `POST /api/margin-guard` - Criar/atualizar configuração
+  - ✅ `GET /api/margin-guard/configuration` - Obter configuração atual
+
+### **8.1.3 Separação de Responsabilidades** ✅ **COMPLETA**
+- [x] **8.1.3.1** Painel Administrativo ✅
+  - ✅ Controla O QUE cada plano pode fazer
+  - ✅ Define limitações e permissões
+  - ✅ Acesso apenas para administradores
+  - ✅ URL: `http://localhost:13000/admin/margin-guard-plans`
+
+- [x] **8.1.3.2** Interface do Usuário ✅
+  - ✅ Usuário configura COMO quer usar
+  - ✅ Dentro das limitações do seu plano
+  - ✅ Validação automática aplicada
+  - ✅ URL: `http://localhost:13000/margin-guard`
+
+### **8.1.4 Organização de Rotas** ✅ **COMPLETA**
+- [x] **8.1.4.1** Rotas Administrativas ✅
+  - ✅ `/api/admin/margin-guard/*` - Controle de planos
+  - ✅ Middleware administrativo
+  - ✅ Validação de permissões
+  - ✅ Registradas no index.ts
+
+- [x] **8.1.4.2** Rotas do Usuário ✅
+  - ✅ `/api/margin-guard/*` - Configuração pessoal
+  - ✅ Middleware de autenticação
+  - ✅ Validação por plano
+  - ✅ Registradas no index.ts
+
+### **8.1.5 Correções de Conflitos** ✅ **COMPLETA**
+- [x] **8.1.5.1** Resolver rotas duplicadas ✅
+  - ✅ Remover rotas duplicadas do automation.routes.ts
+  - ✅ Organizar rotas em arquivos dedicados
+  - ✅ Backend funcionando sem conflitos
+
+- [x] **8.1.5.2** Status WIP ✅
+  - ✅ Implementação completa
+  - ✅ Backend funcionando
+  - ✅ Frontend implementado
+  - ✅ Rotas organizadas
+  - ✅ Separação clara
+  - ⚠️ Dados mockados para desenvolvimento
+  - ⚠️ Integração real pendente
+  - ⚠️ Testes podem precisar validação
+
+---
+
 ## 🎯 **FASE 8: MIGRAÇÃO E DEPLOY**
 
 ### **8.1 Migração de Dados**

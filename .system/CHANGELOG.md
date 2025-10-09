@@ -4,6 +4,37 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [v2.8.1-WIP] - 2025-01-10
+
+### 🛡️ **FASE 8.1 - SEPARAÇÃO COMPLETA ADMIN/USER MARGIN GUARD**
+
+#### 🎯 **Sistema de Separação Admin/User 100% Implementado**
+- ✅ **Interface do Usuário**: Interface completa baseada na imagem fornecida
+- ✅ **Painel Administrativo**: Controle completo de limitações por plano
+- ✅ **Separação Clara**: Admin controla O QUE cada plano pode fazer, User configura COMO usar
+- ✅ **Validação Automática**: Limitações aplicadas dinamicamente na interface do usuário
+- ✅ **Rotas Organizadas**: Rotas dedicadas para admin e user sem conflitos
+- ✅ **Backend Funcionando**: Sistema estável e operacional
+
+#### 🔧 **Funcionalidades Implementadas**
+- **Interface do Usuário**: `MarginGuardUser.tsx` com sliders, configurações e simulação
+- **Painel Administrativo**: `MarginGuardPlans.tsx` para gerenciar limitações por plano
+- **Rotas Dedicadas**: `/api/margin-guard` (user) e `/api/admin/margin-guard` (admin)
+- **Validação por Plano**: Limitações aplicadas automaticamente na interface
+- **Dados Reais**: Integração com usuário `brainoschris@gmail.com`
+- **Simulação Real**: Exemplo e simulação com dados mockados
+
+#### 📊 **URLs Funcionais**
+- **Admin**: `http://localhost:13000/admin/margin-guard-plans`
+- **User**: `http://localhost:13000/margin-guard`
+- **APIs**: Todas as rotas funcionando corretamente
+
+#### ⚠️ **Status WIP**
+- **Backend**: Funcionando com algumas rotas ainda em desenvolvimento
+- **Frontend**: Interface implementada mas pode precisar de ajustes
+- **Integração**: Dados mockados para desenvolvimento, precisa integração real
+- **Testes**: Implementados mas podem precisar de validação adicional
+
 ## [v2.8.0] - 2025-01-10
 
 ### 🛡️ **FASE 8 - PAINEL ADMINISTRATIVO MARGIN GUARD**

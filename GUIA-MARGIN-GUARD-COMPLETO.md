@@ -515,3 +515,4 @@ Para dúvidas ou problemas com o sistema Margin Guard:
 4. **Acesse o painel administrativo**: `http://localhost:13000/admin/margin-guard-plans`
 
 **Sistema desenvolvido com ❤️ para máxima proteção das suas posições!** 🛡️
+

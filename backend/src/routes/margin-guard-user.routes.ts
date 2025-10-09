@@ -211,3 +211,4 @@ export async function marginGuardUserRoutes(fastify: FastifyInstance) {
     marginGuardUserController.getCurrentConfiguration.bind(marginGuardUserController)
   );
 }
+

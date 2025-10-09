@@ -1,0 +1,232 @@
+{
+  "summary": "Plataforma completa de automação de trading para LN Markets com Margin Guard, simulações em tempo real, sistema multi-exchange e dashboard administrativo. Arquitetura robusta com Node.js/Fastify, React/Vite, PostgreSQL/Prisma e Redis/BullMQ.",
+  "how_to_run_local": {
+    "commands": [
+      "cd /home/bychrisr/projects/hub-defisats",
+      "docker compose -f config/docker/docker-compose.dev.yml up -d",
+      "sleep 15 && docker compose -f config/docker/docker-compose.dev.yml ps",
+      "curl -s 'http://localhost:13010/api/version' | jq .",
+      "curl -s -I 'http://localhost:13000' | head -5"
+    ],
+    "env_vars_needed": [
+      "DATABASE_URL=postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public",
+      "REDIS_URL=redis://redis:6379",
+      "JWT_SECRET=development-jwt-secret-key-32-chars-minimum",
+      "ENCRYPTION_KEY=development-encryption-key-32-chars",
+      "LN_MARKETS_API_BASE_URL=https://api.lnmarkets.com/v2"
+    ],
+    "notes": "Usa Docker Compose para desenvolvimento. Backend na porta 13010, frontend na 13000. Workers opcionais com profile 'workers'."
+  },
+  "docker_compose": {
+    "exists": true,
+    "path": "config/docker/docker-compose.dev.yml",
+    "snippet": "services:\n  postgres:\n    image: postgres:15-alpine\n    environment:\n      POSTGRES_DB: hubdefisats\n      POSTGRES_USER: hubdefisats\n      POSTGRES_PASSWORD: hubdefisats_dev_password\n    ports:\n      - \"15432:5432\"\n  redis:\n    image: redis:7\n    ports:\n      - \"16379:6379\"\n  backend:\n    build:\n      context: ../../backend\n      dockerfile: Dockerfile.dev\n    ports:\n      - \"13010:3010\"\n  frontend:\n    build:\n      context: ../../frontend\n      dockerfile: Dockerfile.dev\n    ports:\n      - \"13000:3001\""
+  },
+  "prisma_schema": {
+    "path": "backend/prisma/schema.prisma",
+    "db_migrations_status": "up-to-date"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "auth": "none",
+      "description": "Registro de usuário com validação LN Markets",
+      "sample_request": "curl -X POST http://localhost:13010/api/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"test@example.com\",\"password\":\"password123\",\"ln_markets_api_key\":\"key\",\"ln_markets_api_secret\":\"secret\",\"ln_markets_passphrase\":\"passphrase\"}'",
+      "sample_response": "{\"success\":true,\"data\":{\"user\":{\"id\":\"uuid\",\"email\":\"test@example.com\",\"plan_type\":\"free\"}}}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "auth": "none",
+      "description": "Login de usuário",
+      "sample_request": "curl -X POST http://localhost:13010/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@example.com\",\"password\":\"password123\"}'",
+      "sample_response": "{\"success\":true,\"data\":{\"access_token\":\"jwt_token\",\"refresh_token\":\"refresh_token\"}}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/lnmarkets-robust/dashboard",
+      "auth": "jwt",
+      "description": "Dashboard unificado com dados LN Markets",
+      "sample_request": "curl -H 'Authorization: Bearer jwt_token' http://localhost:13010/api/lnmarkets-robust/dashboard",
+      "sample_response": "{\"success\":true,\"data\":{\"balance\":{\"total\":1000000},\"positions\":[],\"ticker\":{\"price\":50000}}}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations",
+      "auth": "jwt",
+      "description": "Criar automação (Margin Guard, TP/SL, Auto Entry)",
+      "sample_request": "curl -X POST -H 'Authorization: Bearer jwt_token' -H 'Content-Type: application/json' -d '{\"type\":\"margin_guard\",\"config\":{\"threshold\":0.8,\"action\":\"close\"}}' http://localhost:13010/api/automations",
+      "sample_response": "{\"success\":true,\"data\":{\"id\":\"uuid\",\"type\":\"margin_guard\",\"is_active\":true}}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/simulations",
+      "auth": "jwt",
+      "description": "Criar simulação em tempo real",
+      "sample_request": "curl -X POST -H 'Authorization: Bearer jwt_token' -H 'Content-Type: application/json' -d '{\"name\":\"Test Simulation\",\"scenario\":\"bull\",\"automation_type\":\"margin_guard\",\"config\":{\"duration\":300}}' http://localhost:13010/api/simulations",
+      "sample_response": "{\"success\":true,\"data\":{\"id\":\"uuid\",\"status\":\"pending\"}}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/lightning",
+      "auth": "jwt",
+      "description": "Criar invoice Lightning para pagamento",
+      "sample_request": "curl -X POST -H 'Authorization: Bearer jwt_token' -H 'Content-Type: application/json' -d '{\"plan_type\":\"basic\"}' http://localhost:13010/api/payments/lightning",
+      "sample_response": "{\"success\":true,\"data\":{\"invoice\":\"lnbc...\",\"amount\":10000,\"expires_at\":\"2024-01-01T00:00:00Z\"}}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/dashboard",
+      "auth": "jwt",
+      "description": "Dashboard administrativo com métricas",
+      "sample_request": "curl -H 'Authorization: Bearer jwt_token' http://localhost:13010/api/admin/dashboard",
+      "sample_response": "{\"success\":true,\"data\":{\"totalUsers\":100,\"activeUsers\":50,\"monthlyRevenue\":50000}}"
+    }
+  ],
+  "workers_and_queues": [
+    {
+      "name": "margin-guard",
+      "queue": "margin-guard-queue",
+      "path": "backend/src/workers/margin-guard.worker.ts",
+      "concurrency_config": "concurrency: 5, removeOnComplete: 100, removeOnFail: 50",
+      "retries": 3
+    },
+    {
+      "name": "margin-monitor",
+      "queue": "margin-check",
+      "path": "backend/src/workers/margin-monitor.ts",
+      "concurrency_config": "priority: 10, removeOnComplete: 50, removeOnFail: 50",
+      "retries": 3
+    },
+    {
+      "name": "automation-executor",
+      "queue": "automation-execute",
+      "path": "backend/src/workers/automation-executor.ts",
+      "concurrency_config": "priority: 8, removeOnComplete: 100, removeOnFail: 50",
+      "retries": 3
+    },
+    {
+      "name": "notification-worker",
+      "queue": "notification",
+      "path": "backend/src/workers/notification.ts",
+      "concurrency_config": "removeOnComplete: 50, removeOnFail: 25",
+      "retries": 3
+    },
+    {
+      "name": "payment-validator",
+      "queue": "payment-validate",
+      "path": "backend/src/workers/payment-validator.ts",
+      "concurrency_config": "removeOnComplete: 50, removeOnFail: 25",
+      "retries": 5
+    }
+  ],
+  "notifications": {
+    "telegram": {
+      "status": "poc",
+      "bot_token_env": "TELEGRAM_BOT_TOKEN",
+      "example_payload": "{\"number\":\"5511999999999\",\"text\":\"⚠️ Margem crítica! Margin Ratio: 92%\"}"
+    },
+    "whatsapp_evolution": {
+      "status": "poc",
+      "connector": "puppeteer",
+      "webhook_paths": ["/api/notifications/evolution/webhook"]
+    },
+    "smtp": {
+      "status": "poc",
+      "envs": ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS"],
+      "send_test_command": "curl -X POST http://localhost:13010/api/notifications/test-email"
+    }
+  },
+  "payments_lightning": {
+    "strategy": "BTCPay",
+    "btcpay_stack": {
+      "path_compose": "unknown",
+      "lnd_or_cln": "LND",
+      "invoice_flow": "create invoice → confirm → webhook → reconcile → update user plan",
+      "webhook_path": "/api/payments/webhook",
+      "idempotency": "handled via payment_id in database",
+      "sample_webhook": "{\"type\":\"invoice_payment\",\"data\":{\"id\":\"invoice_id\",\"status\":\"paid\",\"amount\":10000}}"
+    },
+    "how_to_simulate_payment": "curl -X POST http://localhost:13010/api/payments/lightning -d '{\"plan_type\":\"basic\"}' | jq -r '.data.invoice' | lncli payinvoice --invoice",
+    "open_tasks": ["Integrar BTCPay Server", "Configurar webhook de pagamento", "Implementar reconciliação automática"]
+  },
+  "ci_cd": {
+    "gh_actions": {
+      "exists": false,
+      "path": ".github/workflows/",
+      "triggers": ["push/main"],
+      "secrets_needed": ["DOCKER_REGISTRY_TOKEN", "DEPLOY_SSH_KEY", "DATABASE_URL", "REDIS_URL", "JWT_SECRET", "ENCRYPTION_KEY"]
+    },
+    "deploy_process": "Manual: docker compose -f config/docker/docker-compose.prod.yml up -d",
+    "recommended_improvements": ["Implementar GitHub Actions", "Adicionar testes automatizados", "Configurar deploy automático"]
+  },
+  "db_and_backup": {
+    "postgres_schema_path": "backend/prisma/schema.prisma",
+    "backup_restore_commands": [
+      "pg_dump -h localhost -p 15432 -U hubdefisats -d hubdefisats > backup.sql",
+      "pg_restore -h localhost -p 15432 -U hubdefisats -d hubdefisats backup.sql"
+    ],
+    "snapshot_recommendation": "yes - daily automated backups with retention policy"
+  },
+  "observability": {
+    "logs_location": {
+      "backend": "/var/log/hub-defisats-backend.log",
+      "n8n": "unknown",
+      "btcpay": "unknown"
+    },
+    "how_to_tail": [
+      "docker logs -f hub-defisats-backend",
+      "docker logs -f hub-defisats-margin-monitor"
+    ],
+    "metrics": "Prometheus endpoints: /api/metrics, Grafana dashboards: unknown"
+  },
+  "security": {
+    "secrets_handling": "stored in .env files, not in version control",
+    "jwt_keys_path": "backend/src/config/env.ts",
+    "recommended_changes": ["Implementar HashiCorp Vault", "Rotação automática de chaves", "Auditoria de acesso"]
+  },
+  "blockers_and_repro": [
+    {
+      "title": "LN Markets API Rate Limiting",
+      "how_to_reproduce": ["Executar múltiplas automações simultaneamente", "Verificar logs de erro 429"],
+      "logs_examples": "Rate limit exceeded: 100 requests per minute",
+      "priority": "medium"
+    },
+    {
+      "title": "WebSocket Connection Drops",
+      "how_to_reproduce": ["Manter dashboard aberto por mais de 2 horas", "Verificar reconexões automáticas"],
+      "logs_examples": "WebSocket connection lost, attempting reconnection...",
+      "priority": "low"
+    }
+  ],
+  "tests": {
+    "unit": {
+      "cmd": "npm run test",
+      "coverage": "unknown",
+      "path": "backend/src/__tests__"
+    },
+    "e2e": {
+      "cmd": "npm run test:e2e",
+      "how_to_run": "unknown",
+      "fixtures": "unknown"
+    }
+  },
+  "missing_files_and_requests": [
+    ".env.example",
+    "docker-compose.prod.yml",
+    "btcpay-compose.yml",
+    "n8n workflows export",
+    "openapi.yaml",
+    "seed data fixtures",
+    "backup scripts",
+    "monitoring dashboards"
+  ],
+  "recommendations_priority": [
+    "1. Implementar BTCPay Server para pagamentos Lightning",
+    "2. Configurar n8n workflows para automações",
+    "3. Criar GitHub Actions para CI/CD",
+    "4. Implementar sistema de backup automatizado",
+    "5. Configurar monitoramento com Prometheus/Grafana"
+  ]
+}
