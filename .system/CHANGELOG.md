@@ -6,6 +6,25 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [v2.8.1-WIP] - 2025-01-10
 
+### 🎨 **MOBILE NAVIGATION - ANIMAÇÃO DE COR SUTIL**
+
+#### ✨ **Nova Funcionalidade**
+- **Animação de Cor no Ícone Central**: Ícone do botão central agora anima suavemente entre azul e roxo
+- **Cores do Design System**: Utiliza as cores oficiais `#3773F5` (azul) e `#8A2BE2` (roxo)
+- **Animação Sutil**: Transição suave de 4 segundos sem glow ou efeitos excessivos
+- **Integração Perfeita**: Mantém a estética elegante da navegação mobile
+
+#### 🔧 **Implementação Técnica**
+- **Classe CSS Customizada**: `.icon-gradient` com animação `colorShift`
+- **Keyframes CSS**: Transição suave entre as cores oficiais
+- **Compatibilidade**: Funciona perfeitamente com ícones SVG do Lucide React
+- **Performance**: Animação otimizada com `ease-in-out` para suavidade
+
+#### 📱 **Componente Atualizado**
+- **Arquivo**: `frontend/src/components/layout/MobileNavigationReference.tsx`
+- **Estilo**: `frontend/src/index.css` com animação customizada
+- **Resultado**: Ícone central com animação de cor elegante e sutil
+
 ### 🛡️ **FASE 8.1 - SEPARAÇÃO COMPLETA ADMIN/USER MARGIN GUARD**
 
 #### 🎯 **Sistema de Separação Admin/User 100% Implementado**

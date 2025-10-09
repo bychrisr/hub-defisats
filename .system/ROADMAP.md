@@ -4,11 +4,11 @@
 
 Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organizado em fases que vão desde o setup inicial até a comercialização completa. Cada fase tem objetivos claros, entregas específicas e critérios de sucesso.
 
-## Status Atual: v2.5.4 ✅ COMPLETA
+## Status Atual: v2.8.1-WIP 🚧 EM DESENVOLVIMENTO
 
-**Versão**: v2.5.4  
-**Status**: Exchanges Management 100% Funcional  
-**Data**: 2025-01-09
+**Versão**: v2.8.1-WIP  
+**Status**: Mobile Navigation Animation Implementada  
+**Data**: 2025-01-10
 
 ### Funcionalidades Implementadas
 - ✅ Sistema de Simulações em Tempo Real
@@ -30,6 +30,7 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **CRÍTICO**: Prisma Race Condition Resolvido
 - ✅ **CRÍTICO**: Login UX Melhorado
 - ✅ **CRÍTICO**: Workers Estáveis e Funcionais
+- ✅ **Mobile Navigation Animation** - Ícone central com animação de cor sutil
 - ✅ **NOVO**: Store Global Zustand para Dados Centralizados
 - ✅ **NOVO**: Validação Real de Credenciais LN Markets
 - ✅ **NOVO**: Status de Conexão Consistente entre Componentes
@@ -134,6 +135,7 @@ Este roadmap apresenta o planejamento técnico do projeto Hub-defisats, organiza
 - ✅ **CRÍTICO**: Prisma Race Condition Resolvido
 - ✅ **CRÍTICO**: Login UX Melhorado
 - ✅ **CRÍTICO**: Workers Estáveis e Funcionais
+- ✅ **Mobile Navigation Animation** - Ícone central com animação de cor sutil
 - ✅ **NOVO**: Store Global Zustand para Dados Centralizados
 - ✅ **NOVO**: Validação Real de Credenciais LN Markets
 - ✅ **NOVO**: Status de Conexão Consistente entre Componentes

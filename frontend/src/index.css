@@ -4,6 +4,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Animação de gradiente sutil para o ícone central */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Classe para ícone com gradiente animado */
+.icon-gradient {
+  color: #3773F5;
+  animation: colorShift 4s ease-in-out infinite;
+}
+
+@keyframes colorShift {
+  0% {
+    color: #3773F5;
+  }
+  50% {
+    color: #8A2BE2;
+  }
+  100% {
+    color: #3773F5;
+  }
+}
+
 /* Axisor Design System - Dark Mode First */
 
 @layer base {

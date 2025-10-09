@@ -1,5 +1,5 @@
 import { DesktopHeader } from './DesktopNavigation';
-import { MobileNavigationSimple as MobileNavigation } from './MobileNavigationSimple';
+import { MobileNavigationReference as MobileNavigation } from './MobileNavigationReference';
 import LNMarketsHeader from './LNMarketsHeader';
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
