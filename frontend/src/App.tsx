@@ -46,6 +46,7 @@ import { Logs } from '@/pages/Logs';
 import Reports from '@/pages/Reports';
 import Positions from '@/pages/Positions';
 import PositionsRefactored from '@/pages/PositionsRefactored';
+import PositionsNew from '@/pages/Positions/index';
 import Backtests from '@/pages/Backtests';
 import Trading from '@/pages/Trading';
 import Simulation from '@/pages/Simulation';
@@ -370,7 +371,7 @@ const App = () => {
                 <ProtectedRoute>
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
-                      <Positions />
+                      <PositionsNew />
                     </ResponsiveLayout>
                   </RouteGuard>
                 </ProtectedRoute>
