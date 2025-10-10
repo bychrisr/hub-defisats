@@ -2,9 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
 import { useWebSocket } from './useWebSocket';
+import { useActiveAccountData } from './useActiveAccountData';
 
 interface DashboardData {
   user: any;
+  accountId?: string;
+  accountName?: string;
+  exchangeName?: string;
   balance: any;
   positions: any[];
   estimatedBalance: any;
@@ -35,6 +39,9 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<number | null>(null);
   const [cacheHit, setCacheHit] = useState(false);
+
+  // Hook para escutar mudanças de conta ativa
+  const { accountInfo, refreshDashboardData } = useActiveAccountData();
 
   // Verificar se é admin
   const isAdmin = user?.is_admin || false;
@@ -79,7 +86,15 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
         });
 
 
-        setData(dashboardData.data);
+        // Incluir informações da conta ativa nos dados
+        const enhancedData = {
+          ...dashboardData.data,
+          accountId: dashboardData.data.accountId || accountInfo?.accountId,
+          accountName: dashboardData.data.accountName || accountInfo?.accountName,
+          exchangeName: dashboardData.data.exchangeName || accountInfo?.exchangeName
+        };
+        
+        setData(enhancedData);
         setLastUpdate(dashboardData.data.lastUpdate);
         setCacheHit(dashboardData.data.cacheHit);
       } else {
@@ -101,7 +116,25 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, user?.id, isAdmin]);
+  }, [isAuthenticated, user?.id, isAdmin, accountInfo]);
+
+  // ========================================================================
+  // ESCUTAR MUDANÇAS DE CONTA ATIVA VIA WEBSOCKET
+  // ========================================================================
+  
+  useEffect(() => {
+    if (accountInfo?.accountId) {
+      console.log('🔄 OPTIMIZED DASHBOARD - Active account changed, refreshing data:', {
+        accountId: accountInfo.accountId,
+        accountName: accountInfo.accountName,
+        exchangeName: accountInfo.exchangeName,
+        timestamp: new Date(accountInfo.timestamp).toISOString()
+      });
+      
+      // Refresh automático quando conta ativa mudar
+      fetchDashboardData();
+    }
+  }, [accountInfo?.accountId, fetchDashboardData]);
 
   // WebSocket para atualizações em tempo real (integrado com LNMarketsRobustService)
   const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;

@@ -12,6 +12,8 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { Logger } from 'winston';
 import { LNMarketsRobustService } from '../services/LNMarketsRobustService';
+import { DashboardDataService } from '../services/dashboard-data.service';
+import { AccountCredentialsService } from '../services/account-credentials.service';
 
 export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
   console.log('🚀 LN MARKETS ROBUST ROUTES - Initializing...');
@@ -22,6 +24,13 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
   if (!prisma) {
     throw new Error('Prisma client not available in Fastify instance');
   }
+  
+  // Initialize multi-account services
+  const accountCredentialsService = new AccountCredentialsService(prisma);
+  const dashboardDataService = new DashboardDataService({
+    prisma,
+    accountCredentialsService
+  });
   
   console.log('✅ LN MARKETS ROBUST ROUTES - Dependencies injected successfully');
 
@@ -35,7 +44,7 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
       const startTime = Date.now();
       const requestId = `robust-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
-      console.log(`\n🚀🚀🚀 [${requestId}] ===== LN MARKETS ROBUST DASHBOARD START =====`);
+      console.log(`\n🚀🚀🚀 [${requestId}] ===== LN MARKETS ROBUST DASHBOARD START (MULTI-ACCOUNT) =====`);
       console.log(`📅 [${requestId}] Timestamp: ${new Date().toISOString()}`);
       console.log(`⏱️ [${requestId}] Start Time: ${startTime}`);
       
@@ -57,27 +66,42 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
         console.log(`✅ [${requestId}] User authenticated: ${userId}`);
 
         // ========================================================================
-        // FASE 2: BUSCA DE CREDENCIAIS
+        // FASE 2: BUSCA DE DADOS DA CONTA ATIVA (MULTI-ACCOUNT)
         // ========================================================================
         
-        const credentialsStartTime = Date.now();
+        const dataFetchStartTime = Date.now();
         
-        const userProfile = await prisma.user.findUnique({
-          where: { id: userId },
-          select: {
-            ln_markets_api_key: true,
-            ln_markets_api_secret: true,
-            ln_markets_passphrase: true,
-            email: true,
-            username: true,
-            plan_type: true,
-          },
+        console.log(`🔄 [${requestId}] Fetching dashboard data for active account...`);
+        
+        const dashboardResult = await dashboardDataService.getDashboardDataWithFallback(userId);
+        
+        console.log(`✅ [${requestId}] Dashboard data fetched (${Date.now() - dataFetchStartTime}ms):`, {
+          success: dashboardResult.success,
+          hasActiveAccount: dashboardResult.hasActiveAccount,
+          hasData: !!dashboardResult.data,
+          accountId: dashboardResult.data?.accountId,
+          accountName: dashboardResult.data?.accountName,
+          exchangeName: dashboardResult.data?.exchangeName
         });
 
-        if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
-          console.log(`⚠️ [${requestId}] User has no LN Markets credentials, returning public data`);
+        // ========================================================================
+        // FASE 3: TRATAMENTO DE CASOS SEM CONTA ATIVA
+        // ========================================================================
+        
+        if (!dashboardResult.success || !dashboardResult.hasActiveAccount) {
+          console.log(`⚠️ [${requestId}] No active account found, returning public data`);
           
-          // Retornar dados públicos quando usuário não tem credenciais
+          // Buscar dados do usuário para resposta pública
+          const userProfile = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+              email: true,
+              username: true,
+              plan_type: true,
+            },
+          });
+
+          // Retornar dados públicos quando usuário não tem conta ativa
           const publicMarketData = {
             index: 122850,
             index24hChange: 0.856,
@@ -91,10 +115,13 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
           const publicDashboardData = {
             user: {
               id: userId,
-              email: userProfile.email,
-              username: userProfile.username,
-              plan_type: userProfile.plan_type
+              email: userProfile?.email,
+              username: userProfile?.username,
+              plan_type: userProfile?.plan_type
             },
+            accountId: null,
+            accountName: null,
+            exchangeName: null,
             balance: null,
             positions: [],
             estimatedBalance: null,
@@ -104,7 +131,7 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
             lastUpdate: Date.now(),
             cacheHit: false,
             credentialsConfigured: false,
-            message: 'LN Markets credentials not configured. Please configure your API credentials in settings to access your trading data.'
+            message: dashboardResult.error || 'No active exchange account found. Please configure your exchange credentials and set an active account.'
           };
 
           return reply.send({
@@ -115,123 +142,61 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
           });
         }
 
-        console.log(`✅ [${requestId}] Credentials found (${Date.now() - credentialsStartTime}ms)`);
-
         // ========================================================================
-        // FASE 3: DESCRIPTOGRAFIA INTELIGENTE
-        // ========================================================================
-        
-        const decryptStartTime = Date.now();
-        
-        const { AuthService } = await import('../services/auth.service');
-        const authService = new AuthService(prisma, request.server);
-        
-        let credentials;
-        
-        // Detectar se credenciais estão criptografadas
-        const isEncrypted = userProfile.ln_markets_api_key?.includes(':') && 
-                           /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || '');
-        
-        if (isEncrypted) {
-          console.log(`🔐 [${requestId}] Credentials are encrypted, decrypting...`);
-          try {
-            credentials = {
-              apiKey: authService.decryptData(userProfile.ln_markets_api_key),
-              apiSecret: authService.decryptData(userProfile.ln_markets_api_secret),
-              passphrase: authService.decryptData(userProfile.ln_markets_passphrase),
-            };
-            console.log(`✅ [${requestId}] Credentials decrypted successfully`);
-          } catch (decryptError: any) {
-            console.log(`⚠️ [${requestId}] Decryption failed, using fallback: ${decryptError.message}`);
-            credentials = {
-              apiKey: 'test-api-key',
-              apiSecret: 'test-api-secret',
-              passphrase: 'test-passphrase',
-            };
-          }
-        } else {
-          console.log(`🔓 [${requestId}] Credentials are plain text, using directly`);
-          credentials = {
-            apiKey: userProfile.ln_markets_api_key,
-            apiSecret: userProfile.ln_markets_api_secret,
-            passphrase: userProfile.ln_markets_passphrase,
-          };
-        }
-
-        console.log(`✅ [${requestId}] Credentials processed (${Date.now() - decryptStartTime}ms)`);
-
-        // ========================================================================
-        // FASE 4: SERVIÇO ROBUSTO E OTIMIZADO
-        // ========================================================================
-        
-        const serviceStartTime = Date.now();
-        
-        const lnMarketsService = new LNMarketsRobustService({
-          ...credentials,
-          isTestnet: false,
-        }, logger);
-
-        console.log(`✅ [${requestId}] Robust service initialized (${Date.now() - serviceStartTime}ms)`);
-
-        // ========================================================================
-        // FASE 5: BUSCA ÚNICA OTIMIZADA
-        // ========================================================================
-        
-        const dataFetchStartTime = Date.now();
-        
-        console.log(`🚀 [${requestId}] Fetching all data in single optimized request...`);
-        const allData = await lnMarketsService.getAllUserData();
-        
-        console.log(`✅ [${requestId}] All data fetched successfully (${Date.now() - dataFetchStartTime}ms)`);
-
-        // ========================================================================
-        // FASE 6: ESTRUTURAÇÃO ESCALÁVEL
+        // FASE 4: ESTRUTURAÇÃO DOS DADOS DA CONTA ATIVA
         // ========================================================================
         
         const processingStartTime = Date.now();
         
+        const dashboardData = dashboardResult.data!;
+        
+        // Buscar dados do usuário para resposta completa
+        const userProfile = await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            email: true,
+            username: true,
+            plan_type: true,
+          },
+        });
+
         const response = {
           success: true,
           data: {
             // Dados do usuário da nossa plataforma
             user: {
               id: userId,
-              email: userProfile.email,
-              username: userProfile.username,
-              plan_type: userProfile.plan_type,
+              email: userProfile?.email,
+              username: userProfile?.username,
+              plan_type: userProfile?.plan_type,
             },
+            
+            // Informações da conta ativa
+            accountId: dashboardData.accountId,
+            accountName: dashboardData.accountName,
+            exchangeName: dashboardData.exchangeName,
             
             // TODOS os dados da LN Markets estruturados
             lnMarkets: {
-              // Dados completos
-              rawData: allData,
-              
               // Dados estruturados para fácil acesso
-              user: allData.user,
-              balance: allData.balance,
-              positions: allData.positions,
-              market: allData.market,
-              deposits: allData.deposits,
-              withdrawals: allData.withdrawals,
-              orders: allData.orders,
-              trades: allData.trades,
+              balance: dashboardData.balance,
+              positions: dashboardData.positions,
+              ticker: dashboardData.ticker,
               
               // Metadados
               metadata: {
-                lastUpdate: new Date().toISOString(),
-                dataSource: 'lnmarkets-robust-service',
-                version: '3.0.0',
-                signatureFormat: 'adaptive',
-                optimizationLevel: 'single-request'
+                lastUpdate: new Date(dashboardData.timestamp).toISOString(),
+                dataSource: 'dashboard-data-service-multi-account',
+                version: '4.0.0',
+                accountId: dashboardData.accountId,
+                accountName: dashboardData.accountName,
+                exchangeName: dashboardData.exchangeName
               }
             },
             
             // Métricas de performance
             performance: {
               totalDuration: Date.now() - startTime,
-              credentialsDuration: Date.now() - credentialsStartTime,
-              decryptDuration: Date.now() - decryptStartTime,
-              serviceDuration: Date.now() - serviceStartTime,
               dataFetchDuration: Date.now() - dataFetchStartTime,
               processingDuration: Date.now() - processingStartTime,
             },
@@ -239,15 +204,20 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
             // Status geral
             status: {
               apiConnected: true,
-              dataAvailable: allData.user !== null || allData.positions.length > 0,
-              lastSync: new Date().toISOString(),
-              serviceType: 'robust-optimized'
+              dataAvailable: dashboardData.positions.length > 0 || dashboardData.balance !== null,
+              lastSync: new Date(dashboardData.timestamp).toISOString(),
+              serviceType: 'multi-account-optimized',
+              activeAccount: {
+                id: dashboardData.accountId,
+                name: dashboardData.accountName,
+                exchange: dashboardData.exchangeName
+              }
             }
           },
-          message: 'LN Markets dashboard data fetched successfully with robust service',
+          message: `Dashboard data fetched successfully for active account: ${dashboardData.accountName} (${dashboardData.exchangeName})`,
           requestId,
           timestamp: new Date().toISOString(),
-          version: '3.0.0'
+          version: '4.0.0'
         };
 
         logger.info(`🎉 [${requestId}] Request completed successfully in ${Date.now() - startTime}ms`);

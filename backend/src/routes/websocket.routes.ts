@@ -19,6 +19,9 @@ export async function websocketRoutes(fastify: FastifyInstance) {
       return;
     }
 
+    // ✅ ARMAZENAR USER ID NA CONEXÃO PARA BROADCAST
+    connection.userId = userId;
+
     // ✅ MENSAGEM DE BOAS-VINDAS (como commit estável)
     connection.send(JSON.stringify({
       type: 'connection',

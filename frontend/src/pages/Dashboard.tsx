@@ -42,6 +42,7 @@ import { useFormatSats } from '@/hooks/useFormatSats';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
+import { useActiveAccountData } from '@/hooks/useActiveAccountData';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { LNMarketsError } from '@/components/LNMarketsError';
 import { PnLCard } from '@/components/dashboard/PnLCard';
@@ -85,6 +86,9 @@ export default function Dashboard() {
   
   // Dados de posições otimizados
   const { positions: optimizedPositions } = useOptimizedPositions();
+
+  // Hook para informações da conta ativa
+  const { accountInfo, hasActiveAccount } = useActiveAccountData();
   // ✅ DADOS DE TESTE PARA SIMULAR POSIÇÕES
   const testPositions = useMemo(() => {
     // Simular 2 posições para teste
@@ -747,7 +751,21 @@ export default function Dashboard() {
 
         {/* Nova Linha - Cards Principais */}
         <div className="space-y-3 sm:space-y-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-vibrant">Key Metrics</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl sm:text-2xl font-bold text-vibrant">Key Metrics</h2>
+            {/* Badge da conta ativa */}
+            {hasActiveAccount && accountInfo ? (
+              <Badge variant="outline" className="text-sm">
+                <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
+                {accountInfo.exchangeName} - {accountInfo.accountName}
+              </Badge>
+            ) : (
+              <Badge variant="destructive" className="text-sm">
+                <XCircle className="w-3 h-3 mr-1" />
+                Nenhuma conta ativa
+              </Badge>
+            )}
+          </div>
           
           {/* Cards com degradês coloridos - Layout responsivo */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">

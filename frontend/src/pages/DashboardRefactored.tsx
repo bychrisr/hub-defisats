@@ -12,6 +12,7 @@ import { useAutomationStore } from '@/stores/automationStore';
 import { useLNMarketsRefactoredDashboard, useLNMarketsRefactoredMetrics, useLNMarketsRefactoredPositions, useLNMarketsRefactoredTicker, useLNMarketsRefactoredConnectionStatus, useLNMarketsRefactoredRealtime } from '@/hooks/useLNMarketsRefactored';
 import { useOptimizedMarketData } from '@/hooks/useOptimizedMarketData';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
+import { useActiveAccountData } from '@/hooks/useActiveAccountData';
 import { useUserBalance } from '@/contexts/RealtimeDataContext';
 import { useCredentialsError } from '@/contexts/PositionsContext';
 import { useFormatSats } from '@/hooks/useFormatSats';
@@ -66,6 +67,9 @@ export default function DashboardRefactored() {
     lastUpdate,
     cacheHit
   } = useLNMarketsRefactoredDashboard();
+
+  // Hook para informações da conta ativa
+  const { accountInfo, hasActiveAccount } = useActiveAccountData();
   
   // Métricas refatoradas da dashboard
   const {
@@ -189,7 +193,21 @@ export default function DashboardRefactored() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard Refatorado</h1>
+          <div className="flex items-center gap-4 mb-2">
+            <h1 className="text-3xl font-bold">Dashboard Refatorado</h1>
+            {/* Badge da conta ativa */}
+            {hasActiveAccount && accountInfo ? (
+              <Badge variant="outline" className="text-sm">
+                <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
+                {accountInfo.exchangeName} - {accountInfo.accountName}
+              </Badge>
+            ) : (
+              <Badge variant="destructive" className="text-sm">
+                <XCircle className="w-3 h-3 mr-1" />
+                Nenhuma conta ativa
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground">
             Dados da LN Markets API v2 refatorada
             {lastUpdate && (

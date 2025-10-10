@@ -12,10 +12,12 @@ import { CredentialCacheService } from './credential-cache.service';
 import { Redis } from 'ioredis';
 
 // Create Redis connection for caching
-const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
+const redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379', {
+  maxRetriesPerRequest: 3,
   enableReadyCheck: false,
   lazyConnect: true,
+  retryDelayOnFailover: 100,
+  connectTimeout: 10000,
 });
 
 // Create credential cache service
@@ -513,5 +515,3 @@ process.on('SIGINT', async () => {
   await redis.disconnect();
   process.exit(0);
 });
-
-export { AccountCredentialsService };

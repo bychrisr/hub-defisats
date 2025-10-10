@@ -339,6 +339,46 @@ export class UserExchangeAccountController {
         accountName: account.account_name
       });
 
+      // ========================================================================
+      // EMITIR EVENTO WEBSOCKET PARA MUDANÇA DE CONTA ATIVA
+      // ========================================================================
+      
+      try {
+        const fastifyInstance = (request as any).server;
+        
+        if (fastifyInstance && fastifyInstance.websocketServer) {
+          console.log('🔌 USER EXCHANGE ACCOUNT CONTROLLER - Broadcasting active account change via WebSocket');
+          
+          // Enviar evento para todos os clientes WebSocket conectados deste usuário
+          fastifyInstance.websocketServer.clients.forEach((client: any) => {
+            if (client.userId === user.id && client.readyState === 1) { // WebSocket.OPEN = 1
+              const websocketMessage = {
+                type: 'active_account_changed',
+                accountId: account.id,
+                accountName: account.account_name,
+                exchangeName: account.exchange.name,
+                exchangeId: account.exchange.id,
+                timestamp: Date.now()
+              };
+              
+              console.log('📡 USER EXCHANGE ACCOUNT CONTROLLER - Sending WebSocket message:', {
+                userId: user.id,
+                message: websocketMessage
+              });
+              
+              client.send(JSON.stringify(websocketMessage));
+            }
+          });
+          
+          console.log('✅ USER EXCHANGE ACCOUNT CONTROLLER - WebSocket event broadcasted successfully');
+        } else {
+          console.warn('⚠️ USER EXCHANGE ACCOUNT CONTROLLER - WebSocket server not available');
+        }
+      } catch (websocketError) {
+        console.error('❌ USER EXCHANGE ACCOUNT CONTROLLER - Error broadcasting WebSocket event:', websocketError);
+        // Não falhar a requisição por erro no WebSocket
+      }
+
       return reply.status(200).send({
         success: true,
         data: {
