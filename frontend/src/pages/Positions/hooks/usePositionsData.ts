@@ -113,6 +113,11 @@ export const usePositionsData = (): PositionsData => {
         fundingCost: pos.fundingCost,
         createdAt: pos.createdAt,
         timestamp: pos.timestamp,
+        // ✅ VERIFICAR SE LN MARKETS JÁ RETORNA MARGIN RATIO
+        marginRatio: pos.marginRatio,
+        margin_ratio: pos.margin_ratio,
+        ratio: pos.ratio,
+        marginRatioFromAPI: pos.marginRatio || pos.margin_ratio || pos.ratio,
         allKeys: Object.keys(pos)
       });
 
@@ -222,22 +227,51 @@ function calculatePLPercentage(position: any, currentPrice: number): number {
 }
 
 function calculateMarginRatio(position: any, totalBalance?: number): number {
+  // ✅ PRIORIDADE: Verificar se LN Markets já retorna o marginRatio
+  if (position.marginRatio !== undefined && position.marginRatio !== null) {
+    console.log('🔍 MARGIN RATIO FROM API:', {
+      positionId: position.id || position.uid,
+      marginRatioFromAPI: position.marginRatio,
+      source: 'LN Markets API'
+    });
+    return position.marginRatio;
+  }
+  
+  // ✅ FALLBACK: Se não tiver margin_ratio ou ratio
+  if (position.margin_ratio !== undefined && position.margin_ratio !== null) {
+    console.log('🔍 MARGIN RATIO FROM API (snake_case):', {
+      positionId: position.id || position.uid,
+      marginRatioFromAPI: position.margin_ratio,
+      source: 'LN Markets API (snake_case)'
+    });
+    return position.margin_ratio;
+  }
+  
+  if (position.ratio !== undefined && position.ratio !== null) {
+    console.log('🔍 MARGIN RATIO FROM API (ratio):', {
+      positionId: position.id || position.uid,
+      marginRatioFromAPI: position.ratio,
+      source: 'LN Markets API (ratio)'
+    });
+    return position.ratio;
+  }
+  
   if (!position.margin) {
     return 0;
   }
   
-  // ✅ CORREÇÃO: LN Markets calcula Margin Ratio como Margin / (Quantity * Price) * 100
-  // Baseado na investigação, esta é a fórmula que mais se aproxima dos valores da LN Markets
+  // ✅ CALCULO MANUAL: LN Markets calcula Margin Ratio como Margin / (Quantity * Price) * 100
   if (position.quantity && position.price) {
     const marginRatio = (position.margin / (position.quantity * position.price)) * 100;
     
-    console.log('🔍 MARGIN RATIO CORRECTED:', {
+    console.log('🔍 MARGIN RATIO CALCULATED:', {
       positionId: position.id || position.uid,
       margin: position.margin,
       quantity: position.quantity,
       price: position.price,
       marginRatio: marginRatio,
-      formula: 'margin / (quantity * price) * 100'
+      formula: 'margin / (quantity * price) * 100',
+      source: 'Manual calculation'
     });
     
     return marginRatio;
