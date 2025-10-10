@@ -43,11 +43,27 @@ export const RobustAuthGuard: React.FC<RobustAuthGuardProps> = ({
             error: null
           });
         } else {
-          console.log('🔧 ROBUST AUTH GUARD - Com token, definindo estado autenticado');
+          console.log('🔧 ROBUST AUTH GUARD - Com token, validando...');
+          // ✅ CORREÇÃO: Não assumir que token = autenticado, validar primeiro
           useAuthStore.setState({
-            isLoading: false,
-            isInitialized: true,
+            isLoading: true,
+            isInitialized: false,
             error: null
+          });
+          
+          // Validar token em background
+          useAuthStore.getState().getProfile().catch((error) => {
+            console.log('❌ ROBUST AUTH GUARD - Token validation failed:', error.message);
+            // Se falhar, limpar tokens e desautenticar
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            useAuthStore.setState({
+              isAuthenticated: false,
+              user: null,
+              isLoading: false,
+              isInitialized: true,
+              error: null
+            });
           });
         }
         

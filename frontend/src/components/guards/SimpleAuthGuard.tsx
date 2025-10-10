@@ -54,9 +54,18 @@ export const SimpleAuthGuard: React.FC<SimpleAuthGuardProps> = ({
         
       } catch (error) {
         console.error('❌ SIMPLE AUTH GUARD - Error during initialization:', error);
-        // Limpar tokens inválidos
+        // Limpar tokens inválidos e atualizar estado
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        
+        // ✅ CORREÇÃO: Atualizar o estado do store para não autenticado
+        useAuthStore.setState({
+          isAuthenticated: false,
+          user: null,
+          isLoading: false,
+          isInitialized: true,
+          error: null
+        });
       } finally {
         setIsInitialized(true);
       }
@@ -66,6 +75,19 @@ export const SimpleAuthGuard: React.FC<SimpleAuthGuardProps> = ({
     const timeout = setTimeout(() => {
       if (!isInitialized) {
         console.log('⏰ SIMPLE AUTH GUARD - Timeout reached, forcing initialization');
+        
+        // ✅ CORREÇÃO: Se timeout atingido, verificar token e definir estado apropriado
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          useAuthStore.setState({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false,
+            isInitialized: true,
+            error: null
+          });
+        }
+        
         setIsInitialized(true);
       }
     }, 5000);
