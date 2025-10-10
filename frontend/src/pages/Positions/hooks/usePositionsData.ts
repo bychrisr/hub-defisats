@@ -103,15 +103,7 @@ export const usePositionsData = (): PositionsData => {
         allKeys: Object.keys(pos)
       });
 
-      // 🔍 DEBUG DETALHADO - Verificar TODOS os campos disponíveis
-      console.log('🔍 POSITION ALL FIELDS DETECTED:');
-      console.log('  Position ID:', pos.id || pos.uid);
-      console.log('  All Keys:', Object.keys(pos));
-      console.log('  Liquidation:', pos.liquidation);
-      console.log('  Trading Fees:', pos.tradingFees);
-      console.log('  Funding Cost:', pos.fundingCost);
-      console.log('  Created At:', pos.createdAt);
-      console.log('  Raw Position Object:', pos);
+      // ✅ Field mapping corrected based on actual API response
 
       return {
         id: pos.id || pos.uid,
@@ -122,15 +114,15 @@ export const usePositionsData = (): PositionsData => {
         leverage: pos.leverage || 1,
         margin: pos.margin || 0,
         tradeMargin: pos.tradeMargin || 0,
-        liquidationPrice: pos.liquidation || pos.liquidationPrice || 0,
-        stopLoss: pos.stopLoss,
-        takeProfit: pos.takeProfit,
+        liquidationPrice: pos.liquidation || 0, // ✅ CORRETO: liquidation existe
+        stopLoss: pos.stoploss || pos.stopLoss,
+        takeProfit: pos.takeprofit || pos.takeProfit,
         pl,
         plPercentage,
         marginRatio,
-        tradingFees: pos.tradingFees || 0,
-        fundingCost: pos.fundingCost || 0,
-        createdAt: pos.createdAt || pos.timestamp,
+        tradingFees: pos.opening_fee || pos.closing_fee || 0, // ✅ CORRETO: opening_fee existe
+        fundingCost: pos.sum_carry_fees || 0, // ✅ CORRETO: sum_carry_fees existe
+        createdAt: pos.creation_ts || pos.market_filled_ts || pos.createdAt,
         updatedAt: pos.updatedAt || pos.timestamp,
         status: pos.status || 'running',
         currentPL: pl,
