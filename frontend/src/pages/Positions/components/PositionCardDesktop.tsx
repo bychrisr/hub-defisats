@@ -148,9 +148,8 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
               <DollarSign className="h-3 w-3" />
               <span>Quantity</span>
             </div>
-            <div className="font-mono text-[#E6E6E6] flex items-center gap-1">
-              {formatSats(position.quantity)}
-              <SatsIcon size={14} variant="neutral" />
+            <div className="font-mono text-[#E6E6E6]">
+              ${position.quantity.toLocaleString('pt-BR')}
             </div>
           </div>
 
@@ -161,7 +160,7 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
               <span>Price</span>
             </div>
             <div className="font-mono text-[#E6E6E6]">
-              {formatCurrency(position.entryPrice)}
+              ${position.entryPrice.toLocaleString('pt-BR')}
             </div>
           </div>
 
@@ -172,7 +171,7 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
               <span>Liquidation</span>
             </div>
             <div className="font-mono text-[#E6E6E6]">
-              {formatCurrency(position.liquidationPrice)}
+              ${position.liquidationPrice ? position.liquidationPrice.toLocaleString('pt-BR') : 'N/A'}
             </div>
           </div>
 
@@ -203,7 +202,7 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
           <div className="space-y-1">
             <div className="flex items-center space-x-1 text-[#B8BCC8]">
               <div className="w-2 h-2 bg-[#0ECB81] rounded-full"></div>
-              <span>Margin Ratio</span>
+              <span>Ratio</span>
             </div>
             <div className="font-mono text-[#0ECB81]">
               {position.marginRatio.toFixed(1)}%
@@ -248,7 +247,7 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
           </div>
           
           <div className="text-xs">
-            Created: {new Date(position.createdAt).toLocaleDateString('pt-BR')}
+            Created: {position.createdAt ? new Date(position.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
           </div>
         </div>
 

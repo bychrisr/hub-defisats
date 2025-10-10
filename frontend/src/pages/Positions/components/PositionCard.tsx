@@ -134,9 +134,8 @@ export const PositionCard: React.FC<PositionCardProps> = ({
               <DollarSign className="h-4 w-4" />
               <span>Quantity</span>
             </div>
-            <div className="font-mono text-[#E6E6E6] flex items-center gap-1">
-              {formatSats(position.quantity)}
-              <SatsIcon size={14} variant="neutral" />
+            <div className="font-mono text-[#E6E6E6]">
+              ${position.quantity.toLocaleString('pt-BR')}
             </div>
           </div>
 
@@ -153,10 +152,10 @@ export const PositionCard: React.FC<PositionCardProps> = ({
           <div className="space-y-2">
             <div className="flex items-center space-x-2 text-sm text-[#B8BCC8]">
               <DollarSign className="h-4 w-4" />
-              <span>Entry</span>
+              <span>Price</span>
             </div>
             <div className="font-mono text-[#E6E6E6]">
-              {formatCurrency(position.entryPrice)}
+              ${position.entryPrice.toLocaleString('pt-BR')}
             </div>
           </div>
 
@@ -166,7 +165,7 @@ export const PositionCard: React.FC<PositionCardProps> = ({
               <span>Liquidation</span>
             </div>
             <div className="font-mono text-[#E6E6E6]">
-              {formatCurrency(position.liquidationPrice)}
+              ${position.liquidationPrice ? position.liquidationPrice.toLocaleString('pt-BR') : 'N/A'}
             </div>
           </div>
         </div>
@@ -197,18 +196,31 @@ export const PositionCard: React.FC<PositionCardProps> = ({
         {/* Footer com métricas e ações */}
         <div className="pt-3 border-t border-[#2A3441]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-[#0ECB81] rounded-full"></div>
-                <span className="text-[#B8BCC8]">Margin Ratio</span>
-                <span className="font-mono text-[#0ECB81]">
-                  {position.marginRatio.toFixed(1)}%
-                </span>
+            <div className="flex flex-col space-y-2 text-sm">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-[#0ECB81] rounded-full"></div>
+                  <span className="text-[#B8BCC8]">Ratio</span>
+                  <span className="font-mono text-[#0ECB81]">
+                    {position.marginRatio.toFixed(1)}%
+                  </span>
+                </div>
+                
+                <div className="text-[#B8BCC8] flex items-center gap-1">
+                  Fees: {formatSats(position.tradingFees)}
+                  <SatsIcon size={12} variant="neutral" />
+                </div>
               </div>
               
-              <div className="text-[#B8BCC8] flex items-center gap-1">
-                Fees: {formatSats(position.tradingFees)}
-                <SatsIcon size={12} variant="neutral" />
+              <div className="flex items-center space-x-4">
+                <div className="text-[#B8BCC8] flex items-center gap-1">
+                  Funding: {formatSats(position.fundingCost)}
+                  <SatsIcon size={12} variant="neutral" />
+                </div>
+                
+                <div className="text-[#B8BCC8] text-xs">
+                  Created: {position.createdAt ? new Date(position.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
+                </div>
               </div>
             </div>
 
