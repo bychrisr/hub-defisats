@@ -342,11 +342,14 @@ export async function lnmarketsCentralizedRoutes(fastify: FastifyInstance) {
         // ========================================================================
         
         const serviceStartTime = Date.now();
-        const { LNMarketsAPIService } = await import('../services/lnmarkets-api.service');
-        const lnMarketsService = new LNMarketsAPIService({
-          ...credentials,
-          isTestnet: false,
-        }, logger);
+        const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');
+        const lnMarketsService = new LNMarketsAPIv2({
+          credentials: {
+            ...credentials,
+            isTestnet: false
+          },
+          logger: logger
+        });
 
         logger.info(`✅ [${requestId}] LN Markets service initialized (${Date.now() - serviceStartTime}ms)`);
 
