@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { createLNMarketsService, LNMarketsService } from './lnmarkets.service';
+import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 
 const prisma = new PrismaClient();
 
@@ -66,14 +66,18 @@ export class BacktestService {
     }
 
     // Create LN Markets service
-    const lnMarkets = createLNMarketsService({
-      apiKey: user.ln_markets_api_key,
-      apiSecret: user.ln_markets_api_secret,
-      passphrase: user.ln_markets_passphrase || '',
+    const lnMarkets = new LNMarketsAPIv2({
+      credentials: {
+        apiKey: user.ln_markets_api_key,
+        apiSecret: user.ln_markets_api_secret,
+        passphrase: user.ln_markets_passphrase || '',
+        isTestnet: false
+      },
+      logger: console as any
     });
 
     // Get historical trades
-    const historicalTrades = await lnMarkets.getClosedTrades(config.startDate, config.endDate);
+    const historicalTrades = await lnMarkets.futures.getClosedTrades(config.startDate, config.endDate);
 
     if (historicalTrades.length === 0) {
       throw new Error('No historical trades found for the specified period');
