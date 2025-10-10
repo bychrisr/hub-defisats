@@ -21,6 +21,7 @@ import {
   PieChart,
   BarChart3,
   HelpCircle,
+  XCircle,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useAutomationStore } from '@/stores/automation';
