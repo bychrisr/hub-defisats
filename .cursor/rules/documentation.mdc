@@ -1,0 +1,344 @@
+# Regras de Documentação para Cursor AI
+
+## 🎯 Objetivo
+
+Garantir que toda documentação criada ou atualizada pela Cursor AI siga os padrões estabelecidos em `.system/DOCUMENTATION_STANDARDS.md` e mantenha a qualidade exemplar demonstrada em `.system/docs/lnmarkets/`.
+
+## 📚 Regras Principais
+
+### 1. SEMPRE Seguir DOCUMENTATION_STANDARDS.md
+
+- **Estrutura de pastas padrão**: Use o template definido
+- **Template de arquivo obrigatório**: Todos os arquivos devem ter metadados
+- **Metadados completos**: Status, versão, data, responsável
+
+**Verificação:**
+```bash
+# Antes de commitar, verificar se documentação segue padrões
+cat .system/DOCUMENTATION_STANDARDS.md
+```
+
+### 2. Usar .system/docs/lnmarkets/ como Referência Gold Standard
+
+- **Copiar estrutura e estilo**: Mantenha mesmo padrão
+- **Manter mesmo nível de qualidade**: Não aceitar documentação inferior
+- **Seguir exemplos existentes**: Use como template
+
+**Exemplos de Qualidade:**
+- `.system/docs/lnmarkets/README.md` - Índice completo
+- `.system/docs/lnmarkets/internal-implementation/01-architecture.md` - Arquitetura detalhada
+- `.system/docs/lnmarkets/internal-implementation/02-best-practices.md` - Exemplos práticos
+- `.system/docs/lnmarkets/internal-implementation/05-examples.md` - Code snippets testados
+
+### 3. Separar external-api de internal-implementation
+
+**NUNCA misturar os dois contextos:**
+
+```
+✅ CORRETO:
+.system/docs/feature/
+├── external-api/          # API de terceiros (LN Markets, Stripe, etc.)
+│   └── 01-overview.md
+└── internal-implementation/  # Nossa implementação
+    └── 01-architecture.md
+
+❌ ERRADO:
+.system/docs/feature/
+└── implementation.md      # Mistura API externa com nossa implementação
+```
+
+### 4. Incluir Exemplos Práticos Testados
+
+- **Code snippets do projeto real**: Nunca inventar exemplos
+- **Não code snippets genéricos**: Usar código real do Axisor
+- **Testar antes de documentar**: Garantir que funciona
+
+**Exemplo:**
+```typescript
+// ✅ CORRETO: Código real do projeto
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: {
+    apiKey: credentials.credentials['API Key'],
+    apiSecret: credentials.credentials['API Secret'],
+    passphrase: credentials.credentials['Passphrase'],
+    isTestnet: false
+  },
+  logger: console as any
+});
+
+const user = await lnMarketsService.user.getUser();
+```
+
+### 5. Manter Metadados Atualizados
+
+**Sempre incluir no topo de cada arquivo:**
+
+```markdown
+# Feature Name - Document Title
+
+> **Status**: Active  
+> **Última Atualização**: 2025-01-09  
+> **Versão**: 1.0.0  
+> **Responsável**: System Name  
+```
+
+**Atualizar quando:**
+- Mudar conteúdo do documento
+- Deprecar funcionalidade
+- Versionar mudanças importantes
+
+### 6. Cross-References Devem Funcionar
+
+- **Testar todos os links**: Garantir que não estão quebrados
+- **Usar caminhos relativos**: Nunca absolutos
+- **Atualizar se arquivos movidos**: Manter referências corretas
+
+**Formato:**
+```markdown
+# ✅ CORRETO
+Ver [Arquitetura](./internal-implementation/01-architecture.md)
+Ver [Erro de Signature](./internal-implementation/04-troubleshooting.md#signature-is-not-valid)
+
+# ❌ ERRADO
+Ver Arquitetura (sem link)
+Ver /home/user/.system/docs/architecture.md (caminho absoluto)
+```
+
+### 7. Code Snippets Devem Ter Syntax Highlighting
+
+**Sempre especificar a linguagem:**
+
+```typescript
+// ✅ CORRETO
+const example = 'with highlighting';
+```
+
+```
+// ❌ ERRADO (sem linguagem especificada)
+const example = 'no highlighting';
+```
+
+**Incluir comentários explicativos:**
+```typescript
+const apiKey = credentials.credentials['API Key'];  // Access with bracket notation
+const balance = user.balance ?? 0;                   // Fallback to 0 if null
+```
+
+### 8. Diagramas Quando Úteis
+
+**Preferência:**
+1. **Mermaid** (código como diagrama)
+2. **ASCII art** (aceitável para diagramas simples)
+3. **Imagens** (último recurso)
+
+**Exemplo Mermaid:**
+```mermaid
+graph TB
+    A[Client] --> B[API]
+    B --> C[LNMarketsAPIv2]
+    C --> D[External API]
+```
+
+### 9. Changelog Sempre Atualizado
+
+**Toda mudança relevante deve estar no CHANGELOG:**
+
+```markdown
+## [Unreleased]
+
+### Added
+- Nova feature X com documentação completa
+- Documentação de troubleshooting para erro Y
+
+### Changed
+- Refatorada documentação de arquitetura
+- Atualizado diagrama de fluxo de dados
+
+### Fixed
+- Corrigido link quebrado em README
+- Atualizado exemplo de autenticação
+```
+
+### 10. Documentação Antes do Commit
+
+**Workflow obrigatório:**
+
+```bash
+# 1. Fazer mudança no código
+git add backend/src/services/new-service.ts
+
+# 2. Criar/Atualizar documentação
+git add .system/docs/feature/internal-implementation/01-architecture.md
+
+# 3. Atualizar CHANGELOG
+git add .system/CHANGELOG.md
+
+# 4. Commit incluindo tudo
+git commit -m "feat(feature): implement new service
+
+- Implement new service X
+- Add architecture documentation
+- Update changelog"
+```
+
+## 🚀 Comandos Úteis
+
+### Criar Nova Estrutura de Documentação
+
+```bash
+# Usar script automatizado
+./.system/scripts/create-docs-structure.sh stripe-integration
+
+# Resultado: Estrutura completa em .system/docs/stripe-integration/
+```
+
+### Verificar Markdown
+
+```bash
+# Validar sintaxe de todos os arquivos .md
+npx markdownlint-cli .system/docs/**/*.md
+
+# Verificar links quebrados
+npx markdown-link-check .system/docs/lnmarkets/README.md
+```
+
+### Gerar TOC Automático
+
+```bash
+# Gerar índice automaticamente
+npx markdown-toc -i .system/docs/feature/README.md
+```
+
+## 📋 Checklist de Qualidade
+
+Antes de marcar documentação como completa:
+
+- [ ] **Metadados**: Status, versão, data, responsável preenchidos
+- [ ] **TOC**: Índice presente e atualizado
+- [ ] **Code Snippets**: Testados e funcionais
+- [ ] **Exemplos Práticos**: Incluídos e reais (não genéricos)
+- [ ] **Cross-References**: Links funcionando corretamente
+- [ ] **Links para Código**: Referências ao código fonte
+- [ ] **Typos**: Sem erros ortográficos
+- [ ] **Markdown Válido**: Sem erros de sintaxe
+- [ ] **Diagramas**: Incluídos quando necessário
+- [ ] **Changelog**: Atualizado em `.system/CHANGELOG.md`
+- [ ] **Commit**: Documentação commitada junto com código
+
+## 🚨 Avisos Críticos
+
+### ❌ NUNCA Fazer
+
+1. **Documentação sem metadados**
+   ```markdown
+   ❌ ERRADO:
+   # Título
+   Conteúdo...
+   
+   ✅ CORRETO:
+   # Título
+   > **Status**: Active
+   > **Última Atualização**: 2025-01-09
+   Conteúdo...
+   ```
+
+2. **Code snippets sem syntax highlighting**
+   ````markdown
+   ❌ ERRADO:
+   ```
+   const x = 1;
+   ```
+   
+   ✅ CORRETO:
+   ```typescript
+   const x = 1;
+   ```
+   ````
+
+3. **Exemplos genéricos**
+   ```typescript
+   ❌ ERRADO:
+   const service = new Service();
+   
+   ✅ CORRETO:
+   const lnMarketsService = new LNMarketsAPIv2({
+     credentials: realCredentials,
+     logger: logger
+   });
+   ```
+
+4. **Links quebrados**
+   ```markdown
+   ❌ ERRADO:
+   Ver [Docs](./non-existent-file.md)
+   
+   ✅ CORRETO:
+   Ver [Architecture](./internal-implementation/01-architecture.md)
+   ```
+
+5. **Documentação desatualizada**
+   - Sempre atualizar quando código mudar
+   - Marcar como Deprecated se obsoleto
+   - Remover após período de transição
+
+### ✅ SEMPRE Fazer
+
+1. **Seguir DOCUMENTATION_STANDARDS.md**
+2. **Usar .system/docs/lnmarkets/ como referência**
+3. **Testar code snippets antes de documentar**
+4. **Atualizar CHANGELOG.md**
+5. **Commitar docs junto com código**
+6. **Verificar links funcionam**
+7. **Incluir metadados completos**
+8. **Separar external-api de internal-implementation**
+9. **Usar diagramas quando útil**
+10. **Manter qualidade gold standard**
+
+## 🎯 Exemplo de Workflow Completo
+
+```bash
+# 1. Criar nova feature
+mkdir -p backend/src/services/payment
+
+# 2. Criar documentação automaticamente
+./.system/scripts/create-docs-structure.sh payment-integration
+
+# 3. Implementar código
+vim backend/src/services/payment/payment.service.ts
+
+# 4. Preencher documentação
+vim .system/docs/payment-integration/internal-implementation/01-architecture.md
+vim .system/docs/payment-integration/internal-implementation/05-examples.md
+
+# 5. Adicionar exemplos testados
+npm test -- payment.service.test.ts
+
+# 6. Atualizar CHANGELOG
+vim .system/CHANGELOG.md
+
+# 7. Verificar markdown
+npx markdownlint-cli .system/docs/payment-integration/**/*.md
+
+# 8. Commit tudo junto
+git add backend/src/services/payment .system/docs/payment-integration .system/CHANGELOG.md
+git commit -m "feat(payment): implement payment integration
+
+- Implement payment service
+- Add complete documentation
+- Add examples and tests"
+
+# 9. Push
+git push origin feature/payment-integration
+```
+
+## 📚 Referências
+
+- [DOCUMENTATION_STANDARDS.md](../../.system/DOCUMENTATION_STANDARDS.md) - Padrões completos
+- [.system/docs/lnmarkets/](../../.system/docs/lnmarkets/) - Exemplo gold standard
+- [create-docs-structure.sh](../../.system/scripts/create-docs-structure.sh) - Script de criação
+
+---
+
+**Última Atualização**: 2025-01-09  
+**Versão**: 1.0.0  
+**Responsável**: Sistema de Documentação Axisor
