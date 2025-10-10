@@ -104,59 +104,14 @@ export const usePositionsData = (): PositionsData => {
       });
 
       // 🔍 DEBUG DETALHADO - Verificar TODOS os campos disponíveis
-      console.log('🔍 POSITION ALL FIELDS DETECTED:', {
-        positionId: pos.id || pos.uid,
-        // Campos de liquidação
-        liquidation: pos.liquidation,
-        liquidationPrice: pos.liquidationPrice,
-        liquidation_price: pos.liquidation_price,
-        
-        // Campos de taxas
-        tradingFees: pos.tradingFees,
-        trading_fees: pos.trading_fees,
-        fees: pos.fees,
-        openingFee: pos.openingFee,
-        opening_fee: pos.opening_fee,
-        
-        // Campos de funding
-        fundingCost: pos.fundingCost,
-        funding_cost: pos.funding_cost,
-        funding: pos.funding,
-        
-        // Campos de data
-        createdAt: pos.createdAt,
-        created_at: pos.created_at,
-        timestamp: pos.timestamp,
-        date: pos.date,
-        
-        // Todos os campos disponíveis
-        allFields: Object.keys(pos).reduce((acc, key) => {
-          acc[key] = pos[key];
-          return acc;
-        }, {} as any),
-        
-        // 🔍 LISTA COMPLETA DE CHAVES DISPONÍVEIS
-        allKeys: Object.keys(pos),
-        
-        // 🔍 CHAVES ESPECÍFICAS QUE PROCURAMOS
-        keysWeNeed: {
-          liquidation: pos.liquidation,
-          liquidationPrice: pos.liquidationPrice,
-          liquidation_price: pos.liquidation_price,
-          tradingFees: pos.tradingFees,
-          trading_fees: pos.trading_fees,
-          fees: pos.fees,
-          openingFee: pos.openingFee,
-          opening_fee: pos.opening_fee,
-          fundingCost: pos.fundingCost,
-          funding_cost: pos.funding_cost,
-          funding: pos.funding,
-          createdAt: pos.createdAt,
-          created_at: pos.created_at,
-          timestamp: pos.timestamp,
-          date: pos.date
-        }
-      });
+      console.log('🔍 POSITION ALL FIELDS DETECTED:');
+      console.log('  Position ID:', pos.id || pos.uid);
+      console.log('  All Keys:', Object.keys(pos));
+      console.log('  Liquidation:', pos.liquidation);
+      console.log('  Trading Fees:', pos.tradingFees);
+      console.log('  Funding Cost:', pos.fundingCost);
+      console.log('  Created At:', pos.createdAt);
+      console.log('  Raw Position Object:', pos);
 
       return {
         id: pos.id || pos.uid,
