@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { useActiveAccountData } from '@/hooks/useActiveAccountData';
 
 interface MarketData {
   // Dados do mercado
@@ -43,6 +44,7 @@ export const MarketDataProvider: React.FC<MarketDataProviderProps> = ({
   refreshInterval = 0 // Desabilitado por padrão para evitar recarregamentos
 }) => {
   const { isAuthenticated, user } = useAuthStore();
+  const { accountInfo } = useActiveAccountData(); // Escutar mudanças de conta ativa
   const [data, setData] = useState<MarketData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,43 +79,42 @@ export const MarketDataProvider: React.FC<MarketDataProviderProps> = ({
     setError(null);
 
     try {
-      // ✅ REQUISIÇÃO ÚNICA: Buscar todos os dados de uma vez
-      const [dashboardResponse, marketResponse] = await Promise.all([
-        api.get('/api/lnmarkets-robust/dashboard'),
-        api.get('/api/market/index/public')
-      ]);
-
+      // ✅ REQUISIÇÃO ÚNICA: Usar apenas o endpoint unificado que já tem tudo
+      const dashboardResponse = await api.get('/api/lnmarkets-robust/dashboard');
       const dashboardData = dashboardResponse.data;
-      const marketData = marketResponse.data;
 
-      console.log('📊 MARKET DATA - Data received:', {
+      console.log('📊 MARKET DATA - Data received from unified endpoint:', {
         dashboardSuccess: dashboardData.success,
-        marketSuccess: marketData.success,
-        positionsCount: dashboardData.data?.lnMarkets?.positions?.length || 0,
-        hasBalance: !!dashboardData.data?.lnMarkets?.balance,
-        btcPrice: marketData.data?.index || 0,
-        lnMarketsStructure: Object.keys(dashboardData.data?.lnMarkets || {})
+        positionsCount: dashboardData.data?.positions?.length || 0,
+        hasBalance: !!dashboardData.data?.balance,
+        hasMarketIndex: !!dashboardData.data?.marketIndex,
+        lnMarketsStructure: Object.keys(dashboardData.data || {}),
+        accountInfo: {
+          accountId: dashboardData.data?.accountId,
+          accountName: dashboardData.data?.accountName,
+          exchangeName: dashboardData.data?.exchangeName
+        }
       });
 
-      // ✅ CONSOLIDAR TODOS OS DADOS EM UM ÚNICO OBJETO
+      // ✅ CONSOLIDAR DADOS DO ENDPOINT UNIFICADO
       const consolidatedData: MarketData = {
-        // Dados do mercado
-        btcPrice: marketData.data?.index || 0,
-        marketIndex: marketData.data,
-        ticker: marketData.data,
+        // Dados do mercado (do endpoint unificado)
+        btcPrice: dashboardData.data?.marketIndex?.index || 0,
+        marketIndex: dashboardData.data?.marketIndex,
+        ticker: dashboardData.data?.marketIndex,
         
-        // Dados de posições (CORRIGIDO: usar lnMarkets.positions)
-        positions: dashboardData.data?.lnMarkets?.positions || [],
+        // Dados de posições (CORRIGIDO: usar posições diretas)
+        positions: dashboardData.data?.positions || [],
         
-        // Dados de saldo (CORRIGIDO: usar lnMarkets.balance)
-        balance: dashboardData.data?.lnMarkets?.balance,
-        estimatedBalance: dashboardData.data?.lnMarkets?.balance,
+        // Dados de saldo (CORRIGIDO: usar saldo direto)
+        balance: dashboardData.data?.balance,
+        estimatedBalance: dashboardData.data?.estimatedBalance || dashboardData.data?.balance,
         
         // Metadados
-        lastUpdate: Date.now(),
+        lastUpdate: dashboardData.data?.lastUpdate || Date.now(),
         isLoading: false,
         error: null,
-        cacheHit: false
+        cacheHit: dashboardData.data?.cacheHit || false
       };
 
       setData(consolidatedData);
@@ -150,6 +151,21 @@ export const MarketDataProvider: React.FC<MarketDataProviderProps> = ({
       isInitialLoad.current = false;
     }
   }, [isAuthenticated, user?.id, fetchAllMarketData]);
+
+  // ✅ ESCUTAR MUDANÇAS DE CONTA ATIVA
+  useEffect(() => {
+    if (accountInfo?.accountId) {
+      console.log('🔄 MARKET DATA - Active account changed, refreshing data:', {
+        accountId: accountInfo.accountId,
+        accountName: accountInfo.accountName,
+        exchangeName: accountInfo.exchangeName,
+        timestamp: new Date(accountInfo.timestamp).toISOString()
+      });
+      
+      // Refresh automático quando conta ativa mudar
+      fetchAllMarketData();
+    }
+  }, [accountInfo?.accountId, fetchAllMarketData]);
 
   // ✅ ATUALIZAÇÃO AUTOMÁTICA (OPCIONAL)
   useEffect(() => {
@@ -209,7 +225,14 @@ export const useMarketTicker = () => {
 
 export const useOptimizedPositions = () => {
   const { data, isLoading, error } = useMarketData();
-  
+
+  console.log('🔍 OPTIMIZED POSITIONS - Data:', {
+    hasData: !!data,
+    hasPositions: !!data?.positions,
+    positionsLength: data?.positions?.length || 0,
+    positions: data?.positions?.map(p => ({ id: p.id, pl: p.pl, side: p.side })) || []
+  });
+
   return {
     positions: data?.positions || [],
     isLoading,
@@ -220,11 +243,18 @@ export const useOptimizedPositions = () => {
 export const useOptimizedDashboardMetrics = () => {
   const { data } = useMarketData();
   
-  if (!data) {
+  if (!data || !data.positions) {
+    console.log('🔍 DASHBOARD METRICS - No data or positions available:', {
+      hasData: !!data,
+      hasPositions: !!data?.positions,
+      positionsLength: data?.positions?.length || 0
+    });
     return {
       totalPL: 0,
       totalMargin: 0,
-      positionCount: 0
+      positionCount: 0,
+      availableMargin: 0,
+      estimatedBalance: 0
     };
   }
 
@@ -232,11 +262,24 @@ export const useOptimizedDashboardMetrics = () => {
   const totalPL = data.positions.reduce((sum, pos) => sum + (pos.pl || 0), 0);
   const totalMargin = data.positions.reduce((sum, pos) => sum + (pos.margin || 0), 0);
   const positionCount = data.positions.length;
+  const availableMargin = data.balance?.balance || 0;
+  const estimatedBalance = (data.balance?.balance || 0) + totalPL;
+
+  console.log('📊 DASHBOARD METRICS - Calculated metrics:', {
+    totalPL,
+    totalMargin,
+    positionCount,
+    availableMargin,
+    estimatedBalance,
+    positions: data.positions.map(p => ({ id: p.id, pl: p.pl, margin: p.margin }))
+  });
 
   return {
     totalPL,
     totalMargin,
-    positionCount
+    positionCount,
+    availableMargin,
+    estimatedBalance
   };
 };
 
@@ -254,9 +297,19 @@ export const useBtcPrice = () => {
 export const useOptimizedMarketData = () => {
   const { data, isLoading, error } = useMarketData();
   
+  console.log('🔍 OPTIMIZED MARKET DATA - Data:', {
+    hasData: !!data,
+    hasMarketIndex: !!data?.marketIndex,
+    marketIndex: data?.marketIndex,
+    hasBalance: !!data?.balance
+  });
+  
   return {
     marketIndex: data?.marketIndex || null,
     ticker: data?.ticker || null,
+    balance: data?.balance || null,
+    deposits: data?.deposits || [],
+    withdrawals: data?.withdrawals || [],
     isLoading,
     error
   };
