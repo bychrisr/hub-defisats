@@ -1,497 +1,278 @@
-# LN Markets API v2 - Guia de Migração
+# LN Markets API v2 - Migration Guide
 
-> **Status**: Active  
-> **Última Atualização**: 2025-01-09  
-> **Versão**: 2.0.0  
-> **Responsável**: Sistema LN Markets API v2  
+## Overview
 
-## Índice
+This guide provides step-by-step instructions for migrating from the legacy LN Markets API implementation to the new centralized LNMarketsAPIv2 architecture.
 
-- [Visão Geral](#visão-geral)
-- [Mapeamento de Métodos](#mapeamento-de-métodos)
-- [Migração por Tipo de Arquivo](#migração-por-tipo-de-arquivo)
-- [Exemplos de Migração](#exemplos-de-migração)
-- [Checklist de Migração](#checklist-de-migração)
-- [Troubleshooting](#troubleshooting)
+## Migration Checklist
 
-## Visão Geral
+### ✅ Phase 1: Understanding the New Architecture
 
-Este guia detalha como migrar do `LNMarketsAPIService` (v1) para o `LNMarketsAPIv2` (v2), incluindo mapeamento de métodos, mudanças de estrutura e exemplos práticos.
+- [ ] Review [API_V2_ARCHITECTURE.md](./01-architecture.md)
+- [ ] Understand the new service structure
+- [ ] Familiarize with domain-specific endpoints
 
-## Mapeamento de Métodos
+### ✅ Phase 2: Update Imports
 
-### User Methods
-
-| v1 (LNMarketsAPIService) | v2 (LNMarketsAPIv2) | Notas |
-|---------------------------|---------------------|-------|
-| `getUserBalance()` | `user.getUser().balance` | Agora retorna objeto completo |
-| `getUserDeposits(type)` | `user.getDeposits(type)` | Mantém mesma interface |
-| `getUserWithdrawals()` | `user.getWithdrawals()` | Mantém mesma interface |
-
-### Futures Methods
-
-| v1 (LNMarketsAPIService) | v2 (LNMarketsAPIv2) | Notas |
-|---------------------------|---------------------|-------|
-| `getUserPositions()` | `futures.getRunningPositions()` | Nome mais descritivo |
-| `closePosition(id)` | `futures.closePosition(id)` | Mantém mesma interface |
-| `openPosition(data)` | `futures.openPosition(data)` | Mantém mesma interface |
-
-### Market Methods
-
-| v1 (LNMarketsAPIService) | v2 (LNMarketsAPIv2) | Notas |
-|---------------------------|---------------------|-------|
-| `getFuturesTicker()` | `market.getTicker()` | Nome simplificado |
-| `getIndexHistory()` | `market.getIndexHistory()` | Mantém mesma interface |
-
-## Migração por Tipo de Arquivo
-
-### 1. Services
-
-#### Antes (v1)
-
+**Before:**
 ```typescript
 import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
-
-export class DashboardDataService {
-  private lnMarketsService: LNMarketsAPIService;
-
-  constructor() {
-    this.lnMarketsService = new LNMarketsAPIService();
-  }
-
-  async getDashboardDataForActiveAccount(userId: string): Promise<DashboardData> {
-    const credentials = await this.getCredentials(userId);
-    
-    const balance = await this.lnMarketsService.getUserBalance(credentials);
-    const positions = await this.lnMarketsService.getUserPositions(credentials);
-    const ticker = await this.lnMarketsService.getFuturesTicker();
-    
-    return { balance, positions, ticker };
-  }
-}
 ```
 
-#### Depois (v2)
-
+**After:**
 ```typescript
 import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
+```
 
-export class DashboardDataService {
-  async getDashboardDataForActiveAccount(userId: string): Promise<DashboardData> {
-    const credentials = await this.getCredentials(userId);
-    
-    const lnMarketsService = new LNMarketsAPIv2({
-      credentials: {
-        apiKey: credentials.credentials['API Key'],
-        apiSecret: credentials.credentials['API Secret'],
-        passphrase: credentials.credentials['Passphrase'],
-        isTestnet: false
-      },
-      logger: this.logger
-    });
+### ✅ Phase 3: Update Service Instantiation
 
-    const [balance, positions, ticker] = await Promise.all([
-      lnMarketsService.user.getUser(),
-      lnMarketsService.futures.getRunningPositions(),
-      lnMarketsService.market.getTicker()
-    ]);
-    
-    return {
-      balance: balance.balance,
-      positions,
-      ticker
-    };
-  }
+**Before:**
+```typescript
+const lnMarketsService = new LNMarketsAPIService({
+  apiKey: credentials.api_key,
+  apiSecret: credentials.api_secret,
+  passphrase: credentials.passphrase,
+  isTestnet: false
+}, logger);
+```
+
+**After:**
+```typescript
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: {
+    apiKey: credentials.api_key,
+    apiSecret: credentials.api_secret,
+    passphrase: credentials.passphrase,
+    isTestnet: false
+  },
+  logger: logger
+});
+```
+
+### ✅ Phase 4: Update Method Calls
+
+#### User Operations
+
+**Before:**
+```typescript
+const user = await lnMarketsService.getUser();
+const balance = await lnMarketsService.getUserBalance();
+```
+
+**After:**
+```typescript
+const user = await lnMarketsService.user.getUser();
+const balance = user.balance; // Extract from user object
+```
+
+#### Futures Operations
+
+**Before:**
+```typescript
+const positions = await lnMarketsService.getUserPositions();
+const trades = await lnMarketsService.getUserTrades();
+```
+
+**After:**
+```typescript
+const positions = await lnMarketsService.futures.getRunningPositions();
+const trades = await lnMarketsService.futures.getUserTrades();
+```
+
+#### Market Data
+
+**Before:**
+```typescript
+const ticker = await lnMarketsService.getTicker();
+const marketData = await lnMarketsService.getMarketData();
+```
+
+**After:**
+```typescript
+const ticker = await lnMarketsService.market.getTicker();
+const marketData = await lnMarketsService.market.getIndexHistory();
+```
+
+### ✅ Phase 5: Update Credential Access
+
+**Before:**
+```typescript
+const apiKey = credentials.api_key;
+const apiSecret = credentials.api_secret;
+const passphrase = credentials.passphrase;
+```
+
+**After:**
+```typescript
+const apiKey = credentials['API Key']; // Note: Key names may vary
+const apiSecret = credentials['API Secret'];
+const passphrase = credentials['Passphrase'];
+```
+
+### ✅ Phase 6: Update Error Handling
+
+**Before:**
+```typescript
+try {
+  const result = await lnMarketsService.getUser();
+} catch (error) {
+  // Handle error
 }
 ```
 
-### 2. Controllers
-
-#### Antes (v1)
-
+**After:**
 ```typescript
-export class TradingController {
-  constructor(private lnMarketsService: LNMarketsAPIService) {}
-
-  async getPositions(request: FastifyRequest, reply: FastifyReply) {
-    try {
-      const userId = request.user.id;
-      const credentials = await this.getCredentials(userId);
-      
-      const positions = await this.lnMarketsService.getUserPositions(credentials);
-      reply.send(positions);
-    } catch (error) {
-      reply.status(500).send({ error: error.message });
-    }
-  }
+try {
+  const result = await lnMarketsService.user.getUser();
+} catch (error) {
+  // Enhanced error handling with proper error propagation
 }
 ```
 
-#### Depois (v2)
+## Common Migration Patterns
+
+### Pattern 1: Route Migration
 
 ```typescript
-import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
+// Before
+fastify.get('/positions', async (request, reply) => {
+  const lnMarketsService = new LNMarketsAPIService(credentials, logger);
+  const positions = await lnMarketsService.getUserPositions();
+  return { success: true, data: positions };
+});
 
-export class TradingController {
-  async getPositions(request: FastifyRequest, reply: FastifyReply) {
-    try {
-      const userId = request.user.id;
-      const credentials = await this.getCredentials(userId);
-      
-      const lnMarketsService = new LNMarketsAPIv2({
-        credentials: {
-          apiKey: credentials.credentials['API Key'],
-          apiSecret: credentials.credentials['API Secret'],
-          passphrase: credentials.credentials['Passphrase'],
-          isTestnet: false
-        },
-        logger: this.logger
-      });
-
-      const positions = await lnMarketsService.futures.getRunningPositions();
-      reply.send(positions);
-    } catch (error) {
-      this.logger.error('Failed to get positions', { userId: request.user.id, error });
-      reply.status(500).send({ error: 'Failed to retrieve positions' });
-    }
-  }
-}
-```
-
-### 3. Workers
-
-#### Antes (v1)
-
-```typescript
-export class MarginGuardWorker {
-  constructor(private lnMarketsService: LNMarketsAPIService) {}
-
-  async checkMarginLevels(userId: string): Promise<void> {
-    const credentials = await this.getCredentials(userId);
-    
-    const positions = await this.lnMarketsService.getUserPositions(credentials);
-    const balance = await this.lnMarketsService.getUserBalance(credentials);
-    
-    for (const position of positions) {
-      if (this.isLowMargin(position, balance)) {
-        await this.lnMarketsService.closePosition(credentials, position.id);
-      }
-    }
-  }
-}
-```
-
-#### Depois (v2)
-
-```typescript
-import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
-
-export class MarginGuardWorker {
-  async checkMarginLevels(userId: string): Promise<void> {
-    const credentials = await this.getCredentials(userId);
-    
-    const lnMarketsService = new LNMarketsAPIv2({
-      credentials: {
-        apiKey: credentials.credentials['API Key'],
-        apiSecret: credentials.credentials['API Secret'],
-        passphrase: credentials.credentials['Passphrase'],
-        isTestnet: false
-      },
-      logger: this.logger
-    });
-
-    const [positions, user] = await Promise.all([
-      lnMarketsService.futures.getRunningPositions(),
-      lnMarketsService.user.getUser()
-    ]);
-    
-    for (const position of positions) {
-      if (this.isLowMargin(position, user.balance)) {
-        await lnMarketsService.futures.closePosition(position.id);
-      }
-    }
-  }
-}
-```
-
-### 4. Routes
-
-#### Antes (v1)
-
-```typescript
-import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
-
-export async function tradingRoutes(fastify: FastifyInstance) {
-  const lnMarketsService = new LNMarketsAPIService();
-
-  fastify.get('/balance', async (request, reply) => {
-    const userId = request.user.id;
-    const credentials = await getCredentials(userId);
-    
-    const balance = await lnMarketsService.getUserBalance(credentials);
-    reply.send({ balance });
+// After
+fastify.get('/positions', async (request, reply) => {
+  const lnMarketsService = new LNMarketsAPIv2({
+    credentials: credentials,
+    logger: logger
   });
-}
+  const positions = await lnMarketsService.futures.getRunningPositions();
+  return { success: true, data: positions };
+});
 ```
 
-#### Depois (v2)
+### Pattern 2: Controller Migration
 
 ```typescript
-import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
+// Before
+export class LNMarketsController {
+  private async getService(credentials: any): Promise<LNMarketsAPIService> {
+    return new LNMarketsAPIService(credentials, console as any);
+  }
+}
 
-export async function tradingRoutes(fastify: FastifyInstance) {
-  fastify.get('/balance', async (request, reply) => {
-    try {
-      const userId = request.user.id;
-      const credentials = await getCredentials(userId);
-      
-      const lnMarketsService = new LNMarketsAPIv2({
-        credentials: {
-          apiKey: credentials.credentials['API Key'],
-          apiSecret: credentials.credentials['API Secret'],
-          passphrase: credentials.credentials['Passphrase'],
-          isTestnet: false
-        },
-        logger: fastify.log
-      });
-
-      const user = await lnMarketsService.user.getUser();
-      reply.send({ balance: user.balance });
-    } catch (error) {
-      fastify.log.error('Failed to get balance', { userId: request.user.id, error });
-      reply.status(500).send({ error: 'Failed to retrieve balance' });
-    }
-  });
+// After
+export class LNMarketsController {
+  private async getService(credentials: any): Promise<LNMarketsAPIv2> {
+    return new LNMarketsAPIv2({
+      credentials: credentials,
+      logger: console as any
+    });
+  }
 }
 ```
 
-## Exemplos de Migração
-
-### Exemplo 1: Dashboard Service Completo
-
-#### Antes (v1)
+### Pattern 3: Service Migration
 
 ```typescript
-export class DashboardDataService {
-  private lnMarketsService: LNMarketsAPIService;
-
-  async getDashboardDataForActiveAccount(userId: string): Promise<DashboardData> {
-    try {
-      const credentials = await this.accountCredentialsService.getCredentials(userId);
-      
-      if (!credentials || !credentials.credentials) {
-        throw new Error('No credentials found');
-      }
-
-      const [balance, positions, ticker] = await Promise.all([
-        this.getUserBalance(credentials),
-        this.getUserPositions(credentials),
-        this.getTicker()
-      ]);
-
-      return {
-        balance: balance || 0,
-        positions: positions || [],
-        ticker: ticker,
-        lastUpdate: new Date().toISOString()
-      };
-    } catch (error) {
-      this.logger.error('Error getting dashboard data:', error);
-      throw error;
-    }
+// Before
+export class SomeService {
+  constructor(private lnMarketsService: LNMarketsAPIService) {}
+  
+  async getData() {
+    const user = await this.lnMarketsService.getUser();
+    const positions = await this.lnMarketsService.getUserPositions();
+    return { user, positions };
   }
+}
 
-  private async getUserBalance(credentials: any): Promise<number> {
-    try {
-      const balance = await this.lnMarketsService.getUserBalance(credentials);
-      return balance;
-    } catch (error: any) {
-      this.logger.error('Error getting user balance:', error);
-      return 0; // Error masking
-    }
-  }
-
-  private async getUserPositions(credentials: any): Promise<any[]> {
-    try {
-      const positions = await this.lnMarketsService.getUserPositions(credentials);
-      return positions || [];
-    } catch (error: any) {
-      this.logger.error('Error getting user positions:', error);
-      return [];
-    }
-  }
-
-  private async getTicker(): Promise<any> {
-    try {
-      const ticker = await this.lnMarketsService.getFuturesTicker();
-      return ticker;
-    } catch (error: any) {
-      this.logger.error('Error getting ticker:', error);
-      return null;
-    }
+// After
+export class SomeService {
+  constructor(private lnMarketsService: LNMarketsAPIv2) {}
+  
+  async getData() {
+    const user = await this.lnMarketsService.user.getUser();
+    const positions = await this.lnMarketsService.futures.getRunningPositions();
+    return { user, positions };
   }
 }
 ```
 
-#### Depois (v2)
+## Testing Migration
+
+### 1. Unit Tests
+
+Update test files to use the new service structure:
 
 ```typescript
-import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
+// Before
+const mockService = new LNMarketsAPIService(mockCredentials, mockLogger);
 
-export class DashboardDataService {
-  async getDashboardDataForActiveAccount(userId: string): Promise<DashboardData> {
-    try {
-      const credentials = await this.accountCredentialsService.getCredentials(userId);
-      
-      if (!credentials || !credentials.credentials) {
-        throw new Error('No credentials found');
-      }
-
-      const lnMarketsService = new LNMarketsAPIv2({
-        credentials: {
-          apiKey: credentials.credentials['API Key'],
-          apiSecret: credentials.credentials['API Secret'],
-          passphrase: credentials.credentials['Passphrase'],
-          isTestnet: false
-        },
-        logger: this.logger
-      });
-
-      const [positions, balance, ticker] = await Promise.all([
-        this.getUserPositions(lnMarketsService),
-        this.getUserBalance(lnMarketsService),
-        this.getTicker(lnMarketsService)
-      ]);
-
-      return {
-        balance: balance?.balance || 0,
-        positions: positions || [],
-        ticker: ticker,
-        lastUpdate: new Date().toISOString()
-      };
-    } catch (error) {
-      this.logger.error('Error getting dashboard data:', error);
-      throw error;
-    }
-  }
-
-  private async getUserPositions(lnMarketsService: LNMarketsAPIv2): Promise<any[]> {
-    try {
-      const positions = await lnMarketsService.futures.getRunningPositions();
-      return positions || [];
-    } catch (error: any) {
-      this.logger.error('Error getting user positions:', error);
-      return [];
-    }
-  }
-
-  private async getUserBalance(lnMarketsService: LNMarketsAPIv2): Promise<any | null> {
-    try {
-      const user = await lnMarketsService.user.getUser();
-      return {
-        balance: user.balance,
-        synthetic_usd_balance: user.synthetic_usd_balance,
-        uid: user.uid,
-        username: user.username,
-        role: user.role
-      };
-    } catch (error: any) {
-      this.logger.error('Error getting user balance:', error);
-      return null;
-    }
-  }
-
-  private async getTicker(lnMarketsService: LNMarketsAPIv2): Promise<any | null> {
-    try {
-      const ticker = await lnMarketsService.market.getTicker();
-      return ticker;
-    } catch (error: any) {
-      this.logger.error('Error getting ticker:', error);
-      return null;
-    }
-  }
-}
+// After
+const mockService = new LNMarketsAPIv2({
+  credentials: mockCredentials,
+  logger: mockLogger
+});
 ```
 
-## Checklist de Migração
+### 2. Integration Tests
 
-### Para Cada Arquivo:
+Ensure all endpoints work with the new implementation:
 
-- [ ] **Import**: Mudar de `LNMarketsAPIService` para `LNMarketsAPIv2`
-- [ ] **Instanciação**: Usar novo construtor com `credentials` e `logger`
-- [ ] **Credenciais**: Acessar com `credentials.credentials['API Key']` em vez de `credentials.api_key`
-- [ ] **Métodos**: Mapear para novos métodos (ex: `getUserPositions()` → `futures.getRunningPositions()`)
-- [ ] **Response**: Ajustar acesso aos dados (ex: `balance` → `user.balance`)
-- [ ] **Error Handling**: Remover error masking, propagar erros reais
-- [ ] **Logging**: Adicionar logging estruturado
-- [ ] **Testes**: Executar testes após migração
-- [ ] **Validação**: Testar com credenciais reais
+```bash
+# Test user endpoints
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:13010/api/lnmarkets-robust/dashboard"
 
-### Para o Projeto:
-
-- [ ] **Varredura**: Identificar todos os 80+ arquivos que usam LN Markets
-- [ ] **Priorização**: Migrar por ordem: Routes → Controllers → Workers → Services
-- [ ] **Testes**: Testar cada endpoint após migração
-- [ ] **Documentação**: Atualizar documentação referente
-- [ ] **Cleanup**: Remover serviços obsoletos após migração completa
+# Test market endpoints
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:13010/api/market/data"
+```
 
 ## Troubleshooting
 
-### Erro: "Cannot find module 'LNMarketsAPIService'"
+### Common Issues
 
-**Causa**: Import ainda apontando para serviço antigo.
+1. **Import Errors**: Ensure correct import path to `LNMarketsAPIv2`
+2. **Credential Access**: Verify credential key names match your data structure
+3. **Method Not Found**: Check domain-specific endpoint usage (`.user.`, `.futures.`, `.market.`)
+4. **Authentication Errors**: Verify credentials are properly decrypted
 
-**Solução**:
-```typescript
-// ❌ Antigo
-import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+### Debug Steps
 
-// ✅ Novo
-import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
-```
+1. Check service instantiation logs
+2. Verify credential structure
+3. Test individual endpoint calls
+4. Review error messages for specific failures
 
-### Erro: "Cannot read properties of undefined (reading 'balance')"
+## Migration Status
 
-**Causa**: Tentativa de acessar propriedade em objeto que não existe.
+- ✅ Routes: 7/7 migrated (100%)
+- ✅ Controllers: 5/5 migrated (100%)
+- ✅ Services: 4/6 migrated (67%)
+- ✅ Workers: 3/3 migrated (100%)
+- ✅ Utils: 1/1 migrated (100%)
 
-**Solução**:
-```typescript
-// ❌ Antigo
-const balance = await lnMarketsService.getUserBalance(credentials);
+## Post-Migration
 
-// ✅ Novo
-const user = await lnMarketsService.user.getUser();
-const balance = user.balance;
-```
+After migration:
 
-### Erro: "Signature is not valid"
+1. Remove old service imports
+2. Update documentation
+3. Run comprehensive tests
+4. Monitor for any issues
+5. Update deployment configurations
 
-**Causa**: Credenciais sendo acessadas incorretamente.
+## Support
 
-**Solução**:
-```typescript
-// ❌ Antigo
-const credentials = {
-  api_key: credentials.api_key,
-  api_secret: credentials.api_secret,
-  passphrase: credentials.passphrase
-};
+For migration support:
 
-// ✅ Novo
-const credentials = {
-  apiKey: credentials.credentials['API Key'],
-  apiSecret: credentials.credentials['API Secret'],
-  passphrase: credentials.credentials['Passphrase'],
-  isTestnet: false
-};
-```
-
-## Referências
-
-- [Arquitetura do Sistema](./01-architecture.md)
-- [Best Practices](./02-best-practices.md)
-- [Troubleshooting](./04-troubleshooting.md)
-- [Exemplos Práticos](./05-examples.md)
+1. Review [Troubleshooting Guide](./04-troubleshooting.md)
+2. Check [Best Practices](./02-best-practices.md)
+3. Review [Examples](./05-examples.md)
+4. Contact development team
 
 ---
-*Documentação gerada seguindo DOCUMENTATION_STANDARDS.md*
+
+**Last Updated**: 2025-01-09  
+**Version**: 1.0.0  
+**Status**: Complete

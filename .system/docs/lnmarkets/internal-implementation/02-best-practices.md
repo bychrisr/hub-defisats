@@ -1,480 +1,439 @@
-# LN Markets API v2 - Guia de Boas Práticas
+# LN Markets API v2 - Best Practices
 
-> **Status**: Active  
-> **Última Atualização**: 2025-01-09  
-> **Versão**: 2.0.0  
-> **Responsável**: Sistema LN Markets API v2  
+## Overview
 
-## Índice
+This document outlines best practices for using the LNMarketsAPIv2 service in your application.
 
-- [Visão Geral](#visão-geral)
-- [Instanciação e Configuração](#instanciação-e-configuração)
-- [Uso em Rotas](#uso-em-rotas)
-- [Uso em Controllers](#uso-em-controllers)
-- [Uso em Workers](#uso-em-workers)
-- [Error Handling](#error-handling)
-- [Performance](#performance)
-- [Segurança](#segurança)
-- [Logging](#logging)
+## Service Instantiation
 
-## Visão Geral
-
-Este guia apresenta as melhores práticas para usar a LNMarketsAPIv2 em diferentes contextos da aplicação, garantindo código limpo, performático e seguro.
-
-## Instanciação e Configuração
-
-### ✅ Boa Prática: Factory Pattern
+### ✅ Correct Pattern
 
 ```typescript
-// ✅ CORRETO: Usar factory para criar instâncias
-class LNMarketsServiceFactory {
-  static createForUser(userId: string, logger: Logger): LNMarketsAPIv2 {
-    const credentials = this.getUserCredentials(userId);
-    
-    return new LNMarketsAPIv2({
-      credentials: {
-        apiKey: credentials.credentials['API Key'],
-        apiSecret: credentials.credentials['API Secret'],
-        passphrase: credentials.credentials['Passphrase'],
-        isTestnet: credentials.isTestnet || false
-      },
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
+
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: {
+    apiKey: 'your-api-key',
+    apiSecret: 'your-api-secret',
+    passphrase: 'your-passphrase',
+    isTestnet: false
+  },
+  logger: console as any // Use proper logger in production
+});
+```
+
+### ❌ Avoid
+
+```typescript
+// Don't use old service
+import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+
+// Don't create multiple instances unnecessarily
+const service1 = new LNMarketsAPIv2(config);
+const service2 = new LNMarketsAPIv2(config); // Reuse service1
+```
+
+## Credential Management
+
+### ✅ Secure Credential Handling
+
+```typescript
+// Decrypt credentials before use
+const authService = new AuthService(prisma, {} as any);
+const apiKey = authService.decryptData(user.ln_markets_api_key);
+const apiSecret = authService.decryptData(user.ln_markets_api_secret);
+const passphrase = authService.decryptData(user.ln_markets_passphrase);
+
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: {
+    apiKey,
+    apiSecret,
+    passphrase,
+    isTestnet: false
+  },
+  logger: logger
+});
+```
+
+### ❌ Avoid
+
+```typescript
+// Don't store credentials in plain text
+const credentials = {
+  apiKey: 'plain-text-key', // ❌ Never do this
+  apiSecret: 'plain-text-secret'
+};
+
+// Don't hardcode credentials
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: {
+    apiKey: 'hardcoded-key', // ❌ Never hardcode
+    apiSecret: 'hardcoded-secret'
+  }
+});
+```
+
+## Error Handling
+
+### ✅ Proper Error Handling
+
+```typescript
+try {
+  const user = await lnMarketsService.user.getUser();
+  const positions = await lnMarketsService.futures.getRunningPositions();
+  
+  return {
+    success: true,
+    data: {
+      user,
+      positions
+    }
+  };
+} catch (error: any) {
+  console.error('LN Markets API Error:', error);
+  
+  // Handle specific error types
+  if (error.message?.includes('Signature is not valid')) {
+    return {
+      success: false,
+      error: 'INVALID_CREDENTIALS',
+      message: 'API credentials are invalid'
+    };
+  }
+  
+  return {
+    success: false,
+    error: 'API_ERROR',
+    message: error.message || 'Unknown error occurred'
+  };
+}
+```
+
+### ❌ Avoid
+
+```typescript
+// Don't ignore errors
+const user = await lnMarketsService.user.getUser(); // ❌ No error handling
+
+// Don't expose sensitive error details
+catch (error) {
+  return { error: error.stack }; // ❌ Exposes sensitive info
+}
+```
+
+## Performance Optimization
+
+### ✅ Efficient Data Fetching
+
+```typescript
+// Use Promise.all for parallel requests
+const [user, positions, ticker] = await Promise.all([
+  lnMarketsService.user.getUser(),
+  lnMarketsService.futures.getRunningPositions(),
+  lnMarketsService.market.getTicker()
+]);
+
+// Cache service instances
+const serviceCache = new Map();
+function getCachedService(userId: string, credentials: any) {
+  if (!serviceCache.has(userId)) {
+    serviceCache.set(userId, new LNMarketsAPIv2({
+      credentials,
       logger: logger
-    });
+    }));
   }
+  return serviceCache.get(userId);
 }
 ```
 
-### ❌ Evitar: Instanciação Direta Repetitiva
+### ❌ Avoid
 
 ```typescript
-// ❌ ERRADO: Repetir lógica de instanciação
-const service1 = new LNMarketsAPIv2({ credentials: {...}, logger: ... });
-const service2 = new LNMarketsAPIv2({ credentials: {...}, logger: ... });
-```
+// Don't make sequential requests when parallel is possible
+const user = await lnMarketsService.user.getUser();
+const positions = await lnMarketsService.futures.getRunningPositions(); // ❌ Sequential
 
-### ✅ Boa Prática: Dependency Injection
-
-```typescript
-// ✅ CORRETO: Injetar dependências
-export class TradingService {
-  constructor(
-    private lnMarketsFactory: LNMarketsServiceFactory,
-    private logger: Logger
-  ) {}
-
-  async getUserBalance(userId: string): Promise<number> {
-    const service = this.lnMarketsFactory.createForUser(userId, this.logger);
-    const user = await service.user.getUser();
-    return user.balance;
-  }
+// Don't create new service instances for each request
+function getData(userId: string) {
+  const service = new LNMarketsAPIv2(config); // ❌ New instance every time
+  return service.user.getUser();
 }
 ```
 
-## Uso em Rotas
+## Logging Best Practices
 
-### ✅ Boa Prática: Service Layer
+### ✅ Proper Logging
 
 ```typescript
-// routes/trading.routes.ts
-export async function tradingRoutes(fastify: FastifyInstance) {
-  fastify.get('/balance', async (request, reply) => {
+const logger = {
+  info: (message: string, meta?: any) => console.log(`[LNMarketsAPI] ${message}`, meta),
+  error: (message: string, meta?: any) => console.error(`[LNMarketsAPI] ${message}`, meta),
+  warn: (message: string, meta?: any) => console.warn(`[LNMarketsAPI] ${message}`, meta),
+  debug: (message: string, meta?: any) => console.debug(`[LNMarketsAPI] ${message}`, meta)
+};
+
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: credentials,
+  logger: logger
+});
+
+// Log important operations
+logger.info('Fetching user data', { userId });
+const user = await lnMarketsService.user.getUser();
+logger.info('User data fetched successfully', { balance: user.balance });
+```
+
+### ❌ Avoid
+
+```typescript
+// Don't use console.log directly
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: credentials,
+  logger: console // ❌ Too generic
+});
+
+// Don't log sensitive data
+logger.info('User data', { apiKey: credentials.apiKey }); // ❌ Logs sensitive info
+```
+
+## Testing Best Practices
+
+### ✅ Proper Testing
+
+```typescript
+// Mock the service for unit tests
+const mockService = {
+  user: {
+    getUser: jest.fn().mockResolvedValue({
+      balance: 1000,
+      username: 'testuser'
+    })
+  },
+  futures: {
+    getRunningPositions: jest.fn().mockResolvedValue([])
+  },
+  market: {
+    getTicker: jest.fn().mockResolvedValue({
+      index: 50000,
+      timestamp: Date.now()
+    })
+  }
+};
+
+// Test with real service in integration tests
+const realService = new LNMarketsAPIv2({
+  credentials: testCredentials,
+  logger: mockLogger
+});
+```
+
+### ❌ Avoid
+
+```typescript
+// Don't use real credentials in tests
+const service = new LNMarketsAPIv2({
+  credentials: {
+    apiKey: 'real-production-key', // ❌ Never use real credentials in tests
+    apiSecret: 'real-production-secret'
+  }
+});
+```
+
+## Route Implementation
+
+### ✅ Proper Route Structure
+
+```typescript
+export async function lnMarketsRoutes(fastify: FastifyInstance) {
+  // GET /api/lnmarkets/positions
+  fastify.get('/positions', {
+    preHandler: [authMiddleware],
+    schema: {
+      description: 'Get LN Markets positions',
+      tags: ['LN Markets'],
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'array',
+              items: { type: 'object' }
+            }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
     try {
-      const userId = request.user.id;
-      const balance = await fastify.tradingService.getUserBalance(userId);
+      const userId = (request as any).user?.id;
       
-      reply.send({ balance });
-    } catch (error) {
-      fastify.log.error('Error fetching balance:', error);
-      reply.status(500).send({ error: 'Internal server error' });
+      // Get credentials
+      const credentials = await getCredentials(userId);
+      
+      // Create service
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: credentials,
+        logger: fastify.log
+      });
+      
+      // Fetch data
+      const positions = await lnMarketsService.futures.getRunningPositions();
+      
+      return reply.status(200).send({
+        success: true,
+        data: positions
+      });
+    } catch (error: any) {
+      fastify.log.error('Error fetching positions:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to fetch positions'
+      });
     }
   });
 }
 ```
 
-### ✅ Boa Prática: Validação de Input
+## Controller Implementation
+
+### ✅ Proper Controller Structure
 
 ```typescript
-// routes/positions.routes.ts
-const closePositionSchema = {
-  params: {
-    type: 'object',
-    properties: {
-      positionId: { type: 'string', minLength: 1 }
-    },
-    required: ['positionId']
-  }
-};
+export class LNMarketsController {
+  constructor(private prisma: PrismaClient) {}
 
-fastify.delete('/positions/:positionId', { schema: closePositionSchema }, async (request, reply) => {
-  const { positionId } = request.params;
-  const userId = request.user.id;
-  
-  try {
-    await fastify.tradingService.closePosition(userId, positionId);
-    reply.send({ success: true });
-  } catch (error) {
-    if (error.message.includes('Position not found')) {
-      reply.status(404).send({ error: 'Position not found' });
-    } else {
-      reply.status(500).send({ error: 'Failed to close position' });
+  private async getLNMarketsService(userId: string): Promise<LNMarketsAPIv2> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        ln_markets_api_key: true,
+        ln_markets_api_secret: true,
+        ln_markets_passphrase: true
+      }
+    });
+
+    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret) {
+      throw new Error('LN Markets credentials not configured');
+    }
+
+    const authService = new AuthService(this.prisma, {} as any);
+    const apiKey = authService.decryptData(user.ln_markets_api_key);
+    const apiSecret = authService.decryptData(user.ln_markets_api_secret);
+    const passphrase = authService.decryptData(user.ln_markets_passphrase);
+
+    return new LNMarketsAPIv2({
+      credentials: {
+        apiKey,
+        apiSecret,
+        passphrase,
+        isTestnet: false
+      },
+      logger: console as any
+    });
+  }
+
+  async getPositions(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userId = (request as any).user?.id;
+      const service = await this.getLNMarketsService(userId);
+      const positions = await service.futures.getRunningPositions();
+      
+      return reply.status(200).send({
+        success: true,
+        data: positions
+      });
+    } catch (error: any) {
+      console.error('Error getting positions:', error);
+      return reply.status(500).send({
+        success: false,
+        error: error.message
+      });
     }
   }
+}
+```
+
+## Security Considerations
+
+### ✅ Security Best Practices
+
+```typescript
+// Validate credentials before use
+function validateCredentials(credentials: any): boolean {
+  return !!(
+    credentials?.apiKey &&
+    credentials?.apiSecret &&
+    credentials?.passphrase &&
+    credentials.apiKey.length > 0 &&
+    credentials.apiSecret.length > 0
+  );
+}
+
+// Use proper error messages (don't expose internals)
+catch (error) {
+  if (error.message?.includes('Signature is not valid')) {
+    throw new Error('Invalid API credentials');
+  }
+  throw new Error('API request failed');
+}
+
+// Sanitize data before logging
+logger.info('User operation', {
+  userId: user.id,
+  operation: 'getPositions',
+  // Don't log: credentials, sensitive data
 });
 ```
 
-## Uso em Controllers
+## Monitoring and Observability
 
-### ✅ Boa Prática: Controller Focado
-
-```typescript
-// controllers/trading.controller.ts
-export class TradingController {
-  constructor(
-    private tradingService: TradingService,
-    private logger: Logger
-  ) {}
-
-  async getDashboardData(request: FastifyRequest, reply: FastifyReply) {
-    try {
-      const userId = request.user.id;
-      const data = await this.tradingService.getDashboardData(userId);
-      
-      this.logger.info('Dashboard data retrieved', { userId, positionsCount: data.positions.length });
-      reply.send(data);
-    } catch (error) {
-      this.logger.error('Failed to get dashboard data', { userId: request.user.id, error });
-      reply.status(500).send({ error: 'Failed to retrieve dashboard data' });
-    }
-  }
-
-  async openPosition(request: FastifyRequest, reply: FastifyReply) {
-    try {
-      const userId = request.user.id;
-      const positionData = request.body as OpenPositionRequest;
-      
-      // Validação de negócio
-      if (positionData.leverage > 10) {
-        return reply.status(400).send({ error: 'Leverage too high' });
-      }
-      
-      const position = await this.tradingService.openPosition(userId, positionData);
-      
-      this.logger.info('Position opened', { 
-        userId, 
-        positionId: position.id, 
-        side: position.side,
-        quantity: position.quantity 
-      });
-      
-      reply.send(position);
-    } catch (error) {
-      this.logger.error('Failed to open position', { userId: request.user.id, error });
-      reply.status(500).send({ error: 'Failed to open position' });
-    }
-  }
-}
-```
-
-## Uso em Workers
-
-### ✅ Boa Prática: Worker com Retry Logic
+### ✅ Proper Monitoring
 
 ```typescript
-// workers/margin-guard.worker.ts
-export class MarginGuardWorker {
-  constructor(
-    private lnMarketsFactory: LNMarketsServiceFactory,
-    private logger: Logger
-  ) {}
+// Add metrics and monitoring
+import { metrics } from '../utils/metrics';
 
-  async checkMarginLevels(userId: string): Promise<void> {
-    try {
-      const service = this.lnMarketsFactory.createForUser(userId, this.logger);
-      const [positions, user] = await Promise.all([
-        service.futures.getRunningPositions(),
-        service.user.getUser()
-      ]);
-
-      for (const position of positions) {
-        const marginRatio = this.calculateMarginRatio(position, user.balance);
-        
-        if (marginRatio < 0.1) { // 10% margin
-          await this.closePosition(service, position.id);
-          this.logger.warn('Position closed due to low margin', {
-            userId,
-            positionId: position.id,
-            marginRatio
-          });
-        }
-      }
-    } catch (error) {
-      this.logger.error('Margin guard check failed', { userId, error });
-      // Implementar retry logic ou notificação
-    }
-  }
-
-  private async closePosition(service: LNMarketsAPIv2, positionId: string): Promise<void> {
-    try {
-      await service.futures.closePosition(positionId);
-    } catch (error) {
-      // Log error mas não falha o worker
-      this.logger.error('Failed to close position', { positionId, error });
-    }
-  }
-}
-```
-
-### ✅ Boa Prática: Automation Worker
-
-```typescript
-// workers/automation.worker.ts
-export class AutomationWorker {
-  async executeAutomation(userId: string, automationId: string): Promise<void> {
-    const service = this.lnMarketsFactory.createForUser(userId, this.logger);
-    
-    try {
-      // 1. Verificar condições
-      const conditions = await this.checkAutomationConditions(service);
-      
-      if (!conditions.met) {
-        this.logger.debug('Automation conditions not met', { userId, automationId });
-        return;
-      }
-      
-      // 2. Executar ação
-      const result = await this.executeAutomationAction(service, automationId);
-      
-      this.logger.info('Automation executed', { 
-        userId, 
-        automationId, 
-        action: result.action,
-        success: result.success 
-      });
-      
-    } catch (error) {
-      this.logger.error('Automation execution failed', { userId, automationId, error });
-      throw error; // Re-throw para retry do sistema de filas
-    }
-  }
-}
-```
-
-## Error Handling
-
-### ✅ Boa Prática: Error Classification
-
-```typescript
-export class LNMarketsErrorHandler {
-  static handle(error: any): never {
-    if (error.response?.status === 401) {
-      throw new Error('Invalid LN Markets credentials');
-    }
-    
-    if (error.response?.status === 403) {
-      throw new Error('LN Markets API rate limit exceeded');
-    }
-    
-    if (error.response?.status === 404) {
-      throw new Error('LN Markets resource not found');
-    }
-    
-    if (error.code === 'ECONNREFUSED') {
-      throw new Error('LN Markets API unavailable');
-    }
-    
-    // Log error details para debugging
-    console.error('LN Markets API Error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
+async function getPositionsWithMetrics(userId: string) {
+  const startTime = Date.now();
+  
+  try {
+    const service = new LNMarketsAPIv2({
+      credentials: await getCredentials(userId),
+      logger: logger
     });
     
-    throw new Error('LN Markets API error occurred');
+    const positions = await service.futures.getRunningPositions();
+    
+    // Record success metrics
+    metrics.recordApiCall('lnmarkets.getPositions', Date.now() - startTime, true);
+    
+    return positions;
+  } catch (error) {
+    // Record error metrics
+    metrics.recordApiCall('lnmarkets.getPositions', Date.now() - startTime, false);
+    throw error;
   }
 }
 ```
 
-### ✅ Boa Prática: Graceful Degradation
+## Common Anti-Patterns
 
-```typescript
-export class DashboardService {
-  async getDashboardData(userId: string): Promise<DashboardData> {
-    try {
-      const service = this.lnMarketsFactory.createForUser(userId, this.logger);
-      
-      const [positions, balance, ticker] = await Promise.allSettled([
-        service.futures.getRunningPositions(),
-        service.user.getUser(),
-        service.market.getTicker()
-      ]);
-      
-      return {
-        positions: positions.status === 'fulfilled' ? positions.value : [],
-        balance: balance.status === 'fulfilled' ? balance.value.balance : 0,
-        ticker: ticker.status === 'fulfilled' ? ticker.value : null,
-        lastUpdate: new Date().toISOString()
-      };
-      
-    } catch (error) {
-      this.logger.error('Dashboard data fetch failed', { userId, error });
-      
-      // Retornar dados padrão em caso de erro
-      return {
-        positions: [],
-        balance: 0,
-        ticker: null,
-        lastUpdate: new Date().toISOString(),
-        error: 'Unable to fetch live data'
-      };
-    }
-  }
-}
-```
+### ❌ Avoid These Patterns
 
-## Performance
-
-### ✅ Boa Prática: Connection Pooling
-
-```typescript
-export class LNMarketsConnectionPool {
-  private connections: Map<string, LNMarketsAPIv2> = new Map();
-  
-  getConnection(userId: string, logger: Logger): LNMarketsAPIv2 {
-    if (!this.connections.has(userId)) {
-      const service = this.lnMarketsFactory.createForUser(userId, logger);
-      this.connections.set(userId, service);
-    }
-    
-    return this.connections.get(userId)!;
-  }
-  
-  clearConnection(userId: string): void {
-    this.connections.delete(userId);
-  }
-}
-```
-
-### ✅ Boa Prática: Caching de Dados de Mercado
-
-```typescript
-export class MarketDataCache {
-  private cache = new Map<string, { data: any; timestamp: number }>();
-  private readonly TTL = 5000; // 5 segundos
-  
-  async getTicker(service: LNMarketsAPIv2): Promise<LNMarketsTicker> {
-    const cached = this.cache.get('ticker');
-    
-    if (cached && (Date.now() - cached.timestamp) < this.TTL) {
-      return cached.data;
-    }
-    
-    const ticker = await service.market.getTicker();
-    this.cache.set('ticker', { data: ticker, timestamp: Date.now() });
-    
-    return ticker;
-  }
-}
-```
-
-## Segurança
-
-### ✅ Boa Prática: Validação de Credenciais
-
-```typescript
-export class CredentialsValidator {
-  static validate(credentials: any): boolean {
-    if (!credentials || typeof credentials !== 'object') {
-      return false;
-    }
-    
-    const required = ['API Key', 'API Secret', 'Passphrase'];
-    
-    for (const field of required) {
-      if (!credentials[field] || typeof credentials[field] !== 'string') {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-}
-```
-
-### ✅ Boa Prática: Sanitização de Logs
-
-```typescript
-export class SecureLogger {
-  static logApiCall(service: string, endpoint: string, userId: string): void {
-    console.log(`🔗 ${service} - API call to ${endpoint}`, {
-      userId,
-      endpoint,
-      timestamp: new Date().toISOString()
-      // NÃO logar credenciais ou dados sensíveis
-    });
-  }
-  
-  static logError(error: any, context: any): void {
-    console.error('❌ LN Markets API Error', {
-      message: error.message,
-      status: error.response?.status,
-      context: this.sanitizeContext(context)
-    });
-  }
-  
-  private static sanitizeContext(context: any): any {
-    const sanitized = { ...context };
-    delete sanitized.credentials;
-    delete sanitized.apiKey;
-    delete sanitized.apiSecret;
-    return sanitized;
-  }
-}
-```
-
-## Logging
-
-### ✅ Boa Prática: Logging Estruturado
-
-```typescript
-export class LNMarketsLogger {
-  constructor(private logger: Logger) {}
-  
-  logApiRequest(endpoint: string, userId: string): void {
-    this.logger.info('🚀 LN Markets API Request', {
-      endpoint,
-      userId,
-      timestamp: new Date().toISOString()
-    });
-  }
-  
-  logApiResponse(endpoint: string, userId: string, duration: number, success: boolean): void {
-    this.logger.info('✅ LN Markets API Response', {
-      endpoint,
-      userId,
-      duration,
-      success,
-      timestamp: new Date().toISOString()
-    });
-  }
-  
-  logError(endpoint: string, userId: string, error: any): void {
-    this.logger.error('❌ LN Markets API Error', {
-      endpoint,
-      userId,
-      error: error.message,
-      status: error.response?.status,
-      timestamp: new Date().toISOString()
-    });
-  }
-}
-```
-
-## Referências
-
-- [Arquitetura do Sistema](./01-architecture.md)
-- [Migration Guide](./03-migration-guide.md)
-- [Troubleshooting](./04-troubleshooting.md)
-- [Exemplos Práticos](./05-examples.md)
+1. **Creating multiple service instances unnecessarily**
+2. **Not handling authentication errors properly**
+3. **Exposing sensitive error information**
+4. **Using synchronous operations where async is needed**
+5. **Not validating input data**
+6. **Hardcoding credentials or configuration**
+7. **Not implementing proper logging**
+8. **Ignoring rate limits and error responses**
 
 ---
-*Documentação gerada seguindo DOCUMENTATION_STANDARDS.md*
+
+**Last Updated**: 2025-01-09  
+**Version**: 1.0.0  
+**Status**: Complete
