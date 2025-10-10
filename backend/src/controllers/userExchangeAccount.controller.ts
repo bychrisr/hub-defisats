@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { UserExchangeAccountService, CreateUserExchangeAccountData, UpdateUserExchangeAccountData } from '../services/userExchangeAccount.service';
+import { broadcastToUser } from '../routes/websocket.routes';
 
 export class UserExchangeAccountController {
   private prisma: PrismaClient;
@@ -344,35 +345,23 @@ export class UserExchangeAccountController {
       // ========================================================================
       
       try {
-        const fastifyInstance = (request as any).server;
+        console.log('🔌 USER EXCHANGE ACCOUNT CONTROLLER - Broadcasting active account change via WebSocket');
         
-        if (fastifyInstance && fastifyInstance.websocketServer) {
-          console.log('🔌 USER EXCHANGE ACCOUNT CONTROLLER - Broadcasting active account change via WebSocket');
-          
-          // Enviar evento para todos os clientes WebSocket conectados deste usuário
-          fastifyInstance.websocketServer.clients.forEach((client: any) => {
-            if (client.userId === user.id && client.readyState === 1) { // WebSocket.OPEN = 1
-              const websocketMessage = {
-                type: 'active_account_changed',
-                accountId: account.id,
-                accountName: account.account_name,
-                exchangeName: account.exchange.name,
-                exchangeId: account.exchange.id,
-                timestamp: Date.now()
-              };
-              
-              console.log('📡 USER EXCHANGE ACCOUNT CONTROLLER - Sending WebSocket message:', {
-                userId: user.id,
-                message: websocketMessage
-              });
-              
-              client.send(JSON.stringify(websocketMessage));
-            }
-          });
-          
+        const websocketMessage = {
+          type: 'active_account_changed',
+          accountId: account.id,
+          accountName: account.account_name,
+          exchangeName: account.exchange.name,
+          exchangeId: account.exchange.id,
+          timestamp: Date.now()
+        };
+        
+        const success = broadcastToUser(user.id, websocketMessage);
+        
+        if (success) {
           console.log('✅ USER EXCHANGE ACCOUNT CONTROLLER - WebSocket event broadcasted successfully');
         } else {
-          console.warn('⚠️ USER EXCHANGE ACCOUNT CONTROLLER - WebSocket server not available');
+          console.warn('⚠️ USER EXCHANGE ACCOUNT CONTROLLER - No active WebSocket connection found for user');
         }
       } catch (websocketError) {
         console.error('❌ USER EXCHANGE ACCOUNT CONTROLLER - Error broadcasting WebSocket event:', websocketError);

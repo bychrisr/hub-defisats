@@ -2,6 +2,9 @@ import { FastifyInstance } from 'fastify';
 import { LNMarketsRobustService } from '../services/LNMarketsRobustService';
 import { AuthService } from '../services/auth.service';
 
+// Global WebSocket connections manager
+const wsConnections = new Map<string, any>();
+
 export async function websocketRoutes(fastify: FastifyInstance) {
   // ✅ WEBSOCKET SIMPLES: Baseado no commit estável que funcionava perfeitamente
   fastify.get('/ws', { websocket: true }, async (connection: any, req) => {
@@ -21,6 +24,10 @@ export async function websocketRoutes(fastify: FastifyInstance) {
 
     // ✅ ARMAZENAR USER ID NA CONEXÃO PARA BROADCAST
     connection.userId = userId;
+    
+    // ✅ ADICIONAR CONEXÃO AO MANAGER GLOBAL
+    wsConnections.set(userId, connection);
+    console.log('✅ WEBSOCKET - Connection added to global manager:', { userId, totalConnections: wsConnections.size });
 
     // ✅ MENSAGEM DE BOAS-VINDAS (como commit estável)
     connection.send(JSON.stringify({
@@ -220,6 +227,10 @@ export async function websocketRoutes(fastify: FastifyInstance) {
     connection.on('close', () => {
       console.log('🔌 WEBSOCKET - Conexão fechada para usuário:', userId);
       clearInterval(marketInterval);
+      
+      // ✅ REMOVER CONEXÃO DO MANAGER GLOBAL
+      wsConnections.delete(userId);
+      console.log('✅ WEBSOCKET - Connection removed from global manager:', { userId, totalConnections: wsConnections.size });
     });
 
     // ✅ HANDLE ERRORS (como commit estável)
@@ -229,4 +240,22 @@ export async function websocketRoutes(fastify: FastifyInstance) {
 
     console.log('✅ WEBSOCKET - Conexão estabelecida com sucesso para usuário:', userId);
   });
+}
+
+// Export function to broadcast messages to specific user
+export function broadcastToUser(userId: string, message: any) {
+  const connection = wsConnections.get(userId);
+  if (connection && connection.readyState === 1) { // WebSocket.OPEN
+    console.log('📡 WEBSOCKET - Broadcasting message to user:', { userId, message });
+    connection.send(JSON.stringify(message));
+    return true;
+  } else {
+    console.log('⚠️ WEBSOCKET - No active connection found for user:', userId);
+    return false;
+  }
+}
+
+// Export function to get connection count
+export function getConnectionCount() {
+  return wsConnections.size;
 }

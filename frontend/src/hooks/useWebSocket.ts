@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface WebSocketMessage {
-  type: 'price_update' | 'candle_update' | 'market_data' | 'error';
-  data: any;
-  timestamp: number;
+  type: 'price_update' | 'candle_update' | 'market_data' | 'error' | 'active_account_changed' | 'connection' | 'data_update';
+  data?: any;
+  timestamp?: number;
+  accountId?: string;
+  accountName?: string;
+  exchangeName?: string;
+  exchangeId?: string;
+  message?: string;
 }
 
 interface UseWebSocketOptions {
