@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from './useWebSocket';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../stores/auth';
 
 // Interface para informações da conta ativa
 export interface ActiveAccountInfo {
