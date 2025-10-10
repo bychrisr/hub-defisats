@@ -8,6 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Universal Documentation Standards System (v2.2.0)**: Sistema completo de padrões de documentação
+  - `DOCUMENTATION_STANDARDS.md` - Guia completo de padrões universais
+  - `create-docs-structure.sh` - Script automatizado para criar estrutura de documentação
+  - `.cursor/rules/documentation.mdc` - Integração com Cursor AI
+  - Gold Standard Reference: `.system/docs/lnmarkets/`
+  - Template universal para qualquer módulo/feature
+  - Separação clara: external-api vs internal-implementation
+  - Metadados obrigatórios (Status, Versão, Data, Responsável)
+  - Convenções de nomenclatura (kebab-case, numeração)
+  - Code snippets requirements e best practices
+  - Cross-references e linking standards
+  - Quality checklist e maintenance rules
+
+- **LN Markets Documentation Reorganization**: Documentação LN Markets completamente reorganizada
+  - Estrutura modular: `external-api/`, `internal-implementation/`, `formulas/`, `diagrams/`
+  - 17 arquivos de documentação de alta qualidade (6,764 linhas)
+  - Documentação externa da API (overview, authentication, endpoints, rate-limits)
+  - Documentação interna (architecture, best-practices, migration-guide, troubleshooting, examples)
+  - Fórmulas de cálculo (balance, fees, positions)
+  - Diagramas Mermaid (architecture, data flow)
+  - HISTORY.md com timeline completa de refatorações
+  - README.md como índice navegável
+
+- **LN Markets API v2 Migration Checklist**: Lista priorizada de 48 arquivos para migração
+  - Identificação completa de todos os arquivos usando APIs antigas
+  - Priorização por impacto: Routes → Controllers → Workers → Services → Tests → Utils
+  - Status de migração rastreável
+  - Estimativa de tempo por fase
+
+- **LN Markets API v2 - Arquitetura Centralizada**: Implementação completa da nova arquitetura LN Markets API v2
+- **LNMarketsAPIv2.service.ts**: Serviço principal centralizado como ponto único de entrada
+- **LNMarketsClient.ts**: Cliente base HTTP com autenticação HMAC SHA256 corrigida (base64)
+- **Endpoints Organizados por Domínio**: 
+  - `user.endpoints.ts` - Operações de usuário (balance, deposits, withdrawals)
+  - `futures.endpoints.ts` - Operações de trading (posições, ordens)
+  - `market.endpoints.ts` - Dados de mercado (ticker, histórico)
+- **Interfaces TypeScript**: Type-safe para todas as respostas da API
+- **Error Handling Correto**: Erros propagam corretamente (não mais mascarados)
+- **Testes com Credenciais Reais**: Suite de testes validada com usuário brainoschris@gmail.com
+- **Logging Detalhado**: Debugging avançado para troubleshooting
 - **Sistema Multi-Account Dashboard**: Implementação completa do sistema multi-account para dashboard
 - **DashboardDataService**: Serviço backend para buscar dados da conta ativa do usuário
 - **useActiveAccountData Hook**: Hook frontend para escutar mudanças de conta ativa via WebSocket
@@ -20,7 +60,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuração de desenvolvimento otimizada
 
 ### Changed
+- **Routes Migration Started**: Migração de rotas críticas para LNMarketsAPIv2 iniciada
+  - `dashboard-optimized.routes.ts` - Migrado para usar LNMarketsAPIv2
+  - `market-data.routes.ts` - Migração de imports iniciada
+  - Manutenção de compatibilidade com respostas da API
+  - Uso de métodos domain-specific (user.getUser, futures.getRunningPositions, market.getTicker)
+
+- **Dashboard Data Service**: Migrado para usar LNMarketsAPIv2 em vez da API antiga
+- **Autenticação LN Markets**: Corrigida para usar base64 (não hexadecimal) na assinatura HMAC
+- **Endpoints Corrigidos**: 
+  - `getUserPositions()` sem parâmetro incorreto
+  - `getTicker()` → `getFuturesTicker()` com endpoint correto `/futures/ticker`
+- **Error Handling**: Removido masking de erros - agora propaga corretamente
+- **Estrutura de Credenciais**: Corrigido acesso às credenciais usando chaves corretas (`API Key`, `API Secret`, `Passphrase`)
 - **Dashboard Multi-Account**: Endpoint `/api/lnmarkets-robust/dashboard` refatorado para usar sistema multi-account
+
+### Fixed
+- **Dashboard Cards Zeroed**: Problema dos cards zerados foi completamente resolvido
+- **Balance Display**: Agora mostra 3,567 sats corretamente na conta C1 - Main
+- **Positions Loading**: 2 posições carregando com dados completos
+- **Ticker Data**: Market data carregando em tempo real
+- **Error Masking**: Removido retorno de `balance: 0` quando há erro de API
+- **Authentication Issues**: Corrigida assinatura HMAC para usar base64 em vez de hexadecimal
+
+### Tested
+- **C1 - Main Account**: ✅ Balance 3,567 sats, 2 posições, ticker funcionando
+- **C2 - Test Account**: ✅ Error handling correto (credenciais inválidas retornam null)
+- **All Endpoints**: ✅ GET /user, GET /futures, GET /ticker validados
+- **Real Credentials**: ✅ Testado com usuário brainoschris@gmail.com
 - **WebSocket Integration**: Controller `userExchangeAccount` agora emite eventos WebSocket para mudança de conta
 - **Dashboard Components**: Componentes Dashboard e DashboardRefactored atualizados com badges de conta ativa
 - **Hook Integration**: `useOptimizedDashboardData` integrado com `useActiveAccountData` para atualizações automáticas
