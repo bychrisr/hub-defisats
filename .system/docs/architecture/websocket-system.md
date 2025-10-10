@@ -1,8 +1,25 @@
 # 🔌 Sistema WebSocket - Documentação Completa
 
-## 📋 Visão Geral
+## ⚠️ ARQUITETURA ATUALIZADA (v2.0)
+
+**ANTES (Deprecado v1.0):**
+- Múltiplas conexões WebSocket (useActiveAccountData, useOptimizedDashboardData, LNMarketsChart)
+- Conflitos de conexão causando desconexão imediata (código 1006)
+
+**AGORA (Atual v2.0):**
+- Conexão WebSocket única centralizada no RealtimeDataContext
+- Sistema de roteamento de mensagens por tipo
+- Componentes consomem via Context API ou accountEventManager
+
+[Ver documentação completa da nova arquitetura](./websocket-centralized-architecture.md)
+
+---
+
+## 📋 Visão Geral (Histórico)
 
 O sistema WebSocket do Axisor implementa uma arquitetura híbrida robusta que combina **WebSocket em tempo real** com **fallback HTTP inteligente**, garantindo atualizações instantâneas dos dados de trading enquanto mantém alta disponibilidade e confiabilidade.
+
+**NOTA:** A documentação abaixo refere-se à arquitetura anterior (v1.0). Para a implementação atual, consulte [websocket-centralized-architecture.md](./websocket-centralized-architecture.md).
 
 ### 🎯 Objetivos do Sistema
 

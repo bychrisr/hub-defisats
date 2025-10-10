@@ -6,9 +6,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useWebSocket } from './useWebSocket';
 import { useAuthStore } from '../stores/auth';
 import { api } from '@/lib/api';
+import { accountEventManager } from './useAccountEvents';
 
 // Interface para informações da conta ativa
 export interface ActiveAccountInfo {
@@ -36,87 +36,41 @@ export const useActiveAccountData = (): UseActiveAccountDataReturn => {
   
   const { user } = useAuthStore();
 
-  // WebSocket para escutar mudanças de conta
-  const wsUrl = user?.id ? `ws://localhost:13000/ws?userId=${user.id}` : null;
-  const { lastMessage, readyState } = useWebSocket({
-    url: wsUrl,
-    onMessage: useCallback((message) => {
-      console.log('🔌 ACTIVE ACCOUNT DATA - WebSocket message received:', message);
-      
-      if (message.type === 'active_account_changed') {
-        console.log('🔄 ACTIVE ACCOUNT DATA - Active account changed:', message);
-
-        const newAccountInfo: ActiveAccountInfo = {
-          accountId: message.accountId,
-          accountName: message.accountName,
-          exchangeName: message.exchangeName,
-          exchangeId: message.exchangeId,
-          timestamp: message.timestamp
-        };
-
-        setAccountInfo(newAccountInfo);
-        setError(null);
-
-        // Trigger refresh automático da dashboard
-        console.log('🔄 ACTIVE ACCOUNT DATA - Triggering automatic dashboard refresh');
-        refreshDashboardData();
-
-        // Log para debugging
-        console.log('✅ ACTIVE ACCOUNT DATA - Account info updated:', {
-          accountId: newAccountInfo.accountId,
-          accountName: newAccountInfo.accountName,
-          exchangeName: newAccountInfo.exchangeName,
-          timestamp: new Date(newAccountInfo.timestamp).toISOString()
-        });
-      }
-
-      if (message.type === 'connection') {
-        console.log('✅ ACTIVE ACCOUNT DATA - WebSocket connected:', message);
-        setError(null);
-      }
-
-      if (message.type === 'error') {
-        console.error('❌ ACTIVE ACCOUNT DATA - WebSocket error:', message);
-        setError(message.message || 'WebSocket connection error');
-      }
-    }, [refreshDashboardData]),
-    onOpen: useCallback(() => {
-      console.log('✅ ACTIVE ACCOUNT DATA - WebSocket connection established');
-      setError(null);
-    }, []),
-    onError: useCallback((error) => {
-      console.error('❌ ACTIVE ACCOUNT DATA - WebSocket connection error:', error);
-      setError('WebSocket connection failed');
-    }, [])
-  });
-
   // Função para trigger refresh da dashboard
   const refreshDashboardData = useCallback(() => {
     console.log('🔄 ACTIVE ACCOUNT DATA - Triggering dashboard refresh');
     setRefreshTrigger(prev => prev + 1);
   }, []);
 
-
-  // Monitorar estado da conexão WebSocket
+  // === LISTENER PARA EVENTOS DE CONTA ATIVADA (via accountEventManager) ===
   useEffect(() => {
-    if (readyState === 1) { // WebSocket.OPEN
-      console.log('✅ ACTIVE ACCOUNT DATA - WebSocket connected');
-      setError(null);
-    } else if (readyState === 3) { // WebSocket.CLOSED
-      console.warn('⚠️ ACTIVE ACCOUNT DATA - WebSocket disconnected');
-      setError('WebSocket connection lost');
-    } else if (readyState === 0) { // WebSocket.CONNECTING
-      console.log('🔄 ACTIVE ACCOUNT DATA - WebSocket connecting...');
-      setIsLoading(true);
-    }
-  }, [readyState]);
+    const handleAccountActivated = async () => {
+      if (!user?.id) return;
+      console.log('🔄 ACTIVE ACCOUNT DATA - Account activated, refetching...');
+      
+      try {
+        const response = await api.get('/api/lnmarkets-robust/dashboard');
+        if (response.data.success && response.data.data) {
+          const { accountId, accountName, exchangeName } = response.data.data;
+          setAccountInfo({
+            accountId,
+            accountName,
+            exchangeName,
+            exchangeId: exchangeName,
+            timestamp: Date.now()
+          });
+          refreshDashboardData();
+        }
+      } catch (error) {
+        console.error('❌ ACTIVE ACCOUNT DATA - Error:', error);
+      }
+    };
+    
+    accountEventManager.subscribe('accountActivated', handleAccountActivated);
+    return () => accountEventManager.unsubscribe('accountActivated', handleAccountActivated);
+  }, [user?.id, refreshDashboardData]);
 
-  // Reset loading quando conectado
-  useEffect(() => {
-    if (readyState === 1) { // WebSocket.OPEN
-      setIsLoading(false);
-    }
-  }, [readyState]);
+
 
   // ========================================================================
   // FETCH INICIAL DA CONTA ATIVA
@@ -184,10 +138,9 @@ export const useActiveAccountData = (): UseActiveAccountDataReturn => {
         exchangeName: accountInfo.exchangeName
       } : null,
       isLoading,
-      error,
-      websocketReadyState: readyState
+      error
     });
-  }, [hasActiveAccount, accountInfo, isLoading, error, readyState]);
+  }, [hasActiveAccount, accountInfo, isLoading, error]);
 
   return {
     accountInfo,

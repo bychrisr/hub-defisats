@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, Rea
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/lib/api';
+import { accountEventManager } from '@/hooks/useAccountEvents';
 
 // Tipos de dados em tempo real
 interface MarketData {
@@ -44,6 +45,14 @@ interface RealtimeData {
   lastUpdate: number;
   isConnected: boolean;
   connectionStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
+  // NOVOS CAMPOS PARA ARQUITETURA CENTRALIZADA
+  dashboardData: any | null;
+  activeAccount: {
+    accountId: string;
+    accountName: string;
+    exchangeName: string;
+    exchangeId: string;
+  } | null;
 }
 
 interface RealtimeDataContextType {
@@ -55,6 +64,15 @@ interface RealtimeDataContextType {
   loadRealPositions: (positions: any[]) => void;
   updatePositions: (positions: any[]) => void;
   loadUserBalance: () => Promise<void>;
+  // NOVOS CAMPOS PARA ARQUITETURA CENTRALIZADA
+  dashboardData: any | null;
+  activeAccount: {
+    accountId: string;
+    accountName: string;
+    exchangeName: string;
+    exchangeId: string;
+  } | null;
+  marketData: Record<string, any>;
 }
 
 const RealtimeDataContext = createContext<RealtimeDataContextType | undefined>(undefined);
@@ -73,7 +91,10 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     userBalance: null,
     lastUpdate: 0,
     isConnected: false,
-    connectionStatus: 'disconnected'
+    connectionStatus: 'disconnected',
+    // NOVOS CAMPOS PARA ARQUITETURA CENTRALIZADA
+    dashboardData: null,
+    activeAccount: null
   });
 
   const [subscribedSymbols, setSubscribedSymbols] = useState<Set<string>>(new Set());
@@ -172,8 +193,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // ✅ CONEXÃO DIRETA: Removendo verificações de redirecionamento
 
-  // ✅ WEBSOCKET: URL correta para ws://localhost:13000/ws
-  const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;
+  // ✅ WEBSOCKET: URL correta para ws://localhost:13010/ws
+  const wsUrl = `ws://localhost:13010/ws?userId=${user?.id || 'anonymous'}`;
   
   console.log('🔗 REALTIME - URL do WebSocket gerada:', wsUrl);
   console.log('🔗 REALTIME - window.location:', {
@@ -200,6 +221,33 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
             setData(prev => ({
               ...prev,
               connectionStatus: 'connected',
+              lastUpdate: Date.now()
+            }));
+            break;
+
+          // === MUDANÇA DE CONTA ATIVA ===
+          case 'active_account_changed':
+            console.log('🔄 REALTIME - Active account changed:', message);
+            accountEventManager.emit('accountActivated');
+            // Atualizar dados locais
+            setData(prev => ({
+              ...prev,
+              activeAccount: {
+                accountId: message.accountId,
+                accountName: message.accountName,
+                exchangeName: message.exchangeName,
+                exchangeId: message.exchangeId
+              },
+              lastUpdate: Date.now()
+            }));
+            break;
+          
+          // === ATUALIZAÇÃO DE DADOS DO DASHBOARD ===
+          case 'data_update':
+            console.log('🔄 REALTIME - Dashboard data update:', message.data);
+            setData(prev => ({
+              ...prev,
+              dashboardData: message.data,
               lastUpdate: Date.now()
             }));
             break;
@@ -369,8 +417,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
       
-      // ✅ WEBSOCKET: URL correta para ws://localhost:13000/ws
-      const wsUrl = `ws://localhost:13000/ws?userId=${user.id}`;
+      // ✅ WEBSOCKET: URL correta para ws://localhost:13010/ws
+      const wsUrl = `ws://localhost:13010/ws?userId=${user.id}`;
       console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
       console.log('🔗 REALTIME - VITE_WS_URL env var:', import.meta.env.VITE_WS_URL);
       connect();
@@ -611,7 +659,11 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     reconnect,
     loadRealPositions,
     updatePositions,
-    loadUserBalance
+    loadUserBalance,
+    // NOVOS CAMPOS PARA ARQUITETURA CENTRALIZADA
+    dashboardData: data.dashboardData,
+    activeAccount: data.activeAccount,
+    marketData: data.marketData
   };
 
   return (

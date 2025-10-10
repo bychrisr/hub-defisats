@@ -37,7 +37,7 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 import { marketDataService, CandleData, MarketData } from '@/services/marketData.service';
 
 interface LNMarketsChartProps {
@@ -68,32 +68,31 @@ const LNMarketsChart: React.FC<LNMarketsChartProps> = ({
   const [priceChange, setPriceChange] = useState(0);
   const [priceChangePercent, setPriceChangePercent] = useState(0);
 
-  // WebSocket para dados em tempo real
-  const { connect, disconnect, sendMessage } = useWebSocket({
-    url: `${import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`}/ws/market?symbol=${symbol}`,
-    onMessage: (message) => {
-      const newCandle = marketDataService.processWebSocketMessage(message);
-      if (newCandle && seriesRef.current) {
+  // === CONSUMIR DADOS DO REALTIME CONTEXT ===
+  const { marketData, subscribeToSymbol, unsubscribeFromSymbol } = useRealtimeData();
+
+  // Inscrever no símbolo quando o componente monta
+  useEffect(() => {
+    if (symbol) {
+      subscribeToSymbol(symbol);
+      return () => unsubscribeFromSymbol(symbol);
+    }
+  }, [symbol, subscribeToSymbol, unsubscribeFromSymbol]);
+
+  // Processar dados do mercado quando chegam via WebSocket
+  useEffect(() => {
+    const symbolData = marketData?.[symbol || 'default'];
+    if (symbolData && seriesRef.current) {
+      const newCandle = marketDataService.processWebSocketMessage(symbolData);
+      if (newCandle) {
         seriesRef.current.update(marketDataService.formatCandleData(newCandle));
         setCandles(prev => [...prev.slice(-99), newCandle]);
         setCurrentPrice(newCandle.close);
         setPriceChange(newCandle.close - newCandle.open);
         setPriceChangePercent(((newCandle.close - newCandle.open) / newCandle.open) * 100);
       }
-    },
-    onError: (error) => {
-      console.error('❌ CHART - Erro WebSocket:', error);
-      setIsConnected(false);
-    },
-    onOpen: () => {
-      console.log('📊 CHART - WebSocket conectado para', symbol);
-      setIsConnected(true);
-    },
-    onClose: () => {
-      console.log('📊 CHART - WebSocket desconectado');
-      setIsConnected(false);
     }
-  });
+  }, [marketData, symbol]);
 
   const initializeChart = () => {
     if (!chartContainerRef.current) return;

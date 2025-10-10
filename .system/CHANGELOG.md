@@ -75,6 +75,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rate limiting configurado
 
 ### Fixed
+- **WebSocket Connection Bug**: Corrigido bug crítico de múltiplas conexões WebSocket simultâneas causando desconexão imediata (código 1006)
+  - **Centralized WebSocket Architecture**: Refatorado sistema WebSocket para usar conexão única centralizada no RealtimeDataContext
+  - **Message Routing System**: Implementado sistema de roteamento de mensagens WebSocket por tipo
+  - **useActiveAccountData Hook**: Removido WebSocket próprio, agora usa accountEventManager para eventos locais
+  - **useOptimizedDashboardData Hook**: Removido WebSocket, agora consome dados do RealtimeDataContext
+  - **LNMarketsChart Component**: Removido WebSocket, agora consome dados do RealtimeDataContext via Context API
+  - **RealtimeDataContext**: Expandido para ser o hub central de todas as comunicações WebSocket
+  - **WebSocket URL Fix**: Corrigido URL de `ws://localhost:13000/ws` para `ws://localhost:13010/ws`
+  - **readyState Error**: Corrigido erro de `readyState` não definido no useActiveAccountData
+- **Active Account Badge**: Badge de conta ativa agora atualiza corretamente ao trocar de conta
 - **Dashboard Cards**: Problema de cards mostrando zero/vazio resolvido com sistema multi-account
 - **PositionsContext Parsing**: Corrigido parsing de dados da dashboard multi-account no frontend
 - **Data Structure Access**: Corrigido acesso a `data.lnMarkets.positions` em vez de `data` diretamente
@@ -83,6 +93,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dashboard Cards Issue**: Identificado que cards zerados eram devido à falta de contas ativas configuradas, não bugs no código
 - **CRÍTICO - Badge "Nenhuma conta ativa"**: Corrigido hook `useActiveAccountData` que não fazia fetch inicial da conta ativa
 - **CRÍTICO - Parsing de Dados Dashboard**: Corrigido `useOptimizedDashboardMetrics` que acessava campo inexistente `data.lnMarkets.user` → `data.lnMarkets.balance`
+
+### Identified (Pending Fix)
+- **LN Markets API Integration**: Identificados erros na integração LN Markets API que causam saldo 0 e posições vazias
+  - `lnMarketsService.getTicker is not a function` - Método não existe
+  - `Cannot read properties of undefined (reading 'error')` - Propriedades undefined
+  - `Unknown error, returning default balance` - Retornando saldo padrão (0)
+  - **Impacto**: Cards do dashboard aparecem zerados mesmo com conta ativa configurada
 - Problemas de migração do Prisma resolvidos
 - Cache do Prisma Client atualizado
 - Health checks funcionando corretamente

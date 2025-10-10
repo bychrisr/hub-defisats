@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
-import { useWebSocket } from './useWebSocket';
 import { useActiveAccountData } from './useActiveAccountData';
+import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 
 interface DashboardData {
   user: any;
@@ -146,52 +146,21 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
     }
   }, [accountInfo?.accountId, fetchDashboardData]);
 
-  // WebSocket para atualizações em tempo real (integrado com LNMarketsRobustService)
-  const wsUrl = `ws://localhost:13000/ws?userId=${user?.id || 'anonymous'}`;
-  const { isConnected, sendMessage } = useWebSocket({
-    url: wsUrl,
-    onMessage: useCallback((message) => {
-      console.log('📊 OPTIMIZED DASHBOARD - Mensagem WebSocket recebida:', message);
-      
-      // ✅ HANDLE DATA UPDATE (dados reais da LN Markets)
-      if (message.type === 'data_update') {
-        console.log('🔄 OPTIMIZED DASHBOARD - Dados atualizados via WebSocket:', message.data);
-        
-        // Atualizar dados diretamente sem fazer nova requisição
-        setData(prev => ({
-          ...prev,
-          lnMarkets: message.data,
-          lastUpdate: Date.now(),
-          cacheHit: false // Dados frescos do WebSocket
-        }));
-        
-        console.log('✅ OPTIMIZED DASHBOARD - Dados atualizados com sucesso:', {
-          positionsCount: message.data.positions?.length || 0,
-          hasUser: !!message.data.user,
-          timestamp: new Date().toISOString()
-        });
-      }
-      // ✅ HANDLE CONNECTION ESTABLISHED
-      else if (message.type === 'connection') {
-        console.log('✅ OPTIMIZED DASHBOARD - Conexão WebSocket estabelecida');
-        
-        // Solicitar dados iniciais após conexão
-        setTimeout(() => {
-          console.log('🔄 OPTIMIZED DASHBOARD - Solicitando dados iniciais via WebSocket...');
-          sendMessage({
-            type: 'refresh_data',
-            userId: user?.id
-          });
-        }, 1000);
-      }
-      // ✅ HANDLE ERROR
-      else if (message.type === 'error') {
-        console.error('❌ OPTIMIZED DASHBOARD - Erro WebSocket:', message.message);
-        // Fallback para fetchDashboardData em caso de erro
-        fetchDashboardData();
-      }
-    }, [fetchDashboardData, user?.id])
-  });
+  // === CONSUMIR DADOS DO REALTIME CONTEXT ===
+  const { dashboardData: realtimeDashboardData } = useRealtimeData();
+
+  // Atualizar dados quando chegam via WebSocket do RealtimeDataContext
+  useEffect(() => {
+    if (realtimeDashboardData) {
+      console.log('🔄 OPTIMIZED DASHBOARD - Data from WebSocket:', realtimeDashboardData);
+      setData(prev => ({
+        ...prev,
+        lnMarkets: realtimeDashboardData,
+        lastUpdate: Date.now(),
+        cacheHit: false
+      }));
+    }
+  }, [realtimeDashboardData]);
 
   // ✅ SISTEMA HÍBRIDO OTIMIZADO: WebSocket Primário + Fallback HTTP Condicional
   useEffect(() => {

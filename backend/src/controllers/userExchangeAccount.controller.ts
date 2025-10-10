@@ -323,6 +323,12 @@ export class UserExchangeAccountController {
    * POST /api/user/exchange-accounts/:id/set-active - Definir conta ativa
    */
   async setActiveAccount(request: FastifyRequest, reply: FastifyReply) {
+    console.log('🚀 USER EXCHANGE ACCOUNT CONTROLLER - setActiveAccount called:', {
+      userId: (request as any).user?.id,
+      accountId: (request.params as any).id,
+      timestamp: new Date().toISOString()
+    });
+    
     try {
       const user = (request as any).user;
       const { id } = request.params as { id: string };
