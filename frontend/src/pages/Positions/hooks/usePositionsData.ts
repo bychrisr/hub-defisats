@@ -193,13 +193,43 @@ function calculatePLPercentage(position: any, currentPrice: number): number {
 }
 
 function calculateMarginRatio(position: any): number {
-  if (!position.margin || !position.quantity || !position.entryPrice) return 0;
+  console.log('🔍 MARGIN RATIO DEBUG:', {
+    positionId: position.id || position.uid,
+    margin: position.margin,
+    quantity: position.quantity,
+    entryPrice: position.entryPrice,
+    price: position.price,
+    hasMargin: !!position.margin,
+    hasQuantity: !!position.quantity,
+    hasEntryPrice: !!position.entryPrice,
+    hasPrice: !!position.price
+  });
+
+  if (!position.margin || !position.quantity || !position.entryPrice) {
+    console.log('❌ MARGIN RATIO - Missing required fields:', {
+      margin: position.margin,
+      quantity: position.quantity,
+      entryPrice: position.entryPrice
+    });
+    return 0;
+  }
   
   // Margin Ratio = (Margin / Position Value) * 100
   // Position Value = quantity * entryPrice
   const positionValue = position.quantity * position.entryPrice;
+  const marginRatio = (position.margin / positionValue) * 100;
   
-  return (position.margin / positionValue) * 100;
+  console.log('📊 MARGIN RATIO CALCULATION:', {
+    positionId: position.id || position.uid,
+    margin: position.margin,
+    quantity: position.quantity,
+    entryPrice: position.entryPrice,
+    positionValue,
+    marginRatio,
+    formula: `(${position.margin} / ${positionValue}) * 100 = ${marginRatio}%`
+  });
+  
+  return marginRatio;
 }
 
 function calculateLiquidationRisk(position: any, currentPrice: number): 'low' | 'medium' | 'high' {
