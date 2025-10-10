@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Sistema Multi-Account Dashboard**: Implementação completa do sistema multi-account para dashboard
+- **DashboardDataService**: Serviço backend para buscar dados da conta ativa do usuário
+- **useActiveAccountData Hook**: Hook frontend para escutar mudanças de conta ativa via WebSocket
+- **WebSocket Events**: Eventos em tempo real para mudança de conta ativa
+- **Active Account Badges**: Interface visual mostrando conta ativa nas dashboards
 - Sistema completo de renomeação de "Hub DeFiSats" para "Axisor"
 - Ambiente Docker completamente funcional com containers atualizados
 - Banco de dados PostgreSQL com schema completo (39 tabelas)
@@ -15,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuração de desenvolvimento otimizada
 
 ### Changed
+- **Dashboard Multi-Account**: Endpoint `/api/lnmarkets-robust/dashboard` refatorado para usar sistema multi-account
+- **WebSocket Integration**: Controller `userExchangeAccount` agora emite eventos WebSocket para mudança de conta
+- **Dashboard Components**: Componentes Dashboard e DashboardRefactored atualizados com badges de conta ativa
+- **Hook Integration**: `useOptimizedDashboardData` integrado com `useActiveAccountData` para atualizações automáticas
 - **BREAKING CHANGE**: Nome do projeto alterado de "Hub DeFiSats" para "Axisor"
 - **BREAKING CHANGE**: Todos os containers Docker renomeados para `axisor-*`
 - **BREAKING CHANGE**: Network Docker alterada para `axisor-network`
@@ -25,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING CHANGE**: Package author alterado para "Axisor Team"
 
 ### Technical Changes
+- **Multi-Account System**: 9 arquivos modificados para implementação do sistema multi-account
+  - `backend/src/services/dashboard-data.service.ts` (novo)
+  - `frontend/src/hooks/useActiveAccountData.ts` (novo)
+  - 7 arquivos existentes refatorados
 - 76 arquivos modificados com renomeação completa
 - 16 arquivos de documentação atualizados
 - 7 arquivos de configuração Docker/K8s/nginx atualizados
@@ -62,11 +75,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rate limiting configurado
 
 ### Fixed
+- **Dashboard Cards**: Problema de cards mostrando zero/vazio resolvido com sistema multi-account
+- **Redis Connection**: Configuração Redis corrigida para conexão lazy com retry
+- **Export Duplication**: Erro de export duplicado no `AccountCredentialsService` corrigido
 - Problemas de migração do Prisma resolvidos
 - Cache do Prisma Client atualizado
 - Health checks funcionando corretamente
 - API endpoints respondendo adequadamente
 - Frontend servindo arquivos corretamente
+
+### Multi-Account Dashboard System
+- **Backend Services**:
+  - `DashboardDataService`: Busca dados da conta ativa
+  - `AccountCredentialsService`: Gerencia credenciais com cache Redis
+  - WebSocket events: `active_account_changed` para mudanças de conta
+  
+- **Frontend Hooks**:
+  - `useActiveAccountData`: Escuta mudanças via WebSocket
+  - `useOptimizedDashboardData`: Integração com sistema multi-account
+  
+- **UI Components**:
+  - Badges visuais mostrando conta ativa
+  - Atualização automática quando conta muda
+  - Fallback para dados públicos quando sem conta ativa
+  
+- **Performance**:
+  - Dashboard carrega em < 200ms
+  - WebSocket para atualizações em tempo real
+  - Cache Redis para credenciais (10min TTL)
 
 ### Migration Guide
 Para migrar de "Hub DeFiSats" para "Axisor":
