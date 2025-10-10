@@ -573,9 +573,14 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         queryClient.invalidateQueries({ queryKey: ['menus'] });
       }
 
-      if (positionsData.success && positionsData.data && Array.isArray(positionsData.data)) {
+      // Verificar se há dados de posições na nova estrutura multi-account
+      const positionsArray = positionsData.data?.lnMarkets?.positions || positionsData.data?.positions || [];
+      
+      if (positionsData.success && positionsData.data && Array.isArray(positionsArray)) {
+        console.log('🔄 POSITIONS CONTEXT - Processing positions from multi-account structure:', positionsArray.length);
+        
         // Transformar dados da LN Markets para o formato do contexto
-        const transformedPositions: LNPosition[] = positionsData.data.map((pos: any) => ({
+        const transformedPositions: LNPosition[] = positionsArray.map((pos: any) => ({
           id: pos.id,
           quantity: pos.quantity || 0,
           price: pos.price || 0,
@@ -614,7 +619,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         
         // Transformar para o formato esperado pelo RealtimeDataContext
         // O RealtimeDataContext espera dados brutos da API, não dados transformados
-        const realtimePositions = positionsData.data.map((pos: any) => ({
+        const realtimePositions = positionsArray.map((pos: any) => ({
           id: pos.id,
           side: pos.side, // 'b' ou 's' - dados brutos da API
           quantity: pos.quantity,
