@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { PositionCardProps } from '../types/positions.types';
 import { cn } from '../../../lib/utils';
+import SatsIcon from '../../../components/SatsIcon';
 
 export const PositionCardDesktop: React.FC<PositionCardProps> = ({
   position,
@@ -41,7 +42,7 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
   };
 
   const formatSats = (value: number) => {
-    return `${value.toLocaleString('pt-BR')} sats`;
+    return value.toLocaleString('pt-BR');
   };
 
   const formatPercentage = (value: number) => {
@@ -74,10 +75,14 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
             
             <div className="text-right">
               <div className={cn(
-                'text-xl font-mono font-bold',
+                'text-xl font-mono font-bold flex items-center justify-end gap-1',
                 isProfit ? 'text-[#0ECB81]' : 'text-[#F6465D]'
               )}>
                 {formatSats(position.currentPL)}
+                <SatsIcon 
+                  size={18} 
+                  variant={isProfit ? 'positive' : 'negative'}
+                />
               </div>
               <div className={cn(
                 'text-sm',
@@ -152,8 +157,9 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
               <DollarSign className="h-3 w-3" />
               <span>Quantity</span>
             </div>
-            <div className="font-mono text-[#E6E6E6]">
+            <div className="font-mono text-[#E6E6E6] flex items-center gap-1">
               {formatSats(position.quantity)}
+              <SatsIcon size={14} variant="neutral" />
             </div>
           </div>
 
@@ -196,8 +202,9 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
               <DollarSign className="h-3 w-3" />
               <span>Margin</span>
             </div>
-            <div className="font-mono text-[#E6E6E6]">
+            <div className="font-mono text-[#E6E6E6] flex items-center gap-1">
               {formatSats(position.margin)}
+              <SatsIcon size={14} variant="neutral" />
             </div>
           </div>
 
@@ -239,8 +246,14 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
         {/* Footer com fees e funding */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#2A3441] text-sm text-[#B8BCC8]">
           <div className="flex items-center space-x-4">
-            <span>Trading Fees: {formatSats(position.tradingFees)}</span>
-            <span>Funding Cost: {formatSats(position.fundingCost)}</span>
+            <span className="flex items-center gap-1">
+              Trading Fees: {formatSats(position.tradingFees)}
+              <SatsIcon size={12} variant="neutral" />
+            </span>
+            <span className="flex items-center gap-1">
+              Funding Cost: {formatSats(position.fundingCost)}
+              <SatsIcon size={12} variant="neutral" />
+            </span>
           </div>
           
           <div className="text-xs">

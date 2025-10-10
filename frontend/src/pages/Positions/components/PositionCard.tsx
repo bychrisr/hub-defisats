@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { PositionCardProps } from '../types/positions.types';
 import { cn } from '../../../lib/utils';
+import SatsIcon from '../../../components/SatsIcon';
 
 export const PositionCard: React.FC<PositionCardProps> = ({
   position,
@@ -41,7 +42,7 @@ export const PositionCard: React.FC<PositionCardProps> = ({
   };
 
   const formatSats = (value: number) => {
-    return `${value.toLocaleString('pt-BR')} sats`;
+    return value.toLocaleString('pt-BR');
   };
 
   const formatPercentage = (value: number) => {
@@ -74,10 +75,14 @@ export const PositionCard: React.FC<PositionCardProps> = ({
             
             <div className="text-right">
               <div className={cn(
-                'text-2xl font-mono font-bold',
+                'text-2xl font-mono font-bold flex items-center justify-end gap-1',
                 isProfit ? 'text-[#0ECB81]' : 'text-[#F6465D]'
               )}>
                 {formatSats(position.currentPL)}
+                <SatsIcon 
+                  size={20} 
+                  variant={isProfit ? 'positive' : 'negative'}
+                />
               </div>
               <div className={cn(
                 'text-sm',
@@ -124,8 +129,9 @@ export const PositionCard: React.FC<PositionCardProps> = ({
               <DollarSign className="h-4 w-4" />
               <span>Quantity</span>
             </div>
-            <div className="font-mono text-[#E6E6E6]">
+            <div className="font-mono text-[#E6E6E6] flex items-center gap-1">
               {formatSats(position.quantity)}
+              <SatsIcon size={14} variant="neutral" />
             </div>
           </div>
 
@@ -195,8 +201,9 @@ export const PositionCard: React.FC<PositionCardProps> = ({
                 </span>
               </div>
               
-              <div className="text-[#B8BCC8]">
+              <div className="text-[#B8BCC8] flex items-center gap-1">
                 Fees: {formatSats(position.tradingFees)}
+                <SatsIcon size={12} variant="neutral" />
               </div>
             </div>
 
