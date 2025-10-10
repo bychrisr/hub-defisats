@@ -133,7 +133,10 @@ export const usePositionsData = (): PositionsData => {
         allFields: Object.keys(pos).reduce((acc, key) => {
           acc[key] = pos[key];
           return acc;
-        }, {} as any)
+        }, {} as any),
+        
+        // 🔍 LISTA COMPLETA DE CHAVES DISPONÍVEIS
+        allKeys: Object.keys(pos)
       });
 
       return {
