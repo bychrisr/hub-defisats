@@ -141,7 +141,7 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
         </div>
 
         {/* Grid de métricas */}
-        <div className="grid grid-cols-6 gap-4 text-sm">
+        <div className="grid grid-cols-5 gap-4 text-sm">
           {/* Quantity */}
           <div className="space-y-1">
             <div className="flex items-center space-x-1 text-[#B8BCC8]">
@@ -198,16 +198,6 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
             </div>
           </div>
 
-          {/* Margin Ratio */}
-          <div className="space-y-1">
-            <div className="flex items-center space-x-1 text-[#B8BCC8]">
-              <div className="w-2 h-2 bg-[#0ECB81] rounded-full"></div>
-              <span>Ratio</span>
-            </div>
-            <div className="font-mono text-[#0ECB81]">
-              {position.marginRatio ? position.marginRatio.toFixed(3) : '0.000'}%
-            </div>
-          </div>
         </div>
 
         {/* SL/TP se definidos */}

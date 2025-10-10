@@ -198,13 +198,6 @@ export const PositionCard: React.FC<PositionCardProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex flex-col space-y-2 text-sm">
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-[#0ECB81] rounded-full"></div>
-                  <span className="text-[#B8BCC8]">Ratio</span>
-                  <span className="font-mono text-[#0ECB81]">
-                    {position.marginRatio ? position.marginRatio.toFixed(3) : '0.000'}%
-                  </span>
-                </div>
                 
                 <div className="text-[#B8BCC8] flex items-center gap-1">
                   Fees: {formatSats(position.tradingFees)}
