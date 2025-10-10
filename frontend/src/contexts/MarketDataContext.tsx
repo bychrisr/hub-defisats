@@ -85,10 +85,10 @@ export const MarketDataProvider: React.FC<MarketDataProviderProps> = ({
 
       console.log('📊 MARKET DATA - Data received from unified endpoint:', {
         dashboardSuccess: dashboardData.success,
-        positionsCount: dashboardData.data?.positions?.length || 0,
-        hasBalance: !!dashboardData.data?.balance,
-        hasMarketIndex: !!dashboardData.data?.marketIndex,
-        lnMarketsStructure: Object.keys(dashboardData.data || {}),
+        positionsCount: dashboardData.data?.lnMarkets?.positions?.length || 0,
+        hasBalance: !!dashboardData.data?.lnMarkets?.balance,
+        hasMarketIndex: !!dashboardData.data?.lnMarkets?.ticker,
+        lnMarketsStructure: Object.keys(dashboardData.data?.lnMarkets || {}),
         accountInfo: {
           accountId: dashboardData.data?.accountId,
           accountName: dashboardData.data?.accountName,
@@ -99,19 +99,19 @@ export const MarketDataProvider: React.FC<MarketDataProviderProps> = ({
       // ✅ CONSOLIDAR DADOS DO ENDPOINT UNIFICADO
       const consolidatedData: MarketData = {
         // Dados do mercado (do endpoint unificado)
-        btcPrice: dashboardData.data?.marketIndex?.index || 0,
-        marketIndex: dashboardData.data?.marketIndex,
-        ticker: dashboardData.data?.marketIndex,
+        btcPrice: dashboardData.data?.lnMarkets?.ticker?.index || 0,
+        marketIndex: dashboardData.data?.lnMarkets?.ticker,
+        ticker: dashboardData.data?.lnMarkets?.ticker,
         
-        // Dados de posições (CORRIGIDO: usar posições diretas)
-        positions: dashboardData.data?.positions || [],
+        // Dados de posições (CORRIGIDO: usar posições do lnMarkets)
+        positions: dashboardData.data?.lnMarkets?.positions || [],
         
-        // Dados de saldo (CORRIGIDO: usar saldo direto)
-        balance: dashboardData.data?.balance,
-        estimatedBalance: dashboardData.data?.estimatedBalance || dashboardData.data?.balance,
+        // Dados de saldo (CORRIGIDO: usar saldo do lnMarkets)
+        balance: dashboardData.data?.lnMarkets?.balance,
+        estimatedBalance: dashboardData.data?.lnMarkets?.balance,
         
         // Metadados
-        lastUpdate: dashboardData.data?.lastUpdate || Date.now(),
+        lastUpdate: dashboardData.data?.lnMarkets?.metadata?.lastUpdate || Date.now(),
         isLoading: false,
         error: null,
         cacheHit: dashboardData.data?.cacheHit || false
