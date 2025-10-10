@@ -76,6 +76,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Dashboard Cards**: Problema de cards mostrando zero/vazio resolvido com sistema multi-account
+- **PositionsContext Parsing**: Corrigido parsing de dados da dashboard multi-account no frontend
+- **Data Structure Access**: Corrigido acesso a `data.lnMarkets.positions` em vez de `data` diretamente
 - **Redis Connection**: Configuração Redis corrigida para conexão lazy com retry
 - **Export Duplication**: Erro de export duplicado no `AccountCredentialsService` corrigido
 - Problemas de migração do Prisma resolvidos
