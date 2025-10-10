@@ -8,8 +8,16 @@ import { api } from '../../../lib/api';
 import { PositionWithLiveData, PositionsData } from '../types/positions.types';
 
 export const usePositionsData = (): PositionsData => {
+  console.log('🔍 USE POSITIONS DATA - Hook called');
+  
   const { marketData } = useRealtimeData();
   const { accountInfo } = useActiveAccountData();
+  
+  console.log('🔍 USE POSITIONS DATA - Context data:', {
+    hasMarketData: !!marketData,
+    marketDataKeys: marketData ? Object.keys(marketData) : [],
+    accountInfo: accountInfo?.accountId
+  });
 
   // Polling inteligente 15s para posições (respeitando rate limits LN Markets)
   const { data: positions, isLoading, error } = useQuery({
@@ -54,9 +62,16 @@ export const usePositionsData = (): PositionsData => {
 
   // Calcular PL em tempo real com market data do WebSocket
   const positionsWithLivePL = useMemo(() => {
-    if (!positions) {
+    if (!positions || positions.length === 0) {
+      console.log('🔍 POSITIONS DEBUG - No positions available:', { positions });
       return [];
     }
+    
+    console.log('🔍 POSITIONS DEBUG - Processing positions:', {
+      count: positions.length,
+      samplePosition: positions[0],
+      sampleKeys: positions[0] ? Object.keys(positions[0]) : []
+    });
     
     return positions.map((pos: any): PositionWithLiveData => {
       const pl = calculatePL(pos, currentPrice);
