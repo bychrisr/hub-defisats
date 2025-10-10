@@ -205,7 +205,16 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
               <span>Ratio</span>
             </div>
             <div className="font-mono text-[#0ECB81]">
-              {position.marginRatio.toFixed(1)}%
+              {(() => {
+                console.log('🔍 MARGIN RATIO IN DESKTOP COMPONENT:', {
+                  positionId: position.id,
+                  marginRatio: position.marginRatio,
+                  type: typeof position.marginRatio,
+                  isNaN: isNaN(position.marginRatio),
+                  toFixed: position.marginRatio?.toFixed(1)
+                });
+                return position.marginRatio ? position.marginRatio.toFixed(1) : '0.0';
+              })()}%
             </div>
           </div>
         </div>

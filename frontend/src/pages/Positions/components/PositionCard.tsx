@@ -202,7 +202,16 @@ export const PositionCard: React.FC<PositionCardProps> = ({
                   <div className="w-2 h-2 bg-[#0ECB81] rounded-full"></div>
                   <span className="text-[#B8BCC8]">Ratio</span>
                   <span className="font-mono text-[#0ECB81]">
-                    {position.marginRatio.toFixed(1)}%
+                    {(() => {
+                      console.log('🔍 MARGIN RATIO IN COMPONENT:', {
+                        positionId: position.id,
+                        marginRatio: position.marginRatio,
+                        type: typeof position.marginRatio,
+                        isNaN: isNaN(position.marginRatio),
+                        toFixed: position.marginRatio?.toFixed(1)
+                      });
+                      return position.marginRatio ? position.marginRatio.toFixed(1) : '0.0';
+                    })()}%
                   </span>
                 </div>
                 
