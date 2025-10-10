@@ -545,16 +545,17 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     try {
       console.log('🔍 POSITIONS CONTEXT - Fetching real positions, market index and menu from LN Markets...');
 
-      // Atualizar posições, índice e menu simultaneamente
-      const [positionsResponse, indexResponse, menuResponse] = await Promise.all([
+      // ✅ USAR APENAS ENDPOINT UNIFICADO - já contém tudo (posições, índice, dados)
+      const [positionsResponse, menuResponse] = await Promise.all([
         api.get('/api/lnmarkets-robust/dashboard'),
-        api.get('/api/market/index/public'), // Usar instância api configurada
         api.get('/api/menu')
       ]);
 
       const positionsData = positionsResponse.data;
-      const indexData = indexResponse.data;
       const menuData = menuResponse.data;
+      
+      // Extrair dados do endpoint unificado
+      const indexData = positionsData.data?.lnMarkets?.ticker || positionsData.data?.marketIndex;
       console.log('✅ POSITIONS CONTEXT - Received real positions:', positionsData);
       console.log('✅ POSITIONS CONTEXT - Received market index:', indexData);
       console.log('✅ POSITIONS CONTEXT - Received menu data:', menuData);
@@ -641,24 +642,25 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         let marketIndex: MarketIndexData | null = null;
         let marketIndexError: string | null = null;
 
-        if (indexData.success && indexData.data) {
+        // ✅ USAR DADOS DO ENDPOINT UNIFICADO
+        if (indexData && indexData.index) {
           marketIndex = {
-            index: indexData.data.index,
-            index24hChange: indexData.data.index24hChange,
-            tradingFees: indexData.data.tradingFees,
-            nextFunding: indexData.data.nextFunding,
-            rate: indexData.data.rate,
-            rateChange: indexData.data.rateChange,
-            timestamp: indexData.data.timestamp,
-            source: indexData.data.source
+            index: indexData.index,
+            index24hChange: indexData.index24hChange || 0,
+            tradingFees: indexData.tradingFees || 0.1,
+            nextFunding: indexData.nextFunding || '1h 24m',
+            rate: indexData.rate || 0.006,
+            rateChange: indexData.rateChange || 0,
+            timestamp: indexData.timestamp || Date.now(),
+            source: 'lnmarkets-unified'
           };
-          console.log('✅ POSITIONS CONTEXT - Market index processed:', marketIndex);
+          console.log('✅ POSITIONS CONTEXT - Market index processed from unified endpoint:', marketIndex);
           console.log('📊 MARKET INDEX - Index value:', marketIndex.index);
           console.log('📊 MARKET INDEX - 24h change:', marketIndex.index24hChange);
         } else {
-          marketIndexError = indexData.message || 'Failed to fetch market index';
+          marketIndexError = 'No market index data in unified endpoint';
           console.log('❌ POSITIONS CONTEXT - Market index error:', marketIndexError);
-          console.log('❌ MARKET INDEX - Response data:', indexData);
+          console.log('❌ MARKET INDEX - Unified endpoint data:', indexData);
         }
 
         // Atualizar o RealtimeDataContext com as posições reais
@@ -698,19 +700,20 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         let marketIndex: MarketIndexData | null = null;
         let marketIndexError: string | null = null;
 
-        if (indexData.success && indexData.data) {
+        // ✅ USAR DADOS DO ENDPOINT UNIFICADO
+        if (indexData && indexData.index) {
           marketIndex = {
-            index: indexData.data.index,
-            index24hChange: indexData.data.index24hChange,
-            tradingFees: indexData.data.tradingFees,
-            nextFunding: indexData.data.nextFunding,
-            rate: indexData.data.rate,
-            rateChange: indexData.data.rateChange,
-            timestamp: indexData.data.timestamp,
-            source: indexData.data.source
+            index: indexData.index,
+            index24hChange: indexData.index24hChange || 0,
+            tradingFees: indexData.tradingFees || 0.1,
+            nextFunding: indexData.nextFunding || '1h 24m',
+            rate: indexData.rate || 0.006,
+            rateChange: indexData.rateChange || 0,
+            timestamp: indexData.timestamp || Date.now(),
+            source: 'lnmarkets-unified'
           };
         } else {
-          marketIndexError = indexData.message || 'Failed to fetch market index';
+          marketIndexError = 'No market index data in unified endpoint';
         }
 
         setData({
