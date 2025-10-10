@@ -86,6 +86,16 @@ export const usePositionsData = (): PositionsData => {
       sampleKeys: positions[0] ? Object.keys(positions[0]) : []
     });
     
+    // ✅ LOG COMPLETO DE TODOS OS DADOS BRUTOS DA LN MARKETS
+    positions.forEach((pos: any, index: number) => {
+      console.log(`🔍 POSIÇÃO ${index + 1} - DADOS COMPLETOS DA LN MARKETS:`, {
+        positionId: pos.id || pos.uid,
+        allFields: pos,
+        allKeys: Object.keys(pos),
+        fieldCount: Object.keys(pos).length
+      });
+    });
+    
     return positions.map((pos: any): PositionWithLiveData => {
       const pl = calculatePL(pos, currentPrice);
       const plPercentage = calculatePLPercentage(pos, currentPrice);
