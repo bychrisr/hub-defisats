@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsService } from './lnmarkets.service';
+import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 import { TradingLoggerService } from './trading-logger.service';
 
 const prisma = new PrismaClient();

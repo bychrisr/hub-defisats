@@ -1,4 +1,4 @@
-import { LNMarketsService } from './lnmarkets.service';
+import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 
 export interface TradingValidationResult {
   isValid: boolean;
