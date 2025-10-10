@@ -86,14 +86,9 @@ export const usePositionsData = (): PositionsData => {
       sampleKeys: positions[0] ? Object.keys(positions[0]) : []
     });
     
-    // ✅ LOG COMPLETO DE TODOS OS DADOS BRUTOS DA LN MARKETS
-    positions.forEach((pos: any, index: number) => {
-      console.log(`🔍 POSIÇÃO ${index + 1} - DADOS COMPLETOS DA LN MARKETS:`);
-      console.log(`🔍 POSIÇÃO ${index + 1} - Position ID:`, pos.id || pos.uid);
-      console.log(`🔍 POSIÇÃO ${index + 1} - ALL KEYS:`, Object.keys(pos));
-      console.log(`🔍 POSIÇÃO ${index + 1} - FIELD COUNT:`, Object.keys(pos).length);
-      console.log(`🔍 POSIÇÃO ${index + 1} - COMPLETE DATA:`, JSON.stringify(pos, null, 2));
-    });
+    // ✅ DADOS BRUTOS IDENTIFICADOS - LN Markets NÃO retorna marginRatio
+    // Campos disponíveis: liquidation, opening_fee, sum_carry_fees, creation_ts
+    // Margin Ratio precisa ser calculado manualmente
     
     return positions.map((pos: any): PositionWithLiveData => {
       const pl = calculatePL(pos, currentPrice);
@@ -114,48 +109,34 @@ export const usePositionsData = (): PositionsData => {
         priceChangePercent: ((currentPrice - (pos.entryPrice || pos.price)) / (pos.entryPrice || pos.price)) * 100
       });
 
-      console.log('🔍 POSITION FIELDS DEBUG:', {
-        positionId: pos.id || pos.uid,
-        liquidation: pos.liquidation,
-        liquidationPrice: pos.liquidationPrice,
-        tradingFees: pos.tradingFees,
-        fundingCost: pos.fundingCost,
-        createdAt: pos.createdAt,
-        timestamp: pos.timestamp,
-        // ✅ VERIFICAR SE LN MARKETS JÁ RETORNA MARGIN RATIO
-        marginRatio: pos.marginRatio,
-        margin_ratio: pos.margin_ratio,
-        ratio: pos.ratio,
-        marginRatioFromAPI: pos.marginRatio || pos.margin_ratio || pos.ratio,
-        allKeys: Object.keys(pos)
-      });
+      // ✅ Dados confirmados da LN Markets API (26 campos)
 
-      // ✅ Field mapping corrected based on actual API response
+          // ✅ Field mapping based on actual LN Markets API response (26 fields confirmed)
 
-      return {
-        id: pos.id || pos.uid,
-        type: pos.side === 'b' ? 'LONG' : 'SHORT',
-        quantity: pos.quantity || 0,
-        entryPrice: pos.entryPrice || pos.price || 0,
-        currentPrice,
-        leverage: pos.leverage || 1,
-        margin: pos.margin || 0,
-        tradeMargin: pos.tradeMargin || 0,
-        liquidationPrice: pos.liquidation || 0, // ✅ CORRETO: liquidation existe
-        stopLoss: pos.stoploss || pos.stopLoss,
-        takeProfit: pos.takeprofit || pos.takeProfit,
-        pl,
-        plPercentage,
-        marginRatio,
-        tradingFees: pos.opening_fee || pos.closing_fee || 0, // ✅ CORRETO: opening_fee existe
-        fundingCost: pos.sum_carry_fees || 0, // ✅ CORRETO: sum_carry_fees existe
-        createdAt: pos.creation_ts || pos.market_filled_ts || pos.createdAt,
-        updatedAt: pos.updatedAt || pos.timestamp,
-        status: pos.status || 'running',
-        currentPL: pl,
-        isLiquidated: liquidationRisk === 'high',
-        liquidationRisk
-      };
+          return {
+            id: pos.id || pos.uid,
+            type: pos.side === 'b' ? 'LONG' : 'SHORT',
+            quantity: pos.quantity || 0,
+            entryPrice: pos.entryPrice || pos.price || 0,
+            currentPrice,
+            leverage: pos.leverage || 1,
+            margin: pos.margin || 0,
+            tradeMargin: pos.entry_margin || pos.tradeMargin || 0,
+            liquidationPrice: pos.liquidation || 0, // ✅ CONFIRMADO: liquidation
+            stopLoss: pos.stoploss || 0, // ✅ CONFIRMADO: stoploss
+            takeProfit: pos.takeprofit || 0, // ✅ CONFIRMADO: takeprofit
+            pl,
+            plPercentage,
+            marginRatio,
+            tradingFees: pos.opening_fee || pos.closing_fee || 0, // ✅ CONFIRMADO: opening_fee
+            fundingCost: pos.sum_carry_fees || 0, // ✅ CONFIRMADO: sum_carry_fees
+            createdAt: pos.creation_ts || pos.market_filled_ts, // ✅ CONFIRMADO: creation_ts
+            updatedAt: pos.updatedAt || pos.timestamp,
+            status: pos.running ? 'running' : (pos.closed ? 'closed' : 'open'),
+            currentPL: pl,
+            isLiquidated: liquidationRisk === 'high',
+            liquidationRisk
+          };
     });
   }, [positions, totalBalance, marketData?.['BTC']?.price, currentPrice]);
 
@@ -236,62 +217,24 @@ function calculatePLPercentage(position: any, currentPrice: number): number {
 }
 
 function calculateMarginRatio(position: any, totalBalance?: number): number {
-  // ✅ PRIORIDADE: Verificar se LN Markets já retorna o marginRatio
-  if (position.marginRatio !== undefined && position.marginRatio !== null) {
-    console.log('🔍 MARGIN RATIO FROM API:', {
-      positionId: position.id || position.uid,
-      marginRatioFromAPI: position.marginRatio,
-      source: 'LN Markets API'
-    });
-    return position.marginRatio;
-  }
+  // ✅ CONFIRMADO: LN Markets NÃO retorna marginRatio na API
+  // Precisamos calcular manualmente usando a fórmula: Margin / (Quantity * Price) * 100
   
-  // ✅ FALLBACK: Se não tiver margin_ratio ou ratio
-  if (position.margin_ratio !== undefined && position.margin_ratio !== null) {
-    console.log('🔍 MARGIN RATIO FROM API (snake_case):', {
-      positionId: position.id || position.uid,
-      marginRatioFromAPI: position.margin_ratio,
-      source: 'LN Markets API (snake_case)'
-    });
-    return position.margin_ratio;
-  }
-  
-  if (position.ratio !== undefined && position.ratio !== null) {
-    console.log('🔍 MARGIN RATIO FROM API (ratio):', {
-      positionId: position.id || position.uid,
-      marginRatioFromAPI: position.ratio,
-      source: 'LN Markets API (ratio)'
-    });
-    return position.ratio;
-  }
-  
-  if (!position.margin) {
+  if (!position.margin || !position.quantity || !position.price) {
     return 0;
   }
   
-  // ✅ CALCULO MANUAL: LN Markets calcula Margin Ratio como Margin / (Quantity * Price) * 100
-  if (position.quantity && position.price) {
-    const marginRatio = (position.margin / (position.quantity * position.price)) * 100;
-    
-    console.log('🔍 MARGIN RATIO CALCULATED:', {
-      positionId: position.id || position.uid,
-      margin: position.margin,
-      quantity: position.quantity,
-      price: position.price,
-      marginRatio: marginRatio,
-      formula: 'margin / (quantity * price) * 100',
-      source: 'Manual calculation'
-    });
-    
-    return marginRatio;
-  }
+  const marginRatio = (position.margin / (position.quantity * position.price)) * 100;
   
-  // Fallback para fórmula com balance (se não tiver quantity/price)
-  if (!totalBalance || totalBalance === 0) {
-    return 100;
-  }
+  console.log('🔍 MARGIN RATIO CALCULATED:', {
+    positionId: position.id || position.uid,
+    margin: position.margin,
+    quantity: position.quantity,
+    price: position.price,
+    marginRatio: marginRatio,
+    formula: 'margin / (quantity * price) * 100'
+  });
   
-  const marginRatio = (position.margin / totalBalance) * 100;
   return marginRatio;
 }
 
