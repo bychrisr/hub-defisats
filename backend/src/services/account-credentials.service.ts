@@ -107,6 +107,8 @@ export class AccountCredentialsService {
       // Get credentials from database (already decrypted by UserExchangeAccountService)
       const credentials = activeAccount.credentials;
       
+      console.log(`🔍 ACCOUNT CREDENTIALS - Raw credentials for ${activeAccount.account_name}:`, credentials);
+      
       if (!credentials || Object.keys(credentials).length === 0) {
         console.warn(`❌ ACCOUNT CREDENTIALS - Account ${activeAccount.account_name} has no credentials`);
         return null;

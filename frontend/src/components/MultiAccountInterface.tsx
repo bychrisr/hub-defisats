@@ -30,6 +30,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import {
   Plus,
@@ -86,6 +87,7 @@ export function MultiAccountInterface() {
     credentials: {} as Record<string, string>
   });
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});
+  const [testnetToggles, setTestnetToggles] = useState<Record<string, boolean>>({});
 
   // Calcular estatísticas de contas usando limites dinâmicos
   const accountStats = getAccountStats(accounts.length);
@@ -223,6 +225,56 @@ export function MultiAccountInterface() {
       ...prev,
       [accountId]: !prev[accountId]
     }));
+  };
+
+  const handleTestnetToggle = async (accountId: string, isTestnet: boolean) => {
+    try {
+      console.log('🔄 TESTNET TOGGLE - Updating testnet mode:', { accountId, isTestnet });
+      
+      // Update the toggle state immediately for UI responsiveness
+      setTestnetToggles(prev => ({
+        ...prev,
+        [accountId]: isTestnet
+      }));
+
+      // Get current account to preserve existing credentials
+      const currentAccount = accounts.find(acc => acc.id === accountId);
+      if (!currentAccount) {
+        throw new Error('Account not found');
+      }
+
+      // Merge existing credentials with testnet flag
+      const updatedCredentials = {
+        ...currentAccount.credentials,
+        isTestnet: isTestnet.toString()
+      };
+
+      // Update account with merged credentials
+      await updateAccount(accountId, {
+        credentials: updatedCredentials
+      });
+
+      toast({
+        title: "Testnet Mode Updated",
+        description: `Account ${isTestnet ? 'enabled' : 'disabled'} for testnet`,
+        variant: "default",
+      });
+
+    } catch (error: any) {
+      console.error('❌ TESTNET TOGGLE - Error updating testnet mode:', error);
+      
+      // Revert toggle state on error
+      setTestnetToggles(prev => ({
+        ...prev,
+        [accountId]: !isTestnet
+      }));
+
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update testnet mode",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading || isLoadingExchanges || isLoadingLimits) {
@@ -463,6 +515,22 @@ export function MultiAccountInterface() {
                             {account.is_verified ? "Verified" : "Not Verified"}
                           </span>
                         </div>
+                      </div>
+                      
+                      {/* Testnet Toggle */}
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor={`testnet-${account.id}`} className="text-sm font-medium">
+                          Testnet Mode
+                        </Label>
+                        <Switch
+                          id={`testnet-${account.id}`}
+                          checked={testnetToggles[account.id] || account.credentials?.isTestnet === 'true'}
+                          onCheckedChange={(checked) => handleTestnetToggle(account.id, checked)}
+                          className="data-[state=checked]:bg-orange-600"
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {testnetToggles[account.id] || account.credentials?.isTestnet === 'true' ? 'ON' : 'OFF'}
+                        </span>
                       </div>
                       
                       <div className="flex items-center gap-2">

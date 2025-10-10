@@ -28,11 +28,14 @@ export class UserExchangeAccountService {
     const authService = new AuthService(this.prisma, {} as any);
     const decryptedCredentials: Record<string, string> = {};
     
+    console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Decrypting credentials:`, credentials);
+    
     if (credentials && typeof credentials === 'object') {
       Object.entries(credentials).forEach(([key, value]) => {
         if (value && typeof value === 'string') {
           try {
             decryptedCredentials[key] = authService.decryptData(value);
+            console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Decrypted ${key}: ${decryptedCredentials[key]}`);
           } catch (error) {
             console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to decrypt credential ${key}:`, error);
             decryptedCredentials[key] = ''; // Fallback para string vazia
@@ -42,6 +45,8 @@ export class UserExchangeAccountService {
         }
       });
     }
+    
+    console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Final decrypted credentials:`, decryptedCredentials);
     
     return decryptedCredentials;
   }
