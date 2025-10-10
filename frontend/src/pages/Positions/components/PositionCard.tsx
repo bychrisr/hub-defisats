@@ -75,12 +75,12 @@ export const PositionCard: React.FC<PositionCardProps> = ({
             
             <div className="text-right">
               <div className={cn(
-                'text-2xl font-mono font-bold flex items-center justify-end gap-2',
+                'text-3xl font-mono font-bold flex items-center justify-end gap-2',
                 isProfit ? 'text-[#0ECB81]' : 'text-[#F6465D]'
               )}>
                 {formatSats(position.currentPL)}
                 <SatsIcon 
-                  size={20} 
+                  size={24} 
                   variant={isProfit ? 'positive' : 'negative'}
                 />
                 <Badge 
