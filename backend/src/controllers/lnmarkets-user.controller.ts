@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 
 export class LNMarketsUserController {
   constructor(private prisma: PrismaClient) {}
@@ -113,12 +113,15 @@ export class LNMarketsUserController {
         debug: (message: string, meta?: any) => console.debug(`[LNMarketsAPI] ${message}`, meta || '')
       };
 
-      return new LNMarketsAPIService({
-        apiKey,
-        apiSecret,
-        passphrase,
-        isTestnet: false // Force mainnet for now
-      }, logger);
+      return new LNMarketsAPIv2({
+        credentials: {
+          apiKey,
+          apiSecret,
+          passphrase,
+          isTestnet: false
+        },
+        logger: logger as any
+      });
     } catch (error: any) {
       console.error(`❌ GET LN MARKETS SERVICE - Error decrypting credentials:`, {
         message: error?.message,

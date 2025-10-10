@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const prisma = new PrismaClient();
@@ -145,20 +145,28 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Initialize LN Markets service
-      console.log('🎯 LN MARKETS CONTROLLER - Initializing LN Markets service');
-      console.log('🚨 TESTE SIMPLES - ANTES DE CRIAR LNMarketsAPIService!');
-      const lnMarketsService = new LNMarketsAPIService({
-        apiKey: userProfile.ln_markets_api_key,
-        apiSecret: userProfile.ln_markets_api_secret,
-        passphrase: userProfile.ln_markets_passphrase,
-        isTestnet: false, // Force mainnet for now
-      });
-      console.log('🚨 TESTE SIMPLES - DEPOIS DE CRIAR LNMarketsAPIService!');
+      // Decrypt credentials
+      const { AuthService } = await import('../services/auth.service');
+      const authService = new AuthService(prisma, {} as any);
+      const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
+      const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
+      const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
 
-      console.log('🎯 LN MARKETS CONTROLLER - Service initialized, calling getUserPositions');
+      // Initialize LN Markets service v2
+      console.log('🎯 LN MARKETS CONTROLLER - Initializing LNMarketsAPIv2 service');
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
+          apiKey,
+          apiSecret,
+          passphrase,
+          isTestnet: false
+        },
+        logger: console as any
+      });
+      console.log('🎯 LN MARKETS CONTROLLER - Service v2 initialized, calling getRunningPositions');
+
       // Get positions using the new service
-      const positions = await lnMarketsService.getUserPositions();
+      const positions = await lnMarketsService.futures.getRunningPositions();
 
       console.log('✅ LN MARKETS CONTROLLER - Positions retrieved successfully:', {
         positionsCount: Array.isArray(positions) ? positions.length : 'not array',
@@ -331,16 +339,19 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
       const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
 
-      // Initialize LN Markets service
-      const lnMarketsService = new LNMarketsAPIService({
-        apiKey,
-        apiSecret,
-        passphrase,
-        isTestnet: false, // Force mainnet for now
+      // Initialize LN Markets service v2
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
+          apiKey,
+          apiSecret,
+          passphrase,
+          isTestnet: false
+        },
+        logger: console as any
       });
 
       // Get market data
-      const marketData = await lnMarketsService.getMarketData();
+      const marketData = await lnMarketsService.market.getTicker();
 
       console.log('✅ LN MARKETS - Market data retrieved successfully');
 
@@ -464,17 +475,15 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       let errorMessage = '';
 
       try {
-        const prodService = new LNMarketsAPIService(prodCredentials, {
-          info: () => {},
-          error: () => {},
-          warn: () => {},
-          debug: () => {}
-        } as any);
+        const prodService = new LNMarketsAPIv2({
+          credentials: prodCredentials,
+          logger: console as any
+        });
         
-        isValid = await prodService.validateCredentials();
-        if (isValid) {
-          console.log('✅ Credentials valid on production');
-        }
+        // Test with getUser() method
+        await prodService.user.getUser();
+        isValid = true;
+        console.log('✅ Credentials valid on production');
       } catch (error: any) {
         console.log('❌ Production validation failed:', error.message);
         errorMessage = error.message;
@@ -483,17 +492,15 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       // If production failed, try testnet
       if (!isValid) {
         try {
-          const testnetService = new LNMarketsAPIService(testCredentials, {
-            info: () => {},
-            error: () => {},
-            warn: () => {},
-            debug: () => {}
-          } as any);
+          const testnetService = new LNMarketsAPIv2({
+            credentials: testCredentials,
+            logger: console as any
+          });
           
-          isValid = await testnetService.validateCredentials();
-          if (isValid) {
-            console.log('✅ Credentials valid on testnet');
-          }
+          // Test with getUser() method
+          await testnetService.user.getUser();
+          isValid = true;
+          console.log('✅ Credentials valid on testnet');
         } catch (error: any) {
           console.log('❌ Testnet validation failed:', error.message);
           errorMessage = error.message;

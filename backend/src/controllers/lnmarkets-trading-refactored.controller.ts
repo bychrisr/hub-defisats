@@ -72,19 +72,22 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
 
       console.log('✅ TRADING CONTROLLER - Credentials decrypted successfully');
 
-      // Initialize LN Markets service directly (based on original implementation)
-      console.log('🔍 TRADING CONTROLLER - Initializing LN Markets service');
-      const { LNMarketsAPIService } = await import('../services/lnmarkets-api.service');
-      const lnMarketsService = new LNMarketsAPIService({
-        apiKey,
-        apiSecret,
-        passphrase,
-        isTestnet: false, // Force mainnet for now
-      }, this.logger);
+      // Initialize LN Markets service v2
+      console.log('🔍 TRADING CONTROLLER - Initializing LNMarketsAPIv2 service');
+      const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
+          apiKey,
+          apiSecret,
+          passphrase,
+          isTestnet: false
+        },
+        logger: this.logger
+      });
 
-      console.log('✅ TRADING CONTROLLER - Service initialized, calling getUserPositions');
-      // Get positions using the service (based on original implementation)
-      const positions = await lnMarketsService.getUserPositions();
+      console.log('✅ TRADING CONTROLLER - Service v2 initialized, calling getRunningPositions');
+      // Get positions using the service v2
+      const positions = await lnMarketsService.futures.getRunningPositions();
 
       console.log('✅ TRADING CONTROLLER - Positions retrieved successfully:', {
         positionsCount: Array.isArray(positions) ? positions.length : 'not array',

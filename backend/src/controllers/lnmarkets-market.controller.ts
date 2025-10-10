@@ -1,11 +1,11 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 
 export class LNMarketsMarketController {
   constructor(private prisma: PrismaClient) {}
 
-  private async getLNMarketsService(userId: string): Promise<LNMarketsAPIService> {
+  private async getLNMarketsService(userId: string): Promise<LNMarketsAPIv2> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { ln_markets_api_key: true, ln_markets_api_secret: true, ln_markets_passphrase: true }
@@ -22,11 +22,14 @@ export class LNMarketsMarketController {
     const apiSecret = authService.decryptData(user.ln_markets_api_secret);
     const passphrase = authService.decryptData(user.ln_markets_passphrase);
 
-    return new LNMarketsAPIService({
-      apiKey,
-      apiSecret,
-      passphrase,
-      isTestnet: false // Force mainnet for now
+    return new LNMarketsAPIv2({
+      credentials: {
+        apiKey,
+        apiSecret,
+        passphrase,
+        isTestnet: false
+      },
+      logger: console as any
     });
   }
 
