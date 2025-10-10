@@ -90,16 +90,24 @@ export class DashboardDataService {
       
       console.log(`🔍 DASHBOARD DATA - Testnet mode detected: ${isTestnet} for account ${credentials.accountName}`);
 
-      // 3. Criar instância do LNMarketsAPIv2 com credenciais da conta ativa
-      const lnMarketsService = new LNMarketsAPIv2({
-        credentials: {
-          apiKey: credentials.credentials['API Key'],
-          apiSecret: credentials.credentials['API Secret'],
-          passphrase: credentials.credentials['Passphrase'],
-          isTestnet: isTestnet
-        },
-        logger: console as any // TODO: Pass proper logger
+      // 3. Log das credenciais para debug
+      console.log(`🔍 DASHBOARD DATA - Credentials for ${credentials.accountName}:`, {
+        apiKey: credentials.credentials['api_key'] ? '***' + credentials.credentials['api_key'].slice(-4) : 'MISSING',
+        apiSecret: credentials.credentials['api_secret'] ? '***' + credentials.credentials['api_secret'].slice(-4) : 'MISSING',
+        passphrase: credentials.credentials['passphrase'] ? '***' + credentials.credentials['passphrase'].slice(-4) : 'MISSING',
+        isTestnet: isTestnet
       });
+
+          // 4. Criar instância do LNMarketsAPIv2 com credenciais da conta ativa
+          const lnMarketsService = new LNMarketsAPIv2({
+            credentials: {
+              apiKey: credentials.credentials['api_key'],
+              apiSecret: credentials.credentials['api_secret'],
+              passphrase: credentials.credentials['passphrase'],
+              isTestnet: isTestnet
+            },
+            logger: console as any // TODO: Pass proper logger
+          });
 
       console.log(`🔄 DASHBOARD DATA - Fetching data from LN Markets API for account ${credentials.accountName}`);
 

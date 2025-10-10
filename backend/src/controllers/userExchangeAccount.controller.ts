@@ -1,15 +1,18 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { UserExchangeAccountService, CreateUserExchangeAccountData, UpdateUserExchangeAccountData } from '../services/userExchangeAccount.service';
+import { AccountCredentialsService } from '../services/account-credentials.service';
 import { broadcastToUser } from '../routes/websocket.routes';
 
 export class UserExchangeAccountController {
   private prisma: PrismaClient;
   private userExchangeAccountService: UserExchangeAccountService;
+  private accountCredentialsService: AccountCredentialsService;
 
   constructor() {
     this.prisma = new PrismaClient();
     this.userExchangeAccountService = new UserExchangeAccountService(this.prisma);
+    this.accountCredentialsService = new AccountCredentialsService(this.prisma);
   }
 
   /**
@@ -345,6 +348,22 @@ export class UserExchangeAccountController {
         exchangeName: account.exchange.name,
         accountName: account.account_name
       });
+
+      // ========================================================================
+      // LIMPAR CACHE DE CREDENCIAIS PARA FORÇAR ATUALIZAÇÃO
+      // ========================================================================
+      
+      try {
+        console.log('🧹 USER EXCHANGE ACCOUNT CONTROLLER - Clearing credentials cache for user');
+        
+        // Limpar todo o cache de credenciais do usuário para garantir que a nova conta ativa seja usada
+        await this.accountCredentialsService.clearUserCredentialsCache(user.id);
+        
+        console.log('✅ USER EXCHANGE ACCOUNT CONTROLLER - Credentials cache cleared successfully');
+      } catch (cacheError) {
+        console.error('❌ USER EXCHANGE ACCOUNT CONTROLLER - Error clearing credentials cache:', cacheError);
+        // Não falhar a requisição por erro no cache
+      }
 
       // ========================================================================
       // EMITIR EVENTO WEBSOCKET PARA MUDANÇA DE CONTA ATIVA
