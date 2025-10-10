@@ -136,7 +136,26 @@ export const usePositionsData = (): PositionsData => {
         }, {} as any),
         
         // 🔍 LISTA COMPLETA DE CHAVES DISPONÍVEIS
-        allKeys: Object.keys(pos)
+        allKeys: Object.keys(pos),
+        
+        // 🔍 CHAVES ESPECÍFICAS QUE PROCURAMOS
+        keysWeNeed: {
+          liquidation: pos.liquidation,
+          liquidationPrice: pos.liquidationPrice,
+          liquidation_price: pos.liquidation_price,
+          tradingFees: pos.tradingFees,
+          trading_fees: pos.trading_fees,
+          fees: pos.fees,
+          openingFee: pos.openingFee,
+          opening_fee: pos.opening_fee,
+          fundingCost: pos.fundingCost,
+          funding_cost: pos.funding_cost,
+          funding: pos.funding,
+          createdAt: pos.createdAt,
+          created_at: pos.created_at,
+          timestamp: pos.timestamp,
+          date: pos.date
+        }
       });
 
       return {
