@@ -212,27 +212,27 @@ export const PositionCard: React.FC<PositionCardProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 px-2 text-xs border-[#2A3441] hover:bg-[#2A3441]"
+                className="h-7 w-7 p-0 bg-green-600 hover:bg-green-700 border-green-600 hover:border-green-700 text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(position.id);
                 }}
+                title="Add Margin"
               >
-                <Plus className="h-3 w-3 mr-1" />
-                Margin
+                <Plus className="h-3 w-3" />
               </Button>
               
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 px-2 text-xs border-[#2A3441] hover:bg-[#2A3441]"
+                className="h-7 w-7 p-0 bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(position.id);
                 }}
+                title="Cash In"
               >
-                <Minus className="h-3 w-3 mr-1" />
-                Cash In
+                <Minus className="h-3 w-3" />
               </Button>
             </div>
           </div>
