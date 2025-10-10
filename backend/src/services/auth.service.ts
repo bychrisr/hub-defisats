@@ -77,21 +77,25 @@ export class AuthService {
     if (ln_markets_api_key && process.env.NODE_ENV !== 'development') {
       try {
         console.log('🔍 Starting LN Markets credentials validation...');
-        const { LNMarketsAPIService } = await import('./lnmarkets-api.service');
-        const lnMarketsService = new LNMarketsAPIService({
-          apiKey: ln_markets_api_key,
-          apiSecret: ln_markets_api_secret,
-          passphrase: ln_markets_passphrase || '',
-          isTestnet: false
-        }, {
-          info: () => {},
-          error: () => {},
-          warn: () => {},
-          debug: () => {},
-        } as any);
+        const { LNMarketsAPIv2 } = await import('./lnmarkets/LNMarketsAPIv2.service');
+        const lnMarketsService = new LNMarketsAPIv2({
+          credentials: {
+            apiKey: ln_markets_api_key,
+            apiSecret: ln_markets_api_secret,
+            passphrase: ln_markets_passphrase || '',
+            isTestnet: false
+          },
+          logger: {
+            info: () => {},
+            error: () => {},
+            warn: () => {},
+            debug: () => {},
+          } as any
+        });
 
         console.log('✅ Validating credentials with LN Markets API...');
-        const isValidCredentials = await lnMarketsService.validateCredentials();
+        await lnMarketsService.user.getUser(); // Test with getUser()
+        const isValidCredentials = true; // If no error, credentials are valid
 
         if (!isValidCredentials) {
           console.log('❌ LN Markets credentials validation failed');
@@ -287,20 +291,24 @@ export class AuthService {
       console.log('🔍 AUTH SERVICE - Fetching LN Markets balance for user:', user.id);
       
       if (user.ln_markets_api_key && user.ln_markets_api_secret && user.ln_markets_passphrase) {
-        const { LNMarketsAPIService } = await import('./lnmarkets-api.service');
-        const lnMarketsService = new LNMarketsAPIService({
-          apiKey: user.ln_markets_api_key,
-          apiSecret: user.ln_markets_api_secret,
-          passphrase: user.ln_markets_passphrase,
-          isTestnet: false
-        }, {
-          info: () => {},
-          error: () => {},
-          warn: () => {},
-          debug: () => {},
-        } as any);
+        const { LNMarketsAPIv2 } = await import('./lnmarkets/LNMarketsAPIv2.service');
+        const lnMarketsService = new LNMarketsAPIv2({
+          credentials: {
+            apiKey: user.ln_markets_api_key,
+            apiSecret: user.ln_markets_api_secret,
+            passphrase: user.ln_markets_passphrase,
+            isTestnet: false
+          },
+          logger: {
+            info: () => {},
+            error: () => {},
+            warn: () => {},
+            debug: () => {},
+          } as any
+        });
 
-        const lnMarketsBalance = await lnMarketsService.getUserBalance();
+        const user = await lnMarketsService.user.getUser();
+        const lnMarketsBalance = { balance: user.balance };
         console.log('✅ AUTH SERVICE - LN Markets balance fetched:', lnMarketsBalance);
         
         userBalance = {

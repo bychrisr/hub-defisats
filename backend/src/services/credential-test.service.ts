@@ -171,8 +171,8 @@ class LNMarketsTestHandler implements ExchangeTestHandler {
     console.log('🧪 LN MARKETS TEST HANDLER - Testing LN Markets credentials...');
     
     try {
-      // Import LN Markets API service dynamically to avoid circular dependencies
-      const { LNMarketsAPIService } = await import('./lnmarkets-api.service');
+      // Import LN Markets API v2 service dynamically to avoid circular dependencies
+      const { LNMarketsAPIv2 } = await import('./lnmarkets/LNMarketsAPIv2.service');
       
       // Create a simple logger for testing
       const logger = {
@@ -183,18 +183,18 @@ class LNMarketsTestHandler implements ExchangeTestHandler {
       } as any;
       
       // Create API service instance with test credentials
-      const apiService = new LNMarketsAPIService(
-        {
+      const apiService = new LNMarketsAPIv2({
+        credentials: {
           apiKey: credentials.api_key,
           apiSecret: credentials.api_secret,
           passphrase: credentials.passphrase,
-          isTestnet: false // Use mainnet for testing
+          isTestnet: false
         },
-        logger
-      );
+        logger: logger
+      });
 
       // Test with a simple API call (get user info)
-      const userInfo = await apiService.getUser();
+      const userInfo = await apiService.user.getUser();
       
       console.log('✅ LN MARKETS TEST HANDLER - Credentials test successful');
       return {
