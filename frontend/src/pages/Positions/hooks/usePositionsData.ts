@@ -67,7 +67,19 @@ export const usePositionsData = (): PositionsData => {
     balanceData,
     balanceType: typeof balanceData,
     balanceKeys: balanceData ? Object.keys(balanceData) : [],
-    balanceValue: balanceData?.balance || balanceData?.value || balanceData
+    balanceValue: balanceData?.balance || balanceData?.value || balanceData,
+    // ✅ EXPANDIR TODAS AS CHAVES PARA VER O VALOR CORRETO
+    allBalanceValues: balanceData ? {
+      balance: balanceData.balance,
+      value: balanceData.value,
+      amount: balanceData.amount,
+      total: balanceData.total,
+      available: balanceData.available,
+      used: balanceData.used,
+      free: balanceData.free,
+      locked: balanceData.locked,
+      wallet: balanceData.wallet
+    } : null
   });
   
   // ✅ CORREÇÃO: Extrair o valor numérico do balance
