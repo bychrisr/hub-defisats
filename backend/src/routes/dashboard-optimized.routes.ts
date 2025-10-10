@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsAPIService } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const prisma = new PrismaClient();
@@ -84,15 +84,18 @@ export async function dashboardOptimizedRoutes(fastify: FastifyInstance) {
         const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
         const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
 
-        // Criar instância do serviço LN Markets
-        const lnMarketsService = new LNMarketsAPIService({
-          apiKey,
-          apiSecret,
-          passphrase,
-          isTestnet: false
-        }, console);
+        // Criar instância do serviço LN Markets v2
+        const lnMarketsService = new LNMarketsAPIv2({
+          credentials: {
+            apiKey,
+            apiSecret,
+            passphrase,
+            isTestnet: false
+          },
+          logger: console as any
+        });
 
-        console.log(`🔄 DASHBOARD OPTIMIZED - Fetching all data in parallel...`);
+        console.log(`🔄 DASHBOARD OPTIMIZED - Fetching all data in parallel (LNMarketsAPIv2)...`);
         
         // Buscar dados essenciais em paralelo (otimização principal) - LN Markets API v2
         const [
@@ -101,16 +104,16 @@ export async function dashboardOptimizedRoutes(fastify: FastifyInstance) {
           positionsData,
           marketData
         ] = await Promise.allSettled([
-          lnMarketsService.getUser(),
-          lnMarketsService.getUserBalance(),
-          lnMarketsService.getUserPositions('running'),
-          lnMarketsService.getTicker()
+          lnMarketsService.user.getUser(),
+          lnMarketsService.user.getUser().then(user => ({ balance: user.balance, synthetic_usd_balance: user.synthetic_usd_balance })),
+          lnMarketsService.futures.getRunningPositions(),
+          lnMarketsService.market.getTicker()
         ]);
 
         // Buscar dados opcionais separadamente (podem falhar)
         const [depositsData, withdrawalsData] = await Promise.allSettled([
-          lnMarketsService.getDeposits().catch(() => []),
-          lnMarketsService.getWithdrawals().catch(() => [])
+          lnMarketsService.user.getDeposits('bitcoin').catch(() => []),
+          lnMarketsService.user.getWithdrawals().catch(() => [])
         ]);
 
         // Processar respostas
