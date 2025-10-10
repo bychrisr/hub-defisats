@@ -48,15 +48,15 @@ export const usePositionsData = (): PositionsData => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
+  // ✅ CORREÇÃO: Calcular currentPrice fora do useMemo para usar no log
+  const btcMarketData = marketData?.['BTC'];
+  const currentPrice = btcMarketData?.price || (positions && positions.length > 0 ? positions[0].price : 0);
+
   // Calcular PL em tempo real com market data do WebSocket
   const positionsWithLivePL = useMemo(() => {
     if (!positions) {
       return [];
     }
-
-    // ✅ CORREÇÃO: Usar dados do BTC do marketData ou fallback para preço das posições
-    const btcMarketData = marketData?.['BTC'];
-    const currentPrice = btcMarketData?.price || (positions.length > 0 ? positions[0].price : 0);
     
     return positions.map((pos: any): PositionWithLiveData => {
       const pl = calculatePL(pos, currentPrice);
