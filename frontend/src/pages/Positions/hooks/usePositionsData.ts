@@ -77,6 +77,17 @@ export const usePositionsData = (): PositionsData => {
         priceChangePercent: ((currentPrice - (pos.entryPrice || pos.price)) / (pos.entryPrice || pos.price)) * 100
       });
 
+      console.log('🔍 POSITION FIELDS DEBUG:', {
+        positionId: pos.id || pos.uid,
+        liquidation: pos.liquidation,
+        liquidationPrice: pos.liquidationPrice,
+        tradingFees: pos.tradingFees,
+        fundingCost: pos.fundingCost,
+        createdAt: pos.createdAt,
+        timestamp: pos.timestamp,
+        allKeys: Object.keys(pos)
+      });
+
       return {
         id: pos.id || pos.uid,
         type: pos.side === 'b' ? 'LONG' : 'SHORT',
@@ -86,7 +97,7 @@ export const usePositionsData = (): PositionsData => {
         leverage: pos.leverage || 1,
         margin: pos.margin || 0,
         tradeMargin: pos.tradeMargin || 0,
-        liquidationPrice: pos.liquidationPrice || 0,
+        liquidationPrice: pos.liquidation || pos.liquidationPrice || 0,
         stopLoss: pos.stopLoss,
         takeProfit: pos.takeProfit,
         pl,
@@ -165,9 +176,13 @@ function calculatePLPercentage(position: any, currentPrice: number): number {
 }
 
 function calculateMarginRatio(position: any): number {
-  if (!position.margin || !position.quantity) return 0;
+  if (!position.margin || !position.quantity || !position.entryPrice) return 0;
   
-  return (position.margin / position.quantity) * 100;
+  // Margin Ratio = (Margin / Position Value) * 100
+  // Position Value = quantity * entryPrice
+  const positionValue = position.quantity * position.entryPrice;
+  
+  return (position.margin / positionValue) * 100;
 }
 
 function calculateLiquidationRisk(position: any, currentPrice: number): 'low' | 'medium' | 'high' {
