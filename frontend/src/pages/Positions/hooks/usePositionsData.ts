@@ -88,12 +88,11 @@ export const usePositionsData = (): PositionsData => {
     
     // ✅ LOG COMPLETO DE TODOS OS DADOS BRUTOS DA LN MARKETS
     positions.forEach((pos: any, index: number) => {
-      console.log(`🔍 POSIÇÃO ${index + 1} - DADOS COMPLETOS DA LN MARKETS:`, {
-        positionId: pos.id || pos.uid,
-        allFields: pos,
-        allKeys: Object.keys(pos),
-        fieldCount: Object.keys(pos).length
-      });
+      console.log(`🔍 POSIÇÃO ${index + 1} - DADOS COMPLETOS DA LN MARKETS:`);
+      console.log(`🔍 POSIÇÃO ${index + 1} - Position ID:`, pos.id || pos.uid);
+      console.log(`🔍 POSIÇÃO ${index + 1} - ALL KEYS:`, Object.keys(pos));
+      console.log(`🔍 POSIÇÃO ${index + 1} - FIELD COUNT:`, Object.keys(pos).length);
+      console.log(`🔍 POSIÇÃO ${index + 1} - COMPLETE DATA:`, JSON.stringify(pos, null, 2));
     });
     
     return positions.map((pos: any): PositionWithLiveData => {
