@@ -188,9 +188,95 @@ services:
     profiles:
       - workers
 
+  # LND Testnet Node
+  lnd-testnet:
+    image: lightninglabs/lnd:v0.17.0-beta
+    container_name: axisor-lnd-testnet
+    environment:
+      - BITCOIN_NETWORK=testnet
+      - LND_ALIAS=Axisor-Testnet-Node
+      - LND_COLOR=#FF6B35
+      - LND_EXTERNALIP=
+      - LND_LISTEN=0.0.0.0:9735
+      - LND_RPCLISTEN=0.0.0.0:10009
+      - LND_RESTLISTEN=0.0.0.0:8080
+      - LND_BITCOIN_NODE=neutrino
+      - LND_NEUTRINO_CONNECT=testnet1-btcd.zaphq.io
+      - LND_NEUTRINO_CONNECT=testnet2-btcd.zaphq.io
+      - LND_ACCEPT_KEYSEND=true
+      - LND_ACCEPT_AMP=true
+      - LND_DEBUGLEVEL=info
+      - LND_TLSAUTOREFRESH=1
+      - LND_TLSEXTRADOMAIN=lnd-testnet
+    ports:
+      - "19735:9735"  # P2P
+      - "20009:10009" # gRPC
+      - "18080:8080"  # REST
+    volumes:
+      - lnd_testnet_data:/lnd
+      - ../../config/lnd/lnd-testnet.conf:/lnd/lnd.conf
+    networks:
+      - axisor-network
+    command: >
+      lnd 
+      --configfile=/lnd/lnd.conf
+      --tlscertpath=/lnd/tls.cert
+      --tlskeypath=/lnd/tls.key
+    healthcheck:
+      test: ["CMD", "lndcli", "--network=testnet", "getinfo"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    profiles:
+      - lnd
+
+  # LND Mainnet Node (comentado por padrão - ativar apenas em produção)
+  # lnd-mainnet:
+  #   image: lightninglabs/lnd:v0.17.0-beta
+  #   container_name: axisor-lnd-mainnet
+  #   environment:
+  #     - BITCOIN_NETWORK=mainnet
+  #     - LND_ALIAS=Axisor-Production-Node
+  #     - LND_COLOR=#4ECDC4
+  #     - LND_EXTERNALIP=
+  #     - LND_LISTEN=0.0.0.0:9736
+  #     - LND_RPCLISTEN=0.0.0.0:10010
+  #     - LND_RESTLISTEN=0.0.0.0:8081
+  #     - LND_BITCOIN_NODE=neutrino
+  #     - LND_NEUTRINO_CONNECT=mainnet1-btcd.zaphq.io
+  #     - LND_NEUTRINO_CONNECT=mainnet2-btcd.zaphq.io
+  #     - LND_ACCEPT_KEYSEND=true
+  #     - LND_ACCEPT_AMP=true
+  #     - LND_DEBUGLEVEL=warn
+  #     - LND_TLSAUTOREFRESH=1
+  #     - LND_TLSEXTRADOMAIN=lnd-mainnet
+  #   ports:
+  #     - "19736:9736"  # P2P
+  #     - "20010:10010" # gRPC
+  #     - "18081:8081"  # REST
+  #   volumes:
+  #     - lnd_mainnet_data:/lnd
+  #     - ../../config/lnd/lnd-mainnet.conf:/lnd/lnd.conf
+  #   networks:
+  #     - axisor-network
+  #   command: >
+  #     lnd 
+  #     --configfile=/lnd/lnd.conf
+  #     --tlscertpath=/lnd/tls.cert
+  #     --tlskeypath=/lnd/tls.key
+  #   healthcheck:
+  #     test: ["CMD", "lndcli", "--network=mainnet", "getinfo"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #   profiles:
+  #     - lnd
+
 volumes:
   postgres_data:
   redis_data:
+  lnd_testnet_data:
+  lnd_mainnet_data:
 
 networks:
   axisor-network:

@@ -69,6 +69,7 @@ model User {
   userPreferences            UserPreferences?
   upgrades_made              UserUpgradeHistory[]      @relation("AdminUpgradeHistory")
   upgrade_history            UserUpgradeHistory[]      @relation("UserUpgradeHistory")
+  testnet_faucet_distributions TestnetFaucetDistribution[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -811,6 +812,30 @@ model UserPreferences {
   @@index([userId])
   @@index([lastUpdated])
   @@map("user_preferences")
+}
+
+model TestnetFaucetDistribution {
+  id               String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  ip_address       String
+  user_id          String?
+  amount_sats      Int
+  invoice_bolt11   String
+  payment_hash     String    @unique
+  payment_preimage String?
+  status           String    @default("pending") // pending, paid, expired, cancelled
+  expires_at       DateTime  @db.Timestamp(6)
+  paid_at          DateTime? @db.Timestamp(6)
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime  @default(now()) @db.Timestamp(6)
+  
+  user             User?     @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  
+  @@index([ip_address])
+  @@index([user_id])
+  @@index([payment_hash])
+  @@index([status])
+  @@index([created_at])
+  @@map("testnet_faucet_distributions")
 }
 
 enum PlanType {

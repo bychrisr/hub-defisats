@@ -68,6 +68,8 @@ import { adminUsersRoutes } from './routes/admin-users.routes';
 import { exchangesRoutes } from './routes/exchanges.routes';
 import { passwordResetRoutes } from './routes/password-reset.routes';
 import { registrationRoutes } from './routes/registration.routes';
+import { testnetFaucetRoutes } from './routes/testnet-faucet.routes';
+import { lndRoutes } from './routes/lnd.routes';
 import { cacheRoutes as adminCacheRoutes } from './routes/admin/cache.routes';
 import { loadBalancerRoutes } from './routes/admin/load-balancer.routes';
 import { monitoringRoutes } from './routes/monitoring.routes';
@@ -540,6 +542,14 @@ async function registerRoutes() {
   // Registration routes
   await fastify.register(registrationRoutes, { prefix: '/api/registration' });
   console.log('✅ Registration routes registered');
+
+  // Testnet Faucet routes
+  await fastify.register(testnetFaucetRoutes, { prefix: '/api/testnet-faucet' });
+  console.log('✅ Testnet Faucet routes registered');
+
+  // LND routes
+  await fastify.register(lndRoutes, { prefix: '/api/lnd' });
+  console.log('✅ LND routes registered');
 
   // Tooltip routes moved to the end to avoid hook leakage
 

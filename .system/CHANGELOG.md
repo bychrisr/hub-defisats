@@ -8,6 +8,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **LND Integration (v2.4.0)**: Integração completa com Lightning Network Daemon
+  - Configuração Docker Compose para LND testnet e mainnet
+  - LND testnet configurado com Neutrino mode (light client)
+  - LND mainnet preparado para produção (comentado por padrão)
+  - Scripts de inicialização e gerenciamento de wallet LND
+  - Backend LNDService com cliente REST API completo
+  - Endpoints LND para info, wallet, invoices, payments, channels, peers, on-chain
+  - Controller LND com todos os métodos necessários
+  - Rotas API REST para operações LND
+  - Suporte a testnet e mainnet com configurações específicas
+  - Health checks e monitoramento de status
+  - Integração com sistema de autenticação existente
+  - Documentação completa da API LND
+  - Scripts de backup e restore de dados LND
+  - Configuração TLS e macaroons automática
+  - Suporte a operações de wallet (criar, desbloquear, backup)
+  - Endpoints para gerenciamento de canais Lightning
+  - Operações de peer-to-peer Lightning
+  - Transações on-chain Bitcoin
+  - Geração e pagamento de invoices Lightning
+  - Sistema de faucet testnet integrado
+  - Rate limiting e circuit breaker para API LND
+  - Logging estruturado para debugging
+  - Tratamento de erros robusto
+  - Configuração de ambiente para desenvolvimento e produção
+  - Volumes persistentes para dados LND
+  - Network isolation e segurança
+  - Scripts de automação para setup inicial
+
+- **Testnet Faucet System (v2.4.1)**: Sistema completo de faucet Lightning testnet
+  - Backend service para gerenciamento de faucet
+  - Rate limiting por IP e usuário
+  - Geração automática de invoices Lightning
+  - Distribuição de sats via Lightning Network
+  - Interface frontend com QR code
+  - Histórico de distribuições
+  - Estatísticas de uso do faucet
+  - Integração com LND testnet
+  - Sistema de validação de requests
+  - Logging de transações
+  - API REST para operações do faucet
+  - Componentes React reutilizáveis
+  - Página dedicada para faucet
+  - Integração com sistema de autenticação
+  - Proteção contra spam e abuse
+  - Configuração flexível de limites
+
+- **Position Simulation System (v2.4.2)**: Sistema de simulação de posições para testes
+  - Script gerador de 20 posições variadas
+  - Simulação realística de dados LN Markets
+  - Geração de PL, margin, fees, timestamps
+  - Mock API responses para desenvolvimento
+  - Arquivo JSON com dados simulados
+  - Suporte a diferentes tipos de posição (long/short)
+  - Variações de leverage, quantidade, preços
+  - Stop loss e take profit simulados
+  - Dados de liquidação e fees
+  - Timestamps realísticos (últimos 30 dias)
+  - Resumo estatístico das posições
+  - Integração com sistema de testes
+  - Validação de dados simulados
+  - Exportação para múltiplos formatos
+
 - **New Positions Page (v2.3.0)**: Página de posições completamente nova com design híbrido LN Markets
   - Design mobile-first inspirado na UI/UX oficial da LN Markets
   - Layout desktop horizontal adaptado ao design system do Axisor
