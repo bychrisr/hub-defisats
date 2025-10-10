@@ -8,6 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **New Positions Page (v2.3.0)**: Página de posições completamente nova com design híbrido LN Markets
+  - Design mobile-first inspirado na UI/UX oficial da LN Markets
+  - Layout desktop horizontal adaptado ao design system do Axisor
+  - Dados em tempo real via WebSocket + polling inteligente (15s)
+  - Cards de posição com ações inline (Fechar, Editar SL/TP)
+  - Modal com informações detalhadas da posição
+  - Filtros: Open/Running/Closed com contadores
+  - Estados vazios e skeletons de loading
+  - Tratamento de erros com mecanismos de retry
+  - Integração completa com LNMarketsAPIv2
+  - Compliance com rate limits (120 req/min para posições)
+  - Estratégia de cache (5s stale time, 15s refetch)
+  - Design responsivo (mobile: stack vertical, desktop: horizontal)
+  - Cores e espaçamentos do design system Axisor
+  - Indicadores de risco de liquidação
+  - Gestão de margem (adicionar/retirar)
+  - Fechamento de posições (individual e em lote)
+  - Exibição de taxas de trading e custos de funding
+  - Rastreamento de data de criação e status
+  - Otimizações de performance com useMemo
+  - WebSocket para dados de mercado em tempo real
+  - Updates otimistas para melhor UX
+  - Error boundaries e estados de fallback
+  - Arquitetura limpa com separação de responsabilidades
+  - Hooks reutilizáveis e componentes
+  - Interfaces TypeScript para type safety
+  - Tratamento de erros consistente
+  - Estrutura de componentes escalável
 - **Universal Documentation Standards System (v2.2.0)**: Sistema completo de padrões de documentação
   - `DOCUMENTATION_STANDARDS.md` - Guia completo de padrões universais
   - `create-docs-structure.sh` - Script automatizado para criar estrutura de documentação
