@@ -8,7 +8,7 @@ async function checkAdminUser() {
     
     // Find user by email
     const user = await prisma.user.findUnique({
-      where: { email: 'admin@defisats.com' }
+      where: { email: 'admin@axisor.com' }
     });
     
     if (!user) {

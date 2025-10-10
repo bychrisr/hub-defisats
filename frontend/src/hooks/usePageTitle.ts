@@ -9,7 +9,7 @@ interface UsePageTitleOptions {
 }
 
 export const usePageTitle = ({
-  baseTitle = 'defiSATS',
+  baseTitle = 'Axisor',
   showPL = true,
   customTitle
 }: UsePageTitleOptions = {}) => {

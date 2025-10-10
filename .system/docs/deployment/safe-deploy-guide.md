@@ -1,4 +1,4 @@
-# 🛡️ GUIA DE DEPLOY SEGURO - Hub DeFiSats
+# 🛡️ GUIA DE DEPLOY SEGURO - Axisor
 
 ## ⚠️ **IMPORTANTE: NÃO QUEBRAR PRODUÇÃO**
 
@@ -95,8 +95,8 @@ curl http://localhost:13010/health
 ./scripts/deploy/check-production.sh
 
 # Verificar logs
-docker logs hub-defisats-backend-prod
-docker logs hub-defisats-frontend-prod
+docker logs axisor-backend-prod
+docker logs axisor-frontend-prod
 ```
 
 ---
@@ -111,9 +111,9 @@ NODE_ENV=production
 PORT=23000
 
 # Database (manter as mesmas)
-POSTGRES_DB=hubdefisats_prod
-POSTGRES_USER=hubdefisats_prod
-POSTGRES_PASSWORD=hubdefisats_prod_password_secure_2024
+POSTGRES_DB=axisor_prod
+POSTGRES_USER=axisor_prod
+POSTGRES_PASSWORD=axisor_prod_password_secure_2024
 
 # Security (manter as mesmas)
 JWT_SECRET=production-jwt-secret-key-32-chars-minimum-2024
@@ -199,7 +199,7 @@ docker compose -f docker-compose.prod.yml up -d
 #### 1. **Frontend não carrega**
 ```bash
 # Verificar logs
-docker logs hub-defisats-frontend-prod
+docker logs axisor-frontend-prod
 
 # Verificar se container está rodando
 docker ps | grep frontend
@@ -208,7 +208,7 @@ docker ps | grep frontend
 #### 2. **API não responde**
 ```bash
 # Verificar logs
-docker logs hub-defisats-backend-prod
+docker logs axisor-backend-prod
 
 # Verificar health
 curl https://api.defisats.site/health
@@ -217,17 +217,17 @@ curl https://api.defisats.site/health
 #### 3. **Workers não funcionam**
 ```bash
 # Verificar logs dos workers
-docker logs hub-defisats-margin-monitor
-docker logs hub-defisats-automation-executor
+docker logs axisor-margin-monitor
+docker logs axisor-automation-executor
 
 # Verificar Redis
-docker logs hub-defisats-redis-prod
+docker logs axisor-redis-prod
 ```
 
 #### 4. **Database connection failed**
 ```bash
 # Verificar PostgreSQL
-docker logs hub-defisats-postgres-prod
+docker logs axisor-postgres-prod
 
 # Verificar connection string
 echo $DATABASE_URL
@@ -251,10 +251,10 @@ echo $DATABASE_URL
 docker ps -a
 
 # Ver logs em tempo real
-docker logs -f hub-defisats-backend-prod
+docker logs -f axisor-backend-prod
 
 # Restart um container
-docker restart hub-defisats-backend-prod
+docker restart axisor-backend-prod
 
 # Ver uso de recursos
 docker stats

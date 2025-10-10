@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Hub-defisats Setup Script
+# Axisor Setup Script
 # This script sets up the development environment
 
 set -e
 
-echo "🚀 Setting up hub-defisats development environment..."
+echo "🚀 Setting up axisor development environment..."
 
 # Colors for output
 RED='\033[0;31m'

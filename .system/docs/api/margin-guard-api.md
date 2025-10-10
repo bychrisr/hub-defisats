@@ -423,7 +423,7 @@ X-RateLimit-Reset: 1640995200
 
 ### JavaScript/TypeScript
 ```javascript
-import { AutomationAPI } from '@hubdefisats/sdk';
+import { AutomationAPI } from '@axisor/sdk';
 
 const api = new AutomationAPI({
   baseURL: 'http://localhost:13010/api',
@@ -484,7 +484,7 @@ class AutomationAPI:
 ## 📞 Suporte
 
 ### Contato
-- **Email**: api-support@hubdefisats.com
+- **Email**: api-support@axisor.com
 - **Discord**: [Link do servidor]
 - **GitHub**: [Link do repositório]
 

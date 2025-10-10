@@ -378,7 +378,7 @@ curl -X GET http://localhost:13010/api/margin-guard/status
 **Logs de execução:**
 ```bash
 # Ver logs em tempo real
-docker logs -f hub-defisats-backend-1 | grep "MARGIN GUARD"
+docker logs -f axisor-backend-1 | grep "MARGIN GUARD"
 ```
 
 **Logs importantes:**
@@ -392,7 +392,7 @@ docker logs -f hub-defisats-backend-1 | grep "MARGIN GUARD"
 **Verificar filas Redis:**
 ```bash
 # Acessar Redis
-docker exec -it hub-defisats-redis-1 redis-cli
+docker exec -it axisor-redis-1 redis-cli
 
 # Ver filas
 LLEN margin-guard-queue
@@ -408,10 +408,10 @@ LLEN margin-guard-scheduler-queue
 **Sistema não inicializa:**
 ```bash
 # Verificar logs
-docker logs hub-defisats-backend-1
+docker logs axisor-backend-1
 
 # Verificar Redis
-docker logs hub-defisats-redis-1
+docker logs axisor-redis-1
 
 # Reiniciar serviços
 docker compose -f config/docker/docker-compose.dev.yml restart
@@ -423,7 +423,7 @@ docker compose -f config/docker/docker-compose.dev.yml restart
 curl -X GET http://localhost:13010/api/margin-guard/status
 
 # Verificar filas
-docker exec -it hub-defisats-redis-1 redis-cli
+docker exec -it axisor-redis-1 redis-cli
 LLEN margin-guard-queue
 ```
 
@@ -433,7 +433,7 @@ LLEN margin-guard-queue
 curl -X GET http://localhost:13010/api/admin/margin-guard/plans/free
 
 # Verificar logs de notificação
-docker logs hub-defisats-backend-1 | grep "NOTIFICATION"
+docker logs axisor-backend-1 | grep "NOTIFICATION"
 ```
 
 ### **9.2 Comandos de Diagnóstico**
@@ -509,7 +509,7 @@ curl -X GET http://localhost:13010/api/admin/margin-guard/statistics
 
 Para dúvidas ou problemas com o sistema Margin Guard:
 
-1. **Verifique os logs**: `docker logs hub-defisats-backend-1`
+1. **Verifique os logs**: `docker logs axisor-backend-1`
 2. **Teste o health check**: `curl http://localhost:13010/api/margin-guard/health`
 3. **Consulte a documentação**: `http://localhost:13010/docs`
 4. **Acesse o painel administrativo**: `http://localhost:13000/admin/margin-guard-plans`

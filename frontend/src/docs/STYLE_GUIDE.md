@@ -2,7 +2,7 @@
 
 ## 🎨 Visão Geral
 
-Este guia documenta o sistema de design da aplicação Hub-defisats, inspirado na identidade visual do CoinGecko. A paleta de cores foi cuidadosamente selecionada para replicar a sensação moderna, vibrante e profissional do CoinGecko.
+Este guia documenta o sistema de design da aplicação Axisor, inspirado na identidade visual do CoinGecko. A paleta de cores foi cuidadosamente selecionada para replicar a sensação moderna, vibrante e profissional do CoinGecko.
 
 ## 🌈 Paleta de Cores
 

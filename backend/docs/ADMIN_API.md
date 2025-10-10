@@ -1,6 +1,6 @@
-# API Administrativa - hub-defisats
+# API Administrativa - axisor
 
-Esta documentação descreve todos os endpoints da API administrativa do hub-defisats.
+Esta documentação descreve todos os endpoints da API administrativa do axisor.
 
 ## Autenticação
 
@@ -401,7 +401,7 @@ Obtém dados de gerenciamento de notificações.
       "description": "Email de boas-vindas",
       "channel": "email",
       "category": "system",
-      "template": "Bem-vindo ao hub-defisats!",
+      "template": "Bem-vindo ao axisor!",
       "variables": ["username", "email"],
       "is_active": true,
       "created_at": "2024-01-01T00:00:00Z"

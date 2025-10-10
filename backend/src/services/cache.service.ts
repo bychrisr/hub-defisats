@@ -372,7 +372,7 @@ export class CacheService {
    * Constrói chave completa com prefixo
    */
   private buildKey(key: string, prefix?: string): string {
-    const basePrefix = process.env.CACHE_PREFIX || 'hub-defisats';
+    const basePrefix = process.env.CACHE_PREFIX || 'axisor';
     const finalPrefix = prefix ? `${basePrefix}:${prefix}` : basePrefix;
     return `${finalPrefix}:${key}`;
   }

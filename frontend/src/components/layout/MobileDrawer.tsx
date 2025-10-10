@@ -97,7 +97,7 @@ export const MobileDrawer = ({ isOpen, onClose }: MobileDrawerProps) => {
                 className={MOBILE_TEXT_CLASSES.drawerTitle}
                 style={{ color: 'hsl(var(--text-primary))' }}
               >
-                defiSATS
+                Axisor
               </span>
             </div>
             <Button

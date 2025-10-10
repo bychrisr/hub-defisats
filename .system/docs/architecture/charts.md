@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O Hub DeFiSats implementa um sistema completo de gráficos e visualizações para análise de trading, incluindo gráficos customizados TradingView-style e widgets oficiais da TradingView para dados reais em tempo real.
+O Axisor implementa um sistema completo de gráficos e visualizações para análise de trading, incluindo gráficos customizados TradingView-style e widgets oficiais da TradingView para dados reais em tempo real.
 
 ## Implementações Disponíveis
 
@@ -435,7 +435,7 @@ const Dashboard = () => {
 
 ## Conclusão
 
-O sistema de gráficos e visualizações do Hub DeFiSats oferece:
+O sistema de gráficos e visualizações do Axisor oferece:
 
 - ✅ **Gráficos Customizados**: Interface TradingView-style com dados em tempo real
 - ✅ **Widget TradingView**: Dados reais da Bitstamp com funcionalidades avançadas

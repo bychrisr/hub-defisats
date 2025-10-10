@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * 🚀 TESTE DE CARGA - Hub DeFiSats
+ * 🚀 TESTE DE CARGA - Axisor
  * 
  * Este script realiza testes de carga abrangentes para validar a performance
  * da aplicação após as otimizações implementadas.
@@ -234,7 +234,7 @@ class UserSimulator {
 
 // Função principal de teste de carga
 async function runLoadTest() {
-  console.log('🚀 INICIANDO TESTE DE CARGA - Hub DeFiSats');
+  console.log('🚀 INICIANDO TESTE DE CARGA - Axisor');
   console.log('=' .repeat(60));
   
   metrics.startTime = performance.now();

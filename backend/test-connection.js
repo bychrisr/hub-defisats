@@ -4,7 +4,7 @@ async function testConnection() {
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: "postgresql://postgres:password@localhost:5432/hub_defisats"
+        url: "postgresql://postgres:password@localhost:5432/axisor"
       }
     }
   });

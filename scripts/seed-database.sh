@@ -40,13 +40,13 @@ fi
 
 # Verificar se containers estão rodando
 log_info "Verificando containers..."
-if ! docker ps | grep -q "hub-defisats-postgres"; then
+if ! docker ps | grep -q "axisor-postgres"; then
     log_error "Container PostgreSQL não está rodando"
     log_info "Execute: docker-compose -f docker-compose.dev.yml up -d"
     exit 1
 fi
 
-if ! docker ps | grep -q "hub-defisats-backend"; then
+if ! docker ps | grep -q "axisor-backend"; then
     log_error "Container Backend não está rodando"
     log_info "Execute: docker-compose -f docker-compose.dev.yml up -d"
     exit 1
@@ -63,7 +63,7 @@ run_seeder() {
     log_info "Descrição: $description"
     
     # Executar seeder dentro do container backend
-    if docker exec hub-defisats-backend npm run "seed:$seeder_name"; then
+    if docker exec axisor-backend npm run "seed:$seeder_name"; then
         log_success "Seeder $seeder_name executado com sucesso"
     else
         log_error "Falha ao executar seeder $seeder_name"
@@ -106,7 +106,7 @@ main() {
                 ;;
             5)
                 log_info "Listando seeders disponíveis..."
-                docker exec hub-defisats-backend npm run seed:list
+                docker exec axisor-backend npm run seed:list
                 ;;
             6)
                 log_success "Saindo..."
@@ -142,7 +142,7 @@ else
             run_seeder "plans" "Planos de Assinatura"
             ;;
         "list")
-            docker exec hub-defisats-backend npm run seed:list
+            docker exec axisor-backend npm run seed:list
             ;;
         *)
             echo "Uso: $0 [all|rate-limit|admin|plans|list]"

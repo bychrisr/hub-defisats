@@ -2,7 +2,7 @@
 
 ## 📋 Visão Geral
 
-O sistema WebSocket do Hub DeFiSats implementa uma arquitetura híbrida robusta que combina **WebSocket em tempo real** com **fallback HTTP inteligente**, garantindo atualizações instantâneas dos dados de trading enquanto mantém alta disponibilidade e confiabilidade.
+O sistema WebSocket do Axisor implementa uma arquitetura híbrida robusta que combina **WebSocket em tempo real** com **fallback HTTP inteligente**, garantindo atualizações instantâneas dos dados de trading enquanto mantém alta disponibilidade e confiabilidade.
 
 ### 🎯 Objetivos do Sistema
 
@@ -531,7 +531,7 @@ await fastify.register(websocketRoutes);
 ```bash
 # Backend
 PORT=13010
-DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
+DATABASE_URL="postgresql://user:pass@postgres:5432/axisor"
 
 # Frontend
 VITE_API_URL=http://localhost:13010
@@ -550,35 +550,35 @@ VITE_WS_URL=ws://localhost:13000
 curl -I http://localhost:13000/ws
 
 # Verificar rota no backend
-docker logs hub-defisats-backend | grep "websocket"
+docker logs axisor-backend | grep "websocket"
 ```
 
 #### **2. Dados não atualizam**
 ```bash
 # Verificar logs de autenticação
-docker logs hub-defisats-backend | grep "LN MARKETS AUTH"
+docker logs axisor-backend | grep "LN MARKETS AUTH"
 
 # Verificar credenciais
-docker exec -it hub-defisats-backend psql -U user -d hubdefisats -c "SELECT ln_markets_api_key FROM \"User\" WHERE email = 'brainoschris@gmail.com';"
+docker exec -it axisor-backend psql -U user -d axisor -c "SELECT ln_markets_api_key FROM \"User\" WHERE email = 'brainoschris@gmail.com';"
 ```
 
 #### **3. Reconexão falha**
 ```bash
 # Verificar health check
-docker logs hub-defisats-backend | grep "health check"
+docker logs axisor-backend | grep "health check"
 
 # Verificar rede
-docker network ls | grep hub-defisats
+docker network ls | grep axisor
 ```
 
 ### **Comandos de Debug**
 
 ```bash
 # Verificar conexões WebSocket ativas
-docker exec -it hub-defisats-backend netstat -an | grep :3010
+docker exec -it axisor-backend netstat -an | grep :3010
 
 # Monitorar logs em tempo real
-docker logs -f hub-defisats-backend | grep -E "(WEBSOCKET|WebSocket)"
+docker logs -f axisor-backend | grep -E "(WEBSOCKET|WebSocket)"
 
 # Testar conexão WebSocket
 node -e "

@@ -1,8 +1,8 @@
-# 🧭 Guia de Navegação - Documentação Hub DeFiSats
+# 🧭 Guia de Navegação - Documentação Axisor
 
 ## 📋 Visão Geral
 
-Este guia apresenta a nova estrutura organizacional da documentação do Hub DeFiSats, facilitando a localização de informações específicas.
+Este guia apresenta a nova estrutura organizacional da documentação do Axisor, facilitando a localização de informações específicas.
 
 ## 🏗️ **Estrutura Principal**
 

@@ -6,7 +6,7 @@
 BASE_URL=${1:-"http://localhost:13010"}
 TOKEN=${2:-"test-admin-token"}
 
-echo "🚀 Testando endpoints administrativos do hub-defisats"
+echo "🚀 Testando endpoints administrativos do axisor"
 echo "📍 Base URL: $BASE_URL"
 echo "🔑 Token: ${TOKEN:0:20}..."
 echo ""

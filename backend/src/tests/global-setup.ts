@@ -12,7 +12,7 @@ async function globalSetup() {
 
     // Create test database schema if needed
     await prisma.$runCommandRaw({
-      createDatabase: 'hub_defisats_test',
+      createDatabase: 'axisor_test',
     }).catch(() => {
       // Database might already exist
     });

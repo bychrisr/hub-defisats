@@ -1,8 +1,8 @@
-# Sistema de Cupons - Hub DeFiSats
+# Sistema de Cupons - Axisor
 
 ## 🎯 Visão Geral
 
-O sistema de cupons do Hub DeFiSats foi completamente implementado e está 100% funcional. Permite a criação, edição, exclusão e gerenciamento completo de cupons de desconto para diferentes tipos de planos.
+O sistema de cupons do Axisor foi completamente implementado e está 100% funcional. Permite a criação, edição, exclusão e gerenciamento completo de cupons de desconto para diferentes tipos de planos.
 
 ## ✅ Status: COMPLETO
 

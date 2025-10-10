@@ -23,7 +23,7 @@ gh secret list
 
 ### 2. **Configurar Proteções de Branch**
 
-Acesse: `https://github.com/SEU_USUARIO/hub-defisats/settings/branches`
+Acesse: `https://github.com/SEU_USUARIO/axisor/settings/branches`
 
 #### Branch `main` (Produção)
 - ✅ **Require a pull request before merging**
@@ -120,10 +120,10 @@ gh pr merge <pr-number> --merge
 ### Deploy Manual (se necessário)
 ```bash
 # Staging
-ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/hub-defisats-staging && ./scripts/deploy-staging-github.sh"
+ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/axisor-staging && ./scripts/deploy-staging-github.sh"
 
 # Produção
-ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/hub-defisats-production && ./scripts/deploy-production-github.sh"
+ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/axisor-production && ./scripts/deploy-production-github.sh"
 ```
 
 ## Troubleshooting
@@ -151,7 +151,7 @@ ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/hub-defisats
 ### Verificar Status dos Serviços
 ```bash
 # Staging (Docker)
-ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/hub-defisats-staging && docker compose -f docker-compose.staging.yml ps"
+ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/axisor-staging && docker compose -f docker-compose.staging.yml ps"
 
 # Produção (PM2)
 ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "pm2 status"
@@ -160,7 +160,7 @@ ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "pm2 status"
 ### Verificar Logs
 ```bash
 # Staging
-ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/hub-defisats-staging && docker compose -f docker-compose.staging.yml logs -f"
+ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "cd /home/ubuntu/apps/axisor-staging && docker compose -f docker-compose.staging.yml logs -f"
 
 # Produção
 ssh -i ~/.ssh/debian.pem ubuntu@defisats.site "pm2 logs"

@@ -40,7 +40,7 @@ fi
 
 # Verificar se containers estão rodando
 log_info "Verificando containers..."
-if ! docker ps | grep -q "hub-defisats-postgres"; then
+if ! docker ps | grep -q "axisor-postgres"; then
     log_error "Container PostgreSQL não está rodando"
     log_info "Execute: docker compose -f config/docker/docker-compose.dev.yml up -d"
     exit 1
@@ -60,11 +60,11 @@ create_user() {
     log_info "💰 Plano: $plan_type"
     
     # Verificar se usuário já existe
-    local user_exists=$(docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -t -c "SELECT COUNT(*) FROM \"User\" WHERE email = '$email';" | tr -d ' ')
+    local user_exists=$(docker exec axisor-postgres psql -U axisor -d axisor -t -c "SELECT COUNT(*) FROM \"User\" WHERE email = '$email';" | tr -d ' ')
     
     if [ "$user_exists" != "0" ]; then
         log_warning "Usuário $email já existe - removendo..."
-        docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "DELETE FROM \"User\" WHERE email = '$email';"
+        docker exec axisor-postgres psql -U axisor -d axisor -c "DELETE FROM \"User\" WHERE email = '$email';"
     fi
     
     # Gerar hash da senha
@@ -78,13 +78,13 @@ create_user() {
     
     # Criar usuário
     log_info "👤 Criando usuário no banco..."
-    docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "INSERT INTO \"User\" (id, email, username, password_hash, plan_type, is_active, email_verified, created_at, updated_at) VALUES (gen_random_uuid(), '$email', '$username', '$password_hash', '$plan_type', true, true, NOW(), NOW());"
+    docker exec axisor-postgres psql -U axisor -d axisor -c "INSERT INTO \"User\" (id, email, username, password_hash, plan_type, is_active, email_verified, created_at, updated_at) VALUES (gen_random_uuid(), '$email', '$username', '$password_hash', '$plan_type', true, true, NOW(), NOW());"
     
     log_success "✅ Usuário criado com sucesso!"
     
     # Verificar usuário criado
     log_info "📊 Verificando usuário criado..."
-    docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "SELECT email, username, plan_type, is_active, email_verified FROM \"User\" WHERE email = '$email';"
+    docker exec axisor-postgres psql -U axisor -d axisor -c "SELECT email, username, plan_type, is_active, email_verified FROM \"User\" WHERE email = '$email';"
 }
 
 # Menu interativo

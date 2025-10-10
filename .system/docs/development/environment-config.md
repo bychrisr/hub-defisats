@@ -67,8 +67,8 @@ mkdir -p /home/$USER/projects
 cd /home/$USER/projects
 
 # Clonar repositório
-git clone https://github.com/seu-usuario/hub-defisats.git
-cd hub-defisats
+git clone https://github.com/seu-usuario/axisor.git
+cd axisor
 ```
 
 ### 2. Configurar Variáveis de Ambiente
@@ -190,12 +190,12 @@ docker-compose -f docker-compose.prod.yml config
 ### 2. Configurar Volumes
 ```bash
 # Criar diretórios para volumes
-sudo mkdir -p /var/lib/docker/volumes/hub-defisats_postgres_data/_data
-sudo mkdir -p /var/lib/docker/volumes/hub-defisats_redis_data/_data
+sudo mkdir -p /var/lib/docker/volumes/axisor_postgres_data/_data
+sudo mkdir -p /var/lib/docker/volumes/axisor_redis_data/_data
 
 # Configurar permissões
-sudo chown -R 999:999 /var/lib/docker/volumes/hub-defisats_postgres_data/_data
-sudo chown -R 999:999 /var/lib/docker/volumes/hub-defisats_redis_data/_data
+sudo chown -R 999:999 /var/lib/docker/volumes/axisor_postgres_data/_data
+sudo chown -R 999:999 /var/lib/docker/volumes/axisor_redis_data/_data
 ```
 
 ## 🚀 Deploy Inicial
@@ -285,10 +285,10 @@ BACKUP_DIR="/backups"
 mkdir -p $BACKUP_DIR
 
 # Backup do banco
-docker exec hub-defisats-postgres-prod pg_dump -U hubdefisats_prod hubdefisats_prod > $BACKUP_DIR/db_backup_$DATE.sql
+docker exec axisor-postgres-prod pg_dump -U axisor_prod axisor_prod > $BACKUP_DIR/db_backup_$DATE.sql
 
 # Backup dos volumes
-docker run --rm -v hub-defisats_postgres_data:/data -v $BACKUP_DIR:/backup alpine tar czf /backup/volumes_backup_$DATE.tar.gz -C /data .
+docker run --rm -v axisor_postgres_data:/data -v $BACKUP_DIR:/backup alpine tar czf /backup/volumes_backup_$DATE.tar.gz -C /data .
 
 # Limpar backups antigos (manter últimos 7 dias)
 find $BACKUP_DIR -name "*.sql" -mtime +7 -delete
@@ -364,7 +364,7 @@ nslookup defisats.site
 #### 4. Problemas de banco
 ```bash
 # Verificar conectividade
-docker-compose -f docker-compose.prod.yml exec postgres pg_isready -U hubdefisats_prod
+docker-compose -f docker-compose.prod.yml exec postgres pg_isready -U axisor_prod
 
 # Verificar logs do banco
 docker-compose -f docker-compose.prod.yml logs postgres
@@ -474,7 +474,7 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 ### Credenciais de Desenvolvimento
 ```
-Email/Username: admin@hub-defisats.com
+Email/Username: admin@axisor.com
 Password: Admin123!@#
 ```
 

@@ -281,7 +281,7 @@ O Axisor é uma plataforma de automação de trading para LN Markets que combina
 - Distorcer ou alterar proporções
 - Usar cores não oficiais
 - Aplicar em fundos com baixo contraste
-- Modificar o texto "defiSATS"
+- Modificar o texto "Axisor"
 
 ### Cores em Contexto
 
@@ -365,4 +365,4 @@ Para dúvidas sobre a identidade visual ou solicitações de materiais:
 
 **Versão**: 1.0.0  
 **Última Atualização**: Janeiro 2025  
-**Responsável**: Equipe de Design Hub DeFiSats
+**Responsável**: Equipe de Design Axisor

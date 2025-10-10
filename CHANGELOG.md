@@ -156,7 +156,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - ✅ **Comunicação Interna Corrigida**:
   - Containers se comunicam via nome do serviço
   - Porta interna 3010 (não porta externa 13010)
-  - Rede Docker `hub-defisats-network` funcionando
+  - Rede Docker `axisor-network` funcionando
 
 ##### **2. Validação e Testes**
 - ✅ **API /version respondendo**: `{"version":"1.5.0",...}`

@@ -2,7 +2,7 @@
 
 ## 📍 Visão Geral
 
-Este documento fornece instruções completas para configurar SSL/TLS para o ambiente de staging do defiSATS, incluindo certificados Let's Encrypt (produção) e certificados auto-assinados (desenvolvimento).
+Este documento fornece instruções completas para configurar SSL/TLS para o ambiente de staging do Axisor, incluindo certificados Let's Encrypt (produção) e certificados auto-assinados (desenvolvimento).
 
 ---
 
@@ -25,7 +25,7 @@ Este documento fornece instruções completas para configurar SSL/TLS para o amb
 
 #### 1.2 Executar Script
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 sudo ./scripts/setup-ssl-staging.sh
 ```
 
@@ -44,7 +44,7 @@ sudo ./scripts/setup-ssl-staging.sh
 
 #### 2.1 Para uso em desenvolvimento/testes
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 sudo ./scripts/setup-ssl-self-signed.sh
 ```
 
@@ -108,7 +108,7 @@ server {
 
     # Proxy to frontend staging
     location / {
-        proxy_pass http://hub-defisats-frontend-staging:3001;
+        proxy_pass http://axisor-frontend-staging:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -146,7 +146,7 @@ server {
 
     # Proxy to backend staging
     location / {
-        proxy_pass http://hub-defisats-backend-staging:3010;
+        proxy_pass http://axisor-backend-staging:3010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -344,7 +344,7 @@ docker exec global-nginx-proxy nginx -t
 #### 2.2 Conectividade
 ```bash
 # Testar conectividade interna
-docker exec global-nginx-proxy curl -s http://hub-defisats-backend-staging:3010/health
+docker exec global-nginx-proxy curl -s http://axisor-backend-staging:3010/health
 
 # Testar conectividade externa
 curl -I https://staging.defisats.site
@@ -456,4 +456,4 @@ cd /home/bychrisr/proxy && ./start-proxy.sh restart
 
 *Documentação criada em: 22 de Setembro de 2024*
 *Versão: 1.0*
-*Ambiente: SSL Staging - defiSATS*
+*Ambiente: SSL Staging - Axisor*

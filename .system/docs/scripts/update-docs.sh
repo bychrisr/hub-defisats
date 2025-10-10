@@ -14,8 +14,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configurações
-DOCS_DIR="/home/bychrisr/projects/hub-defisats/.system/docs"
-SYSTEM_DIR="/home/bychrisr/projects/hub-defisats/.system"
+DOCS_DIR="/home/bychrisr/projects/axisor/.system/docs"
+SYSTEM_DIR="/home/bychrisr/projects/axisor/.system"
 LOG_FILE="${DOCS_DIR}/scripts/maintenance.log"
 
 # Função para logging

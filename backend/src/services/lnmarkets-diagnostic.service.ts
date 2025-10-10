@@ -63,7 +63,7 @@ export class LNMarketsDiagnosticService {
       timeout: 30000, // 30 seconds
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Hub-DefiSats-Diagnostic/1.0'
+        'User-Agent': 'Axisor-Diagnostic/1.0'
       }
     });
   }
@@ -75,7 +75,7 @@ export class LNMarketsDiagnosticService {
     try {
       const user = await this.prisma.user.findFirst({
         where: {
-          email: 'admin@hub-defisats.com'
+          email: 'admin@axisor.com'
         },
         select: {
           ln_markets_api_key: true,

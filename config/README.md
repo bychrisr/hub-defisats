@@ -1,4 +1,4 @@
-# Configurações do Hub DeFiSats
+# Configurações do Axisor
 
 Esta pasta contém todas as configurações do projeto organizadas por categoria.
 
@@ -117,7 +117,7 @@ cp config/env/.env.development .env
 docker compose -f config/docker/docker-compose.dev.yml up -d
 
 # 3. Executar migrações
-docker exec hub-defisats-backend-dev npx prisma migrate dev
+docker exec axisor-backend-dev npx prisma migrate dev
 
 # 4. Acessar aplicação
 # Frontend: http://localhost:13000
@@ -134,7 +134,7 @@ cp config/env/.env.production .env
 docker compose -f config/docker/docker-compose.prod.yml up -d
 
 # 4. Executar migrações
-docker exec hub-defisats-backend-prod npx prisma migrate deploy
+docker exec axisor-backend-prod npx prisma migrate deploy
 ```
 
 ### Staging
@@ -173,7 +173,7 @@ curl http://localhost:13010/health
 curl http://localhost:13000
 
 # Banco de dados
-docker exec hub-defisats-postgres-dev pg_isready
+docker exec axisor-postgres-dev pg_isready
 ```
 
 ### Logs
@@ -213,7 +213,7 @@ docker compose -f config/docker/docker-compose.dev.yml logs backend
    docker ps | grep postgres
    
    # Verificar logs do banco
-   docker logs hub-defisats-postgres-dev
+   docker logs axisor-postgres-dev
    ```
 
 4. **Variáveis de ambiente**:
@@ -248,7 +248,7 @@ Para problemas de configuração:
 1. Verificar logs de erro
 2. Consultar documentação específica
 3. Abrir issue no GitHub
-4. Contatar: dev@hub-defisats.com
+4. Contatar: dev@axisor.com
 
 ---
 

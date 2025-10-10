@@ -421,4 +421,4 @@ localStorage.getItem('notified_versions');   // Versões notificadas
 
 **Versão do Documento**: 1.0.0  
 **Última Atualização**: 2025-09-22  
-**Autor**: Sistema de Verificação de Versão - defiSATS
+**Autor**: Sistema de Verificação de Versão - Axisor

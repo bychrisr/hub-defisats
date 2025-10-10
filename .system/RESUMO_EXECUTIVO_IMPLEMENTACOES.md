@@ -163,7 +163,7 @@ Durante esta sessão de desenvolvimento, implementamos um sistema completo de **
 
 ## 🎉 Conclusão
 
-As implementações realizadas durante esta sessão representam um **marco significativo** no desenvolvimento do sistema hub-defisats. O sistema de logging de automações e relatórios de usuário está **100% funcional** e pronto para produção, proporcionando:
+As implementações realizadas durante esta sessão representam um **marco significativo** no desenvolvimento do sistema axisor. O sistema de logging de automações e relatórios de usuário está **100% funcional** e pronto para produção, proporcionando:
 
 - **Transparência total** para usuários sobre suas automações
 - **Ferramentas de debugging** avançadas para desenvolvedores

@@ -1,8 +1,8 @@
-# Sistema de Monitoring - hub-defisats
+# Sistema de Monitoring - Axisor
 
 ## Visão Geral
 
-O sistema de monitoring do hub-defisats fornece monitoramento em tempo real da infraestrutura, métricas de performance e alertas do sistema. O sistema é acessível apenas para usuários administradores e fornece insights críticos sobre a saúde da aplicação.
+O sistema de monitoring do Axisor fornece monitoramento em tempo real da infraestrutura, métricas de performance e alertas do sistema. O sistema é acessível apenas para usuários administradores e fornece insights críticos sobre a saúde da aplicação.
 
 ## Arquitetura
 
@@ -414,7 +414,7 @@ curl -X POST "http://localhost:13010/api/admin/monitoring/alerts/{id}/resolve" \
 # Fazer login
 curl -X POST "http://localhost:13010/api/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"email": "admin@defisats.com", "password": "Admin123!"}'
+  -d '{"email": "admin@axisor.com", "password": "Admin123!"}'
 
 # Verificar perfil
 curl -X GET "http://localhost:13010/api/profile" \
@@ -434,12 +434,12 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile.dev
-    container_name: hub-defisats-backend
+    container_name: axisor-backend
     ports:
       - "13010:3010"
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats
+      DATABASE_URL: postgresql://axisor:axisor_dev_password@postgres:5432/axisor
       REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
@@ -496,7 +496,7 @@ docker compose -f config/docker/docker-compose.dev.yml ps
 
 ## Conclusão
 
-O sistema de monitoring do hub-defisats fornece uma visão abrangente da saúde da aplicação, permitindo identificação rápida de problemas e monitoramento proativo da infraestrutura. A implementação atual é robusta e escalável, com planos para melhorias contínuas baseadas nas necessidades operacionais.
+O sistema de monitoring do Axisor fornece uma visão abrangente da saúde da aplicação, permitindo identificação rápida de problemas e monitoramento proativo da infraestrutura. A implementação atual é robusta e escalável, com planos para melhorias contínuas baseadas nas necessidades operacionais.
 
 ### Principais Conquistas
 

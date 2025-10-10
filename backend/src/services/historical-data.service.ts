@@ -50,7 +50,7 @@ export class HistoricalDataService {
           interval: interval === 'hourly' ? 'hourly' : 'daily',
         },
         headers: {
-          'User-Agent': 'defiSATS/1.0',
+          'User-Agent': 'Axisor/1.0',
           'Accept': 'application/json',
         },
         timeout: 10000,
@@ -123,7 +123,7 @@ export class HistoricalDataService {
           limit,
         },
         headers: {
-          'User-Agent': 'defiSATS/1.0',
+          'User-Agent': 'Axisor/1.0',
           'Accept': 'application/json',
         },
         timeout: 10000,

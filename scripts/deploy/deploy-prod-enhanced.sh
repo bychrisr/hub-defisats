@@ -107,7 +107,7 @@ wait_for_services() {
     
     # Wait for PostgreSQL
     log_info "Waiting for PostgreSQL..."
-    timeout 60 bash -c 'until docker-compose -f docker-compose.prod.yml exec postgres pg_isready -U hubdefisats; do sleep 2; done'
+    timeout 60 bash -c 'until docker-compose -f docker-compose.prod.yml exec postgres pg_isready -U axisor; do sleep 2; done'
     log_success "PostgreSQL is ready"
     
     # Wait for Redis

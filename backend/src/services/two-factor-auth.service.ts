@@ -31,8 +31,8 @@ export class TwoFactorAuthService {
   async generateSecret(userId: string, userEmail: string): Promise<TwoFactorSecret> {
     try {
       const secret = speakeasy.generateSecret({
-        name: `Hub DefiSATS (${userEmail})`,
-        issuer: 'Hub DefiSATS',
+        name: `Axisor (${userEmail})`,
+        issuer: 'Axisor',
         length: 32
       });
 
@@ -248,7 +248,7 @@ export class TwoFactorAuthService {
         algorithm: 'SHA1',
         digits: 6,
         period: 30,
-        issuer: 'Hub DefiSATS',
+        issuer: 'Axisor',
         accountName: 'User Account'
       };
     } catch (error) {

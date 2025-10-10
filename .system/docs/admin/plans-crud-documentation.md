@@ -2,7 +2,7 @@
 
 ## 📋 **VISÃO GERAL**
 
-Este documento detalha a implementação completa do sistema CRUD (Create, Read, Update, Delete) para gerenciamento de planos no painel administrativo do defiSATS. O sistema foi desenvolvido com foco em UX/UI moderna, seguindo os padrões de design do projeto.
+Este documento detalha a implementação completa do sistema CRUD (Create, Read, Update, Delete) para gerenciamento de planos no painel administrativo do Axisor. O sistema foi desenvolvido com foco em UX/UI moderna, seguindo os padrões de design do projeto.
 
 ---
 

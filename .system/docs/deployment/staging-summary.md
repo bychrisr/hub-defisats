@@ -29,13 +29,13 @@
 ### Containers Ativos
 | Container | Status | Porta | Função |
 |-----------|--------|-------|--------|
-| `hub-defisats-postgres-staging` | ✅ Healthy | 5432 | Banco de dados |
-| `hub-defisats-redis-staging` | ✅ Healthy | 6379 | Cache/Queue |
-| `hub-defisats-backend-staging` | ✅ Healthy | 13020 | API Backend |
-| `hub-defisats-frontend-staging` | ⚠️ Parado | 13010 | Frontend (problema nginx) |
+| `axisor-postgres-staging` | ✅ Healthy | 5432 | Banco de dados |
+| `axisor-redis-staging` | ✅ Healthy | 6379 | Cache/Queue |
+| `axisor-backend-staging` | ✅ Healthy | 13020 | API Backend |
+| `axisor-frontend-staging` | ⚠️ Parado | 13010 | Frontend (problema nginx) |
 
 ### Redes Configuradas
-- ✅ `docker_hub-defisats-staging-network` - Rede interna
+- ✅ `docker_axisor-staging-network` - Rede interna
 - ✅ `proxy-network` - Conectado ao proxy global
 
 ---
@@ -108,8 +108,8 @@
 ### Variáveis de Ambiente
 ```bash
 NODE_ENV=staging
-DATABASE_URL=postgresql://hubdefisats_staging:hubdefisats_staging_password_2024@postgres:5432/hubdefisats_staging
-REDIS_URL=redis://:hubdefisats_staging_redis_2024@redis:6379
+DATABASE_URL=postgresql://axisor_staging:axisor_staging_password_2024@postgres:5432/axisor_staging
+REDIS_URL=redis://:axisor_staging_redis_2024@redis:6379
 JWT_SECRET=staging-jwt-secret-key-32-chars-minimum-2024
 CORS_ORIGIN=https://staging.defisats.site
 ```
@@ -126,7 +126,7 @@ CORS_ORIGIN=https://staging.defisats.site
 
 ### 1. Frontend Container
 - **Status**: Parado
-- **Problema**: Nginx config tentando acessar `hub-defisats-backend-prod`
+- **Problema**: Nginx config tentando acessar `axisor-backend-prod`
 - **Impacto**: Frontend não acessível
 - **Solução**: Corrigir configuração nginx do frontend
 
@@ -165,8 +165,8 @@ CORS_ORIGIN=https://staging.defisats.site
 docker ps | grep staging
 
 # Ver logs
-docker logs hub-defisats-backend-staging
-docker logs hub-defisats-frontend-staging
+docker logs axisor-backend-staging
+docker logs axisor-frontend-staging
 
 # Reiniciar staging
 docker compose -f config/docker/docker-compose.staging.yml restart
@@ -229,4 +229,4 @@ O ambiente está pronto para testes e desenvolvimento, com apenas pequenos ajust
 *Deploy executado por: Assistant AI*  
 *Data: 22 de Setembro de 2024*  
 *Versão: 1.0*  
-*Ambiente: Staging - defiSATS*
+*Ambiente: Staging - Axisor*

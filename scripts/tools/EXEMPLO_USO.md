@@ -2,7 +2,7 @@
 
 ## 📋 Visão Geral
 
-Este documento mostra como usar o script `organize-project.sh` para organizar automaticamente qualquer projeto de software seguindo a estrutura padrão do Hub DeFiSats.
+Este documento mostra como usar o script `organize-project.sh` para organizar automaticamente qualquer projeto de software seguindo a estrutura padrão do Axisor.
 
 ## 🎯 Casos de Uso
 
@@ -255,7 +255,7 @@ Para problemas com o script:
 1. Verificar este documento
 2. Verificar logs de erro
 3. Abrir issue no GitHub
-4. Contatar: dev@hub-defisats.com
+4. Contatar: dev@axisor.com
 
 ---
 

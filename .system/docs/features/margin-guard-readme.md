@@ -1,7 +1,7 @@
 # 🛡️ Margin Guard - Sistema de Proteção Automática
 
-[![Status](https://img.shields.io/badge/Status-100%25%20Funcional-brightgreen)](https://github.com/hubdefisats/margin-guard)
-[![Version](https://img.shields.io/badge/Version-1.0.0-blue)](https://github.com/hubdefisats/margin-guard)
+[![Status](https://img.shields.io/badge/Status-100%25%20Funcional-brightgreen)](https://github.com/axisor/margin-guard)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue)](https://github.com/axisor/margin-guard)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](https://opensource.org/licenses/MIT)
 
 > **Sistema avançado de proteção automática para posições de trading na LN Markets**
@@ -28,7 +28,7 @@ O **Margin Guard** é uma automação inteligente que monitora continuamente sua
 ### 1. Configuração Básica
 ```bash
 # Clone o repositório
-git clone https://github.com/hubdefisats/margin-guard
+git clone https://github.com/axisor/margin-guard
 
 # Configure as variáveis de ambiente
 cp .env.example .env
@@ -50,7 +50,7 @@ docker compose up -d
 ### 3. Verificação
 ```bash
 # Verificar logs
-docker logs hub-defisats-backend | grep "MARGIN GUARD"
+docker logs axisor-backend | grep "MARGIN GUARD"
 
 # Status esperado
 ✅ MARGIN GUARD - Monitoring started
@@ -119,7 +119,7 @@ Redis Queue ← LN Markets API ← Credential Cache
 
 ```bash
 # Banco de dados
-DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
+DATABASE_URL="postgresql://user:pass@postgres:5432/axisor"
 
 # Redis
 REDIS_URL="redis://redis:6379"
@@ -151,8 +151,8 @@ services:
   postgres:
     image: postgres:13
     environment:
-      - POSTGRES_DB=hubdefisats
-      - POSTGRES_USER=hubdefisats
+      - POSTGRES_DB=axisor
+      - POSTGRES_USER=axisor
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -395,9 +395,9 @@ docker compose -f docker-compose.staging.yml up -d
 
 ### Contato
 
-- **Email**: suporte@hubdefisats.com
-- **Discord**: [Link do servidor](https://discord.gg/hubdefisats)
-- **GitHub Issues**: [Link do repositório](https://github.com/hubdefisats/margin-guard/issues)
+- **Email**: suporte@axisor.com
+- **Discord**: [Link do servidor](https://discord.gg/axisor)
+- **GitHub Issues**: [Link do repositório](https://github.com/axisor/margin-guard/issues)
 
 ### SLA
 

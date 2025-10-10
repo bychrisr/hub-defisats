@@ -1,6 +1,6 @@
 # Decisões Arquiteturais e Tecnológicas
 
-Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto hub-defisats, seguindo o padrão ADR (Architectural Decision Records).
+Este documento registra as decisões arquiteturais e tecnológicas importantes tomadas durante o desenvolvimento do projeto axisor, seguindo o padrão ADR (Architectural Decision Records).
 
 ## ADR-030: Refatoração da Interface de Gráficos com Dropdown de Timeframe
 
@@ -1148,15 +1148,15 @@ if (error.response?.status === 401 &&
 ```
 /home/ubuntu/
 ├── apps/
-│   ├── hub-defisats/                    # Desenvolvimento (Docker)
-│   ├── hub-defisats-staging/            # Staging (Docker)
-│   └── hub-defisats-production/         # Produção (Nativo)
+│   ├── axisor/                    # Desenvolvimento (Docker)
+│   ├── axisor-staging/            # Staging (Docker)
+│   └── axisor-production/         # Produção (Nativo)
 ├── proxy/                               # Proxy Global
 │   ├── conf.d/
 │   │   ├── staging.conf                 # Configuração Staging
 │   │   └── production.conf              # Configuração Produção
 │   └── certs/                           # Certificados SSL
-└── /var/www/hub-defisats/               # Aplicação Produção (Nativo)
+└── /var/www/axisor/               # Aplicação Produção (Nativo)
     ├── backend/
     ├── frontend/
     └── ecosystem.config.js
@@ -1184,11 +1184,11 @@ services:
 ```javascript
 // PM2 Configuration
 apps: [
-  { name: 'hub-defisats-backend', script: './backend/dist/index.js' },
-  { name: 'hub-defisats-margin-monitor', script: './backend/dist/workers/margin-monitor.js' },
-  { name: 'hub-defisats-automation-executor', script: './backend/dist/workers/automation-executor.js' },
-  { name: 'hub-defisats-notification-worker', script: './backend/dist/workers/notification-worker.js' },
-  { name: 'hub-defisats-payment-validator', script: './backend/dist/workers/payment-validator.js' }
+  { name: 'axisor-backend', script: './backend/dist/index.js' },
+  { name: 'axisor-margin-monitor', script: './backend/dist/workers/margin-monitor.js' },
+  { name: 'axisor-automation-executor', script: './backend/dist/workers/automation-executor.js' },
+  { name: 'axisor-notification-worker', script: './backend/dist/workers/notification-worker.js' },
+  { name: 'axisor-payment-validator', script: './backend/dist/workers/payment-validator.js' }
 ]
 ```
 
@@ -1196,7 +1196,7 @@ apps: [
 ```nginx
 # Staging
 upstream staging_backend {
-    server hub-defisats-nginx-staging:80;
+    server axisor-nginx-staging:80;
 }
 
 # Produção
@@ -1330,7 +1330,7 @@ SLACK_WEBHOOK
 
 **Data**: 2025-01-22  
 **Status**: Aceito  
-**Contexto**: Documentação completa do processo de deploy em produção do Hub DeFiSats
+**Contexto**: Documentação completa do processo de deploy em produção do Axisor
 
 ### Problema
 - Necessidade de documentação completa para deploy em produção
@@ -1385,8 +1385,8 @@ config/docker/docker-compose.prod.yml
 #### **Variáveis de Ambiente Obrigatórias**
 ```bash
 # Database
-POSTGRES_DB=hubdefisats_prod
-POSTGRES_USER=hubdefisats_prod
+POSTGRES_DB=axisor_prod
+POSTGRES_USER=axisor_prod
 POSTGRES_PASSWORD=your_secure_database_password
 
 # Security
@@ -1404,13 +1404,13 @@ LN_MARKETS_API_URL=https://api.lnmarkets.com
 #### **Estrutura Docker**
 | Container | Status | Função | Porta Interna |
 |-----------|--------|--------|---------------|
-| `hub-defisats-backend-prod` | ✅ Healthy | API Backend | 3010 |
-| `hub-defisats-frontend-prod` | ✅ Running | Frontend React | 80 |
-| `hub-defisats-nginx-prod` | ✅ Running | Nginx interno | 80 |
-| `hub-defisats-postgres-prod` | ✅ Healthy | Banco de dados | 5432 |
-| `hub-defisats-redis-prod` | ✅ Healthy | Cache Redis | 6379 |
-| `hub-defisats-margin-monitor-prod` | ⚠️ Restarting | Worker | - |
-| `hub-defisats-automation-executor-prod` | ⚠️ Restarting | Worker | - |
+| `axisor-backend-prod` | ✅ Healthy | API Backend | 3010 |
+| `axisor-frontend-prod` | ✅ Running | Frontend React | 80 |
+| `axisor-nginx-prod` | ✅ Running | Nginx interno | 80 |
+| `axisor-postgres-prod` | ✅ Healthy | Banco de dados | 5432 |
+| `axisor-redis-prod` | ✅ Healthy | Cache Redis | 6379 |
+| `axisor-margin-monitor-prod` | ⚠️ Restarting | Worker | - |
+| `axisor-automation-executor-prod` | ⚠️ Restarting | Worker | - |
 
 #### **Health Checks**
 ```bash
@@ -1421,7 +1421,7 @@ curl -I https://defisats.site
 curl -I https://api.defisats.site/health
 
 # Conectividade interna
-docker exec global-nginx-proxy curl -s http://hub-defisats-nginx-prod:80
+docker exec global-nginx-proxy curl -s http://axisor-nginx-prod:80
 ```
 
 #### **Plano de Rollback**
@@ -1465,20 +1465,20 @@ docker compose -f docker-compose.prod.yml up -d
 ### Troubleshooting Comum
 ```bash
 # Frontend não carrega (502 Bad Gateway)
-docker logs hub-defisats-frontend-prod
+docker logs axisor-frontend-prod
 docker ps | grep frontend
 docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml up -d
 
 # API não responde
-docker logs hub-defisats-backend-prod
+docker logs axisor-backend-prod
 curl https://api.defisats.site/health
-docker logs hub-defisats-postgres-prod
+docker logs axisor-postgres-prod
 
 # Workers não funcionam
-docker logs hub-defisats-margin-monitor
-docker logs hub-defisats-automation-executor
-docker logs hub-defisats-redis-prod
+docker logs axisor-margin-monitor
+docker logs axisor-automation-executor
+docker logs axisor-redis-prod
 ```
 
 ## ADR-017: Ícones Flutuantes & Nova Seção Posições Ativas
@@ -2061,7 +2061,7 @@ private async checkIfAdmin(userId: string): Promise<boolean> {
 - **Relacionamentos**: Usar tabela `UserCoupon` em vez de campo `used_coupon_id`
 - **Campos**: Remover campos inexistentes como `ln_markets_passphrase`
 - **ENUMs**: Criar todos os tipos ENUM necessários no PostgreSQL
-- **Permissões**: Configurar permissões corretas para usuário `hubdefisats`
+- **Permissões**: Configurar permissões corretas para usuário `axisor`
 
 ### Justificativa
 - **Problema**: Campos inexistentes causavam erros de validação
@@ -2075,7 +2075,7 @@ private async checkIfAdmin(userId: string): Promise<boolean> {
 CREATE TYPE "PlanType" AS ENUM ('free', 'basic', 'advanced', 'pro');
 
 -- Configurar permissões
-GRANT ALL PRIVILEGES ON SCHEMA public TO hubdefisats;
+GRANT ALL PRIVILEGES ON SCHEMA public TO axisor;
 ```
 
 ### Consequências
@@ -2693,13 +2693,13 @@ server {
     ssl_certificate_key /etc/nginx/certs/defisats.site.key;
     
     location / {
-        proxy_pass http://hub-defisats-frontend:80;
+        proxy_pass http://axisor-frontend:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
     
     location /api {
-        proxy_pass http://hub-defisats-backend:3000;
+        proxy_pass http://axisor-backend:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }

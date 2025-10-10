@@ -1491,7 +1491,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - **Status**: ✅ **RESOLVIDO - HMR funcionando**
 
 ##### **3. Frontend Permission Errors**
-- **Problema**: `EACCES: permission denied, mkdir '/home/bychrisr/projects/hub-defisats/frontend/node_modules/.vite/deps_temp_...'`
+- **Problema**: `EACCES: permission denied, mkdir '/home/bychrisr/projects/axisor/frontend/node_modules/.vite/deps_temp_...'`
 - **Solução**: Configuração Vite otimizada e cache limpo
 - **Status**: ✅ **RESOLVIDO - Permissões corrigidas**
 
@@ -3218,7 +3218,7 @@ npm run dev
 
 ### ✅ **Conclusão**
 
-O painel administrativo do hub-defisats foi **completamente implementado** com sucesso, atendendo a todos os requisitos especificados. A implementação inclui:
+O painel administrativo do axisor foi **completamente implementado** com sucesso, atendendo a todos os requisitos especificados. A implementação inclui:
 
 - ✅ **10 funcionalidades administrativas completas**
 - ✅ **Interface moderna e responsiva**
@@ -3231,7 +3231,7 @@ O painel administrativo do hub-defisats foi **completamente implementado** com s
 
 ### 📋 **Resumo Executivo da Implementação**
 
-O painel administrativo do hub-defisats foi **completamente implementado** seguindo as especificações da documentação fornecida. Todas as 9 funcionalidades administrativas foram integradas com dados reais do backend, substituindo completamente os dados mockados.
+O painel administrativo do axisor foi **completamente implementado** seguindo as especificações da documentação fornecida. Todas as 9 funcionalidades administrativas foram integradas com dados reais do backend, substituindo completamente os dados mockados.
 
 ### ✅ **Tarefas Concluídas**
 
@@ -3385,7 +3385,7 @@ User, TradeLog, Automation, BacktestReport, Simulation, Payment
 
 ### 🎉 **Conclusão**
 
-O painel administrativo do hub-defisats foi **completamente implementado** com sucesso, atendendo a todos os requisitos especificados na documentação fornecida. A implementação inclui:
+O painel administrativo do axisor foi **completamente implementado** com sucesso, atendendo a todos os requisitos especificados na documentação fornecida. A implementação inclui:
 
 - ✅ **10 funcionalidades administrativas completas**
 - ✅ **Interface moderna e responsiva**
@@ -4526,7 +4526,7 @@ Mobile navigation funcionando perfeitamente e Profile page com layout consistent
 ## [0.1.0] - 2025-01-02 - Estrutura Inicial
 
 ### Added
-- Estrutura inicial do projeto hub-defisats
+- Estrutura inicial do projeto axisor
 - Documentação técnica completa em `0.contexto/`
 - Stack definida: Node.js + Fastify (backend), React 18 (frontend), PostgreSQL + Prisma
 - Arquitetura de microserviços com workers para automações

@@ -239,7 +239,7 @@ const worker = new Worker(
 function formatMessage(message: string, type: string, metadata?: any): string {
   const timestamp = new Date().toLocaleString('pt-BR');
 
-  let formattedMessage = `🚨 *Hub DefiSats* 🚨\n\n`;
+  let formattedMessage = `🚨 *Axisor* 🚨\n\n`;
   formattedMessage += `${message}\n\n`;
   formattedMessage += `⏰ ${timestamp}\n`;
 
@@ -255,7 +255,7 @@ function formatMessage(message: string, type: string, metadata?: any): string {
     }
   }
 
-  formattedMessage += `\n⚡ Powered by Hub DefiSats`;
+  formattedMessage += `\n⚡ Powered by Axisor`;
 
   return formattedMessage;
 }
@@ -263,13 +263,13 @@ function formatMessage(message: string, type: string, metadata?: any): string {
 function getEmailSubject(type: string): string {
   switch (type) {
     case 'margin_alert':
-      return '🚨 Alerta Crítico de Margem - Hub DefiSats';
+      return '🚨 Alerta Crítico de Margem - Axisor';
     case 'trade_executed':
-      return '✅ Trade Executado - Hub DefiSats';
+      return '✅ Trade Executado - Axisor';
     case 'system_alert':
-      return '🔧 Alerta do Sistema - Hub DefiSats';
+      return '🔧 Alerta do Sistema - Axisor';
     default:
-      return '📧 Notificação Hub DefiSats';
+      return '📧 Notificação Axisor';
   }
 }
 
@@ -279,7 +279,7 @@ function formatEmailMessage(message: string, type: string, metadata?: any): stri
   let html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #3773f5, #f5ac37); padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">🚨 Hub DefiSats</h1>
+        <h1 style="color: white; margin: 0; font-size: 24px;">🚨 Axisor</h1>
       </div>
 
       <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px;">
@@ -311,7 +311,7 @@ function formatEmailMessage(message: string, type: string, metadata?: any): stri
 
         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
           <p style="color: #666; font-size: 14px;">
-            ⚡ Powered by <strong>Hub DefiSats</strong><br>
+            ⚡ Powered by <strong>Axisor</strong><br>
             <a href="#" style="color: #3773f5; text-decoration: none;">Acesse seu dashboard</a>
           </p>
         </div>

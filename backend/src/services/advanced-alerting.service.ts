@@ -61,7 +61,7 @@ export class AdvancedAlertingService {
         id: 'high_memory_usage',
         name: 'High Memory Usage',
         description: 'Memory usage exceeds 80%',
-        metric: 'hub_defisats_memory_usage_bytes',
+        metric: 'axisor_memory_usage_bytes',
         condition: 'gt',
         threshold: 0.8,
         severity: 'high',
@@ -74,7 +74,7 @@ export class AdvancedAlertingService {
         id: 'high_cpu_usage',
         name: 'High CPU Usage',
         description: 'CPU usage exceeds 90%',
-        metric: 'hub_defisats_cpu_usage_percent',
+        metric: 'axisor_cpu_usage_percent',
         condition: 'gt',
         threshold: 90,
         severity: 'high',
@@ -87,7 +87,7 @@ export class AdvancedAlertingService {
         id: 'high_error_rate',
         name: 'High Error Rate',
         description: 'HTTP error rate exceeds 10%',
-        metric: 'hub_defisats_http_request_errors_total',
+        metric: 'axisor_http_request_errors_total',
         condition: 'gt',
         threshold: 10,
         severity: 'critical',
@@ -100,7 +100,7 @@ export class AdvancedAlertingService {
         id: 'database_connection_issues',
         name: 'Database Connection Issues',
         description: 'Database connection pool is full',
-        metric: 'hub_defisats_db_connection_pool_size',
+        metric: 'axisor_db_connection_pool_size',
         condition: 'gt',
         threshold: 25,
         severity: 'critical',
@@ -113,7 +113,7 @@ export class AdvancedAlertingService {
         id: 'redis_connection_issues',
         name: 'Redis Connection Issues',
         description: 'Redis connection pool is full',
-        metric: 'hub_defisats_redis_connection_pool_size',
+        metric: 'axisor_redis_connection_pool_size',
         condition: 'gt',
         threshold: 20,
         severity: 'high',
@@ -126,7 +126,7 @@ export class AdvancedAlertingService {
         id: 'slow_response_time',
         name: 'Slow Response Time',
         description: 'Average response time exceeds 2 seconds',
-        metric: 'hub_defisats_http_request_duration_seconds',
+        metric: 'axisor_http_request_duration_seconds',
         condition: 'gt',
         threshold: 2,
         severity: 'medium',
@@ -163,8 +163,8 @@ export class AdvancedAlertingService {
               pass: process.env.SMTP_PASS || ''
             }
           },
-          from: process.env.SMTP_FROM || 'alerts@hubdefisats.com',
-          to: process.env.ALERT_EMAIL_TO || 'admin@hubdefisats.com'
+          from: process.env.SMTP_FROM || 'alerts@axisor.com',
+          to: process.env.ALERT_EMAIL_TO || 'admin@axisor.com'
         },
         enabled: true
       },
@@ -175,7 +175,7 @@ export class AdvancedAlertingService {
         config: {
           webhookUrl: process.env.SLACK_WEBHOOK_URL || '',
           channel: process.env.SLACK_ALERT_CHANNEL || '#alerts',
-          username: 'Hub DefiSATS Alerts'
+          username: 'Axisor Alerts'
         },
         enabled: !!process.env.SLACK_WEBHOOK_URL
       },

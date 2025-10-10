@@ -8,7 +8,7 @@ beforeAll(async () => {
   prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env['DATABASE_URL'] || 'postgresql://postgres:postgres@localhost:15432/hub_defisats'
+        url: process.env['DATABASE_URL'] || 'postgresql://postgres:postgres@localhost:15432/axisor'
       }
     }
   });

@@ -58,7 +58,7 @@ if (token) {
 
 Em outro terminal, monitore os logs:
 ```bash
-docker logs hub-defisats-backend --tail 20 -f
+docker logs axisor-backend --tail 20 -f
 ```
 
 Procure por:

@@ -138,7 +138,7 @@ const GlobalPageTitle = () => {
   const pageConfig = useDynamicPageConfig();
   
   // Sempre chamar o hook, mas controlar a lógica internamente
-  const { updateTitle } = usePageTitle({ baseTitle: 'defiSATS', showPL: true });
+  const { updateTitle } = usePageTitle({ baseTitle: 'Axisor', showPL: true });
   
   useEffect(() => {
     if (!pageConfig.use_dynamic_title) {

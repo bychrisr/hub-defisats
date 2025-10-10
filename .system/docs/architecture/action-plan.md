@@ -2,14 +2,14 @@
 
 ## 📋 RESUMO EXECUTIVO
 
-Este documento apresenta um plano de ação completo para resolver **100% dos problemas arquiteturais** identificados na análise técnica do projeto hub-defisats. O plano está organizado por prioridades críticas e inclui KPIs de sucesso mensuráveis.
+Este documento apresenta um plano de ação completo para resolver **100% dos problemas arquiteturais** identificados na análise técnica do projeto axisor. O plano está organizado por prioridades críticas e inclui KPIs de sucesso mensuráveis.
 
 ---
 
 ## 🎯 OBJETIVOS E KPIs DE SUCESSO
 
 ### **Objetivo Principal**
-Transformar o hub-defisats em uma plataforma de trading automatizado **enterprise-grade**, com segurança, performance e escalabilidade de nível produção.
+Transformar o axisor em uma plataforma de trading automatizado **enterprise-grade**, com segurança, performance e escalabilidade de nível produção.
 
 ### **KPIs de Sucesso**
 - **Segurança**: 0 vulnerabilidades críticas, 100% das credenciais criptografadas
@@ -451,17 +451,17 @@ CMD ["npm", "start"]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hub-defisats-api
+  name: axisor-api
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: hub-defisats-api
+      app: axisor-api
   template:
     spec:
       containers:
       - name: api
-        image: hub-defisats:latest
+        image: axisor:latest
         resources:
           requests:
             memory: "256Mi"
@@ -528,7 +528,7 @@ test('user registration flow', async ({ page }) => {
 import { check } from 'k6';
 
 export default function() {
-  const response = http.get('https://api.hub-defisats.com/health');
+  const response = http.get('https://api.axisor.com/health');
   check(response, {
     'status is 200': (r) => r.status === 200,
     'response time < 200ms': (r) => r.timings.duration < 200,
@@ -564,8 +564,8 @@ jobs:
     steps:
       - name: Deploy to production
         run: |
-          docker build -t hub-defisats .
-          docker push hub-defisats:latest
+          docker build -t axisor .
+          docker push axisor:latest
           kubectl apply -f k8s/
 ```
 
@@ -727,7 +727,7 @@ export class PaginationService {
 
 ## 🚀 CONCLUSÃO
 
-Este plano de ação transformará o hub-defisats em uma plataforma **enterprise-grade** com:
+Este plano de ação transformará o axisor em uma plataforma **enterprise-grade** com:
 
 1. **Segurança robusta** com criptografia adequada e validação completa
 2. **Performance otimizada** com cache inteligente e circuit breakers

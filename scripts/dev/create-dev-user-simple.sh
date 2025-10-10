@@ -22,7 +22,7 @@ else
 fi
 
 # Verificar se o container está rodando
-if ! docker ps | grep -q "hub-defisats-backend"; then
+if ! docker ps | grep -q "axisor-backend"; then
     echo "❌ Container backend não está rodando. Execute 'dev-up' primeiro."
     exit 1
 fi
@@ -55,9 +55,9 @@ fi
 # Se for admin, criar registro na tabela AdminUser
 if [ "$IS_ADMIN" = "--admin" ]; then
     echo "👑 Criando permissões de super admin..."
-    USER_ID=$(docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -t -c "SELECT id FROM \"User\" WHERE email = '$EMAIL';" | tr -d ' \n')
+    USER_ID=$(docker exec axisor-postgres psql -U axisor -d axisor -t -c "SELECT id FROM \"User\" WHERE email = '$EMAIL';" | tr -d ' \n')
     
-    docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "
+    docker exec axisor-postgres psql -U axisor -d axisor -c "
     INSERT INTO \"AdminUser\" (
       id,
       user_id,

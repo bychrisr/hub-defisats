@@ -419,7 +419,7 @@ services:
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/hubdefisats
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/axisor
     depends_on:
       - redis
       - postgres
@@ -430,7 +430,7 @@ services:
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/hubdefisats
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/axisor
     depends_on:
       - redis
       - postgres
@@ -470,7 +470,7 @@ spec:
     spec:
       containers:
       - name: margin-monitor
-        image: hubdefisats/workers:latest
+        image: axisor/workers:latest
         command: ["npm", "run", "worker:margin-monitor"]
         env:
         - name: NODE_ENV

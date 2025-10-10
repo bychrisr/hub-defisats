@@ -62,7 +62,7 @@ async function testBasicConnectivity(user: any): Promise<GuerrillaTestResult> {
     const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {
       timeout: 10000,
       headers: {
-        'User-Agent': `Hub-DefiSats-User-${user.id}/1.0`
+        'User-Agent': `Axisor-User-${user.id}/1.0`
       }
     });
 
@@ -112,7 +112,7 @@ async function testAuthentication(user: any): Promise<GuerrillaTestResult> {
       timeout: 10000,
       headers: {
         ...authHeaders,
-        'User-Agent': `Hub-DefiSats-User-${user.id}/1.0`
+        'User-Agent': `Axisor-User-${user.id}/1.0`
       }
     });
 
@@ -160,7 +160,7 @@ async function testMarketData(user: any): Promise<GuerrillaTestResult> {
     const response = await axios.get('https://api.lnmarkets.com/v2/futures/market', {
       timeout: 10000,
       headers: {
-        'User-Agent': `Hub-DefiSats-User-${user.id}/1.0`
+        'User-Agent': `Axisor-User-${user.id}/1.0`
       }
     });
 
@@ -354,7 +354,7 @@ async function testPerformanceUnderLoad(user: any): Promise<GuerrillaTestResult>
         axios.get('https://api.lnmarkets.com/v2/futures/market', {
           timeout: 5000,
           headers: {
-            'User-Agent': `Hub-DefiSats-Load-${user.id}-${i}/1.0`
+            'User-Agent': `Axisor-Load-${user.id}-${i}/1.0`
           }
         }).catch(err => ({ error: err.message, status: err.response?.status }))
       );
@@ -517,7 +517,7 @@ async function testRealTimeData(user: any): Promise<GuerrillaTestResult> {
     const response = await axios.get('https://api.lnmarkets.com/v2/futures/market', {
       timeout: 5000,
       headers: {
-        'User-Agent': `Hub-DefiSats-Realtime-${user.id}/1.0`
+        'User-Agent': `Axisor-Realtime-${user.id}/1.0`
       }
     });
 

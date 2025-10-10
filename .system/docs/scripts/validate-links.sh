@@ -25,7 +25,7 @@ extract_links() {
 error_count=0
 
 # Verificar links em todos os arquivos .md
-find /home/bychrisr/projects/hub-defisats/.system -name "*.md" -type f | while read -r file; do
+find /home/bychrisr/projects/axisor/.system -name "*.md" -type f | while read -r file; do
     echo ""
     echo "📄 Verificando: $file"
     
@@ -38,7 +38,7 @@ find /home/bychrisr/projects/hub-defisats/.system -name "*.md" -type f | while r
             if [[ "$file" == *"/.system/docs/"* ]]; then
                 # Se estamos em .system/docs/, links relativos começam com ../
                 if [[ "$link" == "../"* ]]; then
-                    target_file="/home/bychrisr/projects/hub-defisats/.system/${link#../}"
+                    target_file="/home/bychrisr/projects/axisor/.system/${link#../}"
                 elif [[ "$link" == "./"* ]]; then
                     target_file="$(dirname "$file")/${link#./}"
                 else
@@ -73,7 +73,7 @@ fi
 
 echo ""
 echo "🔗 Links válidos encontrados:"
-find /home/bychrisr/projects/hub-defisats/.system -name "*.md" -type f | while read -r file; do
+find /home/bychrisr/projects/axisor/.system -name "*.md" -type f | while read -r file; do
     links=$(extract_links "$file")
     if [ -n "$links" ]; then
         echo "📄 $file:"

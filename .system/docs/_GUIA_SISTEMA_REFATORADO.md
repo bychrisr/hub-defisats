@@ -18,9 +18,9 @@
 
 ## 1. **VISÃO GERAL DO SISTEMA**
 
-### 🎯 **Objetivo do Hub DeFiSats**
+### 🎯 **Objetivo do Axisor**
 
-O Hub DeFiSats é uma **plataforma de automação de trading** construída com arquitetura de microserviços, projetada para:
+O Axisor é uma **plataforma de automação de trading** construída com arquitetura de microserviços, projetada para:
 - **Alta disponibilidade** e escalabilidade
 - **Integração robusta** com LN Markets API v2
 - **Monitoramento em tempo real** de posições e margem
@@ -1200,4 +1200,4 @@ const ExpensiveComponent = memo(({ data }) => {
 
 ---
 
-**🎉 Este guia serve como fonte de verdade para o desenvolvimento e manutenção do sistema Hub DeFiSats refatorado. Mantenha-o atualizado conforme o sistema evolui.**
+**🎉 Este guia serve como fonte de verdade para o desenvolvimento e manutenção do sistema Axisor refatorado. Mantenha-o atualizado conforme o sistema evolui.**

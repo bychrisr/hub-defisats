@@ -50,7 +50,7 @@ log "📜 Gerando certificado auto-assinado para staging.defisats.site..."
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /home/bychrisr/proxy/certs/staging.defisats.site.key \
     -out /home/bychrisr/proxy/certs/staging.defisats.site.crt \
-    -subj "/C=BR/ST=SP/L=SaoPaulo/O=defiSATS/OU=IT/CN=staging.defisats.site" \
+    -subj "/C=BR/ST=SP/L=SaoPaulo/O=Axisor/OU=IT/CN=staging.defisats.site" \
     -addext "subjectAltName=DNS:staging.defisats.site,DNS:*.staging.defisats.site"
 
 # 4. Gerar certificado para api-staging.defisats.site
@@ -58,7 +58,7 @@ log "📜 Gerando certificado auto-assinado para api-staging.defisats.site..."
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /home/bychrisr/proxy/certs/api-staging.defisats.site.key \
     -out /home/bychrisr/proxy/certs/api-staging.defisats.site.crt \
-    -subj "/C=BR/ST=SP/L=SaoPaulo/O=defiSATS/OU=IT/CN=api-staging.defisats.site" \
+    -subj "/C=BR/ST=SP/L=SaoPaulo/O=Axisor/OU=IT/CN=api-staging.defisats.site" \
     -addext "subjectAltName=DNS:api-staging.defisats.site,DNS:*.api-staging.defisats.site"
 
 # 5. Ajustar permissões
@@ -104,7 +104,7 @@ server {
 
     # Proxy to frontend
     location / {
-        proxy_pass http://hub-defisats-frontend:3001;
+        proxy_pass http://axisor-frontend:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -141,7 +141,7 @@ server {
 
     # Proxy to backend
     location / {
-        proxy_pass http://hub-defisats-backend:3010;
+        proxy_pass http://axisor-backend:3010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -179,7 +179,7 @@ server {
 
     # Proxy to frontend staging
     location / {
-        proxy_pass http://hub-defisats-frontend-staging:3001;
+        proxy_pass http://axisor-frontend-staging:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -217,7 +217,7 @@ server {
 
     # Proxy to backend staging
     location / {
-        proxy_pass http://hub-defisats-backend-staging:3010;
+        proxy_pass http://axisor-backend-staging:3010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

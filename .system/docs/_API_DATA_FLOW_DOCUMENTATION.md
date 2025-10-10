@@ -17,7 +17,7 @@
 
 ### 🎯 **Princípios Fundamentais**
 
-O Hub DeFiSats implementa uma **arquitetura centralizada de dados** baseada em três pilares:
+O Axisor implementa uma **arquitetura centralizada de dados** baseada em três pilares:
 
 1. **Segurança em Mercados Voláteis**: Cache máximo de 30 segundos, zero tolerância a dados antigos
 2. **Centralização Inteligente**: Uma única requisição para múltiplos dados de mercado

@@ -648,8 +648,8 @@ export const getColorValue = (color: string, theme: 'light' | 'dark') => {
 - **Lighthouse**: Performance e acessibilidade
 
 ### Contato
-- **Design Team**: design@hubdefisats.com
-- **Dev Team**: dev@hubdefisats.com
+- **Design Team**: design@axisor.com
+- **Dev Team**: dev@axisor.com
 - **Issues**: GitHub Issues
 - **Discussions**: GitHub Discussions
 
@@ -657,4 +657,4 @@ export const getColorValue = (color: string, theme: 'light' | 'dark') => {
 
 **Versão**: 1.0.0  
 **Última Atualização**: Janeiro 2025  
-**Responsável**: Equipe de Design Hub DeFiSats
+**Responsável**: Equipe de Design Axisor

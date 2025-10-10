@@ -547,7 +547,7 @@ setInterval(() => {
 REDIS_URL=redis://localhost:6379
 
 # Database
-DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
+DATABASE_URL="postgresql://user:pass@postgres:5432/axisor"
 ```
 
 ---
@@ -559,37 +559,37 @@ DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
 #### **1. Schedules não são criados**
 ```bash
 # Verificar conta ativa
-docker logs hub-defisats-backend | grep "No active account found"
+docker logs axisor-backend | grep "No active account found"
 
 # Verificar automações ativas
-docker logs hub-defisats-backend | grep "No active automations found"
+docker logs axisor-backend | grep "No active automations found"
 ```
 
 #### **2. Timeouts não funcionam**
 ```bash
 # Verificar timeouts ativos
-docker logs hub-defisats-backend | grep "Setting timeout"
+docker logs axisor-backend | grep "Setting timeout"
 
 # Verificar timeouts expirados
-docker logs hub-defisats-backend | grep "Timeout reached"
+docker logs axisor-backend | grep "Timeout reached"
 ```
 
 #### **3. Mudança de conta não atualiza schedules**
 ```bash
 # Verificar mudança de conta
-docker logs hub-defisats-backend | grep "Updating schedules for account change"
+docker logs axisor-backend | grep "Updating schedules for account change"
 
 # Verificar schedules ativos
-docker logs hub-defisats-backend | grep "Automation scheduling started"
+docker logs axisor-backend | grep "Automation scheduling started"
 ```
 
 ### **Comandos de Debug**
 ```bash
 # Verificar schedules ativos
-docker exec -it hub-defisats-backend redis-cli llen automation-execute
+docker exec -it axisor-backend redis-cli llen automation-execute
 
 # Monitorar logs em tempo real
-docker logs -f hub-defisats-backend | grep -E "(AUTOMATION SCHEDULER|Scheduler)"
+docker logs -f axisor-backend | grep -E "(AUTOMATION SCHEDULER|Scheduler)"
 
 # Verificar status de schedules
 curl -X GET "http://localhost:13010/api/automation-scheduler/status?userId=test"

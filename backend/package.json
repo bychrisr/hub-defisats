@@ -1,7 +1,7 @@
 {
-  "name": "hub-defisats-backend",
+  "name": "axisor-backend",
   "version": "1.0.0",
-  "description": "Backend API for Hub DeFiSATS",
+  "description": "Backend API for Axisor",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -73,6 +73,6 @@
     "fastify",
     "typescript"
   ],
-  "author": "Hub DeFiSATS Team",
+  "author": "Axisor Team",
   "license": "MIT"
 }

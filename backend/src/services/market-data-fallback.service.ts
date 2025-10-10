@@ -134,7 +134,7 @@ export class MarketDataFallbackService {
       timeout: config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Hub-DefiSats-Fallback/1.0'
+        'User-Agent': 'Axisor-Fallback/1.0'
       }
     });
 

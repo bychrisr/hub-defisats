@@ -14,7 +14,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configurações
-DOCS_DIR="/home/bychrisr/projects/hub-defisats/.system/docs"
+DOCS_DIR="/home/bychrisr/projects/axisor/.system/docs"
 INDEX_FILE="${DOCS_DIR}/AUTO_INDEX.md"
 
 echo -e "${BLUE}📚 Gerador de Índice Automático${NC}"

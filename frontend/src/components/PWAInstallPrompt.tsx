@@ -69,7 +69,7 @@ export const PWAInstallPrompt = ({ className }: PWAInstallPromptProps) => {
                 <span className="text-white font-bold text-sm">HD</span>
               </div>
               <div>
-                <CardTitle className="text-sm">Hub DeFiSats</CardTitle>
+                <CardTitle className="text-sm">Axisor</CardTitle>
                 <CardDescription className="text-xs">
                   {isUpdateAvailable ? 'Atualização disponível' : 'Instalar app'}
                 </CardDescription>
@@ -121,7 +121,7 @@ export const PWAInstallPrompt = ({ className }: PWAInstallPromptProps) => {
                 <span className="text-sm">Instalar no seu dispositivo</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Instale o Hub DeFiSats para acesso rápido e funcionalidades offline.
+                Instale o Axisor para acesso rápido e funcionalidades offline.
               </p>
               
               <div className="space-y-2">

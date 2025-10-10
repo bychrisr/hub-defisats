@@ -19,14 +19,14 @@ interface AdminUserData {
 
 const defaultAdminUsers: AdminUserData[] = [
   {
-    email: 'admin@hub-defisats.com',
+    email: 'admin@axisor.com',
     password: 'Admin123!@#',
     username: 'admin',
     role: 'superadmin',
     isActive: true
   },
   {
-    email: 'support@hub-defisats.com',
+    email: 'support@axisor.com',
     password: 'Support123!@#',
     username: 'support',
     role: 'admin',

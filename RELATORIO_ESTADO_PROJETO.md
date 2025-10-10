@@ -1,4 +1,4 @@
-# Relatório de Estado do Projeto - Hub DeFiSats
+# Relatório de Estado do Projeto - Axisor
 
 **Data**: 2025-01-26  
 **Versão**: v2.5.4  
@@ -9,7 +9,7 @@
 ## I. Resumo Executivo (Estado Atual do Projeto)
 
 ### **Implementado**
-O Hub DeFiSats é uma **plataforma completa de automação de trading para LN Markets** que oferece proteção de margem em tempo real, simulações avançadas, sistema de automações e dashboard administrativo. A plataforma está **100% funcional** para testers com todas as funcionalidades core implementadas.
+O Axisor é uma **plataforma completa de automação de trading para LN Markets** que oferece proteção de margem em tempo real, simulações avançadas, sistema de automações e dashboard administrativo. A plataforma está **100% funcional** para testers com todas as funcionalidades core implementadas.
 
 ### **Gap (Lacuna)**
 A principal lacuna é a **comercialização completa** - o sistema de pagamentos Lightning Network e landing page comercial ainda não estão implementados, bloqueando a monetização do produto.
@@ -254,7 +254,7 @@ docker compose -f config/docker/docker-compose.prod.yml up -d
 
 ## VII. Conclusão
 
-O **Hub DeFiSats** é uma plataforma tecnicamente **madura e completa** com todas as funcionalidades core implementadas e funcionando. A arquitetura é **robusta, escalável e segura**, preparada para produção comercial.
+O **Axisor** é uma plataforma tecnicamente **madura e completa** com todas as funcionalidades core implementadas e funcionando. A arquitetura é **robusta, escalável e segura**, preparada para produção comercial.
 
 **Principais Conquistas:**
 - ✅ Sistema completo de automação de trading

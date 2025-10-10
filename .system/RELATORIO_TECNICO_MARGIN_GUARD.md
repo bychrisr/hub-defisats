@@ -620,7 +620,7 @@ curl -X GET http://localhost:13010/api/automations/state-history \
 #### 3. Verificação dos Logs
 ```bash
 # ❌ CONFIRMADO: Logs de debug não aparecem
-docker logs hub-defisats-backend --tail 20 | grep "AUTOMATION LOGGER"
+docker logs axisor-backend --tail 20 | grep "AUTOMATION LOGGER"
 # Resultado: (nenhum log encontrado)
 ```
 

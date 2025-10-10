@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Esta documentação fornece uma visão completa de todos os endpoints da API do Hub DeFiSats, incluindo autenticação, parâmetros, respostas e exemplos de uso.
+Esta documentação fornece uma visão completa de todos os endpoints da API do Axisor, incluindo autenticação, parâmetros, respostas e exemplos de uso.
 
 ## Base URL
 
@@ -440,7 +440,7 @@ Para suporte técnico ou dúvidas sobre a API:
 
 - **Email**: support@defisats.site
 - **Documentação**: https://docs.defisats.site
-- **GitHub**: https://github.com/defisats/hub-defisats
+- **GitHub**: https://github.com/defisats/axisor
 
 ---
 

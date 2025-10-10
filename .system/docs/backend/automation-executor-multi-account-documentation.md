@@ -294,7 +294,7 @@ interface AutomationLog {
 REDIS_URL=redis://localhost:6379
 
 # Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/hubdefisats
+DATABASE_URL=postgresql://user:pass@localhost:5432/axisor
 
 # LN Markets API
 LN_MARKETS_API_URL=https://api.lnmarkets.com
@@ -309,7 +309,7 @@ services:
     environment:
       - NODE_ENV=production
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/hubdefisats
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/axisor
     depends_on:
       - redis
       - postgres

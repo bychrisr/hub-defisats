@@ -21,7 +21,7 @@ docker image prune -f
 
 # 4. Remover imagens específicas do projeto
 echo "🗑️ Removendo imagens do projeto..."
-docker images | grep hub-defisats | awk '{print $3}' | xargs -r docker rmi -f || true
+docker images | grep axisor | awk '{print $3}' | xargs -r docker rmi -f || true
 
 # 5. Remover volumes órfãos
 echo "📁 Removendo volumes órfãos..."

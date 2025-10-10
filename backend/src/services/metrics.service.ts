@@ -47,20 +47,20 @@ export class MetricsService {
     
     // Initialize all metrics
     this.httpRequestDuration = new Histogram({
-      name: 'hub_defisats_http_request_duration_seconds',
+      name: 'axisor_http_request_duration_seconds',
       help: 'Duration of HTTP requests in seconds',
       labelNames: ['method', 'route', 'status_code'],
       buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
     });
 
     this.httpRequestTotal = new Counter({
-      name: 'hub_defisats_http_requests_total',
+      name: 'axisor_http_requests_total',
       help: 'Total number of HTTP requests',
       labelNames: ['method', 'route', 'status_code']
     });
 
     this.httpRequestErrors = new Counter({
-      name: 'hub_defisats_http_request_errors_total',
+      name: 'axisor_http_request_errors_total',
       help: 'Total number of HTTP request errors',
       labelNames: ['method', 'route', 'status_code']
     });
@@ -200,7 +200,7 @@ export class MetricsService {
       // Collect default system metrics
       collectDefaultMetrics({
         register,
-        prefix: 'hub_defisats_',
+        prefix: 'axisor_',
         gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
       });
 
@@ -427,7 +427,7 @@ export class MetricsService {
   createCounter(name: string, help: string, labelNames: string[] = []): Counter<string> {
     try {
       const counter = new Counter({
-        name: `hub_defisats_${name}`,
+        name: `axisor_${name}`,
         help,
         labelNames,
         registers: [register],
@@ -447,7 +447,7 @@ export class MetricsService {
   createGauge(name: string, help: string, labelNames: string[] = []): Gauge<string> {
     try {
       const gauge = new Gauge({
-        name: `hub_defisats_${name}`,
+        name: `axisor_${name}`,
         help,
         labelNames,
         registers: [register],
@@ -467,7 +467,7 @@ export class MetricsService {
   createHistogram(name: string, help: string, labelNames: string[] = [], buckets: number[] = []): Histogram<string> {
     try {
       const histogram = new Histogram({
-        name: `hub_defisats_${name}`,
+        name: `axisor_${name}`,
         help,
         labelNames,
         buckets: buckets.length > 0 ? buckets : [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],

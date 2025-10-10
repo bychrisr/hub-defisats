@@ -2,7 +2,7 @@
 
 ## 🎯 Visão Geral
 
-Este documento é um guia completo para desenvolvedores que irão continuar implementando e corrigindo os cards do dashboard do Hub DeFiSats. Ele contém toda a lógica, configuração, troubleshooting e exemplos práticos.
+Este documento é um guia completo para desenvolvedores que irão continuar implementando e corrigindo os cards do dashboard do Axisor. Ele contém toda a lógica, configuração, troubleshooting e exemplos práticos.
 
 ## 🚀 **ATUALIZAÇÃO v2.3.1 - Layout Mobile Responsivo**
 
@@ -776,5 +776,5 @@ docker compose -f config/docker/docker-compose.dev.yml up --build -d
 
 **Última atualização**: 28 de Setembro de 2025  
 **Versão**: 2.3.0 - Sistema Híbrido Otimizado  
-**Desenvolvedor**: Equipe Hub DeFiSats  
+**Desenvolvedor**: Equipe Axisor  
 **Status**: ✅ Sistema Híbrido Funcionando | ✅ UI Otimizada | ✅ Performance Melhorada

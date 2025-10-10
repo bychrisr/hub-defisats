@@ -13,7 +13,7 @@ alerting:
 
 scrape_configs:
   # Backend API
-  - job_name: 'hub-defisats-backend'
+  - job_name: 'axisor-backend'
     static_configs:
       - targets: ['backend:3010']
     metrics_path: '/metrics'
@@ -21,7 +21,7 @@ scrape_configs:
     scrape_timeout: 5s
 
   # Frontend Application
-  - job_name: 'hub-defisats-frontend'
+  - job_name: 'axisor-frontend'
     static_configs:
       - targets: ['frontend:80']
     metrics_path: '/metrics'

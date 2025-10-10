@@ -248,7 +248,7 @@ docker compose -f config/docker/docker-compose.dev.yml logs frontend | grep "DAS
 - `backend/src/controllers/lnmarkets-user.controller.ts` - Controller principal
 
 ### Contatos
-- **Desenvolvedor Principal**: Equipe Hub DeFiSats
+- **Desenvolvedor Principal**: Equipe Axisor
 - **Data**: 22 de Setembro de 2025
 - **Versão**: 1.0.0
 

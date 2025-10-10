@@ -7,7 +7,7 @@ const JWT_SECRET = 'development-jwt-secret-key-32-chars-minimum';
 const payload = {
   id: 'admin-test-user-id',
   userId: 'admin-test-user-id',
-  email: 'admin@hub-defisats.com',
+  email: 'admin@axisor.com',
   planType: 'lifetime',
   username: 'admin'
 };

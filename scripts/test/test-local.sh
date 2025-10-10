@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🧪 Testing Hub-defisats Local Environment..."
+echo "🧪 Testing Axisor Local Environment..."
 
 # Colors for output
 RED='\033[0;31m'

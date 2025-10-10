@@ -340,7 +340,7 @@ npm run deploy:prod      # Deploy para produção
 ### 12.1 Variáveis de Ambiente
 ```bash
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/hubdefisats"
+DATABASE_URL="postgresql://user:password@localhost:5432/axisor"
 REDIS_URL="redis://localhost:6379"
 
 # JWT
@@ -370,8 +370,8 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: hubdefisats
-      POSTGRES_USER: hubdefisats
+      POSTGRES_DB: axisor
+      POSTGRES_USER: axisor
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"

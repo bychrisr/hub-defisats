@@ -34,11 +34,11 @@ SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
 ### 2. ✅ PRISMA CLI FUNCIONA PERFEITAMENTE
 ```bash
 # Teste via Prisma CLI
-docker exec hub-defisats-backend npx prisma db execute --stdin <<< "SELECT COUNT(*) FROM \"Automation\";"
+docker exec axisor-backend npx prisma db execute --stdin <<< "SELECT COUNT(*) FROM \"Automation\";"
 # Resultado: ✅ Sucesso - 0 registros
 
 # Teste via script Node.js
-docker exec hub-defisats-backend node /app/test-prisma-debug.js
+docker exec axisor-backend node /app/test-prisma-debug.js
 # Resultado: ✅ Todas as tabelas acessíveis
 ```
 
@@ -128,27 +128,27 @@ O Prisma Client usa um **singleton pattern** que não está funcionando corretam
 
 ### 1. ✅ Regeneração do Prisma Client
 ```bash
-docker exec hub-defisats-backend npx prisma generate
+docker exec axisor-backend npx prisma generate
 # Status: Executado com sucesso
 ```
 
 ### 2. ✅ Aplicação de Migrações
 ```bash
-docker exec hub-defisats-backend npx prisma migrate deploy
+docker exec axisor-backend npx prisma migrate deploy
 # Status: Executado com sucesso
 ```
 
 ### 3. ✅ Sincronização do Schema
 ```bash
-docker exec hub-defisats-backend npx prisma db pull
-docker exec hub-defisats-backend npx prisma generate
+docker exec axisor-backend npx prisma db pull
+docker exec axisor-backend npx prisma generate
 # Status: Executado com sucesso
 ```
 
 ### 4. ✅ Limpeza de Cache
 ```bash
-docker exec hub-defisats-backend rm -rf node_modules/.prisma
-docker exec hub-defisats-backend rm -rf /tmp/.node_modules_cache
+docker exec axisor-backend rm -rf node_modules/.prisma
+docker exec axisor-backend rm -rf /tmp/.node_modules_cache
 # Status: Executado com sucesso
 ```
 
@@ -260,6 +260,6 @@ const retryPrismaOperation = async (operation: () => Promise<any>, maxRetries = 
 - **Testes e validação**: 2-3 horas
 
 ---
-*Relatório gerado automaticamente pelo sistema de monitoramento do hub-defisats*  
+*Relatório gerado automaticamente pelo sistema de monitoramento do axisor*  
 *Data: 2025-01-09*  
 *Versão: 1.0*

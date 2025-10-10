@@ -2,15 +2,15 @@
 # This file contains development-specific environment variables
 
 # Admin Credentials (for development/testing only)
-ADMIN_EMAIL=admin@hub-defisats.com
+ADMIN_EMAIL=admin@axisor.com
 ADMIN_PASSWORD=Admin123!@#
 
 # Frontend Admin Credentials
-VITE_ADMIN_EMAIL=admin@hub-defisats.com
+VITE_ADMIN_EMAIL=admin@axisor.com
 VITE_ADMIN_PASSWORD=Admin123!@#
 
 # Database (Development)
-DATABASE_URL=postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public
+DATABASE_URL=postgresql://axisor:axisor_dev_password@postgres:5432/axisor?schema=public
 
 # Redis (Development)
 REDIS_URL=redis://redis:6379

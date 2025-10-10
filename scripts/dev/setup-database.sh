@@ -42,13 +42,13 @@ fi
 check_containers() {
     log_info "Verificando containers..."
     
-    if ! docker ps | grep -q "hub-defisats-postgres"; then
+    if ! docker ps | grep -q "axisor-postgres"; then
         log_error "Container PostgreSQL não está rodando"
         log_info "Execute: docker compose -f config/docker/docker-compose.dev.yml up -d"
         exit 1
     fi
     
-    if ! docker ps | grep -q "hub-defisats-backend"; then
+    if ! docker ps | grep -q "axisor-backend"; then
         log_error "Container Backend não está rodando"
         log_info "Execute: docker compose -f config/docker/docker-compose.dev.yml up -d"
         exit 1
@@ -140,8 +140,8 @@ show_data_info() {
     echo "============================"
     echo ""
     echo "🔐 ADMIN USERS:"
-    echo "  • admin@hub-defisats.com (superadmin) - Senha: Admin123!@#"
-    echo "  • support@hub-defisats.com (admin) - Senha: Support123!@#"
+    echo "  • admin@axisor.com (superadmin) - Senha: Admin123!@#"
+    echo "  • support@axisor.com (admin) - Senha: Support123!@#"
     echo ""
     echo "💰 PLANS:"
     echo "  • Free - $0/mês - 3 posições, 1 automação"
@@ -168,14 +168,14 @@ check_final_status() {
     log_info "🔍 Verificando status final..."
     
     # Verificar se backend está saudável
-    if docker compose -f config/docker/docker-compose.dev.yml ps | grep -q "hub-defisats-backend.*healthy"; then
+    if docker compose -f config/docker/docker-compose.dev.yml ps | grep -q "axisor-backend.*healthy"; then
         log_success "Backend está saudável"
     else
         log_warning "Backend pode não estar totalmente saudável"
     fi
     
     # Verificar se frontend está rodando
-    if docker compose -f config/docker/docker-compose.dev.yml ps | grep -q "hub-defisats-frontend"; then
+    if docker compose -f config/docker/docker-compose.dev.yml ps | grep -q "axisor-frontend"; then
         log_success "Frontend está rodando"
     else
         log_warning "Frontend não está rodando"
@@ -233,8 +233,8 @@ main() {
     log_info "  • Swagger Docs: http://localhost:13010/docs"
     echo ""
     log_info "🔐 Usuários criados:"
-    log_info "  • admin@hub-defisats.com (superadmin) - Senha: Admin123!@#"
-    log_info "  • support@hub-defisats.com (admin) - Senha: Support123!@#"
+    log_info "  • admin@axisor.com (superadmin) - Senha: Admin123!@#"
+    log_info "  • support@axisor.com (admin) - Senha: Support123!@#"
 }
 
 # Executar função principal

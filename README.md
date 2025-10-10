@@ -316,7 +316,7 @@ npm run test:e2e
 
 ## 📞 Suporte
 
-- **Email**: dev@hub-defisats.com
+- **Email**: dev@axisor.com
 - **GitHub**: [Issues do repositório]
 - **Documentação**: `.system/README.md`
 
@@ -326,6 +326,6 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ---
 
-**Hub DeFiSats** - Plataforma completa de automação de trading no LN Markets 🚀
+**Axisor** - Plataforma completa de automação de trading no LN Markets 🚀
 
 *Desenvolvido com ❤️ para traders que buscam eficiência e segurança máxima*

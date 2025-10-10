@@ -12,7 +12,7 @@ export class CookieUtils {
       sameSite: 'strict',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: config.isProduction ? '.hubdefisats.com' : undefined,
+      domain: config.isProduction ? '.axisor.com' : undefined,
     });
   }
 
@@ -25,7 +25,7 @@ export class CookieUtils {
       secure: config.isProduction,
       sameSite: 'strict',
       path: '/',
-      domain: config.isProduction ? '.hubdefisats.com' : undefined,
+      domain: config.isProduction ? '.axisor.com' : undefined,
     });
   }
 
@@ -39,7 +39,7 @@ export class CookieUtils {
       sameSite: 'strict',
       path: '/',
       maxAge: 30 * 60 * 1000, // 30 minutes
-      domain: config.isProduction ? '.hubdefisats.com' : undefined,
+      domain: config.isProduction ? '.axisor.com' : undefined,
     });
   }
 
@@ -52,7 +52,7 @@ export class CookieUtils {
       secure: config.isProduction,
       sameSite: 'strict',
       path: '/',
-      domain: config.isProduction ? '.hubdefisats.com' : undefined,
+      domain: config.isProduction ? '.axisor.com' : undefined,
     });
   }
 
@@ -66,7 +66,7 @@ export class CookieUtils {
       sameSite: 'strict',
       path: '/',
       maxAge: 60 * 60 * 1000, // 1 hour
-      domain: config.isProduction ? '.hubdefisats.com' : undefined,
+      domain: config.isProduction ? '.axisor.com' : undefined,
     });
   }
 
@@ -79,7 +79,7 @@ export class CookieUtils {
       secure: config.isProduction,
       sameSite: 'strict',
       path: '/',
-      domain: config.isProduction ? '.hubdefisats.com' : undefined,
+      domain: config.isProduction ? '.axisor.com' : undefined,
     });
   }
 }

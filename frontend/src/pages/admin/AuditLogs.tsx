@@ -179,7 +179,7 @@ export default function AuditLogs() {
           id: '1',
           timestamp: '2025-01-15T14:30:00Z',
           userId: 'user1',
-          userEmail: 'admin@defisats.com',
+          userEmail: 'admin@axisor.com',
           userRole: 'superadmin',
           action: 'user_login',
           resource: 'authentication',
@@ -275,7 +275,7 @@ export default function AuditLogs() {
           id: '5',
           timestamp: '2025-01-15T14:10:00Z',
           userId: 'user1',
-          userEmail: 'admin@defisats.com',
+          userEmail: 'admin@axisor.com',
           userRole: 'superadmin',
           action: 'user_deletion',
           resource: 'user_management',
@@ -311,7 +311,7 @@ export default function AuditLogs() {
         failedActions: 1,
         uniqueUsers: 4,
         avgResponseTime: 660,
-        mostActiveUser: 'admin@defisats.com',
+        mostActiveUser: 'admin@axisor.com',
         mostCommonAction: 'user_login',
         lastActivity: '2025-01-15T14:30:00Z'
       };

@@ -41,7 +41,7 @@ O ambiente de staging é uma réplica do ambiente de produção usado para teste
 │  │  (staging)  │  │  (staging)  │  │  (staging)  │        │
 │  └─────────────┘  └─────────────┘  └─────────────┘        │
 │                                                             │
-│  Rede: docker_hub-defisats-staging-network                 │
+│  Rede: docker_axisor-staging-network                 │
 │  + proxy-network (conectada)                               │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -50,11 +50,11 @@ O ambiente de staging é uma réplica do ambiente de produção usado para teste
 
 | Serviço | Porta Externa | Porta Interna | Container |
 |---------|---------------|---------------|-----------|
-| Frontend | 13010 | 3001 | hub-defisats-frontend-staging |
-| Backend | 13020 | 3010 | hub-defisats-backend-staging |
-| PostgreSQL | 15432 | 5432 | hub-defisats-postgres-staging |
-| Redis | 16379 | 6379 | hub-defisats-redis-staging |
-| Nginx | 8080 | 80 | hub-defisats-nginx-staging |
+| Frontend | 13010 | 3001 | axisor-frontend-staging |
+| Backend | 13020 | 3010 | axisor-backend-staging |
+| PostgreSQL | 15432 | 5432 | axisor-postgres-staging |
+| Redis | 16379 | 6379 | axisor-redis-staging |
+| Nginx | 8080 | 80 | axisor-nginx-staging |
 
 ---
 
@@ -64,15 +64,15 @@ O ambiente de staging é uma réplica do ambiente de produção usado para teste
 
 #### 1.1 Iniciar Ambiente de Staging
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 docker compose -f config/docker/docker-compose.staging.yml up -d
 ```
 
 #### 1.2 Conectar ao Proxy Global
 ```bash
 # Conectar containers de staging ao proxy global
-docker network connect proxy-network hub-defisats-backend-staging
-docker network connect proxy-network hub-defisats-frontend-staging
+docker network connect proxy-network axisor-backend-staging
+docker network connect proxy-network axisor-frontend-staging
 ```
 
 #### 1.3 Reiniciar Proxy Global
@@ -104,11 +104,11 @@ docker compose -f config/docker/docker-compose.staging.yml ps
 docker ps | grep staging
 
 # Ver logs específicos
-docker logs hub-defisats-backend-staging
-docker logs hub-defisats-frontend-staging
+docker logs axisor-backend-staging
+docker logs axisor-frontend-staging
 
 # Reiniciar container específico
-docker restart hub-defisats-backend-staging
+docker restart axisor-backend-staging
 ```
 
 ### 3. Testes de Conectividade
@@ -122,7 +122,7 @@ curl -s http://localhost:13010/ | head -5
 curl -s http://localhost:13020/health
 
 # Testar banco de dados
-docker exec -it hub-defisats-postgres-staging psql -U hubdefisats_staging -d hubdefisats_staging
+docker exec -it axisor-postgres-staging psql -U axisor_staging -d axisor_staging
 ```
 
 #### 3.2 Testes Externos
@@ -134,7 +134,7 @@ curl -I https://staging.defisats.site
 curl -I https://api-staging.defisats.site/health
 
 # Testar através do proxy
-docker exec global-nginx-proxy curl -s http://hub-defisats-backend-staging:3010/health
+docker exec global-nginx-proxy curl -s http://axisor-backend-staging:3010/health
 ```
 
 ---
@@ -143,7 +143,7 @@ docker exec global-nginx-proxy curl -s http://hub-defisats-backend-staging:3010/
 
 ### 1. Variáveis de Ambiente
 
-**Arquivo**: `/home/bychrisr/projects/hub-defisats/.env.staging`
+**Arquivo**: `/home/bychrisr/projects/axisor/.env.staging`
 
 ```bash
 # Staging Environment Variables
@@ -151,14 +151,14 @@ NODE_ENV=staging
 PORT=13020
 
 # Database (Staging)
-POSTGRES_DB=hubdefisats_staging
-POSTGRES_USER=hubdefisats_staging
-POSTGRES_PASSWORD=hubdefisats_staging_password_2024
-DATABASE_URL=postgresql://hubdefisats_staging:hubdefisats_staging_password_2024@postgres:5432/hubdefisats_staging?schema=public
+POSTGRES_DB=axisor_staging
+POSTGRES_USER=axisor_staging
+POSTGRES_PASSWORD=axisor_staging_password_2024
+DATABASE_URL=postgresql://axisor_staging:axisor_staging_password_2024@postgres:5432/axisor_staging?schema=public
 
 # Redis (Staging)
-REDIS_URL=redis://:hubdefisats_staging_redis_2024@redis:6379
-REDIS_PASSWORD=hubdefisats_staging_redis_2024
+REDIS_URL=redis://:axisor_staging_redis_2024@redis:6379
+REDIS_PASSWORD=axisor_staging_redis_2024
 
 # JWT Secrets (Staging)
 JWT_SECRET=staging-jwt-secret-key-32-chars-minimum-2024
@@ -205,33 +205,33 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: hub-defisats-postgres-staging
+    container_name: axisor-postgres-staging
     environment:
-      POSTGRES_DB: hubdefisats_staging
-      POSTGRES_USER: hubdefisats_staging
-      POSTGRES_PASSWORD: hubdefisats_staging_password_2024
+      POSTGRES_DB: axisor_staging
+      POSTGRES_USER: axisor_staging
+      POSTGRES_PASSWORD: axisor_staging_password_2024
     volumes:
       - postgres_staging_data:/var/lib/postgresql/data
     networks:
-      - hub-defisats-staging-network
+      - axisor-staging-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hubdefisats_staging -d hubdefisats_staging"]
+      test: ["CMD-SHELL", "pg_isready -U axisor_staging -d axisor_staging"]
       interval: 30s
       timeout: 10s
       retries: 3
 
   redis:
     image: redis:7-alpine
-    container_name: hub-defisats-redis-staging
-    command: redis-server --appendonly yes --requirepass hubdefisats_staging_redis_2024
+    container_name: axisor-redis-staging
+    command: redis-server --appendonly yes --requirepass axisor_staging_redis_2024
     volumes:
       - redis_staging_data:/data
     networks:
-      - hub-defisats-staging-network
+      - axisor-staging-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "hubdefisats_staging_redis_2024", "ping"]
+      test: ["CMD", "redis-cli", "-a", "axisor_staging_redis_2024", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -240,14 +240,14 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-backend-staging
+    container_name: axisor-backend-staging
     env_file:
       - ../../.env.staging
     environment:
       NODE_ENV: staging
       PORT: 3010
-      DATABASE_URL: postgresql://hubdefisats_staging:hubdefisats_staging_password_2024@postgres:5432/hubdefisats_staging?schema=public
-      REDIS_URL: redis://:hubdefisats_staging_redis_2024@redis:6379
+      DATABASE_URL: postgresql://axisor_staging:axisor_staging_password_2024@postgres:5432/axisor_staging?schema=public
+      REDIS_URL: redis://:axisor_staging_redis_2024@redis:6379
       JWT_SECRET: staging-jwt-secret-key-32-chars-minimum-2024
       REFRESH_TOKEN_SECRET: staging-refresh-secret-key-32-chars-minimum-2024
       ENCRYPTION_KEY: staging-encryption-key-32-chars-2024
@@ -261,7 +261,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-staging-network
+      - axisor-staging-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3010/health"]
@@ -273,7 +273,7 @@ services:
     build:
       context: ../../frontend
       dockerfile: Dockerfile
-    container_name: hub-defisats-frontend-staging
+    container_name: axisor-frontend-staging
     environment:
       VITE_API_URL: https://staging.defisats.site/api
       NODE_ENV: staging
@@ -282,7 +282,7 @@ services:
     depends_on:
       - backend
     networks:
-      - hub-defisats-staging-network
+      - axisor-staging-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001"]
@@ -295,21 +295,21 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-margin-monitor-staging
+    container_name: axisor-margin-monitor-staging
     command: ["npm", "run", "worker:margin-monitor"]
     env_file:
       - ../../.env.staging
     environment:
       NODE_ENV: staging
-      DATABASE_URL: postgresql://hubdefisats_staging:hubdefisats_staging_password_2024@postgres:5432/hubdefisats_staging
-      REDIS_URL: redis://:hubdefisats_staging_redis_2024@redis:6379
+      DATABASE_URL: postgresql://axisor_staging:axisor_staging_password_2024@postgres:5432/axisor_staging
+      REDIS_URL: redis://:axisor_staging_redis_2024@redis:6379
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-staging-network
+      - axisor-staging-network
     restart: unless-stopped
 
   # ... outros workers ...
@@ -323,7 +323,7 @@ volumes:
     driver: local
 
 networks:
-  hub-defisats-staging-network:
+  axisor-staging-network:
     driver: bridge
 ```
 
@@ -356,11 +356,11 @@ http {
     
     # Upstream servers
     upstream backend {
-        server hub-defisats-backend-staging:3010;
+        server axisor-backend-staging:3010;
     }
     
     upstream frontend {
-        server hub-defisats-frontend-staging:3001;
+        server axisor-frontend-staging:3001;
     }
     
     # Main server block
@@ -424,7 +424,7 @@ server {
     server_name staging.defisats.site;
     
     location / {
-        proxy_pass http://hub-defisats-frontend-staging:3001;
+        proxy_pass http://axisor-frontend-staging:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -437,7 +437,7 @@ server {
     server_name api-staging.defisats.site;
     
     location / {
-        proxy_pass http://hub-defisats-backend-staging:3010;
+        proxy_pass http://axisor-backend-staging:3010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -458,10 +458,10 @@ server {
 docker compose -f config/docker/docker-compose.staging.yml logs
 
 # Verificar variáveis de ambiente
-docker exec hub-defisats-backend-staging env | grep -E "(DATABASE_URL|JWT_SECRET)"
+docker exec axisor-backend-staging env | grep -E "(DATABASE_URL|JWT_SECRET)"
 
 # Verificar conectividade do banco
-docker exec hub-defisats-backend-staging npx prisma db push
+docker exec axisor-backend-staging npx prisma db push
 ```
 
 #### 1.2 Proxy não consegue acessar staging
@@ -470,17 +470,17 @@ docker exec hub-defisats-backend-staging npx prisma db push
 docker network inspect proxy-network | grep staging
 
 # Conectar containers manualmente
-docker network connect proxy-network hub-defisats-backend-staging
-docker network connect proxy-network hub-defisats-frontend-staging
+docker network connect proxy-network axisor-backend-staging
+docker network connect proxy-network axisor-frontend-staging
 
 # Testar conectividade interna
-docker exec global-nginx-proxy curl -s http://hub-defisats-backend-staging:3010/health
+docker exec global-nginx-proxy curl -s http://axisor-backend-staging:3010/health
 ```
 
 #### 1.3 Frontend bloqueia acesso
 ```bash
 # Verificar configuração do Vite
-docker exec hub-defisats-frontend-staging cat /app/vite.config.js | grep allowedHosts
+docker exec axisor-frontend-staging cat /app/vite.config.js | grep allowedHosts
 
 # Testar localmente
 curl -s http://localhost:13010/ | head -5
@@ -494,8 +494,8 @@ curl -s http://localhost:13010/ | head -5
 docker ps | grep staging
 
 # Verificar health checks
-docker inspect hub-defisats-backend-staging | grep -A 5 "Health"
-docker inspect hub-defisats-frontend-staging | grep -A 5 "Health"
+docker inspect axisor-backend-staging | grep -A 5 "Health"
+docker inspect axisor-frontend-staging | grep -A 5 "Health"
 ```
 
 #### 2.2 Testes de Conectividade
@@ -507,7 +507,7 @@ curl -I http://localhost:13010
 curl -I http://localhost:13020/health
 
 # Testar através do proxy
-docker exec global-nginx-proxy curl -s http://hub-defisats-backend-staging:3010/health
+docker exec global-nginx-proxy curl -s http://axisor-backend-staging:3010/health
 ```
 
 ---
@@ -520,8 +520,8 @@ docker exec global-nginx-proxy curl -s http://hub-defisats-backend-staging:3010/
 docker compose -f config/docker/docker-compose.staging.yml logs -f
 
 # Logs específicos
-docker logs -f hub-defisats-backend-staging
-docker logs -f hub-defisats-frontend-staging
+docker logs -f axisor-backend-staging
+docker logs -f axisor-frontend-staging
 ```
 
 ### 2. Métricas de Sistema
@@ -540,7 +540,7 @@ docker system df
 ### 1. Backup do Staging
 ```bash
 # Backup do banco de staging
-docker exec hub-defisats-postgres-staging pg_dump -U hubdefisats_staging hubdefisats_staging > staging_backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec axisor-postgres-staging pg_dump -U axisor_staging axisor_staging > staging_backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### 2. Atualizações
@@ -572,8 +572,8 @@ docker volume rm docker_postgres_staging_data docker_redis_staging_data
 |---------|---------|----------|
 | **Domínio** | staging.defisats.site | defisats.site |
 | **API** | api-staging.defisats.site | api.defisats.site |
-| **Banco** | hubdefisats_staging | hubdefisats_prod |
-| **Redis** | hubdefisats_staging_redis_2024 | hubdefisats_redis_password_2024 |
+| **Banco** | axisor_staging | axisor_prod |
+| **Redis** | axisor_staging_redis_2024 | axisor_redis_password_2024 |
 | **JWT Secret** | staging-jwt-secret-... | production-jwt-secret-... |
 | **LN Markets** | Sandbox | Production |
 | **Log Level** | debug | info |
@@ -593,8 +593,8 @@ docker compose -f config/docker/docker-compose.staging.yml down
 docker compose -f config/docker/docker-compose.staging.yml up -d
 
 # Conectar ao proxy
-docker network connect proxy-network hub-defisats-backend-staging
-docker network connect proxy-network hub-defisats-frontend-staging
+docker network connect proxy-network axisor-backend-staging
+docker network connect proxy-network axisor-frontend-staging
 
 # Reiniciar proxy
 cd ~/proxy && ./start-proxy.sh restart
@@ -630,12 +630,12 @@ curl -I https://staging.defisats.site
 curl -I https://api-staging.defisats.site/health
 
 # Logs recentes
-docker logs --tail 10 hub-defisats-backend-staging
-docker logs --tail 10 hub-defisats-frontend-staging
+docker logs --tail 10 axisor-backend-staging
+docker logs --tail 10 axisor-frontend-staging
 ```
 
 ---
 
 *Documentação criada em: 22 de Setembro de 2024*
 *Versão: 1.0*
-*Ambiente: Staging - defiSATS*
+*Ambiente: Staging - Axisor*

@@ -18,14 +18,14 @@ ssh -i ~/.ssh/debian.pem ubuntu@defisats.site
 
 ### **Localização do Projeto**
 ```
-/home/ubuntu/apps/hub-defisats/
+/home/ubuntu/apps/axisor/
 ```
 
 ### **Estrutura Completa**
 ```
 /home/ubuntu/
 ├── apps/
-│   └── hub-defisats/                    # Projeto principal
+│   └── axisor/                    # Projeto principal
 │       ├── backend/                     # Backend Node.js
 │       ├── frontend/                    # Frontend React
 │       ├── docker-compose.prod.yml      # Configuração Docker
@@ -48,7 +48,7 @@ ssh -i ~/.ssh/debian.pem ubuntu@defisats.site
 ### **Containers da Aplicação**
 ```bash
 # Localização
-cd /home/ubuntu/apps/hub-defisats
+cd /home/ubuntu/apps/axisor
 
 # Comandos principais
 docker compose -f docker-compose.prod.yml ps          # Status
@@ -60,15 +60,15 @@ docker compose -f docker-compose.prod.yml up -d       # Iniciar
 ### **Containers Ativos**
 | Container | Status | Função |
 |-----------|--------|--------|
-| `hub-defisats-backend-prod` | ✅ Healthy | API Backend |
-| `hub-defisats-frontend-prod` | ✅ Running | Frontend React |
-| `hub-defisats-nginx-prod` | ✅ Running | Nginx interno |
-| `hub-defisats-postgres-prod` | ✅ Healthy | Banco de dados |
-| `hub-defisats-redis-prod` | ✅ Healthy | Cache Redis |
-| `hub-defisats-margin-monitor-prod` | ⚠️ Restarting | Worker |
-| `hub-defisats-automation-executor-prod` | ⚠️ Restarting | Worker |
-| `hub-defisats-notification-worker-prod` | ⚠️ Restarting | Worker |
-| `hub-defisats-payment-validator-prod` | ⚠️ Restarting | Worker |
+| `axisor-backend-prod` | ✅ Healthy | API Backend |
+| `axisor-frontend-prod` | ✅ Running | Frontend React |
+| `axisor-nginx-prod` | ✅ Running | Nginx interno |
+| `axisor-postgres-prod` | ✅ Healthy | Banco de dados |
+| `axisor-redis-prod` | ✅ Healthy | Cache Redis |
+| `axisor-margin-monitor-prod` | ⚠️ Restarting | Worker |
+| `axisor-automation-executor-prod` | ⚠️ Restarting | Worker |
+| `axisor-notification-worker-prod` | ⚠️ Restarting | Worker |
+| `axisor-payment-validator-prod` | ⚠️ Restarting | Worker |
 
 ### **Proxy Global**
 ```bash
@@ -86,7 +86,7 @@ cd ~/proxy
 ## 🌐 Redes Docker
 
 ### **Rede Principal da Aplicação**
-- **Nome**: `hub-defisats_hub-defisats-network`
+- **Nome**: `axisor_axisor-network`
 - **Subnet**: `172.21.0.0/16`
 - **Gateway**: `172.21.0.1`
 
@@ -96,7 +96,7 @@ cd ~/proxy
 - **Gateway**: `172.20.0.1`
 
 ### **Conectividade**
-- **Proxy Global** → **Nginx da Aplicação**: `http://hub-defisats-nginx-prod:80`
+- **Proxy Global** → **Nginx da Aplicação**: `http://axisor-nginx-prod:80`
 - **Nginx da Aplicação** → **Backend**: `http://backend:3000`
 - **Nginx da Aplicação** → **Frontend**: `http://frontend:80`
 
@@ -105,7 +105,7 @@ cd ~/proxy
 ### **Verificar Status Geral**
 ```bash
 # Containers da aplicação
-docker ps | grep hub-defisats
+docker ps | grep axisor
 
 # Proxy global
 docker ps | grep global-nginx-proxy
@@ -123,7 +123,7 @@ curl -I https://defisats.site
 curl -I https://api.defisats.site/health
 
 # Conectividade interna
-docker exec global-nginx-proxy curl -s http://hub-defisats-nginx-prod:80
+docker exec global-nginx-proxy curl -s http://axisor-nginx-prod:80
 ```
 
 ### **Verificar Logs**
@@ -144,7 +144,7 @@ docker logs global-nginx-proxy
 
 **Solução**:
 ```bash
-cd /home/ubuntu/apps/hub-defisats
+cd /home/ubuntu/apps/axisor
 docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml up -d
 ```
@@ -176,7 +176,7 @@ cd ~/proxy
 ./start-proxy.sh restart
 
 # Reiniciar aplicação
-cd /home/ubuntu/apps/hub-defisats
+cd /home/ubuntu/apps/axisor
 docker compose -f docker-compose.prod.yml up -d
 ```
 
@@ -227,7 +227,7 @@ sudo logrotate -f /etc/logrotate.d/nginx
 
 ### **Processo de Deploy**
 1. **Acessar servidor**: `ssh -i ~/.ssh/debian.pem ubuntu@defisats.site`
-2. **Navegar para projeto**: `cd /home/ubuntu/apps/hub-defisats`
+2. **Navegar para projeto**: `cd /home/ubuntu/apps/axisor`
 3. **Atualizar código**: `git pull origin main`
 4. **Reiniciar containers**: `docker compose -f docker-compose.prod.yml up -d --build`
 5. **Verificar status**: `docker compose -f docker-compose.prod.yml ps`
@@ -235,7 +235,7 @@ sudo logrotate -f /etc/logrotate.d/nginx
 ### **Backup**
 ```bash
 # Backup do banco de dados
-docker exec hub-defisats-postgres-prod pg_dump -U hubdefisats_prod hubdefisats_prod > backup.sql
+docker exec axisor-postgres-prod pg_dump -U axisor_prod axisor_prod > backup.sql
 
 # Backup das configurações
 tar -czf config-backup.tar.gz ~/proxy/conf.d/ ~/proxy/certs/
@@ -247,7 +247,7 @@ tar -czf config-backup.tar.gz ~/proxy/conf.d/ ~/proxy/certs/
 - **Servidor**: defisats.site (3.143.248.70)
 - **Usuário**: ubuntu
 - **Chave SSH**: ~/.ssh/debian.pem
-- **Projeto**: /home/ubuntu/apps/hub-defisats/
+- **Projeto**: /home/ubuntu/apps/axisor/
 
 ### **Comandos de Emergência**
 ```bash
@@ -257,7 +257,7 @@ cd ~/proxy && ./start-proxy.sh stop
 
 # Iniciar tudo
 cd ~/proxy && ./start-proxy.sh start
-cd /home/ubuntu/apps/hub-defisats && docker compose -f docker-compose.prod.yml up -d
+cd /home/ubuntu/apps/axisor && docker compose -f docker-compose.prod.yml up -d
 ```
 
 ---

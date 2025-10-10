@@ -153,7 +153,7 @@ server {
 
     # Proxy to frontend
     location / {
-        proxy_pass http://hub-defisats-frontend:3001;
+        proxy_pass http://axisor-frontend:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -190,7 +190,7 @@ server {
 
     # Proxy to backend
     location / {
-        proxy_pass http://hub-defisats-backend:3010;
+        proxy_pass http://axisor-backend:3010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -228,7 +228,7 @@ server {
 
     # Proxy to frontend staging
     location / {
-        proxy_pass http://hub-defisats-frontend-staging:3001;
+        proxy_pass http://axisor-frontend-staging:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -266,7 +266,7 @@ server {
 
     # Proxy to backend staging
     location / {
-        proxy_pass http://hub-defisats-backend-staging:3010;
+        proxy_pass http://axisor-backend-staging:3010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

@@ -128,7 +128,7 @@ fi
 
 # Teste 4: Usuário ADMIN
 echo -e "\n${YELLOW}=== TESTE 4: Usuário ADMIN ===${NC}"
-if login_user "admin@defisats.com" "admin123" "admin"; then
+if login_user "admin@axisor.com" "admin123" "admin"; then
     get_user_profile "$token"
     
     # Testar rotas que usuário ADMIN pode acessar

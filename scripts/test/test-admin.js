@@ -7,7 +7,7 @@ async function testAdminAccess() {
     // 1. Login to get token
     console.log('1. Logging in...');
     const loginResponse = await axios.post('http://localhost:13010/api/auth/login', {
-      email: 'admin@hub-defisats.com',
+      email: 'admin@axisor.com',
       password: 'AdminPass123!'
     });
     

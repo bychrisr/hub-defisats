@@ -89,7 +89,7 @@ export function useActiveAccount(): UseActiveAccountReturn {
   // Escutar mudanças na conta ativa (para sincronização entre abas)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'hub-defisats-indicator-configs' && e.newValue) {
+      if (e.key === 'axisor-indicator-configs' && e.newValue) {
         try {
           const data = JSON.parse(e.newValue);
           const newAccountId = data.userPreferences?.activeAccountId || null;

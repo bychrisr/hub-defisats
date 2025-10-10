@@ -236,7 +236,7 @@ async function seedMenus() {
     const systemConfigs = [
       {
         key: 'app_name',
-        value: 'defiSATS',
+        value: 'Axisor',
         type: 'string',
         description: 'Nome da aplicação'
       },

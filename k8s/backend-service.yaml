@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hub-defisats-backend-service
-  namespace: hub-defisats
+  name: axisor-backend-service
+  namespace: axisor
   labels:
-    app: hub-defisats-backend
+    app: axisor-backend
 spec:
   selector:
-    app: hub-defisats-backend
+    app: axisor-backend
   ports:
   - name: http
     port: 80
@@ -22,13 +22,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hub-defisats-backend-headless
-  namespace: hub-defisats
+  name: axisor-backend-headless
+  namespace: axisor
   labels:
-    app: hub-defisats-backend
+    app: axisor-backend
 spec:
   selector:
-    app: hub-defisats-backend
+    app: axisor-backend
   ports:
   - name: http
     port: 13016

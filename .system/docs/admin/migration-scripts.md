@@ -250,7 +250,7 @@ docker-compose down
 
 # 2. Backup do banco
 echo "💾 Fazendo backup do banco..."
-docker exec hub-defisats-postgres pg_dump -U postgres defisats > backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec axisor-postgres pg_dump -U postgres defisats > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # 3. Atualizar código
 echo "📦 Atualizando código..."
@@ -301,7 +301,7 @@ docker-compose down
 # 2. Restaurar backup
 echo "💾 Restaurando backup..."
 LATEST_BACKUP=$(ls -t backup_*.sql | head -n1)
-docker exec -i hub-defisats-postgres psql -U postgres defisats < $LATEST_BACKUP
+docker exec -i axisor-postgres psql -U postgres defisats < $LATEST_BACKUP
 
 # 3. Voltar para commit anterior
 echo "📦 Voltando para commit anterior..."

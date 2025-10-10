@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Setting up Hub-defisats Development Environment..."
+echo "🚀 Setting up Axisor Development Environment..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -91,7 +91,7 @@ echo "📋 Services available:"
 echo "  • Frontend: http://localhost:3001"
 echo "  • Backend API: http://localhost:3010"
 echo "  • API Documentation: http://localhost:3010/docs"
-echo "  • Database: localhost:5432 (hubdefisats/hubdefisats_dev_password)"
+echo "  • Database: localhost:5432 (axisor/axisor_dev_password)"
 echo "  • Redis: localhost:6379"
 echo ""
 echo "🔧 Useful commands:"

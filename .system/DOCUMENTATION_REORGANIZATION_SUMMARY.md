@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento resume a reorganização completa da documentação do Hub DeFiSats, realizada em 22 de Janeiro de 2025, para alinhar com a estrutura oficial em `.system/`.
+Este documento resume a reorganização completa da documentação do Axisor, realizada em 22 de Janeiro de 2025, para alinhar com a estrutura oficial em `.system/`.
 
 ## Objetivo
 

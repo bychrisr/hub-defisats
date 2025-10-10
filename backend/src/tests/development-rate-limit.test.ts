@@ -84,7 +84,7 @@ describe('DevelopmentRateLimiter', () => {
       delete process.env.NODE_ENV;
       delete process.env.ENVIRONMENT;
       delete process.env.PORT;
-      process.env.CORS_ORIGIN = 'https://staging.defisats.com';
+      process.env.CORS_ORIGIN = 'https://staging.defisats.site';
       const environment = DevelopmentRateLimiter.detectEnvironment();
       expect(environment).toBe('staging');
     });
@@ -93,7 +93,7 @@ describe('DevelopmentRateLimiter', () => {
       delete process.env.NODE_ENV;
       delete process.env.ENVIRONMENT;
       delete process.env.PORT;
-      process.env.CORS_ORIGIN = 'https://defisats.com';
+      process.env.CORS_ORIGIN = 'https://defisats.site';
       const environment = DevelopmentRateLimiter.detectEnvironment();
       expect(environment).toBe('production');
     });

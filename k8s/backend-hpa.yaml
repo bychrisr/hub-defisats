@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: hub-defisats-backend-hpa
-  namespace: hub-defisats
+  name: axisor-backend-hpa
+  namespace: axisor
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: hub-defisats-backend
+    name: axisor-backend
   minReplicas: 3
   maxReplicas: 10
   metrics:

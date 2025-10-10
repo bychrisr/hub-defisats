@@ -1,8 +1,8 @@
-# 📊 TradingView Documentation Hub - Hub DeFiSats
+# 📊 TradingView Documentation Hub - Axisor
 
 ## 🎯 **Visão Geral**
 
-Este hub centraliza toda a documentação relacionada ao sistema de gráficos TradingView e indicadores técnicos da plataforma Hub DeFiSats. A documentação está organizada por categorias para facilitar a navegação e manutenção.
+Este hub centraliza toda a documentação relacionada ao sistema de gráficos TradingView e indicadores técnicos da plataforma Axisor. A documentação está organizada por categorias para facilitar a navegação e manutenção.
 
 **Status**: ✅ **100% Organizado e Atualizado**  
 **Versão**: v1.0.0 (Stable)  

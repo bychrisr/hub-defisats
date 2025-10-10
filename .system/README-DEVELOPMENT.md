@@ -12,7 +12,7 @@
 1. **Clone o repositório**
 ```bash
 git clone <repository-url>
-cd hub-defisats
+cd axisor
 ```
 
 2. **Configure as variáveis de ambiente**
@@ -28,7 +28,7 @@ docker compose -f config/docker/docker-compose.dev.yml up -d
 
 4. **Crie um usuário superadmin**
 ```bash
-docker exec hub-defisats-backend npx tsx scripts/create-superadmin.ts
+docker exec axisor-backend npx tsx scripts/create-superadmin.ts
 ```
 
 5. **Acesse a aplicação**
@@ -79,31 +79,31 @@ docker compose -f config/docker/docker-compose.dev.yml ps
 ### Backend
 ```bash
 # Executar no container
-docker exec -it hub-defisats-backend sh
+docker exec -it axisor-backend sh
 
 # Instalar dependências
-docker exec hub-defisats-backend npm install
+docker exec axisor-backend npm install
 
 # Executar migrações
-docker exec hub-defisats-backend npx prisma migrate dev
+docker exec axisor-backend npx prisma migrate dev
 
 # Gerar cliente Prisma
-docker exec hub-defisats-backend npx prisma generate
+docker exec axisor-backend npx prisma generate
 
 # Executar testes
-docker exec hub-defisats-backend npm test
+docker exec axisor-backend npm test
 ```
 
 ### Frontend
 ```bash
 # Executar no container
-docker exec -it hub-defisats-frontend sh
+docker exec -it axisor-frontend sh
 
 # Instalar dependências
-docker exec hub-defisats-frontend npm install
+docker exec axisor-frontend npm install
 
 # Executar testes
-docker exec hub-defisats-frontend npm test
+docker exec axisor-frontend npm test
 ```
 
 ## 🔐 Autenticação e Autorização
@@ -181,10 +181,10 @@ docker compose -f config/docker/docker-compose.dev.yml logs postgres
 #### 3. Erro de autenticação
 ```bash
 # Verificar se o usuário admin existe
-docker exec hub-defisats-backend npx tsx scripts/check-admin-user.ts
+docker exec axisor-backend npx tsx scripts/check-admin-user.ts
 
 # Criar usuário admin
-docker exec hub-defisats-backend npx tsx scripts/create-superadmin.ts
+docker exec axisor-backend npx tsx scripts/create-superadmin.ts
 ```
 
 #### 4. Campo is_admin não retornado
@@ -243,32 +243,32 @@ curl -X GET "http://localhost:13010/api/admin/monitoring" \
 ### Testes de Frontend
 ```bash
 # Executar testes
-docker exec hub-defisats-frontend npm test
+docker exec axisor-frontend npm test
 
 # Executar testes com coverage
-docker exec hub-defisats-frontend npm run test:coverage
+docker exec axisor-frontend npm run test:coverage
 ```
 
 ## 📝 Scripts Úteis
 
 ### Criar Superadmin
 ```bash
-docker exec hub-defisats-backend npx tsx scripts/create-superadmin.ts
+docker exec axisor-backend npx tsx scripts/create-superadmin.ts
 ```
 
 ### Verificar Usuário Admin
 ```bash
-docker exec hub-defisats-backend npx tsx scripts/check-admin-user.ts
+docker exec axisor-backend npx tsx scripts/check-admin-user.ts
 ```
 
 ### Testar Perfil
 ```bash
-docker exec hub-defisats-backend npx tsx scripts/test-profile.ts
+docker exec axisor-backend npx tsx scripts/test-profile.ts
 ```
 
 ### Testar Controller
 ```bash
-docker exec hub-defisats-backend npx tsx scripts/test-profile-controller.ts
+docker exec axisor-backend npx tsx scripts/test-profile-controller.ts
 ```
 
 ## 🔄 Fluxo de Desenvolvimento

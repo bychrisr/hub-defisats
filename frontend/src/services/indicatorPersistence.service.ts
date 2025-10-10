@@ -50,7 +50,7 @@ export interface UnifiedPersistenceData {
 }
 
 class IndicatorPersistenceService {
-  private readonly STORAGE_KEY = 'hub-defisats-indicator-configs';
+  private readonly STORAGE_KEY = 'axisor-indicator-configs';
   private readonly VERSION = '1.0.0';
   private readonly DEFAULT_TTL = 30 * 24 * 60 * 60 * 1000; // 30 dias
 

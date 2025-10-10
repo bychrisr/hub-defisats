@@ -1,8 +1,8 @@
-# 🔐 Documentação de Segurança - Hub DeFiSats
+# 🔐 Documentação de Segurança - Axisor
 
 ## 📋 Visão Geral
 
-O Hub DeFiSats implementa um sistema de segurança robusto e moderno, seguindo as melhores práticas da indústria para plataformas de trading financeiro. Este documento detalha todas as medidas de segurança implementadas.
+O Axisor implementa um sistema de segurança robusto e moderno, seguindo as melhores práticas da indústria para plataformas de trading financeiro. Este documento detalha todas as medidas de segurança implementadas.
 
 ## 🛡️ Arquitetura de Segurança
 
@@ -310,7 +310,7 @@ class SecurityConfigService {
 
 Para reportar vulnerabilidades ou questões de segurança:
 
-- **Email**: security@hubdefisats.com
+- **Email**: security@axisor.com
 - **Processo**: Responsible Disclosure
 - **Tempo de Resposta**: 24-48 horas
 - **Recompensas**: Bug Bounty Program
@@ -319,4 +319,4 @@ Para reportar vulnerabilidades ou questões de segurança:
 
 **Última Atualização**: Janeiro 2025  
 **Versão**: 1.0.0  
-**Responsável**: Equipe de Segurança Hub DeFiSats
+**Responsável**: Equipe de Segurança Axisor

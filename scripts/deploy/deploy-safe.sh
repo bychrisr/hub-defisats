@@ -82,7 +82,7 @@ create_backup() {
     
     # Backup current Docker images
     print_status "Backing up current Docker images..."
-    docker images | grep "hub-defisats" > "$BACKUP_DIR/docker_images.txt"
+    docker images | grep "axisor" > "$BACKUP_DIR/docker_images.txt"
     
     # Backup current environment
     if [ -f "config/env/.env.production" ]; then

@@ -24,7 +24,7 @@ export interface AutomationAccountEvent {
 }
 
 class AutomationAccountSyncService {
-  private readonly STORAGE_KEY = 'hub-defisats-automation-sync';
+  private readonly STORAGE_KEY = 'axisor-automation-sync';
   private readonly SYNC_INTERVAL = 30000; // 30 segundos
   private readonly MAX_RETRIES = 3;
   
@@ -65,7 +65,7 @@ class AutomationAccountSyncService {
 
     // Escutar mudanças de storage (cross-tab)
     window.addEventListener('storage', (event) => {
-      if (event.key === 'hub-defisats-indicator-configs') {
+      if (event.key === 'axisor-indicator-configs') {
         this.handleStorageChange(event);
       }
     });

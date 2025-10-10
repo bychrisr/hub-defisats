@@ -133,7 +133,7 @@ check_docker_containers() {
     print_status "Checking Docker containers..."
     
     if command -v docker >/dev/null 2>&1; then
-        local containers=$(docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(hub-defisats|defisats)" || echo "No containers found")
+        local containers=$(docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(axisor|defisats)" || echo "No containers found")
         echo "$containers"
     else
         print_warning "Docker not available locally"

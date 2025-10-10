@@ -285,7 +285,7 @@ Esta pasta contém toda a documentação técnica e de produto do Hub-defisats, 
 
 Para dúvidas sobre a documentação ou sugestões de melhoria:
 
-- **Email**: dev@hub-defisats.com
+- **Email**: dev@axisor.com
 - **GitHub**: [Issues do repositório]
 - **Slack**: #documentation
 

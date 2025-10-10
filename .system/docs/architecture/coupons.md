@@ -1,8 +1,8 @@
-# Sistema de Cupons - Hub DeFiSats
+# Sistema de Cupons - Axisor
 
 ## Visão Geral
 
-O sistema de cupons do Hub DeFiSats foi projetado para oferecer flexibilidade máxima na criação de descontos e promoções. Cada cupom possui 3 variáveis principais que determinam seu comportamento, permitindo configurações complexas e analytics avançados.
+O sistema de cupons do Axisor foi projetado para oferecer flexibilidade máxima na criação de descontos e promoções. Cada cupom possui 3 variáveis principais que determinam seu comportamento, permitindo configurações complexas e analytics avançados.
 
 ## Estrutura dos Cupons
 
@@ -385,7 +385,7 @@ A tabela de cupons exibe:
 
 ## Conclusão
 
-O sistema de cupons do Hub DeFiSats oferece:
+O sistema de cupons do Axisor oferece:
 
 - ✅ **CRUD Completo**: Create, Read, Update, Delete para cupons
 - ✅ **3 Variáveis Principais**: Tempo, Valor, Funcionalidade

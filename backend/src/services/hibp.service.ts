@@ -26,7 +26,7 @@ export class HIBPService {
       const response = await axios.get(`${this.apiUrl}/${prefix}`, {
         timeout: 10000,
         headers: {
-          'User-Agent': 'Hub-defisats-Security-Check',
+          'User-Agent': 'Axisor-Security-Check',
         },
       });
 
@@ -67,7 +67,7 @@ export class HIBPService {
       const response = await axios.get(`${this.apiUrl}/${prefix}`, {
         timeout: 10000,
         headers: {
-          'User-Agent': 'Hub-defisats-Security-Check',
+          'User-Agent': 'Axisor-Security-Check',
         },
       });
 

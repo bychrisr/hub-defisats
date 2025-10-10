@@ -23,7 +23,7 @@ else
 fi
 
 # Verificar se o container está rodando
-if ! docker ps | grep -q "hub-defisats-backend"; then
+if ! docker ps | grep -q "axisor-backend"; then
     echo "❌ Container backend não está rodando. Execute 'dev-up' primeiro."
     exit 1
 fi
@@ -53,10 +53,10 @@ if [ "$IS_ADMIN" = "--admin" ]; then
     echo "👑 Criando permissões de super admin..."
     
     # Obter ID do usuário
-    USER_ID=$(docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -t -c "SELECT id FROM \"User\" WHERE email = '$EMAIL';" | tr -d ' \n')
+    USER_ID=$(docker exec axisor-postgres psql -U axisor -d axisor -t -c "SELECT id FROM \"User\" WHERE email = '$EMAIL';" | tr -d ' \n')
     
     # Criar registro de admin
-    docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "INSERT INTO \"AdminUser\" (id, user_id, role, created_at) VALUES (gen_random_uuid()::text, '$USER_ID', 'superadmin', NOW()) ON CONFLICT (user_id) DO UPDATE SET role = 'superadmin';"
+    docker exec axisor-postgres psql -U axisor -d axisor -c "INSERT INTO \"AdminUser\" (id, user_id, role, created_at) VALUES (gen_random_uuid()::text, '$USER_ID', 'superadmin', NOW()) ON CONFLICT (user_id) DO UPDATE SET role = 'superadmin';"
     
     echo "✅ Permissões de super admin criadas!"
 fi

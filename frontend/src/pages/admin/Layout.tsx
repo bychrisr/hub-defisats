@@ -114,7 +114,7 @@ export default function AdminLayout() {
   // Configurar título e favicon estáticos para o admin
   useEffect(() => {
     // Definir título estático para admin
-    document.title = 'Admin Panel - defiSATS';
+    document.title = 'Admin Panel - Axisor';
     
     // Definir favicon estático para admin
     const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;

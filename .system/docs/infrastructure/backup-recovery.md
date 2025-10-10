@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este guia fornece estratégias e técnicas para otimizar a performance do Hub DeFiSats, incluindo otimizações de banco de dados, cache, frontend e infraestrutura.
+Este guia fornece estratégias e técnicas para otimizar a performance do Axisor, incluindo otimizações de banco de dados, cache, frontend e infraestrutura.
 
 ## Otimizações de Banco de Dados
 

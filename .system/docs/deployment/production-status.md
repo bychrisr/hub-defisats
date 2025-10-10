@@ -18,14 +18,14 @@
 ### Containers Ativos
 | Container | Status | Porta | Função |
 |-----------|--------|-------|--------|
-| `hub-defisats-postgres` | ✅ Healthy | 15432 | Banco de dados |
-| `hub-defisats-redis` | ✅ Healthy | 16379 | Cache/Queue |
-| `hub-defisats-backend` | ✅ Healthy | 13010 | API Backend |
-| `hub-defisats-frontend` | ❌ Parado | - | Frontend |
+| `axisor-postgres` | ✅ Healthy | 15432 | Banco de dados |
+| `axisor-redis` | ✅ Healthy | 16379 | Cache/Queue |
+| `axisor-backend` | ✅ Healthy | 13010 | API Backend |
+| `axisor-frontend` | ❌ Parado | - | Frontend |
 | `global-nginx-proxy` | ⚠️ Reiniciando | 80/443 | Proxy Global |
 
 ### Redes Configuradas
-- ✅ `docker_hub-defisats-network` - Rede interna
+- ✅ `docker_axisor-network` - Rede interna
 - ✅ `proxy-network` - Backend conectado
 
 ---
@@ -43,7 +43,7 @@
 
 ### ⚠️ Proxy Global
 - ⚠️ Container reiniciando constantemente
-- ⚠️ Erro: `host not found in upstream "hub-defisats-frontend"`
+- ⚠️ Erro: `host not found in upstream "axisor-frontend"`
 - ⚠️ Frontend não está na rede do proxy
 
 ---
@@ -58,7 +58,7 @@
 
 ### 2. Proxy Global
 - **Status**: Reiniciando constantemente
-- **Causa**: Não consegue resolver `hub-defisats-frontend`
+- **Causa**: Não consegue resolver `axisor-frontend`
 - **Impacto**: Acesso externo limitado
 - **Solução**: Conectar frontend à rede do proxy
 
@@ -109,13 +109,13 @@
 ### Verificar Status
 ```bash
 # Ver containers
-docker ps | grep hub-defisats
+docker ps | grep axisor
 
 # Ver logs do backend
-docker logs hub-defisats-backend
+docker logs axisor-backend
 
 # Ver logs do frontend
-docker logs hub-defisats-frontend
+docker logs axisor-frontend
 
 # Ver logs do proxy
 docker logs global-nginx-proxy
@@ -124,7 +124,7 @@ docker logs global-nginx-proxy
 ### Gerenciar Containers
 ```bash
 # Reiniciar frontend
-docker restart hub-defisats-frontend
+docker restart axisor-frontend
 
 # Reiniciar todos
 docker compose -f config/docker/docker-compose.dev.yml restart
@@ -168,13 +168,13 @@ curl -k -I https://api.defisats.site/health
 ### 1. Corrigir Frontend
 ```bash
 # Verificar logs
-docker logs hub-defisats-frontend
+docker logs axisor-frontend
 
 # Reiniciar se necessário
-docker restart hub-defisats-frontend
+docker restart axisor-frontend
 
 # Conectar à rede do proxy
-docker network connect proxy-network hub-defisats-frontend
+docker network connect proxy-network axisor-frontend
 ```
 
 ### 2. Corrigir Proxy
@@ -205,8 +205,8 @@ curl -k -I https://defisats.site
 - **Frontend**: `https://defisats.site` *(quando frontend funcionar)*
 
 ### Credenciais
-- **Banco**: `hubdefisats_prod` / `hubdefisats_prod_password_secure_2024`
-- **Redis**: `hubdefisats_redis_password_2024`
+- **Banco**: `axisor_prod` / `axisor_prod_password_secure_2024`
+- **Redis**: `axisor_redis_password_2024`
 
 ---
 
@@ -224,4 +224,4 @@ O ambiente está **80% funcional** com apenas ajustes menores necessários.
 
 *Status atualizado em: 22 de Setembro de 2024*  
 *Versão: 1.0*  
-*Ambiente: Produção - defiSATS*
+*Ambiente: Produção - Axisor*

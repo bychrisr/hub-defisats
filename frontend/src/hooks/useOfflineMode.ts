@@ -33,7 +33,7 @@ export const useOfflineMode = () => {
       setState(prev => ({ ...prev, offlineData }));
       
       // Salvar no localStorage
-      localStorage.setItem('hub-defisats-offline-data', JSON.stringify(offlineData));
+      localStorage.setItem('axisor-offline-data', JSON.stringify(offlineData));
       
       console.log('[Offline] Dados salvos offline:', key);
     } catch (error) {
@@ -44,7 +44,7 @@ export const useOfflineMode = () => {
   // Carregar dados offline do localStorage
   const loadOfflineData = useCallback(() => {
     try {
-      const savedData = localStorage.getItem('hub-defisats-offline-data');
+      const savedData = localStorage.getItem('axisor-offline-data');
       if (savedData) {
         const offlineData = JSON.parse(savedData);
         setState(prev => ({ ...prev, offlineData }));
@@ -71,10 +71,10 @@ export const useOfflineMode = () => {
 
     // Salvar no localStorage
     try {
-      const savedActions = localStorage.getItem('hub-defisats-pending-actions');
+      const savedActions = localStorage.getItem('axisor-pending-actions');
       const actions = savedActions ? JSON.parse(savedActions) : [];
       actions.push(pendingAction);
-      localStorage.setItem('hub-defisats-pending-actions', JSON.stringify(actions));
+      localStorage.setItem('axisor-pending-actions', JSON.stringify(actions));
     } catch (error) {
       console.error('[Offline] Erro ao salvar ação pendente:', error);
     }
@@ -110,7 +110,7 @@ export const useOfflineMode = () => {
     }));
 
     // Limpar do localStorage
-    localStorage.removeItem('hub-defisats-pending-actions');
+    localStorage.removeItem('axisor-pending-actions');
     
     console.log('[Offline] Sincronização concluída');
   }, [state.pendingActions]);
@@ -145,7 +145,7 @@ export const useOfflineMode = () => {
     
     // Carregar ações pendentes
     try {
-      const savedActions = localStorage.getItem('hub-defisats-pending-actions');
+      const savedActions = localStorage.getItem('axisor-pending-actions');
       if (savedActions) {
         const actions = JSON.parse(savedActions);
         setState(prev => ({ ...prev, pendingActions: actions }));
@@ -173,8 +173,8 @@ export const useOfflineMode = () => {
       pendingActions: [],
     }));
     
-    localStorage.removeItem('hub-defisats-offline-data');
-    localStorage.removeItem('hub-defisats-pending-actions');
+    localStorage.removeItem('axisor-offline-data');
+    localStorage.removeItem('axisor-pending-actions');
     
     console.log('[Offline] Dados offline limpos');
   }, []);

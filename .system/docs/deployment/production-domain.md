@@ -25,7 +25,7 @@
 ```bash
 NODE_ENV=production
 PORT=3000
-DATABASE_URL=postgresql://hubdefisats_prod:hubdefisats_prod_password_secure_2024@postgres:5432/hubdefisats_prod?schema=public
+DATABASE_URL=postgresql://axisor_prod:axisor_prod_password_secure_2024@postgres:5432/axisor_prod?schema=public
 REDIS_URL=redis://redis:6379
 JWT_SECRET=production-jwt-secret-key-32-chars-minimum-2024
 ENCRYPTION_KEY=production-encryption-key-32-chars-2024
@@ -63,7 +63,7 @@ cp env.production .env
 docker compose -f docker-compose.prod.yml up -d
 
 # 3. Executar migrações
-docker exec hub-defisats-backend-prod npx prisma migrate deploy
+docker exec axisor-backend-prod npx prisma migrate deploy
 
 # 4. Verificar status
 docker compose -f docker-compose.prod.yml ps

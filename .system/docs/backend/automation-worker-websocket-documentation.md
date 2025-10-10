@@ -578,7 +578,7 @@ const worker = new Worker(
 REDIS_URL=redis://localhost:6379
 
 # Database
-DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
+DATABASE_URL="postgresql://user:pass@postgres:5432/axisor"
 
 # LN Markets
 LN_MARKETS_API_URL=https://api.lnmarkets.com
@@ -593,37 +593,37 @@ LN_MARKETS_API_URL=https://api.lnmarkets.com
 #### **1. WebSocket não conecta**
 ```bash
 # Verificar WebSocketManagerService
-docker logs hub-defisats-backend | grep "WEBSOCKET MANAGER"
+docker logs axisor-backend | grep "WEBSOCKET MANAGER"
 
 # Verificar credenciais
-docker logs hub-defisats-backend | grep "AUTOMATION WORKER"
+docker logs axisor-backend | grep "AUTOMATION WORKER"
 ```
 
 #### **2. Fallback HTTP ativado**
 ```bash
 # Verificar logs de fallback
-docker logs hub-defisats-backend | grep "Falling back to HTTP"
+docker logs axisor-backend | grep "Falling back to HTTP"
 
 # Verificar conexões WebSocket
-docker logs hub-defisats-backend | grep "WebSocket connection"
+docker logs axisor-backend | grep "WebSocket connection"
 ```
 
 #### **3. Automações não executam**
 ```bash
 # Verificar fila de automações
-docker exec -it hub-defisats-backend redis-cli llen automation-execute
+docker exec -it axisor-backend redis-cli llen automation-execute
 
 # Verificar logs do worker
-docker logs hub-defisats-backend | grep "AUTOMATION WORKER"
+docker logs axisor-backend | grep "AUTOMATION WORKER"
 ```
 
 ### **Comandos de Debug**
 ```bash
 # Verificar conexões WebSocket ativas
-docker exec -it hub-defisats-backend netstat -an | grep :3010
+docker exec -it axisor-backend netstat -an | grep :3010
 
 # Monitorar logs em tempo real
-docker logs -f hub-defisats-backend | grep -E "(AUTOMATION WORKER|WEBSOCKET)"
+docker logs -f axisor-backend | grep -E "(AUTOMATION WORKER|WEBSOCKET)"
 
 # Testar conexão WebSocket
 node -e "

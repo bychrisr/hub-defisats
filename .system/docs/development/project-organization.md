@@ -1,8 +1,8 @@
-# 🗂️ Guia de Organização de Projetos - Hub DeFiSats
+# 🗂️ Guia de Organização de Projetos - Axisor
 
 ## 📋 Visão Geral
 
-Este documento explica como organizar um projeto de software de forma profissional, hierárquica e escalável, baseado na estrutura implementada no Hub DeFiSats. A organização segue princípios de **Clean Architecture** e **Domain-Driven Design**.
+Este documento explica como organizar um projeto de software de forma profissional, hierárquica e escalável, baseado na estrutura implementada no Axisor. A organização segue princípios de **Clean Architecture** e **Domain-Driven Design**.
 
 ## 🎯 Princípios da Organização
 
@@ -438,7 +438,7 @@ Para dúvidas sobre organização de projetos:
 1. Consultar este documento
 2. Verificar exemplos na pasta `examples/`
 3. Abrir issue no repositório
-4. Contatar: dev@hub-defisats.com
+4. Contatar: dev@axisor.com
 
 ---
 
@@ -448,4 +448,4 @@ Para dúvidas sobre organização de projetos:
 
 ---
 
-*Este guia foi criado baseado na experiência de organização do Hub DeFiSats e pode ser adaptado para qualquer tipo de projeto de software.*
+*Este guia foi criado baseado na experiência de organização do Axisor e pode ser adaptado para qualquer tipo de projeto de software.*

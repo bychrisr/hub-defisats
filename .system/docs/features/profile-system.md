@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-This document describes the comprehensive profile management system implemented for the Hub DeFiSats platform, including plan-based avatar indicators, notification preferences, and billing management.
+This document describes the comprehensive profile management system implemented for the Axisor platform, including plan-based avatar indicators, notification preferences, and billing management.
 
 ## 🎯 Features Implemented
 

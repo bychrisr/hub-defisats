@@ -2,7 +2,7 @@
 
 ## 🎯 Visão Geral
 
-Este documento fornece instruções detalhadas e específicas para configurar, executar e manter a aplicação defiSATS em um servidor de produção. A documentação é específica para a estrutura atual do servidor e inclui todos os passos necessários desde o acesso inicial até a configuração completa do ambiente.
+Este documento fornece instruções detalhadas e específicas para configurar, executar e manter a aplicação Axisor em um servidor de produção. A documentação é específica para a estrutura atual do servidor e inclui todos os passos necessários desde o acesso inicial até a configuração completa do ambiente.
 
 ---
 
@@ -14,7 +14,7 @@ Este documento fornece instruções detalhadas e específicas para configurar, e
   - Frontend: `https://defisats.site`
   - API: `https://api.defisats.site`
 - **Usuário**: `bychrisr`
-- **Diretório do Projeto**: `/home/bychrisr/projects/hub-defisats`
+- **Diretório do Projeto**: `/home/bychrisr/projects/axisor`
 - **Senha sudo**: `0,0,`
 
 ---
@@ -44,7 +44,7 @@ Este documento fornece instruções detalhadas e específicas para configurar, e
 │  │   :6379     │  │  (various)  │  │   :8080     │        │
 │  └─────────────┘  └─────────────┘  └─────────────┘        │
 │                                                             │
-│  Rede: docker_hub-defisats-network                         │
+│  Rede: docker_axisor-network                         │
 │  + proxy-network (conectada)                               │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -52,7 +52,7 @@ Este documento fornece instruções detalhadas e específicas para configurar, e
 ### Redes Docker
 
 1. **proxy-network**: Rede global para comunicação entre proxy e aplicações
-2. **docker_hub-defisats-network**: Rede interna da aplicação defiSATS
+2. **docker_axisor-network**: Rede interna da aplicação Axisor
 
 ---
 
@@ -67,13 +67,13 @@ ssh bychrisr@3.143.248.70
 
 #### 1.2 Navegação para o Projeto
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 ```
 
 ### 2. Estrutura de Diretórios
 
 ```
-/home/bychrisr/projects/hub-defisats/
+/home/bychrisr/projects/axisor/
 ├── backend/                    # API Node.js/TypeScript
 ├── frontend/                   # Aplicação React/Vite
 ├── config/                     # Configurações do projeto
@@ -102,7 +102,7 @@ cd /home/bychrisr/proxy
 ```
 /home/bychrisr/proxy/
 ├── conf.d/
-│   └── defisats.conf         # Configuração específica do defiSATS
+│   └── defisats.conf         # Configuração específica do Axisor
 ├── nginx.conf                # Configuração principal do Nginx
 ├── docker-compose.yml        # Docker Compose do proxy
 └── start-proxy.sh           # Script de inicialização
@@ -116,7 +116,7 @@ server {
     server_name defisats.site www.defisats.site;
     
     location / {
-        proxy_pass http://hub-defisats-frontend:3001;
+        proxy_pass http://axisor-frontend:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -130,7 +130,7 @@ server {
     server_name api.defisats.site;
     
     location / {
-        proxy_pass http://hub-defisats-backend:3010;
+        proxy_pass http://axisor-backend:3010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -159,7 +159,7 @@ docker logs global-nginx-proxy
 
 #### 4.1 Variáveis de Ambiente
 
-**Arquivo**: `/home/bychrisr/projects/hub-defisats/.env`
+**Arquivo**: `/home/bychrisr/projects/axisor/.env`
 
 ```bash
 # Production Environment Variables
@@ -167,14 +167,14 @@ NODE_ENV=production
 PORT=23000
 
 # Database
-POSTGRES_DB=hubdefisats_prod
-POSTGRES_USER=hubdefisats_prod
-POSTGRES_PASSWORD=hubdefisats_prod_password_secure_2024
-DATABASE_URL=postgresql://hubdefisats_prod:hubdefisats_prod_password_secure_2024@postgres:5432/hubdefisats_prod?schema=public
+POSTGRES_DB=axisor_prod
+POSTGRES_USER=axisor_prod
+POSTGRES_PASSWORD=axisor_prod_password_secure_2024
+DATABASE_URL=postgresql://axisor_prod:axisor_prod_password_secure_2024@postgres:5432/axisor_prod?schema=public
 
 # Redis
 REDIS_URL=redis://redis:6379
-REDIS_PASSWORD=hubdefisats_redis_password_2024
+REDIS_PASSWORD=axisor_redis_password_2024
 
 # JWT Secrets
 JWT_SECRET=production-jwt-secret-key-32-chars-minimum-2024
@@ -232,32 +232,32 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: hub-defisats-postgres
+    container_name: axisor-postgres
     environment:
-      POSTGRES_DB: hubdefisats_dev
-      POSTGRES_USER: hubdefisats_dev
-      POSTGRES_PASSWORD: hubdefisats_dev_password
+      POSTGRES_DB: axisor_dev
+      POSTGRES_USER: axisor_dev
+      POSTGRES_PASSWORD: axisor_dev_password
     ports:
       - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - hub-defisats-network
+      - axisor-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hubdefisats_dev -d hubdefisats_dev"]
+      test: ["CMD-SHELL", "pg_isready -U axisor_dev -d axisor_dev"]
       interval: 30s
       timeout: 10s
       retries: 3
 
   redis:
     image: redis:7
-    container_name: hub-defisats-redis
+    container_name: axisor-redis
     ports:
       - "16379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - hub-defisats-network
+      - axisor-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -268,11 +268,11 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-backend
+    container_name: axisor-backend
     environment:
       NODE_ENV: development
       PORT: 3010
-      DATABASE_URL: postgresql://hubdefisats_dev:hubdefisats_dev_password@postgres:5432/hubdefisats_dev
+      DATABASE_URL: postgresql://axisor_dev:axisor_dev_password@postgres:5432/axisor_dev
       REDIS_URL: redis://redis:6379
     ports:
       - "13010:3010"
@@ -282,7 +282,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     volumes:
       - ../../backend:/app
       - /app/node_modules
@@ -296,7 +296,7 @@ services:
     build:
       context: ../../frontend
       dockerfile: Dockerfile
-    container_name: hub-defisats-frontend
+    container_name: axisor-frontend
     environment:
       VITE_API_URL: http://localhost:3010
     ports:
@@ -304,7 +304,7 @@ services:
     depends_on:
       - backend
     networks:
-      - hub-defisats-network
+      - axisor-network
     volumes:
       - ../../frontend:/app
       - /app/node_modules
@@ -319,7 +319,7 @@ volumes:
   redis_data:
 
 networks:
-  hub-defisats-network:
+  axisor-network:
     driver: bridge
 ```
 
@@ -333,7 +333,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: hub-defisats-postgres
+    container_name: axisor-postgres
     command: postgres -c 'max_connections=200' -c 'shared_buffers=256MB'
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -342,7 +342,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -352,15 +352,15 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: hub-defisats-redis
-    command: redis-server --appendonly yes --requirepass hubdefisats_redis_password_2024
+    container_name: axisor-redis
+    command: redis-server --appendonly yes --requirepass axisor_redis_password_2024
     volumes:
       - redis_data:/data
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "hubdefisats_redis_password_2024", "ping"]
+      test: ["CMD", "redis-cli", "-a", "axisor_redis_password_2024", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -369,7 +369,7 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-backend
+    container_name: axisor-backend
     env_file:
       - ../../.env
     environment:
@@ -385,7 +385,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3010/health"]
@@ -397,7 +397,7 @@ services:
     build:
       context: ../../frontend
       dockerfile: Dockerfile
-    container_name: hub-defisats-frontend
+    container_name: axisor-frontend
     environment:
       VITE_API_URL: https://api.defisats.site
     ports:
@@ -405,7 +405,7 @@ services:
     depends_on:
       - backend
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001"]
@@ -418,7 +418,7 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-margin-monitor
+    container_name: axisor-margin-monitor
     command: ["npm", "run", "worker:margin-monitor"]
     env_file:
       - ../../.env
@@ -428,14 +428,14 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   automation-executor:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-automation-executor
+    container_name: axisor-automation-executor
     command: ["npm", "run", "worker:automation-executor"]
     env_file:
       - ../../.env
@@ -445,14 +445,14 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   notification-worker:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-notification-worker
+    container_name: axisor-notification-worker
     command: ["npm", "run", "worker:notification"]
     env_file:
       - ../../.env
@@ -462,14 +462,14 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   payment-validator:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-payment-validator
+    container_name: axisor-payment-validator
     command: ["npm", "run", "worker:payment-validator"]
     env_file:
       - ../../.env
@@ -479,14 +479,14 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   simulation-executor:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-simulation-executor
+    container_name: axisor-simulation-executor
     command: ["npm", "run", "worker:simulation-executor"]
     env_file:
       - ../../.env
@@ -496,12 +496,12 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   nginx:
     image: nginx:alpine
-    container_name: hub-defisats-nginx
+    container_name: axisor-nginx
     ports:
       - "8080:80"
       - "8443:443"
@@ -512,7 +512,7 @@ services:
       - frontend
       - backend
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
 volumes:
@@ -524,7 +524,7 @@ volumes:
     driver: local
 
 networks:
-  hub-defisats-network:
+  axisor-network:
     driver: bridge
 ```
 
@@ -557,11 +557,11 @@ http {
     
     # Upstream servers
     upstream backend {
-        server hub-defisats-backend:3010;
+        server axisor-backend:3010;
     }
     
     upstream frontend {
-        server hub-defisats-frontend:3001;
+        server axisor-frontend:3001;
     }
     
     # Main server block
@@ -627,15 +627,15 @@ cd /home/bychrisr/proxy
 
 #### 1.2 Iniciar Aplicação (Modo Desenvolvimento)
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 docker compose -f config/docker/docker-compose.dev.yml up -d
 ```
 
 #### 1.3 Conectar Redes
 ```bash
 # Conectar containers da aplicação ao proxy global
-docker network connect proxy-network hub-defisats-backend
-docker network connect proxy-network hub-defisats-frontend
+docker network connect proxy-network axisor-backend
+docker network connect proxy-network axisor-frontend
 ```
 
 ### 2. Comandos de Gerenciamento
@@ -674,11 +674,11 @@ docker logs global-nginx-proxy
 docker ps
 
 # Ver logs de um container específico
-docker logs hub-defisats-backend
-docker logs hub-defisats-frontend
+docker logs axisor-backend
+docker logs axisor-frontend
 
 # Reiniciar container específico
-docker restart hub-defisats-backend
+docker restart axisor-backend
 ```
 
 ### 3. Comandos de Desenvolvimento
@@ -686,37 +686,37 @@ docker restart hub-defisats-backend
 #### 3.1 Backend
 ```bash
 # Entrar no container do backend
-docker exec -it hub-defisats-backend bash
+docker exec -it axisor-backend bash
 
 # Executar migrações do banco
-docker exec hub-defisats-backend npx prisma migrate dev
+docker exec axisor-backend npx prisma migrate dev
 
 # Executar seed do banco
-docker exec hub-defisats-backend npm run db:seed
+docker exec axisor-backend npm run db:seed
 
 # Ver logs em tempo real
-docker logs -f hub-defisats-backend
+docker logs -f axisor-backend
 ```
 
 #### 3.2 Frontend
 ```bash
 # Entrar no container do frontend
-docker exec -it hub-defisats-frontend bash
+docker exec -it axisor-frontend bash
 
 # Ver logs em tempo real
-docker logs -f hub-defisats-frontend
+docker logs -f axisor-frontend
 ```
 
 #### 3.3 Banco de Dados
 ```bash
 # Conectar ao PostgreSQL
-docker exec -it hub-defisats-postgres psql -U hubdefisats_dev -d hubdefisats_dev
+docker exec -it axisor-postgres psql -U axisor_dev -d axisor_dev
 
 # Backup do banco
-docker exec hub-defisats-postgres pg_dump -U hubdefisats_dev hubdefisats_dev > backup.sql
+docker exec axisor-postgres pg_dump -U axisor_dev axisor_dev > backup.sql
 
 # Restaurar backup
-docker exec -i hub-defisats-postgres psql -U hubdefisats_dev -d hubdefisats_dev < backup.sql
+docker exec -i axisor-postgres psql -U axisor_dev -d axisor_dev < backup.sql
 ```
 
 ---
@@ -728,39 +728,39 @@ docker exec -i hub-defisats-postgres psql -U hubdefisats_dev -d hubdefisats_dev 
 #### 1.1 Aplicação não inicia
 ```bash
 # Verificar logs
-docker logs hub-defisats-backend
-docker logs hub-defisats-frontend
+docker logs axisor-backend
+docker logs axisor-frontend
 
 # Verificar variáveis de ambiente
-docker exec hub-defisats-backend env | grep -E "(DATABASE_URL|JWT_SECRET)"
+docker exec axisor-backend env | grep -E "(DATABASE_URL|JWT_SECRET)"
 
 # Verificar conectividade do banco
-docker exec hub-defisats-backend npx prisma db push
+docker exec axisor-backend npx prisma db push
 ```
 
 #### 1.2 Proxy não consegue acessar aplicação
 ```bash
 # Verificar se containers estão na mesma rede
 docker network inspect proxy-network
-docker network inspect docker_hub-defisats-network
+docker network inspect docker_axisor-network
 
 # Conectar containers manualmente
-docker network connect proxy-network hub-defisats-backend
-docker network connect proxy-network hub-defisats-frontend
+docker network connect proxy-network axisor-backend
+docker network connect proxy-network axisor-frontend
 
 # Testar conectividade interna
-docker exec global-nginx-proxy curl -s http://hub-defisats-backend:3010/health
+docker exec global-nginx-proxy curl -s http://axisor-backend:3010/health
 ```
 
 #### 1.3 Problemas de permissão
 ```bash
 # Corrigir permissões do arquivo .env
-sudo chown bychrisr:bychrisr /home/bychrisr/projects/hub-defisats/.env
-sudo chmod 644 /home/bychrisr/projects/hub-defisats/.env
+sudo chown bychrisr:bychrisr /home/bychrisr/projects/axisor/.env
+sudo chmod 644 /home/bychrisr/projects/axisor/.env
 
 # Corrigir permissões do nginx.conf
-sudo chown root:root /home/bychrisr/projects/hub-defisats/config/docker/nginx/nginx.conf
-sudo chmod 644 /home/bychrisr/projects/hub-defisats/config/docker/nginx/nginx.conf
+sudo chown root:root /home/bychrisr/projects/axisor/config/docker/nginx/nginx.conf
+sudo chmod 644 /home/bychrisr/projects/axisor/config/docker/nginx/nginx.conf
 ```
 
 ### 2. Verificações de Saúde
@@ -771,8 +771,8 @@ sudo chmod 644 /home/bychrisr/projects/hub-defisats/config/docker/nginx/nginx.co
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 # Verificar health checks
-docker inspect hub-defisats-backend | grep -A 5 "Health"
-docker inspect hub-defisats-frontend | grep -A 5 "Health"
+docker inspect axisor-backend | grep -A 5 "Health"
+docker inspect axisor-frontend | grep -A 5 "Health"
 ```
 
 #### 2.2 Testes de Conectividade
@@ -784,7 +784,7 @@ curl -I https://defisats.site
 curl -I https://api.defisats.site/health
 
 # Testar API internamente
-docker exec global-nginx-proxy curl -s http://hub-defisats-backend:3010/health
+docker exec global-nginx-proxy curl -s http://axisor-backend:3010/health
 ```
 
 #### 2.3 Verificação de Logs
@@ -796,7 +796,7 @@ docker logs global-nginx-proxy --tail 50
 docker compose -f config/docker/docker-compose.dev.yml logs --tail 50
 
 # Logs específicos do nginx interno
-docker logs hub-defisats-nginx --tail 50
+docker logs axisor-nginx --tail 50
 ```
 
 ---
@@ -824,8 +824,8 @@ ps aux | grep -E "(node|nginx|postgres|redis)"
 docker compose -f config/docker/docker-compose.dev.yml logs -f
 
 # Logs específicos por serviço
-docker logs -f hub-defisats-backend
-docker logs -f hub-defisats-frontend
+docker logs -f axisor-backend
+docker logs -f axisor-frontend
 docker logs -f global-nginx-proxy
 ```
 
@@ -835,8 +835,8 @@ docker logs -f global-nginx-proxy
 netstat -tlnp | grep -E "(80|443|3001|3010|5432|6379)"
 
 # Verificar conectividade entre containers
-docker exec hub-defisats-backend ping hub-defisats-postgres
-docker exec global-nginx-proxy ping hub-defisats-backend
+docker exec axisor-backend ping axisor-postgres
+docker exec global-nginx-proxy ping axisor-backend
 ```
 
 ---
@@ -848,16 +848,16 @@ docker exec global-nginx-proxy ping hub-defisats-backend
 #### 1.1 Backup do Banco de Dados
 ```bash
 # Backup completo
-docker exec hub-defisats-postgres pg_dump -U hubdefisats_dev hubdefisats_dev > backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec axisor-postgres pg_dump -U axisor_dev axisor_dev > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Backup apenas dados
-docker exec hub-defisats-postgres pg_dump -U hubdefisats_dev -d hubdefisats_dev --data-only > data_backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec axisor-postgres pg_dump -U axisor_dev -d axisor_dev --data-only > data_backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 #### 1.2 Restore do Banco de Dados
 ```bash
 # Restaurar backup completo
-docker exec -i hub-defisats-postgres psql -U hubdefisats_dev -d hubdefisats_dev < backup_20241222_143000.sql
+docker exec -i axisor-postgres psql -U axisor_dev -d axisor_dev < backup_20241222_143000.sql
 ```
 
 ### 2. Atualizações
@@ -877,10 +877,10 @@ docker compose -f config/docker/docker-compose.dev.yml up -d
 #### 2.2 Atualizar Dependências
 ```bash
 # Backend
-docker exec hub-defisats-backend npm update
+docker exec axisor-backend npm update
 
 # Frontend
-docker exec hub-defisats-frontend npm update
+docker exec axisor-frontend npm update
 ```
 
 ### 3. Limpeza
@@ -900,8 +900,8 @@ docker system prune -a -f
 #### 3.2 Limpeza de Logs
 ```bash
 # Limpar logs antigos
-docker logs --tail 0 -f hub-defisats-backend > /dev/null
-docker logs --tail 0 -f hub-defisats-frontend > /dev/null
+docker logs --tail 0 -f axisor-backend > /dev/null
+docker logs --tail 0 -f axisor-frontend > /dev/null
 ```
 
 ---
@@ -918,21 +918,21 @@ cd /home/bychrisr/proxy && ./start-proxy.sh stop
 
 # Iniciar tudo
 cd /home/bychrisr/proxy && ./start-proxy.sh start
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 docker compose -f config/docker/docker-compose.dev.yml up -d
-docker network connect proxy-network hub-defisats-backend
-docker network connect proxy-network hub-defisats-frontend
+docker network connect proxy-network axisor-backend
+docker network connect proxy-network axisor-frontend
 ```
 
 #### 1.2 Recuperação de Rede
 ```bash
 # Recriar redes se necessário
-docker network rm docker_hub-defisats-network
-docker network create docker_hub-defisats-network
+docker network rm docker_axisor-network
+docker network create docker_axisor-network
 
 # Reconectar containers
-docker network connect proxy-network hub-defisats-backend
-docker network connect proxy-network hub-defisats-frontend
+docker network connect proxy-network axisor-backend
+docker network connect proxy-network axisor-frontend
 ```
 
 ### 2. Rollback
@@ -951,7 +951,7 @@ docker compose -f config/docker/docker-compose.dev.yml up -d
 #### 2.2 Rollback de Banco
 ```bash
 # Restaurar backup anterior
-docker exec -i hub-defisats-postgres psql -U hubdefisats_dev -d hubdefisats_dev < backup_anterior.sql
+docker exec -i axisor-postgres psql -U axisor_dev -d axisor_dev < backup_anterior.sql
 ```
 
 ---
@@ -961,7 +961,7 @@ docker exec -i hub-defisats-postgres psql -U hubdefisats_dev -d hubdefisats_dev 
 ### Informações do Servidor
 - **Servidor**: AWS EC2 (3.143.248.70)
 - **Usuário**: bychrisr
-- **Projeto**: /home/bychrisr/projects/hub-defisats
+- **Projeto**: /home/bychrisr/projects/axisor
 - **Proxy**: /home/bychrisr/proxy
 
 ### URLs de Acesso
@@ -979,8 +979,8 @@ curl -I https://defisats.site
 curl -I https://api.defisats.site/health
 
 # Logs recentes
-docker logs --tail 10 hub-defisats-backend
-docker logs --tail 10 hub-defisats-frontend
+docker logs --tail 10 axisor-backend
+docker logs --tail 10 axisor-frontend
 ```
 
 ---
@@ -998,4 +998,4 @@ docker logs --tail 10 hub-defisats-frontend
 
 *Documentação criada em: 22 de Setembro de 2024*
 *Versão: 1.0*
-*Projeto: defiSATS - Sistema de Trading DeFi*
+*Projeto: Axisor - Sistema de Trading DeFi*

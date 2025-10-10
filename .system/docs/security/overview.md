@@ -532,10 +532,10 @@ incident_response:
 ```typescript
 // Notificações de incidente
 const incidentNotifications = {
-  'internal': ['security@hub-defisats.com'],
-  'external': ['users@hub-defisats.com'],
-  'regulatory': ['compliance@hub-defisats.com'],
-  'public': ['status.hub-defisats.com']
+  'internal': ['security@axisor.com'],
+  'external': ['users@axisor.com'],
+  'regulatory': ['compliance@axisor.com'],
+  'public': ['status.axisor.com']
 };
 ```
 

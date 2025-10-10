@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔍 DIAGNÓSTICO DE PRODUÇÃO - Hub-defisats"
+echo "🔍 DIAGNÓSTICO DE PRODUÇÃO - Axisor"
 echo "=========================================="
 
 echo ""

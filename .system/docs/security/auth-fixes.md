@@ -10,7 +10,7 @@
 
 ### 🔐 Credenciais de Acesso
 ```
-Email/Username: admin@hub-defisats.com
+Email/Username: admin@axisor.com
 Password: Admin123!@#
 ```
 
@@ -70,7 +70,7 @@ recordAuthAttempt(type: string, status: string, error?: string): void {
 ```bash
 curl -X POST http://localhost:13010/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"emailOrUsername": "admin@hub-defisats.com", "password": "Admin123!@#"}'
+  -d '{"emailOrUsername": "admin@axisor.com", "password": "Admin123!@#"}'
 ```
 **Resultado**: `200 OK` - Login bem-sucedido com token JWT
 
@@ -78,7 +78,7 @@ curl -X POST http://localhost:13010/api/auth/login \
 ```bash
 curl -X POST http://localhost:13000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"emailOrUsername": "admin@hub-defisats.com", "password": "Admin123!@#"}'
+  -d '{"emailOrUsername": "admin@axisor.com", "password": "Admin123!@#"}'
 ```
 **Resultado**: `200 OK` - Login funcionando através do proxy do frontend
 

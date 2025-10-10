@@ -3,7 +3,7 @@
 Você obrigatóriamente deve usar docker compose no projeto, estamos em abiente de desenvolvimento. A pasta com o docker e env é 'config'
 
 Para login com usuário admin:
-   - Email: `admin@hub-defisats.com`
+   - Email: `admin@axisor.com`
    - Senha: `Admin123!@#`
 
 Para login com usuário comum:

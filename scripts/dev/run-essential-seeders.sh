@@ -40,13 +40,13 @@ fi
 
 # Verificar se containers estão rodando
 log_info "Verificando containers..."
-if ! docker ps | grep -q "hub-defisats-postgres"; then
+if ! docker ps | grep -q "axisor-postgres"; then
     log_error "Container PostgreSQL não está rodando"
     log_info "Execute: docker compose -f config/docker/docker-compose.dev.yml up -d"
     exit 1
 fi
 
-if ! docker ps | grep -q "hub-defisats-backend"; then
+if ! docker ps | grep -q "axisor-backend"; then
     log_error "Container Backend não está rodando"
     log_info "Execute: docker compose -f config/docker/docker-compose.dev.yml up -d"
     exit 1
@@ -90,11 +90,11 @@ log_info "📊 Verificando status final..."
 
 # Verificar exchanges
 log_info "🔍 Verificando exchanges..."
-docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "SELECT name, slug, is_active FROM exchanges;"
+docker exec axisor-postgres psql -U axisor -d axisor -c "SELECT name, slug, is_active FROM exchanges;"
 
 # Verificar planos (se existir)
 log_info "🔍 Verificando planos..."
-if docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "SELECT name, slug FROM plans LIMIT 3;" 2>/dev/null; then
+if docker exec axisor-postgres psql -U axisor -d axisor -c "SELECT name, slug FROM plans LIMIT 3;" 2>/dev/null; then
     log_success "Planos encontrados"
 else
     log_warning "Tabela de planos não encontrada ou vazia"

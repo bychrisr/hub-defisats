@@ -8,7 +8,7 @@ async function testFrontendAuth() {
     // 1. Fazer login
     console.log('📝 Fazendo login...');
     const loginResponse = await axios.post('http://localhost:13000/api/auth/login', {
-      emailOrUsername: 'admin@hub-defisats.com',
+      emailOrUsername: 'admin@axisor.com',
       password: 'Admin123!@#'
     });
     

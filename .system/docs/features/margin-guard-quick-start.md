@@ -95,7 +95,7 @@ Ação: Fechar Posição
 
 1. **Logs do Sistema**
 ```bash
-docker logs hub-defisats-backend | grep "MARGIN GUARD"
+docker logs axisor-backend | grep "MARGIN GUARD"
 ```
 
 2. **Status na Interface**
@@ -150,7 +150,7 @@ docker logs hub-defisats-backend | grep "MARGIN GUARD"
 ### ❌ "Worker não está rodando"
 **Solução**:
 1. Verifique se backend está online
-2. Reinicie o container: `docker restart hub-defisats-backend`
+2. Reinicie o container: `docker restart axisor-backend`
 3. Aguarde 30 segundos
 
 ### ❌ "Credenciais LN Markets inválidas"
@@ -212,7 +212,7 @@ Quando BTC subir para ~68,000:
 
 ### Precisa de Ajuda?
 - **Discord**: [Link do servidor]
-- **Email**: suporte@hubdefisats.com
+- **Email**: suporte@axisor.com
 - **GitHub**: [Link do repositório]
 
 ### Informações para Suporte

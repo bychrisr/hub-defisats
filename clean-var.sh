@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script para limpar o diretório /var e liberar espaço em disco
-# Desenvolvido para o projeto hub-defisats
+# Desenvolvido para o projeto axisor
 # Uso: sudo ./clean-var.sh
 
 set -e

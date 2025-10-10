@@ -310,4 +310,4 @@ Cards fixos → Cores específicas
 
 **Última Atualização**: Janeiro 2025  
 **Versão**: 1.0  
-**Autor**: Sistema de Dashboard Hub DeFiSats
+**Autor**: Sistema de Dashboard Axisor

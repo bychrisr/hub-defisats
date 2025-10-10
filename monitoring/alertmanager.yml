@@ -1,6 +1,6 @@
 global:
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'alerts@hubdefisats.com'
+  smtp_from: 'alerts@axisor.com'
   smtp_auth_username: '${SMTP_USER}'
   smtp_auth_password: '${SMTP_PASS}'
 
@@ -9,20 +9,20 @@ route:
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: 'hub-defisats-alerts'
+  receiver: 'axisor-alerts'
   routes:
   - match:
       severity: critical
-    receiver: 'hub-defisats-critical'
+    receiver: 'axisor-critical'
   - match:
       service: database
-    receiver: 'hub-defisats-database'
+    receiver: 'axisor-database'
   - match:
       service: payments
-    receiver: 'hub-defisats-payments'
+    receiver: 'axisor-payments'
 
 receivers:
-- name: 'hub-defisats-alerts'
+- name: 'axisor-alerts'
   slack_configs:
   - api_url: '${SLACK_WEBHOOK_URL}'
     channel: '#alerts'
@@ -35,7 +35,7 @@ receivers:
       *Service:* {{ .Labels.service }}
       {{ end }}
 
-- name: 'hub-defisats-critical'
+- name: 'axisor-critical'
   slack_configs:
   - api_url: '${SLACK_WEBHOOK_URL}'
     channel: '#critical-alerts'
@@ -49,9 +49,9 @@ receivers:
       *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
       {{ end }}
 
-- name: 'hub-defisats-database'
+- name: 'axisor-database'
   email_configs:
-  - to: 'dba@hubdefisats.com'
+  - to: 'dba@axisor.com'
     subject: 'Database Alert: {{ .GroupLabels.alertname }}'
     body: |
       Database alert triggered:
@@ -62,9 +62,9 @@ receivers:
       Severity: {{ .Labels.severity }}
       {{ end }}
 
-- name: 'hub-defisats-payments'
+- name: 'axisor-payments'
   email_configs:
-  - to: 'payments@hubdefisats.com'
+  - to: 'payments@axisor.com'
     subject: 'Payment Alert: {{ .GroupLabels.alertname }}'
     body: |
       Payment system alert:

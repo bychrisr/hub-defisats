@@ -218,7 +218,7 @@ describe('useActiveAccount', () => {
 
       // Simulate storage change
       const storageEvent = new StorageEvent('storage', {
-        key: 'hub-defisats-indicator-configs',
+        key: 'axisor-indicator-configs',
         newValue: JSON.stringify({
           userPreferences: { activeAccountId: 'account-456' },
         }),
@@ -275,7 +275,7 @@ describe('useActiveAccount', () => {
       const { result } = renderHook(() => useActiveAccount());
 
       const storageEvent = new StorageEvent('storage', {
-        key: 'hub-defisats-indicator-configs',
+        key: 'axisor-indicator-configs',
         newValue: 'invalid-json',
       });
 

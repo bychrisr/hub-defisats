@@ -1,4 +1,4 @@
-# Scripts do Hub DeFiSats
+# Scripts do Axisor
 
 Esta pasta contém todos os scripts organizados por categoria para facilitar a manutenção e uso.
 
@@ -261,7 +261,7 @@ Para problemas com scripts:
 1. Verificar logs de erro
 2. Consultar documentação específica
 3. Abrir issue no GitHub
-4. Contatar: dev@hub-defisats.com
+4. Contatar: dev@axisor.com
 
 ---
 

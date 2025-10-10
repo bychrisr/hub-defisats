@@ -247,7 +247,7 @@ export class LightningPaymentService {
     }
 
     const pricing = this.getPlanPricing(planType);
-    const description = `Hub DefiSats - ${pricing.description}`;
+    const description = `Axisor - ${pricing.description}`;
 
     // Try each provider in order until one succeeds
     let lastError: Error | null = null;

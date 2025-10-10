@@ -137,7 +137,7 @@ sleep 5
 
 # Testar configuração
 echo "🧪 Testando configuração..."
-curl -X POST "https://defisats.site/api/auth/login" -H "Content-Type: application/json" -d '{"email":"admin@defisats.com","password":"password"}'
+curl -X POST "https://defisats.site/api/auth/login" -H "Content-Type: application/json" -d '{"email":"admin@axisor.com","password":"password"}'
 
 echo "✅ Configuração do Nginx corrigida!"
 

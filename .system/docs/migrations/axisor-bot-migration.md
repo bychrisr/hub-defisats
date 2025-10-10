@@ -2,7 +2,7 @@
 
 ## 📋 **Resumo Executivo**
 
-Este relatório documenta a migração completa do projeto `hub-defisats` para `axisor-bot`, incluindo a mudança de estratégia de deploy de Docker para nativo, renomeação de todos os componentes e configuração da infraestrutura de produção.
+Este relatório documenta a migração completa do projeto `axisor` para `axisor-bot`, incluindo a mudança de estratégia de deploy de Docker para nativo, renomeação de todos os componentes e configuração da infraestrutura de produção.
 
 ## 🎯 **Decisões Estratégicas**
 
@@ -12,7 +12,7 @@ Este relatório documenta a migração completa do projeto `hub-defisats` para `
 - **Motivação**: Simplificar a infraestrutura e reduzir complexidade de gerenciamento
 
 ### 2. **Renomeação do Projeto**
-- **Antes**: `hub-defisats`
+- **Antes**: `axisor`
 - **Depois**: `axisor-bot`
 - **Escopo**: Todos os componentes (código, banco de dados, configurações, documentação)
 
@@ -91,14 +91,14 @@ module.exports = {
 #### **2.1 Renomeação do Banco**
 ```sql
 -- Comandos executados
-ALTER DATABASE hubdefisats_prod RENAME TO axisor_bot_prod;
-ALTER USER hubdefisats_prod RENAME TO axisor_bot_prod;
+ALTER DATABASE axisor_prod RENAME TO axisor_bot_prod;
+ALTER USER axisor_prod RENAME TO axisor_bot_prod;
 ```
 
 #### **2.2 Atualização da URL de Conexão**
 ```bash
 # Antes
-DATABASE_URL="postgresql://hubdefisats_prod:hubdefisats_prod_password_secure_2024@localhost:5432/hubdefisats_prod?schema=public"
+DATABASE_URL="postgresql://axisor_prod:axisor_prod_password_secure_2024@localhost:5432/axisor_prod?schema=public"
 
 # Depois
 DATABASE_URL="postgresql://postgres@localhost:5432/axisor_bot_prod?schema=public"
@@ -115,7 +115,7 @@ npx prisma db push --force-reset
 #### **3.1 Renomeação no Servidor**
 ```bash
 # Comando executado
-sudo mv /home/ubuntu/apps/hub-defisats /home/ubuntu/apps/axisor-bot
+sudo mv /home/ubuntu/apps/axisor /home/ubuntu/apps/axisor-bot
 ```
 
 #### **3.2 Estrutura Atual**

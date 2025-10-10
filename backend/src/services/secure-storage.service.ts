@@ -23,7 +23,7 @@ export class SecureStorageService {
     const salt = Buffer.from(config.security.encryption.key, 'hex');
     return (await scryptAsync(
       salt,
-      'hub-defisats-salt',
+      'axisor-salt',
       this.keyLength
     )) as Buffer;
   }

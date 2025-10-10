@@ -68,7 +68,7 @@ export const useAccessibility = () => {
     document.addEventListener('mousedown', handleMouseDown);
 
     // Carregar configurações salvas
-    const savedSettings = localStorage.getItem('hub-defisats-accessibility');
+    const savedSettings = localStorage.getItem('axisor-accessibility');
     if (savedSettings) {
       try {
         const settings = JSON.parse(savedSettings);
@@ -92,7 +92,7 @@ export const useAccessibility = () => {
     setState(updatedState);
     
     try {
-      localStorage.setItem('hub-defisats-accessibility', JSON.stringify(updatedState));
+      localStorage.setItem('axisor-accessibility', JSON.stringify(updatedState));
     } catch (error) {
       console.error('Erro ao salvar configurações de acessibilidade:', error);
     }

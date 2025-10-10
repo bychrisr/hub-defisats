@@ -210,10 +210,10 @@ chmod 755 uploads/avatars
 **Solução:**
 ```bash
 # Verificar se o plugin está registrado
-docker logs hub-defisats-backend | grep "multipart"
+docker logs axisor-backend | grep "multipart"
 
 # Reiniciar backend se necessário
-docker restart hub-defisats-backend
+docker restart axisor-backend
 ```
 
 #### 2. **"Tipo de arquivo não permitido"**
@@ -231,10 +231,10 @@ docker restart hub-defisats-backend
 ### Logs de Debug
 ```bash
 # Verificar logs do backend
-docker logs hub-defisats-backend --tail 50
+docker logs axisor-backend --tail 50
 
 # Verificar logs de upload
-docker logs hub-defisats-backend | grep -i upload
+docker logs axisor-backend | grep -i upload
 
 # Verificar arquivos de upload
 ls -la backend/uploads/avatars/
@@ -319,7 +319,7 @@ Para contribuir com melhorias no sistema de upload:
 ## 📞 Suporte
 
 Para dúvidas ou problemas:
-- 📧 **Email:** dev@hub-defisats.com
+- 📧 **Email:** dev@axisor.com
 - 💬 **Discord:** #support
 - 📋 **Issues:** GitHub Issues
 - 📚 **Docs:** Esta documentação

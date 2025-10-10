@@ -303,7 +303,7 @@ describe('Persistence System Tests', () => {
   describe('Cross-Tab Synchronization', () => {
     it('should handle storage events for cross-tab sync', () => {
       const storageEvent = new StorageEvent('storage', {
-        key: 'hub-defisats-indicator-configs',
+        key: 'axisor-indicator-configs',
         newValue: JSON.stringify({
           userPreferences: {
             activeAccountId: 'account-456',
@@ -325,7 +325,7 @@ describe('Persistence System Tests', () => {
 
     it('should handle malformed storage events', () => {
       const storageEvent = new StorageEvent('storage', {
-        key: 'hub-defisats-indicator-configs',
+        key: 'axisor-indicator-configs',
         newValue: 'invalid-json',
         oldValue: null,
       });

@@ -2,14 +2,14 @@
   "summary": "Plataforma completa de automação de trading para LN Markets com Margin Guard, simulações em tempo real, sistema multi-exchange e dashboard administrativo. Arquitetura robusta com Node.js/Fastify, React/Vite, PostgreSQL/Prisma e Redis/BullMQ.",
   "how_to_run_local": {
     "commands": [
-      "cd /home/bychrisr/projects/hub-defisats",
+      "cd /home/bychrisr/projects/axisor",
       "docker compose -f config/docker/docker-compose.dev.yml up -d",
       "sleep 15 && docker compose -f config/docker/docker-compose.dev.yml ps",
       "curl -s 'http://localhost:13010/api/version' | jq .",
       "curl -s -I 'http://localhost:13000' | head -5"
     ],
     "env_vars_needed": [
-      "DATABASE_URL=postgresql://hubdefisats:hubdefisats_dev_password@postgres:5432/hubdefisats?schema=public",
+      "DATABASE_URL=postgresql://axisor:axisor_dev_password@postgres:5432/axisor?schema=public",
       "REDIS_URL=redis://redis:6379",
       "JWT_SECRET=development-jwt-secret-key-32-chars-minimum",
       "ENCRYPTION_KEY=development-encryption-key-32-chars",
@@ -20,7 +20,7 @@
   "docker_compose": {
     "exists": true,
     "path": "config/docker/docker-compose.dev.yml",
-    "snippet": "services:\n  postgres:\n    image: postgres:15-alpine\n    environment:\n      POSTGRES_DB: hubdefisats\n      POSTGRES_USER: hubdefisats\n      POSTGRES_PASSWORD: hubdefisats_dev_password\n    ports:\n      - \"15432:5432\"\n  redis:\n    image: redis:7\n    ports:\n      - \"16379:6379\"\n  backend:\n    build:\n      context: ../../backend\n      dockerfile: Dockerfile.dev\n    ports:\n      - \"13010:3010\"\n  frontend:\n    build:\n      context: ../../frontend\n      dockerfile: Dockerfile.dev\n    ports:\n      - \"13000:3001\""
+    "snippet": "services:\n  postgres:\n    image: postgres:15-alpine\n    environment:\n      POSTGRES_DB: axisor\n      POSTGRES_USER: axisor\n      POSTGRES_PASSWORD: axisor_dev_password\n    ports:\n      - \"15432:5432\"\n  redis:\n    image: redis:7\n    ports:\n      - \"16379:6379\"\n  backend:\n    build:\n      context: ../../backend\n      dockerfile: Dockerfile.dev\n    ports:\n      - \"13010:3010\"\n  frontend:\n    build:\n      context: ../../frontend\n      dockerfile: Dockerfile.dev\n    ports:\n      - \"13000:3001\""
   },
   "prisma_schema": {
     "path": "backend/prisma/schema.prisma",
@@ -164,20 +164,20 @@
   "db_and_backup": {
     "postgres_schema_path": "backend/prisma/schema.prisma",
     "backup_restore_commands": [
-      "pg_dump -h localhost -p 15432 -U hubdefisats -d hubdefisats > backup.sql",
-      "pg_restore -h localhost -p 15432 -U hubdefisats -d hubdefisats backup.sql"
+      "pg_dump -h localhost -p 15432 -U axisor -d axisor > backup.sql",
+      "pg_restore -h localhost -p 15432 -U axisor -d axisor backup.sql"
     ],
     "snapshot_recommendation": "yes - daily automated backups with retention policy"
   },
   "observability": {
     "logs_location": {
-      "backend": "/var/log/hub-defisats-backend.log",
+      "backend": "/var/log/axisor-backend.log",
       "n8n": "unknown",
       "btcpay": "unknown"
     },
     "how_to_tail": [
-      "docker logs -f hub-defisats-backend",
-      "docker logs -f hub-defisats-margin-monitor"
+      "docker logs -f axisor-backend",
+      "docker logs -f axisor-margin-monitor"
     ],
     "metrics": "Prometheus endpoints: /api/metrics, Grafana dashboards: unknown"
   },

@@ -168,7 +168,7 @@ export default function SystemReports() {
           status: 'completed',
           createdAt: '2025-01-15T10:30:00Z',
           completedAt: '2025-01-15T10:35:00Z',
-          generatedBy: 'admin@defisats.com',
+          generatedBy: 'admin@axisor.com',
           fileSize: 2048576, // 2MB
           recordCount: 15420,
           parameters: {
@@ -197,7 +197,7 @@ export default function SystemReports() {
           type: 'user_activity',
           status: 'generating',
           createdAt: '2025-01-15T11:00:00Z',
-          generatedBy: 'admin@defisats.com',
+          generatedBy: 'admin@axisor.com',
           fileSize: 0,
           recordCount: 0,
           parameters: {
@@ -218,7 +218,7 @@ export default function SystemReports() {
           status: 'completed',
           createdAt: '2025-01-15T09:15:00Z',
           completedAt: '2025-01-15T09:20:00Z',
-          generatedBy: 'admin@defisats.com',
+          generatedBy: 'admin@axisor.com',
           fileSize: 1024000, // 1MB
           recordCount: 3250,
           parameters: {
@@ -248,7 +248,7 @@ export default function SystemReports() {
           status: 'scheduled',
           createdAt: '2025-01-15T08:00:00Z',
           scheduledFor: '2025-01-16T09:00:00Z',
-          generatedBy: 'admin@defisats.com',
+          generatedBy: 'admin@axisor.com',
           fileSize: 0,
           recordCount: 0,
           parameters: {

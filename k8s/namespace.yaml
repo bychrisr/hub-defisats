@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: hub-defisats
+  name: axisor
   labels:
-    name: hub-defisats
-    app: hub-defisats
+    name: axisor
+    app: axisor
     environment: production

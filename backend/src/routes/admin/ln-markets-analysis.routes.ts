@@ -199,7 +199,7 @@ export async function lnMarketsAnalysisRoutes(fastify: FastifyInstance) {
           const response = await require('axios').get('https://api.lnmarkets.com/v1/status', {
             timeout: config.timeout,
             headers: {
-              'User-Agent': `Hub-DefiSats-Test-${config.name}/1.0`
+              'User-Agent': `Axisor-Test-${config.name}/1.0`
             }
           });
 

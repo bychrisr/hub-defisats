@@ -3,7 +3,7 @@ INSERT INTO users (id, username, email, password_hash, plan_type, created_at, up
 VALUES (
   'admin-test-user-id', 
   'admin', 
-  'admin@hub-defisats.com', 
+  'admin@axisor.com', 
   '$2b$10$dummy.hash.for.testing', 
   'lifetime', 
   NOW(), 

@@ -21,7 +21,7 @@ async function encryptCredentials() {
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: 'postgresql://hubdefisats:hubdefisats_dev_password@localhost:15432/hubdefisats'
+        url: 'postgresql://axisor:axisor_dev_password@localhost:15432/axisor'
       }
     }
   });

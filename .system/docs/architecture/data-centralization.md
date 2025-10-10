@@ -2,7 +2,7 @@
 
 ## 📋 **Visão Geral**
 
-O **MarketDataContext** é o núcleo da nova arquitetura centralizada de dados do Hub DeFiSats, implementado para resolver problemas de performance, consistência e manutenibilidade.
+O **MarketDataContext** é o núcleo da nova arquitetura centralizada de dados do Axisor, implementado para resolver problemas de performance, consistência e manutenibilidade.
 
 ## 🚀 **Problemas Resolvidos**
 

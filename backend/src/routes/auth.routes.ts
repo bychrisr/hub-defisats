@@ -171,7 +171,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         );
 
         // Generate unique email for testing
-        const testEmail = `test-${Date.now()}@hubdefisats.com`;
+        const testEmail = `test-${Date.now()}@axisor.com`;
 
         const registrationData = {
           email: testEmail,

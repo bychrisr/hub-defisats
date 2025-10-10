@@ -8,7 +8,7 @@
 ---
 
 ## 🎯 **OBJETIVO PRINCIPAL**
-Estabilizar e otimizar a aplicação Hub DeFiSats seguindo uma abordagem incremental e segura, priorizando a estabilidade sobre velocidade.
+Estabilizar e otimizar a aplicação Axisor seguindo uma abordagem incremental e segura, priorizando a estabilidade sobre velocidade.
 
 ---
 

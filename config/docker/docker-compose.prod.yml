@@ -4,19 +4,19 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: hub-defisats-postgres
+    container_name: axisor-postgres
     environment:
-      POSTGRES_DB: hub_defisats
+      POSTGRES_DB: axisor
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/prisma/migrations:/docker-entrypoint-initdb.d/migrations
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d hub_defisats"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d axisor"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -24,12 +24,12 @@ services:
   # Redis Cache & Queue
   redis:
     image: redis:7-alpine
-    container_name: hub-defisats-redis
-    command: redis-server --appendonly yes --requirepass hubdefisats_redis_password_2024
+    container_name: axisor-redis
+    command: redis-server --appendonly yes --requirepass axisor_redis_password_2024
     volumes:
       - redis_data:/data
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
@@ -42,13 +42,13 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-backend
+    container_name: axisor-backend
     env_file:
       - ../../.env
     environment:
       NODE_ENV: production
       PORT: 3010
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/hub_defisats
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/axisor
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
@@ -74,7 +74,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3010/health"]
@@ -87,7 +87,7 @@ services:
     build:
       context: ../../frontend
       dockerfile: Dockerfile
-    container_name: hub-defisats-frontend
+    container_name: axisor-frontend
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3010}
       VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3010}
@@ -100,7 +100,7 @@ services:
     depends_on:
       - backend
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
@@ -111,7 +111,7 @@ services:
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: hub-defisats-nginx
+    container_name: axisor-nginx
     ports:
       - "8443:443"
     volumes:
@@ -122,7 +122,7 @@ services:
       - backend
       - frontend
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   # Worker Services
@@ -130,11 +130,11 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-margin-monitor
+    container_name: axisor-margin-monitor
     command: ["npm", "run", "worker:margin-monitor"]
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/hub_defisats
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/axisor
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
@@ -147,18 +147,18 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   automation-executor:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-automation-executor
+    container_name: axisor-automation-executor
     command: ["npm", "run", "worker:automation-executor"]
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/hub_defisats
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/axisor
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
@@ -171,18 +171,18 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   notification-worker:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-notification-worker
+    container_name: axisor-notification-worker
     command: ["npm", "run", "worker:notification"]
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/hub_defisats
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/axisor
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       EVOLUTION_API_URL: ${EVOLUTION_API_URL}
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
@@ -192,18 +192,18 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   payment-validator:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-payment-validator
+    container_name: axisor-payment-validator
     command: ["npm", "run", "worker:payment-validator"]
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/hub_defisats
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/axisor
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       LN_MARKETS_API_KEY: ${LN_MARKETS_API_KEY}
       LN_MARKETS_API_SECRET: ${LN_MARKETS_API_SECRET}
@@ -214,18 +214,18 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   simulation-executor:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: hub-defisats-simulation-executor
+    container_name: axisor-simulation-executor
     command: ["npm", "run", "worker:simulation-executor"]
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/hub_defisats
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/axisor
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
     depends_on:
       postgres:
@@ -233,7 +233,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
 volumes:
@@ -245,5 +245,5 @@ volumes:
     driver: local
 
 networks:
-  hub-defisats-network:
+  axisor-network:
     driver: bridge

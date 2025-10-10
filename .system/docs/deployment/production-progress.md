@@ -61,7 +61,7 @@ curl -k -I https://localhost/health -H "Host: api.defisats.site"
 # ✅ Resposta: HTTP/2 200
 
 # Proxy interno
-docker exec global-nginx-proxy curl -s http://hub-defisats-backend:3010/health
+docker exec global-nginx-proxy curl -s http://axisor-backend:3010/health
 # ✅ Resposta: {"status":"healthy",...}
 ```
 
@@ -133,11 +133,11 @@ docker exec global-nginx-proxy curl -s http://hub-defisats-backend:3010/health
 ### Verificar Status
 ```bash
 # Ver todos os containers
-docker ps | grep hub-defisats
+docker ps | grep axisor
 
 # Ver logs específicos
-docker logs hub-defisats-backend
-docker logs hub-defisats-frontend
+docker logs axisor-backend
+docker logs axisor-frontend
 docker logs global-nginx-proxy
 
 # Testar conectividade
@@ -148,7 +148,7 @@ curl -s http://localhost:13000/
 ### Gerenciar Serviços
 ```bash
 # Reiniciar frontend
-docker restart hub-defisats-frontend
+docker restart axisor-frontend
 
 # Reiniciar proxy
 cd ~/proxy && ./start-proxy.sh restart
@@ -216,4 +216,4 @@ O ambiente está **quase completamente funcional** com apenas pequenos ajustes p
 
 *Progresso atualizado em: 22 de Setembro de 2024*  
 *Versão: 2.0*  
-*Ambiente: Produção - defiSATS*
+*Ambiente: Produção - Axisor*

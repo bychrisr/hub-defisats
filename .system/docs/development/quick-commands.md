@@ -8,7 +8,7 @@ Password: password
 
 # Acesso SSH
 ssh user@defisats.site
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 ```
 
 ## 🐳 Docker - Comandos Essenciais
@@ -50,7 +50,7 @@ docker compose -f docker-compose.prod.yml logs redis --follow
 docker compose -f docker-compose.prod.yml exec backend bash
 
 # PostgreSQL
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod
 
 # Redis
 docker compose -f docker-compose.prod.yml exec redis redis-cli
@@ -61,16 +61,16 @@ docker compose -f docker-compose.prod.yml exec redis redis-cli
 ### Comandos SQL
 ```bash
 # Conectar ao banco
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod
 
 # Ver usuários
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod -c "SELECT email, username, is_active FROM \"User\";"
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod -c "SELECT email, username, is_active FROM \"User\";"
 
 # Ver admins
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod -c "SELECT u.email, u.username, au.role FROM \"User\" u LEFT JOIN \"AdminUser\" au ON u.id = au.user_id WHERE au.role IS NOT NULL;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod -c "SELECT u.email, u.username, au.role FROM \"User\" u LEFT JOIN \"AdminUser\" au ON u.id = au.user_id WHERE au.role IS NOT NULL;"
 
 # Backup
-docker exec hub-defisats-postgres-prod pg_dump -U hubdefisats_prod hubdefisats_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec axisor-postgres-prod pg_dump -U axisor_prod axisor_prod > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### Migrações
@@ -128,13 +128,13 @@ node scripts/admin/create-admin.js
 ### Gerenciar Usuários
 ```bash
 # Listar usuários
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod -c "SELECT id, email, username, is_active, created_at FROM \"User\" ORDER BY created_at DESC;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod -c "SELECT id, email, username, is_active, created_at FROM \"User\" ORDER BY created_at DESC;"
 
 # Ativar/desativar usuário
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod -c "UPDATE \"User\" SET is_active = true WHERE email = 'user@example.com';"
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod -c "UPDATE \"User\" SET is_active = true WHERE email = 'user@example.com';"
 
 # Deletar usuário
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod -c "DELETE FROM \"User\" WHERE email = 'user@example.com';"
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod -c "DELETE FROM \"User\" WHERE email = 'user@example.com';"
 ```
 
 ## 🔍 Troubleshooting
@@ -148,7 +148,7 @@ curl http://localhost:13010/health
 curl http://localhost/health
 
 # PostgreSQL
-docker compose -f docker-compose.prod.yml exec postgres pg_isready -U hubdefisats_prod
+docker compose -f docker-compose.prod.yml exec postgres pg_isready -U axisor_prod
 
 # Redis
 docker compose -f docker-compose.prod.yml exec redis redis-cli ping
@@ -175,7 +175,7 @@ docker compose -f docker-compose.prod.yml exec backend env | grep -E "(DATABASE|
 docker compose -f docker-compose.prod.yml down
 
 # 2. Remover volumes (CUIDADO: apaga dados)
-docker volume rm hub-defisats_postgres_data hub-defisats_redis_data
+docker volume rm axisor_postgres_data axisor_redis_data
 
 # 3. Rebuild
 docker compose -f docker-compose.prod.yml build --no-cache
@@ -240,10 +240,10 @@ docker system prune -a
 ### Backup
 ```bash
 # Backup do banco
-docker exec hub-defisats-postgres-prod pg_dump -U hubdefisats_prod hubdefisats_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec axisor-postgres-prod pg_dump -U axisor_prod axisor_prod > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Backup dos volumes
-docker run --rm -v hub-defisats_postgres_data:/data -v $(pwd):/backup alpine tar czf /backup/postgres_backup_$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
+docker run --rm -v axisor_postgres_data:/data -v $(pwd):/backup alpine tar czf /backup/postgres_backup_$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
 ```
 
 ## 🌐 URLs e Portas

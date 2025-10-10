@@ -40,13 +40,13 @@ fi
 
 # Verificar se containers estão rodando
 log_info "Verificando containers..."
-if ! docker ps | grep -q "hub-defisats-postgres"; then
+if ! docker ps | grep -q "axisor-postgres"; then
     log_error "Container PostgreSQL não está rodando"
     log_info "Execute: docker compose -f config/docker/docker-compose.dev.yml up -d"
     exit 1
 fi
 
-if ! docker ps | grep -q "hub-defisats-backend"; then
+if ! docker ps | grep -q "axisor-backend"; then
     log_error "Container Backend não está rodando"
     log_info "Execute: docker compose -f config/docker/docker-compose.dev.yml up -d"
     exit 1
@@ -119,8 +119,8 @@ show_data_info() {
     echo "============================"
     echo ""
     echo "🔐 ADMIN USERS:"
-    echo "  • admin@hub-defisats.com (superadmin) - Senha: Admin123!@#"
-    echo "  • support@hub-defisats.com (admin) - Senha: Support123!@#"
+    echo "  • admin@axisor.com (superadmin) - Senha: Admin123!@#"
+    echo "  • support@axisor.com (admin) - Senha: Support123!@#"
     echo ""
     echo "💰 PLANS:"
     echo "  • Free - $0/mês - 3 posições, 1 automação"

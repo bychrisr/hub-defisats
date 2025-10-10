@@ -48,7 +48,7 @@ async function updateRealCredentials() {
     console.log('✅ Credentials updated in database successfully');
     console.log('🎉 Credential update completed!');
     console.log('\n📝 Next steps:');
-    console.log('1. Restart the backend container: docker restart hub-defisats-backend');
+    console.log('1. Restart the backend container: docker restart axisor-backend');
     console.log('2. Test the LN Markets integration');
     
   } catch (error) {

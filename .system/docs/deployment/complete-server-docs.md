@@ -81,7 +81,7 @@ O **Hub DefiSats** é uma plataforma de automação para LN Markets que oferece:
 ## 📁 Estrutura de Diretórios
 
 ```
-hub-defisats/
+axisor/
 ├── backend/                    # Backend API (Fastify + TypeScript)
 │   ├── src/
 │   │   ├── controllers/        # Controladores da API
@@ -120,18 +120,18 @@ hub-defisats/
 
 ## 🐳 Containers e Serviços
 
-### 1. **PostgreSQL** (`hub-defisats-postgres-prod`)
+### 1. **PostgreSQL** (`axisor-postgres-prod`)
 ```yaml
 Image: postgres:15-alpine
 Port: 5432
 Volume: postgres_data:/var/lib/postgresql/data
 Environment:
-  POSTGRES_DB: hubdefisats_prod
-  POSTGRES_USER: hubdefisats_prod
+  POSTGRES_DB: axisor_prod
+  POSTGRES_USER: axisor_prod
   POSTGRES_PASSWORD: [SECRET]
 ```
 
-### 2. **Redis** (`hub-defisats-redis-prod`)
+### 2. **Redis** (`axisor-redis-prod`)
 ```yaml
 Image: redis:6-alpine
 Port: 6379
@@ -139,19 +139,19 @@ Volume: redis_data:/data
 Command: redis-server --appendonly yes --maxmemory 256mb
 ```
 
-### 3. **Backend** (`hub-defisats-backend-prod`)
+### 3. **Backend** (`axisor-backend-prod`)
 ```yaml
 Build: ./backend/Dockerfile
 Port: 13010:3010
 Environment:
   NODE_ENV: production
-  DATABASE_URL: postgresql://hubdefisats_prod:[PASSWORD]@postgres:5432/hubdefisats_prod
+  DATABASE_URL: postgresql://axisor_prod:[PASSWORD]@postgres:5432/axisor_prod
   REDIS_URL: redis://redis:6379
   JWT_SECRET: [SECRET]
   ENCRYPTION_KEY: [SECRET]
 ```
 
-### 4. **Frontend** (`hub-defisats-frontend-prod`)
+### 4. **Frontend** (`axisor-frontend-prod`)
 ```yaml
 Build: ./frontend/Dockerfile
 Port: 80 (via Nginx)
@@ -237,28 +237,28 @@ Role: superadmin
 ssh user@defisats.site
 
 # Diretório do projeto
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 ```
 
 ### Acesso aos Containers
 ```bash
 # Backend
-docker exec -it hub-defisats-backend-prod bash
+docker exec -it axisor-backend-prod bash
 
 # PostgreSQL
-docker exec -it hub-defisats-postgres-prod psql -U hubdefisats_prod -d hubdefisats_prod
+docker exec -it axisor-postgres-prod psql -U axisor_prod -d axisor_prod
 
 # Redis
-docker exec -it hub-defisats-redis-prod redis-cli
+docker exec -it axisor-redis-prod redis-cli
 ```
 
 ### Variáveis de Ambiente
 ```bash
 # Arquivo: config/env/env.production
-POSTGRES_DB=hubdefisats_prod
-POSTGRES_USER=hubdefisats_prod
-POSTGRES_PASSWORD=hubdefisats_prod_password_secure_2024
-DATABASE_URL=postgresql://hubdefisats_prod:hubdefisats_prod_password_secure_2024@postgres:5432/hubdefisats_prod
+POSTGRES_DB=axisor_prod
+POSTGRES_USER=axisor_prod
+POSTGRES_PASSWORD=axisor_prod_password_secure_2024
+DATABASE_URL=postgresql://axisor_prod:axisor_prod_password_secure_2024@postgres:5432/axisor_prod
 REDIS_URL=redis://redis:6379
 JWT_SECRET=production-jwt-secret-key-32-chars-minimum-2024
 ENCRYPTION_KEY=production-encryption-key-32-chars-2024
@@ -310,10 +310,10 @@ docker compose -f docker-compose.prod.yml logs backend --follow
 ### 4. Backup do Banco de Dados
 ```bash
 # Backup completo
-docker exec hub-defisats-postgres-prod pg_dump -U hubdefisats_prod hubdefisats_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec axisor-postgres-prod pg_dump -U axisor_prod axisor_prod > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Restore
-docker exec -i hub-defisats-postgres-prod psql -U hubdefisats_prod hubdefisats_prod < backup_file.sql
+docker exec -i axisor-postgres-prod psql -U axisor_prod axisor_prod < backup_file.sql
 ```
 
 ---
@@ -344,7 +344,7 @@ curl http://localhost:13010/health
 curl http://localhost/health
 
 # PostgreSQL
-docker compose -f docker-compose.prod.yml exec postgres pg_isready -U hubdefisats_prod
+docker compose -f docker-compose.prod.yml exec postgres pg_isready -U axisor_prod
 
 # Redis
 docker compose -f docker-compose.prod.yml exec redis redis-cli ping
@@ -398,7 +398,7 @@ docker compose -f docker-compose.prod.yml logs backend --tail=100
 curl -v http://localhost:13010/health
 
 # Verificar banco de dados
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod -c "SELECT 1;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod -c "SELECT 1;"
 ```
 
 #### Problemas de Autenticação
@@ -407,7 +407,7 @@ docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod
 docker compose -f docker-compose.prod.yml exec backend env | grep JWT_SECRET
 
 # Verificar usuários no banco
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod -c "SELECT email, username FROM \"User\";"
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod -c "SELECT email, username FROM \"User\";"
 
 # Limpar cache do Redis
 docker compose -f docker-compose.prod.yml exec redis redis-cli FLUSHALL
@@ -419,7 +419,7 @@ docker compose -f docker-compose.prod.yml exec redis redis-cli FLUSHALL
 docker compose -f docker-compose.prod.yml down
 
 # 2. Remover volumes (CUIDADO: apaga dados)
-docker volume rm hub-defisats_postgres_data hub-defisats_redis_data
+docker volume rm axisor_postgres_data axisor_redis_data
 
 # 3. Rebuild completo
 docker compose -f docker-compose.prod.yml build --no-cache
@@ -459,7 +459,7 @@ docker compose -f docker-compose.prod.yml logs -f backend
 ### Banco de Dados
 ```bash
 # Conectar ao PostgreSQL
-docker compose -f docker-compose.prod.yml exec postgres psql -U hubdefisats_prod -d hubdefisats_prod
+docker compose -f docker-compose.prod.yml exec postgres psql -U axisor_prod -d axisor_prod
 
 # Executar migrações
 docker compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
@@ -591,4 +591,4 @@ ufw allow 443   # HTTPS
 
 **📅 Última Atualização:** 20 de Setembro de 2025  
 **👨‍💻 Mantido por:** Equipe Hub DefiSats  
-**🔗 Repositório:** https://github.com/seu-usuario/hub-defisats
+**🔗 Repositório:** https://github.com/seu-usuario/axisor

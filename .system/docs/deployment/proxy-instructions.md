@@ -8,7 +8,7 @@ A arquitetura de proxy reverso global foi implementada com sucesso! Aqui estão 
 
 ### 1. Parar a Aplicação Atual
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 docker-compose -f docker-compose.prod.yml down
 ```
 
@@ -36,7 +36,7 @@ cd ~/proxy
 
 ### 5. Iniciar a Aplicação
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
@@ -47,7 +47,7 @@ cd ~/proxy
 ./start-proxy.sh status
 
 # Verificar aplicação
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 docker-compose -f docker-compose.prod.yml ps
 ```
 
@@ -106,7 +106,7 @@ cd ~/proxy
 
 ### Gerenciar Aplicação
 ```bash
-cd /home/bychrisr/projects/hub-defisats
+cd /home/bychrisr/projects/axisor
 docker-compose -f docker-compose.prod.yml up -d    # Iniciar
 docker-compose -f docker-compose.prod.yml down     # Parar
 docker-compose -f docker-compose.prod.yml logs     # Ver logs
@@ -132,7 +132,7 @@ docker logs -f global-nginx-proxy
 
 ### Redes Docker
 - **proxy-network**: Compartilhada entre proxy e aplicações
-- **hub-defisats-network**: Rede interna da aplicação
+- **axisor-network**: Rede interna da aplicação
 
 ### Domínios Configurados
 - `defisats.site` → Frontend

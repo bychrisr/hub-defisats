@@ -11,7 +11,7 @@ Todos os endpoints (exceto os públicos) requerem autenticação via JWT token n
 ## Base URL
 
 - **Desenvolvimento**: `http://localhost:13010`
-- **Produção**: `https://api.hub-defisats.com`
+- **Produção**: `https://api.axisor.com`
 
 ## Códigos de Status HTTP
 
@@ -991,7 +991,7 @@ Gera relatório de trades.
 {
   "report_id": "uuid",
   "status": "generating",
-  "download_url": "https://api.hub-defisats.com/reports/uuid/download"
+  "download_url": "https://api.axisor.com/reports/uuid/download"
 }
 ```
 

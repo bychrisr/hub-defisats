@@ -22,8 +22,8 @@ export class TwoFactorService {
   async generateSecret(userId: string, userEmail: string): Promise<TwoFactorSetup> {
     // Generate TOTP secret
     const secret = speakeasy.generateSecret({
-      name: `Hub DefiSats (${userEmail})`,
-      issuer: 'Hub DefiSats',
+      name: `Axisor (${userEmail})`,
+      issuer: 'Axisor',
       length: 32,
     });
 

@@ -17,7 +17,7 @@ echo "   docker network inspect proxy-network"
 echo ""
 
 echo "3. Parar e reiniciar aplicação:"
-echo "   cd /home/bychrisr/projects/hub-defisats"
+echo "   cd /home/bychrisr/projects/axisor"
 echo "   docker compose -f docker-compose.prod.yml down"
 echo "   docker compose -f docker-compose.prod.yml up -d"
 echo ""
@@ -32,7 +32,7 @@ echo "   docker compose -f docker-compose.prod.yml logs backend"
 echo ""
 
 echo "6. Testar conectividade interna:"
-echo "   docker exec global-nginx-proxy curl -s http://hub-defisats-nginx-prod:80"
+echo "   docker exec global-nginx-proxy curl -s http://axisor-nginx-prod:80"
 echo ""
 
 echo "7. Se necessário, recriar rede proxy:"

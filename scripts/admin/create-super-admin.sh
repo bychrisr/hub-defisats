@@ -17,7 +17,7 @@ echo "🔑 Password: $PASSWORD"
 echo "🔓 Sem API Keys (não necessário para admin)"
 
 # Verificar se o container está rodando
-if ! docker ps | grep -q "hub-defisats-postgres"; then
+if ! docker ps | grep -q "axisor-postgres"; then
     echo "❌ Container PostgreSQL não está rodando. Execute 'dev-up' primeiro."
     exit 1
 fi
@@ -27,7 +27,7 @@ fi
 PASSWORD_HASH='$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
 
 echo "📝 Criando usuário super admin no banco de dados..."
-docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "
+docker exec axisor-postgres psql -U axisor -d axisor -c "
 INSERT INTO \"User\" (
   id,
   email,
@@ -55,9 +55,9 @@ INSERT INTO \"User\" (
 echo "✅ Usuário super admin criado/atualizado!"
 
 echo "👑 Criando permissões de super admin..."
-USER_ID=$(docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -t -c "SELECT id FROM \"User\" WHERE email = '$EMAIL';" | tr -d ' \n')
+USER_ID=$(docker exec axisor-postgres psql -U axisor -d axisor -t -c "SELECT id FROM \"User\" WHERE email = '$EMAIL';" | tr -d ' \n')
 
-docker exec hub-defisats-postgres psql -U hubdefisats -d hubdefisats -c "
+docker exec axisor-postgres psql -U axisor -d axisor -c "
 INSERT INTO \"AdminUser\" (
   id,
   user_id,

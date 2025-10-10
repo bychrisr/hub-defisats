@@ -4,7 +4,7 @@ services:
   # Prometheus
   prometheus:
     image: prom/prometheus:latest
-    container_name: hub-defisats-prometheus
+    container_name: axisor-prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -19,13 +19,13 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   # Alertmanager
   alertmanager:
     image: prom/alertmanager:latest
-    container_name: hub-defisats-alertmanager
+    container_name: axisor-alertmanager
     ports:
       - "9093:9093"
     volumes:
@@ -35,13 +35,13 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   # Grafana
   grafana:
     image: grafana/grafana:latest
-    container_name: hub-defisats-grafana
+    container_name: axisor-grafana
     ports:
       - "3000:3000"
     environment:
@@ -53,7 +53,7 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
     depends_on:
       - prometheus
@@ -61,7 +61,7 @@ services:
   # Node Exporter
   node-exporter:
     image: prom/node-exporter:latest
-    container_name: hub-defisats-node-exporter
+    container_name: axisor-node-exporter
     ports:
       - "9100:9100"
     volumes:
@@ -74,13 +74,13 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   # cAdvisor
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
-    container_name: hub-defisats-cadvisor
+    container_name: axisor-cadvisor
     ports:
       - "8080:8080"
     volumes:
@@ -92,13 +92,13 @@ services:
     devices:
       - /dev/kmsg
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   # Loki (Log aggregation)
   loki:
     image: grafana/loki:latest
-    container_name: hub-defisats-loki
+    container_name: axisor-loki
     ports:
       - "3100:3100"
     volumes:
@@ -106,19 +106,19 @@ services:
       - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
     command: -config.file=/etc/loki/local-config.yaml
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
   # Promtail (Log shipping)
   promtail:
     image: grafana/promtail:latest
-    container_name: hub-defisats-promtail
+    container_name: axisor-promtail
     volumes:
       - /var/log:/var/log:ro
       - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
     command: -config.file=/etc/promtail/config.yml
     networks:
-      - hub-defisats-network
+      - axisor-network
     restart: unless-stopped
 
 volumes:
@@ -132,7 +132,7 @@ volumes:
     driver: local
 
 networks:
-  hub-defisats-network:
+  axisor-network:
     external: true
-    name: hub-defisats_hb-defisats-network
+    name: axisor-network
 

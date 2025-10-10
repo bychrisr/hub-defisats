@@ -578,7 +578,7 @@ export default function Profile() {
         <CardContent>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              You can request your Hub DeFiSats account to be deleted along with all your associated data. 
+              You can request your Axisor account to be deleted along with all your associated data. 
               Your request will be processed within 21 days.
             </p>
             <Button variant="outline" size="sm" className="bg-red-600 hover:bg-red-700 text-white border-red-600">

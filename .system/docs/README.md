@@ -1,8 +1,8 @@
-# Documentação Técnica - Hub DeFiSats
+# Documentação Técnica - Axisor
 
 ## Visão Geral
 
-Esta documentação técnica fornece informações detalhadas sobre o desenvolvimento, deploy, manutenção e uso do Hub DeFiSats.
+Esta documentação técnica fornece informações detalhadas sobre o desenvolvimento, deploy, manutenção e uso do Axisor.
 
 ## Estrutura da Documentação
 
@@ -139,7 +139,7 @@ Para contribuir com a documentação:
 ## Contato
 
 - **Email**: docs@defisats.site
-- **GitHub**: https://github.com/defisats/hub-defisats
+- **GitHub**: https://github.com/defisats/axisor
 - **Documentação**: https://docs.defisats.site
 
 ---

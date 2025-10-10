@@ -13,8 +13,8 @@ Sistema para popular banco de dados vazio com dados padrão essenciais.
 ### 2. **admin-user**
 - **Descrição**: Usuários administrativos padrão
 - **Dados**: 
-  - `admin@hub-defisats.com` (superadmin)
-  - `support@hub-defisats.com` (admin)
+  - `admin@axisor.com` (superadmin)
+  - `support@axisor.com` (admin)
 - **Senhas**: Definidas nos dados padrão
 
 ### 3. **plans**

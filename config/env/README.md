@@ -50,7 +50,7 @@ VITE_API_URL=https://your_domain.com/api
 ### Desenvolvimento
 ```bash
 # Database
-DATABASE_URL=postgresql://hubdefisats:password@localhost:5432/hubdefisats_dev
+DATABASE_URL=postgresql://axisor:password@localhost:5432/axisor_dev
 
 # Security
 JWT_SECRET=dev_jwt_secret_32_chars_minimum

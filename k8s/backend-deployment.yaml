@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hub-defisats-backend
-  namespace: hub-defisats
+  name: axisor-backend
+  namespace: axisor
   labels:
-    app: hub-defisats-backend
+    app: axisor-backend
     version: v1
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: hub-defisats-backend
+      app: axisor-backend
   template:
     metadata:
       labels:
-        app: hub-defisats-backend
+        app: axisor-backend
         version: v1
     spec:
       containers:
       - name: backend
-        image: hub-defisats/backend:latest
+        image: axisor/backend:latest
         ports:
         - containerPort: 13016
           name: http
@@ -29,137 +29,137 @@ spec:
         - name: NODE_ENV
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: NODE_ENV
         - name: PORT
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: PORT
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: LOG_LEVEL
         - name: LOG_FORMAT
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: LOG_FORMAT
         - name: RATE_LIMIT_MAX
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: RATE_LIMIT_MAX
         - name: RATE_LIMIT_TIME_WINDOW
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: RATE_LIMIT_TIME_WINDOW
         - name: CORS_ORIGIN
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: CORS_ORIGIN
         - name: PROMETHEUS_PORT
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: PROMETHEUS_PORT
         - name: JWT_EXPIRES_IN
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: JWT_EXPIRES_IN
         - name: REFRESH_TOKEN_EXPIRES_IN
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: REFRESH_TOKEN_EXPIRES_IN
         - name: LN_MARKETS_API_URL
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: LN_MARKETS_API_URL
         - name: LN_MARKETS_SANDBOX_URL
           valueFrom:
             configMapKeyRef:
-              name: hub-defisats-config
+              name: axisor-config
               key: LN_MARKETS_SANDBOX_URL
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: DATABASE_URL
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: REDIS_URL
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: JWT_SECRET
         - name: REFRESH_TOKEN_SECRET
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: REFRESH_TOKEN_SECRET
         - name: ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: ENCRYPTION_KEY
         - name: SMTP_HOST
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: SMTP_HOST
         - name: SMTP_PORT
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: SMTP_PORT
         - name: SMTP_USER
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: SMTP_USER
         - name: SMTP_PASS
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: SMTP_PASS
         - name: SMTP_FROM
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: SMTP_FROM
         - name: ALERT_EMAIL_TO
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: ALERT_EMAIL_TO
         - name: SLACK_WEBHOOK_URL
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: SLACK_WEBHOOK_URL
         - name: SLACK_ALERT_CHANNEL
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: SLACK_ALERT_CHANNEL
         - name: ALERT_WEBHOOK_URL
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: ALERT_WEBHOOK_URL
         - name: ALERT_WEBHOOK_TOKEN
           valueFrom:
             secretKeyRef:
-              name: hub-defisats-secrets
+              name: axisor-secrets
               key: ALERT_WEBHOOK_TOKEN
         resources:
           requests:

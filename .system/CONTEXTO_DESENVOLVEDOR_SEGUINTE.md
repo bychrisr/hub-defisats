@@ -102,7 +102,7 @@ O frontend está apresentando erro `"Failed to fetch automation reports"` na pá
 
 ### **1. Verificar Logs do Backend**
 ```bash
-docker logs hub-defisats-backend --tail 50
+docker logs axisor-backend --tail 50
 ```
 **Procurar por:**
 - Erros relacionados a `automation-reports`
@@ -125,7 +125,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:13010/api/automations/e
 ### **3. Verificar Banco de Dados**
 ```bash
 # Conectar ao PostgreSQL
-docker exec -it hub-defisats-postgres psql -U postgres -d hub_defisats
+docker exec -it axisor-postgres psql -U postgres -d hub_defisats
 
 # Verificar se as tabelas existem
 \dt
@@ -226,10 +226,10 @@ curl -H "Authorization: Bearer <token>" http://localhost:13010/api/automation-re
 ### **3. Teste de Banco de Dados**
 ```bash
 # Verificar conexão com PostgreSQL
-docker exec -it hub-defisats-postgres psql -U postgres -d hub_defisats -c "SELECT 1;"
+docker exec -it axisor-postgres psql -U postgres -d hub_defisats -c "SELECT 1;"
 
 # Verificar tabelas
-docker exec -it hub-defisats-postgres psql -U postgres -d hub_defisats -c "\dt"
+docker exec -it axisor-postgres psql -U postgres -d hub_defisats -c "\dt"
 ```
 
 ---
@@ -279,29 +279,29 @@ docker exec -it hub-defisats-postgres psql -U postgres -d hub_defisats -c "\dt"
 docker-compose up -d
 
 # Ver logs do backend
-docker logs hub-defisats-backend -f
+docker logs axisor-backend -f
 
 # Ver logs do frontend
-docker logs hub-defisats-frontend -f
+docker logs axisor-frontend -f
 
 # Ver logs do PostgreSQL
-docker logs hub-defisats-postgres -f
+docker logs axisor-postgres -f
 
 # Reiniciar serviços
-docker restart hub-defisats-backend
-docker restart hub-defisats-frontend
+docker restart axisor-backend
+docker restart axisor-frontend
 ```
 
 ### **Banco de Dados**
 ```bash
 # Conectar ao PostgreSQL
-docker exec -it hub-defisats-postgres psql -U postgres -d hub_defisats
+docker exec -it axisor-postgres psql -U postgres -d hub_defisats
 
 # Executar migrações
-docker exec -it hub-defisats-backend npx prisma migrate deploy
+docker exec -it axisor-backend npx prisma migrate deploy
 
 # Gerar Prisma Client
-docker exec -it hub-defisats-backend npx prisma generate
+docker exec -it axisor-backend npx prisma generate
 ```
 
 ### **Debugging**
@@ -321,7 +321,7 @@ ss -tlnp | grep -E "(13000|13010|15432|16379)"
 ## 📞 **Contato e Suporte**
 
 ### **Informações do Projeto**
-- **Nome**: hub-defisats
+- **Nome**: axisor
 - **Versão Atual**: v1.9.0
 - **Última Atualização**: 2025-01-25
 - **Status**: Em desenvolvimento ativo

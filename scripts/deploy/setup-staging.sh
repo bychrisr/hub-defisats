@@ -65,7 +65,7 @@ max_attempts=30
 attempt=1
 
 while [ $attempt -le $max_attempts ]; do
-    if docker exec hub-defisats-postgres-staging pg_isready -U $POSTGRES_USER -d $POSTGRES_DB_STAGING >/dev/null 2>&1; then
+    if docker exec axisor-postgres-staging pg_isready -U $POSTGRES_USER -d $POSTGRES_DB_STAGING >/dev/null 2>&1; then
         print_success "PostgreSQL staging is ready!"
         break
     else
@@ -78,23 +78,23 @@ done
 if [ $attempt -gt $max_attempts ]; then
     print_error "PostgreSQL staging failed to start within expected time"
     print_status "Checking PostgreSQL staging logs..."
-    docker logs hub-defisats-postgres-staging
+    docker logs axisor-postgres-staging
     exit 1
 fi
 
 # Create staging database if it doesn't exist
 print_status "Creating staging database if it doesn't exist..."
-docker exec hub-defisats-postgres-staging psql -U $POSTGRES_USER -c "CREATE DATABASE $POSTGRES_DB_STAGING;" 2>/dev/null || print_warning "Database might already exist"
+docker exec axisor-postgres-staging psql -U $POSTGRES_USER -c "CREATE DATABASE $POSTGRES_DB_STAGING;" 2>/dev/null || print_warning "Database might already exist"
 
 # Run Prisma migrations for staging (inside container)
 print_status "Running Prisma migrations for staging..."
-docker exec hub-defisats-backend-staging npx prisma migrate deploy --schema=./prisma/schema.prisma
+docker exec axisor-backend-staging npx prisma migrate deploy --schema=./prisma/schema.prisma
 if [ $? -eq 0 ]; then
     print_success "Prisma migrations completed successfully"
 else
     print_error "Prisma migrations failed"
     print_status "Trying to push schema instead..."
-    docker exec hub-defisats-backend-staging npx prisma db push --schema=./prisma/schema.prisma
+    docker exec axisor-backend-staging npx prisma db push --schema=./prisma/schema.prisma
     if [ $? -eq 0 ]; then
         print_success "Prisma schema pushed successfully"
     else
@@ -126,7 +126,7 @@ done
 if [ $attempt -gt $max_attempts ]; then
     print_error "Staging backend health check failed"
     print_status "Checking backend logs..."
-    docker logs hub-defisats-backend-staging
+    docker logs axisor-backend-staging
     exit 1
 fi
 
@@ -137,7 +137,7 @@ if curl -s http://localhost:23010 >/dev/null 2>&1; then
 else
     print_warning "Staging frontend might not be ready yet"
     print_status "Checking frontend logs..."
-    docker logs hub-defisats-frontend-staging
+    docker logs axisor-frontend-staging
 fi
 
 # Show staging environment status
@@ -149,8 +149,8 @@ echo ""
 print_success "🎉 Staging environment is ready!"
 echo ""
 print_status "Access URLs:"
-echo "  Frontend: http://localhost:23010 ou https://staging.hubdefisats.com"
-echo "  Backend API: http://localhost:23020 ou https://staging.hubdefisats.com/api"
+echo "  Frontend: http://localhost:23010 ou https://staging.axisor.com"
+echo "  Backend API: http://localhost:23020 ou https://staging.axisor.com/api"
 echo "  Health Check: http://localhost:23020/api/health"
 echo ""
 print_status "Database:"

@@ -100,7 +100,7 @@ export class LNMarketsConnectionAnalyzerService {
       const response = await axios.get(`${this.baseURL}/v1/status`, {
         timeout: 10000,
         headers: {
-          'User-Agent': 'Hub-DefiSats-Analyzer/1.0'
+          'User-Agent': 'Axisor-Analyzer/1.0'
         }
       });
 
@@ -240,7 +240,7 @@ export class LNMarketsConnectionAnalyzerService {
         timeout: 10000,
         headers: {
           ...authHeaders,
-          'User-Agent': 'Hub-DefiSats-Analyzer/1.0'
+          'User-Agent': 'Axisor-Analyzer/1.0'
         }
       });
 

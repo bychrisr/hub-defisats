@@ -88,7 +88,7 @@ export class ExternalAPIMonitorService {
         timeout: apiConfig.timeout,
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'Hub-DefiSats-Monitor/1.0'
+          'User-Agent': 'Axisor-Monitor/1.0'
         }
       });
 

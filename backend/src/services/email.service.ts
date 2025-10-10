@@ -24,12 +24,12 @@ export class EmailService {
     const verificationUrl = `${config.env.CORS_ORIGIN}/verify-email?token=${token}`;
 
     const mailOptions = {
-      from: `"Hub-defisats" <${config.notification.email.user}>`,
+      from: `"Axisor" <${config.notification.email.user}>`,
       to: email,
       subject: 'Verify your email address',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Welcome to Hub-defisats!</h2>
+          <h2>Welcome to Axisor!</h2>
           <p>Please verify your email address by clicking the link below:</p>
           <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">Verify Email</a>
           <p>This link will expire in 2 hours.</p>
@@ -48,7 +48,7 @@ export class EmailService {
     const resetUrl = `${config.env.CORS_ORIGIN}/reset-password?token=${token}`;
 
     const mailOptions = {
-      from: `"Hub-defisats" <${config.notification.email.user}>`,
+      from: `"Axisor" <${config.notification.email.user}>`,
       to: email,
       subject: 'Reset your password',
       html: `

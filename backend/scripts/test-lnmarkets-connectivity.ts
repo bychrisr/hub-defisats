@@ -34,7 +34,7 @@ class LNMarketsConnectivityTester {
         const response = await axios.get(`${this.baseURL}${endpoint}`, {
           timeout: 10000,
           headers: {
-            'User-Agent': 'Hub-DefiSats-Connectivity-Test/1.0'
+            'User-Agent': 'Axisor-Connectivity-Test/1.0'
           }
         });
         
@@ -70,7 +70,7 @@ class LNMarketsConnectivityTester {
         const response = await axios.get(`${domain}/v2/ticker`, {
           timeout: 10000,
           headers: {
-            'User-Agent': 'Hub-DefiSats-Connectivity-Test/1.0'
+            'User-Agent': 'Axisor-Connectivity-Test/1.0'
           }
         });
         
@@ -95,7 +95,7 @@ class LNMarketsConnectivityTester {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       'curl/7.68.0',
       'PostmanRuntime/7.28.4',
-      'Hub-DefiSats/1.0',
+      'Axisor/1.0',
       'LN-Markets-Client/1.0'
     ];
 

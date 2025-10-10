@@ -103,7 +103,7 @@ export class LNMarketsEndpointDiscoveryService {
         url,
         timeout: 5000,
         headers: {
-          'User-Agent': 'Hub-DefiSats-Discovery/1.0'
+          'User-Agent': 'Axisor-Discovery/1.0'
         }
       };
 

@@ -109,7 +109,7 @@ export default function DynamicPagesConfig() {
       page_name: 'Profile',
       use_dynamic_title: false,
       use_dynamic_favicon: false,
-      custom_title: 'Profile - defiSATS',
+      custom_title: 'Profile - Axisor',
       custom_favicon_url: '/favicon.svg',
       description: 'Página de perfil - usa título e favicon estáticos',
       is_active: true,
@@ -120,7 +120,7 @@ export default function DynamicPagesConfig() {
       page_name: 'Admin Panel',
       use_dynamic_title: false,
       use_dynamic_favicon: false,
-      custom_title: 'Admin Panel - defiSATS',
+      custom_title: 'Admin Panel - Axisor',
       custom_favicon_url: '/favicon-admin.svg',
       description: 'Painel administrativo - usa título e favicon estáticos',
       is_active: true,
@@ -131,7 +131,7 @@ export default function DynamicPagesConfig() {
       page_name: 'Menu Management',
       use_dynamic_title: false,
       use_dynamic_favicon: false,
-      custom_title: 'Menu Management - defiSATS',
+      custom_title: 'Menu Management - Axisor',
       custom_favicon_url: '/favicon-admin.svg',
       description: 'Gerenciamento de menus - usa título e favicon estáticos',
       is_active: true,
@@ -142,7 +142,7 @@ export default function DynamicPagesConfig() {
       page_name: 'Login',
       use_dynamic_title: false,
       use_dynamic_favicon: false,
-      custom_title: 'Login - defiSATS',
+      custom_title: 'Login - Axisor',
       custom_favicon_url: '/favicon.svg',
       description: 'Página de login - usa título e favicon estáticos',
       is_active: true,
@@ -153,7 +153,7 @@ export default function DynamicPagesConfig() {
       page_name: 'Register',
       use_dynamic_title: false,
       use_dynamic_favicon: false,
-      custom_title: 'Register - defiSATS',
+      custom_title: 'Register - Axisor',
       custom_favicon_url: '/favicon.svg',
       description: 'Página de registro - usa título e favicon estáticos',
       is_active: true,
@@ -435,7 +435,7 @@ export default function DynamicPagesConfig() {
                       ...editingConfig,
                       custom_title: e.target.value
                     })}
-                    placeholder="Título da Página - defiSATS"
+                    placeholder="Título da Página - Axisor"
                   />
                 </div>
               )}

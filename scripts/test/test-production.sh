@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🧪 Testing Hub-defisats Production Environment..."
+echo "🧪 Testing Axisor Production Environment..."
 
 # Colors for output
 RED='\033[0;31m'

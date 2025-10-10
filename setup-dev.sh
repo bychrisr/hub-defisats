@@ -20,10 +20,10 @@ NODE_ENV=development
 PORT=3010
 
 # Database
-POSTGRES_DB=hubdefisats
-POSTGRES_USER=hubdefisats
-POSTGRES_PASSWORD=hubdefisats_dev_password
-DATABASE_URL=postgresql://hubdefisats:hubdefisats_dev_password@localhost:15432/hubdefisats?schema=public
+POSTGRES_DB=axisor
+POSTGRES_USER=axisor
+POSTGRES_PASSWORD=axisor_dev_password
+DATABASE_URL=postgresql://axisor:axisor_dev_password@localhost:15432/axisor?schema=public
 
 # Redis
 REDIS_URL=redis://localhost:16379
@@ -85,7 +85,7 @@ docker compose -f config/docker/docker-compose.dev.yml ps
 
 # Executar migrações do banco
 echo "🗄️ Executando migrações do banco de dados..."
-docker exec hub-defisats-backend npx prisma migrate dev --name init 2>/dev/null || echo "⚠️ Migrações já executadas ou erro na execução"
+docker exec axisor-backend npx prisma migrate dev --name init 2>/dev/null || echo "⚠️ Migrações já executadas ou erro na execução"
 
 # Verificar saúde dos serviços
 echo "🏥 Verificando saúde dos serviços..."

@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este guia aborda os problemas mais comuns encontrados durante o desenvolvimento e uso do Hub DeFiSats, com soluções práticas e comandos de diagnóstico.
+Este guia aborda os problemas mais comuns encontrados durante o desenvolvimento e uso do Axisor, com soluções práticas e comandos de diagnóstico.
 
 ## Problemas de Autenticação
 
@@ -55,7 +55,7 @@ async function refreshToken() {
 **Diagnóstico:**
 ```bash
 # Verificar logs do backend
-docker logs hub-defisats-backend-prod
+docker logs axisor-backend-prod
 
 # Testar credenciais LN Markets
 curl -X POST https://api.defisats.site/api/auth/test-sandbox \
@@ -83,10 +83,10 @@ curl -X POST https://api.defisats.site/api/auth/test-sandbox \
 docker ps | grep postgres
 
 # Testar conexão
-docker exec hub-defisats-postgres-prod psql -U hubdefisats_prod -d hubdefisats_prod -c "SELECT 1;"
+docker exec axisor-postgres-prod psql -U axisor_prod -d axisor_prod -c "SELECT 1;"
 
 # Verificar logs
-docker logs hub-defisats-postgres-prod
+docker logs axisor-postgres-prod
 ```
 
 **Soluções:**
@@ -96,7 +96,7 @@ docker logs hub-defisats-postgres-prod
 
 ```bash
 # Reiniciar PostgreSQL
-docker restart hub-defisats-postgres-prod
+docker restart axisor-postgres-prod
 
 # Verificar variáveis de ambiente
 echo $DATABASE_URL
@@ -149,10 +149,10 @@ npx prisma generate
 docker ps | grep frontend
 
 # Verificar logs do frontend
-docker logs hub-defisats-frontend-prod
+docker logs axisor-frontend-prod
 
 # Verificar logs do nginx
-docker logs hub-defisats-nginx-prod
+docker logs axisor-nginx-prod
 ```
 
 **Soluções:**
@@ -162,7 +162,7 @@ docker logs hub-defisats-nginx-prod
 
 ```bash
 # Reiniciar frontend
-docker restart hub-defisats-frontend-prod
+docker restart axisor-frontend-prod
 
 # Rebuild da imagem
 docker compose -f docker-compose.prod.yml build frontend
@@ -198,7 +198,7 @@ curl -H "Origin: https://defisats.site" \
 export CORS_ORIGIN="https://defisats.site,https://staging.defisats.site"
 
 # Reiniciar backend
-docker restart hub-defisats-backend-prod
+docker restart axisor-backend-prod
 ```
 
 ## Problemas de Workers
@@ -216,11 +216,11 @@ docker restart hub-defisats-backend-prod
 docker ps | grep worker
 
 # Verificar logs dos workers
-docker logs hub-defisats-margin-monitor-prod
-docker logs hub-defisats-automation-executor-prod
+docker logs axisor-margin-monitor-prod
+docker logs axisor-automation-executor-prod
 
 # Verificar Redis
-docker logs hub-defisats-redis-prod
+docker logs axisor-redis-prod
 ```
 
 **Soluções:**
@@ -230,11 +230,11 @@ docker logs hub-defisats-redis-prod
 
 ```bash
 # Reiniciar workers
-docker restart hub-defisats-margin-monitor-prod
-docker restart hub-defisats-automation-executor-prod
+docker restart axisor-margin-monitor-prod
+docker restart axisor-automation-executor-prod
 
 # Verificar Redis
-docker exec hub-defisats-redis-prod redis-cli ping
+docker exec axisor-redis-prod redis-cli ping
 ```
 
 ### 2. Margin Guard Não Monitora
@@ -247,10 +247,10 @@ docker exec hub-defisats-redis-prod redis-cli ping
 **Diagnóstico:**
 ```bash
 # Verificar logs do margin monitor
-docker logs hub-defisats-margin-monitor-prod
+docker logs axisor-margin-monitor-prod
 
 # Verificar filas Redis
-docker exec hub-defisats-redis-prod redis-cli llen margin-check
+docker exec axisor-redis-prod redis-cli llen margin-check
 
 # Testar credenciais LN Markets
 curl -X POST https://api.defisats.site/api/test/margin-guard \
@@ -277,10 +277,10 @@ curl -X POST https://api.defisats.site/api/test/margin-guard \
 docker stats
 
 # Verificar logs de performance
-docker logs hub-defisats-backend-prod | grep -i "slow"
+docker logs axisor-backend-prod | grep -i "slow"
 
 # Verificar índices do banco
-docker exec hub-defisats-postgres-prod psql -U hubdefisats_prod -d hubdefisats_prod -c "\d+"
+docker exec axisor-postgres-prod psql -U axisor_prod -d axisor_prod -c "\d+"
 ```
 
 **Soluções:**
@@ -301,10 +301,10 @@ docker exec hub-defisats-postgres-prod psql -U hubdefisats_prod -d hubdefisats_p
 docker stats --no-stream
 
 # Verificar logs de memória
-docker logs hub-defisats-backend-prod | grep -i "memory"
+docker logs axisor-backend-prod | grep -i "memory"
 
 # Verificar processos
-docker exec hub-defisats-backend-prod ps aux
+docker exec axisor-backend-prod ps aux
 ```
 
 **Soluções:**
@@ -402,7 +402,7 @@ curl -I https://api.defisats.site/ws
 ### Verificação de Banco de Dados
 ```bash
 # Conectar ao banco
-docker exec -it hub-defisats-postgres-prod psql -U hubdefisats_prod -d hubdefisats_prod
+docker exec -it axisor-postgres-prod psql -U axisor_prod -d axisor_prod
 
 # Verificar tabelas
 \dt
@@ -414,30 +414,30 @@ SELECT * FROM pg_stat_activity;
 ## Logs Importantes
 
 ### Localizações dos Logs
-- **Backend**: `docker logs hub-defisats-backend-prod`
-- **Frontend**: `docker logs hub-defisats-frontend-prod`
-- **Nginx**: `docker logs hub-defisats-nginx-prod`
-- **PostgreSQL**: `docker logs hub-defisats-postgres-prod`
-- **Redis**: `docker logs hub-defisats-redis-prod`
+- **Backend**: `docker logs axisor-backend-prod`
+- **Frontend**: `docker logs axisor-frontend-prod`
+- **Nginx**: `docker logs axisor-nginx-prod`
+- **PostgreSQL**: `docker logs axisor-postgres-prod`
+- **Redis**: `docker logs axisor-redis-prod`
 - **Proxy Global**: `~/proxy/logs/`
 
 ### Comandos de Log
 ```bash
 # Logs específicos
-docker logs hub-defisats-backend-prod --tail 100
+docker logs axisor-backend-prod --tail 100
 
 # Logs com timestamp
-docker logs hub-defisats-backend-prod -t
+docker logs axisor-backend-prod -t
 
 # Logs de erro
-docker logs hub-defisats-backend-prod 2>&1 | grep -i error
+docker logs axisor-backend-prod 2>&1 | grep -i error
 ```
 
 ## Contatos de Suporte
 
 - **Email**: support@defisats.site
 - **Documentação**: https://docs.defisats.site
-- **GitHub Issues**: https://github.com/defisats/hub-defisats/issues
+- **GitHub Issues**: https://github.com/defisats/axisor/issues
 
 ---
 

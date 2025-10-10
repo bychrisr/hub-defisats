@@ -655,7 +655,7 @@ const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379', {
 REDIS_URL=redis://localhost:6379
 
 # Database
-DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
+DATABASE_URL="postgresql://user:pass@postgres:5432/axisor"
 ```
 
 ---
@@ -667,37 +667,37 @@ DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
 #### **1. Credenciais não encontradas**
 ```bash
 # Verificar conta ativa
-docker logs hub-defisats-backend | grep "No active account found"
+docker logs axisor-backend | grep "No active account found"
 
 # Verificar credenciais
-docker logs hub-defisats-backend | grep "has no credentials"
+docker logs axisor-backend | grep "has no credentials"
 ```
 
 #### **2. Cache não funciona**
 ```bash
 # Verificar conexão Redis
-docker logs hub-defisats-backend | grep "Redis connection"
+docker logs axisor-backend | grep "Redis connection"
 
 # Verificar cache hit/miss
-docker logs hub-defisats-backend | grep "Credentials found in cache"
+docker logs axisor-backend | grep "Credentials found in cache"
 ```
 
 #### **3. Validação falha**
 ```bash
 # Verificar validação
-docker logs hub-defisats-backend | grep "Credentials validation failed"
+docker logs axisor-backend | grep "Credentials validation failed"
 
 # Verificar erros específicos
-docker logs hub-defisats-backend | grep "errors:"
+docker logs axisor-backend | grep "errors:"
 ```
 
 ### **Comandos de Debug**
 ```bash
 # Verificar cache Redis
-docker exec -it hub-defisats-backend redis-cli keys "credentials-*"
+docker exec -it axisor-backend redis-cli keys "credentials-*"
 
 # Monitorar logs em tempo real
-docker logs -f hub-defisats-backend | grep -E "(ACCOUNT CREDENTIALS|Credentials)"
+docker logs -f axisor-backend | grep -E "(ACCOUNT CREDENTIALS|Credentials)"
 
 # Verificar estatísticas
 curl -X GET "http://localhost:13010/api/account-credentials/stats"

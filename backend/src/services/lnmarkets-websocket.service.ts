@@ -87,7 +87,7 @@ export class LNMarketsWebSocketService extends EventEmitter {
       // Usar CoinGecko para preços reais do Bitcoin com rate limiting
       const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true', {
         headers: {
-          'User-Agent': 'defiSATS/1.0',
+          'User-Agent': 'Axisor/1.0',
           'Accept': 'application/json'
         }
       });

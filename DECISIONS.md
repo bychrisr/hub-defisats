@@ -1,6 +1,6 @@
 # Decisões Técnicas (Architecture Decision Records)
 
-Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Hub DeFiSats.
+Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Axisor.
 
 ## ADR-011: CORREÇÃO DEFINITIVA - DUPLA CONVERSÃO TIMESTAMPS
 
@@ -182,7 +182,7 @@ Este documento registra as decisões técnicas importantes tomadas durante o des
    - `/version` → `http://backend:3010` (versão)
 
 2. **Rede Docker Funcionando**:
-   - Containers na mesma rede `hub-defisats-network`
+   - Containers na mesma rede `axisor-network`
    - Comunicação via nome do serviço (não localhost)
    - Porta interna 3010 (não porta externa 13010)
 

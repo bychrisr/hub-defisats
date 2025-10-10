@@ -106,7 +106,7 @@ export default function RateLimiting() {
         console.log('🔐 No token found, attempting login...');
         try {
           const loginResponse = await api.post('/auth/login', {
-            email: 'admin@hub-defisats.com',
+            email: 'admin@axisor.com',
             password: process.env.VITE_ADMIN_PASSWORD || 'Admin123!@#'
           });
           

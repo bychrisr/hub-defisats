@@ -115,7 +115,7 @@ async function updateRealCredentialsInteractive() {
     console.log('🎉 Atualização concluída!');
     console.log('');
     console.log('📝 Próximos passos:');
-    console.log('1. Reinicie o container do backend: docker restart hub-defisats-backend');
+    console.log('1. Reinicie o container do backend: docker restart axisor-backend');
     console.log('2. Teste a integração com a LN Markets');
     console.log('3. Verifique se os dados estão sendo exibidos corretamente no frontend');
     

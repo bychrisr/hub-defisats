@@ -269,12 +269,12 @@ O sistema gera alertas para:
 
 1. **Verificar logs do worker:**
 ```bash
-docker logs hub-defisats-backend | grep "MARGIN GUARD"
+docker logs axisor-backend | grep "MARGIN GUARD"
 ```
 
 2. **Verificar status do Redis:**
 ```bash
-docker exec -it hub-defisats-redis redis-cli ping
+docker exec -it axisor-redis redis-cli ping
 ```
 
 3. **Verificar configurações no banco:**
@@ -360,7 +360,7 @@ SELECT * FROM "Automation" WHERE type = 'margin_guard';
 
 ```bash
 # Variáveis de ambiente necessárias
-DATABASE_URL="postgresql://user:pass@postgres:5432/hubdefisats"
+DATABASE_URL="postgresql://user:pass@postgres:5432/axisor"
 REDIS_URL="redis://redis:6379"
 JWT_SECRET="your-secret-key"
 ENCRYPTION_KEY="your-encryption-key"
@@ -370,7 +370,7 @@ ENCRYPTION_KEY="your-encryption-key"
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/your-repo/hub-defisats
+git clone https://github.com/your-repo/axisor
 
 # 2. Configure as variáveis de ambiente
 cp .env.example .env
@@ -379,20 +379,20 @@ cp .env.example .env
 docker compose up -d
 
 # 4. Verifique os logs
-docker logs hub-defisats-backend
+docker logs axisor-backend
 ```
 
 ### Verificação de Saúde
 
 ```bash
 # Verificar se o worker está rodando
-docker logs hub-defisats-backend | grep "Margin Guard monitoring started"
+docker logs axisor-backend | grep "Margin Guard monitoring started"
 
 # Verificar conexão com banco
-docker exec hub-defisats-backend npm run db:status
+docker exec axisor-backend npm run db:status
 
 # Verificar Redis
-docker exec hub-defisats-redis redis-cli ping
+docker exec axisor-redis redis-cli ping
 ```
 
 ---
@@ -446,7 +446,7 @@ docker exec hub-defisats-redis redis-cli ping
 
 ### Contato
 
-- **Email**: suporte@hubdefisats.com
+- **Email**: suporte@axisor.com
 - **Discord**: [Link do servidor]
 - **GitHub Issues**: [Link do repositório]
 

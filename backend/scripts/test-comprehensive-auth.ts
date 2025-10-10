@@ -279,7 +279,7 @@ class ComprehensiveAuthTester {
       'LNM-ACCESS-TIMESTAMP': timestamp,
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'User-Agent': 'Hub-DefiSats/1.0'
+      'User-Agent': 'Axisor/1.0'
     };
     await this.testHeaders('Headers com User-Agent', headers5);
   }

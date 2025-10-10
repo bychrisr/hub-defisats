@@ -216,12 +216,12 @@ async function registerPlugins() {
     openapi: {
       openapi: '3.0.0',
       info: {
-        title: 'Hub-defisats API',
+        title: 'Axisor API',
         description: 'API for LN Markets automation platform',
         version: '0.0.2',
         contact: {
-          name: 'Hub-defisats',
-          email: 'support@hubdefisats.com',
+          name: 'Axisor',
+          email: 'support@axisor.com',
         },
         license: {
           name: 'MIT',
@@ -230,7 +230,7 @@ async function registerPlugins() {
       },
       servers: [
         {
-          url: config.isDevelopment ? 'http://localhost:13010' : 'https://api.hubdefisats.com',
+          url: config.isDevelopment ? 'http://localhost:13010' : 'https://api.axisor.com',
           description: config.isDevelopment ? 'Development server' : 'Production server',
         },
       ],
@@ -1028,7 +1028,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Start the server
-console.log('🚀 Starting hub-defisats backend server...');
+console.log('🚀 Starting axisor backend server...');
 console.log('📋 Environment variables loaded:', {
   NODE_ENV: process.env['NODE_ENV'],
   PORT: process.env['PORT'],

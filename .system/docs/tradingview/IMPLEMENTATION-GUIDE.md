@@ -2,7 +2,7 @@
 
 ## 🎯 **Visão Geral**
 
-Este documento consolida as informações essenciais para implementar o sistema de gráficos TradingView e indicadores técnicos na plataforma Hub DeFiSats.
+Este documento consolida as informações essenciais para implementar o sistema de gráficos TradingView e indicadores técnicos na plataforma Axisor.
 
 **Status**: ✅ **100% Funcional**  
 **Versão**: v1.0.0 (Stable)  
