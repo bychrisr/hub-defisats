@@ -61,7 +61,19 @@ export const usePositionsData = (): PositionsData => {
   // ✅ CORREÇÃO: Calcular currentPrice fora do useMemo para usar no log
   const btcMarketData = marketData?.['BTC'];
   const positions = dashboardData?.data?.lnMarkets?.positions || [];
-  const totalBalance = dashboardData?.data?.lnMarkets?.balance || 0;
+  const balanceData = dashboardData?.data?.lnMarkets?.balance;
+  
+  console.log('🔍 BALANCE DATA STRUCTURE:', {
+    balanceData,
+    balanceType: typeof balanceData,
+    balanceKeys: balanceData ? Object.keys(balanceData) : [],
+    balanceValue: balanceData?.balance || balanceData?.value || balanceData
+  });
+  
+  // ✅ CORREÇÃO: Extrair o valor numérico do balance
+  const totalBalance = typeof balanceData === 'number' ? balanceData : 
+                      balanceData?.balance || balanceData?.value || balanceData?.amount || 0;
+  
   const currentPrice = btcMarketData?.price || (positions && positions.length > 0 ? positions[0].price : 0);
 
   // Calcular PL em tempo real com market data do WebSocket
