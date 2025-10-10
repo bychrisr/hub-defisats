@@ -37,25 +37,12 @@ export const useActiveAccountData = (): UseActiveAccountDataReturn => {
   const { user } = useAuthStore();
 
   // WebSocket para escutar mudanças de conta
-  const { lastMessage, readyState } = useWebSocket(
-    user?.id ? `/ws?userId=${user.id}` : null
-  );
-
-  // Função para trigger refresh da dashboard
-  const refreshDashboardData = useCallback(() => {
-    console.log('🔄 ACTIVE ACCOUNT DATA - Triggering dashboard refresh');
-    setRefreshTrigger(prev => prev + 1);
-  }, []);
-
-  // Escutar mensagens WebSocket
-  useEffect(() => {
-    if (!lastMessage) return;
-
-    console.log('🔌 ACTIVE ACCOUNT DATA - WebSocket message received:', lastMessage);
-
-    try {
-      const message = typeof lastMessage === 'string' ? JSON.parse(lastMessage) : lastMessage;
-
+  const wsUrl = user?.id ? `ws://localhost:13000/ws?userId=${user.id}` : null;
+  const { lastMessage, readyState } = useWebSocket({
+    url: wsUrl,
+    onMessage: useCallback((message) => {
+      console.log('🔌 ACTIVE ACCOUNT DATA - WebSocket message received:', message);
+      
       if (message.type === 'active_account_changed') {
         console.log('🔄 ACTIVE ACCOUNT DATA - Active account changed:', message);
 
@@ -92,12 +79,23 @@ export const useActiveAccountData = (): UseActiveAccountDataReturn => {
         console.error('❌ ACTIVE ACCOUNT DATA - WebSocket error:', message);
         setError(message.message || 'WebSocket connection error');
       }
+    }, [refreshDashboardData]),
+    onOpen: useCallback(() => {
+      console.log('✅ ACTIVE ACCOUNT DATA - WebSocket connection established');
+      setError(null);
+    }, []),
+    onError: useCallback((error) => {
+      console.error('❌ ACTIVE ACCOUNT DATA - WebSocket connection error:', error);
+      setError('WebSocket connection failed');
+    }, [])
+  });
 
-    } catch (error) {
-      console.error('❌ ACTIVE ACCOUNT DATA - Error parsing WebSocket message:', error);
-      setError('Failed to parse WebSocket message');
-    }
-  }, [lastMessage, refreshDashboardData]);
+  // Função para trigger refresh da dashboard
+  const refreshDashboardData = useCallback(() => {
+    console.log('🔄 ACTIVE ACCOUNT DATA - Triggering dashboard refresh');
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
 
   // Monitorar estado da conexão WebSocket
   useEffect(() => {
