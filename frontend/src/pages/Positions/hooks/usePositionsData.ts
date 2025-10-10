@@ -23,10 +23,23 @@ export const usePositionsData = (): PositionsData => {
       console.log('✅ POSITIONS DATA - Received dashboard data:', {
         success: dashboardData.success,
         positionsCount: dashboardData.data?.lnMarkets?.positions?.length || 0,
-        hasMarketData: !!dashboardData.data?.lnMarkets?.ticker
+        hasMarketData: !!dashboardData.data?.lnMarkets?.ticker,
+        dataStructure: {
+          hasData: !!dashboardData.data,
+          hasLnMarkets: !!dashboardData.data?.lnMarkets,
+          lnMarketsKeys: Object.keys(dashboardData.data?.lnMarkets || {}),
+          positionsSample: dashboardData.data?.lnMarkets?.positions?.[0] || null
+        }
       });
 
-      return dashboardData.data?.lnMarkets?.positions || [];
+      const positions = dashboardData.data?.lnMarkets?.positions || [];
+      console.log('🔍 POSITIONS DATA - Raw positions structure:', {
+        count: positions.length,
+        samplePosition: positions[0] || null,
+        positionKeys: positions[0] ? Object.keys(positions[0]) : []
+      });
+
+      return positions;
     },
     refetchInterval: 15000, // 15s polling
     staleTime: 5000, // Cache 5s
@@ -37,11 +50,13 @@ export const usePositionsData = (): PositionsData => {
 
   // Calcular PL em tempo real com market data do WebSocket
   const positionsWithLivePL = useMemo(() => {
-    if (!positions || !marketData?.ticker?.index) {
+    if (!positions) {
       return [];
     }
 
-    const currentPrice = marketData.ticker.index;
+    // ✅ CORREÇÃO: Usar dados do BTC do marketData ou fallback para preço das posições
+    const btcMarketData = marketData?.['BTC'];
+    const currentPrice = btcMarketData?.price || (positions.length > 0 ? positions[0].price : 0);
     
     return positions.map((pos: any): PositionWithLiveData => {
       const pl = calculatePL(pos, currentPrice);
@@ -94,7 +109,9 @@ export const usePositionsData = (): PositionsData => {
     totalPL,
     totalMargin,
     activeCount,
-    currentPrice: marketData?.ticker?.index
+    currentPrice,
+    hasMarketData: !!btcMarketData,
+    rawPositionsCount: positions?.length || 0
   });
 
   return {
