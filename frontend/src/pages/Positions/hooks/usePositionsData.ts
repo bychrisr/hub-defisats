@@ -196,77 +196,59 @@ function calculatePL(position: any, currentPrice: number): number {
 }
 
 function calculatePLPercentage(position: any, currentPrice: number): number {
+  // ✅ CORREÇÃO: LN Markets calcula PL% como PL / Margin * 100
+  if (position.pl && position.margin && position.margin !== 0) {
+    const plPercentage = (position.pl / position.margin) * 100;
+    
+    console.log('🔍 PL PERCENTAGE CORRECTED:', {
+      positionId: position.id || position.uid,
+      pl: position.pl,
+      margin: position.margin,
+      plPercentage: plPercentage,
+      formula: 'pl / margin * 100'
+    });
+    
+    return plPercentage;
+  }
+  
+  // Fallback para cálculo baseado em preço (se não tiver PL direto da API)
   const entryPrice = position.entryPrice || position.price;
   if (!entryPrice || !currentPrice) return 0;
   
   const priceChange = ((currentPrice - entryPrice) / entryPrice) * 100;
   const multiplier = position.side === 'b' ? 1 : -1; // LONG = +1, SHORT = -1
   
-  // ✅ INVESTIGAR: Como LN Markets calcula PL percentage
-  console.log('🔍 PL PERCENTAGE INVESTIGATION:', {
-    positionId: position.id || position.uid,
-    entryPrice: entryPrice,
-    currentPrice: currentPrice,
-    priceChange: priceChange,
-    side: position.side,
-    pl: position.pl,
-    margin: position.margin,
-    quantity: position.quantity,
-    // ✅ POSSÍVEL FÓRMULA: PL Percentage = PL / Margin * 100
-    possibleFormula1: position.pl && position.margin ? 
-      (position.pl / position.margin) * 100 : 'N/A',
-    // ✅ POSSÍVEL FÓRMULA: PL Percentage = PL / (Quantity * EntryPrice) * 100
-    possibleFormula2: position.pl && position.quantity && entryPrice ? 
-      (position.pl / (position.quantity * entryPrice)) * 100 : 'N/A',
-    // ✅ FÓRMULA ATUAL: Price change percentage
-    currentFormula: priceChange * multiplier
-  });
-  
   return priceChange * multiplier;
 }
 
 function calculateMarginRatio(position: any, totalBalance?: number): number {
-  // ✅ INVESTIGAR: Como LN Markets calcula margin ratio
-  console.log('🔍 MARGIN RATIO INVESTIGATION:', {
-    positionId: position.id || position.uid,
-    margin: position.margin,
-    totalBalance: totalBalance,
-    quantity: position.quantity,
-    price: position.price,
-    entryPrice: position.entryPrice,
-    leverage: position.leverage,
-    // ✅ POSSÍVEL FÓRMULA: Margin Ratio = Margin / (Quantity * Price)
-    possibleFormula1: position.margin && position.quantity && position.price ? 
-      (position.margin / (position.quantity * position.price)) * 100 : 'N/A',
-    // ✅ POSSÍVEL FÓRMULA: Margin Ratio = Margin / (Quantity * EntryPrice)
-    possibleFormula2: position.margin && position.quantity && position.entryPrice ? 
-      (position.margin / (position.quantity * position.entryPrice)) * 100 : 'N/A',
-    // ✅ POSSÍVEL FÓRMULA: Margin Ratio = Margin / (Quantity * Price / Leverage)
-    possibleFormula3: position.margin && position.quantity && position.price && position.leverage ? 
-      (position.margin / ((position.quantity * position.price) / position.leverage)) * 100 : 'N/A'
-  });
-
   if (!position.margin) {
     return 0;
   }
   
+  // ✅ CORREÇÃO: LN Markets calcula Margin Ratio como Margin / (Quantity * Price) * 100
+  // Baseado na investigação, esta é a fórmula que mais se aproxima dos valores da LN Markets
+  if (position.quantity && position.price) {
+    const marginRatio = (position.margin / (position.quantity * position.price)) * 100;
+    
+    console.log('🔍 MARGIN RATIO CORRECTED:', {
+      positionId: position.id || position.uid,
+      margin: position.margin,
+      quantity: position.quantity,
+      price: position.price,
+      marginRatio: marginRatio,
+      formula: 'margin / (quantity * price) * 100'
+    });
+    
+    return marginRatio;
+  }
+  
+  // Fallback para fórmula com balance (se não tiver quantity/price)
   if (!totalBalance || totalBalance === 0) {
-    // ✅ TESTAR FÓRMULAS ALTERNATIVAS quando balance é 0
-    if (position.quantity && position.price) {
-      const alternativeRatio = (position.margin / (position.quantity * position.price)) * 100;
-      console.log('🔍 ALTERNATIVE MARGIN RATIO (no balance):', {
-        positionId: position.id || position.uid,
-        alternativeRatio,
-        formula: 'margin / (quantity * price)'
-      });
-      return alternativeRatio;
-    }
     return 100;
   }
   
-  // ✅ FÓRMULA OFICIAL LN MARKETS: Margin Ratio = Total Margin Used / Total Balance
   const marginRatio = (position.margin / totalBalance) * 100;
-  
   return marginRatio;
 }
 
