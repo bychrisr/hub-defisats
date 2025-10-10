@@ -82,6 +82,15 @@ export const usePositionsData = (): PositionsData => {
     } : null
   });
   
+  // ✅ LOG ADICIONAL PARA VER EXATAMENTE AS 5 CHAVES
+  if (balanceData && typeof balanceData === 'object') {
+    console.log('🔍 BALANCE OBJECT DETAILS:');
+    console.log('📊 balanceKeys:', Object.keys(balanceData));
+    Object.keys(balanceData).forEach(key => {
+      console.log(`📊 ${key}:`, balanceData[key], typeof balanceData[key]);
+    });
+  }
+  
   // ✅ CORREÇÃO: Extrair o valor numérico do balance
   const totalBalance = typeof balanceData === 'number' ? balanceData : 
                       balanceData?.balance || balanceData?.value || balanceData?.amount || 0;
