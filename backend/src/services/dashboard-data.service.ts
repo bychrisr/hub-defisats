@@ -37,6 +37,38 @@ export class DashboardDataService {
   }
 
   /**
+   * Detect if account should use testnet mode
+   */
+  private detectTestnetMode(accountName: string, credentials: Record<string, string>): boolean {
+    // 1. Check if account name contains testnet keywords
+    const testnetKeywords = ['testnet', 'test', 'sandbox', 'dev', 'development'];
+    const accountNameLower = accountName.toLowerCase();
+    
+    for (const keyword of testnetKeywords) {
+      if (accountNameLower.includes(keyword)) {
+        console.log(`🔍 DASHBOARD DATA - Testnet detected by account name keyword: ${keyword}`);
+        return true;
+      }
+    }
+
+    // 2. Check if credentials contain testnet flag
+    if (credentials.isTestnet === 'true' || credentials.testnet === 'true') {
+      console.log(`🔍 DASHBOARD DATA - Testnet detected by credentials flag`);
+      return true;
+    }
+
+    // 3. Check if API key starts with testnet pattern (optional)
+    const apiKey = credentials['API Key'] || credentials.api_key;
+    if (apiKey && apiKey.startsWith('test_')) {
+      console.log(`🔍 DASHBOARD DATA - Testnet detected by API key pattern`);
+      return true;
+    }
+
+    // Default to mainnet
+    return false;
+  }
+
+  /**
    * Get dashboard data for user's active account
    */
   async getDashboardDataForActiveAccount(userId: string): Promise<DashboardData> {
@@ -53,13 +85,18 @@ export class DashboardDataService {
 
       console.log(`✅ DASHBOARD DATA - Found active account: ${credentials.accountName} (${credentials.exchangeName})`);
 
-      // 2. Criar instância do LNMarketsAPIv2 com credenciais da conta ativa
+      // 2. Detectar se deve usar testnet baseado no nome da conta
+      const isTestnet = this.detectTestnetMode(credentials.accountName, credentials.credentials);
+      
+      console.log(`🔍 DASHBOARD DATA - Testnet mode detected: ${isTestnet} for account ${credentials.accountName}`);
+
+      // 3. Criar instância do LNMarketsAPIv2 com credenciais da conta ativa
       const lnMarketsService = new LNMarketsAPIv2({
         credentials: {
           apiKey: credentials.credentials['API Key'],
           apiSecret: credentials.credentials['API Secret'],
           passphrase: credentials.credentials['Passphrase'],
-          isTestnet: false
+          isTestnet: isTestnet
         },
         logger: console as any // TODO: Pass proper logger
       });
