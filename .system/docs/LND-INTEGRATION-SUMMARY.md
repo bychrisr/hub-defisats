@@ -190,6 +190,19 @@ npx ts-node backend/scripts/lnd/init-lnd-wallet.ts
 - `config/env/env.development`
 - `config/env/env.production`
 
+## 📚 Documentação Adicional
+
+### Arquivos de Documentação
+- **`LND-INTEGRATION-SUMMARY.md`**: Este arquivo - resumo completo da implementação
+- **`LND-WALLET-INFO.md`**: Informações detalhadas da carteira, senha e mnemonic
+- **CHANGELOG.md**: Histórico completo de mudanças e implementações
+
+### Informações Sensíveis
+⚠️ **IMPORTANTE**: As credenciais da carteira LND testnet estão documentadas em:
+- **Senha**: `axisor-testnet-password-2025`
+- **Mnemonic**: 24 palavras (ver `LND-WALLET-INFO.md`)
+- **Container**: `axisor-lnd-testnet`
+
 ## 🎉 Conclusão
 
 A integração LND foi implementada com sucesso, incluindo:
@@ -199,6 +212,8 @@ A integração LND foi implementada com sucesso, incluindo:
 - ✅ Frontend components para faucet
 - ✅ Scripts de automação e teste
 - ✅ Database schema atualizado
-- ✅ Documentação e configurações
+- ✅ Documentação completa com credenciais
 
 O sistema está pronto para desenvolvimento e testes, com a infraestrutura LND funcionando corretamente e todos os componentes integrados.
+
+**Documentação da Carteira**: Consulte `LND-WALLET-INFO.md` para informações detalhadas sobre senha, mnemonic e comandos de acesso.
