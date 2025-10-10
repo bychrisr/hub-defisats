@@ -7,7 +7,7 @@
 
 import { Logger } from 'winston';
 import { ExchangeApiService, ExchangeCredentials } from './ExchangeApiService.interface';
-import { LNMarketsApiService, LNMarketsCredentials } from './LNMarketsApiService';
+import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 
 export type SupportedExchange = 'lnmarkets' | 'binance' | 'coinbase' | 'kraken';
 
@@ -69,7 +69,7 @@ export class ExchangeServiceFactory {
   /**
    * Create LN Markets service instance
    */
-  private createLNMarketsService(credentials: LNMarketsCredentials, logger: Logger): LNMarketsApiService {
+  private createLNMarketsService(credentials: any, logger: Logger): LNMarketsAPIv2 {
     this.logger.debug('Creating LN Markets service', {
       hasApiKey: !!credentials.apiKey,
       hasApiSecret: !!credentials.apiSecret,
@@ -77,7 +77,10 @@ export class ExchangeServiceFactory {
       isTestnet: credentials.isTestnet || false
     });
 
-    return new LNMarketsApiService(credentials, logger);
+    return new LNMarketsAPIv2({
+      credentials: credentials,
+      logger: logger
+    });
   }
 
   /**

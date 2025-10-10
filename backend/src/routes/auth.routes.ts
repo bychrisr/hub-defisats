@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { AuthController } from '../controllers/auth.controller';
 import { PrismaClient } from '@prisma/client';
-import { testSandboxCredentials } from '../services/lnmarkets.service';
+// import { testSandboxCredentials } from '../services/lnmarkets.service'; // Removed
 // import {
 //   RegisterRequestSchema,
 //   LoginRequestSchema,
@@ -85,7 +85,7 @@ export async function authRoutes(fastify: FastifyInstance) {
           originalConsoleError(...args);
         };
 
-        await testSandboxCredentials();
+        // await testSandboxCredentials(); // Removed - service no longer exists
 
         // Restore console methods
         console.log = originalConsoleLog;
