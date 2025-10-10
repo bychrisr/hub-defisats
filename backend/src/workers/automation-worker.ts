@@ -8,7 +8,7 @@
 
 import { Worker, Queue } from 'bullmq';
 import { Redis } from 'ioredis';
-import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 import { LNMarketsWebSocketService, LNMarketsWebSocketCredentials } from '../services/lnmarkets-websocket.service';
 import { WebSocketManagerService } from '../services/websocket-manager.service';
 import { UserExchangeAccountService } from '../services/userExchangeAccount.service';
@@ -74,7 +74,10 @@ async function getOrCreateLNMarketsWebSocket(userId: string, credentials: any): 
     
     // Fallback to HTTP service
     console.log(`🔄 AUTOMATION WORKER - Falling back to HTTP service for user ${userId}`);
-    const httpService = new LNMarketsAPIService(credentials, console as any);
+    const httpService = new LNMarketsAPIv2({
+      credentials: credentials,
+      logger: console as any
+    });
     return httpService as any; // Type assertion for compatibility
   }
 }

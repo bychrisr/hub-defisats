@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
-import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 import { SecureCredentials } from '../services/secure-storage.service';
 import { prisma } from '../lib/prisma';
 import { CredentialCacheService } from '../services/credential-cache.service';
@@ -462,7 +462,10 @@ const worker = new Worker(
       console.log(`✅ AUTOMATION EXECUTOR - Using credentials for account: ${account.account_name}`);
 
       // Create LN Markets service instance
-      const lnMarkets = new LNMarketsAPIService(credentials, console as any);
+      const lnMarkets = new LNMarketsAPIv2({
+        credentials: credentials,
+        logger: console as any
+      });
 
       // Execute based on automation type
       const accountName = automation.user_exchange_account?.account_name || 'Unknown Account';

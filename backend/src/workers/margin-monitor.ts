@@ -1,6 +1,6 @@
 import { Worker, Queue } from 'bullmq';
 import { Redis } from 'ioredis';
-import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 // Import notification queue
 import { notificationQueue } from '../queues/notification.queue';
 import { PrismaClient } from '@prisma/client';
@@ -35,12 +35,12 @@ const marginCheckQueue = new Queue('margin-check', {
 // Note: Credentials are now fetched from database and decrypted on-demand
 
 // Store LN Markets service instances with connection pooling
-const lnMarketsServices: { [userId: string]: LNMarketsAPIService } = {};
+const lnMarketsServices: { [userId: string]: LNMarketsAPIv2 } = {};
 const serviceCreationTimes: { [userId: string]: number } = {};
 const SERVICE_TTL = 10 * 60 * 1000; // 10 minutes TTL for services
 
 // Function to create or get LN Markets service with connection pooling
-function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarketsAPIService {
+function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarketsAPIv2 {
   const now = Date.now();
   const serviceCreationTime = serviceCreationTimes[userId];
   
@@ -52,7 +52,10 @@ function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarket
   
   // Create new service
   console.log(`🆕 MARGIN GUARD - Creating new LN Markets service for user ${userId}`);
-  const service = new LNMarketsAPIService(credentials, console as any);
+  const service = new LNMarketsAPIv2({
+    credentials: credentials,
+    logger: console as any
+  });
   lnMarketsServices[userId] = service;
   serviceCreationTimes[userId] = now;
   
@@ -829,17 +832,26 @@ export async function simulateMarginMonitoring(
     }
 
     // Create LN Markets service
-    const lnMarkets = new LNMarketsAPIService(credentials, console as any);
+    const lnMarkets = new LNMarketsAPIv2({
+      credentials: credentials,
+      logger: console as any
+    });
 
-    // Simulate margin monitoring
-    const marginInfo = await lnMarkets.getMarginInfo();
-    const positions = await lnMarkets.getPositions();
+    // Get margin info and positions
+    const user = await lnMarkets.user.getUser();
+    const positions = await lnMarkets.futures.getRunningPositions();
 
     console.log(
-      `📊 Simulated margin check for ${userId}: ${marginInfo.marginLevel?.toFixed(2)}%`
+      `📊 Simulated margin check for ${userId}: Balance ${user.balance} sats, ${positions.length} positions`
     );
 
-    const risk = lnMarkets.calculateLiquidationRisk(marginInfo, positions);
+    // Calculate risk based on user balance and positions
+    const totalPL = positions.reduce((sum, pos) => sum + (pos.pl || 0), 0);
+    const totalMargin = positions.reduce((sum, pos) => sum + (pos.margin || 0), 0);
+    const risk = {
+      atRisk: totalMargin > user.balance * 0.8, // 80% of balance
+      message: `High margin usage: ${totalMargin} sats of ${user.balance} balance`
+    };
 
     if (risk.atRisk) {
       console.log(`⚠️  ${risk.message}`);
