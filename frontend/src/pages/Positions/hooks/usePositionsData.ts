@@ -68,10 +68,13 @@ export const usePositionsData = (): PositionsData => {
         positionId: pos.id || pos.uid,
         originalPL: pos.pl,
         calculatedPL: pl,
+        plPercentage: plPercentage,
         currentPrice,
         entryPrice: pos.entryPrice || pos.price,
         quantity: pos.quantity,
-        side: pos.side
+        side: pos.side,
+        priceChange: currentPrice - (pos.entryPrice || pos.price),
+        priceChangePercent: ((currentPrice - (pos.entryPrice || pos.price)) / (pos.entryPrice || pos.price)) * 100
       });
 
       return {
@@ -152,10 +155,11 @@ function calculatePL(position: any, currentPrice: number): number {
 }
 
 function calculatePLPercentage(position: any, currentPrice: number): number {
-  if (!position.entryPrice) return 0;
+  const entryPrice = position.entryPrice || position.price;
+  if (!entryPrice || !currentPrice) return 0;
   
-  const priceChange = ((currentPrice - position.entryPrice) / position.entryPrice) * 100;
-  const multiplier = position.side === 'b' ? 1 : -1;
+  const priceChange = ((currentPrice - entryPrice) / entryPrice) * 100;
+  const multiplier = position.side === 'b' ? 1 : -1; // LONG = +1, SHORT = -1
   
   return priceChange * multiplier;
 }

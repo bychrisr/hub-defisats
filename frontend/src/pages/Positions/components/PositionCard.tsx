@@ -75,7 +75,7 @@ export const PositionCard: React.FC<PositionCardProps> = ({
             
             <div className="text-right">
               <div className={cn(
-                'text-2xl font-mono font-bold flex items-center justify-end gap-1',
+                'text-2xl font-mono font-bold flex items-center justify-end gap-2',
                 isProfit ? 'text-[#0ECB81]' : 'text-[#F6465D]'
               )}>
                 {formatSats(position.currentPL)}
@@ -83,12 +83,17 @@ export const PositionCard: React.FC<PositionCardProps> = ({
                   size={20} 
                   variant={isProfit ? 'positive' : 'negative'}
                 />
-              </div>
-              <div className={cn(
-                'text-sm',
-                isProfit ? 'text-[#0ECB81]' : 'text-[#F6465D]'
-              )}>
-                {formatPercentage(position.plPercentage)}
+                <Badge 
+                  variant="outline"
+                  className={cn(
+                    'text-xs font-medium px-2 py-1',
+                    isProfit 
+                      ? 'bg-green-600/20 border-green-600/50 text-green-400' 
+                      : 'bg-red-600/20 border-red-600/50 text-red-400'
+                  )}
+                >
+                  {formatPercentage(position.plPercentage)}
+                </Badge>
               </div>
             </div>
           </div>
