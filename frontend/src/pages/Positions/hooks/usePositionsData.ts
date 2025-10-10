@@ -63,37 +63,13 @@ export const usePositionsData = (): PositionsData => {
   const positions = dashboardData?.data?.lnMarkets?.positions || [];
   const balanceData = dashboardData?.data?.lnMarkets?.balance;
   
-  console.log('🔍 BALANCE DATA STRUCTURE:', {
-    balanceData,
-    balanceType: typeof balanceData,
-    balanceKeys: balanceData ? Object.keys(balanceData) : [],
-    balanceValue: balanceData?.balance || balanceData?.value || balanceData,
-    // ✅ EXPANDIR TODAS AS CHAVES PARA VER O VALOR CORRETO
-    allBalanceValues: balanceData ? {
-      balance: balanceData.balance,
-      value: balanceData.value,
-      amount: balanceData.amount,
-      total: balanceData.total,
-      available: balanceData.available,
-      used: balanceData.used,
-      free: balanceData.free,
-      locked: balanceData.locked,
-      wallet: balanceData.wallet
-    } : null
+  // ✅ SOLUÇÃO SIMPLES: Usar o balance real da API (pode ser 0 se usado como margem)
+  const totalBalance = balanceData?.balance || 0;
+  
+  console.log('🔍 BALANCE SIMPLE:', {
+    balance: totalBalance,
+    note: totalBalance === 0 ? 'Balance is 0 (used as margin)' : 'Using actual balance'
   });
-  
-  // ✅ LOG ADICIONAL PARA VER EXATAMENTE AS 5 CHAVES
-  if (balanceData && typeof balanceData === 'object') {
-    console.log('🔍 BALANCE OBJECT DETAILS:');
-    console.log('📊 balanceKeys:', Object.keys(balanceData));
-    Object.keys(balanceData).forEach(key => {
-      console.log(`📊 ${key}:`, balanceData[key], typeof balanceData[key]);
-    });
-  }
-  
-  // ✅ CORREÇÃO: Extrair o valor numérico do balance
-  const totalBalance = typeof balanceData === 'number' ? balanceData : 
-                      balanceData?.balance || balanceData?.value || balanceData?.amount || 0;
   
   const currentPrice = btcMarketData?.price || (positions && positions.length > 0 ? positions[0].price : 0);
 
@@ -230,35 +206,18 @@ function calculatePLPercentage(position: any, currentPrice: number): number {
 }
 
 function calculateMarginRatio(position: any, totalBalance?: number): number {
-  console.log('🔍 MARGIN RATIO DEBUG (LN Markets Official Formula):', {
-    positionId: position.id || position.uid,
-    margin: position.margin,
-    totalBalance: totalBalance,
-    hasMargin: !!position.margin,
-    hasTotalBalance: !!totalBalance,
-    formula: 'marginRatio = totalMarginUsed / totalBalance'
-  });
-
-  if (!position.margin || !totalBalance || totalBalance === 0) {
-    console.log('❌ MARGIN RATIO - Missing required fields:', {
-      margin: position.margin,
-      totalBalance: totalBalance,
-      note: 'Using LN Markets official formula: marginRatio = totalMarginUsed / totalBalance'
-    });
+  // ✅ SOLUÇÃO SIMPLES: Se balance é 0 (usado como margem), mostrar 100%
+  if (!position.margin) {
     return 0;
+  }
+  
+  if (!totalBalance || totalBalance === 0) {
+    // Se não há balance disponível (foi usado como margem), mostrar 100%
+    return 100;
   }
   
   // ✅ FÓRMULA OFICIAL LN MARKETS: Margin Ratio = Total Margin Used / Total Balance
   const marginRatio = (position.margin / totalBalance) * 100;
-  
-  console.log('📊 MARGIN RATIO CALCULATION (Official LN Markets):', {
-    positionId: position.id || position.uid,
-    margin: position.margin,
-    totalBalance: totalBalance,
-    marginRatio,
-    formula: `(${position.margin} / ${totalBalance}) * 100 = ${marginRatio.toFixed(2)}%`,
-    note: 'Official LN Markets formula: marginRatio = totalMarginUsed / totalBalance'
-  });
   
   return marginRatio;
 }
