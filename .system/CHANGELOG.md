@@ -80,6 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Data Structure Access**: Corrigido acesso a `data.lnMarkets.positions` em vez de `data` diretamente
 - **Redis Connection**: Configuração Redis corrigida para conexão lazy com retry
 - **Export Duplication**: Erro de export duplicado no `AccountCredentialsService` corrigido
+- **Dashboard Cards Issue**: Identificado que cards zerados eram devido à falta de contas ativas configuradas, não bugs no código
+- **CRÍTICO - Badge "Nenhuma conta ativa"**: Corrigido hook `useActiveAccountData` que não fazia fetch inicial da conta ativa
+- **CRÍTICO - Parsing de Dados Dashboard**: Corrigido `useOptimizedDashboardMetrics` que acessava campo inexistente `data.lnMarkets.user` → `data.lnMarkets.balance`
 - Problemas de migração do Prisma resolvidos
 - Cache do Prisma Client atualizado
 - Health checks funcionando corretamente
@@ -93,8 +96,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - WebSocket events: `active_account_changed` para mudanças de conta
   
 - **Frontend Hooks**:
-  - `useActiveAccountData`: Escuta mudanças via WebSocket
+  - `useActiveAccountData`: Escuta mudanças via WebSocket + **fetch inicial da conta ativa**
   - `useOptimizedDashboardData`: Integração com sistema multi-account
+  - `useOptimizedDashboardMetrics`: **Corrigido parsing de dados** (`user` → `balance`)
   
 - **UI Components**:
   - Badges visuais mostrando conta ativa
@@ -105,6 +109,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dashboard carrega em < 200ms
   - WebSocket para atualizações em tempo real
   - Cache Redis para credenciais (10min TTL)
+  
+- **Correções Críticas**:
+  - **Fetch Inicial**: `useActiveAccountData` agora busca conta ativa no mount
+  - **Parsing Correto**: Métricas usam `data.lnMarkets.balance` em vez de campo inexistente
+  - **Logs Detalhados**: Debugging aprimorado para rastrear carregamento de dados
 
 ### Migration Guide
 Para migrar de "Hub DeFiSats" para "Axisor":

@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useAuthStore } from '../stores/auth';
+import { api } from '@/lib/api';
 
 // Interface para informações da conta ativa
 export interface ActiveAccountInfo {
@@ -118,6 +119,59 @@ export const useActiveAccountData = (): UseActiveAccountDataReturn => {
       setIsLoading(false);
     }
   }, [readyState]);
+
+  // ========================================================================
+  // FETCH INICIAL DA CONTA ATIVA
+  // ========================================================================
+  
+  useEffect(() => {
+    const fetchInitialAccountInfo = async () => {
+      if (!user?.id) {
+        console.log('🔍 ACTIVE ACCOUNT DATA - No user ID, skipping initial fetch');
+        return;
+      }
+      
+      console.log('🚀 ACTIVE ACCOUNT DATA - Fetching initial account info for user:', user.id);
+      
+      try {
+        const response = await api.get('/api/lnmarkets-robust/dashboard');
+        
+        if (response.data.success && response.data.data) {
+          const { accountId, accountName, exchangeName, status } = response.data.data;
+          
+          if (accountId && accountName && exchangeName) {
+            const initialAccountInfo: ActiveAccountInfo = {
+              accountId,
+              accountName,
+              exchangeName,
+              exchangeId: status?.activeAccount?.exchange || exchangeName,
+              timestamp: Date.now()
+            };
+            
+            setAccountInfo(initialAccountInfo);
+            setError(null);
+            
+            console.log('✅ ACTIVE ACCOUNT DATA - Initial account info loaded:', {
+              accountId,
+              accountName,
+              exchangeName,
+              timestamp: new Date(initialAccountInfo.timestamp).toISOString()
+            });
+          } else {
+            console.log('⚠️ ACTIVE ACCOUNT DATA - No active account found in API response');
+          }
+        } else {
+          console.log('⚠️ ACTIVE ACCOUNT DATA - API response indicates no active account');
+        }
+      } catch (error) {
+        console.error('❌ ACTIVE ACCOUNT DATA - Error fetching initial account info:', error);
+        // Não definir error aqui para não interferir com WebSocket
+        // O WebSocket ainda pode funcionar para mudanças futuras
+      }
+    };
+    
+    fetchInitialAccountInfo();
+  }, [user?.id]);
 
   // Determinar se tem conta ativa
   const hasActiveAccount = accountInfo !== null;

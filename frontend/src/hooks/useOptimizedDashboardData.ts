@@ -82,7 +82,17 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
           marketIndex: dashboardData.data.marketIndex ? 'present' : 'null',
           cacheHit: dashboardData.data.cacheHit,
           duration: `${duration}ms`,
-          fullData: dashboardData.data // 🔍 DEBUG: Log completo dos dados
+          accountInfo: {
+            accountId: dashboardData.data.accountId,
+            accountName: dashboardData.data.accountName,
+            exchangeName: dashboardData.data.exchangeName
+          },
+          lnMarketsData: {
+            hasBalance: !!dashboardData.data.lnMarkets?.balance,
+            hasPositions: !!dashboardData.data.lnMarkets?.positions,
+            balanceValue: dashboardData.data.lnMarkets?.balance?.balance || 0,
+            positionsCount: dashboardData.data.lnMarkets?.positions?.length || 0
+          }
         });
 
 
@@ -337,7 +347,7 @@ export const useOptimizedDashboardMetrics = () => {
 
   // Calcular métricas dos dados unificados (API v2)
   const positions = data.lnMarkets?.positions || [];
-  const user = data.lnMarkets?.user || {};
+  const balance = data.lnMarkets?.balance || {};
   
   // ✅ Dados recebidos com sucesso
   const calculatedTotalPL = positions.reduce((sum, pos) => sum + (pos.pl || 0), 0);
@@ -346,7 +356,7 @@ export const useOptimizedDashboardMetrics = () => {
     hasData: !!data,
     hasLnMarkets: !!data.lnMarkets,
     positionsCount: positions.length,
-    userBalance: user.balance,
+    balance: balance.balance,
     totalPL: calculatedTotalPL,
     timestamp: new Date().toISOString()
   });
@@ -364,8 +374,8 @@ export const useOptimizedDashboardMetrics = () => {
   }, 0);
   const totalMargin = positions.reduce((sum, pos) => sum + (pos.margin || 0), 0);
   const estimatedFees = positions.reduce((sum, pos) => sum + (pos.opening_fee || 0) + (pos.closing_fee || 0), 0);
-  const availableMargin = user.balance || 0; // Saldo da wallet
-  const estimatedBalance = (user.balance || 0) + totalPL; // Saldo + P&L
+  const availableMargin = balance.balance || 0; // Saldo da wallet
+  const estimatedBalance = (balance.balance || 0) + totalPL; // Saldo + P&L
   const totalInvested = totalMargin; // Margem total investida
   const netProfit = totalPL; // P&L líquido
   const feesPaid = estimatedFees; // Taxas pagas
