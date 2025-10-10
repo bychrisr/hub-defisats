@@ -36,6 +36,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Interfaces TypeScript para type safety
   - Tratamento de erros consistente
   - Estrutura de componentes escalável
+
+### Fixed
+- **Authentication Loop Fix (v2.3.1)**: Correção do loop infinito de redirecionamento para login
+  - Resolvido problema de loop infinito quando token está expirado/inválido
+  - Guards não estavam atualizando corretamente o estado do auth store em falhas de validação
+  - SimpleAuthGuard estava limpando tokens mas não atualizando estado isAuthenticated
+  - RobustAuthGuard assumia que existência de token = autenticação sem validação
+  - Adicionada atualização adequada de estado no catch block quando getProfile() falha
+  - Definido isAuthenticated: false quando validação de token falha
+  - Atualizado handler de timeout para verificar token e definir estado apropriado
+  - Removida suposição de que existência de token = autenticação
+  - Adicionada validação adequada de token via chamada getProfile()
+  - Adicionado tratamento de erro para falhas de validação de token
+  - Limpeza adequada de estado quando token é inválido
+  - Expiração de token agora dispara logout adequado em vez de loop infinito
+  - Estado do auth store é corretamente sincronizado com localStorage
+  - Guards agora lidam adequadamente com tokens ausentes e inválidos
+  - Mecanismos de timeout garantem que app não fique preso em estados de loading
+  - Usuários com tokens expirados são redirecionados para login em vez de loop infinito
+  - Gerenciamento limpo de estado de autenticação
+  - Tratamento adequado de erros para falhas de validação de token
+  - Experiência de usuário melhorada com fluxo de autenticação claro
 - **Universal Documentation Standards System (v2.2.0)**: Sistema completo de padrões de documentação
   - `DOCUMENTATION_STANDARDS.md` - Guia completo de padrões universais
   - `create-docs-structure.sh` - Script automatizado para criar estrutura de documentação
