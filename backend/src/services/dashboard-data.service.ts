@@ -8,7 +8,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { AccountCredentialsService, AccountCredentials } from './account-credentials.service';
-import { LNMarketsAPIService } from './lnmarkets-api.service';
+import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 
 // Interface for dashboard data response
 export interface DashboardData {
@@ -53,11 +53,15 @@ export class DashboardDataService {
 
       console.log(`✅ DASHBOARD DATA - Found active account: ${credentials.accountName} (${credentials.exchangeName})`);
 
-      // 2. Criar instância do LNMarketsService com credenciais da conta ativa
-      const lnMarketsService = new LNMarketsAPIService({
-        apiKey: credentials.credentials.api_key,
-        apiSecret: credentials.credentials.api_secret,
-        passphrase: credentials.credentials.passphrase
+      // 2. Criar instância do LNMarketsAPIv2 com credenciais da conta ativa
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
+          apiKey: credentials.credentials['API Key'],
+          apiSecret: credentials.credentials['API Secret'],
+          passphrase: credentials.credentials['Passphrase'],
+          isTestnet: false
+        },
+        logger: console as any // TODO: Pass proper logger
       });
 
       console.log(`🔄 DASHBOARD DATA - Fetching data from LN Markets API for account ${credentials.accountName}`);
@@ -100,57 +104,63 @@ export class DashboardDataService {
   }
 
   /**
-   * Get user positions from LN Markets API
+   * Get user positions from LN Markets API v2
    */
-  private async getUserPositions(lnMarketsService: LNMarketsAPIService): Promise<any[]> {
+  private async getUserPositions(lnMarketsService: LNMarketsAPIv2): Promise<any[]> {
     try {
       console.log(`🔄 DASHBOARD DATA - Fetching user positions`);
       
-      const positions = await lnMarketsService.getUserPositions('running');
+      const positions = await lnMarketsService.futures.getRunningPositions();
       
       console.log(`✅ DASHBOARD DATA - Fetched ${positions?.length || 0} positions`);
       
       return positions || [];
       
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`⚠️ DASHBOARD DATA - Failed to fetch positions:`, error.message);
       return [];
     }
   }
 
   /**
-   * Get user balance from LN Markets API
+   * Get user balance from LN Markets API v2
    */
-  private async getUserBalance(lnMarketsService: LNMarketsAPIService): Promise<any | null> {
+  private async getUserBalance(lnMarketsService: LNMarketsAPIv2): Promise<any | null> {
     try {
       console.log(`🔄 DASHBOARD DATA - Fetching user balance`);
       
-      const balance = await lnMarketsService.getUserBalance();
+      const user = await lnMarketsService.user.getUser();
       
-      console.log(`✅ DASHBOARD DATA - Fetched balance:`, balance ? 'success' : 'empty');
+      console.log(`✅ DASHBOARD DATA - Fetched balance:`, user.balance);
       
-      return balance;
+      return {
+        balance: user.balance,
+        synthetic_usd_balance: user.synthetic_usd_balance,
+        uid: user.uid,
+        username: user.username,
+        role: user.role
+      };
       
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`⚠️ DASHBOARD DATA - Failed to fetch balance:`, error.message);
       return null;
     }
   }
 
   /**
-   * Get ticker data from LN Markets API
+   * Get ticker data from LN Markets API v2
    */
-  private async getTicker(lnMarketsService: LNMarketsAPIService): Promise<any | null> {
+  private async getTicker(lnMarketsService: LNMarketsAPIv2): Promise<any | null> {
     try {
       console.log(`🔄 DASHBOARD DATA - Fetching ticker data`);
       
-      const ticker = await lnMarketsService.getTicker();
+      const ticker = await lnMarketsService.market.getTicker();
       
-      console.log(`✅ DASHBOARD DATA - Fetched ticker:`, ticker ? 'success' : 'empty');
+      console.log(`✅ DASHBOARD DATA - Fetched ticker:`, ticker.lastPrice);
       
       return ticker;
       
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`⚠️ DASHBOARD DATA - Failed to fetch ticker:`, error.message);
       return null;
     }
@@ -173,11 +183,15 @@ export class DashboardDataService {
 
       console.log(`✅ DASHBOARD DATA - Found account: ${credentials.accountName} (${credentials.exchangeName})`);
 
-      // 2. Criar instância do LNMarketsService com credenciais da conta
-      const lnMarketsService = new LNMarketsAPIService({
-        apiKey: credentials.credentials.api_key,
-        apiSecret: credentials.credentials.api_secret,
-        passphrase: credentials.credentials.passphrase
+      // 2. Criar instância do LNMarketsAPIv2 com credenciais da conta
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
+          apiKey: credentials.credentials['API Key'],
+          apiSecret: credentials.credentials['API Secret'],
+          passphrase: credentials.credentials['Passphrase'],
+          isTestnet: false
+        },
+        logger: console as any // TODO: Pass proper logger
       });
 
       console.log(`🔄 DASHBOARD DATA - Fetching data from LN Markets API for account ${credentials.accountName}`);
