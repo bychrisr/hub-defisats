@@ -1,4 +1,4 @@
-import { LNMarketsAPIService, LNMarketsCredentials } from './lnmarkets-api.service';
+import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 import { CircuitBreaker } from './circuit-breaker.service';
 import { RetryService } from './retry.service';
 import { Logger } from 'winston';
@@ -20,7 +20,7 @@ export interface LNMarketsFallbackConfig {
 }
 
 export class LNMarketsFallbackService {
-  private primaryService: LNMarketsAPIService;
+  private primaryService: LNMarketsAPIv2;
   private fallbackProviders: FallbackProvider[];
   private circuitBreaker: CircuitBreaker;
   private retryService: RetryService;
@@ -33,7 +33,10 @@ export class LNMarketsFallbackService {
     logger: Logger,
     config: Partial<LNMarketsFallbackConfig> = {}
   ) {
-    this.primaryService = new LNMarketsAPIService(credentials, logger);
+    this.primaryService = new LNMarketsAPIv2({
+      credentials: credentials,
+      logger: logger
+    });
     this.fallbackProviders = fallbackProviders;
     this.logger = logger;
     

@@ -1,21 +1,28 @@
-import { LNMarketsAPIService, LNMarketsCredentials } from '../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 
 /**
- * Factory function to create LNMarketsAPIService instances
+ * Factory function to create LNMarketsAPIv2 instances
  * This allows for easier testing and dependency injection
  */
-export function createLNMarketsService(credentials: LNMarketsCredentials): LNMarketsAPIService {
-  return new LNMarketsAPIService(credentials, console as any);
+export function createLNMarketsService(credentials: any): LNMarketsAPIv2 {
+  return new LNMarketsAPIv2({
+    credentials: credentials,
+    logger: console as any
+  });
 }
 
 /**
- * Factory function to create LNMarketsAPIService with default test credentials
+ * Factory function to create LNMarketsAPIv2 with default test credentials
  * Used primarily for testing purposes
  */
-export function createTestLNMarketsService(): LNMarketsAPIService {
-  return new LNMarketsAPIService({
-    apiKey: 'test-api-key',
-    apiSecret: 'test-api-secret',
-    passphrase: 'test-passphrase',
-  }, console as any);
+export function createTestLNMarketsService(): LNMarketsAPIv2 {
+  return new LNMarketsAPIv2({
+    credentials: {
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      passphrase: 'test-passphrase',
+      isTestnet: false
+    },
+    logger: console as any
+  });
 }

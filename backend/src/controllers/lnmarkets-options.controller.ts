@@ -28,11 +28,14 @@ export class LNMarketsOptionsController {
       throw new Error('LN Markets credentials not configured');
     }
 
-    return new LNMarketsAPIService({
+    return new LNMarketsAPIv2({
+      credentials: {
       apiKey: user.ln_markets_api_key,
       apiSecret: user.ln_markets_api_secret,
       passphrase: user.ln_markets_passphrase,
-      isTestnet: false // Force mainnet for now
+      isTestnet: false
+      },
+      logger: console as any
     });
   }
 
