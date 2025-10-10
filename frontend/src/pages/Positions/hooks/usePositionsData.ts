@@ -64,6 +64,16 @@ export const usePositionsData = (): PositionsData => {
       const marginRatio = calculateMarginRatio(pos);
       const liquidationRisk = calculateLiquidationRisk(pos, currentPrice);
 
+      console.log('🔍 POSITION PL DEBUG:', {
+        positionId: pos.id || pos.uid,
+        originalPL: pos.pl,
+        calculatedPL: pl,
+        currentPrice,
+        entryPrice: pos.entryPrice || pos.price,
+        quantity: pos.quantity,
+        side: pos.side
+      });
+
       return {
         id: pos.id || pos.uid,
         type: pos.side === 'b' ? 'LONG' : 'SHORT',
@@ -127,6 +137,12 @@ export const usePositionsData = (): PositionsData => {
 
 // Funções auxiliares para cálculos
 function calculatePL(position: any, currentPrice: number): number {
+  // Se a posição já tem um PL calculado (vem da API), usar esse valor
+  if (position.pl !== undefined && position.pl !== null) {
+    return position.pl;
+  }
+  
+  // Caso contrário, calcular baseado nos preços
   if (!position.quantity || !position.entryPrice) return 0;
   
   const priceDiff = currentPrice - position.entryPrice;

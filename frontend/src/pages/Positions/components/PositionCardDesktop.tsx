@@ -77,7 +77,7 @@ export const PositionCardDesktop: React.FC<PositionCardProps> = ({
                 'text-xl font-mono font-bold',
                 isProfit ? 'text-[#0ECB81]' : 'text-[#F6465D]'
               )}>
-                {formatCurrency(position.currentPL)}
+                {formatSats(position.currentPL)}
               </div>
               <div className={cn(
                 'text-sm',
