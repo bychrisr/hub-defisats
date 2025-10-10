@@ -8,7 +8,7 @@ import { FastifyInstance } from 'fastify';
 import { adminAuthMiddleware } from '../../middleware/auth.middleware';
 import { PrismaClient } from '@prisma/client';
 import { AuthService } from '../../services/auth.service';
-import { LNMarketsAPIService } from '../../services/lnmarkets-api.service';
+import { LNMarketsAPIv2 } from '../../services/lnmarkets/LNMarketsAPIv2.service';
 import { logger } from '../../utils/logger';
 
 export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
@@ -79,12 +79,15 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       }
       
       // Create LN Markets service
-      const lnMarketsService = new LNMarketsAPIService({
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
         apiKey,
         apiSecret,
         passphrase,
         isTestnet: false
-      }, logger as any);
+        },
+        logger: logger as any
+      });
       
       // Get real market data
       const marketData = await lnMarketsService.getMarketData();
@@ -186,12 +189,15 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       }
       
       // Create LN Markets service
-      const lnMarketsService = new LNMarketsAPIService({
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
         apiKey,
         apiSecret,
         passphrase,
         isTestnet: false
-      }, logger as any);
+        },
+        logger: logger as any
+      });
       
       // Test connection
       const status = await lnMarketsService.testConnection();
@@ -288,12 +294,15 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       }
       
       // Create LN Markets service
-      const lnMarketsService = new LNMarketsAPIService({
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
         apiKey,
         apiSecret,
         passphrase,
         isTestnet: false
-      }, logger as any);
+        },
+        logger: logger as any
+      });
       
       // Test connection
       const testResult = await lnMarketsService.testConnection();

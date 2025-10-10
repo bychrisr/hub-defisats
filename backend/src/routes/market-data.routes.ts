@@ -243,11 +243,14 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
       const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
 
       // Initialize LN Markets service
-      const lnMarketsService = new LNMarketsAPIService({
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
         apiKey,
         apiSecret,
         passphrase,
-        isTestnet: false,
+        isTestnet: false
+        },
+        logger: console as any
       });
 
       // Get historical data from LN Markets
@@ -373,11 +376,14 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
       const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
 
       // Initialize LN Markets service
-      const lnMarketsService = new LNMarketsAPIService({
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
         apiKey,
         apiSecret,
         passphrase,
-        isTestnet: false,
+        isTestnet: false
+        },
+        logger: console as any
       });
 
       // Get market index data from LN Markets
@@ -531,11 +537,14 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
       }
 
       // Initialize LN Markets service
-      const lnMarketsService = new LNMarketsAPIService({
+      const lnMarketsService = new LNMarketsAPIv2({
+        credentials: {
         apiKey: userProfile.ln_markets_api_key,
         apiSecret: userProfile.ln_markets_api_secret,
         passphrase: userProfile.ln_markets_passphrase,
-        isTestnet: false,
+        isTestnet: false
+        },
+        logger: console as any
       });
 
       // Get current market data
