@@ -202,7 +202,7 @@ export const PositionCard: React.FC<PositionCardProps> = ({
                   <div className="w-2 h-2 bg-[#0ECB81] rounded-full"></div>
                   <span className="text-[#B8BCC8]">Ratio</span>
                   <span className="font-mono text-[#0ECB81]">
-                    {position.marginRatio ? position.marginRatio.toFixed(2) : '0.00'}%
+                    {position.marginRatio ? position.marginRatio.toFixed(3) : '0.000'}%
                   </span>
                 </div>
                 
