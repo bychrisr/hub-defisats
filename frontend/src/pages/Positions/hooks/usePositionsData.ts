@@ -193,30 +193,37 @@ function calculatePLPercentage(position: any, currentPrice: number): number {
 }
 
 function calculateMarginRatio(position: any): number {
+  // ✅ CORREÇÃO: Usar 'price' como fallback para 'entryPrice'
+  const entryPrice = position.entryPrice || position.price;
+  
   console.log('🔍 MARGIN RATIO DEBUG:', {
     positionId: position.id || position.uid,
     margin: position.margin,
     quantity: position.quantity,
     entryPrice: position.entryPrice,
     price: position.price,
+    finalEntryPrice: entryPrice,
     hasMargin: !!position.margin,
     hasQuantity: !!position.quantity,
     hasEntryPrice: !!position.entryPrice,
-    hasPrice: !!position.price
+    hasPrice: !!position.price,
+    hasFinalEntryPrice: !!entryPrice
   });
 
-  if (!position.margin || !position.quantity || !position.entryPrice) {
+  if (!position.margin || !position.quantity || !entryPrice) {
     console.log('❌ MARGIN RATIO - Missing required fields:', {
       margin: position.margin,
       quantity: position.quantity,
-      entryPrice: position.entryPrice
+      entryPrice: position.entryPrice,
+      price: position.price,
+      finalEntryPrice: entryPrice
     });
     return 0;
   }
   
   // Margin Ratio = (Margin / Position Value) * 100
   // Position Value = quantity * entryPrice
-  const positionValue = position.quantity * position.entryPrice;
+  const positionValue = position.quantity * entryPrice;
   const marginRatio = (position.margin / positionValue) * 100;
   
   console.log('📊 MARGIN RATIO CALCULATION:', {
@@ -224,6 +231,8 @@ function calculateMarginRatio(position: any): number {
     margin: position.margin,
     quantity: position.quantity,
     entryPrice: position.entryPrice,
+    price: position.price,
+    finalEntryPrice: entryPrice,
     positionValue,
     marginRatio,
     formula: `(${position.margin} / ${positionValue}) * 100 = ${marginRatio}%`
