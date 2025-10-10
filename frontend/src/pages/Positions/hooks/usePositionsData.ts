@@ -103,6 +103,39 @@ export const usePositionsData = (): PositionsData => {
         allKeys: Object.keys(pos)
       });
 
+      // 🔍 DEBUG DETALHADO - Verificar TODOS os campos disponíveis
+      console.log('🔍 POSITION ALL FIELDS DETECTED:', {
+        positionId: pos.id || pos.uid,
+        // Campos de liquidação
+        liquidation: pos.liquidation,
+        liquidationPrice: pos.liquidationPrice,
+        liquidation_price: pos.liquidation_price,
+        
+        // Campos de taxas
+        tradingFees: pos.tradingFees,
+        trading_fees: pos.trading_fees,
+        fees: pos.fees,
+        openingFee: pos.openingFee,
+        opening_fee: pos.opening_fee,
+        
+        // Campos de funding
+        fundingCost: pos.fundingCost,
+        funding_cost: pos.funding_cost,
+        funding: pos.funding,
+        
+        // Campos de data
+        createdAt: pos.createdAt,
+        created_at: pos.created_at,
+        timestamp: pos.timestamp,
+        date: pos.date,
+        
+        // Todos os campos disponíveis
+        allFields: Object.keys(pos).reduce((acc, key) => {
+          acc[key] = pos[key];
+          return acc;
+        }, {} as any)
+      });
+
       return {
         id: pos.id || pos.uid,
         type: pos.side === 'b' ? 'LONG' : 'SHORT',
