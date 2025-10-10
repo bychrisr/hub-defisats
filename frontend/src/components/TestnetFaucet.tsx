@@ -14,7 +14,7 @@ import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Alert, AlertDescription } from './ui/alert';
-import { SatsIcon } from './ui/SatsIcon';
+import { SatsIcon } from './SatsIcon';
 import { 
   Zap, 
   QrCode, 

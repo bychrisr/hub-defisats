@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../stores/auth';
 
 export interface FaucetInfo {
   maxAmount: number;
