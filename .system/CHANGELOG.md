@@ -131,6 +131,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Positions Loading**: 2 posições carregando com dados completos
 - **Ticker Data**: Market data carregando em tempo real
 - **Error Masking**: Removido retorno de `balance: 0` quando há erro de API
+- **Credentials Cache Issue**: Corrigido problema de cache de credenciais na mudança de contas ativas
+  - Implementada limpeza automática de cache quando conta ativa é alterada
+  - Adicionado `AccountCredentialsService` ao `UserExchangeAccountController`
+  - Cache de credenciais é limpo via `clearUserCredentialsCache()` em `setActiveAccount`
+  - Resolvido problema onde sistema usava credenciais da conta anterior
+  - Sistema agora reconhece corretamente mudanças de conta ativa
 - **Authentication Issues**: Corrigida assinatura HMAC para usar base64 em vez de hexadecimal
 
 ### Tested
