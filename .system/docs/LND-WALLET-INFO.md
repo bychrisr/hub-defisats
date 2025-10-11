@@ -6,7 +6,7 @@
 
 **Container**: `axisor-lnd-testnet`  
 **Network**: Bitcoin Testnet  
-**Senha da Wallet**: `axisor-testnet-password-2025`
+**Senha da Wallet**: `axisor-testnet-2025-secure`
 
 ### Mnemonic da Carteira
 
@@ -14,12 +14,12 @@
 
 ```
 ---------------BEGIN LND CIPHER SEED---------------
- 1. absent   2. direct     3. drum       4. session
- 5. border   6. tuition    7. smooth     8. battle 
- 9. know    10. bean      11. shaft     12. lazy   
-13. grain   14. clump     15. agree     16. tornado
-17. vault   18. motor     19. arrange   20. way    
-21. blood   22. indicate  23. exercise  24. milk   
+ 1. absorb   2. deposit    3. pass       4. bargain
+ 5. patch    6. cereal     7. whip       8. cart 
+ 9. goose   10. provide   11. say       12. order   
+13. divide  14. bracket   15. mixed     16. language
+17. primary 18. deposit   19. health    20. bronze
+21. vessel  22. sign      23. narrow    24. badge 
 ---------------END LND CIPHER SEED-----------------
 ```
 

@@ -5,25 +5,44 @@
  */
 
 import { FastifyInstance } from 'fastify';
+import axios from 'axios';
 
 export async function lndSyncSimpleRoutes(fastify: FastifyInstance) {
   // Get LND sync progress
   fastify.get('/sync-progress', async (request, reply) => {
     try {
+      // Get real LND info via REST API
+      // First get the macaroon from the container
+      const { execSync } = require('child_process');
+      const macaroonCmd = `docker exec axisor-lnd-testnet cat /root/.lnd/data/chain/bitcoin/testnet/admin.macaroon | xxd -p -c 1000`;
+      const macaroonHex = execSync(macaroonCmd, { encoding: 'utf-8' }).trim();
+      
+      // Get LND info via REST API
+      const lndResponse = await axios.get('https://localhost:18080/v1/getinfo', {
+        httpsAgent: new (require('https')).Agent({
+          rejectUnauthorized: false
+        }),
+        headers: {
+          'Grpc-Metadata-macaroon': macaroonHex
+        },
+        timeout: 5000
+      });
+      
+      const lndInfo = lndResponse.data;
+      
       // Get current testnet block height from external API
       const currentBlockHeight = await getCurrentTestnetBlockHeight();
       
-      // For now, return mock data with real current block
       const progress = {
-        currentBlock: 3808000, // From our curl test
+        currentBlock: lndInfo.block_height,
         currentTestnetBlock: currentBlockHeight,
-        percentage: Math.min(100, Math.max(0, (3808000 / currentBlockHeight) * 100)),
-        syncedToChain: false,
-        syncedToGraph: false,
-        numPeers: 0,
-        version: "0.17.0-beta",
-        alias: "Axisor-Testnet-Node",
-        color: "#ff6b35",
+        percentage: Math.min(100, Math.max(0, (lndInfo.block_height / currentBlockHeight) * 100)),
+        syncedToChain: lndInfo.synced_to_chain,
+        syncedToGraph: lndInfo.synced_to_graph,
+        numPeers: lndInfo.num_peers,
+        version: lndInfo.version,
+        alias: lndInfo.alias,
+        color: lndInfo.color,
         timestamp: new Date().toISOString()
       };
 

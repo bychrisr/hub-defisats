@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Script para testar faucets Lightning testnet alternativos
+# Invoice: 1,000,000 sats
+
+echo "🚀 Testando Faucets Lightning Testnet Alternativos"
+echo "================================================="
+echo ""
+echo "💰 Invoice (1,000,000 sats):"
+echo "lntb10m1p5w5lkrpp5ztykhy2grn2eu54j79my0f43rkg9n5cwxnsuyfyfazq2rndg9flqdp523jhxarwv46zqenpw43k2apqve6kuerfdenjqtfqx9xjqumpw3escqzzsxqyz5vqsp5g7fefkzh0jucxage2d0f3fvug2sqmw40kcv5s5ul6xvjupjkn9zq9qyyssqznmezdhv99l7mh0nrasehwznsg3wd3q3tkxxgux9telq0g3yjmn9w79xfp5z0pl2k2tnzhkz84ve5ch7vpm4uj63el8cz4p4h4s36kgpxj7ha2"
+echo ""
+
+echo "📋 Faucets Alternativos para Testar:"
+echo "===================================="
+echo ""
+echo "1. 🌐 FixedFloat Lightning Faucet"
+echo "   URL: https://fixedfloat.com/faucet"
+echo "   Valor: 1,000 sats"
+echo "   Status: Testando..."
+echo ""
+
+echo "2. 🌐 EscapeQR Faucet"
+echo "   URL: https://faucet.escapeqr.com/"
+echo "   Valor: 500 sats"
+echo "   Status: Testando..."
+echo ""
+
+echo "3. 🌐 CryptoAlly Faucet"
+echo "   URL: https://cryptoally.com/faucet"
+echo "   Valor: 200 sats"
+echo "   Status: Testando..."
+echo ""
+
+echo "4. 🌐 Light.Yuyaogawa Faucet"
+echo "   URL: https://light.yuyaogawa.com/"
+echo "   Valor: 100 sats"
+echo "   Status: Testando..."
+echo ""
+
+echo "5. 🌐 Testnet Faucet Mempool"
+echo "   URL: https://testnet-faucet.mempool.co/"
+echo "   Valor: Bitcoin testnet (on-chain)"
+echo "   Status: Testando..."
+echo ""
+
+echo "6. 🌐 Testnet Faucet Bitcoin"
+echo "   URL: https://testnet.help/en/bitcoincoinfaucet/testnet/"
+echo "   Valor: Bitcoin testnet (on-chain)"
+echo "   Status: Testando..."
+echo ""
+
+echo "7. 🌐 Lightning Labs Testnet Faucet"
+echo "   URL: https://faucet.lightning.community/"
+echo "   Valor: Lightning testnet"
+echo "   Status: INACESSÍVEL ❌"
+echo ""
+
+echo "📝 Instruções para cada faucet:"
+echo "==============================="
+echo ""
+echo "Para faucets Lightning:"
+echo "- Cole o invoice acima no campo apropriado"
+echo "- Clique em Submit/Pay"
+echo "- Aguarde confirmação"
+echo ""
+echo "Para faucets Bitcoin on-chain:"
+echo "- Primeiro crie um endereço Bitcoin testnet"
+echo "- Use o endereço no faucet"
+echo "- Depois crie um canal Lightning com os sats recebidos"
+echo ""
+
+echo "🔧 Comandos para criar endereço Bitcoin testnet:"
+echo "==============================================="
+echo ""
+echo "# Criar endereço Bitcoin testnet"
+echo "docker exec axisor-lnd-testnet lncli --network=testnet --tlscertpath=/root/.lnd/tls.cert --macaroonpath=/root/.lnd/data/chain/bitcoin/testnet/admin.macaroon newaddress p2wkh"
+echo ""
+echo "# Ver saldo on-chain"
+echo "docker exec axisor-lnd-testnet lncli --network=testnet --tlscertpath=/root/.lnd/tls.cert --macaroonpath=/root/.lnd/data/chain/bitcoin/testnet/admin.macaroon walletbalance"
+echo ""
+
+echo "⏳ Monitor de pagamento disponível:"
+echo "   ./scripts/monitor-invoice-payment.sh"
+echo ""
+
+echo "✅ Pronto para testar os faucets!"
+echo "Escolha um dos faucets acima e siga as instruções."

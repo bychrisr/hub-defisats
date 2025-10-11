@@ -12,7 +12,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const LND_CONTAINER = 'axisor-lnd-testnet';
-const WALLET_PASSWORD = 'axisor-testnet-password-2025';
+const WALLET_PASSWORD = 'axisor-testnet-2025-secure';
 const MNEMONIC_FILE = '/tmp/lnd-mnemonic.txt';
 
 async function initLNDWallet() {
@@ -34,7 +34,7 @@ async function initLNDWallet() {
     // 2. Verificar se já existe uma wallet
     console.log('📋 Checking if wallet already exists...');
     try {
-      const walletCheck = execSync(`docker exec ${LND_CONTAINER} lncli --network=testnet --tlscertpath=/lnd/tls.cert --macaroonpath=/lnd/data/chain/bitcoin/testnet/admin.macaroon getinfo`, 
+      const walletCheck = execSync(`docker exec ${LND_CONTAINER} lncli --network=testnet --tlscertpath=/root/.lnd/tls.cert --macaroonpath=/root/.lnd/data/chain/bitcoin/testnet/admin.macaroon getinfo`, 
         { encoding: 'utf-8', stdio: 'pipe' });
       
       console.log('⚠️  Wallet already exists and is unlocked');
@@ -51,7 +51,7 @@ async function initLNDWallet() {
     fs.writeFileSync(MNEMONIC_FILE, WALLET_PASSWORD);
     
     try {
-      const createWalletCmd = `docker exec -i ${LND_CONTAINER} lncli --network=testnet --tlscertpath=/lnd/tls.cert create`;
+      const createWalletCmd = `docker exec -i ${LND_CONTAINER} lncli --network=testnet --tlscertpath=/root/.lnd/tls.cert create`;
       const createWalletResult = execSync(createWalletCmd, {
         input: `${WALLET_PASSWORD}\n${WALLET_PASSWORD}\n`,
         encoding: 'utf-8'
@@ -75,7 +75,7 @@ async function initLNDWallet() {
       
       // 5. Verificar status da wallet
       console.log('📋 Verifying wallet status...');
-      const walletStatus = execSync(`docker exec ${LND_CONTAINER} lncli --network=testnet --tlscertpath=/lnd/tls.cert --macaroonpath=/lnd/data/chain/bitcoin/testnet/admin.macaroon getinfo`, 
+      const walletStatus = execSync(`docker exec ${LND_CONTAINER} lncli --network=testnet --tlscertpath=/root/.lnd/tls.cert --macaroonpath=/root/.lnd/data/chain/bitcoin/testnet/admin.macaroon getinfo`, 
         { encoding: 'utf-8' });
       
       console.log('✅ Wallet is ready!');

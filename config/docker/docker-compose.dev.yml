@@ -200,19 +200,6 @@ services:
     image: lightninglabs/lnd:v0.17.0-beta
     container_name: axisor-lnd-testnet
     environment:
-      - BITCOIN_NETWORK=testnet
-      - LND_ALIAS=Axisor-Testnet-Node
-      - LND_COLOR=#FF6B35
-      - LND_EXTERNALIP=
-      - LND_LISTEN=0.0.0.0:9735
-      - LND_RPCLISTEN=0.0.0.0:10009
-      - LND_RESTLISTEN=0.0.0.0:8080
-      - LND_BITCOIN_NODE=neutrino
-      - LND_NEUTRINO_ADDPEER=faucet.lightning.community
-      - LND_NEUTRINO_ADDPEER=btcd-testnet.lightning.computer
-      - LND_ACCEPT_KEYSEND=true
-      - LND_ACCEPT_AMP=true
-      - LND_DEBUGLEVEL=info
       - LND_TLSAUTOREFRESH=1
       - LND_TLSEXTRADOMAIN=lnd-testnet
     ports:
@@ -221,14 +208,23 @@ services:
       - "18080:8080"  # REST
     volumes:
       - lnd_testnet_data:/lnd
-      - ../../config/lnd/lnd-testnet.conf:/lnd/lnd.conf
     networks:
       - axisor-network
     command: >
       lnd 
-      --configfile=/lnd/lnd.conf
-      --tlscertpath=/lnd/tls.cert
-      --tlskeypath=/lnd/tls.key
+      --bitcoin.active
+      --bitcoin.testnet
+      --bitcoin.node=neutrino
+      --neutrino.addpeer=faucet.lightning.community
+      --neutrino.addpeer=btcd-testnet.lightning.computer
+      --alias=Axisor-Testnet-Node
+      --color=#FF6B35
+      --listen=0.0.0.0:9735
+      --rpclisten=0.0.0.0:10009
+      --restlisten=0.0.0.0:8080
+      --accept-keysend
+      --accept-amp
+      --debuglevel=info
     healthcheck:
       test: ["CMD", "lndcli", "--network=testnet", "getinfo"]
       interval: 30s
