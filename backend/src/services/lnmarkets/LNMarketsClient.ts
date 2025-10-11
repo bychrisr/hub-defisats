@@ -160,12 +160,12 @@ export class LNMarketsClient {
     // Prepare query string for signature (only for GET/DELETE)
     let queryString = '';
     if ((method === 'GET' || method === 'DELETE') && config.params) {
-      queryString = new URLSearchParams(config.params).toString();
+      const params = new URLSearchParams(config.params).toString();
+      queryString = params ? `?${params}` : '';
     }
 
-    // Create signature message (include /v2 in path for LN Markets API)
-    const fullPath = path.startsWith('/v2') ? path : `/v2${path}`;
-    const message = timestamp + method + fullPath + queryString + body;
+    // Create signature message (LN Markets API expects path without /v2)
+    const message = timestamp + method + path + queryString + body;
 
     // Generate HMAC SHA256 signature in base64 (REQUIRED by LN Markets API)
     const signature = crypto
