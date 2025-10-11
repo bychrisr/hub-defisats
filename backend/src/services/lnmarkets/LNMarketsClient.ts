@@ -161,11 +161,27 @@ export class LNMarketsClient {
     let queryString = '';
     if ((method === 'GET' || method === 'DELETE') && config.params) {
       const params = new URLSearchParams(config.params).toString();
-      queryString = params ? `?${params}` : '';
+      // TESTNET FIX: Add ? prefix only for testnet to fix signature validation
+      if (this.credentials.isTestnet && params) {
+        queryString = `?${params}`;
+        this.logger.debug('🔧 TESTNET FIX - Query string with ? prefix', { 
+          originalParams: config.params, 
+          urlParams: params, 
+          finalQueryString: queryString 
+        });
+      } else {
+        queryString = params;
+        this.logger.debug('🔧 MAINNET - Query string without ? prefix', { 
+          originalParams: config.params, 
+          urlParams: params, 
+          finalQueryString: queryString 
+        });
+      }
     }
 
-    // Create signature message (LN Markets API expects path without /v2)
-    const message = timestamp + method + path + queryString + body;
+    // Create signature message (include /v2 in path for LN Markets API)
+    const fullPath = path.startsWith('/v2') ? path : `/v2${path}`;
+    const message = timestamp + method + fullPath + queryString + body;
 
     // Generate HMAC SHA256 signature in base64 (REQUIRED by LN Markets API)
     const signature = crypto
