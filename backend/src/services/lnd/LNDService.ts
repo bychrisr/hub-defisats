@@ -84,16 +84,32 @@ export class LNDService implements LNDServiceInterface {
    * Build testnet configuration
    */
   private buildTestnetConfig(baseConfig: Partial<LNDConfig>): LNDConfig {
-    const baseURL = process.env.LND_TESTNET_REST_URL || 'http://lnd-testnet:8080';
-    const macaroonPath = process.env.LND_TESTNET_MACAROON_PATH || '/lnd/data/chain/bitcoin/testnet/admin.macaroon';
-    const tlsCertPath = process.env.LND_TESTNET_TLS_CERT_PATH || '/lnd/tls.cert';
+    const baseURL = process.env.LND_TESTNET_BASE_URL || 'https://localhost:18080';
+    const macaroonPath = process.env.LND_TESTNET_MACAROON_PATH || '/tmp/admin.macaroon';
+    const tlsCertPath = process.env.LND_TESTNET_TLS_CERT_PATH || '/tmp/tls.cert';
+
+    this.logger.info('🔧 Building testnet config:', {
+      baseURL,
+      macaroonPath,
+      tlsCertPath,
+      macaroonExists: fs.existsSync(macaroonPath),
+      tlsCertExists: fs.existsSync(tlsCertPath)
+    });
+
+    const macaroon = this.readMacaroon(macaroonPath);
+    const tlsCert = this.readTLSCert(tlsCertPath);
+
+    this.logger.info('🔧 Credentials loaded:', {
+      macaroonLength: macaroon.length,
+      tlsCertLength: tlsCert.length
+    });
 
     return {
       network: 'testnet',
       baseURL,
       credentials: {
-        macaroon: this.readMacaroon(macaroonPath),
-        tlsCert: this.readTLSCert(tlsCertPath)
+        macaroon,
+        tlsCert
       },
       timeout: 30000,
       retryAttempts: 3,

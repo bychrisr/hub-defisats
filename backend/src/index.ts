@@ -70,6 +70,8 @@ import { passwordResetRoutes } from './routes/password-reset.routes';
 import { registrationRoutes } from './routes/registration.routes';
 import { testnetFaucetRoutes } from './routes/testnet-faucet.routes';
 import { lndRoutes } from './routes/lnd.routes';
+import { lndSyncMonitorRoutes } from './routes/lnd-sync-monitor.routes';
+import { lndSyncSimpleRoutes } from './routes/lnd-sync-simple.routes';
 import { cacheRoutes as adminCacheRoutes } from './routes/admin/cache.routes';
 import { loadBalancerRoutes } from './routes/admin/load-balancer.routes';
 import { monitoringRoutes } from './routes/monitoring.routes';
@@ -104,7 +106,7 @@ import multipart from '@fastify/multipart';
 // Prisma client is now imported as singleton from lib/prisma.ts
 
 // Create Redis connection
-const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
+const redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379');
 
 // Initialize advanced services (will be updated after Prisma connection)
 let advancedHealth: AdvancedHealthService;
@@ -550,6 +552,14 @@ async function registerRoutes() {
   // LND routes
   await fastify.register(lndRoutes, { prefix: '/api/lnd' });
   console.log('✅ LND routes registered');
+
+  // LND Sync Monitor routes
+  await fastify.register(lndSyncMonitorRoutes, { prefix: '/api/lnd-sync' });
+  console.log('✅ LND Sync Monitor routes registered');
+
+  // LND Sync Simple routes (fallback)
+  await fastify.register(lndSyncSimpleRoutes, { prefix: '/api/lnd-sync-simple' });
+  console.log('✅ LND Sync Simple routes registered');
 
   // Tooltip routes moved to the end to avoid hook leakage
 

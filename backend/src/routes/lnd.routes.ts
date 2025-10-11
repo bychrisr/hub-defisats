@@ -16,21 +16,21 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // Get node information
-  fastify.get('/api/lnd/info', {
+  fastify.get('/info', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getInfo(request, reply);
   });
 
   // Get network information
-  fastify.get('/api/lnd/network-info', {
+  fastify.get('/network-info', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getNetworkInfo(request, reply);
   });
 
   // Get node metrics
-  fastify.get('/api/lnd/metrics', {
+  fastify.get('/metrics', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getMetrics(request, reply);
@@ -41,35 +41,35 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // Get total balance (on-chain + channels)
-  fastify.get('/api/lnd/wallet/balance', {
+  fastify.get('/wallet/balance', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getTotalBalance(request, reply);
   });
 
   // Get on-chain balance
-  fastify.get('/api/lnd/wallet/balance/onchain', {
+  fastify.get('/wallet/balance/onchain', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getOnchainBalance(request, reply);
   });
 
   // Get channel balance
-  fastify.get('/api/lnd/wallet/balance/channels', {
+  fastify.get('/wallet/balance/channels', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getChannelBalance(request, reply);
   });
 
   // List UTXOs
-  fastify.get('/api/lnd/wallet/utxos', {
+  fastify.get('/wallet/utxos', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listUTXOs(request, reply);
   });
 
   // Estimate fee
-  fastify.post('/api/lnd/wallet/estimate-fee', {
+  fastify.post('/wallet/estimate-fee', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.estimateFee(request, reply);
@@ -80,49 +80,49 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // Create invoice
-  fastify.post('/api/lnd/invoices', {
+  fastify.post('/invoices', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.createInvoice(request, reply);
   });
 
   // Create HODL invoice
-  fastify.post('/api/lnd/invoices/hold', {
+  fastify.post('/invoices/hold', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.createHoldInvoice(request, reply);
   });
 
   // Get invoice by payment hash
-  fastify.get('/api/lnd/invoices/:paymentHash', {
+  fastify.get('/invoices/:paymentHash', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getInvoice(request, reply);
   });
 
   // List invoices
-  fastify.get('/api/lnd/invoices', {
+  fastify.get('/invoices', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listInvoices(request, reply);
   });
 
   // Settle invoice
-  fastify.post('/api/lnd/invoices/:paymentHash/settle', {
+  fastify.post('/invoices/:paymentHash/settle', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.settleInvoice(request, reply);
   });
 
   // Cancel invoice
-  fastify.post('/api/lnd/invoices/:paymentHash/cancel', {
+  fastify.post('/invoices/:paymentHash/cancel', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.cancelInvoice(request, reply);
   });
 
   // Decode payment request
-  fastify.post('/api/lnd/invoices/decode', {
+  fastify.post('/invoices/decode', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.decodePaymentRequest(request, reply);
@@ -133,42 +133,42 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // Send payment
-  fastify.post('/api/lnd/payments', {
+  fastify.post('/payments', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.sendPayment(request, reply);
   });
 
   // Pay invoice
-  fastify.post('/api/lnd/payments/invoice', {
+  fastify.post('/payments/invoice', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.payInvoice(request, reply);
   });
 
   // Get payment details
-  fastify.get('/api/lnd/payments/:paymentHash', {
+  fastify.get('/payments/:paymentHash', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getPayment(request, reply);
   });
 
   // List payments
-  fastify.get('/api/lnd/payments', {
+  fastify.get('/payments', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listPayments(request, reply);
   });
 
   // Track payment
-  fastify.post('/api/lnd/payments/:paymentHash/track', {
+  fastify.post('/payments/:paymentHash/track', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.trackPayment(request, reply);
   });
 
   // Estimate route fee
-  fastify.post('/api/lnd/payments/estimate-route', {
+  fastify.post('/payments/estimate-route', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.estimateRouteFee(request, reply);
@@ -179,56 +179,56 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // List active channels
-  fastify.get('/api/lnd/channels', {
+  fastify.get('/channels', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listChannels(request, reply);
   });
 
   // List pending channels
-  fastify.get('/api/lnd/channels/pending', {
+  fastify.get('/channels/pending', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listPendingChannels(request, reply);
   });
 
   // List closed channels
-  fastify.get('/api/lnd/channels/closed', {
+  fastify.get('/channels/closed', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listClosedChannels(request, reply);
   });
 
   // Open channel
-  fastify.post('/api/lnd/channels/open', {
+  fastify.post('/channels/open', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.openChannel(request, reply);
   });
 
   // Close channel
-  fastify.post('/api/lnd/channels/:channelPoint/close', {
+  fastify.post('/channels/:channelPoint/close', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.closeChannel(request, reply);
   });
 
   // Update channel policy
-  fastify.post('/api/lnd/channels/:channelPoint/update-policy', {
+  fastify.post('/channels/:channelPoint/update-policy', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.updateChannelPolicy(request, reply);
   });
 
   // Export channel backup
-  fastify.get('/api/lnd/channels/backup', {
+  fastify.get('/channels/backup', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.exportChannelBackup(request, reply);
   });
 
   // Restore channel backup
-  fastify.post('/api/lnd/channels/restore', {
+  fastify.post('/channels/restore', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.restoreChannelBackup(request, reply);
@@ -239,21 +239,21 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // List peers
-  fastify.get('/api/lnd/peers', {
+  fastify.get('/peers', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listPeers(request, reply);
   });
 
   // Connect peer
-  fastify.post('/api/lnd/peers/connect', {
+  fastify.post('/peers/connect', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.connectPeer(request, reply);
   });
 
   // Disconnect peer
-  fastify.post('/api/lnd/peers/:pubkey/disconnect', {
+  fastify.post('/peers/:pubkey/disconnect', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.disconnectPeer(request, reply);
@@ -264,35 +264,35 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // Generate new address
-  fastify.post('/api/lnd/onchain/address', {
+  fastify.post('/onchain/address', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.generateAddress(request, reply);
   });
 
   // Send BTC on-chain
-  fastify.post('/api/lnd/onchain/send', {
+  fastify.post('/onchain/send', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.sendCoins(request, reply);
   });
 
   // Send BTC to multiple addresses
-  fastify.post('/api/lnd/onchain/send-many', {
+  fastify.post('/onchain/send-many', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.sendMany(request, reply);
   });
 
   // List on-chain transactions
-  fastify.get('/api/lnd/onchain/transactions', {
+  fastify.get('/onchain/transactions', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.listTransactions(request, reply);
   });
 
   // Get specific transaction
-  fastify.get('/api/lnd/onchain/transactions/:txid', {
+  fastify.get('/onchain/transactions/:txid', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getTransaction(request, reply);
@@ -303,26 +303,26 @@ export async function lndRoutes(fastify: FastifyInstance) {
   // ============================================================================
 
   // Switch network (admin only)
-  fastify.post('/api/lnd/network/switch', {
+  fastify.post('/network/switch', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.switchNetwork(request, reply);
   });
 
   // Get service status
-  fastify.get('/api/lnd/status', {
+  fastify.get('/status', {
     preHandler: [authMiddleware]
   }, async (request, reply) => {
     return lndController.getStatus(request, reply);
   });
 
   // Health check
-  fastify.get('/api/lnd/health', async (request, reply) => {
+  fastify.get('/health', async (request, reply) => {
     return lndController.healthCheck(request, reply);
   });
 
-  // GET /api/lnd/version - Get LND version
-  fastify.get('/api/lnd/version', {
+  // GET /version - Get LND version
+  fastify.get('/version', {
     schema: {
       description: 'Get LND version information',
       tags: ['LND'],
@@ -345,16 +345,7 @@ export async function lndRoutes(fastify: FastifyInstance) {
     }
   }, async (request, reply) => {
     try {
-      const info = await lndService.info!.getInfo();
-      
-      return reply.status(200).send({
-        success: true,
-        data: {
-          version: info.version || 'unknown',
-          commit_hash: info.commit_hash || 'unknown',
-          build_tags: info.build_tags || []
-        }
-      });
+      return lndController.getVersion(request, reply);
     } catch (error: any) {
       console.error('❌ Failed to get LND version:', error);
       return reply.status(500).send({

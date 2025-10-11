@@ -819,6 +819,30 @@ export class LNDController {
   }
 
   /**
+   * GET /api/lnd/version - Get LND version information
+   */
+  async getVersion(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const info = await this.lndService.info!.getInfo();
+      
+      return reply.status(200).send({
+        success: true,
+        data: {
+          version: info.version || 'unknown',
+          commit_hash: info.commit_hash || 'unknown',
+          build_tags: info.build_tags || []
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Failed to get LND version:', error);
+      return reply.status(500).send({
+        success: false,
+        error: error.message || 'Failed to get LND version'
+      });
+    }
+  }
+
+  /**
    * GET /api/lnd/health - Health check
    */
   async healthCheck(request: FastifyRequest, reply: FastifyReply) {
