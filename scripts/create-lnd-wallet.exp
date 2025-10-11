@@ -1,0 +1,21 @@
+#!/usr/bin/expect
+set timeout 60
+set password [lindex $env(LND_PASSWORD)]
+set tls_cert_path [lindex $env(LND_TLS_CERT_PATH)]
+set network [lindex $env(LND_NETWORK)]
+
+spawn lncli --network=$network --tlscertpath=$tls_cert_path create
+
+expect "Input wallet password:"
+send "$password\r"
+
+expect "Confirm password:"
+send "$password\r"
+
+expect "Enter 'y' to use an existing cipher seed mnemonic, 'x' to use an extended master root key or 'n' to create a new seed (Enter y/x/n):"
+send "n\r"
+
+expect "Input your passphrase if you wish to encrypt it (or press enter to proceed without a cipher seed passphrase):"
+send "\r"
+
+expect eof
