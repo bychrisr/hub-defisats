@@ -161,25 +161,17 @@ export class LNMarketsClient {
     let queryString = '';
     if ((method === 'GET' || method === 'DELETE') && config.params) {
       const params = new URLSearchParams(config.params).toString();
-      // TESTNET FIX: Add ? prefix only for testnet to fix signature validation
-      if (this.credentials.isTestnet && params) {
-        queryString = `?${params}`;
-        this.logger.debug('🔧 TESTNET FIX - Query string with ? prefix', { 
-          originalParams: config.params, 
-          urlParams: params, 
-          finalQueryString: queryString 
-        });
-      } else {
-        queryString = params;
-        this.logger.debug('🔧 MAINNET - Query string without ? prefix', { 
-          originalParams: config.params, 
-          urlParams: params, 
-          finalQueryString: queryString 
-        });
-      }
+      // Both mainnet and testnet use query string without ? prefix in signature
+      queryString = params;
+      this.logger.debug('🔧 Query string for signature', { 
+        originalParams: config.params, 
+        urlParams: params, 
+        finalQueryString: queryString,
+        isTestnet: this.credentials.isTestnet
+      });
     }
 
-    // Create signature message (include /v2 in path for LN Markets API)
+    // Create signature message (both mainnet and testnet need /v2 in path)
     const fullPath = path.startsWith('/v2') ? path : `/v2${path}`;
     const message = timestamp + method + fullPath + queryString + body;
 

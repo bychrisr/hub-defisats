@@ -79,6 +79,8 @@ export class DashboardDataService {
       const isTestnet = this.detectTestnetMode(credentials.accountName, credentials.credentials);
       
       console.log(`🔍 DASHBOARD DATA - Testnet mode detected: ${isTestnet} for account ${credentials.accountName}`);
+      console.log(`🔍 DASHBOARD DATA - Credentials keys:`, Object.keys(credentials.credentials));
+      console.log(`🔍 DASHBOARD DATA - isTestnet flag:`, credentials.credentials.isTestnet);
 
       // 3. Log das credenciais para debug
       console.log(`🔍 DASHBOARD DATA - Credentials for ${credentials.accountName}:`, {

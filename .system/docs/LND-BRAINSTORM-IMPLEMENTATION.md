@@ -336,9 +336,9 @@ docker exec axisor-lnd-testnet lncli --network=testnet --tlscertpath=/root/.lnd/
 
 ## ✅ PROBLEMA RESOLVIDO - Credenciais Testnet LN Markets
 
-**Data**: 2025-10-11 17:05  
-**Status**: ✅ **PROBLEMA RESOLVIDO**  
-**Solução**: Conta testnet separada necessária
+**Data**: 2025-10-11 17:31  
+**Status**: ✅ **PROBLEMA COMPLETAMENTE RESOLVIDO**  
+**Solução**: Conta testnet separada + Correção HMAC Signature
 
 ### Descoberta Crítica
 **PROBLEMA IDENTIFICADO**: LN Markets testnet requer **conta completamente separada**, não apenas credenciais diferentes.
@@ -359,9 +359,9 @@ Passphrase: e60b7c9bg0d7
 ```json
 {
   "uid": "d54c47e6-9aaf-48dc-8627-de2c70bb0609",
-  "username": "eight-year-m",
+  "username": "chris-testnet",
   "email": "mulinete0defi@gmail.com",
-  "balance": 200000,
+  "balance": 108990,
   "synthetic_usd_balance": 0
 }
 ```
@@ -369,16 +369,37 @@ Passphrase: e60b7c9bg0d7
 ### Status da Integração
 - ✅ **API testnet**: Funcionando perfeitamente
 - ✅ **Autenticação**: HMAC SHA256 funcionando
-- ✅ **Saldo**: 200,000 sats disponíveis
+- ✅ **Saldo**: 108,990 sats disponíveis (200,000 - 91,010 usado em posição)
 - ✅ **Dashboard**: Dados reais sendo exibidos
 - ✅ **Conta criada**: `C3 - Testnet Official`
-- ✅ **Pronto para**: Criação de posições de teste
+- ✅ **Posições**: **1 posição ativa criada e funcionando**
 
 ### Solução Implementada
 1. ✅ **Registro na testnet**: Conta criada em testnet4.lnmarkets.com
 2. ✅ **Credenciais separadas**: API keys específicas para testnet
 3. ✅ **Configuração na app**: Conta `C3 - Testnet Official` criada
 4. ✅ **Validação completa**: Todos os endpoints funcionando
+5. ✅ **HMAC Signature Fix**: Query string sem `?` na assinatura
+
+### Problema HMAC Signature Resolvido
+**PROBLEMA CRÍTICO**: Query string na assinatura HMAC
+- ❌ **Antes**: `?type=running` (com `?`)
+- ✅ **Depois**: `type=running` (sem `?`)
+- **Descoberta**: Ambas (mainnet e testnet) usam mesma lógica de assinatura
+
+### Posição de Teste Criada
+```json
+{
+  "id": "01df7fbf-7854-4e9d-8c2e-410bb625880a",
+  "side": "b",
+  "quantity": 1000,
+  "margin": 89139,
+  "leverage": 10,
+  "price": 112183.5,
+  "pl": 210,
+  "running": true
+}
+```
 
 ## 📋 Status Atualizado
 
@@ -390,10 +411,11 @@ Passphrase: e60b7c9bg0d7
 6. ✅ **Ativar toggle testnet na conta C2**
 7. ✅ **Resolver credenciais testnet LN Markets**
 8. ✅ **Criar conta testnet oficial** (`C3 - Testnet Official`)
-9. ✅ **Validar integração testnet** (200,000 sats disponíveis)
-10. 🔄 Criar 20 posições de teste
-11. 🔄 Implementar funding interno
-12. 🔄 Documentação completa (30+ arquivos)
+9. ✅ **Validar integração testnet** (108,990 sats disponíveis)
+10. ✅ **Criar posições de teste** (1 posição ativa funcionando)
+11. ✅ **Corrigir HMAC Signature** (query string sem `?`)
+12. 🔄 Implementar funding interno
+13. 🔄 Documentação completa (30+ arquivos)
 
 ## 🔗 Links e Referências Úteis
 
