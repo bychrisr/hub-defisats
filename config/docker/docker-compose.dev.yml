@@ -52,6 +52,13 @@ services:
       LN_MARKETS_API_BASE_URL: "https://api.lnmarkets.com/v2"
       LN_MARKETS_API_BASE_URL_TESTNET: "https://api.testnet4.lnmarkets.com/v2"
       LN_MARKETS_API_BASE_URL_CURRENT: "https://api.lnmarkets.com/v2"
+      # LND Configuration
+      LND_TESTNET_ENABLED: "true"
+      LND_TESTNET_BASE_URL: "https://localhost:18080"
+      LND_TESTNET_TLS_CERT_PATH: "/lnd/tls.cert"
+      LND_TESTNET_MACAROON_PATH: "/lnd/data/chain/bitcoin/testnet/admin.macaroon"
+      LND_MAINNET_ENABLED: "false"
+      LND_MAINNET_BASE_URL: "https://localhost:18081"
     ports:
       - "13010:3010"
     volumes:
@@ -201,8 +208,8 @@ services:
       - LND_RPCLISTEN=0.0.0.0:10009
       - LND_RESTLISTEN=0.0.0.0:8080
       - LND_BITCOIN_NODE=neutrino
-      - LND_NEUTRINO_CONNECT=testnet1-btcd.zaphq.io
-      - LND_NEUTRINO_CONNECT=testnet2-btcd.zaphq.io
+      - LND_NEUTRINO_ADDPEER=faucet.lightning.community
+      - LND_NEUTRINO_ADDPEER=btcd-testnet.lightning.computer
       - LND_ACCEPT_KEYSEND=true
       - LND_ACCEPT_AMP=true
       - LND_DEBUGLEVEL=info
