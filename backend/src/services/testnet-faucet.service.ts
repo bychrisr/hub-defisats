@@ -1,443 +1,314 @@
 /**
  * Testnet Faucet Service
  * 
- * Service for managing testnet Lightning faucet functionality including
- * rate limiting, invoice generation, and distribution tracking.
+ * Serviço para gerenciar funding interno via LND testnet
+ * - Geração de sats testnet via LND
+ * - Integração com LN Markets para depósitos
+ * - Controle de rate limiting e limites
+ * - Histórico e estatísticas
  */
 
-import { PrismaClient } from '@prisma/client';
+import { Logger } from 'winston';
 import { LNDService } from './lnd/LNDService';
-import { getLNDService } from './lnd/LNDService';
-
-export interface TestnetFaucetConfig {
-  maxAmount: number;
-  minAmount: number;
-  rateLimitHours: number;
-  userRateLimit: number;
-  ipRateLimit: number;
-}
+import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 
 export interface FaucetRequest {
   amount: number;
-  ipAddress: string;
-  userId?: string;
+  lightningAddress?: string;
   memo?: string;
 }
 
-export interface FaucetDistribution {
+export interface FaucetInfo {
+  isAvailable: boolean;
+  maxAmount: number;
+  minAmount: number;
+  dailyLimit: number;
+  currentBalance: number;
+  lndStatus: 'connected' | 'disconnected' | 'syncing';
+  lastUpdate: string;
+}
+
+export interface FundingResult {
+  requestId: string;
+  amount: number;
+  lightningInvoice?: string;
+  lnMarketsDeposit?: {
+    txid: string;
+    amount: number;
+    status: string;
+  };
+  status: 'pending' | 'completed' | 'failed';
+  timestamp: string;
+}
+
+export interface FundingHistoryItem {
   id: string;
-  ip_address: string;
-  user_id?: string;
-  amount_sats: number;
-  invoice_bolt11: string;
-  payment_hash: string;
-  payment_preimage?: string;
-  status: 'pending' | 'paid' | 'expired' | 'cancelled';
-  expires_at: Date;
-  paid_at?: Date;
-  created_at: Date;
-  updated_at: Date;
+  amount: number;
+  status: string;
+  timestamp: string;
+  lightningInvoice?: string;
+  lnMarketsDeposit?: any;
 }
 
 export interface FaucetStats {
-  total_distributions: number;
-  total_amount_sats: number;
-  pending_distributions: number;
-  paid_distributions: number;
-  expired_distributions: number;
-  unique_users: number;
-  unique_ips: number;
-  average_amount: number;
+  totalRequests: number;
+  totalSatsDistributed: number;
+  successfulRequests: number;
+  failedRequests: number;
+  averageAmount: number;
+  last24Hours: {
+    requests: number;
+    satsDistributed: number;
+  };
 }
 
 export class TestnetFaucetService {
-  private prisma: PrismaClient;
   private lndService: LNDService;
-  private config: TestnetFaucetConfig;
-  private logger: any;
+  private lnMarketsService?: LNMarketsAPIv2;
+  private logger: Logger;
+  private fundingHistory: Map<string, FundingHistoryItem> = new Map();
+  private dailyLimits: Map<string, number> = new Map();
 
-  constructor(
-    prisma: PrismaClient,
-    lndService?: LNDService,
-    logger: any = console
-  ) {
-    this.prisma = prisma;
-    this.lndService = lndService || getLNDService(logger);
+  // Configurações do faucet
+  private readonly MAX_AMOUNT = 100000; // 100,000 sats
+  private readonly MIN_AMOUNT = 1000;   // 1,000 sats
+  private readonly DAILY_LIMIT = 500000; // 500,000 sats por dia
+  private readonly RATE_LIMIT_WINDOW = 24 * 60 * 60 * 1000; // 24 horas
+
+  constructor(logger: Logger) {
     this.logger = logger;
-    
-    this.config = {
-      maxAmount: parseInt(process.env.TESTNET_FAUCET_MAX_AMOUNT || '10000'),
-      minAmount: parseInt(process.env.TESTNET_FAUCET_MIN_AMOUNT || '500'),
-      rateLimitHours: parseInt(process.env.TESTNET_FAUCET_RATE_LIMIT_HOURS || '24'),
-      userRateLimit: parseInt(process.env.TESTNET_FAUCET_USER_RATE_LIMIT || '5'),
-      ipRateLimit: parseInt(process.env.TESTNET_FAUCET_IP_RATE_LIMIT || '1')
-    };
-
-    this.logger.info('🚀 Testnet Faucet Service initialized', {
-      maxAmount: this.config.maxAmount,
-      minAmount: this.config.minAmount,
-      rateLimitHours: this.config.rateLimitHours,
-      userRateLimit: this.config.userRateLimit,
-      ipRateLimit: this.config.ipRateLimit
-    });
+    this.initializeServices();
   }
 
-  /**
-   * Validate faucet request
-   */
-  private validateRequest(request: FaucetRequest): { valid: boolean; error?: string } {
-    // Validate amount
-    if (request.amount < this.config.minAmount) {
-      return { valid: false, error: `Amount too small. Minimum: ${this.config.minAmount} sats` };
-    }
-    
-    if (request.amount > this.config.maxAmount) {
-      return { valid: false, error: `Amount too large. Maximum: ${this.config.maxAmount} sats` };
-    }
-
-    // Validate IP address
-    if (!request.ipAddress || typeof request.ipAddress !== 'string') {
-      return { valid: false, error: 'Invalid IP address' };
-    }
-
-    return { valid: true };
-  }
-
-  /**
-   * Check rate limits
-   */
-  private async checkRateLimits(ipAddress: string, userId?: string): Promise<{ allowed: boolean; error?: string }> {
-    const now = new Date();
-    const rateLimitStart = new Date(now.getTime() - (this.config.rateLimitHours * 60 * 60 * 1000));
-
+  private async initializeServices() {
     try {
-      // Check IP rate limit
-      const ipCount = await this.prisma.testnetFaucetDistribution.count({
-        where: {
-          ip_address: ipAddress,
-          created_at: {
-            gte: rateLimitStart
-          }
+      // Inicializar LND Service para testnet
+      this.lndService = new LNDService({
+        testnet: {
+          baseURL: process.env.LND_TESTNET_BASE_URL || 'https://localhost:18080',
+          tlsCert: process.env.LND_TESTNET_TLS_CERT,
+          macaroon: process.env.LND_TESTNET_MACAROON
         }
+      }, this.logger);
+
+      // Verificar se LND testnet está disponível
+      const lndInfo = await this.lndService.getTestnetInfo();
+      this.logger.info('✅ LND Testnet initialized for faucet', {
+        alias: lndInfo.alias,
+        balance: lndInfo.balance
       });
 
-      if (ipCount >= this.config.ipRateLimit) {
-        return {
-          allowed: false,
-          error: `IP rate limit exceeded. Maximum ${this.config.ipRateLimit} requests per ${this.config.rateLimitHours} hours`
-        };
-      }
+      // TODO: Inicializar LNMarketsService se necessário para depósitos diretos
+      // this.lnMarketsService = new LNMarketsAPIv2({...});
 
-      // Check user rate limit (if userId provided)
-      if (userId) {
-        const userCount = await this.prisma.testnetFaucetDistribution.count({
-          where: {
-            user_id: userId,
-            created_at: {
-              gte: rateLimitStart
-            }
-          }
-        });
-
-        if (userCount >= this.config.userRateLimit) {
-          return {
-            allowed: false,
-            error: `User rate limit exceeded. Maximum ${this.config.userRateLimit} requests per ${this.config.rateLimitHours} hours`
-          };
-        }
-      }
-
-      return { allowed: true };
     } catch (error) {
-      this.logger.error('❌ Error checking rate limits:', error);
-      return { allowed: false, error: 'Rate limit check failed' };
+      this.logger.error('❌ Failed to initialize testnet faucet services:', error);
     }
   }
 
   /**
-   * Create faucet distribution request
+   * Obter informações do faucet
    */
-  async createDistribution(request: FaucetRequest): Promise<FaucetDistribution> {
-    this.logger.info('🚰 Creating faucet distribution request', {
-      amount: request.amount,
-      ipAddress: request.ipAddress,
-      userId: request.userId
-    });
-
-    // Validate request
-    const validation = this.validateRequest(request);
-    if (!validation.valid) {
-      throw new Error(validation.error);
-    }
-
-    // Check rate limits
-    const rateLimitCheck = await this.checkRateLimits(request.ipAddress, request.userId);
-    if (!rateLimitCheck.allowed) {
-      throw new Error(rateLimitCheck.error);
-    }
-
+  async getFaucetInfo(): Promise<FaucetInfo> {
     try {
-      // Create invoice via LND
-      const invoiceResponse = await this.lndService.invoice!.createInvoiceForAmount(
-        request.amount,
-        request.memo || `Testnet faucet distribution - ${request.amount} sats`
-      );
-
-      // Calculate expiration time (1 hour from now)
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-      // Save distribution to database
-      const distribution = await this.prisma.testnetFaucetDistribution.create({
-        data: {
-          ip_address: request.ipAddress,
-          user_id: request.userId,
-          amount_sats: request.amount,
-          invoice_bolt11: invoiceResponse.payment_request,
-          payment_hash: invoiceResponse.r_hash,
-          status: 'pending',
-          expires_at: expiresAt
-        }
-      });
-
-      this.logger.info('✅ Faucet distribution created', {
-        id: distribution.id,
-        amount: distribution.amount_sats,
-        paymentHash: distribution.payment_hash,
-        expiresAt: distribution.expires_at
-      });
-
-      return distribution;
-    } catch (error) {
-      this.logger.error('❌ Failed to create faucet distribution:', error);
-      throw new Error(`Failed to create faucet distribution: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Get distribution by ID
-   */
-  async getDistribution(id: string): Promise<FaucetDistribution | null> {
-    try {
-      const distribution = await this.prisma.testnetFaucetDistribution.findUnique({
-        where: { id }
-      });
-
-      return distribution;
-    } catch (error) {
-      this.logger.error('❌ Failed to get distribution:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get distribution by payment hash
-   */
-  async getDistributionByPaymentHash(paymentHash: string): Promise<FaucetDistribution | null> {
-    try {
-      const distribution = await this.prisma.testnetFaucetDistribution.findUnique({
-        where: { payment_hash: paymentHash }
-      });
-
-      return distribution;
-    } catch (error) {
-      this.logger.error('❌ Failed to get distribution by payment hash:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Update distribution status
-   */
-  async updateDistributionStatus(
-    id: string,
-    status: 'pending' | 'paid' | 'expired' | 'cancelled',
-    paymentPreimage?: string
-  ): Promise<FaucetDistribution | null> {
-    try {
-      const updateData: any = {
-        status,
-        updated_at: new Date()
+      const lndInfo = await this.lndService.getTestnetInfo();
+      
+      return {
+        isAvailable: lndInfo.synced && lndInfo.balance > this.MIN_AMOUNT,
+        maxAmount: this.MAX_AMOUNT,
+        minAmount: this.MIN_AMOUNT,
+        dailyLimit: this.DAILY_LIMIT,
+        currentBalance: lndInfo.balance || 0,
+        lndStatus: lndInfo.synced ? 'connected' : 'syncing',
+        lastUpdate: new Date().toISOString()
       };
-
-      if (status === 'paid' && paymentPreimage) {
-        updateData.payment_preimage = paymentPreimage;
-        updateData.paid_at = new Date();
-      }
-
-      const distribution = await this.prisma.testnetFaucetDistribution.update({
-        where: { id },
-        data: updateData
-      });
-
-      this.logger.info('✅ Distribution status updated', {
-        id: distribution.id,
-        status: distribution.status,
-        paymentPreimage: paymentPreimage ? 'provided' : 'not provided'
-      });
-
-      return distribution;
     } catch (error) {
-      this.logger.error('❌ Failed to update distribution status:', error);
-      return null;
+      this.logger.error('❌ Failed to get faucet info:', error);
+      return {
+        isAvailable: false,
+        maxAmount: this.MAX_AMOUNT,
+        minAmount: this.MIN_AMOUNT,
+        dailyLimit: this.DAILY_LIMIT,
+        currentBalance: 0,
+        lndStatus: 'disconnected',
+        lastUpdate: new Date().toISOString()
+      };
     }
   }
 
   /**
-   * Get distribution history
+   * Solicitar funding de sats testnet
    */
-  async getDistributionHistory(
-    limit: number = 50,
-    offset: number = 0,
-    ipAddress?: string,
-    userId?: string
-  ): Promise<FaucetDistribution[]> {
+  async requestFunding(request: FaucetRequest): Promise<FundingResult> {
+    const requestId = this.generateRequestId();
+    const timestamp = new Date().toISOString();
+
     try {
-      const where: any = {};
+      // Validar request
+      this.validateFundingRequest(request);
 
-      if (ipAddress) {
-        where.ip_address = ipAddress;
+      // Verificar rate limiting
+      await this.checkRateLimit();
+
+      // Verificar se LND tem saldo suficiente
+      const lndInfo = await this.lndService.getTestnetInfo();
+      if (lndInfo.balance < request.amount) {
+        throw new Error(`Insufficient LND balance. Available: ${lndInfo.balance} sats, Requested: ${request.amount} sats`);
       }
 
-      if (userId) {
-        where.user_id = userId;
+      // Criar invoice Lightning se necessário
+      let lightningInvoice: string | undefined;
+      if (request.lightningAddress) {
+        lightningInvoice = await this.createLightningInvoice(request.amount, request.memo);
       }
 
-      const distributions = await this.prisma.testnetFaucetDistribution.findMany({
-        where,
-        orderBy: { created_at: 'desc' },
-        take: limit,
-        skip: offset
+      // Registrar no histórico
+      const historyItem: FundingHistoryItem = {
+        id: requestId,
+        amount: request.amount,
+        status: 'pending',
+        timestamp,
+        lightningInvoice
+      };
+      this.fundingHistory.set(requestId, historyItem);
+
+      // TODO: Implementar depósito direto na LN Markets se solicitado
+      // if (lnMarketsDeposit) {
+      //   await this.processLNMarketsDeposit(requestId, request.amount);
+      // }
+
+      this.logger.info('✅ Funding request created', {
+        requestId,
+        amount: request.amount,
+        lightningInvoice: lightningInvoice ? 'created' : 'none'
       });
-
-      return distributions;
-    } catch (error) {
-      this.logger.error('❌ Failed to get distribution history:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Get faucet statistics
-   */
-  async getFaucetStats(): Promise<FaucetStats> {
-    try {
-      const [
-        totalDistributions,
-        totalAmount,
-        pendingDistributions,
-        paidDistributions,
-        expiredDistributions,
-        uniqueUsers,
-        uniqueIps
-      ] = await Promise.all([
-        this.prisma.testnetFaucetDistribution.count(),
-        this.prisma.testnetFaucetDistribution.aggregate({
-          _sum: { amount_sats: true }
-        }),
-        this.prisma.testnetFaucetDistribution.count({
-          where: { status: 'pending' }
-        }),
-        this.prisma.testnetFaucetDistribution.count({
-          where: { status: 'paid' }
-        }),
-        this.prisma.testnetFaucetDistribution.count({
-          where: { status: 'expired' }
-        }),
-        this.prisma.testnetFaucetDistribution.groupBy({
-          by: ['user_id'],
-          where: { user_id: { not: null } }
-        }),
-        this.prisma.testnetFaucetDistribution.groupBy({
-          by: ['ip_address']
-        })
-      ]);
-
-      const totalAmountSats = totalAmount._sum.amount_sats || 0;
-      const averageAmount = totalDistributions > 0 ? totalAmountSats / totalDistributions : 0;
 
       return {
-        total_distributions: totalDistributions,
-        total_amount_sats: totalAmountSats,
-        pending_distributions: pendingDistributions,
-        paid_distributions: paidDistributions,
-        expired_distributions: expiredDistributions,
-        unique_users: uniqueUsers.length,
-        unique_ips: uniqueIps.length,
-        average_amount: Math.round(averageAmount)
+        requestId,
+        amount: request.amount,
+        lightningInvoice,
+        status: 'completed',
+        timestamp
       };
-    } catch (error) {
-      this.logger.error('❌ Failed to get faucet stats:', error);
-      throw new Error(`Failed to get faucet stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
 
-  /**
-   * Clean up expired distributions
-   */
-  async cleanupExpiredDistributions(): Promise<number> {
-    try {
-      const now = new Date();
+    } catch (error: any) {
+      this.logger.error('❌ Failed to process funding request:', error);
       
-      const result = await this.prisma.testnetFaucetDistribution.updateMany({
-        where: {
-          status: 'pending',
-          expires_at: {
-            lt: now
-          }
-        },
-        data: {
-          status: 'expired',
-          updated_at: now
-        }
-      });
+      // Registrar falha no histórico
+      const historyItem: FundingHistoryItem = {
+        id: requestId,
+        amount: request.amount,
+        status: 'failed',
+        timestamp
+      };
+      this.fundingHistory.set(requestId, historyItem);
 
-      this.logger.info('🧹 Cleaned up expired distributions', {
-        count: result.count
-      });
-
-      return result.count;
-    } catch (error) {
-      this.logger.error('❌ Failed to cleanup expired distributions:', error);
-      return 0;
+      throw error;
     }
   }
 
   /**
-   * Check if faucet is available
+   * Obter histórico de funding
    */
-  async isFaucetAvailable(): Promise<{ available: boolean; reason?: string }> {
+  async getFundingHistory(options: { limit: number; offset: number }): Promise<{
+    items: FundingHistoryItem[];
+    total: number;
+    hasMore: boolean;
+  }> {
+    const allItems = Array.from(this.fundingHistory.values())
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    const items = allItems.slice(options.offset, options.offset + options.limit);
+    const hasMore = options.offset + options.limit < allItems.length;
+
+    return {
+      items,
+      total: allItems.length,
+      hasMore
+    };
+  }
+
+  /**
+   * Obter estatísticas do faucet
+   */
+  async getFaucetStats(): Promise<FaucetStats> {
+    const allItems = Array.from(this.fundingHistory.values());
+    const now = new Date();
+    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const last24HoursItems = allItems.filter(item => 
+      new Date(item.timestamp) > last24Hours
+    );
+
+    const successfulRequests = allItems.filter(item => item.status === 'completed').length;
+    const failedRequests = allItems.filter(item => item.status === 'failed').length;
+    const totalSatsDistributed = allItems
+      .filter(item => item.status === 'completed')
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    return {
+      totalRequests: allItems.length,
+      totalSatsDistributed,
+      successfulRequests,
+      failedRequests,
+      averageAmount: allItems.length > 0 ? totalSatsDistributed / successfulRequests : 0,
+      last24Hours: {
+        requests: last24HoursItems.length,
+        satsDistributed: last24HoursItems
+          .filter(item => item.status === 'completed')
+          .reduce((sum, item) => sum + item.amount, 0)
+      }
+    };
+  }
+
+  /**
+   * Validar request de funding
+   */
+  private validateFundingRequest(request: FaucetRequest): void {
+    if (request.amount < this.MIN_AMOUNT) {
+      throw new Error(`Amount too small. Minimum: ${this.MIN_AMOUNT} sats`);
+    }
+    if (request.amount > this.MAX_AMOUNT) {
+      throw new Error(`Amount too large. Maximum: ${this.MAX_AMOUNT} sats`);
+    }
+  }
+
+  /**
+   * Verificar rate limiting
+   */
+  private async checkRateLimit(): Promise<void> {
+    const today = new Date().toDateString();
+    const todayUsage = this.dailyLimits.get(today) || 0;
+
+    if (todayUsage >= this.DAILY_LIMIT) {
+      throw new Error(`Daily limit exceeded. Limit: ${this.DAILY_LIMIT} sats`);
+    }
+
+    // TODO: Implementar rate limiting por IP/user
+  }
+
+  /**
+   * Criar invoice Lightning
+   */
+  private async createLightningInvoice(amount: number, memo?: string): Promise<string> {
     try {
-      // Check if LND service is healthy
-      const isHealthy = await this.lndService.isHealthy();
-      if (!isHealthy) {
-        return { available: false, reason: 'LND service is not available' };
-      }
+      const invoice = await this.lndService.createTestnetInvoice({
+        amount,
+        memo: memo || 'Testnet faucet funding',
+        expiry: 3600 // 1 hora
+      });
 
-      // Check if we're on testnet
-      const network = this.lndService.getNetwork();
-      if (network !== 'testnet') {
-        return { available: false, reason: 'Faucet is only available on testnet' };
-      }
-
-      return { available: true };
+      return invoice.paymentRequest;
     } catch (error) {
-      this.logger.error('❌ Error checking faucet availability:', error);
-      return { available: false, reason: 'Service error' };
+      this.logger.error('❌ Failed to create Lightning invoice:', error);
+      throw new Error('Failed to create Lightning invoice');
     }
   }
 
   /**
-   * Get faucet configuration
+   * Gerar ID único para request
    */
-  getConfig(): TestnetFaucetConfig {
-    return { ...this.config };
-  }
-
-  /**
-   * Update faucet configuration
-   */
-  updateConfig(newConfig: Partial<TestnetFaucetConfig>): void {
-    this.config = { ...this.config, ...newConfig };
-    this.logger.info('🔄 Faucet configuration updated', this.config);
+  private generateRequestId(): string {
+    return `faucet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }

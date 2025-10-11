@@ -1,263 +1,262 @@
 /**
  * Testnet Faucet Hook
  * 
- * Hook for managing testnet faucet operations including requesting
- * testnet sats, checking status, and managing QR codes.
+ * Hook para interagir com o sistema de funding interno via LND testnet
  */
 
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../stores/auth';
+import { useState, useCallback } from 'react';
 
 export interface FaucetInfo {
+  isAvailable: boolean;
   maxAmount: number;
   minAmount: number;
-  rateLimitHours: number;
-  userRateLimit: number;
-  isEnabled: boolean;
-  network: 'testnet' | 'mainnet';
+  dailyLimit: number;
+  currentBalance: number;
+  lndStatus: 'connected' | 'disconnected' | 'syncing';
+  lastUpdate: string;
 }
 
-export interface FaucetRequest {
+export interface FundingRequest {
   amount: number;
-  invoice: string;
+  lightningAddress?: string;
+  memo?: string;
 }
 
-export interface FaucetDistribution {
+export interface FundingResult {
+  requestId: string;
+  amount: number;
+  lightningInvoice?: string;
+  lnMarketsDeposit?: {
+    txid: string;
+    amount: number;
+    status: string;
+  };
+  status: 'pending' | 'completed' | 'failed';
+  timestamp: string;
+}
+
+export interface FundingHistoryItem {
   id: string;
-  ip_address: string;
-  user_id?: string;
-  amount_sats: number;
-  invoice_bolt11: string;
-  payment_hash: string;
-  payment_preimage?: string;
-  status: 'pending' | 'paid' | 'expired' | 'cancelled';
-  expires_at: string;
-  paid_at?: string;
-  created_at: string;
-  updated_at: string;
+  amount: number;
+  status: string;
+  timestamp: string;
+  lightningInvoice?: string;
+  lnMarketsDeposit?: any;
 }
 
 export interface FaucetStats {
-  totalDistributed: number;
-  totalUsers: number;
+  totalRequests: number;
+  totalSatsDistributed: number;
+  successfulRequests: number;
+  failedRequests: number;
   averageAmount: number;
-  successRate: number;
-  last24Hours: number;
+  last24Hours: {
+    requests: number;
+    satsDistributed: number;
+  };
 }
 
-export const useTestnetFaucet = () => {
-  const { user } = useAuthStore();
-  const queryClient = useQueryClient();
-  const [currentInvoice, setCurrentInvoice] = useState<string>('');
-  const [qrCodeData, setQrCodeData] = useState<string>('');
+export function useTestnetFaucet() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [faucetInfo, setFaucetInfo] = useState<FaucetInfo | null>(null);
+  const [fundingHistory, setFundingHistory] = useState<FundingHistoryItem[]>([]);
+  const [stats, setStats] = useState<FaucetStats | null>(null);
 
-  // Get faucet info
-  const { data: faucetInfo, isLoading: infoLoading } = useQuery<FaucetInfo>({
-    queryKey: ['testnet-faucet-info'],
-    queryFn: async () => {
+  /**
+   * Obter informações do faucet
+   */
+  const getFaucetInfo = useCallback(async (): Promise<FaucetInfo> => {
+    setLoading(true);
+    setError(null);
+
+    try {
       const response = await fetch('/api/testnet-faucet/info');
-      if (!response.ok) {
-        throw new Error('Failed to fetch faucet info');
-      }
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+      const result = await response.json();
 
-  // Get faucet stats
-  const { data: faucetStats, isLoading: statsLoading } = useQuery<FaucetStats>({
-    queryKey: ['testnet-faucet-stats'],
-    queryFn: async () => {
-      const response = await fetch('/api/testnet-faucet/stats');
-      if (!response.ok) {
-        throw new Error('Failed to fetch faucet stats');
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to get faucet info');
       }
-      return response.json();
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-  });
 
-  // Get user's faucet history
-  const { data: faucetHistory, isLoading: historyLoading } = useQuery<FaucetDistribution[]>({
-    queryKey: ['testnet-faucet-history', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      
-      const response = await fetch('/api/testnet-faucet/history');
-      if (!response.ok) {
-        throw new Error('Failed to fetch faucet history');
-      }
-      return response.json();
-    },
-    enabled: !!user?.id,
-    staleTime: 1 * 60 * 1000, // 1 minute
-  });
+      setFaucetInfo(result.data);
+      return result.data;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to get faucet info';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  // Request testnet sats
-  const requestSatsMutation = useMutation<FaucetDistribution, Error, { amount: number }>({
-    mutationFn: async ({ amount }) => {
+  /**
+   * Solicitar funding
+   */
+  const requestFunding = useCallback(async (
+    request: FundingRequest
+  ): Promise<FundingResult> => {
+    setLoading(true);
+    setError(null);
+
+    try {
       const response = await fetch('/api/testnet-faucet/request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify(request),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to request testnet sats');
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to request funding');
       }
 
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setCurrentInvoice(data.invoice_bolt11);
-      setQrCodeData(data.invoice_bolt11);
-      
-      // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['testnet-faucet-history'] });
-      queryClient.invalidateQueries({ queryKey: ['testnet-faucet-stats'] });
-    },
-    onError: (error) => {
-      console.error('❌ Failed to request testnet sats:', error);
-    },
-  });
+      // Atualizar histórico local
+      setFundingHistory(prev => [result.data, ...prev]);
 
-  // Check payment status
-  const checkPaymentStatusMutation = useMutation<FaucetDistribution, Error, string>({
-    mutationFn: async (paymentHash) => {
-      const response = await fetch(`/api/testnet-faucet/status/${paymentHash}`);
-      if (!response.ok) {
-        throw new Error('Failed to check payment status');
+      // Atualizar informações do faucet
+      await getFaucetInfo();
+
+      return result.data;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to request funding';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [getFaucetInfo]);
+
+  /**
+   * Obter histórico de funding
+   */
+  const getFundingHistory = useCallback(async (
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<FundingHistoryItem[]> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/testnet-faucet/history?limit=${limit}&offset=${offset}`
+      );
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to get funding history');
       }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      if (data.status === 'paid') {
-        setCurrentInvoice('');
-        setQrCodeData('');
-        
-        // Invalidate related queries
-        queryClient.invalidateQueries({ queryKey: ['testnet-faucet-history'] });
-        queryClient.invalidateQueries({ queryKey: ['testnet-faucet-stats'] });
+
+      setFundingHistory(result.data.items);
+      return result.data.items;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to get funding history';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Obter estatísticas do faucet
+   */
+  const getFaucetStats = useCallback(async (): Promise<FaucetStats> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/testnet-faucet/stats');
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to get faucet stats');
       }
-    },
-  });
 
-  // Auto-refresh payment status
-  useEffect(() => {
-    if (currentInvoice && requestSatsMutation.data) {
-      const interval = setInterval(() => {
-        checkPaymentStatusMutation.mutate(requestSatsMutation.data.payment_hash);
-      }, 5000); // Check every 5 seconds
-
-      return () => clearInterval(interval);
+      setStats(result.data);
+      return result.data;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to get faucet stats';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-  }, [currentInvoice, requestSatsMutation.data]);
+  }, []);
 
-  // Request testnet sats
-  const requestSats = (amount: number) => {
-    if (!faucetInfo?.isEnabled) {
-      throw new Error('Testnet faucet is not enabled');
-    }
-
-    if (amount < faucetInfo.minAmount || amount > faucetInfo.maxAmount) {
-      throw new Error(`Amount must be between ${faucetInfo.minAmount} and ${faucetInfo.maxAmount} sats`);
-    }
-
-    requestSatsMutation.mutate({ amount });
-  };
-
-  // Check if user can request more sats
-  const canRequestMore = () => {
-    if (!faucetInfo || !faucetHistory) return false;
-    
-    const now = new Date();
-    const rateLimitMs = faucetInfo.rateLimitHours * 60 * 60 * 1000;
-    
-    const recentRequests = faucetHistory.filter(request => {
-      const requestTime = new Date(request.created_at);
-      return (now.getTime() - requestTime.getTime()) < rateLimitMs;
+  /**
+   * Solicitar funding com valores padrão
+   */
+  const requestDefaultFunding = useCallback(async (amount?: number) => {
+    return requestFunding({
+      amount: amount || 10000, // 10,000 sats por padrão
+      memo: 'Testnet faucet funding'
     });
+  }, [requestFunding]);
 
-    return recentRequests.length < faucetInfo.userRateLimit;
-  };
+  /**
+   * Solicitar funding máximo
+   */
+  const requestMaxFunding = useCallback(async () => {
+    if (!faucetInfo) {
+      await getFaucetInfo();
+    }
 
-  // Get time until next request is allowed
-  const getTimeUntilNextRequest = () => {
-    if (!faucetInfo || !faucetHistory || canRequestMore()) return null;
+    const maxAmount = faucetInfo?.maxAmount || 100000;
+    return requestFunding({
+      amount: maxAmount,
+      memo: 'Maximum testnet funding'
+    });
+  }, [faucetInfo, getFaucetInfo, requestFunding]);
 
-    const now = new Date();
-    const rateLimitMs = faucetInfo.rateLimitHours * 60 * 60 * 1000;
-    
-    const oldestRequest = faucetHistory
-      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-      .find(request => {
-        const requestTime = new Date(request.created_at);
-        return (now.getTime() - requestTime.getTime()) < rateLimitMs;
-      });
+  /**
+   * Limpar erro
+   */
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
-    if (!oldestRequest) return null;
-
-    const oldestRequestTime = new Date(oldestRequest.created_at);
-    const nextAllowedTime = new Date(oldestRequestTime.getTime() + rateLimitMs);
-    
-    return nextAllowedTime;
-  };
-
-  // Get user's total received sats
-  const getTotalReceived = () => {
-    if (!faucetHistory) return 0;
-    
-    return faucetHistory
-      .filter(request => request.status === 'paid')
-      .reduce((total, request) => total + request.amount_sats, 0);
-  };
-
-  // Get user's pending requests
-  const getPendingRequests = () => {
-    if (!faucetHistory) return [];
-    
-    return faucetHistory.filter(request => request.status === 'pending');
-  };
-
-  // Get user's successful requests
-  const getSuccessfulRequests = () => {
-    if (!faucetHistory) return [];
-    
-    return faucetHistory.filter(request => request.status === 'paid');
-  };
+  /**
+   * Refresh de todos os dados
+   */
+  const refresh = useCallback(async () => {
+    try {
+      await Promise.all([
+        getFaucetInfo(),
+        getFundingHistory(),
+        getFaucetStats()
+      ]);
+    } catch (err) {
+      console.error('Failed to refresh faucet data:', err);
+    }
+  }, [getFaucetInfo, getFundingHistory, getFaucetStats]);
 
   return {
-    // Data
+    // Estado
+    loading,
+    error,
     faucetInfo,
-    faucetStats,
-    faucetHistory,
-    currentInvoice,
-    qrCodeData,
-    
-    // Loading states
-    infoLoading,
-    statsLoading,
-    historyLoading,
-    isRequesting: requestSatsMutation.isPending,
-    isCheckingStatus: checkPaymentStatusMutation.isPending,
-    
-    // Actions
-    requestSats,
-    checkPaymentStatus: checkPaymentStatusMutation.mutate,
-    
-    // Computed values
-    canRequestMore: canRequestMore(),
-    timeUntilNextRequest: getTimeUntilNextRequest(),
-    totalReceived: getTotalReceived(),
-    pendingRequests: getPendingRequests(),
-    successfulRequests: getSuccessfulRequests(),
-    
-    // Errors
-    requestError: requestSatsMutation.error,
-    statusCheckError: checkPaymentStatusMutation.error,
+    fundingHistory,
+    stats,
+
+    // Ações
+    getFaucetInfo,
+    requestFunding,
+    requestDefaultFunding,
+    requestMaxFunding,
+    getFundingHistory,
+    getFaucetStats,
+    clearError,
+    refresh,
+
+    // Helpers
+    isAvailable: faucetInfo?.isAvailable || false,
+    currentBalance: faucetInfo?.currentBalance || 0,
+    maxAmount: faucetInfo?.maxAmount || 100000,
+    minAmount: faucetInfo?.minAmount || 1000,
+    dailyLimit: faucetInfo?.dailyLimit || 500000,
+    lndStatus: faucetInfo?.lndStatus || 'disconnected'
   };
-};
+}

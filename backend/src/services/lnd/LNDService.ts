@@ -353,6 +353,119 @@ export class LNDService implements LNDServiceInterface {
       config: Object.keys(newConfig)
     });
   }
+
+  // ========================================
+  // TESTNET SPECIFIC METHODS
+  // ========================================
+
+  /**
+   * Get testnet node information
+   */
+  public async getTestnetInfo(): Promise<any> {
+    if (!this.testnetClient) {
+      throw new Error('Testnet client not initialized');
+    }
+
+    // Temporarily switch to testnet
+    const originalNetwork = this.activeNetwork;
+    this.activeNetwork = 'testnet';
+    this.initializeEndpoints();
+
+    try {
+      const info = await this.getInfo();
+      return info;
+    } finally {
+      // Restore original network
+      this.activeNetwork = originalNetwork;
+      this.initializeEndpoints();
+    }
+  }
+
+  /**
+   * Create testnet invoice
+   */
+  public async createTestnetInvoice(request: { amount: number; memo?: string; expiry?: number }): Promise<any> {
+    if (!this.testnetClient) {
+      throw new Error('Testnet client not initialized');
+    }
+
+    // Temporarily switch to testnet
+    const originalNetwork = this.activeNetwork;
+    this.activeNetwork = 'testnet';
+    this.initializeEndpoints();
+
+    try {
+      if (!this.invoice) {
+        throw new Error('Invoice endpoints not initialized');
+      }
+      
+      const invoice = await this.invoice.createInvoice({
+        value: request.amount,
+        memo: request.memo || 'Testnet invoice',
+        expiry: request.expiry || 3600
+      });
+
+      return invoice;
+    } finally {
+      // Restore original network
+      this.activeNetwork = originalNetwork;
+      this.initializeEndpoints();
+    }
+  }
+
+  /**
+   * Get testnet wallet balance
+   */
+  public async getTestnetBalance(): Promise<number> {
+    if (!this.testnetClient) {
+      throw new Error('Testnet client not initialized');
+    }
+
+    // Temporarily switch to testnet
+    const originalNetwork = this.activeNetwork;
+    this.activeNetwork = 'testnet';
+    this.initializeEndpoints();
+
+    try {
+      if (!this.wallet) {
+        throw new Error('Wallet endpoints not initialized');
+      }
+      
+      const balance = await this.wallet.getBalance();
+      return balance.total_balance || 0;
+    } finally {
+      // Restore original network
+      this.activeNetwork = originalNetwork;
+      this.initializeEndpoints();
+    }
+  }
+
+  /**
+   * Get testnet channels
+   */
+  public async getTestnetChannels(): Promise<any> {
+    if (!this.testnetClient) {
+      throw new Error('Testnet client not initialized');
+    }
+
+    // Temporarily switch to testnet
+    const originalNetwork = this.activeNetwork;
+    this.activeNetwork = 'testnet';
+    this.initializeEndpoints();
+
+    try {
+      if (!this.channel) {
+        throw new Error('Channel endpoints not initialized');
+      }
+      
+      const channels = await this.channel.getChannels();
+      return channels;
+    } finally {
+      // Restore original network
+      this.activeNetwork = originalNetwork;
+      this.initializeEndpoints();
+    }
+  }
 }
 
 // Export singleton instance
