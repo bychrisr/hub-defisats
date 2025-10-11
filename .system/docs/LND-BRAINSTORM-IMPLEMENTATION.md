@@ -334,6 +334,52 @@ docker exec axisor-lnd-testnet lncli --network=testnet --tlscertpath=/root/.lnd/
 - `./scripts/monitor-transaction.sh` - Monitor de transações
 - `./scripts/test-faucets-alternatives.sh` - Lista de alternativas
 
+## ✅ PROBLEMA RESOLVIDO - Credenciais Testnet LN Markets
+
+**Data**: 2025-10-11 17:05  
+**Status**: ✅ **PROBLEMA RESOLVIDO**  
+**Solução**: Conta testnet separada necessária
+
+### Descoberta Crítica
+**PROBLEMA IDENTIFICADO**: LN Markets testnet requer **conta completamente separada**, não apenas credenciais diferentes.
+
+### Site Oficial Testnet Descoberto
+- **URL**: [https://testnet4.lnmarkets.com/en/welcome](https://testnet4.lnmarkets.com/en/welcome)
+- **Registro**: Necessário criar conta específica para testnet
+- **Credenciais**: Cada ambiente tem suas próprias credenciais
+
+### Credenciais Testnet Oficiais
+```
+API Key: k7WbaBogWpas/yZwkKE5mEJVAsOpxbQN1+mpTzo4+Qk=
+API Secret: 4LXnPFKCzARK6Asn9l/YyIWS08s9++4OSaXomss4b96dlf9apRAq621DI9KiSNhlaRRr7Czqg7g9hXxQYeOOSQ==
+Passphrase: e60b7c9bg0d7
+```
+
+### Dados da Conta Testnet
+```json
+{
+  "uid": "d54c47e6-9aaf-48dc-8627-de2c70bb0609",
+  "username": "eight-year-m",
+  "email": "mulinete0defi@gmail.com",
+  "balance": 200000,
+  "synthetic_usd_balance": 0
+}
+```
+
+### Status da Integração
+- ✅ **API testnet**: Funcionando perfeitamente
+- ✅ **Autenticação**: HMAC SHA256 funcionando
+- ✅ **Saldo**: 200,000 sats disponíveis
+- ✅ **Dashboard**: Dados reais sendo exibidos
+- ✅ **Conta criada**: `C3 - Testnet Official`
+- ✅ **Pronto para**: Criação de posições de teste
+
+### Solução Implementada
+1. ✅ **Registro na testnet**: Conta criada em testnet4.lnmarkets.com
+2. ✅ **Credenciais separadas**: API keys específicas para testnet
+3. ✅ **Configuração na app**: Conta `C3 - Testnet Official` criada
+4. ✅ **Validação completa**: Todos os endpoints funcionando
+
 ## 📋 Status Atualizado
 
 1. ✅ Resolver conectividade Neutrino
@@ -341,12 +387,17 @@ docker exec axisor-lnd-testnet lncli --network=testnet --tlscertpath=/root/.lnd/
 3. ✅ Aguardar sincronização completa
 4. ✅ Criar invoice de 1M sats
 5. ✅ **Receber Bitcoin testnet via faucet público**
-6. 🔄 Implementar funding interno
-7. 🔄 Criar 20 posições de teste
-8. 🔄 Documentação completa (30+ arquivos)
+6. ✅ **Ativar toggle testnet na conta C2**
+7. ✅ **Resolver credenciais testnet LN Markets**
+8. ✅ **Criar conta testnet oficial** (`C3 - Testnet Official`)
+9. ✅ **Validar integração testnet** (200,000 sats disponíveis)
+10. 🔄 Criar 20 posições de teste
+11. 🔄 Implementar funding interno
+12. 🔄 Documentação completa (30+ arquivos)
 
 ## 🔗 Links e Referências Úteis
 
+### LND
 - **Documentação Oficial LND**: https://dev.lightning.community/guides/installation/
 - **Nós Neutrino Confiáveis**: 
   - `faucet.lightning.community`
@@ -355,6 +406,12 @@ docker exec axisor-lnd-testnet lncli --network=testnet --tlscertpath=/root/.lnd/
   - https://testnet.help/en/bitcoincoinfaucet/testnet/
   - https://faucet.lightning.community/
   - https://testnet-faucet.mempool.co/
+
+### LN Markets
+- **Site Oficial Testnet**: https://testnet4.lnmarkets.com/en/welcome
+- **API Testnet**: https://api.testnet4.lnmarkets.com/v2
+- **WebSocket Testnet**: wss://api.testnet4.lnmarkets.com
+- **Documentação API**: https://docs.lnmarkets.com/api/
 
 ---
 
