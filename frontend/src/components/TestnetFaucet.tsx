@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { Separator } from './ui/separator';
-import { SatsIcon } from './SatsIcon';
+import SatsIcon from './SatsIcon';
 import { 
   Zap, 
   Wallet, 
