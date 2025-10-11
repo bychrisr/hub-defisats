@@ -74,11 +74,15 @@
 
 #### 📋 Tarefas Planejadas
 
-- [ ] **Sistema de Pagamentos Lightning**
-  - [ ] Integração com Lightning Network
-  - [ ] Processamento de pagamentos
-  - [ ] Webhooks de confirmação
-  - [ ] Sistema de billing
+- [x] **Sistema de Pagamentos Lightning** ✅ CONCLUÍDO
+  - [x] Integração com Lightning Network (LND Testnet)
+  - [x] Wallet LND criada e configurada
+  - [x] REST API funcionando com autenticação
+  - [x] Macaroon configurado corretamente
+  - [x] Validação de integração LND ↔ LN Markets
+  - [ ] Processamento de pagamentos (próxima fase)
+  - [ ] Webhooks de confirmação (próxima fase)
+  - [ ] Sistema de billing (próxima fase)
 
 - [ ] **Landing Page Comercial**
   - [ ] Design responsivo

@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **LND Integration Validation (v2.6.0)**: Validação completa da integração LND ↔ LN Markets
+  - Validação da integração LND testnet com LN Markets
+  - Wallet LND criada e configurada com sucesso
+  - REST API funcionando com autenticação macaroon
+  - Macaroon configurado corretamente em formato hexadecimal
+  - Testes diretos da API REST LND validados
+  - Integração LN Markets testnet funcionando
+  - Posições carregando e exibindo corretamente
+  - Dashboard mostrando dados em tempo real
+  - Documentação completa da validação
+  - Atualização do roadmap com status da integração
+
+### Added
 - **LND Integration (v2.4.0)**: Integração completa com Lightning Network Daemon
   - Configuração Docker Compose para LND testnet e mainnet
   - LND testnet configurado com Neutrino mode (light client)
