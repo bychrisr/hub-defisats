@@ -40,31 +40,21 @@ export class DashboardDataService {
    * Detect if account should use testnet mode
    */
   private detectTestnetMode(accountName: string, credentials: Record<string, string>): boolean {
-    // 1. PRIORITY: Check if credentials contain testnet toggle flag (manual toggle)
+    // 1. PRIORITY: Check if credentials contain testnet toggle flag (manual toggle only)
     if (credentials.isTestnet === 'true' || credentials.testnet === 'true') {
       console.log(`🔍 DASHBOARD DATA - Testnet detected by manual toggle flag`);
       return true;
     }
 
-    // 2. Check if account name contains testnet keywords (automatic detection)
-    const testnetKeywords = ['testnet', 'test', 'sandbox', 'dev', 'development'];
-    const accountNameLower = accountName.toLowerCase();
-    
-    for (const keyword of testnetKeywords) {
-      if (accountNameLower.includes(keyword)) {
-        console.log(`🔍 DASHBOARD DATA - Testnet detected by account name keyword: ${keyword}`);
-        return true;
-      }
-    }
-
-    // 3. Check if API key starts with testnet pattern (optional)
+    // 2. Check if API key starts with testnet pattern (optional)
     const apiKey = credentials['API Key'] || credentials.api_key;
     if (apiKey && apiKey.startsWith('test_')) {
       console.log(`🔍 DASHBOARD DATA - Testnet detected by API key pattern`);
       return true;
     }
 
-    // Default to mainnet
+    // Default to mainnet (no automatic detection by account name)
+    console.log(`🔍 DASHBOARD DATA - Using mainnet (no testnet flags detected)`);
     return false;
   }
 

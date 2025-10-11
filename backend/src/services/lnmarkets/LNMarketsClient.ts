@@ -112,12 +112,35 @@ export class LNMarketsClient {
   }
 
   /**
+   * Check if endpoint is public (no authentication required)
+   */
+  private isPublicEndpoint(path: string): boolean {
+    const publicEndpoints = [
+      '/futures/ticker',
+      '/futures/btc_usd/ticker',
+      '/futures/btc_usd/index',
+      '/futures/btc_usd/price',
+      '/options/btc_usd/volatility-index',
+      '/leaderboard',
+      '/options/market'
+    ];
+    
+    return publicEndpoints.some(endpoint => path.includes(endpoint));
+  }
+
+  /**
    * Authenticate request with HMAC SHA256 signature
    */
   private authenticateRequest(config: AxiosRequestConfig): AxiosRequestConfig {
     const timestamp = Date.now().toString();
     const method = (config.method || 'GET').toUpperCase();
     const path = config.url || '';
+
+    // Check if this is a public endpoint
+    if (this.isPublicEndpoint(path)) {
+      this.logger.debug('🌐 Public endpoint - skipping authentication', { path });
+      return config;
+    }
 
     // Rate limiting
     const now = Date.now();
