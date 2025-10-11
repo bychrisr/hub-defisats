@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { lightningPaymentService } from '../services/lightning-payment.service';
 
 // Create Redis connection
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379');
 
 // Create Prisma client
 const prisma = new PrismaClient();

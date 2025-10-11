@@ -45,7 +45,7 @@ export class WorkerManagerService extends EventEmitter {
       ...config,
     };
 
-    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    this.redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379');
   }
 
   /**

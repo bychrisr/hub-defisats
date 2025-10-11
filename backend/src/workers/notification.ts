@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 import { PrismaClient } from '@prisma/client';
 
 // Create Redis connection
-const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
+const redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379');
 
 // Initialize Prisma
 const prisma = new PrismaClient();

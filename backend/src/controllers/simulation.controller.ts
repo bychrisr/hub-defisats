@@ -158,7 +158,7 @@ export class SimulationController {
 
       // Obter dados em tempo real do Redis
       const redis = require('ioredis');
-      const redisClient = new redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
+      const redisClient = new redis(process.env['REDIS_URL'] || 'redis://redis:6379');
 
       const progress = await redisClient.get(`simulation:${id}:progress`);
       const currentPrice = await redisClient.get(`simulation:${id}:current_price`);

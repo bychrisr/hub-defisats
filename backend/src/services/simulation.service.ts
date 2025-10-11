@@ -33,7 +33,7 @@ export class SimulationService {
 
   constructor() {
     this.prisma = new PrismaClient();
-    this.redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
+    this.redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379');
     this.simulationQueue = new Queue('simulation', {
       connection: this.redis,
       defaultJobOptions: {

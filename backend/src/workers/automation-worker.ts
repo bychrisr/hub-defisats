@@ -17,7 +17,7 @@ import { AutomationLoggerService } from '../services/automation-logger.service';
 import { prisma } from '../lib/prisma';
 
 // Create Redis connection with BullMQ compatible options
-const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379', {
+const redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379', {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   lazyConnect: true,

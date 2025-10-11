@@ -7,7 +7,7 @@ import { CredentialCacheService } from '../services/credential-cache.service';
 import { UserExchangeAccountService } from '../services/userExchangeAccount.service';
 
 // Create Redis connection
-const redis = new Redis(process.env['REDIS_URL'] || 'redis://localhost:6379');
+const redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379');
 
 // Create credential cache service
 const credentialCache = new CredentialCacheService(redis);
