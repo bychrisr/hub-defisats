@@ -14,6 +14,9 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { AlertCircle, RefreshCw, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { PositionCreationModal } from '../../components/PositionCreationModal';
+import { PositionTestManager } from '../../components/PositionTestManager';
+import { usePositionCreation } from '../../hooks/usePositionCreation';
 
 export default function Positions() {
   const [filters, setFilters] = useState<PositionFiltersType>({
@@ -42,6 +45,8 @@ export default function Positions() {
     isClosingAll,
     isLoading: isActionLoading
   } = usePositionActions();
+
+  const { createPosition, loading: isCreatingPosition } = usePositionCreation();
 
   // Filtrar posições baseado nos filtros
   const filteredPositions = useMemo(() => {
@@ -173,6 +178,15 @@ export default function Positions() {
           </div>
           
           <div className="flex items-center space-x-2 mt-4 sm:mt-0">
+            <PositionCreationModal 
+              onCreatePosition={createPosition}
+              disabled={isCreatingPosition}
+            />
+            
+            <PositionTestManager 
+              disabled={isCreatingPosition}
+            />
+            
             <Button
               variant="outline"
               className="border-[#2A3441] hover:bg-[#2A3441] text-[#E6E6E6]"
