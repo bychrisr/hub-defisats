@@ -30,28 +30,30 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
         });
       }
 
-      // Get user credentials from database (based on original implementation)
-      console.log('🔍 TRADING CONTROLLER - Fetching user credentials from database');
-      const userProfile = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true,
+      // Get active exchange account credentials
+      console.log('🔍 TRADING CONTROLLER - Fetching active exchange account');
+      const activeAccount = await this.prisma.userExchangeAccount.findFirst({
+        where: {
+          user_id: userId,
+          is_active: true,
+          exchange: {
+            slug: 'ln-markets'
+          }
         },
+        include: {
+          exchange: true
+        }
       });
 
-      console.log('🔍 TRADING CONTROLLER - User profile from DB:', {
-        hasApiKey: !!userProfile?.ln_markets_api_key,
-        hasApiSecret: !!userProfile?.ln_markets_api_secret,
-        hasPassphrase: !!userProfile?.ln_markets_passphrase,
-        apiKeyPreview: userProfile?.ln_markets_api_key ? `${userProfile.ln_markets_api_key.substring(0, 10)}...` : 'MISSING',
-        apiSecretPreview: userProfile?.ln_markets_api_secret ? `${userProfile.ln_markets_api_secret.substring(0, 10)}...` : 'MISSING',
-        passphrasePreview: userProfile?.ln_markets_passphrase ? `${userProfile.ln_markets_passphrase.substring(0, 5)}...` : 'MISSING'
+      console.log('🔍 TRADING CONTROLLER - Active account:', {
+        hasAccount: !!activeAccount,
+        accountName: activeAccount?.account_name,
+        hasCredentials: !!activeAccount?.credentials,
+        credentialsKeys: activeAccount?.credentials ? Object.keys(activeAccount.credentials) : []
       });
 
-      if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
-        console.log('❌ TRADING CONTROLLER - Missing credentials, returning 400');
+      if (!activeAccount || !activeAccount.credentials) {
+        console.log('❌ TRADING CONTROLLER - Missing active account or credentials, returning 400');
         return reply.status(400).send({
           success: false,
           error: 'MISSING_CREDENTIALS',
@@ -59,28 +61,41 @@ export class LNMarketsTradingRefactoredController extends ExchangeBaseController
         });
       }
 
-      // Decrypt credentials (based on original implementation)
-      console.log('🔍 TRADING CONTROLLER - Decrypting credentials...');
+      const credentials = activeAccount.credentials as any;
+      if (!credentials.api_key || !credentials.api_secret || !credentials.passphrase) {
+        console.log('❌ TRADING CONTROLLER - Incomplete credentials, returning 400');
+        return reply.status(400).send({
+          success: false,
+          error: 'MISSING_CREDENTIALS',
+          message: 'LN Markets credentials incomplete',
+        });
+      }
+
+      // Use credentials directly (they should already be decrypted)
+      console.log('🔍 TRADING CONTROLLER - Using credentials...');
       
-      // Import AuthService and create instance
-      const { AuthService } = await import('../services/auth.service');
-      const authService = new AuthService(this.prisma, request.server);
-      
-      const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
-      const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
-      const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
+      const apiKey = credentials.api_key;
+      const apiSecret = credentials.api_secret;
+      const passphrase = credentials.passphrase;
 
       console.log('✅ TRADING CONTROLLER - Credentials decrypted successfully');
 
+      // Detect testnet mode
+      const isTestnet = credentials.isTestnet === 'true' || credentials.testnet === 'true' || 
+                       (credentials.api_key && credentials.api_key.startsWith('test_'));
+
       // Initialize LN Markets service v2
-      console.log('🔍 TRADING CONTROLLER - Initializing LNMarketsAPIv2 service');
+      console.log('🔍 TRADING CONTROLLER - Initializing LNMarketsAPIv2 service', {
+        isTestnet,
+        accountName: activeAccount.account_name
+      });
       const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');
       const lnMarketsService = new LNMarketsAPIv2({
         credentials: {
           apiKey,
           apiSecret,
           passphrase,
-          isTestnet: false
+          isTestnet
         },
         logger: this.logger
       });
