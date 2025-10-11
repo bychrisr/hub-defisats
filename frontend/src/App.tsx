@@ -48,6 +48,7 @@ import Positions from '@/pages/Positions';
 import PositionsRefactored from '@/pages/PositionsRefactored';
 import PositionsNew from '@/pages/Positions/index';
 import Backtests from '@/pages/Backtests';
+import LNDSyncMonitor from '@/pages/LNDSyncMonitor';
 import { TestnetFaucetPage } from '@/pages/TestnetFaucet';
 import Trading from '@/pages/Trading';
 import Simulation from '@/pages/Simulation';
@@ -385,6 +386,18 @@ const App = () => {
                   <RouteGuard requiredPlan="basic">
                     <ResponsiveLayout>
                       <PositionsRefactored />
+                    </ResponsiveLayout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+                  <Route
+              path="/lnd-sync-monitor"
+                element={
+                <ProtectedRoute>
+                  <RouteGuard requiredPlan="basic">
+                    <ResponsiveLayout>
+                      <LNDSyncMonitor />
                     </ResponsiveLayout>
                   </RouteGuard>
                 </ProtectedRoute>
