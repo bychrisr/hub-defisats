@@ -545,6 +545,7 @@ export class MarginGuardController {
 
   // Métodos auxiliares privados
 
+
   private async fetchRunningPositions(userId: string): Promise<any[]> {
     console.log('🔍 MARGIN GUARD - Fetching running positions for user:', userId);
     
@@ -583,12 +584,13 @@ export class MarginGuardController {
       try {
         console.log(`🔍 MARGIN GUARD - Processing account: ${account.account_name}`);
         
+        // ✅ USAR LÓGICA AUTOMÁTICA EXISTENTE: O LNMarketsClient já detecta testnet automaticamente
         const lnMarkets = new LNMarketsAPIv2({
           credentials: {
             apiKey: account.credentials['API Key'],
             apiSecret: account.credentials['API Secret'],
             passphrase: account.credentials['Passphrase'],
-            isTestnet: false // TODO: Implementar detecção de testnet
+            isTestnet: account.credentials.isTestnet === 'true' || account.credentials.testnet === 'true'
           },
           logger: console as any
         });
