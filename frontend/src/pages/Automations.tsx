@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Bot, Plus, Shield, TrendingUp, Zap, AlertTriangle, Activity, TrendingDown, Target, ArrowRight, CheckCircle } from 'lucide-react';
+import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 import { apiFetch } from '@/lib/fetch';
 
 interface MarginGuardConfig {
@@ -53,6 +54,8 @@ interface UpgradePlan {
 }
 
 export const Automations = () => {
+  const { marketData, dashboardData } = useRealtimeData();
+  
   // Estados para Margin Guard
   const [marginGuardConfig, setMarginGuardConfig] = useState<MarginGuardConfig>({
     mode: 'global',
@@ -296,7 +299,7 @@ export const Automations = () => {
                             setMarginGuardConfig(prev => ({ ...prev, is_active: checked }))
                           }
                         />
-                      </div>
+        </div>
 
                       <Separator />
 
@@ -321,11 +324,11 @@ export const Automations = () => {
                             </span>
                             <span>25%</span>
                           </div>
-                        </div>
+                    </div>
                         <p className="text-sm text-muted-foreground">
                           Quando o preço chegar a {marginGuardConfig.margin_threshold}% do preço de liquidação, o Margin Guard será acionado
                         </p>
-                      </div>
+                    </div>
 
                       {/* Slider: % de margem para adicionar */}
                       <div className="space-y-3">
@@ -347,12 +350,12 @@ export const Automations = () => {
                               {marginGuardConfig.add_margin_percentage}%
                             </span>
                             <span>100%</span>
-                          </div>
-                        </div>
+                  </div>
+                </div>
                         <p className="text-sm text-muted-foreground">
                           Adicionará {marginGuardConfig.add_margin_percentage}% da margem atual da posição
                         </p>
-                      </div>
+          </div>
 
                       <Separator />
 
@@ -367,10 +370,10 @@ export const Automations = () => {
                             className="h-auto p-4 flex flex-col items-center gap-2"
                           >
                             <Target className="h-4 w-4" />
-                            <div className="text-center">
+                  <div className="text-center">
                               <div className="font-medium">Global</div>
                               <div className="text-xs opacity-70">Todas as posições</div>
-                            </div>
+                    </div>
                           </Button>
                           <Button
                             variant={marginGuardConfig.mode === 'unitario' ? 'default' : 'outline'}
@@ -379,13 +382,13 @@ export const Automations = () => {
                             className="h-auto p-4 flex flex-col items-center gap-2"
                           >
                             <Activity className="h-4 w-4" />
-                            <div className="text-center">
+                  <div className="text-center">
                               <div className="font-medium">Unitário</div>
                               <div className="text-xs opacity-70">Posições específicas</div>
-                            </div>
+                    </div>
                           </Button>
-                        </div>
-                      </div>
+                  </div>
+                </div>
 
                       {/* Botão Salvar */}
                       <Button 
@@ -395,13 +398,13 @@ export const Automations = () => {
                       >
                         {loading ? 'Salvando...' : 'Salvar Configuração'}
                       </Button>
-                    </CardContent>
-                  </Card>
-
+            </CardContent>
+          </Card>
+          
                   {/* Lista de Posições (Modo Unitário) */}
                   {marginGuardConfig.mode === 'unitario' && positions.length > 0 && (
                     <Card>
-                      <CardHeader>
+          <CardHeader>
                         <CardTitle>Posições Running</CardTitle>
                         <CardDescription>
                           Selecione quais posições monitorar
@@ -410,20 +413,20 @@ export const Automations = () => {
                               {' '}(Máximo {planFeatures.maxPositions})
                             </span>
                           )}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Table>
-                          <TableHeader>
+                </CardDescription>
+          </CardHeader>
+          <CardContent>
+                  <Table>
+                    <TableHeader>
                             <TableRow>
                               <TableHead className="w-12">Sel.</TableHead>
                               <TableHead>Tipo</TableHead>
                               <TableHead>Margem</TableHead>
                               <TableHead>Preço Liquidação</TableHead>
                               <TableHead>Distância</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                             {positions.map((position) => (
                               <TableRow key={position.trade_id}>
                                 <TableCell>
@@ -432,18 +435,18 @@ export const Automations = () => {
                                     onCheckedChange={() => togglePosition(position.trade_id)}
                                     disabled={!marginGuardConfig.selected_positions.includes(position.trade_id) && !canSelectMore()}
                                   />
-                                </TableCell>
-                                <TableCell>
+                          </TableCell>
+                          <TableCell>
                                   <Badge variant={position.side === 'b' ? 'default' : 'secondary'}>
                                     {position.side === 'b' ? 'LONG' : 'SHORT'}
-                                  </Badge>
-                                </TableCell>
+                            </Badge>
+                          </TableCell>
                                 <TableCell>{position.margin.toLocaleString()} sats</TableCell>
                                 <TableCell>${position.liquidation_price.toLocaleString()}</TableCell>
-                                <TableCell>
+                          <TableCell>
                                   <Badge variant={position.distance_percentage < marginGuardConfig.margin_threshold ? 'destructive' : 'outline'}>
                                     {position.distance_percentage.toFixed(1)}%
-                                  </Badge>
+                                    </Badge>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -451,94 +454,159 @@ export const Automations = () => {
                         </Table>
                       </CardContent>
                     </Card>
-                  )}
-                </div>
+                                  )}
+                                </div>
 
                 {/* Coluna Direita - Preview e Status */}
                 <div className="space-y-6">
-                  {/* Preview de Cálculo */}
-                  {preview && (
-                    <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Target className="h-5 w-5 text-green-600" />
-                          Simulação Real
-                        </CardTitle>
-                      </CardHeader>
+                  {/* Preview de Cálculo em Tempo Real */}
+                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-blue-600" />
+                        Preview em Tempo Real
+                      </CardTitle>
+                      <CardDescription>
+                        Cálculo baseado nos dados atuais do mercado
+                      </CardDescription>
+                    </CardHeader>
                       <CardContent>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label className="text-sm font-medium">Preço Atual</Label>
-                              <p className="text-lg font-semibold">${preview.current_price?.toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Preço de Trigger</Label>
-                              <p className="text-lg font-semibold text-orange-600">
-                                ${preview.trigger_price?.toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
+                        {(() => {
+                          // Dados em tempo real
+                          const btcPrice = marketData?.['BTC']?.price || dashboardData?.lnMarkets?.ticker?.lastPrice || 0;
+                          const positions = dashboardData?.lnMarkets?.positions || [];
+                          const activePositions = positions.filter(pos => pos.quantity > 0);
                           
-                          <Separator />
-                          
-                          <div>
-                            <Label className="text-sm font-medium">Margem a Adicionar</Label>
-                            <p className="text-xl font-bold text-green-600">
-                              +{preview.margin_to_add?.toLocaleString()} sats
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <Label className="text-sm font-medium">Taxas Incluídas</Label>
-                            <div className="space-y-1 text-sm">
-                              <div className="flex justify-between">
-                                <span>Opening Fee:</span>
-                                <span>{preview.fees?.opening_fee?.toFixed(2)} sats</span>
+                          if (activePositions.length === 0) {
+                            return (
+                              <div className="text-center py-8">
+                                <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                                <p className="text-sm text-muted-foreground">
+                                  Nenhuma posição ativa encontrada
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Abra uma posição para ver o preview
+                                </p>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Closing Fee:</span>
-                                <span>{preview.fees?.closing_fee?.toFixed(2)} sats</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Maintenance Margin:</span>
-                                <span>{preview.fees?.maintenance_margin?.toFixed(2)} sats</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Carry Fees:</span>
-                                <span>{preview.fees?.sum_carry_fees?.toFixed(2)} sats</span>
-                              </div>
-                            </div>
-                          </div>
+                            );
+                          }
+
+                          // Usar a primeira posição para o exemplo
+                          const examplePosition = activePositions[0];
+                          const entryPrice = examplePosition.entry_price;
+                          const liquidationPrice = examplePosition.liquidation;
+                          const currentMargin = examplePosition.margin;
+                          const side = examplePosition.side;
                           
-                          <Separator />
+                          // Calcular trigger price
+                          const distanceToLiquidation = Math.abs(entryPrice - liquidationPrice);
+                          const activationDistance = distanceToLiquidation * (marginGuardConfig.margin_threshold / 100);
+                          const triggerPrice = side === 'b' 
+                            ? liquidationPrice + activationDistance
+                            : liquidationPrice - activationDistance;
                           
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label className="text-sm font-medium">Custo Total</Label>
-                              <p className="text-xl font-bold text-red-600">
-                                {preview.total_cost?.toLocaleString()} sats
-                              </p>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Nova Margem</Label>
-                              <p className="text-xl font-bold text-green-600">
-                                {preview.new_margin?.toLocaleString()} sats
-                              </p>
-                            </div>
-                          </div>
+                          // Calcular margem a adicionar
+                          const marginToAdd = currentMargin * (marginGuardConfig.add_margin_percentage / 100);
+                          const newMargin = currentMargin + marginToAdd;
                           
-                          <Alert>
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertDescription>
-                              As taxas da LN Markets são descontadas automaticamente. 
-                              Certifique-se de ter saldo suficiente.
-                            </AlertDescription>
-                          </Alert>
-                        </div>
+                          // Calcular nova liquidação (aproximação)
+                          const newLiquidationPrice = side === 'b' 
+                            ? liquidationPrice - (marginToAdd / examplePosition.quantity)
+                            : liquidationPrice + (marginToAdd / examplePosition.quantity);
+                          
+                          // Calcular melhoria da distância
+                          const currentDistance = Math.abs(btcPrice - liquidationPrice);
+                          const newDistance = Math.abs(btcPrice - newLiquidationPrice);
+                          const distanceImprovement = newDistance > currentDistance ? 
+                            ((newDistance - currentDistance) / currentDistance) * 100 : 0;
+
+                          return (
+                            <div className="space-y-4">
+                              {/* Preço atual do BTC */}
+                              <div className="bg-white rounded-lg p-3 border">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-sm text-muted-foreground">Preço Atual BTC</Label>
+                                  <Badge variant="outline" className="text-xs">
+                                    Tempo Real
+                                  </Badge>
+                                </div>
+                                <p className="text-xl font-bold text-blue-600">
+                                  ${btcPrice.toLocaleString()}
+                                </p>
+                              </div>
+
+                              {/* Informações da posição */}
+                              <div className="bg-white rounded-lg p-3 border">
+                                <Label className="text-sm text-muted-foreground">Posição Exemplo</Label>
+                                <div className="grid grid-cols-2 gap-3 mt-2">
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Tipo</p>
+                                    <Badge variant={side === 'b' ? 'default' : 'secondary'} className="text-xs">
+                                      {side === 'b' ? 'LONG' : 'SHORT'}
+                                    </Badge>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Margem Atual</p>
+                                    <p className="text-sm font-semibold">{currentMargin.toLocaleString()} sats</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Cálculo do trigger */}
+                              <div className="bg-white rounded-lg p-3 border">
+                                <Label className="text-sm text-muted-foreground">Quando o Margin Guard será acionado</Label>
+                                <div className="mt-2">
+                                  <p className="text-lg font-semibold text-orange-600">
+                                    ${triggerPrice.toLocaleString()}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {marginGuardConfig.margin_threshold}% do preço de liquidação (${liquidationPrice.toLocaleString()})
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Margem a adicionar */}
+                              <div className="bg-white rounded-lg p-3 border">
+                                <Label className="text-sm text-muted-foreground">Margem a Adicionar</Label>
+                                <div className="mt-2">
+                                  <p className="text-lg font-semibold text-green-600">
+                                    {marginToAdd.toLocaleString()} sats
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {marginGuardConfig.add_margin_percentage}% da margem atual
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Resultado */}
+                              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 border border-green-200">
+                                <Label className="text-sm text-green-700">Nova Proteção</Label>
+                                <div className="mt-2">
+                                  <p className="text-lg font-semibold text-green-700">
+                                    Nova Liquidação: ${newLiquidationPrice.toLocaleString()}
+                                  </p>
+                                  <p className="text-sm text-green-600">
+                                    +{distanceImprovement.toFixed(1)}% de proteção adicional
+                                  </p>
+                                  <p className="text-xs text-green-600">
+                                    Nova margem: {newMargin.toLocaleString()} sats
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Disclaimer */}
+                              <Alert>
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertDescription className="text-xs">
+                                  <strong>Importante:</strong> Este cálculo é uma estimativa baseada nos dados atuais. 
+                                  As taxas reais (opening_fee, closing_fee, maintenance_margin) serão aplicadas na execução.
+                                </AlertDescription>
+                              </Alert>
+                            </div>
+                          );
+                        })()}
                       </CardContent>
                     </Card>
-                  )}
 
                   {/* Card de Sugestão de Upgrade */}
                   {isLimitedByPlan && availableUpgrades.length > 0 && (
@@ -604,8 +672,8 @@ export const Automations = () => {
           {/* Automatic Entries Tab */}
           <TabsContent value="entry" className="space-y-6">
             {/* Conteúdo vazio - a ser implementado */}
-          </TabsContent>
-        </Tabs>
+              </TabsContent>
+            </Tabs>
       </div>
     </div>
   );
