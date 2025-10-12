@@ -23,26 +23,32 @@ export interface PnLChartCardProps {
 
 // ===== MOCK CHART DATA =====
 const generateMockChartData = (period: TimeFilterPeriod, pnlValue: number) => {
+  // Validate pnlValue to prevent NaN
+  const safePnlValue = Number.isFinite(pnlValue) ? pnlValue : 0;
+  
   const now = Date.now();
   const dataPoints = period === '24H' ? 24 : period === '7D' ? 168 : period === '30D' ? 720 : 2160;
   const interval = period === '24H' ? 3600000 : period === '7D' ? 3600000 : 3600000; // 1 hour intervals
   
   const data = [];
-  let currentValue = pnlValue * 0.3; // Start at 30% of current value
+  let currentValue = safePnlValue * 0.3; // Start at 30% of current value
   
   for (let i = 0; i < dataPoints; i++) {
     const time = now - (dataPoints - i) * interval;
     
     // Simulate realistic PnL movement
-    const volatility = pnlValue * 0.1; // 10% volatility
-    const trend = (pnlValue - currentValue) / (dataPoints - i) * 0.8; // Trend towards target
+    const volatility = Math.abs(safePnlValue) * 0.1; // 10% volatility
+    const trend = (safePnlValue - currentValue) / (dataPoints - i) * 0.8; // Trend towards target
     const random = (Math.random() - 0.5) * volatility * 0.3;
     
     currentValue += trend + random;
     
+    // Ensure value is finite
+    const finalValue = Number.isFinite(currentValue) ? currentValue : 0;
+    
     data.push({
       time: time / 1000, // Convert to seconds
-      value: Math.round(currentValue)
+      value: Math.round(finalValue)
     });
   }
   
@@ -55,10 +61,22 @@ const SimpleLineChart: React.FC<{
   pnlValue: number;
   className?: string;
 }> = ({ data, pnlValue, className }) => {
-  const isPositive = pnlValue > 0;
+  // Validate inputs to prevent NaN
+  const safePnlValue = Number.isFinite(pnlValue) ? pnlValue : 0;
+  const isPositive = safePnlValue > 0;
   
-  // Find min/max for scaling
-  const values = data.map(d => d.value);
+  // Validate data and find min/max for scaling
+  const validData = data.filter(d => Number.isFinite(d.value));
+  if (validData.length === 0) {
+    // Return empty chart if no valid data
+    return (
+      <div className={cn('relative w-full h-32 flex items-center justify-center', className)}>
+        <div className="text-muted-foreground text-sm">No data available</div>
+      </div>
+    );
+  }
+  
+  const values = validData.map(d => d.value);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
   const range = maxValue - minValue || 1;
@@ -68,8 +86,8 @@ const SimpleLineChart: React.FC<{
   const height = 120;
   const padding = 20;
   
-  const points = data.map((point, index) => {
-    const x = (index / (data.length - 1)) * (width - 2 * padding) + padding;
+  const points = validData.map((point, index) => {
+    const x = (index / (validData.length - 1)) * (width - 2 * padding) + padding;
     const y = height - padding - ((point.value - minValue) / range) * (height - 2 * padding);
     return `${x},${y}`;
   }).join(' ');
@@ -120,10 +138,10 @@ const SimpleLineChart: React.FC<{
         />
         
         {/* Current point */}
-        {data.length > 0 && (
+        {validData.length > 0 && (
           <circle
             cx={width - padding}
-            cy={height - padding - ((pnlValue - minValue) / range) * (height - 2 * padding)}
+            cy={height - padding - ((safePnlValue - minValue) / range) * (height - 2 * padding)}
             r="4"
             fill={isPositive ? '#22c55e' : '#ef4444'}
             className="drop-shadow-sm"
@@ -167,16 +185,19 @@ export const PnLChartCard: React.FC<PnLChartCardProps> = ({
   
   // ===== CHART DATA =====
   const chartData = useMemo(() => {
+    // Validate pnlValue to prevent NaN
+    const safePnlValue = Number.isFinite(pnlValue) ? pnlValue : 0;
+    
     if (candleData && candleData.length > 0) {
       // Use real data if available
       return candleData.map(candle => ({
         time: typeof candle.time === 'number' ? candle.time : new Date(candle.time).getTime() / 1000,
-        value: Math.round(pnlValue * (candle.close / candleData[candleData.length - 1].close))
+        value: Math.round(safePnlValue * (candle.close / candleData[candleData.length - 1].close))
       }));
     }
     
     // Fallback to mock data
-    return generateMockChartData(selectedPeriod, pnlValue);
+    return generateMockChartData(selectedPeriod, safePnlValue);
   }, [candleData, selectedPeriod, pnlValue]);
   
   // ===== COMPUTED VALUES =====

@@ -774,10 +774,12 @@ export default function DashboardLiquid() {
             {/* Main PnL Chart Card - Spans 2 rows, responsive columns */}
             <div className="col-span-12 md:col-span-6 lg:col-span-5 row-span-2">
               <PnLChartCard 
-                totalPL={totalPL || 0}
-                totalMargin={totalMargin || 0}
-                historicalData={historicalData}
-                isLoading={isUpdating}
+                pnlValue={totalPL || 0}
+                percentageChange={totalMargin > 0 ? ((totalPL || 0) / totalMargin * 100) : 0}
+                subtitle={`Margin: ${formatSats(totalMargin || 0, { size: 16, variant: 'neutral' })}`}
+                showChart={true}
+                showFilters={true}
+                initialPeriod="7D"
               />
             </div>
             
