@@ -120,14 +120,17 @@ export const Automations = () => {
         }
       }
 
-      // Carregar features do plano
-      const featuresResponse = await apiFetch('/api/user/margin-guard/plan-features');
-      if (featuresResponse.ok) {
-        const featuresData = await featuresResponse.json();
-        console.log('🔍 FRONTEND - Plan features response:', featuresData);
-        console.log('🔍 FRONTEND - Plan info:', featuresData.plan_info);
-        setPlanFeatures(featuresData);
-      }
+        // Carregar features do plano
+        const featuresResponse = await apiFetch('/api/user/margin-guard/plan-features');
+        if (featuresResponse.ok) {
+          const featuresData = await featuresResponse.json();
+          console.log('🔍 FRONTEND - Plan features response:', featuresData);
+          console.log('🔍 FRONTEND - Plan info:', featuresData.plan_info);
+          console.log('🔍 FRONTEND - Features object:', featuresData.features);
+          console.log('🔍 FRONTEND - Features modes:', featuresData.features?.modes);
+          console.log('🔍 FRONTEND - Features maxPositions:', featuresData.features?.maxPositions);
+          setPlanFeatures(featuresData);
+        }
 
       // Carregar posições running
       const positionsResponse = await apiFetch('/api/user/margin-guard/positions');
@@ -192,8 +195,8 @@ export const Automations = () => {
         }
         
         // Validar número de posições selecionadas
-        if (marginGuardConfig.mode === 'unitario' && marginGuardConfig.selected_positions.length > planFeatures.maxPositions && planFeatures.maxPositions !== -1) {
-          toast.error(`Máximo ${planFeatures.maxPositions} posições permitidas no seu plano atual`);
+        if (marginGuardConfig.mode === 'unitario' && marginGuardConfig.selected_positions.length > planFeatures.features.maxPositions && planFeatures.features.maxPositions !== -1) {
+          toast.error(`Máximo ${planFeatures.features.maxPositions} posições permitidas no seu plano atual`);
           return;
         }
       }
@@ -254,20 +257,28 @@ export const Automations = () => {
   };
 
   const canSelectMore = () => {
-    if (!planFeatures || typeof planFeatures.maxPositions !== 'number') {
+    if (!planFeatures || !planFeatures.features || typeof planFeatures.features.maxPositions !== 'number') {
       console.warn('🔍 FRONTEND - Plan features not loaded yet for canSelectMore:', { planFeatures });
       return false;
     }
-    if (planFeatures.maxPositions === -1) return true;
-    return marginGuardConfig.selected_positions.length < planFeatures.maxPositions;
+    if (planFeatures.features.maxPositions === -1) return true;
+    return marginGuardConfig.selected_positions.length < planFeatures.features.maxPositions;
   };
 
   const isModeAllowed = (mode: string) => {
-    if (!planFeatures || !planFeatures.modes || !Array.isArray(planFeatures.modes)) {
+    console.log('🔍 FRONTEND - isModeAllowed called:', { 
+      mode, 
+      planFeatures, 
+      modes: planFeatures?.features?.modes,
+      modesType: typeof planFeatures?.features?.modes,
+      isArray: Array.isArray(planFeatures?.features?.modes)
+    });
+    
+    if (!planFeatures || !planFeatures.features || !planFeatures.features.modes || !Array.isArray(planFeatures.features.modes)) {
       console.warn('🔍 FRONTEND - Plan features not loaded yet:', { planFeatures, mode });
       return false;
     }
-    return planFeatures.modes.includes(mode);
+    return planFeatures.features.modes.includes(mode);
   };
 
   return (
@@ -473,9 +484,9 @@ export const Automations = () => {
                         <CardTitle>Posições Running</CardTitle>
                         <CardDescription>
                           Selecione quais posições monitorar
-                          {planFeatures && planFeatures.maxPositions > 0 && (
+                          {planFeatures && planFeatures.features && planFeatures.features.maxPositions > 0 && (
                             <span className="text-orange-600 font-medium">
-                              {' '}(Máximo {planFeatures.maxPositions})
+                              {' '}(Máximo {planFeatures.features.maxPositions})
                             </span>
                           )}
                 </CardDescription>
@@ -851,11 +862,11 @@ export const Automations = () => {
                           <div className="grid grid-cols-2 gap-2 mt-2">
                             <div className="flex items-center gap-2 text-sm">
                               <CheckCircle className="h-3 w-3 text-green-500" />
-                              <span>Modos: {planFeatures.modes?.join(', ') || 'N/A'}</span>
+                              <span>Modos: {planFeatures.features?.modes?.join(', ') || 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
                               <CheckCircle className="h-3 w-3 text-green-500" />
-                              <span>Posições: {planFeatures.maxPositions === -1 ? 'Ilimitado' : planFeatures.maxPositions}</span>
+                              <span>Posições: {planFeatures.features.maxPositions === -1 ? 'Ilimitado' : planFeatures.features.maxPositions}</span>
                             </div>
                           </div>
                         </div>

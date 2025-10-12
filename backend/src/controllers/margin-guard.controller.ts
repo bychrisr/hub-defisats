@@ -332,6 +332,8 @@ export class MarginGuardController {
       console.log('✅ MARGIN GUARD API - Plan features retrieved:', {
         planType: user.plan_type,
         features: planFeatures,
+        featuresModes: planFeatures.modes,
+        featuresMaxPositions: planFeatures.maxPositions,
         upgradesAvailable: availableUpgrades.length,
         planDisplayName: this.getPlanDisplayName(user.plan_type)
       });
