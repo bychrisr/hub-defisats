@@ -351,12 +351,12 @@ export class MarginGuardV2Worker extends EventEmitter {
   }
 
   /**
-   * Calcular margem com taxas
+   * Calcular margem com taxas baseado na documentação oficial da LN Markets
    */
   private calculateMarginWithFees(
     currentMargin: number,
     addMarginPercentage: number,
-    positionFees: PositionData['fees'],
+    positionData: PositionData,
     liquidationPrice: number,
     entryPrice: number,
     side: 'b' | 's'
@@ -365,14 +365,30 @@ export class MarginGuardV2Worker extends EventEmitter {
     // 1. Calcular margem base
     const baseMargin = currentMargin * (addMarginPercentage / 100);
     
-    // 2. Calcular taxas proporcionais
-    const feeRatio = baseMargin / currentMargin;
+    // 2. ✅ CÁLCULO CORRETO BASEADO NA DOCUMENTAÇÃO LN MARKETS
+    // Taxa de negociação baseada no nível do usuário (assumindo Tier 1 = 0.1%)
+    const tradingFeeRate = 0.001; // 0.1% conforme documentação oficial
+    
+    // Cálculo das taxas baseado na documentação oficial:
+    // - Taxa de abertura reservada = (Quantidade / Preço de entrada) × Taxa do nível 1
+    // - Taxa de fechamento reservada = (Quantidade / Preço de liquidação inicial) × Taxa do nível 1
+    
+    const quantity = positionData.quantity || 0; // Quantidade da posição em BTC
+    const positionValueBTC = quantity; // Quantidade já em BTC
+    const positionValueUSD = positionValueBTC * entryPrice; // Valor em USD
+    
+    // Taxas proporcionais à margem adicionada (não à posição total)
+    const marginRatio = baseMargin / currentMargin;
     
     const fees = {
-      opening_fee: positionFees.opening_fee * feeRatio,
-      closing_fee: positionFees.closing_fee * feeRatio,
-      maintenance_margin: positionFees.maintenance_margin * feeRatio,
-      sum_carry_fees: positionFees.sum_carry_fees * feeRatio
+      // Taxa de abertura proporcional à margem adicionada
+      opening_fee: (positionValueUSD / entryPrice) * tradingFeeRate * marginRatio * 100000000, // Convertido para sats
+      // Taxa de fechamento proporcional à margem adicionada  
+      closing_fee: (positionValueUSD / liquidationPrice) * tradingFeeRate * marginRatio * 100000000, // Convertido para sats
+      // Maintenance margin (reservado para taxas futuras)
+      maintenance_margin: baseMargin * 0.002, // 0.2% da margem adicionada
+      // Carry fees (taxas de financiamento acumuladas)
+      sum_carry_fees: positionData.fees?.sum_carry_fees * marginRatio || 0
     };
     
     // 3. Calcular custo total

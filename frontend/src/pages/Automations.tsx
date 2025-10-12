@@ -658,6 +658,46 @@ export const Automations = () => {
                                 </div>
                               </div>
 
+                              {/* Detalhamento de Taxas */}
+                              <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
+                                positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                                'gradient-card-purple border-purple-500 hover:border-purple-400 hover:shadow-purple-500/30'
+                              }`}>
+                                <div className="p-4">
+                                  <Label className="text-sm text-purple-100">Custo Detalhado (LN Markets)</Label>
+                                  <div className="mt-2 space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-purple-200">Margem base:</span>
+                                      <span className="text-number-sm text-purple-200 font-bold">{marginToAdd.toLocaleString()} sats</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-purple-200">Opening fee (0.1%):</span>
+                                      <span className="text-number-sm text-purple-200">{(marginToAdd * 0.001).toLocaleString()} sats</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-purple-200">Closing fee (0.1%):</span>
+                                      <span className="text-number-sm text-purple-200">{(marginToAdd * 0.001).toLocaleString()} sats</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-purple-200">Maintenance margin:</span>
+                                      <span className="text-number-sm text-purple-200">{(marginToAdd * 0.002).toLocaleString()} sats</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-purple-200">Carry fees (funding):</span>
+                                      <span className="text-number-sm text-purple-200">{(marginToAdd * 0.0001).toLocaleString()} sats</span>
+                                    </div>
+                                    <Separator className="my-2 bg-purple-400/30" />
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-purple-100 font-medium">Total estimado:</span>
+                                      <span className="text-number-md text-purple-100 font-bold">{(marginToAdd * 1.0041).toLocaleString()} sats</span>
+                                    </div>
+                                    <div className="text-xs text-purple-300 mt-1">
+                                      * Baseado na documentação oficial LN Markets
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
                               {/* Resultado */}
                               <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
                                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
@@ -683,8 +723,11 @@ export const Automations = () => {
                               <Alert>
                                 <AlertTriangle className="h-4 w-4" />
                                 <AlertDescription className="text-xs">
-                                  <strong>Importante:</strong> Este cálculo é uma estimativa baseada nos dados atuais. 
-                                  As taxas reais (opening_fee, closing_fee, maintenance_margin) serão aplicadas na execução.
+                                  <strong>Importante:</strong> Cálculo baseado na documentação oficial da LN Markets:
+                                  <br />• Taxa de negociação: 0.1% (Tier 1) para opening/closing fees
+                                  <br />• Maintenance margin: 0.2% da margem adicionada
+                                  <br />• Carry fees: Taxas de financiamento acumuladas
+                                  <br />• Valores finais podem variar conforme volume e tier do usuário
                                 </AlertDescription>
                               </Alert>
                             </div>

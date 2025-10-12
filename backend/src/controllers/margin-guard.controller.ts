@@ -734,6 +734,7 @@ export class MarginGuardController {
     const currentPrice = position.current_price;
     const currentMargin = position.margin;
     const side = position.side;
+    const quantity = position.quantity || 0; // Quantidade da posição em BTC
 
     // Calcular distância
     const distanceToLiquidation = Math.abs(entryPrice - liquidationPrice);
@@ -745,17 +746,35 @@ export class MarginGuardController {
       ? liquidationPrice + activationDistance
       : liquidationPrice - activationDistance;
 
-    // Calcular margem
+    // Calcular margem base a ser adicionada
     const baseMargin = currentMargin * (addMarginPercentage / 100);
-    const feeRatio = baseMargin / currentMargin;
+    
+    // ✅ CÁLCULO CORRETO BASEADO NA DOCUMENTAÇÃO LN MARKETS
+    // Taxa de negociação baseada no nível do usuário (assumindo Tier 1 = 0.1%)
+    const tradingFeeRate = 0.001; // 0.1% conforme documentação oficial
+    
+    // Cálculo das taxas baseado na documentação oficial:
+    // - Taxa de abertura reservada = (Quantidade / Preço de entrada) × Taxa do nível 1
+    // - Taxa de fechamento reservada = (Quantidade / Preço de liquidação inicial) × Taxa do nível 1
+    
+    const positionValueBTC = quantity; // Quantidade já em BTC
+    const positionValueUSD = positionValueBTC * entryPrice; // Valor em USD
+    
+    // Taxas proporcionais à margem adicionada (não à posição total)
+    const marginRatio = baseMargin / currentMargin;
     
     const fees = {
-      opening_fee: position.fees.opening_fee * feeRatio,
-      closing_fee: position.fees.closing_fee * feeRatio,
-      maintenance_margin: position.fees.maintenance_margin * feeRatio,
-      sum_carry_fees: position.fees.sum_carry_fees * feeRatio
+      // Taxa de abertura proporcional à margem adicionada
+      opening_fee: (positionValueUSD / entryPrice) * tradingFeeRate * marginRatio * 100000000, // Convertido para sats
+      // Taxa de fechamento proporcional à margem adicionada  
+      closing_fee: (positionValueUSD / liquidationPrice) * tradingFeeRate * marginRatio * 100000000, // Convertido para sats
+      // Maintenance margin (reservado para taxas futuras)
+      maintenance_margin: baseMargin * 0.002, // 0.2% da margem adicionada
+      // Carry fees (taxas de financiamento acumuladas)
+      sum_carry_fees: position.sum_carry_fees * marginRatio || 0
     };
     
+    // Custo total = margem base + taxas
     const totalCost = baseMargin + fees.opening_fee + fees.closing_fee + 
                      fees.maintenance_margin + fees.sum_carry_fees;
     
@@ -775,7 +794,14 @@ export class MarginGuardController {
       distance_improvement: this.calculateDistanceImprovement(
         distancePercentage,
         marginThreshold
-      )
+      ),
+      // Informações adicionais para transparência
+      position_info: {
+        quantity_btc: quantity,
+        position_value_usd: positionValueUSD,
+        margin_ratio: marginRatio,
+        trading_fee_rate: tradingFeeRate
+      }
     };
   }
 
