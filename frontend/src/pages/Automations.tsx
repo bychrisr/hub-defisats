@@ -14,6 +14,7 @@ import { Bot, Plus, Shield, TrendingUp, Zap, AlertTriangle, Activity, TrendingDo
 import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 import { useOptimizedPositions } from '@/hooks/useOptimizedDashboardData';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
+import { useLiquidGlassAnimation } from '@/hooks/useLiquidGlassAnimation';
 import { apiFetch } from '@/lib/fetch';
 
 interface MarginGuardConfig {
@@ -561,21 +562,36 @@ export const Automations = () => {
                           const distanceImprovement = newDistance > currentDistance ? 
                             ((newDistance - currentDistance) / currentDistance) * 100 : 0;
 
+                          // Hook de animação para o preço BTC
+                          const btcAnimation = useLiquidGlassAnimation({
+                            variant: 'info',
+                            value: currentBtcPrice,
+                            isPositive: currentBtcPrice > 0,
+                            isNegative: false,
+                            isNeutral: currentBtcPrice === 0
+                          });
+
                           return (
                             <div className="space-y-4">
                               {/* Preço atual do BTC */}
-                              <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
-                                btcLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
-                                'gradient-card-blue border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30'
-                              }`}>
+                              <div 
+                                className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
+                                  btcLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
+                                  'gradient-card-blue border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30'
+                                }`}
+                                style={btcAnimation.dynamicStyle}
+                                onMouseEnter={btcAnimation.onMouseEnter}
+                                onMouseLeave={btcAnimation.onMouseLeave}
+                                onMouseMove={btcAnimation.onMouseMove}
+                              >
                                 <div className="p-4">
                                   <div className="flex items-center justify-between mb-2">
                                     <Label className="text-sm text-blue-100">Preço Atual BTC</Label>
                                     <Badge variant="outline" className="text-xs border-blue-400/60 text-blue-200 bg-blue-600/20">
                                       Tempo Real
-                              </Badge>
+                                    </Badge>
                                   </div>
-                                  <p className="text-xl font-bold text-blue-200">
+                                  <p className="text-number-lg text-blue-200 font-bold">
                                     ${currentBtcPrice.toLocaleString()}
                                   </p>
                                 </div>
@@ -596,11 +612,11 @@ export const Automations = () => {
                                         'bg-red-600/20 border-red-400/60 text-red-200'
                                       }`}>
                                         {side === 'b' ? 'LONG' : 'SHORT'}
-                                </Badge>
+                                      </Badge>
                                     </div>
                                     <div>
                                       <p className="text-xs text-purple-200">Margem Atual</p>
-                                      <p className="text-sm font-semibold text-purple-200">{currentMargin.toLocaleString()} sats</p>
+                                      <p className="text-number-md text-purple-200 font-bold">{currentMargin.toLocaleString()} sats</p>
                                     </div>
                                   </div>
                                 </div>
@@ -614,7 +630,7 @@ export const Automations = () => {
                                 <div className="p-4">
                                   <Label className="text-sm text-orange-100">Quando o Margin Guard será acionado</Label>
                                   <div className="mt-2">
-                                    <p className="text-lg font-semibold text-orange-200">
+                                    <p className="text-number-lg text-orange-200 font-bold">
                                       ${triggerPrice.toLocaleString()}
                                     </p>
                                     <p className="text-xs text-orange-200">
@@ -632,7 +648,7 @@ export const Automations = () => {
                                 <div className="p-4">
                                   <Label className="text-sm text-green-100">Margem a Adicionar</Label>
                                   <div className="mt-2">
-                                    <p className="text-lg font-semibold text-green-200">
+                                    <p className="text-number-lg text-green-200 font-bold">
                                       {marginToAdd.toLocaleString()} sats
                                     </p>
                                     <p className="text-xs text-green-200">
@@ -650,13 +666,13 @@ export const Automations = () => {
                                 <div className="p-4">
                                   <Label className="text-sm text-green-100">Nova Proteção</Label>
                                   <div className="mt-2">
-                                    <p className="text-lg font-semibold text-green-200">
+                                    <p className="text-number-lg text-green-200 font-bold">
                                       Nova Liquidação: ${newLiquidationPrice.toLocaleString()}
                                     </p>
                                     <p className="text-sm text-green-200">
                                       +{distanceImprovement.toFixed(1)}% de proteção adicional
                                     </p>
-                                    <p className="text-xs text-green-200">
+                                    <p className="text-number-sm text-green-200 font-bold">
                                       Nova margem: {newMargin.toLocaleString()} sats
                                     </p>
                                   </div>
