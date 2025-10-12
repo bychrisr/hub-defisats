@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Bot, Plus, Shield, TrendingUp, Zap, AlertTriangle, Activity, TrendingDown, Target, ArrowRight, CheckCircle } from 'lucide-react';
+import { apiFetch } from '@/lib/fetch';
 
 interface MarginGuardConfig {
   id?: string;
@@ -84,8 +85,10 @@ export const Automations = () => {
     try {
       setLoading(true);
       
+      // ✅ USAR API AUTENTICADA: Usar apiFetch que inclui automaticamente o token Bearer
+      
       // Carregar configuração atual
-      const configResponse = await fetch('/api/user/margin-guard');
+      const configResponse = await apiFetch('/api/user/margin-guard');
       if (configResponse.ok) {
         const configData = await configResponse.json();
         if (configData.config) {
@@ -94,21 +97,21 @@ export const Automations = () => {
       }
 
       // Carregar features do plano
-      const featuresResponse = await fetch('/api/user/margin-guard/plan-features');
+      const featuresResponse = await apiFetch('/api/user/margin-guard/plan-features');
       if (featuresResponse.ok) {
         const featuresData = await featuresResponse.json();
         setPlanFeatures(featuresData.features);
       }
 
       // Carregar posições running
-      const positionsResponse = await fetch('/api/user/margin-guard/positions');
+      const positionsResponse = await apiFetch('/api/user/margin-guard/positions');
       if (positionsResponse.ok) {
         const positionsData = await positionsResponse.json();
-        setPositions(positionsData.positions);
+        setPositions(positionsData.data?.positions || []);
       }
 
       // Carregar upgrades disponíveis
-      const upgradesResponse = await fetch('/api/user/margin-guard/available-upgrades');
+      const upgradesResponse = await apiFetch('/api/user/margin-guard/available-upgrades');
       if (upgradesResponse.ok) {
         const upgradesData = await upgradesResponse.json();
         setAvailableUpgrades(upgradesData.available_upgrades || []);
@@ -129,7 +132,9 @@ export const Automations = () => {
     if (!position) return;
 
     try {
-      const response = await fetch('/api/user/margin-guard/preview', {
+      // ✅ USAR API AUTENTICADA: Usar apiFetch que inclui automaticamente o token Bearer
+      
+      const response = await apiFetch('/api/user/margin-guard/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -152,7 +157,9 @@ export const Automations = () => {
     try {
       setLoading(true);
       
-      const response = await fetch('/api/user/margin-guard', {
+      // ✅ USAR API AUTENTICADA: Usar apiFetch que inclui automaticamente o token Bearer
+      
+      const response = await apiFetch('/api/user/margin-guard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(marginGuardConfig)
