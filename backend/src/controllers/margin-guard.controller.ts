@@ -107,10 +107,28 @@ export class MarginGuardController {
 
         if (!planValidation.isValid) {
           console.log('❌ MARGIN GUARD API - Plan validation failed:', planValidation.error);
-          reply.status(403).json({
+          
+          // Buscar informações detalhadas do plano atual
+          const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { plan_type: true }
+          });
+          
+          const currentPlanFeatures = this.planLimitsService.getMarginGuardFeatures(user?.plan_type || 'basic');
+          const availableUpgrades = await this.planLimitsService.getAvailableUpgrades(user?.plan_type || 'basic');
+          
+          reply.status(403).send({
             error: planValidation.error,
             limitations: planValidation.limitations,
-            availableUpgrades: planValidation.availableUpgrades
+            availableUpgrades: availableUpgrades,
+            currentPlan: {
+              type: user?.plan_type || 'basic',
+              name: this.getPlanDisplayName(user?.plan_type || 'basic'),
+              features: currentPlanFeatures
+            },
+            suggestion: availableUpgrades.length > 0 
+              ? `Considere fazer upgrade para ${availableUpgrades[0]?.name || 'um plano superior'} para desbloquear esta funcionalidade`
+              : 'Entre em contato com o suporte para mais informações'
           });
           return;
         }
@@ -287,28 +305,78 @@ export class MarginGuardController {
         return;
       }
 
+      console.log('🔍 MARGIN GUARD API - Getting plan features for user:', userId);
+
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { plan_type: true }
       });
 
       if (!user) {
+        console.log('❌ MARGIN GUARD API - User not found:', userId);
         reply.status(404).send({ error: 'Usuário não encontrado' });
         return;
       }
 
+      console.log('🔍 MARGIN GUARD API - User plan type:', user.plan_type);
+
       const planFeatures = this.planLimitsService.getMarginGuardFeatures(user.plan_type);
+      const availableUpgrades = await this.planLimitsService.getAvailableUpgrades(user.plan_type);
+
+      console.log('✅ MARGIN GUARD API - Plan features retrieved:', {
+        planType: user.plan_type,
+        features: planFeatures,
+        upgradesAvailable: availableUpgrades.length
+      });
 
       reply.send({
         success: true,
         plan_type: user.plan_type,
-        features: planFeatures
+        features: planFeatures,
+        available_upgrades: availableUpgrades,
+        limitations: planFeatures.limitations,
+        // Informações adicionais para UI
+        plan_info: {
+          name: this.getPlanDisplayName(user.plan_type),
+          description: this.getPlanDescription(user.plan_type),
+          max_positions: planFeatures.maxPositions,
+          supported_modes: planFeatures.modes,
+          available_features: planFeatures.features
+        }
       });
 
     } catch (error: any) {
       console.error('❌ MARGIN GUARD API - Failed to get plan features:', error);
       reply.status(500).send({ error: 'Erro interno do servidor' });
     }
+  }
+
+  /**
+   * Get plan display name
+   */
+  private getPlanDisplayName(planType: string): string {
+    const names = {
+      'free': 'Gratuito',
+      'basic': 'Básico',
+      'advanced': 'Avançado',
+      'pro': 'Profissional',
+      'lifetime': 'Vitalício'
+    };
+    return names[planType as keyof typeof names] || 'Desconhecido';
+  }
+
+  /**
+   * Get plan description
+   */
+  private getPlanDescription(planType: string): string {
+    const descriptions = {
+      'free': 'Margin Guard básico para até 2 posições',
+      'basic': 'Margin Guard para todas as posições (modo global)',
+      'advanced': 'Margin Guard completo com modo unitário',
+      'pro': 'Margin Guard profissional com configurações individuais',
+      'lifetime': 'Margin Guard vitalício com todas as funcionalidades'
+    };
+    return descriptions[planType as keyof typeof descriptions] || 'Plano não identificado';
   }
 
   /**

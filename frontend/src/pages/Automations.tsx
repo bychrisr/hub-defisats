@@ -181,6 +181,21 @@ export const Automations = () => {
     try {
       setLoading(true);
       
+      // Validar limitações do plano antes de salvar
+      if (planFeatures) {
+        // Validar modo
+        if (!isModeAllowed(marginGuardConfig.mode)) {
+          toast.error(`Modo ${marginGuardConfig.mode} não disponível no seu plano atual`);
+          return;
+        }
+        
+        // Validar número de posições selecionadas
+        if (marginGuardConfig.mode === 'unitario' && marginGuardConfig.selected_positions.length > planFeatures.maxPositions && planFeatures.maxPositions !== -1) {
+          toast.error(`Máximo ${planFeatures.maxPositions} posições permitidas no seu plano atual`);
+          return;
+        }
+      }
+      
       // ✅ USAR API AUTENTICADA: Usar apiFetch que inclui automaticamente o token Bearer
       
       const response = await apiFetch('/api/user/margin-guard', {
@@ -193,12 +208,32 @@ export const Automations = () => {
         const data = await response.json();
         setMarginGuardConfig(data.config);
         await calculatePreview();
+        toast.success('Configuração salva com sucesso!');
       } else {
         const errorData = await response.json();
+        if (errorData.limitations && errorData.availableUpgrades) {
+          // Mostrar toast com sugestão de upgrade
+          toast.error(errorData.error, {
+            description: `Upgrades disponíveis: ${errorData.availableUpgrades.map((u: any) => u.name).join(', ')}`,
+            action: {
+              label: 'Ver Upgrades',
+              onClick: () => {
+                // Scroll para a seção de upgrades
+                const upgradesSection = document.querySelector('[data-upgrades]');
+                if (upgradesSection) {
+                  upgradesSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }
+            }
+          });
+        } else {
+          toast.error(errorData.error || 'Erro ao salvar configuração');
+        }
         console.error('Erro ao salvar configuração:', errorData);
       }
     } catch (error) {
       console.error('Erro ao salvar configuração:', error);
+      toast.error('Erro ao salvar configuração');
     } finally {
       setLoading(false);
     }
@@ -737,53 +772,99 @@ export const Automations = () => {
                     </Card>
 
                   {/* Card de Sugestão de Upgrade */}
-                  {isLimitedByPlan && availableUpgrades.length > 0 && (
-                    <Card className="border-primary bg-gradient-to-br from-primary/5 to-primary/10">
+                  {availableUpgrades.length > 0 && (
+                    <Card className="border-blue-200 bg-gradient-to-br from-blue-50/50 to-blue-100/30" data-upgrades>
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <TrendingUp className="h-5 w-5 text-primary" />
-                          Desbloqueie mais recursos
+                        <CardTitle className="flex items-center gap-2 text-blue-700">
+                          <TrendingUp className="h-5 w-5" />
+                          Upgrades Disponíveis
                         </CardTitle>
+                        <CardDescription className="text-blue-600">
+                          Desbloqueie mais funcionalidades do Margin Guard
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Seu plano atual tem limitações. Veja os planos superiores:
+                        <p className="text-sm text-blue-700 mb-4">
+                          {isLimitedByPlan 
+                            ? 'Seu plano atual tem limitações. Veja os planos superiores:' 
+                            : 'Explore planos com funcionalidades avançadas:'
+                          }
                         </p>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {availableUpgrades.slice(0, 3).map((plan) => (
-                            <div key={plan.slug} className="flex items-center justify-between p-3 border rounded hover:bg-muted/50 transition-colors">
-                              <div>
-                                <p className="font-semibold">{plan.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  ${plan.price}/mês
+                            <div key={plan.slug} className="flex items-center justify-between p-3 border border-blue-200 rounded-lg bg-white hover:bg-blue-50/50 transition-colors">
+                              <div className="flex-1">
+                                <p className="font-semibold text-gray-900">{plan.name}</p>
+                                <p className="text-xs text-gray-600 mb-1">
+                                  {plan.features && Object.keys(plan.features).length > 0 && (
+                                    <span>
+                                      {plan.features.margin_guard?.max_positions === -1 
+                                        ? 'Posições ilimitadas' 
+                                        : `Até ${plan.features.margin_guard?.max_positions} posições`
+                                      }
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-sm font-medium text-blue-600">
+                                  {plan.price_sats?.toLocaleString()} sats
                                 </p>
                               </div>
-                              <Button variant="outline" size="sm">
-                                Ver Plano
-                                <ArrowRight className="h-4 w-4 ml-2" />
+                              <Button variant="default" size="sm" className="bg-blue-600 hover:bg-blue-700">
+                                <ArrowRight className="h-3 w-3 mr-1" />
+                                Upgrade
                               </Button>
                             </div>
                           ))}
+                        </div>
+                        <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-700">
+                          💡 Upgrade agora e desbloqueie configurações avançadas do Margin Guard
                         </div>
                       </CardContent>
                     </Card>
                   )}
 
-                  {/* Limitações do Plano */}
-                  {planFeatures && planFeatures.limitations.length > 0 && (
+                  {/* Informações do Plano */}
+                  {planFeatures && (
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-sm">Limitações do Plano</CardTitle>
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Shield className="h-4 w-4" />
+                          Plano Atual: {planFeatures.plan_info?.name || 'Desconhecido'}
+                        </CardTitle>
+                        <CardDescription>
+                          {planFeatures.plan_info?.description || 'Informações do plano não disponíveis'}
+                        </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {planFeatures.limitations.map((limitation, index) => (
-                            <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                              {limitation}
-                            </li>
-                          ))}
-                        </ul>
+                      <CardContent className="space-y-4">
+                        {/* Recursos Disponíveis */}
+                        <div>
+                          <Label className="text-sm font-medium">Recursos Disponíveis</Label>
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                              <span>Modos: {planFeatures.modes?.join(', ') || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                              <span>Posições: {planFeatures.maxPositions === -1 ? 'Ilimitado' : planFeatures.maxPositions}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Limitações */}
+                        {planFeatures.limitations && planFeatures.limitations.length > 0 && (
+                          <div>
+                            <Label className="text-sm font-medium text-orange-600">Limitações</Label>
+                            <ul className="space-y-1 mt-2">
+                              {planFeatures.limitations.map((limitation, index) => (
+                                <li key={index} className="flex items-center gap-2 text-sm text-orange-600">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  {limitation}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   )}
