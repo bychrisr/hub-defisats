@@ -25,12 +25,25 @@ export class MarginGuardController {
    * Criar ou atualizar configuração do Margin Guard
    */
   async createOrUpdateConfig(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    console.log('🚀 MARGIN GUARD API - createOrUpdateConfig called');
     try {
       const userId = (request as any).user?.id;
+      console.log('🔍 MARGIN GUARD API - User ID:', userId);
+      
       if (!userId) {
+        console.log('❌ MARGIN GUARD API - No user ID found');
         reply.status(401).send({ error: 'Usuário não autenticado' });
         return;
       }
+
+      const requestBody = request.body as any;
+      console.log('🔍 MARGIN GUARD API - Request body:', {
+        mode: requestBody.mode,
+        margin_threshold: requestBody.margin_threshold,
+        add_margin_percentage: requestBody.add_margin_percentage,
+        selected_positions: requestBody.selected_positions,
+        is_active: requestBody.is_active
+      });
 
       const {
         mode,
@@ -38,10 +51,16 @@ export class MarginGuardController {
         add_margin_percentage,
         selected_positions = [],
         is_active = true
-      } = request.body as any;
+      } = requestBody;
 
       // 1. Validar dados
+      console.log('🔍 MARGIN GUARD API - Validating input data...');
       if (!mode || !margin_threshold || !add_margin_percentage) {
+        console.log('❌ MARGIN GUARD API - Missing required fields:', {
+          mode: !!mode,
+          margin_threshold: !!margin_threshold,
+          add_margin_percentage: !!add_margin_percentage
+        });
         reply.status(400).send({ 
           error: 'Dados obrigatórios: mode, margin_threshold, add_margin_percentage' 
         });
@@ -49,104 +68,170 @@ export class MarginGuardController {
       }
 
       if (!['unitario', 'global'].includes(mode)) {
+        console.log('❌ MARGIN GUARD API - Invalid mode:', mode);
         reply.status(400).send({ error: 'Mode deve ser "unitario" ou "global"' });
         return;
       }
 
       if (margin_threshold < 5 || margin_threshold > 95) {
+        console.log('❌ MARGIN GUARD API - Invalid margin_threshold:', margin_threshold);
         reply.status(400).send({ error: 'margin_threshold deve estar entre 5% e 95%' });
         return;
       }
 
       if (add_margin_percentage < 10 || add_margin_percentage > 100) {
+        console.log('❌ MARGIN GUARD API - Invalid add_margin_percentage:', add_margin_percentage);
         reply.status(400).send({ error: 'add_margin_percentage deve estar entre 10% e 100%' });
         return;
       }
 
-      // 2. Validar limitações do plano
-      const planValidation = await this.planLimitsService.validateMarginGuardConfig({
-        userId,
-        mode,
-        selectedPositions: selected_positions,
-        marginThreshold: margin_threshold,
-        addMarginPercentage: add_margin_percentage
-      });
+      console.log('✅ MARGIN GUARD API - Input validation passed');
 
-      if (!planValidation.isValid) {
-        reply.status(403).json({
-          error: planValidation.error,
-          limitations: planValidation.limitations,
-          availableUpgrades: planValidation.availableUpgrades
+      // 2. Validar limitações do plano
+      console.log('🔍 MARGIN GUARD API - Validating plan limitations...');
+      try {
+        const planValidation = await this.planLimitsService.validateMarginGuardConfig({
+          userId,
+          mode,
+          selectedPositions: selected_positions,
+          marginThreshold: margin_threshold,
+          addMarginPercentage: add_margin_percentage
         });
-        return;
+
+        console.log('🔍 MARGIN GUARD API - Plan validation result:', {
+          isValid: planValidation.isValid,
+          error: planValidation.error,
+          hasLimitations: !!planValidation.limitations,
+          hasUpgrades: !!planValidation.availableUpgrades
+        });
+
+        if (!planValidation.isValid) {
+          console.log('❌ MARGIN GUARD API - Plan validation failed:', planValidation.error);
+          reply.status(403).json({
+            error: planValidation.error,
+            limitations: planValidation.limitations,
+            availableUpgrades: planValidation.availableUpgrades
+          });
+          return;
+        }
+        console.log('✅ MARGIN GUARD API - Plan validation passed');
+      } catch (planError: any) {
+        console.error('❌ MARGIN GUARD API - Plan validation error:', planError);
+        throw planError;
       }
 
       // 3. Se modo unitário, validar posições selecionadas
       if (mode === 'unitario' && selected_positions.length > 0) {
-        const positions = await this.fetchRunningPositions(userId);
-        const validPositions = positions.map(p => p.trade_id);
-        const invalidPositions = selected_positions.filter(id => !validPositions.includes(id));
-        
-        if (invalidPositions.length > 0) {
-          reply.status(400).send({ 
-            error: `Posições inválidas: ${invalidPositions.join(', ')}` 
+        console.log('🔍 MARGIN GUARD API - Validating selected positions for unitario mode...');
+        try {
+          const positions = await this.fetchRunningPositions(userId);
+          console.log('🔍 MARGIN GUARD API - Fetched positions:', positions.length);
+          
+          const validPositions = positions.map(p => p.trade_id);
+          const invalidPositions = selected_positions.filter(id => !validPositions.includes(id));
+          
+          console.log('🔍 MARGIN GUARD API - Position validation:', {
+            selectedPositions: selected_positions.length,
+            validPositions: validPositions.length,
+            invalidPositions: invalidPositions.length
           });
-          return;
+          
+          if (invalidPositions.length > 0) {
+            console.log('❌ MARGIN GUARD API - Invalid positions found:', invalidPositions);
+            reply.status(400).send({ 
+              error: `Posições inválidas: ${invalidPositions.join(', ')}` 
+            });
+            return;
+          }
+          console.log('✅ MARGIN GUARD API - Position validation passed');
+        } catch (positionError: any) {
+          console.error('❌ MARGIN GUARD API - Position validation error:', positionError);
+          throw positionError;
         }
       }
 
       // 4. Criar ou atualizar configuração
-      const config = await this.prisma.marginGuardConfig.upsert({
-        where: { user_id: userId },
-        update: {
-          mode,
-          margin_threshold,
-          add_margin_percentage,
-          selected_positions: mode === 'unitario' ? selected_positions : [],
-          is_active,
-          updated_at: new Date()
-        },
-        create: {
-          user_id: userId,
-          mode,
-          margin_threshold,
-          add_margin_percentage,
-          selected_positions: mode === 'unitario' ? selected_positions : [],
-          is_active
-        }
-      });
+      console.log('🔍 MARGIN GUARD API - Creating/updating configuration...');
+      try {
+        const config = await this.prisma.marginGuardConfig.upsert({
+          where: { user_id: userId },
+          update: {
+            mode,
+            margin_threshold,
+            add_margin_percentage,
+            selected_positions: mode === 'unitario' ? selected_positions : [],
+            is_active,
+            updated_at: new Date()
+          },
+          create: {
+            user_id: userId,
+            mode,
+            margin_threshold,
+            add_margin_percentage,
+            selected_positions: mode === 'unitario' ? selected_positions : [],
+            is_active
+          }
+        });
 
-      // 5. Atualizar worker se ativo
-      if (is_active) {
-        const worker = getMarginGuardV2Worker(this.prisma);
-        await worker.addConfiguration(config);
-      }
-
-      console.log('✅ MARGIN GUARD API - Configuration saved:', {
-        userId,
-        configId: config.id,
-        mode,
-        marginThreshold: margin_threshold,
-        addMarginPercentage: add_margin_percentage
-      });
-
-      reply.send({
-        success: true,
-        config: {
-          id: config.id,
+        console.log('✅ MARGIN GUARD API - Configuration saved:', {
+          configId: config.id,
           mode: config.mode,
-          margin_threshold: config.margin_threshold,
-          add_margin_percentage: config.add_margin_percentage,
-          selected_positions: config.selected_positions,
-          is_active: config.is_active,
-          created_at: config.created_at,
-          updated_at: config.updated_at
+          marginThreshold: config.margin_threshold,
+          addMarginPercentage: config.add_margin_percentage,
+          isActive: config.is_active
+        });
+
+        // 5. Atualizar worker se ativo
+        if (is_active) {
+          console.log('🔍 MARGIN GUARD API - Updating worker configuration...');
+          try {
+            const worker = getMarginGuardV2Worker(this.prisma);
+            await worker.addConfiguration(config);
+            console.log('✅ MARGIN GUARD API - Worker configuration updated');
+          } catch (workerError: any) {
+            console.error('❌ MARGIN GUARD API - Worker update error:', workerError);
+            // Não falhar por causa do worker, apenas logar o erro
+          }
         }
-      });
+
+        console.log('✅ MARGIN GUARD API - Final configuration saved:', {
+          userId,
+          configId: config.id,
+          mode,
+          marginThreshold: margin_threshold,
+          addMarginPercentage: add_margin_percentage
+        });
+
+        reply.send({
+          success: true,
+          config: {
+            id: config.id,
+            mode: config.mode,
+            margin_threshold: config.margin_threshold,
+            add_margin_percentage: config.add_margin_percentage,
+            selected_positions: config.selected_positions,
+            is_active: config.is_active,
+            created_at: config.created_at,
+            updated_at: config.updated_at
+          }
+        });
+      } catch (dbError: any) {
+        console.error('❌ MARGIN GUARD API - Database operation error:', dbError);
+        throw dbError;
+      }
 
     } catch (error: any) {
       console.error('❌ MARGIN GUARD API - Failed to create/update config:', error);
-      reply.status(500).send({ error: 'Erro interno do servidor' });
+      console.error('❌ MARGIN GUARD API - Error details:', {
+        message: error.message,
+        stack: error.stack,
+        code: error.code,
+        name: error.name
+      });
+      reply.status(500).send({ 
+        error: 'Erro interno do servidor',
+        details: error.message 
+      });
     }
   }
 
@@ -557,28 +642,29 @@ export class MarginGuardController {
   private async fetchRunningPositions(userId: string): Promise<any[]> {
     console.log('🔍 MARGIN GUARD - Fetching running positions for user:', userId);
     
-    // Buscar TODAS as contas ativas do usuário (não apenas a primeira)
-    const activeAccounts = await this.prisma.userExchangeAccounts.findMany({
-      where: {
-        user_id: userId,
-        is_active: true,
-        exchange: {
-          slug: 'ln-markets' // Apenas LN Markets por enquanto
+    try {
+      // Buscar TODAS as contas ativas do usuário (não apenas a primeira)
+      const activeAccounts = await this.prisma.userExchangeAccounts.findMany({
+        where: {
+          user_id: userId,
+          is_active: true,
+          exchange: {
+            slug: 'ln-markets' // Apenas LN Markets por enquanto
+          }
+        },
+        include: {
+          exchange: true
         }
-      },
-      include: {
-        exchange: true
-      }
-    });
+      });
 
-    console.log('🔍 MARGIN GUARD - Found active accounts:', {
-      count: activeAccounts.length,
-      accounts: activeAccounts.map(acc => ({
-        id: acc.id,
-        accountName: acc.account_name,
-        exchangeName: acc.exchange.name
-      }))
-    });
+      console.log('🔍 MARGIN GUARD - Found active accounts:', {
+        count: activeAccounts.length,
+        accounts: activeAccounts.map(acc => ({
+          id: acc.id,
+          accountName: acc.account_name,
+          exchangeName: acc.exchange.name
+        }))
+      });
 
     if (!activeAccounts.length) {
       console.log('⚠️ MARGIN GUARD - No active LN Markets accounts found');
@@ -624,8 +710,17 @@ export class MarginGuardController {
       }
     }
 
-    console.log(`✅ MARGIN GUARD - Total active positions across all accounts: ${allPositions.length}`);
-    return allPositions;
+      console.log(`✅ MARGIN GUARD - Total active positions across all accounts: ${allPositions.length}`);
+      return allPositions;
+    } catch (error: any) {
+      console.error('❌ MARGIN GUARD - Error in fetchRunningPositions:', error);
+      console.error('❌ MARGIN GUARD - Error details:', {
+        message: error.message,
+        stack: error.stack,
+        code: error.code
+      });
+      return []; // Retornar array vazio em caso de erro
+    }
   }
 
   private calculateDistancePercentage(entryPrice: number, liquidationPrice: number): number {
