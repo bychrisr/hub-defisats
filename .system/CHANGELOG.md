@@ -8,6 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Liquid Glass Design System (v1.0.0)**: Sistema de design moderno inspirado no iOS 26 Glass Liquid
+  - Implementação do LiquidGlassCard como componente base
+  - Sistema de tooltips com efeito liquid glass
+  - PnLChartCard com gráfico integrado e filtros temporais
+  - MetricMiniCard para métricas específicas (Active Trades, Balance, Margin)
+  - TimeFilter component para filtros de período (24H, 7D, 30D, 90D, ALL)
+  - Hook useLiquidGlassAnimation para gerenciar animações fluidas
+  - Layout mosaic responsivo para dashboard
+  - Validação robusta de dados para prevenir erros NaN
+  - CSS classes liquid-glass reutilizáveis
+  - Integração completa com DashboardLiquid.tsx
+  - Documentação completa do design system
+  - Rotas configuradas: / para liquid, /dashboard-classic para original
+
+### Fixed
+- **Dashboard NaN Errors**: Correção de erros NaN no PnLChartCard
+  - Validação de entrada no SimpleLineChart para prevenir valores NaN
+  - Validação de pnlValue e dados do gráfico antes de renderizar elementos SVG
+  - Fallback para dados vazios/inválidos com mensagem 'No data available'
+  - Correção do mapeamento de props no DashboardLiquid para PnLChartCard
+  - Garantia de que todas as operações matemáticas lidam com valores NaN/infinitos de forma segura
+  - Validação safePnlValue na função generateMockChartData
+  - Correção do erro 'animation.getTextColor is not a function' no MetricMiniCard
+
 - **LND Integration Validation (v2.6.0)**: Validação completa da integração LND ↔ LN Markets
   - Validação da integração LND testnet com LN Markets
   - Wallet LND criada e configurada com sucesso
