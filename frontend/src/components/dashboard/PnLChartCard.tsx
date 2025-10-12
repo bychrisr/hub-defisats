@@ -117,7 +117,7 @@ const SimpleLineChart: React.FC<{
         width="100%"
         height="100%"
         viewBox={`0 0 ${width} ${height}`}
-        className="overflow-visible"
+        className="overflow-hidden"
       >
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
@@ -257,7 +257,7 @@ export const PnLChartCard: React.FC<PnLChartCardProps> = ({
         position="top" 
         delay={300}
       >
-        <div className="p-6 h-full flex flex-col">
+        <div className="p-6 h-full flex flex-col max-h-[320px]">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
