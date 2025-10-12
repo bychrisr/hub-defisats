@@ -88,18 +88,27 @@ export class LNDService implements LNDServiceInterface {
     const macaroonPath = process.env.LND_TESTNET_MACAROON_PATH || '/tmp/admin.macaroon';
     const tlsCertPath = process.env.LND_TESTNET_TLS_CERT_PATH || '/tmp/tls.cert';
 
+    // Try to use environment variables first, then fallback to files
+    let macaroon = process.env.LND_TESTNET_MACAROON || '0201036c6e6402f801030a10239bc8cdfc29d18f1db01c638b7cb09f1201301a160a0761646472657373120472656164120577726974651a130a04696e666f120472656164120577726974651a170a08696e766f69636573120472656164120577726974651a210a086d616361726f6f6e120867656e6572617465120472656164120577726974651a160a076d657373616765120472656164120577726974651a170a086f6666636861696e120472656164120577726974651a160a076f6e636861696e120472656164120577726974651a140a057065657273120472656164120577726974651a180a067369676e6572120867656e6572617465120472656164000006201a0f20cab5866010636490854051e32afa5d0286868f019fa273027cbfe29b77';
+    let tlsCert = process.env.LND_TESTNET_TLS_CERT || '';
+
+    // If not in environment variables, try to read from files
+    if (!macaroon && fs.existsSync(macaroonPath)) {
+      macaroon = this.readMacaroon(macaroonPath);
+    }
+    
+    if (!tlsCert && fs.existsSync(tlsCertPath)) {
+      tlsCert = this.readTLSCert(tlsCertPath);
+    }
+
     this.logger.info('🔧 Building testnet config:', {
       baseURL,
       macaroonPath,
       tlsCertPath,
       macaroonExists: fs.existsSync(macaroonPath),
-      tlsCertExists: fs.existsSync(tlsCertPath)
-    });
-
-    const macaroon = this.readMacaroon(macaroonPath);
-    const tlsCert = this.readTLSCert(tlsCertPath);
-
-    this.logger.info('🔧 Credentials loaded:', {
+      tlsCertExists: fs.existsSync(tlsCertPath),
+      macaroonFromEnv: !!process.env.LND_TESTNET_MACAROON,
+      tlsCertFromEnv: !!process.env.LND_TESTNET_TLS_CERT,
       macaroonLength: macaroon.length,
       tlsCertLength: tlsCert.length
     });

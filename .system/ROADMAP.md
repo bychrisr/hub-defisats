@@ -80,9 +80,15 @@
   - [x] REST API funcionando com autenticação
   - [x] Macaroon configurado corretamente
   - [x] Validação de integração LND ↔ LN Markets
+  - [x] Sistema de funding interno (testnet faucet)
+  - [x] Documentação completa (30+ arquivos)
+  - [x] Sistema de gestão de posições
   - [ ] Processamento de pagamentos (próxima fase)
   - [ ] Webhooks de confirmação (próxima fase)
   - [ ] Sistema de billing (próxima fase)
+  - [ ] **Melhorias Opcionais** ⚠️
+    - [ ] Corrigir LNDService backend (erro de inicialização)
+    - [ ] Completar sincronização Bitcoin testnet (80.4% → 100%)
 
 - [ ] **Landing Page Comercial**
   - [ ] Design responsivo
