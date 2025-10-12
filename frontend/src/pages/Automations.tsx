@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Bot, Plus, Shield, TrendingUp, Zap, AlertTriangle, Activity, TrendingDown, Target, ArrowRight, CheckCircle } from 'lucide-react';
 import { useRealtimeData } from '@/contexts/RealtimeDataContext';
+import { useOptimizedPositions } from '@/hooks/useOptimizedDashboardData';
 import { apiFetch } from '@/lib/fetch';
 
 interface MarginGuardConfig {
@@ -54,7 +55,8 @@ interface UpgradePlan {
 }
 
 export const Automations = () => {
-  const { marketData, dashboardData } = useRealtimeData();
+  const { marketData } = useRealtimeData();
+  const { positions: optimizedPositions, isLoading: positionsLoading } = useOptimizedPositions();
   
   // Estados para Margin Guard
   const [marginGuardConfig, setMarginGuardConfig] = useState<MarginGuardConfig>({
@@ -472,10 +474,37 @@ export const Automations = () => {
                     </CardHeader>
                       <CardContent>
                         {(() => {
+                          // Debug: Log dos dados disponíveis
+                          console.log('🔍 MARGIN GUARD PREVIEW - Debug data:', {
+                            marketData: marketData,
+                            optimizedPositions: optimizedPositions,
+                            positionsLoading: positionsLoading,
+                            btcPrice: marketData?.['BTC']?.price,
+                            positionsLength: optimizedPositions?.length
+                          });
+
                           // Dados em tempo real
-                          const btcPrice = marketData?.['BTC']?.price || dashboardData?.lnMarkets?.ticker?.lastPrice || 0;
-                          const positions = dashboardData?.lnMarkets?.positions || [];
+                          const btcPrice = marketData?.['BTC']?.price || 0;
+                          const positions = optimizedPositions || [];
                           const activePositions = positions.filter(pos => pos.quantity > 0);
+                          
+                          console.log('🔍 MARGIN GUARD PREVIEW - Filtered positions:', {
+                            totalPositions: positions.length,
+                            activePositions: activePositions.length,
+                            positionsData: positions,
+                            activePositionsData: activePositions
+                          });
+                          
+                          if (positionsLoading) {
+                            return (
+                              <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                <p className="text-sm text-muted-foreground">
+                                  Carregando posições...
+                                </p>
+                              </div>
+                            );
+                          }
                           
                           if (activePositions.length === 0) {
                             return (
@@ -483,6 +512,9 @@ export const Automations = () => {
                                 <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
                                 <p className="text-sm text-muted-foreground">
                                   Nenhuma posição ativa encontrada
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Debug: {positions.length} posições totais, {activePositions.length} ativas
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
                                   Abra uma posição para ver o preview
