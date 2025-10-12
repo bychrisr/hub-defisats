@@ -87,12 +87,26 @@ const SimpleLineChart: React.FC<{
   const padding = 20;
   
   const points = validData.map((point, index) => {
-    const x = (index / (validData.length - 1)) * (width - 2 * padding) + padding;
-    const y = height - padding - ((point.value - minValue) / range) * (height - 2 * padding);
+    // Prevent division by zero when there's only one data point
+    const xRatio = validData.length > 1 ? index / (validData.length - 1) : 0;
+    const x = xRatio * (width - 2 * padding) + padding;
+    
+    // Ensure y calculation is safe
+    const yValue = Number.isFinite(point.value) ? point.value : 0;
+    const safeMinValue = Number.isFinite(minValue) ? minValue : 0;
+    const safeRange = Number.isFinite(range) && range > 0 ? range : 1;
+    const y = height - padding - ((yValue - safeMinValue) / safeRange) * (height - 2 * padding);
+    
     return `${x},${y}`;
   }).join(' ');
   
-  const pathData = `M ${points}`;
+  // Validate that all points are valid numbers
+  const validPoints = points.split(' ').filter(point => {
+    const [x, y] = point.split(',');
+    return Number.isFinite(parseFloat(x)) && Number.isFinite(parseFloat(y));
+  }).join(' ');
+  
+  const pathData = `M ${validPoints}`;
   
   // Gradient definition
   const gradientId = `gradient-${isPositive ? 'positive' : 'negative'}`;
@@ -138,15 +152,25 @@ const SimpleLineChart: React.FC<{
         />
         
         {/* Current point */}
-        {validData.length > 0 && (
-          <circle
-            cx={width - padding}
-            cy={height - padding - ((safePnlValue - minValue) / range) * (height - 2 * padding)}
-            r="4"
-            fill={isPositive ? '#22c55e' : '#ef4444'}
-            className="drop-shadow-sm"
-          />
-        )}
+        {validData.length > 0 && (() => {
+          const safeMinValue = Number.isFinite(minValue) ? minValue : 0;
+          const safeRange = Number.isFinite(range) && range > 0 ? range : 1;
+          const cyValue = height - padding - ((safePnlValue - safeMinValue) / safeRange) * (height - 2 * padding);
+          
+          // Only render if cy is a valid number
+          if (Number.isFinite(cyValue)) {
+            return (
+              <circle
+                cx={width - padding}
+                cy={cyValue}
+                r="4"
+                fill={isPositive ? '#22c55e' : '#ef4444'}
+                className="drop-shadow-sm"
+              />
+            );
+          }
+          return null;
+        })()}
       </svg>
     </div>
   );
