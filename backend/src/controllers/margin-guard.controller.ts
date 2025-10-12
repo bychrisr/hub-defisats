@@ -319,6 +319,12 @@ export class MarginGuardController {
       }
 
       console.log('🔍 MARGIN GUARD API - User plan type:', user.plan_type);
+      console.log('🔍 MARGIN GUARD API - User plan type (raw):', JSON.stringify(user.plan_type));
+      console.log('🔍 MARGIN GUARD API - Plan type check:', {
+        isLifetime: user.plan_type === 'lifetime',
+        type: typeof user.plan_type,
+        length: user.plan_type?.length
+      });
 
       const planFeatures = this.planLimitsService.getMarginGuardFeatures(user.plan_type);
       const availableUpgrades = await this.planLimitsService.getAvailableUpgrades(user.plan_type);
@@ -326,7 +332,8 @@ export class MarginGuardController {
       console.log('✅ MARGIN GUARD API - Plan features retrieved:', {
         planType: user.plan_type,
         features: planFeatures,
-        upgradesAvailable: availableUpgrades.length
+        upgradesAvailable: availableUpgrades.length,
+        planDisplayName: this.getPlanDisplayName(user.plan_type)
       });
 
       reply.send({
@@ -355,6 +362,15 @@ export class MarginGuardController {
    * Get plan display name
    */
   private getPlanDisplayName(planType: string): string {
+    // Normalizar o tipo de plano (trim, lowercase)
+    const normalizedPlanType = (planType || '').toString().trim().toLowerCase();
+    
+    console.log('🔍 PLAN DISPLAY NAME - Input:', {
+      original: planType,
+      normalized: normalizedPlanType,
+      type: typeof planType
+    });
+
     const names = {
       'free': 'Gratuito',
       'basic': 'Básico',
@@ -362,13 +378,25 @@ export class MarginGuardController {
       'pro': 'Profissional',
       'lifetime': 'Vitalício'
     };
-    return names[planType as keyof typeof names] || 'Desconhecido';
+    
+    const result = names[normalizedPlanType as keyof typeof names] || 'Desconhecido';
+    
+    console.log('✅ PLAN DISPLAY NAME - Result:', {
+      input: normalizedPlanType,
+      found: !!names[normalizedPlanType as keyof typeof names],
+      result
+    });
+    
+    return result;
   }
 
   /**
    * Get plan description
    */
   private getPlanDescription(planType: string): string {
+    // Normalizar o tipo de plano (trim, lowercase)
+    const normalizedPlanType = (planType || '').toString().trim().toLowerCase();
+    
     const descriptions = {
       'free': 'Margin Guard básico para até 2 posições',
       'basic': 'Margin Guard para todas as posições (modo global)',
@@ -376,7 +404,7 @@ export class MarginGuardController {
       'pro': 'Margin Guard profissional com configurações individuais',
       'lifetime': 'Margin Guard vitalício com todas as funcionalidades'
     };
-    return descriptions[planType as keyof typeof descriptions] || 'Plano não identificado';
+    return descriptions[normalizedPlanType as keyof typeof descriptions] || 'Plano não identificado';
   }
 
   /**

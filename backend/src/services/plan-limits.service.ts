@@ -33,6 +33,12 @@ export class PlanLimitsService {
    * Obter features do Margin Guard por plano
    */
   getMarginGuardFeatures(planType: string): MarginGuardFeatures {
+    console.log('🔍 PLAN LIMITS SERVICE - Getting features for plan:', {
+      planType,
+      planTypeString: JSON.stringify(planType),
+      type: typeof planType
+    });
+
     const planLimits = {
       'free': {
         maxPositions: 2,
@@ -76,7 +82,15 @@ export class PlanLimitsService {
       }
     };
 
-    return planLimits[planType as keyof typeof planLimits] || planLimits.free;
+    const result = planLimits[planType as keyof typeof planLimits] || planLimits.free;
+    
+    console.log('✅ PLAN LIMITS SERVICE - Returning features:', {
+      planType,
+      found: !!planLimits[planType as keyof typeof planLimits],
+      result: result
+    });
+
+    return result;
   }
 
   /**
