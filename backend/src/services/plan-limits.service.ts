@@ -1,478 +1,326 @@
-import { getPrisma } from '../lib/prisma';
+import { PrismaClient } from '@prisma/client';
 
-export interface PlanLimits {
-  id: string;
-  planId: string;
-  maxExchangeAccounts: number;
-  maxAutomations: number;
-  maxIndicators: number;
-  maxSimulations: number;
-  maxBacktests: number;
-  createdAt: string;  // ✅ Mudado de Date para string
-  updatedAt: string;  // ✅ Mudado de Date para string
-  plan: {
-    id: string;
-    name: string;
-    slug: string;
-  };
+export interface MarginGuardConfigRequest {
+  userId: string;
+  mode: 'unitario' | 'global';
+  selectedPositions: string[];
+  marginThreshold: number;
+  addMarginPercentage: number;
 }
 
-export interface CreatePlanLimitsRequest {
-  planId: string;
-  maxExchangeAccounts: number;
-  maxAutomations: number;
-  maxIndicators: number;
-  maxSimulations: number;
-  maxBacktests: number;
-}
-
-export interface UpdatePlanLimitsRequest {
-  id: string;
-  maxExchangeAccounts?: number;
-  maxAutomations?: number;
-  maxIndicators?: number;
-  maxSimulations?: number;
-  maxBacktests?: number;
-}
-
-export interface LimitValidationResult {
+export interface PlanValidationResult {
   isValid: boolean;
-  currentCount: number;
-  maxLimit: number;
-  limitType: string;
-  message?: string;
+  error?: string;
+  limitations?: any;
+  availableUpgrades?: any[];
+}
+
+export interface MarginGuardFeatures {
+  maxPositions: number;
+  modes: string[];
+  features: string[];
+  limitations: string[];
 }
 
 export class PlanLimitsService {
-  private async getPrisma() {
-    try {
-      return await getPrisma();
-    } catch (error) {
-      console.error('❌ PlanLimitsService - Error getting Prisma client:', error);
-      throw error;
-    }
+  private prisma: PrismaClient;
+
+  constructor(prisma: PrismaClient) {
+    this.prisma = prisma;
   }
 
   /**
-   * Criar limites para um plano
+   * Obter features do Margin Guard por plano
    */
-  async createPlanLimits(data: CreatePlanLimitsRequest): Promise<PlanLimits> {
-    try {
-      // Verificar se o plano existe
-      const prisma = await this.getPrisma();
-      const plan = await prisma.plan.findUnique({
-        where: { id: data.planId }
-      });
-
-      if (!plan) {
-        throw new Error('Plan not found');
+  getMarginGuardFeatures(planType: string): MarginGuardFeatures {
+    const planLimits = {
+      'free': {
+        maxPositions: 2,
+        modes: ['global'],
+        features: ['basic_config', 'preview'],
+        limitations: [
+          'Máximo 2 posições monitoradas',
+          'Apenas modo global',
+          'Configurações básicas'
+        ]
+      },
+      'basic': {
+        maxPositions: -1, // ilimitado
+        modes: ['global'],
+        features: ['basic_config', 'preview', 'reports'],
+        limitations: [
+          'Apenas modo global',
+          'Configurações padrão'
+        ]
+      },
+      'advanced': {
+        maxPositions: -1,
+        modes: ['unitario', 'global'],
+        features: ['advanced_config', 'preview', 'reports', 'statistics'],
+        limitations: [
+          'Configurações avançadas',
+          'Modo unitário disponível'
+        ]
+      },
+      'pro': {
+        maxPositions: -1,
+        modes: ['unitario', 'global', 'individual'],
+        features: ['all_features', 'priority_support'],
+        limitations: []
+      },
+      'lifetime': {
+        maxPositions: -1,
+        modes: ['unitario', 'global', 'individual'],
+        features: ['all_features', 'priority_support', 'custom_configs'],
+        limitations: []
       }
+    };
 
-      // Verificar se já existem limites para este plano
-      const existingLimits = await prisma.planLimits.findUnique({
-        where: { plan_id: data.planId }
-      });
-
-      if (existingLimits) {
-        throw new Error('Plan limits already exist for this plan');
-      }
-
-      const planLimits = await prisma.planLimits.create({
-        data: {
-          plan_id: data.planId,
-          max_exchange_accounts: data.maxExchangeAccounts,
-          max_automations: data.maxAutomations,
-          max_indicators: data.maxIndicators,
-          max_simulations: data.maxSimulations,
-          max_backtests: data.maxBacktests
-        },
-        include: {
-          plan: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          }
-        }
-      });
-
-      console.log(`✅ PlanLimitsService - Created limits for plan: ${plan.name}`);
-      return {
-        id: planLimits.id,
-        planId: planLimits.plan_id,
-        maxExchangeAccounts: planLimits.max_exchange_accounts,
-        maxAutomations: planLimits.max_automations,
-        maxIndicators: planLimits.max_indicators,
-        maxSimulations: planLimits.max_simulations,
-        maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at.toISOString(),
-        updatedAt: planLimits.updated_at.toISOString(),
-        plan: planLimits.plan
-      };
-
-    } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error creating plan limits:', error);
-      throw new Error(`Failed to create plan limits: ${error.message}`);
-    }
+    return planLimits[planType as keyof typeof planLimits] || planLimits.free;
   }
 
   /**
-   * Atualizar limites de um plano
+   * Validar configuração do Margin Guard
    */
-  async updatePlanLimits(data: UpdatePlanLimitsRequest): Promise<PlanLimits> {
+  async validateMarginGuardConfig(config: MarginGuardConfigRequest): Promise<PlanValidationResult> {
     try {
-      const prisma = await this.getPrisma();
-      const planLimits = await prisma.planLimits.update({
-        where: { id: data.id },
-        data: {
-          max_exchange_accounts: data.maxExchangeAccounts,
-          max_automations: data.maxAutomations,
-          max_indicators: data.maxIndicators,
-          max_simulations: data.maxSimulations,
-          max_backtests: data.maxBacktests,
-          updated_at: new Date()
-        },
-        include: {
-          plan: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          }
-        }
-      });
-
-      console.log(`✅ PlanLimitsService - Updated limits for plan: ${planLimits.plan.name}`);
-      
-      const result = {
-        id: planLimits.id,
-        planId: planLimits.plan_id,
-        maxExchangeAccounts: planLimits.max_exchange_accounts,
-        maxAutomations: planLimits.max_automations,
-        maxIndicators: planLimits.max_indicators,
-        maxSimulations: planLimits.max_simulations,
-        maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at.toISOString(),
-        updatedAt: planLimits.updated_at.toISOString(),
-        plan: planLimits.plan
-      };
-      
-      console.log('🔍 PlanLimitsService - updatePlanLimits - Result object:', result);
-      console.log('🔍 PlanLimitsService - updatePlanLimits - Result stringified:', JSON.stringify(result, null, 2));
-      
-      return result;
-
-    } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error updating plan limits:', error);
-      throw new Error(`Failed to update plan limits: ${error.message}`);
-    }
-  }
-
-  /**
-   * Obter limites de um plano
-   */
-  async getPlanLimits(planId: string): Promise<PlanLimits | null> {
-    try {
-      const prisma = await this.getPrisma();
-      const planLimits = await prisma.planLimits.findUnique({
-        where: { plan_id: planId },
-        include: {
-          plan: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          }
-        }
-      });
-
-      if (!planLimits) return null;
-      
-      return {
-        id: planLimits.id,
-        planId: planLimits.plan_id,
-        maxExchangeAccounts: planLimits.max_exchange_accounts,
-        maxAutomations: planLimits.max_automations,
-        maxIndicators: planLimits.max_indicators,
-        maxSimulations: planLimits.max_simulations,
-        maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at.toISOString(),
-        updatedAt: planLimits.updated_at.toISOString(),
-        plan: planLimits.plan
-      };
-
-    } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error getting plan limits:', error);
-      throw new Error(`Failed to get plan limits: ${error.message}`);
-    }
-  }
-
-  /**
-   * Listar todos os limites de planos
-   */
-  async getAllPlanLimits(): Promise<PlanLimits[]> {
-    try {
-      const prisma = await this.getPrisma();
-      const planLimits = await prisma.planLimits.findMany({
-        include: {
-          plan: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          }
-        },
-        orderBy: {
-          plan: {
-            name: 'asc'
-          }
-        }
-      });
-
-      console.log(`✅ PlanLimitsService - Retrieved ${planLimits.length} plan limits`);
-      return planLimits.map(pl => ({
-        id: pl.id,
-        planId: pl.plan_id,
-        maxExchangeAccounts: pl.max_exchange_accounts,
-        maxAutomations: pl.max_automations,
-        maxIndicators: pl.max_indicators,
-        maxSimulations: pl.max_simulations,
-        maxBacktests: pl.max_backtests,
-        createdAt: pl.created_at.toISOString(),
-        updatedAt: pl.updated_at.toISOString(),
-        plan: pl.plan
-      }));
-
-    } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error getting all plan limits:', error);
-      throw new Error(`Failed to get all plan limits: ${error.message}`);
-    }
-  }
-
-  /**
-   * Obter limites de um usuário
-   */
-  async getUserLimits(userId: string): Promise<PlanLimits | null> {
-    try {
-      const prisma = await this.getPrisma();
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          plan_type: true
-        }
+      // 1. Buscar plano do usuário
+      const user = await this.prisma.user.findUnique({
+        where: { id: config.userId },
+        select: { plan_type: true }
       });
 
       if (!user) {
-        console.log(`⚠️ PlanLimitsService - User not found: ${userId}`);
-        return null;
-      }
-
-      // Buscar limites do plano do usuário
-      const planLimits = await prisma.planLimits.findFirst({
-        where: {
-          plan: {
-            slug: user.plan_type.toLowerCase()
-          }
-        },
-        include: {
-          plan: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          }
-        }
-      });
-
-      if (!planLimits) {
-        console.log(`⚠️ PlanLimitsService - No limits found for user plan: ${user.plan_type}`);
-        return null;
-      }
-
-      return {
-        id: planLimits.id,
-        planId: planLimits.plan_id,
-        maxExchangeAccounts: planLimits.max_exchange_accounts,
-        maxAutomations: planLimits.max_automations,
-        maxIndicators: planLimits.max_indicators,
-        maxSimulations: planLimits.max_simulations,
-        maxBacktests: planLimits.max_backtests,
-        createdAt: planLimits.created_at.toISOString(),
-        updatedAt: planLimits.updated_at.toISOString(),
-        plan: planLimits.plan
-      };
-
-    } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error getting user limits:', error);
-      throw new Error(`Failed to get user limits: ${error.message}`);
-    }
-  }
-
-  /**
-   * Validar limite específico
-   */
-  async validateLimit(
-    userId: string,
-    limitType: 'EXCHANGE_ACCOUNTS' | 'AUTOMATIONS' | 'INDICATORS' | 'SIMULATIONS' | 'BACKTESTS'
-  ): Promise<LimitValidationResult> {
-    try {
-      const limits = await this.getUserLimits(userId);
-      
-      if (!limits) {
         return {
           isValid: false,
-          currentCount: 0,
-          maxLimit: 0,
-          limitType,
-          message: 'No plan limits found'
+          error: 'Usuário não encontrado'
         };
       }
 
-      // Obter contagem atual
-      const prisma = await this.getPrisma();
-      let currentCount = 0;
-      switch (limitType) {
-        case 'EXCHANGE_ACCOUNTS':
-          currentCount = await prisma.userExchangeAccounts.count({
-            where: { user_id: userId }
-          });
-          break;
-        case 'AUTOMATIONS':
-          currentCount = await prisma.automation.count({
-            where: { user_id: userId }
-          });
-          break;
-        case 'INDICATORS':
-          // Implementar contagem de indicadores quando necessário
-          currentCount = 0;
-          break;
-        case 'SIMULATIONS':
-          currentCount = await prisma.simulation.count({
-            where: { user_id: userId }
-          });
-          break;
-        case 'BACKTESTS':
-          currentCount = await prisma.backtestReport.count({
-            where: { user_id: userId }
-          });
-          break;
+      const planFeatures = this.getMarginGuardFeatures(user.plan_type);
+
+      // 2. Validar modo
+      if (!planFeatures.modes.includes(config.mode)) {
+        return {
+          isValid: false,
+          error: `Modo ${config.mode} não disponível no plano ${user.plan_type}`,
+          limitations: planFeatures.limitations,
+          availableUpgrades: await this.getAvailableUpgrades(user.plan_type)
+        };
       }
 
-      const maxLimit = this.getLimitByType(limits, limitType);
-      const isValid = currentCount < maxLimit;
+      // 3. Validar número de posições (se modo unitário)
+      if (config.mode === 'unitario' && planFeatures.maxPositions > 0) {
+        if (config.selectedPositions.length > planFeatures.maxPositions) {
+          return {
+            isValid: false,
+            error: `Máximo ${planFeatures.maxPositions} posições no plano ${user.plan_type}`,
+            limitations: planFeatures.limitations,
+            availableUpgrades: await this.getAvailableUpgrades(user.plan_type)
+          };
+        }
+      }
 
-      return {
-        isValid,
-        currentCount,
-        maxLimit,
-        limitType,
-        message: isValid ? undefined : `Limit exceeded for ${limitType}`
-      };
+      // 4. Validar threshold mínimo por plano
+      const minThreshold = this.getMinThresholdByPlan(user.plan_type);
+      if (config.marginThreshold < minThreshold) {
+        return {
+          isValid: false,
+          error: `Threshold mínimo ${minThreshold}% no plano ${user.plan_type}`,
+          limitations: planFeatures.limitations,
+          availableUpgrades: await this.getAvailableUpgrades(user.plan_type)
+        };
+      }
+
+      // 5. Validar porcentagem de margem por plano
+      const maxMarginPercentage = this.getMaxMarginPercentageByPlan(user.plan_type);
+      if (config.addMarginPercentage > maxMarginPercentage) {
+        return {
+          isValid: false,
+          error: `Máximo ${maxMarginPercentage}% de margem no plano ${user.plan_type}`,
+          limitations: planFeatures.limitations,
+          availableUpgrades: await this.getAvailableUpgrades(user.plan_type)
+        };
+      }
+
+      return { isValid: true };
 
     } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error validating limit:', error);
+      console.error('❌ PLAN LIMITS - Validation error:', error);
       return {
         isValid: false,
-        currentCount: 0,
-        maxLimit: 0,
-        limitType,
-        message: `Error validating limit: ${error.message}`
+        error: 'Erro interno na validação'
       };
     }
   }
 
   /**
-   * Obter limite por tipo
+   * Buscar planos de upgrade disponíveis
    */
-  private getLimitByType(limits: PlanLimits, type: string): number {
-    switch (type) {
-      case 'EXCHANGE_ACCOUNTS':
-        return limits.maxExchangeAccounts;
-      case 'AUTOMATIONS':
-        return limits.maxAutomations;
-      case 'INDICATORS':
-        return limits.maxIndicators;
-      case 'SIMULATIONS':
-        return limits.maxSimulations;
-      case 'BACKTESTS':
-        return limits.maxBacktests;
-      default:
-        return 0;
+  async getAvailableUpgrades(currentPlan: string): Promise<any[]> {
+    try {
+      // Buscar planos superiores
+      const upgrades = await this.prisma.$queryRaw`
+        SELECT 
+          slug,
+          name,
+          price,
+          features,
+          margin_guard_features
+        FROM plans 
+        WHERE price > (
+          SELECT price FROM plans p 
+          WHERE p.slug = ${currentPlan}
+        )
+        ORDER BY price ASC
+        LIMIT 3
+      `;
+
+      return upgrades as any[];
+
+    } catch (error: any) {
+      console.error('❌ PLAN LIMITS - Failed to get upgrades:', error);
+      return [];
     }
   }
 
   /**
-   * Deletar limites de um plano
+   * Obter threshold mínimo por plano
    */
-  async deletePlanLimits(id: string): Promise<void> {
+  private getMinThresholdByPlan(planType: string): number {
+    const thresholds = {
+      'free': 15,      // 15% mínimo
+      'basic': 10,     // 10% mínimo
+      'advanced': 5,   // 5% mínimo
+      'pro': 5,        // 5% mínimo
+      'lifetime': 5    // 5% mínimo
+    };
+
+    return thresholds[planType as keyof typeof thresholds] || 15;
+  }
+
+  /**
+   * Obter porcentagem máxima de margem por plano
+   */
+  private getMaxMarginPercentageByPlan(planType: string): number {
+    const percentages = {
+      'free': 50,      // 50% máximo
+      'basic': 75,     // 75% máximo
+      'advanced': 100, // 100% máximo
+      'pro': 100,      // 100% máximo
+      'lifetime': 100  // 100% máximo
+    };
+
+    return percentages[planType as keyof typeof percentages] || 50;
+  }
+
+  /**
+   * Verificar se usuário pode usar feature específica
+   */
+  async canUseFeature(userId: string, feature: string): Promise<boolean> {
     try {
-      const prisma = await this.getPrisma();
-      await prisma.planLimits.delete({
-        where: { id }
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { plan_type: true }
       });
 
-      console.log(`✅ PlanLimitsService - Deleted plan limits: ${id}`);
+      if (!user) return false;
+
+      const features = this.getMarginGuardFeatures(user.plan_type);
+      return features.features.includes(feature);
 
     } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error deleting plan limits:', error);
-      throw new Error(`Failed to delete plan limits: ${error.message}`);
+      console.error('❌ PLAN LIMITS - Failed to check feature access:', error);
+      return false;
     }
   }
 
   /**
-   * Obter estatísticas de uso
+   * Obter limitações específicas do plano
    */
-  async getUsageStatistics(): Promise<{
-    totalPlans: number;
-    plansWithLimits: number;
-    averageLimits: {
-      exchangeAccounts: number;
-      automations: number;
-      indicators: number;
-      simulations: number;
-      backtests: number;
-    };
-  }> {
+  async getPlanLimitations(userId: string): Promise<any> {
     try {
-      const prisma = await this.getPrisma();
-      const totalPlans = await prisma.plan.count();
-      const plansWithLimits = await prisma.planLimits.count();
-      
-      console.log('📊 Statistics - Total plans:', totalPlans);
-      console.log('📊 Statistics - Plans with limits:', plansWithLimits);
-      
-      const limits = await prisma.planLimits.findMany();
-      console.log('📊 Statistics - Limits found:', limits.length);
-      
-      const averageLimits = {
-        exchangeAccounts: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_exchange_accounts, 0) / limits.length : 0,
-        automations: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_automations, 0) / limits.length : 0,
-        indicators: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_indicators, 0) / limits.length : 0,
-        simulations: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_simulations, 0) / limits.length : 0,
-        backtests: limits.length > 0 ? limits.reduce((sum, l) => sum + l.max_backtests, 0) / limits.length : 0
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { plan_type: true }
+      });
+
+      if (!user) {
+        return { error: 'Usuário não encontrado' };
+      }
+
+      const features = this.getMarginGuardFeatures(user.plan_type);
+      const upgrades = await this.getAvailableUpgrades(user.plan_type);
+
+      return {
+        current_plan: user.plan_type,
+        features: features,
+        available_upgrades: upgrades,
+        limitations: features.limitations
       };
-
-      console.log('📊 Statistics - Average limits:', averageLimits);
-
-      const result = {
-        totalPlans,
-        plansWithLimits,
-        averageLimits
-      };
-
-      console.log('📊 Statistics - Final result:', result);
-      return result;
 
     } catch (error: any) {
-      console.error('❌ PlanLimitsService - Error getting usage statistics:', error);
-      throw new Error(`Failed to get usage statistics: ${error.message}`);
+      console.error('❌ PLAN LIMITS - Failed to get plan limitations:', error);
+      return { error: 'Erro interno' };
+    }
+  }
+
+  /**
+   * Validar upgrade de plano
+   */
+  async validatePlanUpgrade(userId: string, targetPlan: string): Promise<{
+    isValid: boolean;
+    error?: string;
+    upgradeInfo?: any;
+  }> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { plan_type: true }
+      });
+
+      if (!user) {
+        return { isValid: false, error: 'Usuário não encontrado' };
+      }
+
+      // Buscar informações do plano alvo
+      const targetPlanInfo = await this.prisma.$queryRaw`
+        SELECT * FROM plans WHERE slug = ${targetPlan}
+      ` as any[];
+
+      if (!targetPlanInfo.length) {
+        return { isValid: false, error: 'Plano não encontrado' };
+      }
+
+      const currentPlanInfo = await this.prisma.$queryRaw`
+        SELECT * FROM plans WHERE slug = ${user.plan_type}
+      ` as any[];
+
+      if (!currentPlanInfo.length) {
+        return { isValid: false, error: 'Plano atual não encontrado' };
+      }
+
+      const target = targetPlanInfo[0];
+      const current = currentPlanInfo[0];
+
+      // Verificar se é um upgrade válido
+      if (target.price <= current.price) {
+        return { isValid: false, error: 'Não é um upgrade válido' };
+      }
+
+      return {
+        isValid: true,
+        upgradeInfo: {
+          from: current,
+          to: target,
+          priceDifference: target.price - current.price,
+          newFeatures: this.getMarginGuardFeatures(targetPlan)
+        }
+      };
+
+    } catch (error: any) {
+      console.error('❌ PLAN LIMITS - Failed to validate upgrade:', error);
+      return { isValid: false, error: 'Erro interno' };
     }
   }
 }
-
-export const planLimitsService = new PlanLimitsService();

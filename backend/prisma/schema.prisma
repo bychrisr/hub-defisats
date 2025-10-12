@@ -70,6 +70,10 @@ model User {
   upgrades_made              UserUpgradeHistory[]      @relation("AdminUpgradeHistory")
   upgrade_history            UserUpgradeHistory[]      @relation("UserUpgradeHistory")
   testnet_faucet_distributions TestnetFaucetDistribution[]
+  margin_guard_config         MarginGuardConfig?
+  in_app_notifications        InAppNotification[]
+  notification_preferences    UserNotificationPreferences?
+  push_tokens                 UserPushTokens[]
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
@@ -836,6 +840,75 @@ model TestnetFaucetDistribution {
   @@index([status])
   @@index([created_at])
   @@map("testnet_faucet_distributions")
+}
+
+model MarginGuardConfig {
+  id                    String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id               String   @unique
+  is_active             Boolean  @default(false)
+  mode                  String   @default("global") // 'unitario' | 'global'
+  margin_threshold      Float    @default(10) // % de distância para acionar
+  add_margin_percentage Float    @default(20) // % de margem a adicionar
+  selected_positions    String[] // IDs das posições (modo unitário)
+  created_at            DateTime @default(now()) @db.Timestamp(6)
+  updated_at            DateTime @default(now()) @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([is_active])
+  @@map("marginGuardConfig")
+}
+
+model InAppNotification {
+  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id    String
+  type       String   // 'margin_guard' | 'tp_sl' | 'auto_entry' | 'system' | 'security'
+  title      String
+  message    String
+  metadata   Json?
+  read       Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([type])
+  @@index([read])
+  @@index([created_at])
+  @@map("inAppNotification")
+}
+
+model UserNotificationPreferences {
+  id               String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id          String   @unique
+  enabled_channels String[] @default(["in_app", "push"])
+  push_enabled     Boolean  @default(true)
+  email_enabled    Boolean  @default(false)
+  sms_enabled      Boolean  @default(false)
+  in_app_enabled   Boolean  @default(true)
+  created_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @default(now()) @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("userNotificationPreferences")
+}
+
+model UserPushTokens {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id     String
+  token       String
+  device_type String?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([is_active])
+  @@map("userPushTokens")
 }
 
 enum PlanType {

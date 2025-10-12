@@ -98,6 +98,46 @@ interface ActiveAutomation {
   updated_at: string;
 }
 
+interface MarginGuardExecution {
+  id: string;
+  trade_id: string;
+  status: 'success' | 'app_error' | 'exchange_error';
+  action: string;
+  trigger_data: {
+    current_price: number;
+    trigger_price: number;
+    distance_to_liquidation: number;
+    margin_threshold: number;
+    position_side: string;
+    entry_price: number;
+    liquidation_price: number;
+    current_margin: number;
+  };
+  execution_result: {
+    margin_added: number;
+    fees: {
+      opening_fee: number;
+      closing_fee: number;
+      maintenance_margin: number;
+      sum_carry_fees: number;
+    };
+    total_cost: number;
+    new_margin: number;
+    new_liquidation_price: number;
+    api_response: any;
+  };
+  error_message?: string;
+  executed_at: string;
+}
+
+interface MarginGuardStatistics {
+  total_executions: number;
+  successful_executions: number;
+  failed_executions: number;
+  success_rate: number;
+  total_margin_added: number;
+}
+
 interface AutomationReportsData {
   executions: AutomationExecution[];
   statistics: AutomationStatistics;
@@ -188,7 +228,11 @@ export default function Reports() {
   const [stateChanges, setStateChanges] = useState<AutomationStateChange[]>([]);
   const [executionDetails, setExecutionDetails] = useState<AutomationExecutionDetail[]>([]);
   const [stats, setStats] = useState<TradeLogStats['data'] | null>(null);
-  const [activeTab, setActiveTab] = useState<'trades' | 'automations'>('trades');
+  const [activeTab, setActiveTab] = useState<'trades' | 'automations' | 'margin-guard'>('trades');
+  
+  // Margin Guard states
+  const [marginGuardExecutions, setMarginGuardExecutions] = useState<MarginGuardExecution[]>([]);
+  const [marginGuardStats, setMarginGuardStats] = useState<MarginGuardStatistics | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -266,6 +310,35 @@ export default function Reports() {
     }
   };
 
+  const fetchMarginGuardExecutions = async () => {
+    try {
+      setIsLoading(true);
+      const response = await apiGet('/api/user/margin-guard/executions?limit=50');
+      const data = await response.json();
+      if (data.success) {
+        setMarginGuardExecutions(data.executions);
+        console.log('✅ MARGIN GUARD EXECUTIONS - Data fetched successfully:', data.executions.length);
+      }
+    } catch (err: any) {
+      console.error('❌ MARGIN GUARD EXECUTIONS - Error fetching executions:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchMarginGuardStatistics = async () => {
+    try {
+      const response = await apiGet('/api/user/margin-guard/statistics');
+      const data = await response.json();
+      if (data.success) {
+        setMarginGuardStats(data.statistics);
+        console.log('✅ MARGIN GUARD STATS - Data fetched successfully:', data.statistics);
+      }
+    } catch (err: any) {
+      console.error('❌ MARGIN GUARD STATS - Error fetching statistics:', err);
+    }
+  };
+
   const fetchTradeLogs = async () => {
     try {
       setIsLoading(true);
@@ -330,10 +403,13 @@ export default function Reports() {
     if (activeTab === 'trades') {
       fetchTradeLogs();
       fetchStats();
-    } else {
+    } else if (activeTab === 'automations') {
       fetchAutomationReports();
       fetchStateChanges();
       fetchExecutionDetails();
+    } else if (activeTab === 'margin-guard') {
+      fetchMarginGuardExecutions();
+      fetchMarginGuardStatistics();
     }
   }, [activeTab, filters, pagination.page, automationFilters]);
 
@@ -483,9 +559,9 @@ export default function Reports() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'trades' | 'automations')} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'trades' | 'automations' | 'margin-guard')} className="w-full">
           <TabsList className={cn(
-            "grid w-full grid-cols-2 h-12",
+            "grid w-full grid-cols-3 h-12",
             theme === 'dark' ? 'profile-tabs-glow' : 'profile-tabs-glow-light'
           )}>
             <TabsTrigger 
@@ -499,6 +575,12 @@ export default function Reports() {
               className="profile-tab-trigger text-sm font-medium"
             >
               Automation Reports
+            </TabsTrigger>
+            <TabsTrigger 
+              value="margin-guard" 
+              className="profile-tab-trigger text-sm font-medium"
+            >
+              Margin Guard Executions
             </TabsTrigger>
           </TabsList>
 
@@ -1077,6 +1159,298 @@ export default function Reports() {
             ))}
           </div>
         )}
+          </TabsContent>
+
+          {/* Margin Guard Executions Tab Content */}
+          <TabsContent value="margin-guard" className="space-y-6">
+            {/* Margin Guard Statistics */}
+            {marginGuardStats && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+                  <CardHeader className="py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500/20 to-green-500/10 backdrop-blur-sm">
+                        <Shield className="h-4 w-4 text-green-500" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold">Total Executions</CardTitle>
+                        <CardDescription className="text-text-secondary text-sm">
+                          Margin Guard executions
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">
+                      {marginGuardStats.total_executions}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+                  <CardHeader className="py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-500/10 backdrop-blur-sm">
+                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold">Success Rate</CardTitle>
+                        <CardDescription className="text-text-secondary text-sm">
+                          Successful executions
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {marginGuardStats.success_rate.toFixed(1)}%
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+                  <CardHeader className="py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-500/10 backdrop-blur-sm">
+                        <TrendingUp className="h-4 w-4 text-orange-500" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold">Margin Added</CardTitle>
+                        <CardDescription className="text-text-secondary text-sm">
+                          Total sats added
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {marginGuardStats.total_margin_added.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">sats</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+                  <CardHeader className="py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-red-500/20 to-red-500/10 backdrop-blur-sm">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold">Failed</CardTitle>
+                        <CardDescription className="text-text-secondary text-sm">
+                          Failed executions
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-red-600">
+                      {marginGuardStats.failed_executions}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Margin Guard Executions Table */}
+            <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+              <CardHeader className="py-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                    <Shield className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Margin Guard Executions</CardTitle>
+                    <CardDescription className="text-text-secondary text-sm">
+                      Detailed logs of Margin Guard executions with trigger data and results
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : marginGuardExecutions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Margin Guard Executions</h3>
+                    <p className="text-muted-foreground">
+                      Margin Guard executions will appear here once they are triggered.
+                    </p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date/Time</TableHead>
+                        <TableHead>Position</TableHead>
+                        <TableHead>Action</TableHead>
+                        <TableHead>Margin Added</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {marginGuardExecutions.map((execution) => (
+                        <TableRow key={execution.id}>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="font-medium">
+                                {new Date(execution.executed_at).toLocaleDateString()}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {new Date(execution.executed_at).toLocaleTimeString()}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="font-mono text-sm">
+                                {execution.trade_id.substring(0, 8)}...
+                              </div>
+                              <Badge variant={execution.trigger_data.position_side === 'b' ? 'default' : 'secondary'}>
+                                {execution.trigger_data.position_side === 'b' ? 'LONG' : 'SHORT'}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">Add Margin</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="font-medium text-green-600">
+                                +{execution.execution_result?.margin_added?.toLocaleString()} sats
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Total: {execution.execution_result?.total_cost?.toLocaleString()} sats
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {getStatusIcon(execution.status)}
+                              {getStatusBadge(execution.status)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm">
+                              Ver Mais
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Execution Details */}
+            {marginGuardExecutions.length > 0 && (
+              <Card className="backdrop-blur-xl bg-card/30 border-border/50 shadow-2xl profile-sidebar-glow">
+                <CardHeader className="py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm">
+                      <Activity className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-semibold">Execution Details</CardTitle>
+                      <CardDescription className="text-text-secondary text-sm">
+                        Detailed information about Margin Guard executions
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {marginGuardExecutions.slice(0, 5).map((execution) => (
+                      <div key={execution.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {getStatusIcon(execution.status)}
+                            <div>
+                              <div className="font-semibold">
+                                Margin Added: +{execution.execution_result?.margin_added?.toLocaleString()} sats
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Position: {execution.trade_id.substring(0, 8)}... • 
+                                {new Date(execution.executed_at).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                          {getStatusBadge(execution.status)}
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Current Price:</span>
+                            <div className="font-mono">${execution.trigger_data.current_price?.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Trigger Price:</span>
+                            <div className="font-mono">${execution.trigger_data.trigger_price?.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Distance:</span>
+                            <div className="font-mono">
+                              {((execution.trigger_data.distance_to_liquidation / execution.trigger_data.liquidation_price) * 100).toFixed(1)}%
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Threshold:</span>
+                            <div className="font-mono">{execution.trigger_data.margin_threshold}%</div>
+                          </div>
+                        </div>
+
+                        {execution.status === 'success' ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <span className="text-muted-foreground">New Margin:</span>
+                                <div className="font-mono">{execution.execution_result?.new_margin?.toLocaleString()} sats</div>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">New Liquidation:</span>
+                                <div className="font-mono">${execution.execution_result?.new_liquidation_price?.toLocaleString()}</div>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Total Cost:</span>
+                                <div className="font-mono">{execution.execution_result?.total_cost?.toLocaleString()} sats</div>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Fees:</span>
+                                <div className="font-mono">
+                                  {(execution.execution_result?.total_cost - execution.execution_result?.margin_added).toLocaleString()} sats
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Error:</span>
+                              <span className="text-red-600 text-sm">
+                                {execution.error_message || 'Unknown error'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="pt-2 border-t">
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Trade ID: {execution.trade_id}</span>
+                            <span>Execution ID: {execution.id.substring(0, 8)}...</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
