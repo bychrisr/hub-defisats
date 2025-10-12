@@ -1,40 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 interface SatsIconProps {
   size?: number;
   className?: string;
-  variant?: 'default' | 'positive' | 'negative' | 'neutral' | 'dynamic';
+  variant?: 'default' | 'positive' | 'negative' | 'neutral';
   forceColor?: boolean; // Força a cor do className a sobrescrever a variante
-  value?: number; // Valor para animação dinâmica
-  animate?: boolean; // Se deve animar mudanças de cor
-  pulseOnChange?: boolean; // Se deve pulsar quando o valor muda
 }
 
 const SatsIcon: React.FC<SatsIconProps> = ({ 
   size = 20, 
   className = '', 
   variant = 'default',
-  forceColor = false,
-  value = 0,
-  animate = true,
-  pulseOnChange = true
+  forceColor = false
 }) => {
-  const [isPulsing, setIsPulsing] = useState(false);
-  const [previousValue, setPreviousValue] = useState(value);
-
-  // Detectar mudanças no valor para animação de pulse
-  useEffect(() => {
-    if (pulseOnChange && value !== previousValue && previousValue !== undefined) {
-      setIsPulsing(true);
-      const timer = setTimeout(() => setIsPulsing(false), 600);
-      return () => clearTimeout(timer);
-    }
-    setPreviousValue(value);
-  }, [value, previousValue, pulseOnChange]);
-
   const getVariantClass = () => {
     if (forceColor) return ''; // Não aplica cor da variante se forceColor for true
-    
     switch (variant) {
       case 'positive':
         return 'text-green-600 dark:text-green-400';
@@ -42,32 +22,9 @@ const SatsIcon: React.FC<SatsIconProps> = ({
         return 'text-red-600 dark:text-red-400';
       case 'neutral':
         return 'text-muted-foreground';
-      case 'dynamic':
-        // Cor dinâmica baseada no valor
-        if (value > 0) return 'text-green-600 dark:text-green-400';
-        if (value < 0) return 'text-red-600 dark:text-red-400';
-        return 'text-muted-foreground';
       default:
         return 'text-current';
     }
-  };
-
-  const getAnimationClass = () => {
-    const classes = [];
-    
-    if (animate) {
-      classes.push('transition-colors duration-300 ease-out');
-    }
-    
-    if (isPulsing) {
-      classes.push('animate-pulse');
-    }
-    
-    if (variant === 'dynamic' && Math.abs(value) > 1000) {
-      classes.push('drop-shadow-lg');
-    }
-    
-    return classes.join(' ');
   };
 
   return (
@@ -77,10 +34,7 @@ const SatsIcon: React.FC<SatsIconProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`${getVariantClass()} ${getAnimationClass()} ${className} ${forceColor ? '!text-current' : ''}`}
-      style={{
-        filter: variant === 'dynamic' && Math.abs(value) > 5000 ? 'drop-shadow(0 0 8px currentColor)' : undefined
-      }}
+      className={`${getVariantClass()} ${className} ${forceColor ? '!text-current' : ''}`}
     >
       {/* Símbolo oficial de satoshi - baseado no código SVG oficial */}
       {/* Barra superior - quadrada */}

@@ -3,8 +3,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { LwcBar } from '@/types/chart';
 import { marketDataService } from '@/services/marketData.service';
 
-export type TimeFilterPeriod = '24H' | '7D' | '30D' | '90D' | 'ALL';
-
 interface UseHistoricalDataProps {
   symbol: string;
   timeframe: string;
@@ -12,13 +10,6 @@ interface UseHistoricalDataProps {
   enabled?: boolean;
   maxDataPoints?: number;
   loadThreshold?: number;
-  period?: TimeFilterPeriod;
-}
-
-interface HistoricalDataCache {
-  data: LwcBar[];
-  timestamp: number;
-  period: TimeFilterPeriod;
 }
 
 interface UseHistoricalDataReturn {
@@ -29,9 +20,6 @@ interface UseHistoricalDataReturn {
   hasMoreData: boolean;
   loadMoreHistorical: () => Promise<void>;
   resetData: () => void;
-  changePeriod: (period: TimeFilterPeriod) => void;
-  currentPeriod: TimeFilterPeriod;
-  getPeriodData: (period: TimeFilterPeriod) => LwcBar[] | null;
 }
 
 export const useHistoricalData = ({
@@ -40,8 +28,7 @@ export const useHistoricalData = ({
   initialLimit = 168,
   enabled = true,
   maxDataPoints = 10000,
-  loadThreshold = 20,
-  period = '7D'
+  loadThreshold = 20
 }: UseHistoricalDataProps): UseHistoricalDataReturn => {
   const [candleData, setCandleData] = useState<LwcBar[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,10 +37,8 @@ export const useHistoricalData = ({
   const [hasMoreData, setHasMoreData] = useState(true);
   const [oldestTimestamp, setOldestTimestamp] = useState<number | null>(null);
   const [newestTimestamp, setNewestTimestamp] = useState<number | null>(null);
-  const [currentPeriod, setCurrentPeriod] = useState<TimeFilterPeriod>(period);
   const loadingRef = useRef(false);
   const dataCacheRef = useRef<Map<string, LwcBar[]>>(new Map());
-  const periodCacheRef = useRef<Map<string, HistoricalDataCache>>(new Map());
 
   // Função para calcular limite baseado no timeframe
   const getLimitForTimeframe = useCallback((tf: string): number => {
@@ -67,90 +52,6 @@ export const useHistoricalData = ({
     if (tfLower.includes('1d')) return 1440;
     return 60; // Default 1h
   }, []);
-
-  // Função para calcular limite baseado no período
-  const getLimitForPeriod = useCallback((period: TimeFilterPeriod): number => {
-    switch (period) {
-      case '24H': return 24; // 24 horas
-      case '7D': return 168; // 7 dias * 24 horas
-      case '30D': return 720; // 30 dias * 24 horas
-      case '90D': return 2160; // 90 dias * 24 horas
-      case 'ALL': return 10000; // Máximo
-      default: return 168;
-    }
-  }, []);
-
-  // Função para obter dados de um período específico do cache
-  const getPeriodData = useCallback((period: TimeFilterPeriod): LwcBar[] | null => {
-    const cacheKey = `${symbol}-${timeframe}-${period}`;
-    const cached = periodCacheRef.current.get(cacheKey);
-    
-    if (cached && (Date.now() - cached.timestamp) < 300000) { // 5 minutos de cache
-      return cached.data;
-    }
-    
-    return null;
-  }, [symbol, timeframe]);
-
-  // Função para mudar período
-  const changePeriod = useCallback(async (period: TimeFilterPeriod) => {
-    if (period === currentPeriod) return;
-    
-    console.log('🔄 HISTORICAL - Changing period:', period);
-    setCurrentPeriod(period);
-    
-    // Verificar cache primeiro
-    const cachedData = getPeriodData(period);
-    if (cachedData) {
-      console.log('📦 HISTORICAL - Using cached period data:', period);
-      setCandleData(cachedData);
-      setError(null);
-      return;
-    }
-    
-    // Carregar novos dados para o período
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const limit = getLimitForPeriod(period);
-      const rawData = await marketDataService.getHistoricalData(symbol, timeframe, limit);
-      
-      const mappedData: LwcBar[] = rawData.map((candle) => ({
-        time: candle.time,
-        open: candle.open,
-        high: candle.high,
-        low: candle.low,
-        close: candle.close,
-        volume: candle.volume
-      }));
-      
-      // Ordenar dados
-      const sortedData = mappedData.sort((a, b) => {
-        const timeA = typeof a.time === 'number' ? a.time : new Date(a.time).getTime() / 1000;
-        const timeB = typeof b.time === 'number' ? b.time : new Date(b.time).getTime() / 1000;
-        return timeA - timeB;
-      });
-      
-      setCandleData(sortedData);
-      
-      // Cache dos dados do período
-      const cacheKey = `${symbol}-${timeframe}-${period}`;
-      periodCacheRef.current.set(cacheKey, {
-        data: sortedData,
-        timestamp: Date.now(),
-        period
-      });
-      
-      console.log('✅ HISTORICAL - Period data loaded:', period, sortedData.length, 'points');
-      
-    } catch (err: any) {
-      console.error('❌ HISTORICAL - Error loading period data:', err);
-      setError(err.message || 'Failed to load period data');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPeriod, symbol, timeframe, getPeriodData, getLimitForPeriod]);
 
   // Função para gerenciar cache de dados
   const getCacheKey = useCallback((startTime: number, endTime: number) => {
@@ -349,7 +250,6 @@ export const useHistoricalData = ({
     setOldestTimestamp(null);
     setNewestTimestamp(null);
     dataCacheRef.current.clear();
-    periodCacheRef.current.clear();
   }, []);
 
   // Carregar dados inicialmente
@@ -359,13 +259,6 @@ export const useHistoricalData = ({
     }
   }, [symbol, timeframe, enabled]);
 
-  // Carregar dados do período atual quando mudar
-  useEffect(() => {
-    if (enabled && currentPeriod !== period) {
-      changePeriod(currentPeriod);
-    }
-  }, [enabled, currentPeriod, period, changePeriod]);
-
   return {
     candleData,
     isLoading,
@@ -373,9 +266,6 @@ export const useHistoricalData = ({
     error,
     hasMoreData,
     loadMoreHistorical,
-    resetData,
-    changePeriod,
-    currentPeriod,
-    getPeriodData
+    resetData
   };
 };
