@@ -806,8 +806,8 @@ async function registerRoutes() {
   console.log('✅ Margin Guard User routes registered');
 
   // Margin Guard V2 routes
-  const marginGuardV2Routes = require('./routes/margin-guard.routes');
-  await fastify.register(marginGuardV2Routes, { prefix: '/api/user/margin-guard' });
+  const { marginGuardRoutes } = await import('./routes/margin-guard.routes');
+  await fastify.register(marginGuardRoutes, { prefix: '/api/user/margin-guard' });
   console.log('✅ Margin Guard V2 routes registered');
 
   // Margin Guard Admin routes

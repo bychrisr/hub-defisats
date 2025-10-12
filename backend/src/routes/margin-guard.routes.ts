@@ -1,104 +1,86 @@
-import { Router } from 'express';
-import { MarginGuardController } from '../controllers/margin-guard.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
+import { MarginGuardController } from '../controllers/margin-guard.controller';
 
-const router = Router();
-const prisma = new PrismaClient();
-const marginGuardController = new MarginGuardController(prisma);
+export async function marginGuardRoutes(fastify: FastifyInstance) {
+  const prisma = new PrismaClient();
+  const marginGuardController = new MarginGuardController(prisma);
 
-// Middleware de autenticação para todas as rotas
-router.use(authenticateToken);
+  // Middleware de autenticação para todas as rotas
+  await fastify.register(async function(fastify) {
+    fastify.addHook('preHandler', fastify.authenticate);
 
-/**
- * @route POST /api/user/margin-guard
- * @desc Criar ou atualizar configuração do Margin Guard
- * @access Private
- */
-router.post('/', async (req, res) => {
-  await marginGuardController.createOrUpdateConfig(req, res);
-});
+    /**
+     * @route POST /api/user/margin-guard
+     * @desc Criar ou atualizar configuração do Margin Guard
+     * @access Private
+     */
+    fastify.post('/', marginGuardController.createOrUpdateConfig.bind(marginGuardController));
 
-/**
- * @route GET /api/user/margin-guard
- * @desc Buscar configuração atual do Margin Guard
- * @access Private
- */
-router.get('/', async (req, res) => {
-  await marginGuardController.getConfig(req, res);
-});
+    /**
+     * @route GET /api/user/margin-guard
+     * @desc Buscar configuração atual do Margin Guard
+     * @access Private
+     */
+    fastify.get('/', marginGuardController.getConfig.bind(marginGuardController));
 
-/**
- * @route GET /api/user/margin-guard/plan-features
- * @desc Buscar features do plano atual
- * @access Private
- */
-router.get('/plan-features', async (req, res) => {
-  await marginGuardController.getPlanFeatures(req, res);
-});
+    /**
+     * @route GET /api/user/margin-guard/plan-features
+     * @desc Buscar features do plano atual
+     * @access Private
+     */
+    fastify.get('/plan-features', marginGuardController.getPlanFeatures.bind(marginGuardController));
 
-/**
- * @route GET /api/user/margin-guard/positions
- * @desc Buscar posições running do usuário
- * @access Private
- */
-router.get('/positions', async (req, res) => {
-  await marginGuardController.getRunningPositions(req, res);
-});
+    /**
+     * @route GET /api/user/margin-guard/positions
+     * @desc Buscar posições running do usuário
+     * @access Private
+     */
+    fastify.get('/positions', marginGuardController.getRunningPositions.bind(marginGuardController));
 
-/**
- * @route POST /api/user/margin-guard/preview
- * @desc Preview de cálculo do Margin Guard
- * @access Private
- */
-router.post('/preview', async (req, res) => {
-  await marginGuardController.previewCalculation(req, res);
-});
+    /**
+     * @route POST /api/user/margin-guard/preview
+     * @desc Preview de cálculo do Margin Guard
+     * @access Private
+     */
+    fastify.post('/preview', marginGuardController.previewCalculation.bind(marginGuardController));
 
-/**
- * @route GET /api/user/margin-guard/executions
- * @desc Buscar execuções do Margin Guard
- * @access Private
- */
-router.get('/executions', async (req, res) => {
-  await marginGuardController.getExecutions(req, res);
-});
+    /**
+     * @route GET /api/user/margin-guard/executions
+     * @desc Buscar execuções do Margin Guard
+     * @access Private
+     */
+    fastify.get('/executions', marginGuardController.getExecutions.bind(marginGuardController));
 
-/**
- * @route GET /api/user/margin-guard/executions/:id
- * @desc Buscar detalhes de uma execução específica
- * @access Private
- */
-router.get('/executions/:id', async (req, res) => {
-  // TODO: Implementar endpoint de detalhes de execução
-  res.status(501).json({ error: 'Endpoint em desenvolvimento' });
-});
+    /**
+     * @route GET /api/user/margin-guard/executions/:id
+     * @desc Buscar detalhes de uma execução específica
+     * @access Private
+     */
+    fastify.get('/executions/:id', async (request, reply) => {
+      // TODO: Implementar endpoint de detalhes de execução
+      reply.status(501).send({ error: 'Endpoint em desenvolvimento' });
+    });
 
-/**
- * @route GET /api/user/margin-guard/statistics
- * @desc Buscar estatísticas do Margin Guard
- * @access Private
- */
-router.get('/statistics', async (req, res) => {
-  await marginGuardController.getStatistics(req, res);
-});
+    /**
+     * @route GET /api/user/margin-guard/statistics
+     * @desc Buscar estatísticas do Margin Guard
+     * @access Private
+     */
+    fastify.get('/statistics', marginGuardController.getStatistics.bind(marginGuardController));
 
-/**
- * @route GET /api/user/margin-guard/monitored
- * @desc Buscar posições sendo monitoradas
- * @access Private
- */
-router.get('/monitored', async (req, res) => {
-  await marginGuardController.getMonitoredPositions(req, res);
-});
+    /**
+     * @route GET /api/user/margin-guard/monitored
+     * @desc Buscar posições sendo monitoradas
+     * @access Private
+     */
+    fastify.get('/monitored', marginGuardController.getMonitoredPositions.bind(marginGuardController));
 
-/**
- * @route GET /api/user/margin-guard/available-upgrades
- * @desc Buscar planos de upgrade disponíveis
- * @access Private
- */
-router.get('/available-upgrades', async (req, res) => {
-  await marginGuardController.getAvailableUpgrades(req, res);
-});
-
-export default router;
+    /**
+     * @route GET /api/user/margin-guard/available-upgrades
+     * @desc Buscar planos de upgrade disponíveis
+     * @access Private
+     */
+    fastify.get('/available-upgrades', marginGuardController.getAvailableUpgrades.bind(marginGuardController));
+  });
+}

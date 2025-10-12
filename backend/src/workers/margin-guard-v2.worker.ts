@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
 import { PrismaClient } from '@prisma/client';
-import { LNMarketsAPIv2 } from '../services/lnmarkets-api-v2.service';
+import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
 import { WebSocketManagerService } from '../services/websocket-manager.service';
 import { AutomationLoggerService } from '../services/automation-logger.service';
 import { NotificationCentralService } from '../services/notification-central.service';
 import { PlanLimitsService } from '../services/plan-limits.service';
-import { UserExchangeAccountService } from '../services/user-exchange-account.service';
+import { UserExchangeAccountService } from '../services/userExchangeAccount.service';
 
 interface MarginGuardConfig {
   id: string;
