@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Bot, Plus, Shield, TrendingUp, Zap, AlertTriangle, Activity, TrendingDown, Target, ArrowRight, CheckCircle } from 'lucide-react';
 import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 import { useOptimizedPositions } from '@/hooks/useOptimizedDashboardData';
+import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { apiFetch } from '@/lib/fetch';
 
 interface MarginGuardConfig {
@@ -57,6 +58,14 @@ interface UpgradePlan {
 export const Automations = () => {
   const { marketData } = useRealtimeData();
   const { positions: optimizedPositions, isLoading: positionsLoading } = useOptimizedPositions();
+  const { price: btcPrice, isLoading: btcLoading } = useBitcoinPrice();
+  
+  // Debug: Verificar tema atual
+  useEffect(() => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const currentClass = document.documentElement.className;
+    console.log('🔍 MARGIN GUARD - Tema atual:', { currentTheme, currentClass });
+  }, []);
   
   // Estados para Margin Guard
   const [marginGuardConfig, setMarginGuardConfig] = useState<MarginGuardConfig>({
@@ -484,7 +493,7 @@ export const Automations = () => {
                           });
 
                           // Dados em tempo real
-                          const btcPrice = marketData?.['BTC']?.price || 0;
+                          const currentBtcPrice = btcPrice || 0;
                           const positions = optimizedPositions || [];
                           const activePositions = positions.filter(pos => pos.quantity > 0);
                           
@@ -495,12 +504,12 @@ export const Automations = () => {
                             activePositionsData: activePositions
                           });
                           
-                          if (positionsLoading) {
+                          if (positionsLoading || btcLoading) {
                             return (
                               <div className="text-center py-8">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
                                 <p className="text-sm text-muted-foreground">
-                                  Carregando posições...
+                                  Carregando dados...
                                 </p>
                               </div>
                             );
@@ -547,8 +556,8 @@ export const Automations = () => {
                             : liquidationPrice + (marginToAdd / examplePosition.quantity);
                           
                           // Calcular melhoria da distância
-                          const currentDistance = Math.abs(btcPrice - liquidationPrice);
-                          const newDistance = Math.abs(btcPrice - newLiquidationPrice);
+                          const currentDistance = Math.abs(currentBtcPrice - liquidationPrice);
+                          const newDistance = Math.abs(currentBtcPrice - newLiquidationPrice);
                           const distanceImprovement = newDistance > currentDistance ? 
                             ((newDistance - currentDistance) / currentDistance) * 100 : 0;
 
@@ -563,7 +572,7 @@ export const Automations = () => {
                                   </Badge>
                                 </div>
                                 <p className="text-xl font-bold text-blue-600">
-                                  ${btcPrice.toLocaleString()}
+                                  ${currentBtcPrice.toLocaleString()}
                                 </p>
                               </div>
 

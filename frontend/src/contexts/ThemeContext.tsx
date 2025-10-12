@@ -26,10 +26,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Verificar se há tema salvo no localStorage
     const savedTheme = localStorage.getItem('axisor-theme');
+    console.log('🎨 THEME CONTEXT - Tema salvo no localStorage:', savedTheme);
     if (savedTheme === 'light' || savedTheme === 'dark') {
+      console.log('🎨 THEME CONTEXT - Usando tema salvo:', savedTheme);
       return savedTheme;
     }
     // Padrão: dark mode (Axisor primary theme)
+    console.log('🎨 THEME CONTEXT - Usando tema padrão: dark');
+    // Forçar dark mode temporariamente para debug
+    localStorage.setItem('axisor-theme', 'dark');
     return 'dark';
   });
 
@@ -52,6 +57,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.className = theme;
     
+    // Debug: Verificar se foi aplicado corretamente
+    console.log('🎨 AXISOR THEME - Verificação pós-aplicação:', {
+      dataTheme: document.documentElement.getAttribute('data-theme'),
+      className: document.documentElement.className,
+      computedStyle: window.getComputedStyle(document.documentElement).backgroundColor
+    });
+    
     // Salvar no localStorage
     localStorage.setItem('axisor-theme', theme);
     
@@ -61,7 +73,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }, 300);
     
     // Disparar evento customizado para gráficos e outros componentes
-    window.dispatchEvent(new CustomEvent('coingecko-theme-change', { 
+    window.dispatchEvent(new CustomEvent('axisor-theme-change', { 
       detail: { theme } 
     }));
   }, [theme]);
@@ -72,7 +84,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     
     const handleChange = (e: MediaQueryListEvent) => {
       // Só aplicar se não houver tema salvo no localStorage
-      if (!localStorage.getItem('coingecko-theme')) {
+      if (!localStorage.getItem('axisor-theme')) {
         setThemeState(e.matches ? 'dark' : 'light');
       }
     };

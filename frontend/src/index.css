@@ -316,11 +316,63 @@
 
   [data-theme="light"] {
     color-scheme: light;
+    
+    /* ===== LIGHT MODE - Axisor Secondary ===== */
+    
+    /* Core Brand Colors - mantém as mesmas */
+    --primary: 220 100% 60%; /* #3773F5 */
+    --secondary: 271 100% 50%; /* #8A2BE2 */
+    --accent: 180 100% 50%; /* #00FFDD */
+    --success: 158 100% 40%; /* #0ECB81 */
+    --destructive: 350 100% 60%; /* #F6465D */
+    --warning: 45 100% 60%; /* #F5AC37 */
+    
+    /* Light Mode Background Colors */
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 210 24% 8%; /* #13161c */
+    
+    /* Text Colors */
+    --text-primary: 210 24% 8%; /* #13161c */
+    --text-secondary: 210 8% 45%; /* #62666f */
+    
+    /* Background Colors */
+    --bg-primary: 0 0% 100%; /* #ffffff */
+    --bg-card: 0 0% 98%; /* #f9fafb */
+    --bg-card-alt: 0 0% 97%; /* #f6f7f8 */
+    --bg-header: 0 0% 97%; /* #f6f7f8 */
+    
+    /* Border Colors */
+    --border: 210 20% 90%; /* #e6e8ec */
+    --border-light: 210 20% 95%;
+    
+    /* UI Elements */
+    --card: 0 0% 100%;
+    --card-foreground: 210 24% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 8%;
+    --input: 210 20% 90%;
+    
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 24% 8%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 210 24% 8%;
+    --sidebar-border: 210 20% 90%;
+    
+    /* SatsIcon colors - preto no light theme para contraste */
+    --sats-icon-color: 0 0% 0%;
   }
 
   /* Garantir que o tema seja aplicado globalmente */
   html {
     transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 
   /* Forçar aplicação do tema em elementos específicos */
