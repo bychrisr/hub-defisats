@@ -398,12 +398,12 @@ export class MarginGuardController {
       // Buscar planos superiores
       const availableUpgrades = await this.prisma.$queryRaw`
         SELECT * FROM plans 
-        WHERE price > (
-          SELECT price FROM plans p 
-          JOIN users u ON u.plan_type = p.slug 
+        WHERE price_sats > (
+          SELECT price_sats FROM plans p 
+          JOIN "User" u ON u.plan_type::text = p.slug 
           WHERE u.id = ${userId}
         )
-        ORDER BY price ASC
+        ORDER BY price_sats ASC
         LIMIT 3
       `;
 
@@ -415,7 +415,15 @@ export class MarginGuardController {
 
     } catch (error: any) {
       console.error('❌ MARGIN GUARD API - Failed to get available upgrades:', error);
-      reply.status(500).send({ error: 'Erro interno do servidor' });
+      console.error('❌ MARGIN GUARD API - Error details:', {
+        message: error.message,
+        stack: error.stack,
+        code: error.code
+      });
+      reply.status(500).send({ 
+        error: 'Erro interno do servidor',
+        details: error.message 
+      });
     }
   }
 
