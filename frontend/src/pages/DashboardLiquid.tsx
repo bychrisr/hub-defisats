@@ -773,14 +773,28 @@ export default function DashboardLiquid() {
           <div className="grid grid-cols-12 gap-4 auto-rows-[140px]">
             {/* Main PnL Chart Card - Spans 2 rows, responsive columns */}
             <div className="col-span-12 md:col-span-6 lg:col-span-5 row-span-2">
-              <PnLChartCard 
-                pnlValue={totalPL || 0}
-                percentageChange={totalMargin > 0 ? ((totalPL || 0) / totalMargin * 100) : 0}
-                subtitle={`Margin: ${formatSats(totalMargin || 0, { size: 16, variant: 'neutral' })}`}
-                showChart={true}
-                showFilters={true}
-                initialPeriod="7D"
-              />
+              {(() => {
+                // Debug: log values being passed to PnLChartCard
+                console.debug("🔍 DASHBOARD LIQUID DEBUG:", {
+                  totalPL,
+                  totalMargin,
+                  totalPLType: typeof totalPL,
+                  totalMarginType: typeof totalMargin,
+                  totalPLIsFinite: Number.isFinite(totalPL),
+                  totalMarginIsFinite: Number.isFinite(totalMargin)
+                });
+                
+                return (
+                  <PnLChartCard 
+                    pnlValue={Number.isFinite(totalPL) ? totalPL : 0}
+                    percentageChange={Number.isFinite(totalMargin) && totalMargin > 0 ? ((Number.isFinite(totalPL) ? totalPL : 0) / totalMargin * 100) : 0}
+                    subtitle={`Margin: ${formatSats(Number.isFinite(totalMargin) ? totalMargin : 0, { size: 16, variant: 'neutral' })}`}
+                    showChart={true}
+                    showFilters={true}
+                    initialPeriod="7D"
+                  />
+                );
+              })()}
             </div>
             
             {/* Mini Cards Grid - Right side */}
@@ -794,24 +808,24 @@ export default function DashboardLiquid() {
               
               {/* Total Margin */}
               <MarginMiniCard 
-                margin={calculateTotalMargin()}
-                marginRatio={totalMargin > 0 ? ((totalPL || 0) / totalMargin * 100) : 0}
+                margin={Number.isFinite(calculateTotalMargin()) ? calculateTotalMargin() : 0}
+                marginRatio={Number.isFinite(totalMargin) && totalMargin > 0 ? ((Number.isFinite(totalPL) ? totalPL : 0) / totalMargin * 100) : 0}
               />
               
               {/* Balance */}
               <BalanceMiniCard 
-                balance={calculateEstimatedBalance()}
-                freeBalance={calculateAvailableMargin()}
+                balance={Number.isFinite(calculateEstimatedBalance()) ? calculateEstimatedBalance() : 0}
+                freeBalance={Number.isFinite(calculateAvailableMargin()) ? calculateAvailableMargin() : 0}
                 showSatsIcon={true}
               />
               
               {/* Free Balance / Estimated Fees */}
               <MetricMiniCard 
                 title="Free Balance"
-                value={calculateAvailableMargin()}
+                value={Number.isFinite(calculateAvailableMargin()) ? calculateAvailableMargin() : 0}
                 formatAsSats={true}
                 showSatsIcon={true}
-                variant={calculateAvailableMargin() > 0 ? 'success' : 'neutral'}
+                variant={Number.isFinite(calculateAvailableMargin()) && calculateAvailableMargin() > 0 ? 'success' : 'neutral'}
                 tooltip="Quanto você tem livre agora para abrir novas posições."
               />
             </div>
