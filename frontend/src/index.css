@@ -4,6 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Liquid Glass Design System */
+@import './styles/liquid-glass.css';
+
 /* Animação de gradiente sutil para o ícone central */
 @keyframes gradientShift {
   0% {
