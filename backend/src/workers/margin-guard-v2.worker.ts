@@ -131,7 +131,7 @@ export class MarginGuardV2Worker extends EventEmitter {
         include: {
           user: {
             include: {
-              userExchangeAccounts: {
+              exchange_accounts: {
                 where: { is_active: true },
                 take: 1
               }
@@ -167,19 +167,19 @@ export class MarginGuardV2Worker extends EventEmitter {
         const user = await this.prisma.user.findUnique({
           where: { id: userId },
           include: {
-            userExchangeAccounts: {
+            exchange_accounts: {
               where: { is_active: true },
               take: 1
             }
           }
         });
 
-        if (!user || !user.userExchangeAccounts.length) {
+        if (!user || !user.exchange_accounts.length) {
           console.warn(`⚠️ MARGIN GUARD V2 - No active exchange account for user ${userId}`);
           continue;
         }
 
-        const account = user.userExchangeAccounts[0];
+        const account = user.exchange_accounts[0];
         const credentials = {
           apiKey: account.credentials['API Key'],
           apiSecret: account.credentials['API Secret'],
@@ -443,18 +443,18 @@ export class MarginGuardV2Worker extends EventEmitter {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         include: {
-          userExchangeAccounts: {
+          exchange_accounts: {
             where: { is_active: true },
             take: 1
           }
         }
       });
 
-      if (!user || !user.userExchangeAccounts.length) {
+      if (!user || !user.exchange_accounts.length) {
         throw new Error('Conta de exchange não encontrada');
       }
 
-      const account = user.userExchangeAccounts[0];
+      const account = user.exchange_accounts[0];
       const lnMarkets = new LNMarketsAPIv2({
         credentials: {
           apiKey: account.credentials['API Key'],
@@ -575,18 +575,18 @@ export class MarginGuardV2Worker extends EventEmitter {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         include: {
-          userExchangeAccounts: {
+          exchange_accounts: {
             where: { is_active: true },
             take: 1
           }
         }
       });
 
-      if (!user || !user.userExchangeAccounts.length) {
+      if (!user || !user.exchange_accounts.length) {
         return false;
       }
 
-      const account = user.userExchangeAccounts[0];
+      const account = user.exchange_accounts[0];
       const lnMarkets = new LNMarketsAPIv2({
         credentials: {
           apiKey: account.credentials['API Key'],
