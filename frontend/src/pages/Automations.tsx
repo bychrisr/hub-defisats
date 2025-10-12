@@ -564,57 +564,60 @@ export const Automations = () => {
                           return (
                             <div className="space-y-4">
                               {/* Preço atual do BTC */}
-                              <div className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                              <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
                                 btcLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                                 'gradient-card-blue border-blue-500 hover:border-blue-400 hover:shadow-blue-500/30'
                               }`}>
                                 <div className="p-4">
                                   <div className="flex items-center justify-between mb-2">
-                                    <Label className="text-sm text-muted-foreground">Preço Atual BTC</Label>
-                                    <Badge variant="outline" className="text-xs">
+                                    <Label className="text-sm text-blue-100">Preço Atual BTC</Label>
+                                    <Badge variant="outline" className="text-xs border-blue-400/60 text-blue-200 bg-blue-600/20">
                                       Tempo Real
-                                    </Badge>
+                              </Badge>
                                   </div>
-                                  <p className="text-xl font-bold text-blue-300">
+                                  <p className="text-xl font-bold text-blue-200">
                                     ${currentBtcPrice.toLocaleString()}
                                   </p>
                                 </div>
                               </div>
 
                               {/* Informações da posição */}
-                              <div className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                              <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
                                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                                 'gradient-card-purple border-purple-500 hover:border-purple-400 hover:shadow-purple-500/30'
                               }`}>
                                 <div className="p-4">
-                                  <Label className="text-sm text-muted-foreground">Posição Exemplo</Label>
+                                  <Label className="text-sm text-purple-100">Posição Exemplo</Label>
                                   <div className="grid grid-cols-2 gap-3 mt-2">
                                     <div>
-                                      <p className="text-xs text-muted-foreground">Tipo</p>
-                                      <Badge variant={side === 'b' ? 'default' : 'secondary'} className="text-xs">
+                                      <p className="text-xs text-purple-200">Tipo</p>
+                                      <Badge variant={side === 'b' ? 'default' : 'secondary'} className={`text-xs ${
+                                        side === 'b' ? 'bg-green-600/20 border-green-400/60 text-green-200' : 
+                                        'bg-red-600/20 border-red-400/60 text-red-200'
+                                      }`}>
                                         {side === 'b' ? 'LONG' : 'SHORT'}
-                                      </Badge>
+                                </Badge>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-muted-foreground">Margem Atual</p>
-                                      <p className="text-sm font-semibold text-purple-300">{currentMargin.toLocaleString()} sats</p>
+                                      <p className="text-xs text-purple-200">Margem Atual</p>
+                                      <p className="text-sm font-semibold text-purple-200">{currentMargin.toLocaleString()} sats</p>
                                     </div>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Cálculo do trigger */}
-                              <div className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                              <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
                                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                                 'gradient-card-orange border-orange-500 hover:border-orange-400 hover:shadow-orange-500/30'
                               }`}>
                                 <div className="p-4">
-                                  <Label className="text-sm text-muted-foreground">Quando o Margin Guard será acionado</Label>
+                                  <Label className="text-sm text-orange-100">Quando o Margin Guard será acionado</Label>
                                   <div className="mt-2">
-                                    <p className="text-lg font-semibold text-orange-300">
+                                    <p className="text-lg font-semibold text-orange-200">
                                       ${triggerPrice.toLocaleString()}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-orange-200">
                                       {marginGuardConfig.margin_threshold}% do preço de liquidação (${liquidationPrice.toLocaleString()})
                                     </p>
                                   </div>
@@ -622,17 +625,17 @@ export const Automations = () => {
                               </div>
 
                               {/* Margem a adicionar */}
-                              <div className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                              <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
                                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                                 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30'
                               }`}>
                                 <div className="p-4">
-                                  <Label className="text-sm text-muted-foreground">Margem a Adicionar</Label>
+                                  <Label className="text-sm text-green-100">Margem a Adicionar</Label>
                                   <div className="mt-2">
-                                    <p className="text-lg font-semibold text-green-300">
+                                    <p className="text-lg font-semibold text-green-200">
                                       {marginToAdd.toLocaleString()} sats
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-green-200">
                                       {marginGuardConfig.add_margin_percentage}% da margem atual
                                     </p>
                                   </div>
@@ -640,20 +643,20 @@ export const Automations = () => {
                               </div>
 
                               {/* Resultado */}
-                              <div className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
+                              <div className={`gradient-card border-2 rounded-lg transition-all duration-300 hover:shadow-xl cursor-default ${
                                 positionsLoading ? 'gradient-card-gray border-gray-500 hover:border-gray-400' :
                                 'gradient-card-green border-green-500 hover:border-green-400 hover:shadow-green-500/30'
                               }`}>
                                 <div className="p-4">
-                                  <Label className="text-sm text-green-300">Nova Proteção</Label>
+                                  <Label className="text-sm text-green-100">Nova Proteção</Label>
                                   <div className="mt-2">
-                                    <p className="text-lg font-semibold text-green-300">
+                                    <p className="text-lg font-semibold text-green-200">
                                       Nova Liquidação: ${newLiquidationPrice.toLocaleString()}
                                     </p>
-                                    <p className="text-sm text-green-300">
+                                    <p className="text-sm text-green-200">
                                       +{distanceImprovement.toFixed(1)}% de proteção adicional
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-green-200">
                                       Nova margem: {newMargin.toLocaleString()} sats
                                     </p>
                                   </div>
