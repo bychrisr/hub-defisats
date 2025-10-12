@@ -1021,6 +1021,13 @@ async function start() {
     startPeriodicMonitoring(prisma); // Passa a instância conectada do Prisma
     console.log('✅ Margin Guard monitoring started');
     
+    // Start Margin Guard V2 Worker with WebSocket integration
+    console.log('🚀 Starting Margin Guard V2 Worker...');
+    const { getMarginGuardV2Worker } = await import('./workers/margin-guard-v2.worker');
+    const marginGuardV2Worker = getMarginGuardV2Worker(prisma);
+    await marginGuardV2Worker.initialize();
+    console.log('✅ Margin Guard V2 Worker started with WebSocket integration');
+    
     // Start Health Checker service
     console.log('🏥 Starting Health Checker service...');
     const { healthCheckerService } = await import('./services/health-checker.service');

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { PrismaClient } from '@prisma/client';
 import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';
-import { WebSocketManagerService } from '../services/websocket-manager.service';
+import { websocketManager } from '../services/websocket-manager.service';
 import { AutomationLoggerService } from '../services/automation-logger.service';
 import { NotificationCentralService } from '../services/notification-central.service';
 import { PlanLimitsService } from '../services/plan-limits.service';
@@ -58,8 +58,6 @@ interface MarginCalculation {
 
 export class MarginGuardV2Worker extends EventEmitter {
   private prisma: PrismaClient;
-  private websocketManager: WebSocketManagerService;
-  private lnMarketsService: LNMarketsAPIv2;
   private automationLogger: AutomationLoggerService;
   private notificationService: NotificationCentralService;
   private planLimitsService: PlanLimitsService;
@@ -70,8 +68,6 @@ export class MarginGuardV2Worker extends EventEmitter {
   constructor(prisma: PrismaClient) {
     super();
     this.prisma = prisma;
-    this.websocketManager = new WebSocketManagerService();
-    this.lnMarketsService = new LNMarketsAPIv2();
     this.automationLogger = new AutomationLoggerService(prisma);
     this.notificationService = new NotificationCentralService(prisma);
     this.planLimitsService = new PlanLimitsService(prisma);
@@ -108,17 +104,17 @@ export class MarginGuardV2Worker extends EventEmitter {
    */
   private setupWebSocketListeners(): void {
     // Listener para atualizações de posição
-    this.websocketManager.on('positionUpdate', async (userId: string, positionData: PositionData) => {
+    websocketManager.on('positionUpdate', async (userId: string, positionData: PositionData) => {
       await this.handlePositionUpdate(userId, positionData);
     });
 
     // Listener para atualizações de preço
-    this.websocketManager.on('marketUpdate', async (userId: string, marketData: any) => {
+    websocketManager.on('marketUpdate', async (userId: string, marketData: any) => {
       await this.handleMarketUpdate(userId, marketData);
     });
 
     // Listener para erros de conexão
-    this.websocketManager.on('userError', (userId: string, error: any) => {
+    websocketManager.on('userError', (userId: string, error: any) => {
       console.error(`❌ MARGIN GUARD V2 - WebSocket error for user ${userId}:`, error);
     });
 
@@ -135,7 +131,7 @@ export class MarginGuardV2Worker extends EventEmitter {
         include: {
           user: {
             include: {
-              exchange_accounts: {
+              userExchangeAccounts: {
                 where: { is_active: true },
                 take: 1
               }
@@ -171,27 +167,27 @@ export class MarginGuardV2Worker extends EventEmitter {
         const user = await this.prisma.user.findUnique({
           where: { id: userId },
           include: {
-            exchange_accounts: {
+            userExchangeAccounts: {
               where: { is_active: true },
               take: 1
             }
           }
         });
 
-        if (!user || !user.exchange_accounts.length) {
+        if (!user || !user.userExchangeAccounts.length) {
           console.warn(`⚠️ MARGIN GUARD V2 - No active exchange account for user ${userId}`);
           continue;
         }
 
-        const account = user.exchange_accounts[0];
+        const account = user.userExchangeAccounts[0];
         const credentials = {
           apiKey: account.credentials['API Key'],
           apiSecret: account.credentials['API Secret'],
           passphrase: account.credentials['Passphrase'],
-          isTestnet: account.is_testnet
+          isTestnet: account.credentials.isTestnet === 'true' || account.credentials.testnet === 'true'
         };
 
-        await this.websocketManager.createConnection(userId, credentials);
+        await websocketManager.createConnection(userId, credentials);
         console.log(`🔌 MARGIN GUARD V2 - WebSocket connection established for user ${userId}`);
 
       } catch (error) {
@@ -447,24 +443,24 @@ export class MarginGuardV2Worker extends EventEmitter {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         include: {
-          exchange_accounts: {
+          userExchangeAccounts: {
             where: { is_active: true },
             take: 1
           }
         }
       });
 
-      if (!user || !user.exchange_accounts.length) {
+      if (!user || !user.userExchangeAccounts.length) {
         throw new Error('Conta de exchange não encontrada');
       }
 
-      const account = user.exchange_accounts[0];
+      const account = user.userExchangeAccounts[0];
       const lnMarkets = new LNMarketsAPIv2({
         credentials: {
           apiKey: account.credentials['API Key'],
           apiSecret: account.credentials['API Secret'],
           passphrase: account.credentials['Passphrase'],
-          isTestnet: account.is_testnet
+          isTestnet: account.credentials.isTestnet === 'true' || account.credentials.testnet === 'true'
         },
         logger: console
       });
@@ -579,24 +575,24 @@ export class MarginGuardV2Worker extends EventEmitter {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         include: {
-          exchange_accounts: {
+          userExchangeAccounts: {
             where: { is_active: true },
             take: 1
           }
         }
       });
 
-      if (!user || !user.exchange_accounts.length) {
+      if (!user || !user.userExchangeAccounts.length) {
         return false;
       }
 
-      const account = user.exchange_accounts[0];
+      const account = user.userExchangeAccounts[0];
       const lnMarkets = new LNMarketsAPIv2({
         credentials: {
           apiKey: account.credentials['API Key'],
           apiSecret: account.credentials['API Secret'],
           passphrase: account.credentials['Passphrase'],
-          isTestnet: account.is_testnet
+          isTestnet: account.credentials.isTestnet === 'true' || account.credentials.testnet === 'true'
         },
         logger: console
       });
