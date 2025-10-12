@@ -241,19 +241,35 @@ export class MarginGuardController {
 
       reply.send({
         success: true,
-        positions: positions.map(pos => ({
-          trade_id: pos.trade_id,
-          side: pos.side,
-          entry_price: pos.entry_price,
-          liquidation_price: pos.liquidation_price,
-          current_price: pos.current_price,
-          margin: pos.margin,
-          fees: pos.fees,
-          distance_percentage: this.calculateDistancePercentage(
-            pos.entry_price,
-            pos.liquidation_price
-          )
-        }))
+        data: {
+          positions: positions.map(pos => ({
+            id: pos.trade_id || pos.id,
+            symbol: pos.symbol || 'BTCUSD',
+            side: pos.side,
+            size: pos.size || pos.quantity,
+            margin: pos.margin,
+            liquidation_price: pos.liquidation_price,
+            current_price: pos.current_price,
+            entry_price: pos.entry_price,
+            pnl: pos.pnl || 0,
+            fees: pos.fees,
+            distance_percentage: this.calculateDistancePercentage(
+              pos.entry_price,
+              pos.liquidation_price
+            ),
+            // Informações da conta (múltiplas contas)
+            account_id: pos.account_id,
+            account_name: pos.account_name,
+            exchange_name: pos.exchange_name
+          })),
+          total: positions.length,
+          accounts: [...new Set(positions.map(pos => pos.account_name))], // Lista de contas únicas
+          closestToLiquidation: positions.reduce((closest, pos) => {
+            const distance = this.calculateDistancePercentage(pos.entry_price, pos.liquidation_price);
+            const closestDistance = this.calculateDistancePercentage(closest.entry_price, closest.liquidation_price);
+            return distance < closestDistance ? pos : closest;
+          }, positions[0]) || null
+        }
       });
 
     } catch (error: any) {
@@ -530,33 +546,76 @@ export class MarginGuardController {
   // Métodos auxiliares privados
 
   private async fetchRunningPositions(userId: string): Promise<any[]> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        exchange_accounts: {
-          where: { is_active: true },
-          take: 1
+    console.log('🔍 MARGIN GUARD - Fetching running positions for user:', userId);
+    
+    // Buscar TODAS as contas ativas do usuário (não apenas a primeira)
+    const activeAccounts = await this.prisma.userExchangeAccounts.findMany({
+      where: {
+        user_id: userId,
+        is_active: true,
+        exchange: {
+          slug: 'ln-markets' // Apenas LN Markets por enquanto
         }
+      },
+      include: {
+        exchange: true
       }
     });
 
-    if (!user || !user.exchange_accounts.length) {
+    console.log('🔍 MARGIN GUARD - Found active accounts:', {
+      count: activeAccounts.length,
+      accounts: activeAccounts.map(acc => ({
+        id: acc.id,
+        accountName: acc.account_name,
+        exchangeName: acc.exchange.name
+      }))
+    });
+
+    if (!activeAccounts.length) {
+      console.log('⚠️ MARGIN GUARD - No active LN Markets accounts found');
       return [];
     }
 
-    const account = user.exchange_accounts[0];
-    const lnMarkets = new LNMarketsAPIv2({
-      credentials: {
-        apiKey: account.credentials['API Key'],
-        apiSecret: account.credentials['API Secret'],
-        passphrase: account.credentials['Passphrase'],
-        isTestnet: false // TODO: Implementar detecção de testnet
-      },
-      logger: console as any
-    });
+    // Agregar posições de TODAS as contas ativas
+    const allPositions: any[] = [];
 
-    const positions = await lnMarkets.futures.getPositions();
-    return positions.filter(pos => pos.quantity > 0); // Posições ativas têm quantidade > 0
+    for (const account of activeAccounts) {
+      try {
+        console.log(`🔍 MARGIN GUARD - Processing account: ${account.account_name}`);
+        
+        const lnMarkets = new LNMarketsAPIv2({
+          credentials: {
+            apiKey: account.credentials['API Key'],
+            apiSecret: account.credentials['API Secret'],
+            passphrase: account.credentials['Passphrase'],
+            isTestnet: false // TODO: Implementar detecção de testnet
+          },
+          logger: console as any
+        });
+
+        const positions = await lnMarkets.futures.getPositions();
+        const activePositions = positions.filter(pos => pos.quantity > 0);
+        
+        // Adicionar informação da conta às posições
+        const positionsWithAccount = activePositions.map(pos => ({
+          ...pos,
+          account_id: account.id,
+          account_name: account.account_name,
+          exchange_name: account.exchange.name
+        }));
+
+        allPositions.push(...positionsWithAccount);
+        
+        console.log(`✅ MARGIN GUARD - Account ${account.account_name}: ${activePositions.length} active positions`);
+        
+      } catch (error) {
+        console.error(`❌ MARGIN GUARD - Error fetching positions for account ${account.account_name}:`, error);
+        // Continue com outras contas mesmo se uma falhar
+      }
+    }
+
+    console.log(`✅ MARGIN GUARD - Total active positions across all accounts: ${allPositions.length}`);
+    return allPositions;
   }
 
   private calculateDistancePercentage(entryPrice: number, liquidationPrice: number): number {
