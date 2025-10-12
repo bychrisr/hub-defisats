@@ -164,15 +164,14 @@ export class PlanLimitsService {
         SELECT 
           slug,
           name,
-          price,
-          features,
-          margin_guard_features
+          price_sats,
+          features
         FROM plans 
-        WHERE price > (
-          SELECT price FROM plans p 
+        WHERE price_sats > (
+          SELECT price_sats FROM plans p 
           WHERE p.slug = ${currentPlan}
         )
-        ORDER BY price ASC
+        ORDER BY price_sats ASC
         LIMIT 3
       `;
 
