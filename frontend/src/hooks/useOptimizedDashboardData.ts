@@ -147,7 +147,7 @@ export const useOptimizedDashboardData = (): UseOptimizedDashboardDataReturn => 
   }, [accountInfo?.accountId, fetchDashboardData]);
 
   // === CONSUMIR DADOS DO REALTIME CONTEXT ===
-  const { dashboardData: realtimeDashboardData } = useRealtimeData();
+  const { dashboardData: realtimeDashboardData, isConnected, sendMessage } = useRealtimeData();
 
   // Atualizar dados quando chegam via WebSocket do RealtimeDataContext
   useEffect(() => {
