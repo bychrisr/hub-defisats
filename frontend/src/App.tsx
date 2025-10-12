@@ -34,6 +34,7 @@ import Payment from '@/pages/Payment';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
+import DashboardLiquid from '@/pages/DashboardLiquid';
 import DashboardRefactored from '@/pages/DashboardRefactored';
 import Profile from '@/pages/Profile';
 import ProfileRefactored from '@/pages/ProfileRefactored';
@@ -275,6 +276,18 @@ const App = () => {
             />
                   <Route
               path="/dashboard"
+                element={
+                <ProtectedRoute>
+                  <RouteGuard>
+                    <ResponsiveLayout>
+                      <DashboardLiquid />
+                    </ResponsiveLayout>
+                  </RouteGuard>
+                </ProtectedRoute>
+              }
+            />
+                  <Route
+              path="/dashboard-classic"
                 element={
                 <ProtectedRoute>
                   <RouteGuard>
