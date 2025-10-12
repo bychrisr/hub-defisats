@@ -124,7 +124,9 @@ export const Automations = () => {
       const featuresResponse = await apiFetch('/api/user/margin-guard/plan-features');
       if (featuresResponse.ok) {
         const featuresData = await featuresResponse.json();
-        setPlanFeatures(featuresData.features);
+        console.log('🔍 FRONTEND - Plan features response:', featuresData);
+        console.log('🔍 FRONTEND - Plan info:', featuresData.plan_info);
+        setPlanFeatures(featuresData);
       }
 
       // Carregar posições running
