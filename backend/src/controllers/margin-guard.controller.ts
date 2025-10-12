@@ -73,9 +73,9 @@ export class MarginGuardController {
         return;
       }
 
-      if (margin_threshold < 5 || margin_threshold > 95) {
+      if (margin_threshold < 5 || margin_threshold > 25) {
         console.log('❌ MARGIN GUARD API - Invalid margin_threshold:', margin_threshold);
-        reply.status(400).send({ error: 'margin_threshold deve estar entre 5% e 95%' });
+        reply.status(400).send({ error: 'margin_threshold deve estar entre 5% e 25%' });
         return;
       }
 

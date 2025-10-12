@@ -310,7 +310,7 @@ export const Automations = () => {
                               setMarginGuardConfig(prev => ({ ...prev, margin_threshold: value[0] }))
                             }
                             min={5}
-                            max={95}
+                            max={25}
                             step={1}
                             className="w-full"
                           />
@@ -319,11 +319,11 @@ export const Automations = () => {
                             <span className="font-medium text-primary">
                               {marginGuardConfig.margin_threshold}%
                             </span>
-                            <span>95%</span>
+                            <span>25%</span>
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Quando o preço chegar a {marginGuardConfig.margin_threshold}% da distância de liquidação, o Margin Guard será acionado
+                          Quando o preço chegar a {marginGuardConfig.margin_threshold}% do preço de liquidação, o Margin Guard será acionado
                         </p>
                       </div>
 
