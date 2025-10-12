@@ -61,6 +61,15 @@ export const Automations = () => {
   const { positions: optimizedPositions, isLoading: positionsLoading } = useOptimizedPositions();
   const { price: btcPrice, isLoading: btcLoading } = useBitcoinPrice();
   
+  // Hook de animação para o preço BTC (sempre chamado no nível superior)
+  const btcAnimation = useLiquidGlassAnimation({
+    variant: 'info',
+    value: btcPrice || 0,
+    isPositive: (btcPrice || 0) > 0,
+    isNegative: false,
+    isNeutral: (btcPrice || 0) === 0
+  });
+  
   // Debug: Verificar tema atual
   useEffect(() => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -561,15 +570,6 @@ export const Automations = () => {
                           const newDistance = Math.abs(currentBtcPrice - newLiquidationPrice);
                           const distanceImprovement = newDistance > currentDistance ? 
                             ((newDistance - currentDistance) / currentDistance) * 100 : 0;
-
-                          // Hook de animação para o preço BTC
-                          const btcAnimation = useLiquidGlassAnimation({
-                            variant: 'info',
-                            value: currentBtcPrice,
-                            isPositive: currentBtcPrice > 0,
-                            isNegative: false,
-                            isNeutral: currentBtcPrice === 0
-                          });
 
                           return (
                             <div className="space-y-4">
