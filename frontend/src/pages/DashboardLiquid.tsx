@@ -773,28 +773,14 @@ export default function DashboardLiquid() {
           <div className="grid grid-cols-12 gap-4 auto-rows-[140px]">
             {/* Main PnL Chart Card - Spans 2 rows, responsive columns */}
             <div className="col-span-12 md:col-span-6 lg:col-span-5 row-span-2">
-              {(() => {
-                // Debug: log values being passed to PnLChartCard
-                console.debug("🔍 DASHBOARD LIQUID DEBUG:", {
-                  totalPL,
-                  totalMargin,
-                  totalPLType: typeof totalPL,
-                  totalMarginType: typeof totalMargin,
-                  totalPLIsFinite: Number.isFinite(totalPL),
-                  totalMarginIsFinite: Number.isFinite(totalMargin)
-                });
-                
-                return (
-                  <PnLChartCard 
-                    pnlValue={Number.isFinite(totalPL) ? totalPL : 0}
-                    percentageChange={Number.isFinite(totalMargin) && totalMargin > 0 ? ((Number.isFinite(totalPL) ? totalPL : 0) / totalMargin * 100) : 0}
-                    subtitle={`Margin: ${formatSats(Number.isFinite(totalMargin) ? totalMargin : 0, { size: 16, variant: 'neutral' })}`}
-                    showChart={true}
-                    showFilters={true}
-                    initialPeriod="7D"
-                  />
-                );
-              })()}
+              <PnLChartCard 
+                pnlValue={Number.isFinite(totalPL) ? totalPL : 0}
+                percentageChange={Number.isFinite(totalMargin) && totalMargin > 0 ? ((Number.isFinite(totalPL) ? totalPL : 0) / totalMargin * 100) : 0}
+                subtitle={`Margin: ${formatSats(Number.isFinite(totalMargin) ? totalMargin : 0, { size: 16, variant: 'neutral' })}`}
+                showChart={true}
+                showFilters={true}
+                initialPeriod="7D"
+              />
             </div>
             
             {/* Mini Cards Grid - Right side */}
