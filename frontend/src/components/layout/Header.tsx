@@ -79,6 +79,55 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
             <DropdownMenuContent align="end" className="w-80">
               <DropdownMenuLabel>Notifications</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              
+              {/* Test Notification Button */}
+              <div className="p-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full mb-2"
+                  onClick={async () => {
+                    try {
+                      // Simular notificação do Margin Guard
+                      const response = await fetch('/api/user/margin-guard/test-notification', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                          type: 'margin_guard',
+                          priority: 'medium',
+                          title: '🛡️ Margem Adicionada',
+                          message: 'Margin Guard adicionou 2,500 sats de margem à posição 12345678...',
+                          metadata: {
+                            tradeId: '12345678',
+                            marginAdded: 2500,
+                            totalCost: 2600,
+                            newLiquidationPrice: 45000,
+                            currentPrice: 47500,
+                            triggerPrice: 46000,
+                            action: 'margin_added',
+                            timestamp: new Date().toISOString()
+                          }
+                        })
+                      });
+                      
+                      if (response.ok) {
+                        console.log('✅ Test notification sent');
+                      } else {
+                        console.error('❌ Failed to send test notification');
+                      }
+                    } catch (error) {
+                      console.error('❌ Error sending test notification:', error);
+                    }
+                  }}
+                >
+                  Test Margin Guard Notification
+                </Button>
+              </div>
+              
+              <DropdownMenuSeparator />
               <div className="p-4 text-center text-sm text-muted-foreground">
                 No notifications
               </div>

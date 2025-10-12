@@ -135,7 +135,7 @@ export class PlanLimitsService {
       // 5. Validar porcentagem de margem por plano
       const maxMarginPercentage = this.getMaxMarginPercentageByPlan(user.plan_type);
       if (config.addMarginPercentage > maxMarginPercentage) {
-        return {
+      return {
           isValid: false,
           error: `Máximo ${maxMarginPercentage}% de margem no plano ${user.plan_type}`,
           limitations: planFeatures.limitations,

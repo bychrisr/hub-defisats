@@ -808,4 +808,198 @@ export class MarginGuardController {
       ? currentPrice <= triggerPrice
       : currentPrice >= triggerPrice;
   }
+
+  /**
+   * Buscar notificações do Margin Guard
+   */
+  async getNotifications(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    console.log('🔔 MARGIN GUARD API - Getting notifications');
+    try {
+      const userId = (request as any).user?.id;
+      
+      if (!userId) {
+        console.log('❌ MARGIN GUARD API - No user ID found');
+        reply.status(401).send({ error: 'Usuário não autenticado' });
+        return;
+      }
+
+      const queryParams = request.query as any;
+      const limit = parseInt(queryParams.limit) || 50;
+
+      // Buscar notificações usando NotificationCentralService
+      const { NotificationCentralService } = await import('../services/notification-central.service');
+      const notificationService = new NotificationCentralService(this.prisma);
+      const notifications = await notificationService.getInAppNotifications(userId, limit, false);
+
+      console.log('✅ MARGIN GUARD API - Notifications retrieved:', {
+        userId,
+        count: notifications.length
+      });
+
+      reply.send({
+        success: true,
+        notifications,
+        count: notifications.length
+      });
+
+    } catch (error: any) {
+      console.error('❌ MARGIN GUARD API - Failed to get notifications:', error);
+      reply.status(500).send({ 
+        error: 'Erro interno do servidor',
+        details: error.message 
+      });
+    }
+  }
+
+  /**
+   * Marcar notificação como lida
+   */
+  async markNotificationAsRead(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    console.log('🔔 MARGIN GUARD API - Marking notification as read');
+    try {
+      const userId = (request as any).user?.id;
+      const { notificationId } = request.params as any;
+      
+      if (!userId) {
+        console.log('❌ MARGIN GUARD API - No user ID found');
+        reply.status(401).send({ error: 'Usuário não autenticado' });
+        return;
+      }
+
+      if (!notificationId) {
+        console.log('❌ MARGIN GUARD API - No notification ID provided');
+        reply.status(400).send({ error: 'ID da notificação é obrigatório' });
+        return;
+      }
+
+      // Marcar notificação como lida usando Prisma diretamente
+      const updated = await this.prisma.inAppNotification.update({
+        where: { 
+          id: notificationId,
+          user_id: userId // Garantir que é do usuário
+        },
+        data: { read: true }
+      });
+      
+      const success = !!updated;
+
+      if (success) {
+        console.log('✅ MARGIN GUARD API - Notification marked as read:', notificationId);
+        reply.send({
+          success: true,
+          message: 'Notificação marcada como lida'
+        });
+      } else {
+        console.log('❌ MARGIN GUARD API - Failed to mark notification as read');
+        reply.status(500).send({ 
+          error: 'Erro ao marcar notificação como lida'
+        });
+      }
+
+    } catch (error: any) {
+      console.error('❌ MARGIN GUARD API - Failed to mark notification as read:', error);
+      reply.status(500).send({ 
+        error: 'Erro interno do servidor',
+        details: error.message 
+      });
+    }
+  }
+
+  /**
+   * Test notification endpoint
+   */
+  async testNotification(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const userId = (request as any).user?.id;
+      
+      if (!userId) {
+        reply.status(401).send({ error: 'Usuário não autenticado' });
+        return;
+      }
+
+      const body = request.body as any;
+      
+      // Validar dados da notificação de teste
+      if (!body.type || !body.title || !body.message) {
+        reply.status(400).send({ 
+          error: 'Dados de notificação inválidos. Requer: type, title, message' 
+        });
+        return;
+      }
+
+      // Usar o NotificationCentralService existente
+      const { NotificationCentralService } = await import('../services/notification-central.service');
+      const notificationService = new NotificationCentralService(this.prisma);
+
+      await notificationService.notify({
+        userId,
+        type: body.type || 'margin_guard',
+        priority: body.priority || 'medium',
+        title: body.title,
+        message: body.message,
+        metadata: body.metadata || {}
+      });
+
+      console.log('✅ MARGIN GUARD API - Test notification sent successfully');
+
+      reply.send({
+        success: true,
+        message: 'Notificação de teste enviada com sucesso',
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error: any) {
+      console.error('❌ MARGIN GUARD API - Failed to send test notification:', error);
+      reply.status(500).send({ 
+        error: 'Erro interno do servidor',
+        details: error.message 
+      });
+    }
+  }
+
+  /**
+   * Obter estatísticas de notificações
+   */
+  async getNotificationStats(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    console.log('📊 MARGIN GUARD API - Getting notification stats');
+    try {
+      const userId = (request as any).user?.id;
+      
+      if (!userId) {
+        console.log('❌ MARGIN GUARD API - No user ID found');
+        reply.status(401).send({ error: 'Usuário não autenticado' });
+        return;
+      }
+
+      // Buscar estatísticas de notificações usando NotificationCentralService
+      const { NotificationCentralService } = await import('../services/notification-central.service');
+      const notificationService = new NotificationCentralService(this.prisma);
+      
+      const notifications = await notificationService.getInAppNotifications(userId, 100, false);
+      
+      const stats = {
+        total: notifications.length,
+        unread: notifications.filter(n => !n.read).length,
+        byType: notifications.reduce((acc, notif) => {
+          acc[notif.type] = (acc[notif.type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        recent: notifications.slice(0, 5)
+      };
+
+      console.log('✅ MARGIN GUARD API - Notification stats retrieved:', stats);
+
+      reply.send({
+        success: true,
+        stats
+      });
+
+    } catch (error: any) {
+      console.error('❌ MARGIN GUARD API - Failed to get notification stats:', error);
+      reply.status(500).send({ 
+        error: 'Erro interno do servidor',
+        details: error.message 
+      });
+    }
+  }
 }

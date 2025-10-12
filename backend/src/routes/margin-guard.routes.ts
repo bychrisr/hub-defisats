@@ -82,5 +82,12 @@ export async function marginGuardRoutes(fastify: FastifyInstance) {
      * @access Private
      */
     fastify.get('/available-upgrades', marginGuardController.getAvailableUpgrades.bind(marginGuardController));
+
+    /**
+     * @route POST /api/user/margin-guard/test-notification
+     * @desc Enviar notificação de teste do Margin Guard
+     * @access Private
+     */
+    fastify.post('/test-notification', marginGuardController.testNotification.bind(marginGuardController));
   });
 }

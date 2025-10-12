@@ -242,7 +242,23 @@ export class MarginGuardV2Worker extends EventEmitter {
         return;
       }
 
-      // 5. Executar proteção
+      // 5. Notificar que a proteção será acionada
+      await this.notificationService.notify({
+        userId,
+        type: 'margin_guard',
+        priority: 'high',
+        title: '⚠️ Margin Guard Ativado',
+        message: `Preço BTC ($${positionData.current_price.toLocaleString()}) atingiu o limite de $${risk.triggerPrice.toLocaleString()}. Margin Guard será executado.`,
+        metadata: {
+          tradeId: positionData.trade_id,
+          currentPrice: positionData.current_price,
+          triggerPrice: risk.triggerPrice,
+          action: 'protection_triggered',
+          timestamp: new Date().toISOString()
+        }
+      });
+
+      // 6. Executar proteção
       await this.executeProtection(userId, config, positionData, risk);
 
     } catch (error) {
@@ -436,6 +452,23 @@ export class MarginGuardV2Worker extends EventEmitter {
       // 2. Validar saldo (implementar validação real)
       const hasSufficientBalance = await this.validateBalance(userId, marginCalculation.totalCost);
       if (!hasSufficientBalance) {
+        // Notificar saldo insuficiente
+        await this.notificationService.notify({
+          userId,
+          type: 'margin_guard',
+          priority: 'high',
+          title: '💰 Saldo Insuficiente',
+          message: `Saldo insuficiente para adicionar margem. Necessário: ${marginCalculation.totalCost.toLocaleString()} sats`,
+          metadata: {
+            tradeId: positionData.trade_id,
+            requiredAmount: marginCalculation.totalCost,
+            currentPrice: positionData.current_price,
+            triggerPrice: risk.triggerPrice,
+            action: 'balance_insufficient',
+            timestamp: new Date().toISOString()
+          }
+        });
+        
         throw new Error('Saldo insuficiente para adicionar margem');
       }
 
@@ -512,13 +545,18 @@ export class MarginGuardV2Worker extends EventEmitter {
         userId,
         type: 'margin_guard',
         priority: 'medium',
-        title: 'Margem Adicionada',
-        message: `Margin Guard adicionou ${marginCalculation.baseMargin.toLocaleString()} sats de margem à posição ${positionData.trade_id.substring(0, 8)}`,
-        metadata: { 
-          tradeId: positionData.trade_id, 
+        title: '🛡️ Margem Adicionada',
+        message: `Margin Guard adicionou ${marginCalculation.baseMargin.toLocaleString()} sats de margem à posição ${positionData.trade_id.substring(0, 8)}...`,
+        metadata: {
+          tradeId: positionData.trade_id,
           marginAdded: marginCalculation.baseMargin,
           totalCost: marginCalculation.totalCost,
-          newLiquidationPrice: marginCalculation.newLiquidationPrice
+          newLiquidationPrice: marginCalculation.newLiquidationPrice,
+          currentPrice: positionData.current_price,
+          triggerPrice: risk.triggerPrice,
+          action: 'margin_added',
+          executionTime: Date.now() - startTime,
+          timestamp: new Date().toISOString()
         }
       });
 
@@ -557,11 +595,16 @@ export class MarginGuardV2Worker extends EventEmitter {
         userId,
         type: 'margin_guard',
         priority: 'high',
-        title: 'Erro no Margin Guard',
-        message: `Falha ao adicionar margem: ${error.message}`,
-        metadata: { 
-          tradeId: positionData.trade_id, 
-          error: error.message 
+        title: '❌ Falha na Execução',
+        message: `Margin Guard falhou ao adicionar margem: ${error.message}`,
+        metadata: {
+          tradeId: positionData.trade_id,
+          error: error.message,
+          currentPrice: positionData.current_price,
+          triggerPrice: risk.triggerPrice,
+          action: 'execution_failed',
+          executionTime: Date.now() - startTime,
+          timestamp: new Date().toISOString()
         }
       });
     }
