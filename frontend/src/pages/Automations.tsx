@@ -254,13 +254,20 @@ export const Automations = () => {
   };
 
   const canSelectMore = () => {
-    if (!planFeatures) return false;
+    if (!planFeatures || typeof planFeatures.maxPositions !== 'number') {
+      console.warn('🔍 FRONTEND - Plan features not loaded yet for canSelectMore:', { planFeatures });
+      return false;
+    }
     if (planFeatures.maxPositions === -1) return true;
     return marginGuardConfig.selected_positions.length < planFeatures.maxPositions;
   };
 
   const isModeAllowed = (mode: string) => {
-    return planFeatures?.modes.includes(mode) || false;
+    if (!planFeatures || !planFeatures.modes || !Array.isArray(planFeatures.modes)) {
+      console.warn('🔍 FRONTEND - Plan features not loaded yet:', { planFeatures, mode });
+      return false;
+    }
+    return planFeatures.modes.includes(mode);
   };
 
   return (
@@ -424,7 +431,7 @@ export const Automations = () => {
                           <Button
                             variant={marginGuardConfig.mode === 'global' ? 'default' : 'outline'}
                             onClick={() => setMarginGuardConfig(prev => ({ ...prev, mode: 'global' }))}
-                            disabled={!isModeAllowed('global')}
+                            disabled={!planFeatures || !isModeAllowed('global')}
                             className="h-auto p-4 flex flex-col items-center gap-2"
                           >
                             <Target className="h-4 w-4" />
@@ -436,7 +443,7 @@ export const Automations = () => {
                           <Button
                             variant={marginGuardConfig.mode === 'unitario' ? 'default' : 'outline'}
                             onClick={() => setMarginGuardConfig(prev => ({ ...prev, mode: 'unitario' }))}
-                            disabled={!isModeAllowed('unitario')}
+                            disabled={!planFeatures || !isModeAllowed('unitario')}
                             className="h-auto p-4 flex flex-col items-center gap-2"
                           >
                             <Activity className="h-4 w-4" />
@@ -491,7 +498,7 @@ export const Automations = () => {
                                   <Checkbox
                                     checked={marginGuardConfig.selected_positions.includes(position.trade_id)}
                                     onCheckedChange={() => togglePosition(position.trade_id)}
-                                    disabled={!marginGuardConfig.selected_positions.includes(position.trade_id) && !canSelectMore()}
+                                    disabled={!planFeatures || (!marginGuardConfig.selected_positions.includes(position.trade_id) && !canSelectMore())}
                                   />
                           </TableCell>
                           <TableCell>
