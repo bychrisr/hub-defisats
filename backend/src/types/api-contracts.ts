@@ -72,15 +72,6 @@ export const RegisterRequestSchema = z.object({
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username must be at most 20 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  ln_markets_api_key: z
-    .string()
-    .min(16, 'LN Markets API key must be at least 16 characters'),
-  ln_markets_api_secret: z
-    .string()
-    .min(16, 'LN Markets API secret must be at least 16 characters'),
-  ln_markets_passphrase: z
-    .string()
-    .min(8, 'LN Markets passphrase must be at least 8 characters'),
   coupon_code: z.string().optional(),
 });
 
@@ -140,8 +131,9 @@ export const UserResponseSchema = z.object({
 });
 
 export const UpdateUserRequestSchema = z.object({
-  ln_markets_api_key: z.string().min(16).optional(),
-  ln_markets_api_secret: z.string().min(16).optional(),
+  email: z.string().email().optional(),
+  username: z.string().min(3).max(20).optional(),
+  bio: z.string().max(500).optional(),
   session_timeout: z.number().min(5).max(1440).optional(), // 5 minutes to 24 hours
 });
 

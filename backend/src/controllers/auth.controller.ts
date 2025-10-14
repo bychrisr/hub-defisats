@@ -9,9 +9,6 @@ interface RegisterRequestBody {
   email?: string;
   username?: string;
   password?: string;
-  ln_markets_api_key?: string;
-  ln_markets_api_secret?: string;
-  ln_markets_passphrase?: string;
   coupon_code?: string;
 }
 
@@ -28,15 +25,6 @@ const RegisterRequestZodSchema = z.object({
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username must be at most 20 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  ln_markets_api_key: z
-    .string()
-    .min(16, 'LN Markets API key must be at least 16 characters'),
-  ln_markets_api_secret: z
-    .string()
-    .min(16, 'LN Markets API secret must be at least 16 characters'),
-  ln_markets_passphrase: z
-    .string()
-    .min(8, 'LN Markets passphrase must be at least 8 characters'),
   coupon_code: z.string().optional(),
 });
 
@@ -103,15 +91,9 @@ export class AuthController {
       hasEmail: !!body?.email,
       hasUsername: !!body?.username,
       hasPassword: !!body?.password,
-      hasApiKey: !!body?.ln_markets_api_key,
-      hasApiSecret: !!body?.ln_markets_api_secret,
-      hasPassphrase: !!body?.ln_markets_passphrase,
       hasCoupon: !!body?.coupon_code,
       email: body?.email,
       username: body?.username,
-      apiKeyLength: body?.ln_markets_api_key?.length,
-      apiSecretLength: body?.ln_markets_api_secret?.length,
-      passphraseLength: body?.ln_markets_passphrase?.length,
     });
 
     try {
@@ -334,50 +316,35 @@ export class AuthController {
       
       const isAdmin = adminUser?.role === 'superadmin';
 
-      // Decrypt LN Markets credentials for display
-      let decryptedCredentials = {
-        ln_markets_api_key: (user as any).ln_markets_api_key,
-        ln_markets_api_secret: (user as any).ln_markets_api_secret,
-        ln_markets_passphrase: (user as any).ln_markets_passphrase,
-      };
+      // Buscar contas do usuário usando o novo sistema
+      const { UserExchangeAccountService } = await import('../services/userExchangeAccount.service');
+      const userExchangeAccountService = new UserExchangeAccountService(this.prisma);
       
+      let userAccounts = [];
       try {
-        if ((user as any).ln_markets_api_key) {
-          console.log('🔓 AUTH ME - Decrypting API key...');
-          decryptedCredentials.ln_markets_api_key = this.authService.decryptData((user as any).ln_markets_api_key);
-        }
-        
-        if ((user as any).ln_markets_api_secret) {
-          console.log('🔓 AUTH ME - Decrypting API secret...');
-          decryptedCredentials.ln_markets_api_secret = this.authService.decryptData((user as any).ln_markets_api_secret);
-        }
-        
-        if ((user as any).ln_markets_passphrase) {
-          console.log('🔓 AUTH ME - Decrypting passphrase...');
-          decryptedCredentials.ln_markets_passphrase = this.authService.decryptData((user as any).ln_markets_passphrase);
-        }
-        
-        console.log('🔓 AUTH ME - All credentials decrypted for display');
+        userAccounts = await userExchangeAccountService.getUserExchangeAccounts(user.id);
+        console.log('✅ AUTH ME - User accounts loaded:', userAccounts.length);
       } catch (error) {
-        console.error('❌ AUTH ME - Error decrypting credentials:', error);
-        // Return encrypted data with indication if decryption fails
-        decryptedCredentials = {
-          ln_markets_api_key: (user as any).ln_markets_api_key ? '[ENCRYPTED]' : null,
-          ln_markets_api_secret: (user as any).ln_markets_api_secret ? '[ENCRYPTED]' : null,
-          ln_markets_passphrase: (user as any).ln_markets_passphrase ? '[ENCRYPTED]' : null,
-        };
+        console.warn('⚠️ AUTH ME - Could not load user accounts:', error);
+        userAccounts = [];
       }
 
-      // Return user info with decrypted credentials
+      // Return user info with exchange accounts
       return reply.status(200).send({
         id: user.id,
         email: user.email,
+        username: user.username,
         plan_type: user.plan_type,
         created_at: (user as any).created_at,
         last_activity_at: (user as any).last_activity_at,
-        ln_markets_api_key: decryptedCredentials.ln_markets_api_key,
-        ln_markets_api_secret: decryptedCredentials.ln_markets_api_secret,
-        ln_markets_passphrase: decryptedCredentials.ln_markets_passphrase,
+        exchange_accounts: userAccounts.map(account => ({
+          id: account.id,
+          account_name: account.account_name,
+          exchange_name: account.exchange?.name,
+          is_active: account.is_active,
+          is_verified: account.is_verified,
+          created_at: account.created_at
+        })),
         is_admin: isAdmin,
       });
     } catch (error) {

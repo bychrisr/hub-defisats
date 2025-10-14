@@ -73,38 +73,39 @@ export class LNMarketsDiagnosticService {
    */
   private async loadCredentials(): Promise<void> {
     try {
-      const user = await this.prisma.user.findFirst({
+      // Get admin user credentials using the new exchange accounts system
+      const adminUser = await this.prisma.user.findFirst({
         where: {
           email: 'admin@axisor.com'
         },
         select: {
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true
+          id: true
         }
       });
 
-      if (user && user.ln_markets_api_key && user.ln_markets_api_secret && user.ln_markets_passphrase) {
-        this.credentials = {
-          apiKey: user.ln_markets_api_key,
-          apiSecret: user.ln_markets_api_secret,
-          passphrase: user.ln_markets_passphrase
-        };
-        logger.info('LN Markets credentials loaded from database', {
-          hasApiKey: !!this.credentials.apiKey,
-          hasApiSecret: !!this.credentials.apiSecret,
-          hasPassphrase: !!this.credentials.passphrase
-        });
+      if (adminUser) {
+        const { AccountCredentialsService } = await import('./account-credentials.service');
+        const accountCredentialsService = new AccountCredentialsService(this.prisma);
+        
+        const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(adminUser.id);
+        
+        if (activeCredentials) {
+          this.credentials = activeCredentials.credentials;
+          logger.info('LN Markets credentials loaded from exchange accounts', {
+            accountName: activeCredentials.accountName,
+            exchangeName: activeCredentials.exchangeName,
+            hasApiKey: !!this.credentials.apiKey,
+            hasApiSecret: !!this.credentials.apiSecret,
+            hasPassphrase: !!this.credentials.passphrase
+          });
+        } else {
+          logger.warn('No active exchange account found for admin user, using public endpoints only');
+        }
       } else {
-        logger.warn('LN Markets credentials not found in database, using public endpoints only', {
-          userFound: !!user,
-          hasApiKey: !!(user?.ln_markets_api_key),
-          hasApiSecret: !!(user?.ln_markets_api_secret),
-          hasPassphrase: !!(user?.ln_markets_passphrase)
-        });
+        logger.warn('Admin user not found, using public endpoints only');
       }
     } catch (error) {
-      logger.error('Failed to load LN Markets credentials from database', { error: error.message });
+      logger.error('Failed to load LN Markets credentials from exchange accounts', { error: error.message });
     }
   }
 

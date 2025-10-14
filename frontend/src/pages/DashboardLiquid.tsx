@@ -171,7 +171,6 @@ const PnLCard: React.FC = () => {
     <LiquidGlassCard 
       variant={isPositive ? 'success' : isNegative ? 'danger' : 'neutral'}
       size="xlarge"
-      tooltipContent="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
     >
       <LiquidGlassTooltip 
         content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." 

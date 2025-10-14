@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Bot, Plus, Shield, TrendingUp, Zap, AlertTriangle, Activity, TrendingDown, Target, ArrowRight, CheckCircle } from 'lucide-react';
+import { Bot, Plus, Shield, TrendingUp, Zap, AlertTriangle, Activity, TrendingDown, Target, ArrowRight, CheckCircle, Settings } from 'lucide-react';
 import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 import { useOptimizedPositions } from '@/hooks/useOptimizedDashboardData';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
@@ -19,10 +19,15 @@ import { apiFetch } from '@/lib/fetch';
 
 interface MarginGuardConfig {
   id?: string;
-  mode: 'unitario' | 'global';
+  mode: 'unitario' | 'global' | 'individual';
   margin_threshold: number;
   add_margin_percentage: number;
   selected_positions: string[];
+  individual_configs?: Record<string, {
+    margin_threshold: number;
+    add_margin_percentage: number;
+    is_active: boolean;
+  }>;
   is_active: boolean;
 }
 
@@ -83,6 +88,7 @@ export const Automations = () => {
     margin_threshold: 10,
     add_margin_percentage: 20,
     selected_positions: [],
+    individual_configs: {},
     is_active: false
   });
 
@@ -265,6 +271,37 @@ export const Automations = () => {
     return marginGuardConfig.selected_positions.length < planFeatures.features.maxPositions;
   };
 
+  const toggleIndividualPosition = (tradeId: string, isActive: boolean) => {
+    setMarginGuardConfig(prev => ({
+      ...prev,
+      individual_configs: {
+        ...prev.individual_configs,
+        [tradeId]: {
+          ...prev.individual_configs[tradeId],
+          is_active: isActive,
+          margin_threshold: prev.individual_configs[tradeId]?.margin_threshold || 10,
+          add_margin_percentage: prev.individual_configs[tradeId]?.add_margin_percentage || 20
+        }
+      }
+    }));
+  };
+
+  const updateIndividualConfig = (tradeId: string, field: 'margin_threshold' | 'add_margin_percentage', value: number) => {
+    setMarginGuardConfig(prev => ({
+      ...prev,
+      individual_configs: {
+        ...prev.individual_configs,
+        [tradeId]: {
+          ...prev.individual_configs[tradeId],
+          is_active: prev.individual_configs[tradeId]?.is_active || false,
+          margin_threshold: prev.individual_configs[tradeId]?.margin_threshold || 10,
+          add_margin_percentage: prev.individual_configs[tradeId]?.add_margin_percentage || 20,
+          [field]: value
+        }
+      }
+    }));
+  };
+
   const isModeAllowed = (mode: string) => {
     console.log('🔍 FRONTEND - isModeAllowed called:', { 
       mode, 
@@ -438,7 +475,7 @@ export const Automations = () => {
                       {/* Seleção de Modo */}
                       <div className="space-y-3">
                         <Label className="text-base">Modo de Operação</Label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-3 gap-3">
                           <Button
                             variant={marginGuardConfig.mode === 'global' ? 'default' : 'outline'}
                             onClick={() => setMarginGuardConfig(prev => ({ ...prev, mode: 'global' }))}
@@ -446,10 +483,10 @@ export const Automations = () => {
                             className="h-auto p-4 flex flex-col items-center gap-2"
                           >
                             <Target className="h-4 w-4" />
-                  <div className="text-center">
+                            <div className="text-center">
                               <div className="font-medium">Global</div>
                               <div className="text-xs opacity-70">Todas as posições</div>
-                    </div>
+                            </div>
                           </Button>
                           <Button
                             variant={marginGuardConfig.mode === 'unitario' ? 'default' : 'outline'}
@@ -458,12 +495,24 @@ export const Automations = () => {
                             className="h-auto p-4 flex flex-col items-center gap-2"
                           >
                             <Activity className="h-4 w-4" />
-                  <div className="text-center">
+                            <div className="text-center">
                               <div className="font-medium">Unitário</div>
                               <div className="text-xs opacity-70">Posições específicas</div>
-                    </div>
+                            </div>
                           </Button>
-                  </div>
+                          <Button
+                            variant={marginGuardConfig.mode === 'individual' ? 'default' : 'outline'}
+                            onClick={() => setMarginGuardConfig(prev => ({ ...prev, mode: 'individual' }))}
+                            disabled={!planFeatures || !isModeAllowed('individual')}
+                            className="h-auto p-4 flex flex-col items-center gap-2"
+                          >
+                            <Settings className="h-4 w-4" />
+                            <div className="text-center">
+                              <div className="font-medium">Individual</div>
+                              <div className="text-xs opacity-70">Por posição</div>
+                            </div>
+                          </Button>
+                        </div>
                 </div>
 
                       {/* Botão Salvar */}
@@ -477,13 +526,16 @@ export const Automations = () => {
             </CardContent>
           </Card>
           
-                  {/* Lista de Posições (Modo Unitário) */}
-                  {marginGuardConfig.mode === 'unitario' && positions.length > 0 && (
+                  {/* Lista de Posições (Modo Unitário e Individual) */}
+                  {(marginGuardConfig.mode === 'unitario' || marginGuardConfig.mode === 'individual') && positions.length > 0 && (
                     <Card>
           <CardHeader>
                         <CardTitle>Posições Running</CardTitle>
                         <CardDescription>
-                          Selecione quais posições monitorar
+                          {marginGuardConfig.mode === 'unitario' 
+                            ? 'Selecione quais posições monitorar'
+                            : 'Configure cada posição individualmente'
+                          }
                           {planFeatures && planFeatures.features && planFeatures.features.maxPositions > 0 && (
                             <span className="text-orange-600 font-medium">
                               {' '}(Máximo {planFeatures.features.maxPositions})
@@ -495,22 +547,37 @@ export const Automations = () => {
                   <Table>
                     <TableHeader>
                             <TableRow>
-                              <TableHead className="w-12">Sel.</TableHead>
+                              <TableHead className="w-12">
+                                {marginGuardConfig.mode === 'unitario' ? 'Sel.' : 'Ativo'}
+                              </TableHead>
                               <TableHead>Tipo</TableHead>
                               <TableHead>Margem</TableHead>
                               <TableHead>Preço Liquidação</TableHead>
                               <TableHead>Distância</TableHead>
+                              {marginGuardConfig.mode === 'individual' && (
+                                <>
+                                  <TableHead>Threshold</TableHead>
+                                  <TableHead>Margem %</TableHead>
+                                </>
+                              )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                             {positions.map((position) => (
                               <TableRow key={position.trade_id}>
                                 <TableCell>
-                                  <Checkbox
-                                    checked={marginGuardConfig.selected_positions.includes(position.trade_id)}
-                                    onCheckedChange={() => togglePosition(position.trade_id)}
-                                    disabled={!planFeatures || (!marginGuardConfig.selected_positions.includes(position.trade_id) && !canSelectMore())}
-                                  />
+                                  {marginGuardConfig.mode === 'unitario' ? (
+                                    <Checkbox
+                                      checked={marginGuardConfig.selected_positions.includes(position.trade_id)}
+                                      onCheckedChange={() => togglePosition(position.trade_id)}
+                                      disabled={!planFeatures || (!marginGuardConfig.selected_positions.includes(position.trade_id) && !canSelectMore())}
+                                    />
+                                  ) : (
+                                    <Switch
+                                      checked={marginGuardConfig.individual_configs[position.trade_id]?.is_active || false}
+                                      onCheckedChange={(checked) => toggleIndividualPosition(position.trade_id, checked)}
+                                    />
+                                  )}
                           </TableCell>
                           <TableCell>
                                   <Badge variant={position.side === 'b' ? 'default' : 'secondary'}>
@@ -524,6 +591,34 @@ export const Automations = () => {
                                     {position.distance_percentage.toFixed(1)}%
                                     </Badge>
                                 </TableCell>
+                                {marginGuardConfig.mode === 'individual' && (
+                                  <>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        min="5"
+                                        max="25"
+                                        value={marginGuardConfig.individual_configs[position.trade_id]?.margin_threshold || 10}
+                                        onChange={(e) => updateIndividualConfig(position.trade_id, 'margin_threshold', parseInt(e.target.value))}
+                                        className="w-16"
+                                        disabled={!marginGuardConfig.individual_configs[position.trade_id]?.is_active}
+                                      />
+                                      <span className="text-xs text-muted-foreground ml-1">%</span>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        min="5"
+                                        max="100"
+                                        value={marginGuardConfig.individual_configs[position.trade_id]?.add_margin_percentage || 20}
+                                        onChange={(e) => updateIndividualConfig(position.trade_id, 'add_margin_percentage', parseInt(e.target.value))}
+                                        className="w-16"
+                                        disabled={!marginGuardConfig.individual_configs[position.trade_id]?.is_active}
+                                      />
+                                      <span className="text-xs text-muted-foreground ml-1">%</span>
+                                    </TableCell>
+                                  </>
+                                )}
                               </TableRow>
                             ))}
                           </TableBody>

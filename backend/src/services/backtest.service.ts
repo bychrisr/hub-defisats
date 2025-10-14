@@ -52,27 +52,19 @@ export class BacktestService {
     console.log(`📊 Executing personal backtest for user ${config.userId}`);
 
     // Get user's credentials
-    const user = await prisma.user.findUnique({
-      where: { id: config.userId },
-      select: {
-        ln_markets_api_key: true,
-        ln_markets_api_secret: true,
-        ln_markets_passphrase: true,
-      },
-    });
-
-    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret) {
-      throw new Error('LN Markets credentials not found');
+    // Get user credentials using the new exchange accounts system
+    const { AccountCredentialsService } = await import('./account-credentials.service');
+    const accountCredentialsService = new AccountCredentialsService(prisma);
+    
+    const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(config.userId);
+    
+    if (!activeCredentials) {
+      throw new Error('No active exchange account found');
     }
 
     // Create LN Markets service
     const lnMarkets = new LNMarketsAPIv2({
-      credentials: {
-        apiKey: user.ln_markets_api_key,
-        apiSecret: user.ln_markets_api_secret,
-        passphrase: user.ln_markets_passphrase || '',
-        isTestnet: false
-      },
+      credentials: activeCredentials.credentials,
       logger: console as any
     });
 

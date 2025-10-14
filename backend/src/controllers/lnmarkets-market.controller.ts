@@ -6,29 +6,18 @@ export class LNMarketsMarketController {
   constructor(private prisma: PrismaClient) {}
 
   private async getLNMarketsService(userId: string): Promise<LNMarketsAPIv2> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { ln_markets_api_key: true, ln_markets_api_secret: true, ln_markets_passphrase: true }
-    });
-
-    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-      throw new Error('LN Markets credentials not configured');
+    // Get user credentials using the new exchange accounts system
+    const { AccountCredentialsService } = await import('../services/account-credentials.service');
+    const accountCredentialsService = new AccountCredentialsService(this.prisma);
+    
+    const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+    
+    if (!activeCredentials) {
+      throw new Error('No active exchange account found');
     }
 
-    // Decrypt credentials
-    const { AuthService } = await import('../services/auth.service');
-    const authService = new AuthService(this.prisma, {} as any);
-    const apiKey = authService.decryptData(user.ln_markets_api_key);
-    const apiSecret = authService.decryptData(user.ln_markets_api_secret);
-    const passphrase = authService.decryptData(user.ln_markets_passphrase);
-
     return new LNMarketsAPIv2({
-      credentials: {
-        apiKey,
-        apiSecret,
-        passphrase,
-        isTestnet: false
-      },
+      credentials: activeCredentials.credentials,
       logger: console as any
     });
   }

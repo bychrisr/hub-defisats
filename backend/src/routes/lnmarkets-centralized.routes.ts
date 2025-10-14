@@ -134,44 +134,34 @@ export async function lnmarketsCentralizedRoutes(fastify: FastifyInstance) {
           console.log(`🔍 [${requestId}] prisma.user:`, typeof prisma.user);
           console.log(`🔍 [${requestId}] prisma.user.findUnique:`, typeof prisma.user.findUnique);
           
-          console.log(`🔍 [${requestId}] Calling prisma.user.findUnique with:`, {
-            where: { id: userId },
-            select: {
-              ln_markets_api_key: true,
-              ln_markets_api_secret: true,
-              ln_markets_passphrase: true,
-              email: true,
-              username: true,
-              plan_type: true,
-            }
-          });
+          console.log(`🔍 [${requestId}] Getting user credentials using new exchange accounts system`);
           
-          userProfile = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-              ln_markets_api_key: true,
-              ln_markets_api_secret: true,
-              ln_markets_passphrase: true,
-              email: true,
-              username: true,
-              plan_type: true,
-            },
+          // Get user credentials using the new exchange accounts system
+          const { AccountCredentialsService } = await import('../services/account-credentials.service');
+          const accountCredentialsService = new AccountCredentialsService(prisma);
+          
+          const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+          
+          if (!activeCredentials) {
+            console.log(`❌ [${requestId}] No active exchange account found for user: ${userId}`);
+            return reply.status(400).send({
+              success: false,
+              error: 'MISSING_CREDENTIALS',
+              message: 'No active exchange account found',
+            });
+          }
+          
+          console.log(`✅ [${requestId}] Active account found:`, {
+            accountName: activeCredentials.accountName,
+            exchangeName: activeCredentials.exchangeName,
+            hasApiKey: !!activeCredentials.credentials.apiKey,
+            hasApiSecret: !!activeCredentials.credentials.apiSecret,
+            hasPassphrase: !!activeCredentials.credentials.passphrase
           });
           
           console.log(`\n✅✅✅ [${requestId}] ===== CONSULTA BANCO OK =====`);
           console.log(`✅ [${requestId}] Database query successful`);
           console.log(`✅ [${requestId}] Query duration: ${Date.now() - credentialsStartTime}ms`);
-          console.log(`📊 [${requestId}] userProfile exists:`, !!userProfile);
-          console.log(`📊 [${requestId}] userProfile type:`, typeof userProfile);
-          console.log(`📊 [${requestId}] userProfile keys:`, userProfile ? Object.keys(userProfile) : 'null');
-          console.log(`📊 [${requestId}] userProfile values:`, userProfile ? {
-            email: userProfile.email,
-            username: userProfile.username,
-            plan_type: userProfile.plan_type,
-            has_api_key: !!userProfile.ln_markets_api_key,
-            has_api_secret: !!userProfile.ln_markets_api_secret,
-            has_passphrase: !!userProfile.ln_markets_passphrase
-          } : 'null');
           
         } catch (dbError: any) {
           console.log(`\n❌❌❌ [${requestId}] ===== ERRO NO BANCO =====`);
@@ -227,115 +217,22 @@ export async function lnmarketsCentralizedRoutes(fastify: FastifyInstance) {
         console.log(`✅ [${requestId}] Credentials validation duration: ${Date.now() - credentialsStartTime}ms`);
 
         // ========================================================================
-        // FASE 3: DESCRIPTOGRAFIA DE CREDENCIAIS - LOGS MÁXIMOS
+        // CREDENCIAIS JÁ VALIDADAS E DESCRIPTOGRAFADAS - LOGS MÁXIMOS
         // ========================================================================
         
-        console.log(`\n🔍🔍🔍 [${requestId}] ===== FASE 3: DESCRIPTOGRAFIA =====`);
+        console.log(`\n🔍🔍🔍 [${requestId}] ===== CREDENCIAIS PRONTAS =====`);
         const decryptStartTime = Date.now();
         
-        console.log(`🔍 [${requestId}] About to import AuthService...`);
-        const { AuthService } = await import('../services/auth.service');
-        console.log(`✅ [${requestId}] AuthService imported successfully`);
-        console.log(`🔍 [${requestId}] AuthService type:`, typeof AuthService);
+        // Usar credenciais já validadas do novo sistema
+        const credentials = {
+          apiKey: activeCredentials.credentials.apiKey,
+          apiSecret: activeCredentials.credentials.apiSecret,
+          passphrase: activeCredentials.credentials.passphrase,
+        };
         
-        console.log(`🔍 [${requestId}] About to create AuthService instance...`);
-        console.log(`🔍 [${requestId}] prisma:`, typeof prisma);
-        console.log(`🔍 [${requestId}] request.server:`, typeof request.server);
-        const authService = new AuthService(prisma, request.server);
-        console.log(`✅ [${requestId}] AuthService instance created successfully`);
-        console.log(`🔍 [${requestId}] authService type:`, typeof authService);
-        console.log(`🔍 [${requestId}] authService.decryptData:`, typeof authService.decryptData);
-        
-        let credentials;
-        
-        // 🔍 DEBUG AVANÇADO - Verificar formato das credenciais
-        console.log(`🔍 DEBUG AVANÇADO - API Key format:`, {
-          value: userProfile.ln_markets_api_key,
-          startsWithColon: userProfile.ln_markets_api_key?.includes(':'),
-          hasHexFormat: /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || ''),
-          length: userProfile.ln_markets_api_key?.length
-        });
-        console.log(`🔍 DEBUG AVANÇADO - API Secret format:`, {
-          value: userProfile.ln_markets_api_secret,
-          startsWithColon: userProfile.ln_markets_api_secret?.includes(':'),
-          hasHexFormat: /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_secret || ''),
-          length: userProfile.ln_markets_api_secret?.length
-        });
-        console.log(`🔍 DEBUG AVANÇADO - Passphrase format:`, {
-          value: userProfile.ln_markets_passphrase,
-          startsWithColon: userProfile.ln_markets_passphrase?.includes(':'),
-          hasHexFormat: /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_passphrase || ''),
-          length: userProfile.ln_markets_passphrase?.length
-        });
-        
-        // 🔧 SOLUÇÃO INTELIGENTE: Detectar se credenciais estão criptografadas ou não
-        const isEncrypted = userProfile.ln_markets_api_key?.includes(':') && 
-                           /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || '');
-        
-        console.log(`🔍 [${requestId}] Credentials encryption status:`, {
-          isEncrypted,
-          reason: isEncrypted ? 'Contains colon and hex format' : 'Plain text format'
-        });
-        
-        if (isEncrypted) {
-          // 🔐 CREDENCIAIS CRIPTOGRAFADAS - Tentar descriptografar
-          console.log(`🔍 [${requestId}] Credentials are encrypted, attempting decryption...`);
-          try {
-            console.log(`🔍 [${requestId}] Decrypting API Key...`);
-            const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
-            console.log(`✅ [${requestId}] API Key decrypted successfully`);
-            
-            console.log(`🔍 [${requestId}] Decrypting API Secret...`);
-            const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
-            console.log(`✅ [${requestId}] API Secret decrypted successfully`);
-            
-            console.log(`🔍 [${requestId}] Decrypting Passphrase...`);
-            const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
-            console.log(`✅ [${requestId}] Passphrase decrypted successfully`);
-            
-            credentials = {
-              apiKey,
-              apiSecret,
-              passphrase,
-            };
-            
-            console.log(`\n✅✅✅ [${requestId}] ===== DESCRIPTOGRAFIA OK =====`);
-            console.log(`✅ [${requestId}] All credentials decrypted successfully`);
-            console.log(`✅ [${requestId}] Decryption duration: ${Date.now() - decryptStartTime}ms`);
-            
-          } catch (decryptError: any) {
-            console.log(`\n❌❌❌ [${requestId}] ===== ERRO NA DESCRIPTOGRAFIA =====`);
-            console.error(`❌ [${requestId}] Decryption failed!`);
-            console.error(`❌ [${requestId}] Error message:`, decryptError.message);
-            
-            // FALLBACK: Usar credenciais de teste se descriptografia falhar
-            console.log(`\n🔄🔄🔄 [${requestId}] ===== USANDO FALLBACK =====`);
-            console.log(`🔄 [${requestId}] Using fallback test credentials`);
-            credentials = {
-              apiKey: 'test-api-key',
-              apiSecret: 'test-api-secret', 
-              passphrase: 'test-passphrase',
-            };
-            console.log(`🔄 [${requestId}] Fallback credentials set`);
-          }
-        } else {
-          // 🔓 CREDENCIAIS EM TEXTO PLANO - Usar diretamente
-          console.log(`\n✅✅✅ [${requestId}] ===== CREDENCIAIS EM TEXTO PLANO =====`);
-          console.log(`✅ [${requestId}] Using credentials directly (not encrypted)`);
-          
-          credentials = {
-            apiKey: userProfile.ln_markets_api_key,
-            apiSecret: userProfile.ln_markets_api_secret,
-            passphrase: userProfile.ln_markets_passphrase,
-          };
-          
-          console.log(`✅ [${requestId}] Direct credentials set successfully`);
-          console.log(`📊 [${requestId}] Credentials summary:`, {
-            apiKeyLength: credentials.apiKey?.length,
-            apiSecretLength: credentials.apiSecret?.length,
-            passphraseLength: credentials.passphrase?.length
-          });
-        }
+        console.log(`\n✅✅✅ [${requestId}] ===== CREDENCIAIS OK =====`);
+        console.log(`✅ [${requestId}] All credentials ready from exchange accounts system`);
+        console.log(`✅ [${requestId}] Credentials preparation duration: ${Date.now() - decryptStartTime}ms`);
 
         // ========================================================================
         // FASE 4: INICIALIZAÇÃO DO SERVIÇO LN MARKETS
@@ -346,7 +243,7 @@ export async function lnmarketsCentralizedRoutes(fastify: FastifyInstance) {
         const lnMarketsService = new LNMarketsAPIv2({
           credentials: {
             ...credentials,
-            isTestnet: false
+            isTestnet: activeCredentials.credentials.isTestnet === 'true' || activeCredentials.credentials.testnet === 'true'
           },
           logger: logger
         });

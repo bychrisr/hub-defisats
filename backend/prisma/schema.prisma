@@ -17,8 +17,6 @@ model User {
   password_hash              String?
   social_provider            String?
   social_id                  String?
-  ln_markets_api_key         String?
-  ln_markets_api_secret      String?
   last_activity_at           DateTime?                 @db.Timestamp(6)
   created_at                 DateTime                  @default(now()) @db.Timestamp(6)
   updated_at                 DateTime                  @default(now()) @db.Timestamp(6)
@@ -37,7 +35,6 @@ model User {
   last_login_ip              String?
   last_login_user_agent      String?
   last_login_at              DateTime?                 @db.Timestamp(6)
-  ln_markets_passphrase      String?                   @db.VarChar(255)
   plan_type                  PlanType                  @default(free)
   preferences                Json?
   bio                        String?
@@ -846,10 +843,11 @@ model MarginGuardConfig {
   id                    String   @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id               String   @unique
   is_active             Boolean  @default(false)
-  mode                  String   @default("global") // 'unitario' | 'global'
+  mode                  String   @default("global") // 'unitario' | 'global' | 'individual'
   margin_threshold      Float    @default(10) // % de distância para acionar
   add_margin_percentage Float    @default(20) // % de margem a adicionar
   selected_positions    String[] // IDs das posições (modo unitário)
+  individual_configs    Json?    // Configurações individuais por posição (modo individual)
   created_at            DateTime @default(now()) @db.Timestamp(6)
   updated_at            DateTime @default(now()) @db.Timestamp(6)
 
@@ -857,7 +855,7 @@ model MarginGuardConfig {
 
   @@index([user_id])
   @@index([is_active])
-  @@map("marginGuardConfig")
+  @@map("margin_guard_configs")
 }
 
 model InAppNotification {

@@ -11,17 +11,39 @@ import { UserExchangeAccountService } from './userExchangeAccount.service';
 import { CredentialCacheService } from './credential-cache.service';
 import { Redis } from 'ioredis';
 
-// Create Redis connection for caching
-const redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379', {
-  maxRetriesPerRequest: 3,
-  enableReadyCheck: false,
-  lazyConnect: true,
-  retryDelayOnFailover: 100,
-  connectTimeout: 10000,
-});
+// Lazy Redis connection for caching
+let redis: Redis | null = null;
+let credentialCache: CredentialCacheService | null = null;
 
-// Create credential cache service
-const credentialCache = new CredentialCacheService(redis);
+function getRedisConnection(): Redis {
+  if (!redis) {
+    console.log('🔗 ACCOUNT CREDENTIALS - Creating Redis connection...');
+    redis = new Redis(process.env['REDIS_URL'] || 'redis://redis:6379', {
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: false,
+      lazyConnect: true,
+      retryDelayOnFailover: 100,
+      connectTimeout: 10000,
+      family: 4, // Force IPv4
+    });
+    
+    redis.on('error', (err) => {
+      console.warn('⚠️ ACCOUNT CREDENTIALS - Redis connection error:', err.message);
+    });
+    
+    redis.on('connect', () => {
+      console.log('✅ ACCOUNT CREDENTIALS - Redis connected');
+    });
+  }
+  return redis;
+}
+
+function getCredentialCache(): CredentialCacheService {
+  if (!credentialCache) {
+    credentialCache = new CredentialCacheService(getRedisConnection());
+  }
+  return credentialCache;
+}
 
 // Interface for account credentials
 export interface AccountCredentials {
@@ -65,7 +87,7 @@ export class AccountCredentialsService {
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
     this.userExchangeAccountService = new UserExchangeAccountService(prisma);
-    this.credentialCache = credentialCache;
+    this.credentialCache = getCredentialCache();
   }
 
   /**
@@ -164,20 +186,25 @@ export class AccountCredentialsService {
       
       // Check cache first
       const cacheKey = `credentials-${userId}-${accountId}`;
-      const cachedCredentials = await this.credentialCache.get(cacheKey);
-      
-      if (cachedCredentials) {
-        console.log(`✅ ACCOUNT CREDENTIALS - Credentials found in cache for account ${account.account_name}`);
-        return {
-          userId,
-          accountId: account.id,
-          accountName: account.account_name,
-          exchangeName: account.exchange.name,
-          credentials: cachedCredentials,
-          isActive: account.is_active,
-          lastValidated: new Date(),
-          validationStatus: 'valid'
-        };
+      try {
+        const cachedCredentials = await this.credentialCache.get(cacheKey);
+        
+        if (cachedCredentials) {
+          console.log(`✅ ACCOUNT CREDENTIALS - Credentials found in cache for account ${account.account_name}`);
+          return {
+            userId,
+            accountId: account.id,
+            accountName: account.account_name,
+            exchangeName: account.exchange.name,
+            credentials: cachedCredentials,
+            isActive: account.is_active,
+            lastValidated: new Date(),
+            validationStatus: 'valid'
+          };
+        }
+      } catch (cacheError) {
+        console.warn(`⚠️ ACCOUNT CREDENTIALS - Cache error for account ${account.account_name}:`, cacheError);
+        // Continue without cache
       }
       
       // Get credentials from database (already decrypted by UserExchangeAccountService)
@@ -199,8 +226,13 @@ export class AccountCredentialsService {
       }
       
       // Cache the credentials
-      await this.credentialCache.set(cacheKey, credentials, this.CACHE_TTL);
-      console.log(`✅ ACCOUNT CREDENTIALS - Credentials cached for account ${account.account_name}`);
+      try {
+        await this.credentialCache.set(cacheKey, credentials, this.CACHE_TTL);
+        console.log(`✅ ACCOUNT CREDENTIALS - Credentials cached for account ${account.account_name}`);
+      } catch (cacheError) {
+        console.warn(`⚠️ ACCOUNT CREDENTIALS - Failed to cache credentials for account ${account.account_name}:`, cacheError);
+        // Continue without caching
+      }
       
       return {
         userId,

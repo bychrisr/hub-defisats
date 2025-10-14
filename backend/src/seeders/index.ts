@@ -15,6 +15,7 @@ import { planLimitsManagementSeeder } from './plan-limits-management.seeder';
 import { automationTypesSeeder } from './automation-types.seeder';
 import { healthCheckSeeder } from './health-check.seeder';
 import { exchangesSeeder } from './exchanges.seeder';
+import { seedTestAccounts } from './test-accounts.seeder';
 
 export interface SeederResult {
   success: boolean;
@@ -44,6 +45,17 @@ export class DatabaseSeeder {
       automationTypesSeeder,
       healthCheckSeeder,
       exchangesSeeder,
+      {
+        name: 'test-accounts',
+        description: 'Create test users and exchange accounts',
+        run: async () => {
+          await seedTestAccounts(this.prisma);
+          return {
+            success: true,
+            message: 'Test accounts created successfully'
+          };
+        }
+      },
     ];
   }
 

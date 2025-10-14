@@ -176,10 +176,6 @@ export async function authRoutes(fastify: FastifyInstance) {
         const registrationData = {
           email: testEmail,
           password: 'TestPassword123!',
-          ln_markets_api_key: 'hC8B4VoDm1X6i2L3qLrdUopNggl3yaJh6S3Zz1tPCoE=',
-          ln_markets_api_secret:
-            'r6tDhZmafgGH/ay2lLmSHnEKoBzwOPN+1O0mDSaX8yq4UKnuz2UnexvONrO1Ph87+AKoEIn39ZpeEBhPT9r7dA==',
-          ln_markets_passphrase: 'a6c1bh56jc33',
           coupon_code: 'ALPHATESTER',
         };
 
@@ -558,9 +554,20 @@ export async function authRoutes(fastify: FastifyInstance) {
               },
               created_at: { type: 'string', format: 'date-time' },
               last_activity_at: { type: 'string', format: 'date-time' },
-              ln_markets_api_key: { type: 'string' },
-              ln_markets_api_secret: { type: 'string' },
-              ln_markets_passphrase: { type: 'string' },
+              exchange_accounts: { 
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    account_name: { type: 'string' },
+                    exchange_name: { type: 'string' },
+                    is_active: { type: 'boolean' },
+                    is_verified: { type: 'boolean' },
+                    created_at: { type: 'string', format: 'date-time' }
+                  }
+                }
+              },
               is_admin: { type: 'boolean' },
             },
           },

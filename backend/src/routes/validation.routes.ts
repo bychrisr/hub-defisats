@@ -450,22 +450,18 @@ export async function validationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Endpoint para validar formulário completo de registro
+  // Endpoint para validar formulário completo de registro (simplificado)
   fastify.post('/validation/register-form', {
     schema: {
       description: 'Validate complete registration form',
       tags: ['Validation'],
       body: {
         type: 'object',
-        required: ['email', 'username', 'password', 'confirmPassword', 'ln_markets_api_key', 'ln_markets_api_secret', 'ln_markets_passphrase'],
+        required: ['email', 'username', 'password'],
         properties: {
           email: { type: 'string' },
           username: { type: 'string' },
           password: { type: 'string' },
-          confirmPassword: { type: 'string' },
-          ln_markets_api_key: { type: 'string' },
-          ln_markets_api_secret: { type: 'string' },
-          ln_markets_passphrase: { type: 'string' },
           coupon_code: { type: 'string' }
         }
       },
@@ -486,10 +482,6 @@ export async function validationRoutes(fastify: FastifyInstance) {
         email: z.string(),
         username: z.string(),
         password: z.string(),
-        confirmPassword: z.string(),
-        ln_markets_api_key: z.string(),
-        ln_markets_api_secret: z.string(),
-        ln_markets_passphrase: z.string(),
         coupon_code: z.string().optional()
       }).parse(request.body);
       
@@ -525,30 +517,6 @@ export async function validationRoutes(fastify: FastifyInstance) {
       });
       results.fields.password = passwordResult.json();
       if (!results.fields.password.valid) results.valid = false;
-      
-      // Validar confirmação de senha
-      if (formData.password !== formData.confirmPassword) {
-        results.fields.confirmPassword = {
-          valid: false,
-          suggestions: ['Passwords do not match']
-        };
-        results.valid = false;
-      } else {
-        results.fields.confirmPassword = { valid: true };
-      }
-      
-      // Validar API keys
-      const apiKeysResult = await fastify.inject({
-        method: 'POST',
-        url: '/api/validation/api-keys',
-        payload: {
-          api_key: formData.ln_markets_api_key,
-          api_secret: formData.ln_markets_api_secret,
-          passphrase: formData.ln_markets_passphrase
-        }
-      });
-      results.fields.api_keys = apiKeysResult.json();
-      if (!results.fields.api_keys.valid) results.valid = false;
       
       return reply.status(200).send(results);
       

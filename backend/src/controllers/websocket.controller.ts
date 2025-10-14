@@ -21,31 +21,22 @@ export class WebSocketController {
       return this.websocketService;
     }
 
-    // Buscar credenciais do usuário
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        ln_markets_api_key: true,
-        ln_markets_api_secret: true,
-        ln_markets_passphrase: true
-      }
-    });
-
-    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-      throw new Error('Credenciais da LN Markets não encontradas');
+    // Buscar credenciais do usuário usando o novo sistema de contas
+    const { AccountCredentialsService } = await import('../services/account-credentials.service');
+    const accountCredentialsService = new AccountCredentialsService(this.prisma);
+    
+    const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+    
+    if (!activeCredentials) {
+      throw new Error('Nenhuma conta de exchange ativa encontrada');
     }
-
-    // Descriptografar credenciais
-    const apiKey = this.authService.decryptData(user.ln_markets_api_key);
-    const apiSecret = this.authService.decryptData(user.ln_markets_api_secret);
-    const passphrase = this.authService.decryptData(user.ln_markets_passphrase);
 
     // Criar serviço WebSocket
     this.websocketService = new LNMarketsWebSocketService({
-      apiKey,
-      apiSecret,
-      passphrase,
-      isTestnet: false
+      apiKey: activeCredentials.credentials.apiKey,
+      apiSecret: activeCredentials.credentials.apiSecret,
+      passphrase: activeCredentials.credentials.passphrase,
+      isTestnet: activeCredentials.credentials.isTestnet === 'true' || activeCredentials.credentials.testnet === 'true'
     });
 
     // Configurar event listeners

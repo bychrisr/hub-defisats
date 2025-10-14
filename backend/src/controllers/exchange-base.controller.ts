@@ -22,34 +22,23 @@ export abstract class ExchangeBaseController {
   }
 
   /**
-   * Get user credentials from database
+   * Get user credentials from database using the new exchange accounts system
    */
   protected async getUserCredentials(userId: string): Promise<ExchangeCredentials> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { 
-        ln_markets_api_key: true, 
-        ln_markets_api_secret: true, 
-        ln_markets_passphrase: true 
-      }
-    });
-
-    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-      throw new Error('LN Markets credentials not configured');
+    const { AccountCredentialsService } = await import('../services/account-credentials.service');
+    const accountCredentialsService = new AccountCredentialsService(this.prisma);
+    
+    const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+    
+    if (!activeCredentials) {
+      throw new Error('No active exchange account found');
     }
 
-    // Decrypt credentials
-    const { AuthService } = await import('../services/auth.service');
-    const authService = new AuthService(this.prisma, {} as any);
-    const apiKey = authService.decryptData(user.ln_markets_api_key);
-    const apiSecret = authService.decryptData(user.ln_markets_api_secret);
-    const passphrase = authService.decryptData(user.ln_markets_passphrase);
-
     return {
-      apiKey,
-      apiSecret,
-      passphrase,
-      sandbox: false // Force mainnet for now
+      apiKey: activeCredentials.credentials.apiKey,
+      apiSecret: activeCredentials.credentials.apiSecret,
+      passphrase: activeCredentials.credentials.passphrase,
+      sandbox: activeCredentials.credentials.isTestnet === 'true' || activeCredentials.credentials.testnet === 'true'
     } as LNMarketsCredentials;
   }
 

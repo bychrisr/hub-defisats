@@ -26,64 +26,26 @@ export class LNMarketsUserController {
   private async getLNMarketsService(userId: string): Promise<LNMarketsAPIService> {
     console.log(`🔍 GET LN MARKETS SERVICE - Starting for user: ${userId}`);
     
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { ln_markets_api_key: true, ln_markets_api_secret: true, ln_markets_passphrase: true }
-    });
-
-    console.log(`🔍 GET LN MARKETS SERVICE - User found:`, {
-      hasApiKey: !!user?.ln_markets_api_key,
-      hasApiSecret: !!user?.ln_markets_api_secret,
-      hasPassphrase: !!user?.ln_markets_passphrase
-    });
-
-    if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-      throw new Error('LN Markets credentials not configured');
+    // Get user credentials using the new exchange accounts system
+    const { AccountCredentialsService } = await import('../services/account-credentials.service');
+    const accountCredentialsService = new AccountCredentialsService(this.prisma);
+    
+    const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+    
+    if (!activeCredentials) {
+      throw new Error('No active exchange account found');
     }
 
+    console.log(`✅ GET LN MARKETS SERVICE - Active account found:`, {
+      accountName: activeCredentials.accountName,
+      exchangeName: activeCredentials.exchangeName,
+      hasApiKey: !!activeCredentials.credentials.apiKey,
+      hasApiSecret: !!activeCredentials.credentials.apiSecret,
+      hasPassphrase: !!activeCredentials.credentials.passphrase
+    });
+
     try {
-      // Decrypt credentials
-      const { AuthService } = await import('../services/auth.service');
-      const authService = new AuthService(this.prisma, {} as any);
-      
-      console.log(`🔍 GET LN MARKETS SERVICE - Decrypting credentials...`);
-      console.log(`🔍 GET LN MARKETS SERVICE - Encrypted data lengths:`, {
-        apiKeyLength: user.ln_markets_api_key?.length || 0,
-        apiSecretLength: user.ln_markets_api_secret?.length || 0,
-        passphraseLength: user.ln_markets_passphrase?.length || 0
-      });
-      
-      console.log(`🔍 GET LN MARKETS SERVICE - Encrypted data samples:`, {
-        apiKey: user.ln_markets_api_key?.substring(0, 20) + '...',
-        apiSecret: user.ln_markets_api_secret?.substring(0, 20) + '...',
-        passphrase: user.ln_markets_passphrase?.substring(0, 10) + '...'
-      });
-      
-      let apiKey, apiSecret, passphrase;
-      
-      try {
-        apiKey = authService.decryptData(user.ln_markets_api_key);
-        console.log(`✅ GET LN MARKETS SERVICE - API Key decrypted successfully`);
-      } catch (error: any) {
-        console.error(`❌ GET LN MARKETS SERVICE - Error decrypting API Key:`, error?.message);
-        throw error;
-      }
-      
-      try {
-        apiSecret = authService.decryptData(user.ln_markets_api_secret);
-        console.log(`✅ GET LN MARKETS SERVICE - API Secret decrypted successfully`);
-      } catch (error: any) {
-        console.error(`❌ GET LN MARKETS SERVICE - Error decrypting API Secret:`, error?.message);
-        throw error;
-      }
-      
-      try {
-        passphrase = authService.decryptData(user.ln_markets_passphrase);
-        console.log(`✅ GET LN MARKETS SERVICE - Passphrase decrypted successfully`);
-      } catch (error: any) {
-        console.error(`❌ GET LN MARKETS SERVICE - Error decrypting Passphrase:`, error?.message);
-        throw error;
-      }
+      const { apiKey, apiSecret, passphrase } = activeCredentials.credentials;
 
       console.log(`🔍 GET LN MARKETS SERVICE - Credentials decrypted successfully:`, {
         apiKeyLength: apiKey?.length || 0,
@@ -933,43 +895,20 @@ export class LNMarketsUserController {
         });
       }
 
-      // Check if user has LN Markets credentials
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { ln_markets_api_key: true, ln_markets_api_secret: true, ln_markets_passphrase: true }
-      });
+      // Check if user has active exchange account
+      const { AccountCredentialsService } = await import('../services/account-credentials.service');
+      const accountCredentialsService = new AccountCredentialsService(this.prisma);
+      
+      const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+      
+      if (!activeCredentials) {
+        console.log(`[UserController] User ${userId} has no active exchange account configured`);
 
-      if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret || !user?.ln_markets_passphrase) {
-        console.log(`[UserController] User ${userId} has no LN Markets credentials configured`);
-
-        // Return null/empty data instead of demo data to avoid misleading users
         return reply.send({
           success: true,
-          data: [], // Empty array instead of demo data
-          message: 'LN Markets credentials not configured. Please configure your API credentials in settings.'
+          data: [], // Empty array
+          message: 'No active exchange account found. Please configure your exchange credentials in settings.'
         });
-      }
-
-      // Check if credentials are placeholders
-      try {
-        const { AuthService } = await import('../services/auth.service');
-        const authService = new AuthService(this.prisma, {} as any);
-        
-        const decryptedApiKey = authService.decryptData(user.ln_markets_api_key);
-        const decryptedApiSecret = authService.decryptData(user.ln_markets_api_secret);
-        
-        if (decryptedApiKey === 'your_api_key_here' || decryptedApiSecret === 'your_api_secret_here') {
-          console.log(`[UserController] User ${userId} has placeholder LN Markets credentials`);
-          
-          return reply.send({
-            success: true,
-            data: [], // Empty array
-            message: 'LN Markets credentials are not configured. Please update your API credentials in settings with real LN Markets API key, secret, and passphrase.'
-          });
-        }
-      } catch (decryptError) {
-        console.log(`[UserController] Error decrypting credentials for user ${userId}:`, decryptError);
-        // Continue with normal flow if decryption fails
       }
 
       try {

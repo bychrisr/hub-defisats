@@ -26,9 +26,6 @@ export class ProfileController {
           plan_type: true,
           created_at: true,
           last_activity_at: true,
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true,
           admin_user: {
             select: {
               role: true
@@ -48,51 +45,17 @@ export class ProfileController {
 
       console.log('✅ PROFILE - Profile fetched successfully');
 
-      // ✅ CORREÇÃO: Detectar se os dados estão criptografados ou não
-      let decryptedProfile = { ...profile };
+      // Buscar contas do usuário usando o novo sistema
+      const { UserExchangeAccountService } = await import('../services/userExchangeAccount.service');
+      const userExchangeAccountService = new UserExchangeAccountService(this.prisma);
       
+      let userAccounts = [];
       try {
-        if (profile.ln_markets_api_key) {
-          // Verificar se está no formato criptografado (iv:encrypted)
-          if (profile.ln_markets_api_key.includes(':')) {
-            console.log('🔓 PROFILE - Decrypting API key...');
-            decryptedProfile.ln_markets_api_key = this.authService.decryptData(profile.ln_markets_api_key);
-            console.log('✅ PROFILE - API key decrypted successfully');
-          } else {
-            console.log('✅ PROFILE - API key is already in plain text');
-            decryptedProfile.ln_markets_api_key = profile.ln_markets_api_key;
-          }
-        }
-        
-        if (profile.ln_markets_api_secret) {
-          // Verificar se está no formato criptografado (iv:encrypted)
-          if (profile.ln_markets_api_secret.includes(':')) {
-            console.log('🔓 PROFILE - Decrypting API secret...');
-            decryptedProfile.ln_markets_api_secret = this.authService.decryptData(profile.ln_markets_api_secret);
-            console.log('✅ PROFILE - API secret decrypted successfully');
-          } else {
-            console.log('✅ PROFILE - API secret is already in plain text');
-            decryptedProfile.ln_markets_api_secret = profile.ln_markets_api_secret;
-          }
-        }
-        
-        if (profile.ln_markets_passphrase) {
-          // Verificar se está no formato criptografado (iv:encrypted)
-          if (profile.ln_markets_passphrase.includes(':')) {
-            console.log('🔓 PROFILE - Decrypting passphrase...');
-            decryptedProfile.ln_markets_passphrase = this.authService.decryptData(profile.ln_markets_passphrase);
-            console.log('✅ PROFILE - Passphrase decrypted successfully');
-          } else {
-            console.log('✅ PROFILE - Passphrase is already in plain text');
-            decryptedProfile.ln_markets_passphrase = profile.ln_markets_passphrase;
-          }
-        }
-        
-        console.log('✅ PROFILE - All credentials processed for display');
+        userAccounts = await userExchangeAccountService.getUserExchangeAccounts(user.id);
+        console.log('✅ PROFILE - User accounts loaded:', userAccounts.length);
       } catch (error) {
-        console.error('❌ PROFILE - Error processing credentials:', error);
-        // Return original data if processing fails
-        decryptedProfile = { ...profile };
+        console.warn('⚠️ PROFILE - Could not load user accounts:', error);
+        userAccounts = [];
       }
 
       // Add is_admin field based on admin_user relation
@@ -101,7 +64,15 @@ export class ProfileController {
       return reply.status(200).send({
         success: true,
         data: {
-          ...decryptedProfile,
+          ...profile,
+          exchange_accounts: userAccounts.map(account => ({
+            id: account.id,
+            account_name: account.account_name,
+            exchange_name: account.exchange?.name,
+            is_active: account.is_active,
+            is_verified: account.is_verified,
+            created_at: account.created_at
+          })),
           is_admin: isAdmin,
           admin_role: profile.admin_user?.role || null
         },
@@ -124,9 +95,8 @@ export class ProfileController {
       console.log('🔍 PROFILE - Updating profile for user:', user?.id);
       console.log('📊 PROFILE - Update data:', {
         email: body.email,
-        ln_markets_api_key: body.ln_markets_api_key ? '***' : 'not provided',
-        ln_markets_api_secret: body.ln_markets_api_secret ? '***' : 'not provided',
-        ln_markets_passphrase: body.ln_markets_passphrase ? '***' : 'not provided',
+        username: body.username,
+        bio: body.bio,
       });
 
       // Check if email is being changed and if it's already taken
@@ -154,24 +124,9 @@ export class ProfileController {
       if (body.username) updateData.username = body.username;
       if (body.bio !== undefined) updateData.bio = body.bio;
       
-      // Encrypt LN Markets credentials before saving
-      if (body.ln_markets_api_key) {
-        console.log('🔒 PROFILE - Encrypting API key...');
-        updateData.ln_markets_api_key = this.authService.encryptData(body.ln_markets_api_key);
-        console.log('✅ PROFILE - API key encrypted successfully');
-      }
-      
-      if (body.ln_markets_api_secret) {
-        console.log('🔒 PROFILE - Encrypting API secret...');
-        updateData.ln_markets_api_secret = this.authService.encryptData(body.ln_markets_api_secret);
-        console.log('✅ PROFILE - API secret encrypted successfully');
-      }
-      
-      if (body.ln_markets_passphrase) {
-        console.log('🔒 PROFILE - Encrypting passphrase...');
-        updateData.ln_markets_passphrase = this.authService.encryptData(body.ln_markets_passphrase);
-        console.log('✅ PROFILE - Passphrase encrypted successfully');
-      }
+      // LN Markets credentials are now managed via exchange accounts system
+      // This endpoint only handles basic profile information
+      console.log('ℹ️ PROFILE - LN Markets credentials are managed via exchange accounts system');
 
       const updatedProfile = await this.prisma.user.update({
         where: { id: user.id },
@@ -184,9 +139,6 @@ export class ProfileController {
           plan_type: true,
           created_at: true,
           last_activity_at: true,
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true,
         },
       });
 

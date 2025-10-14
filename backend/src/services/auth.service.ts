@@ -45,9 +45,6 @@ export class AuthService {
       email: data.email,
       username: data.username,
       hasPassword: !!data.password,
-      hasApiKey: !!data.ln_markets_api_key,
-      hasApiSecret: !!data.ln_markets_api_secret,
-      hasPassphrase: !!data.ln_markets_passphrase,
       couponCode: data.coupon_code,
     });
 
@@ -55,9 +52,6 @@ export class AuthService {
       email,
       username,
       password,
-      ln_markets_api_key,
-      ln_markets_api_secret,
-      ln_markets_passphrase,
       coupon_code,
     } = data;
 
@@ -73,50 +67,8 @@ export class AuthService {
     }
     console.log('✅ User does not exist, proceeding with registration');
 
-    // Validate LN Markets credentials (skip validation in development)
-    if (ln_markets_api_key && process.env.NODE_ENV !== 'development') {
-      try {
-        console.log('🔍 Starting LN Markets credentials validation...');
-        const { LNMarketsAPIv2 } = await import('./lnmarkets/LNMarketsAPIv2.service');
-        const lnMarketsService = new LNMarketsAPIv2({
-          credentials: {
-            apiKey: ln_markets_api_key,
-            apiSecret: ln_markets_api_secret,
-            passphrase: ln_markets_passphrase || '',
-            isTestnet: false
-          },
-          logger: {
-            info: () => {},
-            error: () => {},
-            warn: () => {},
-            debug: () => {},
-          } as any
-        });
-
-        console.log('✅ Validating credentials with LN Markets API...');
-        await lnMarketsService.user.getUser(); // Test with getUser()
-        const isValidCredentials = true; // If no error, credentials are valid
-
-        if (!isValidCredentials) {
-          console.log('❌ LN Markets credentials validation failed');
-          throw new Error(
-            'Invalid LN Markets API credentials. Please check your API Key, Secret, and Passphrase.'
-          );
-        }
-
-        console.log('✅ LN Markets credentials validation successful');
-      } catch (error) {
-        console.error('❌ LN Markets validation error:', error);
-        console.error('❌ Error details:', {
-          message: (error as Error).message,
-          stack: (error as Error).stack,
-        });
-        // Re-throw the error to be handled by the controller
-        throw error;
-      }
-    } else if (ln_markets_api_key && process.env.NODE_ENV === 'development') {
-      console.log('🔧 Development mode: Skipping LN Markets credentials validation');
-    }
+    // LN Markets credentials validation removed - now handled via exchange accounts system
+    console.log('ℹ️ LN Markets credentials will be configured separately via exchange accounts');
 
     // Validate coupon if provided
     console.log('🎫 Validating coupon if provided...');
@@ -135,12 +87,8 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(password, 12);
     console.log('✅ Password hashed successfully');
 
-    console.log('🔐 Encrypting LN Markets credentials...');
-    // Encrypt LN Markets keys
-    const encryptedApiKey = this.encryptData(ln_markets_api_key);
-    const encryptedApiSecret = this.encryptData(ln_markets_api_secret);
-    const encryptedPassphrase = this.encryptData(ln_markets_passphrase);
-    console.log('✅ LN Markets credentials encrypted successfully');
+    // LN Markets credentials encryption removed - now handled via exchange accounts system
+    console.log('ℹ️ LN Markets credentials will be encrypted separately via exchange accounts');
 
     console.log('👤 Creating user in database...');
     // Create user
@@ -149,9 +97,6 @@ export class AuthService {
         email,
         username,
         password_hash: passwordHash,
-        ln_markets_api_key: encryptedApiKey,
-        ln_markets_api_secret: encryptedApiSecret,
-        ln_markets_passphrase: encryptedPassphrase,
         plan_type: planType,
       },
     });
@@ -275,7 +220,7 @@ export class AuthService {
     // Store refresh token in database
     await this.storeRefreshToken(user.id, refreshToken);
 
-    // Fetch real balance from LN Markets
+    // Fetch real balance from LN Markets using new exchange accounts system
     let userBalance: any = {
       balance: 0,
       synthetic_usd_balance: 0,
@@ -290,15 +235,16 @@ export class AuthService {
     try {
       console.log('🔍 AUTH SERVICE - Fetching LN Markets balance for user:', user.id);
       
-      if (user.ln_markets_api_key && user.ln_markets_api_secret && user.ln_markets_passphrase) {
+      // Get user credentials using the new exchange accounts system
+      const { AccountCredentialsService } = await import('./account-credentials.service');
+      const accountCredentialsService = new AccountCredentialsService(this.prisma);
+      
+      const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+      
+      if (activeCredentials) {
         const { LNMarketsAPIv2 } = await import('./lnmarkets/LNMarketsAPIv2.service');
         const lnMarketsService = new LNMarketsAPIv2({
-          credentials: {
-            apiKey: user.ln_markets_api_key,
-            apiSecret: user.ln_markets_api_secret,
-            passphrase: user.ln_markets_passphrase,
-            isTestnet: false
-          },
+          credentials: activeCredentials.credentials,
           logger: {
             info: () => {},
             error: () => {},
@@ -307,8 +253,8 @@ export class AuthService {
           } as any
         });
 
-        const user = await lnMarketsService.user.getUser();
-        const lnMarketsBalance = { balance: user.balance };
+        const lnMarketsUser = await lnMarketsService.user.getUser();
+        const lnMarketsBalance = { balance: lnMarketsUser.balance };
         console.log('✅ AUTH SERVICE - LN Markets balance fetched:', lnMarketsBalance);
         
         userBalance = {
@@ -322,7 +268,7 @@ export class AuthService {
           email: lnMarketsBalance.email || user.email
         };
       } else {
-        console.log('⚠️ AUTH SERVICE - LN Markets credentials not configured, using default balance');
+        console.log('⚠️ AUTH SERVICE - No active exchange account found, using default balance');
       }
     } catch (error: any) {
       console.log('❌ AUTH SERVICE - Error fetching LN Markets balance:', error.message);
@@ -426,9 +372,6 @@ export class AuthService {
           last_activity_at: true,
           is_active: true,
           session_expires_at: true,
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true,
         },
       });
       console.log('🔍 VALIDATE SESSION - User found:', user?.email);
@@ -493,8 +436,6 @@ export class AuthService {
             username: email.split('@')[0] || 'user', // Generate username from email
             social_provider: provider,
             social_id: socialId,
-            ln_markets_api_key: '', // Will be set later
-            ln_markets_api_secret: '', // Will be set later
             plan_type: 'free',
           },
         });

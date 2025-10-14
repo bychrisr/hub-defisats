@@ -59,30 +59,21 @@ export async function dashboardOptimizedRoutes(fastify: FastifyInstance) {
         console.log(`🚀 DASHBOARD OPTIMIZED - Starting unified data fetch for user: ${user.id}`);
         
         // Buscar credenciais do usuário
-        const userProfile = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { 
-            ln_markets_api_key: true, 
-            ln_markets_api_secret: true, 
-            ln_markets_passphrase: true 
-          }
-        });
-
-        if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+        // Get user credentials using the new exchange accounts system
+        const { AccountCredentialsService } = await import('../services/account-credentials.service');
+        const accountCredentialsService = new AccountCredentialsService(prisma);
+        
+        const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+        
+        if (!activeCredentials) {
           return reply.status(400).send({
             success: false,
             error: 'MISSING_CREDENTIALS',
-            message: 'LN Markets credentials not configured'
+            message: 'No active exchange account found'
           });
         }
 
-        // Descriptografar credenciais
-        const { AuthService } = await import('../services/auth.service');
-        const authService = new AuthService(prisma, {} as any);
-        
-        const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
-        const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
-        const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
+        const { apiKey, apiSecret, passphrase } = activeCredentials.credentials;
 
         // Criar instância do serviço LN Markets v2
         const lnMarketsService = new LNMarketsAPIv2({

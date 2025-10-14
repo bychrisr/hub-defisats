@@ -5,9 +5,6 @@ export const RegisterRequestSchema = {
     'email',
     'username',
     'password',
-    'ln_markets_api_key',
-    'ln_markets_api_secret',
-    'ln_markets_passphrase',
   ],
   properties: {
     email: {
@@ -26,21 +23,6 @@ export const RegisterRequestSchema = {
       type: 'string',
       minLength: 8,
       maxLength: 128,
-    },
-    ln_markets_api_key: {
-      type: 'string',
-      minLength: 16,
-      maxLength: 64,
-    },
-    ln_markets_api_secret: {
-      type: 'string',
-      minLength: 16,
-      maxLength: 64,
-    },
-    ln_markets_passphrase: {
-      type: 'string',
-      minLength: 8,
-      maxLength: 64,
     },
     coupon_code: {
       type: 'string',

@@ -27,64 +27,33 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       
       const user = (request as any).user;
       
-      // Get admin user credentials
-      const adminUser = await prisma.user.findUnique({
-        where: { id: user.id }
-      });
+      // Get admin user credentials using new exchange accounts system
+      const { AccountCredentialsService } = await import('../../services/account-credentials.service');
+      const accountCredentialsService = new AccountCredentialsService(prisma);
       
-      if (!adminUser) {
-        logger.error('Admin user not found', { userId: user.id });
-        return reply.status(404).send({
-          success: false,
-          message: 'Admin user not found',
-          error: 'USER_NOT_FOUND'
-        });
-      }
+      const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
       
-      if (!adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
-        logger.warn('Admin user does not have LN Markets credentials configured', { userId: user.id });
+      if (!activeCredentials) {
+        logger.warn('Admin user does not have active LN Markets exchange account', { userId: user.id });
         return reply.status(400).send({
           success: false,
-          message: 'LN Markets credentials not configured. Please configure them in Settings.',
+          message: 'No active LN Markets exchange account found. Please configure one in Settings.',
           error: 'CREDENTIALS_NOT_CONFIGURED',
           details: {
             missingFields: {
-              apiKey: !adminUser.ln_markets_api_key,
-              apiSecret: !adminUser.ln_markets_api_secret,
-              passphrase: !adminUser.ln_markets_passphrase
+              exchangeAccount: true
             }
           }
-        });
-      }
-      
-      // Decrypt credentials
-      let apiKey: string;
-      let apiSecret: string;
-      let passphrase: string;
-      
-      try {
-        apiKey = authService.decryptData(adminUser.ln_markets_api_key);
-        apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
-        passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
-      } catch (decryptError: any) {
-        logger.error('Failed to decrypt LN Markets credentials', { 
-          userId: user.id, 
-          error: decryptError.message 
-        });
-        return reply.status(500).send({
-          success: false,
-          message: 'Failed to decrypt LN Markets credentials',
-          error: 'DECRYPTION_FAILED'
         });
       }
       
       // Create LN Markets service
       const lnMarketsService = new LNMarketsAPIv2({
         credentials: {
-        apiKey,
-        apiSecret,
-        passphrase,
-        isTestnet: false
+          apiKey: activeCredentials.credentials.apiKey,
+          apiSecret: activeCredentials.credentials.apiSecret,
+          passphrase: activeCredentials.credentials.passphrase,
+          isTestnet: activeCredentials.credentials.isTestnet === 'true' || activeCredentials.credentials.testnet === 'true'
         },
         logger: logger as any
       });
@@ -137,64 +106,33 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       
       const user = (request as any).user;
       
-      // Get admin user credentials
-      const adminUser = await prisma.user.findUnique({
-        where: { id: user.id }
-      });
+      // Get admin user credentials using new exchange accounts system
+      const { AccountCredentialsService } = await import('../../services/account-credentials.service');
+      const accountCredentialsService = new AccountCredentialsService(prisma);
       
-      if (!adminUser) {
-        logger.error('Admin user not found', { userId: user.id });
-        return reply.status(404).send({
-          success: false,
-          message: 'Admin user not found',
-          error: 'USER_NOT_FOUND'
-        });
-      }
+      const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
       
-      if (!adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
-        logger.warn('Admin user does not have LN Markets credentials configured', { userId: user.id });
+      if (!activeCredentials) {
+        logger.warn('Admin user does not have active LN Markets exchange account', { userId: user.id });
         return reply.status(400).send({
           success: false,
-          message: 'LN Markets credentials not configured. Please configure them in Settings.',
+          message: 'No active LN Markets exchange account found. Please configure one in Settings.',
           error: 'CREDENTIALS_NOT_CONFIGURED',
           details: {
             missingFields: {
-              apiKey: !adminUser.ln_markets_api_key,
-              apiSecret: !adminUser.ln_markets_api_secret,
-              passphrase: !adminUser.ln_markets_passphrase
+              exchangeAccount: true
             }
           }
-        });
-      }
-      
-      // Decrypt credentials
-      let apiKey: string;
-      let apiSecret: string;
-      let passphrase: string;
-      
-      try {
-        apiKey = authService.decryptData(adminUser.ln_markets_api_key);
-        apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
-        passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
-      } catch (decryptError: any) {
-        logger.error('Failed to decrypt LN Markets credentials', { 
-          userId: user.id, 
-          error: decryptError.message 
-        });
-        return reply.status(500).send({
-          success: false,
-          message: 'Failed to decrypt LN Markets credentials',
-          error: 'DECRYPTION_FAILED'
         });
       }
       
       // Create LN Markets service
       const lnMarketsService = new LNMarketsAPIv2({
         credentials: {
-        apiKey,
-        apiSecret,
-        passphrase,
-        isTestnet: false
+          apiKey: activeCredentials.credentials.apiKey,
+          apiSecret: activeCredentials.credentials.apiSecret,
+          passphrase: activeCredentials.credentials.passphrase,
+          isTestnet: activeCredentials.credentials.isTestnet === 'true' || activeCredentials.credentials.testnet === 'true'
         },
         logger: logger as any
       });
@@ -249,57 +187,28 @@ export async function lnMarketsAdminRoutes(fastify: FastifyInstance) {
       
       const user = (request as any).user;
       
-      // Get admin user credentials
-      const adminUser = await prisma.user.findUnique({
-        where: { id: user.id }
-      });
+      // Get admin user credentials using new exchange accounts system
+      const { AccountCredentialsService } = await import('../../services/account-credentials.service');
+      const accountCredentialsService = new AccountCredentialsService(prisma);
       
-      if (!adminUser) {
-        logger.error('Admin user not found', { userId: user.id });
-        return reply.status(404).send({
-          success: false,
-          message: 'Admin user not found',
-          error: 'USER_NOT_FOUND'
-        });
-      }
+      const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
       
-      if (!adminUser.ln_markets_api_key || !adminUser.ln_markets_api_secret || !adminUser.ln_markets_passphrase) {
-        logger.warn('Admin user does not have LN Markets credentials configured', { userId: user.id });
+      if (!activeCredentials) {
+        logger.warn('Admin user does not have active LN Markets exchange account', { userId: user.id });
         return reply.status(400).send({
           success: false,
-          message: 'LN Markets credentials not configured. Please configure them in Settings.',
+          message: 'No active LN Markets exchange account found. Please configure one in Settings.',
           error: 'CREDENTIALS_NOT_CONFIGURED'
-        });
-      }
-      
-      // Decrypt credentials
-      let apiKey: string;
-      let apiSecret: string;
-      let passphrase: string;
-      
-      try {
-        apiKey = authService.decryptData(adminUser.ln_markets_api_key);
-        apiSecret = authService.decryptData(adminUser.ln_markets_api_secret);
-        passphrase = authService.decryptData(adminUser.ln_markets_passphrase);
-      } catch (decryptError: any) {
-        logger.error('Failed to decrypt LN Markets credentials', { 
-          userId: user.id, 
-          error: decryptError.message 
-        });
-        return reply.status(500).send({
-          success: false,
-          message: 'Failed to decrypt LN Markets credentials',
-          error: 'DECRYPTION_FAILED'
         });
       }
       
       // Create LN Markets service
       const lnMarketsService = new LNMarketsAPIv2({
         credentials: {
-        apiKey,
-        apiSecret,
-        passphrase,
-        isTestnet: false
+          apiKey: activeCredentials.credentials.apiKey,
+          apiSecret: activeCredentials.credentials.apiSecret,
+          passphrase: activeCredentials.credentials.passphrase,
+          isTestnet: activeCredentials.credentials.isTestnet === 'true' || activeCredentials.credentials.testnet === 'true'
         },
         logger: logger as any
       });

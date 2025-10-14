@@ -50,6 +50,7 @@ export class MarginGuardController {
         margin_threshold,
         add_margin_percentage,
         selected_positions = [],
+        individual_configs = null,
         is_active = true
       } = requestBody;
 
@@ -67,9 +68,9 @@ export class MarginGuardController {
         return;
       }
 
-      if (!['unitario', 'global'].includes(mode)) {
+      if (!['unitario', 'global', 'individual'].includes(mode)) {
         console.log('❌ MARGIN GUARD API - Invalid mode:', mode);
-        reply.status(400).send({ error: 'Mode deve ser "unitario" ou "global"' });
+        reply.status(400).send({ error: 'Mode deve ser "unitario", "global" ou "individual"' });
         return;
       }
 
@@ -83,6 +84,28 @@ export class MarginGuardController {
         console.log('❌ MARGIN GUARD API - Invalid add_margin_percentage:', add_margin_percentage);
         reply.status(400).send({ error: 'add_margin_percentage deve estar entre 10% e 100%' });
         return;
+      }
+
+      // Validar configurações individuais (modo individual)
+      if (mode === 'individual' && individual_configs) {
+        console.log('🔍 MARGIN GUARD API - Validating individual configs...');
+        for (const [tradeId, config] of Object.entries(individual_configs as Record<string, any>)) {
+          if (config.margin_threshold < 5 || config.margin_threshold > 25) {
+            console.log('❌ MARGIN GUARD API - Invalid individual margin_threshold for position:', tradeId);
+            reply.status(400).send({ 
+              error: `margin_threshold inválido para posição ${tradeId}: deve estar entre 5% e 25%` 
+            });
+            return;
+          }
+          if (config.add_margin_percentage < 10 || config.add_margin_percentage > 100) {
+            console.log('❌ MARGIN GUARD API - Invalid individual add_margin_percentage for position:', tradeId);
+            reply.status(400).send({ 
+              error: `add_margin_percentage inválido para posição ${tradeId}: deve estar entre 10% e 100%` 
+            });
+            return;
+          }
+        }
+        console.log('✅ MARGIN GUARD API - Individual configs validation passed');
       }
 
       console.log('✅ MARGIN GUARD API - Input validation passed');
@@ -178,6 +201,7 @@ export class MarginGuardController {
             margin_threshold,
             add_margin_percentage,
             selected_positions: mode === 'unitario' ? selected_positions : [],
+            individual_configs: mode === 'individual' ? individual_configs : null,
             is_active,
             updated_at: new Date()
           },
@@ -187,6 +211,7 @@ export class MarginGuardController {
             margin_threshold,
             add_margin_percentage,
             selected_positions: mode === 'unitario' ? selected_positions : [],
+            individual_configs: mode === 'individual' ? individual_configs : null,
             is_active
           }
         });

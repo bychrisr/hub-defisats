@@ -36,6 +36,8 @@ const CredentialsDataSchema = z.object({
   lnMarketsApiKey: z.string().min(1, 'API Key is required'),
   lnMarketsApiSecret: z.string().min(1, 'API Secret is required'),
   lnMarketsPassphrase: z.string().min(1, 'Passphrase is required'),
+  accountName: z.string().optional().default('Main Account'),
+  isTestnet: z.boolean().optional().default(false),
   sessionToken: z.string().optional(),
 });
 
@@ -250,15 +252,53 @@ export class RegistrationService {
         throw new Error('Registration progress not found');
       }
 
-      // Update user with credentials (user will be activated on first login)
+      // Update user plan (user will be activated on first login)
       await this.prisma.user.update({
         where: { id: progress.user_id },
         data: {
-          ln_markets_api_key: data.lnMarketsApiKey,
-          ln_markets_api_secret: data.lnMarketsApiSecret,
-          ln_markets_passphrase: data.lnMarketsPassphrase,
           plan_type: progress.selected_plan as any,
           // User will be activated on first login
+        }
+      });
+
+      // Create exchange account using new system
+      // First, get or create LN Markets exchange
+      let lnMarketsExchange = await this.prisma.exchange.findUnique({
+        where: { slug: 'lnmarkets' }
+      });
+
+      if (!lnMarketsExchange) {
+        lnMarketsExchange = await this.prisma.exchange.create({
+          data: {
+            name: 'LN Markets',
+            slug: 'lnmarkets',
+            description: 'LN Markets Bitcoin Lightning Trading Platform',
+            website: 'https://lnmarkets.com',
+            is_active: true
+          }
+        });
+      }
+
+      // Encrypt credentials using AuthService
+      const encryptedApiKey = this.authService.encryptData(data.lnMarketsApiKey);
+      const encryptedApiSecret = this.authService.encryptData(data.lnMarketsApiSecret);
+      const encryptedPassphrase = this.authService.encryptData(data.lnMarketsPassphrase);
+
+      // Create exchange account
+      const exchangeAccount = await this.prisma.userExchangeAccounts.create({
+        data: {
+          user_id: progress.user_id,
+          exchange_id: lnMarketsExchange.id,
+          account_name: data.accountName || 'Main Account',
+          credentials: {
+            'API Key': encryptedApiKey,
+            'API Secret': encryptedApiSecret,
+            'Passphrase': encryptedPassphrase,
+            isTestnet: data.isTestnet ? 'true' : 'false',
+            testnet: data.isTestnet ? 'true' : 'false'
+          },
+          is_active: true,
+          is_verified: false // Will be verified on first use
         }
       });
 
@@ -272,6 +312,9 @@ export class RegistrationService {
             lnMarketsApiKey: data.lnMarketsApiKey,
             lnMarketsApiSecret: data.lnMarketsApiSecret,
             lnMarketsPassphrase: data.lnMarketsPassphrase,
+            accountName: data.accountName,
+            isTestnet: data.isTestnet,
+            exchangeAccountId: exchangeAccount.id,
             savedAt: new Date().toISOString(),
           },
           session_token: null, // Clear session token
@@ -279,11 +322,12 @@ export class RegistrationService {
         }
       });
 
-      console.log('✅ REGISTRATION - Credentials saved, registration completed');
+      console.log('✅ REGISTRATION - Credentials saved to exchange account, registration completed');
 
       return {
         success: true,
-        message: 'Registration completed successfully'
+        message: 'Registration completed successfully',
+        exchangeAccountId: exchangeAccount.id
       };
 
     } catch (error) {

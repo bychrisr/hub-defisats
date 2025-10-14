@@ -28,9 +28,20 @@ export async function profileRoutes(fastify: FastifyInstance) {
                 plan_type: { type: 'string' },
                 created_at: { type: 'string' },
                 last_activity_at: { type: 'string' },
-                ln_markets_api_key: { type: 'string' },
-                ln_markets_api_secret: { type: 'string' },
-                ln_markets_passphrase: { type: 'string' },
+                exchange_accounts: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string' },
+                      account_name: { type: 'string' },
+                      exchange_name: { type: 'string' },
+                      is_active: { type: 'boolean' },
+                      is_verified: { type: 'boolean' },
+                      created_at: { type: 'string' }
+                    }
+                  }
+                },
                 is_admin: { type: 'boolean' },
                 admin_role: { type: 'string' },
               },
@@ -70,9 +81,6 @@ export async function profileRoutes(fastify: FastifyInstance) {
           email: { type: 'string', format: 'email' },
           username: { type: 'string' },
           bio: { type: 'string' },
-          ln_markets_api_key: { type: 'string' },
-          ln_markets_api_secret: { type: 'string' },
-          ln_markets_passphrase: { type: 'string' },
         },
       },
       response: {
@@ -90,9 +98,6 @@ export async function profileRoutes(fastify: FastifyInstance) {
                 plan_type: { type: 'string' },
                 created_at: { type: 'string' },
                 last_activity_at: { type: 'string' },
-                ln_markets_api_key: { type: 'string' },
-                ln_markets_api_secret: { type: 'string' },
-                ln_markets_passphrase: { type: 'string' },
               },
             },
             message: { type: 'string' },

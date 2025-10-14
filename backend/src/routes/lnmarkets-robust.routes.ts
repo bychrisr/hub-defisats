@@ -264,44 +264,19 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
           });
         }
 
-        const userProfile = await prisma.user.findUnique({
-          where: { id: userId },
-          select: {
-            ln_markets_api_key: true,
-            ln_markets_api_secret: true,
-            ln_markets_passphrase: true,
-          },
-        });
-
-        if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+        // Buscar credenciais da conta ativa usando o novo sistema
+        const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+        
+        if (!activeCredentials) {
           return reply.status(400).send({
             success: false,
             error: 'MISSING_CREDENTIALS',
-            message: 'LN Markets credentials not configured',
+            message: 'No active exchange account found. Please configure your exchange credentials.',
             requestId
           });
         }
 
-        // Detectar se credenciais estão criptografadas
-        const isEncrypted = userProfile.ln_markets_api_key?.includes(':') && 
-                           /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || '');
-        
-        let credentials;
-        if (isEncrypted) {
-          const { AuthService } = await import('../services/auth.service');
-          const authService = new AuthService(prisma, request.server);
-          credentials = {
-            apiKey: authService.decryptData(userProfile.ln_markets_api_key),
-            apiSecret: authService.decryptData(userProfile.ln_markets_api_secret),
-            passphrase: authService.decryptData(userProfile.ln_markets_passphrase),
-          };
-        } else {
-          credentials = {
-            apiKey: userProfile.ln_markets_api_key,
-            apiSecret: userProfile.ln_markets_api_secret,
-            passphrase: userProfile.ln_markets_passphrase,
-          };
-        }
+        const credentials = activeCredentials.credentials;
 
         const lnMarketsService = new LNMarketsRobustService({
           ...credentials,
@@ -365,59 +340,21 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
         
         const credentialsStartTime = Date.now();
         
-        const userProfile = await prisma.user.findUnique({
-          where: { id: userId },
-          select: {
-            ln_markets_api_key: true,
-            ln_markets_api_secret: true,
-            ln_markets_passphrase: true,
-            email: true,
-            username: true,
-            plan_type: true,
-          },
-        });
-
-        if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+        // Buscar credenciais da conta ativa usando o novo sistema
+        const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+        
+        if (!activeCredentials) {
           return reply.status(400).send({
             success: false,
             error: 'MISSING_CREDENTIALS',
-            message: 'LN Markets credentials not configured',
+            message: 'No active exchange account found. Please configure your exchange credentials.',
             requestId
           });
         }
 
-        console.log(`✅ [${requestId}] Credentials found for user: ${userProfile.email}`);
+        console.log(`✅ [${requestId}] Active account found: ${activeCredentials.accountName} (${activeCredentials.exchangeName})`);
 
-        // ========================================================================
-        // FASE 3: DESCRIPTOGRAFIA DE CREDENCIAIS
-        // ========================================================================
-        
-        const decryptStartTime = Date.now();
-        
-        // Detectar se credenciais estão criptografadas
-        const isEncrypted = userProfile.ln_markets_api_key?.includes(':') && 
-                           /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || '');
-        
-        let credentials;
-        if (isEncrypted) {
-          console.log(`🔐 [${requestId}] Credentials are encrypted, decrypting...`);
-          const { AuthService } = await import('../services/auth.service');
-          const authService = new AuthService(prisma, request.server);
-          credentials = {
-            apiKey: authService.decryptData(userProfile.ln_markets_api_key),
-            apiSecret: authService.decryptData(userProfile.ln_markets_api_secret),
-            passphrase: authService.decryptData(userProfile.ln_markets_passphrase),
-          };
-        } else {
-          console.log(`🔓 [${requestId}] Credentials are plain text`);
-          credentials = {
-            apiKey: userProfile.ln_markets_api_key,
-            apiSecret: userProfile.ln_markets_api_secret,
-            passphrase: userProfile.ln_markets_passphrase,
-          };
-        }
-
-        console.log(`✅ [${requestId}] Credentials processed in ${Date.now() - decryptStartTime}ms`);
+        const credentials = activeCredentials.credentials;
 
         // ========================================================================
         // FASE 4: BUSCA DE DADOS VIA LN MARKETS ROBUST SERVICE
@@ -452,9 +389,17 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
           // Dados do usuário da nossa plataforma
           user: {
             id: userId,
-            email: userProfile.email,
-            username: userProfile.username,
-            planType: userProfile.plan_type
+            email: activeCredentials.userId,
+            username: activeCredentials.accountName,
+            planType: 'lifetime' // TODO: Buscar do usuário
+          },
+          
+          // Informações da conta ativa
+          account: {
+            id: activeCredentials.accountId,
+            name: activeCredentials.accountName,
+            exchange: activeCredentials.exchangeName,
+            isActive: activeCredentials.isActive
           },
           
           // Dados específicos das posições da LN Markets
@@ -466,8 +411,7 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
             timestamp: new Date().toISOString(),
             processingTime: Date.now() - startTime,
             credentialsFetchTime: credentialsStartTime - startTime,
-            decryptTime: decryptStartTime - credentialsStartTime,
-            dataFetchTime: dataFetchStartTime - decryptStartTime,
+            dataFetchTime: dataFetchStartTime - credentialsStartTime,
             processingTime: Date.now() - processingStartTime,
             apiCallDuration: Date.now() - dataFetchStartTime
           },

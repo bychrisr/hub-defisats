@@ -51,52 +51,22 @@ export async function websocketRoutes(fastify: FastifyInstance) {
                     // ✅ BUSCAR CREDENCIAIS (usar instância global do Prisma)
                     const prisma = (req.server as any).prisma;
                     
-    const userProfile = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        ln_markets_api_key: true,
-        ln_markets_api_secret: true,
-        ln_markets_passphrase: true,
-                        email: true,
-                        username: true,
-                        plan_type: true,
-      },
-    });
-
-    if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
+    // Get user credentials using the new exchange accounts system
+    const { AccountCredentialsService } = await import('../services/account-credentials.service');
+    const accountCredentialsService = new AccountCredentialsService(prisma);
+    
+    const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+    
+    if (!activeCredentials) {
                       connection.send(JSON.stringify({
                         type: 'error',
-                        message: 'LN Markets credentials not configured',
+                        message: 'No active exchange account found',
                         timestamp: new Date().toISOString()
                       }));
       return;
     }
 
-                    // ✅ DESCRIPTOGRAFIA (mesma lógica do endpoint dashboard)
-    const { AuthService } = await import('../services/auth.service');
-                    const authService = new AuthService(prisma, req.server);
-                    
-                    let credentials;
-                    
-                    // Detectar se credenciais estão criptografadas
-                    const isEncrypted = userProfile.ln_markets_api_key?.includes(':') && 
-                                       /^[0-9a-fA-F:]+$/.test(userProfile.ln_markets_api_key || '');
-                    
-                    if (isEncrypted) {
-                      console.log('🔐 WEBSOCKET - Credentials are encrypted, decrypting...');
-                      credentials = {
-      apiKey: authService.decryptData(userProfile.ln_markets_api_key),
-      apiSecret: authService.decryptData(userProfile.ln_markets_api_secret),
-      passphrase: authService.decryptData(userProfile.ln_markets_passphrase),
-                      };
-      } else {
-                      console.log('🔓 WEBSOCKET - Credentials are plain text');
-                      credentials = {
-          apiKey: userProfile.ln_markets_api_key,
-          apiSecret: userProfile.ln_markets_api_secret,
-          passphrase: userProfile.ln_markets_passphrase,
-                      };
-                    }
+    const credentials = activeCredentials.credentials;
 
                     // ✅ CRIAR SERVIÇO E BUSCAR DADOS
                     console.log('🔄 WEBSOCKET - Criando LNMarketsRobustService com credenciais...');

@@ -25,24 +25,7 @@ const registerSchema = z
         /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/,
         'Password must contain at least one special character'
       ),
-    confirmPassword: z.string(),
-    ln_markets_api_key: z
-      .string()
-      .min(16, 'API key must be at least 16 characters')
-      .max(500, 'API key is too long'),
-    ln_markets_api_secret: z
-      .string()
-      .min(16, 'API secret must be at least 16 characters')
-      .max(500, 'API secret is too long'),
-    ln_markets_passphrase: z
-      .string()
-      .min(8, 'Passphrase must be at least 8 characters')
-      .max(128, 'Passphrase must be at most 128 characters'),
     coupon_code: z.string().optional(),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
   });
 
 // Schema de validação para login
@@ -74,15 +57,8 @@ export async function validateRegisterInput(
       hasEmail: !!(request.body as any)?.email,
       hasUsername: !!(request.body as any)?.username,
       hasPassword: !!(request.body as any)?.password,
-      hasConfirmPassword: !!(request.body as any)?.confirmPassword,
-      hasApiKey: !!(request.body as any)?.ln_markets_api_key,
-      hasApiSecret: !!(request.body as any)?.ln_markets_api_secret,
-      hasPassphrase: !!(request.body as any)?.ln_markets_passphrase,
       email: (request.body as any)?.email,
       username: (request.body as any)?.username,
-      apiKeyLength: (request.body as any)?.ln_markets_api_key?.length,
-      apiSecretLength: (request.body as any)?.ln_markets_api_secret?.length,
-      passphraseLength: (request.body as any)?.ln_markets_passphrase?.length,
     });
     
     // Sanitizar entrada
@@ -90,18 +66,6 @@ export async function validateRegisterInput(
       email: Sanitizer.sanitizeEmail((request.body as Record<string, unknown>)?.['email'] as string || ''),
       username: Sanitizer.sanitizeString((request.body as Record<string, unknown>)?.['username'] as string || ''),
       password: Sanitizer.sanitizeString((request.body as Record<string, unknown>)?.['password'] as string || ''),
-      confirmPassword: Sanitizer.sanitizeString(
-        (request.body as Record<string, unknown>)?.['confirmPassword'] as string || ''
-      ),
-      ln_markets_api_key: Sanitizer.sanitizeString(
-        (request.body as Record<string, unknown>)?.['ln_markets_api_key'] as string || ''
-      ),
-      ln_markets_api_secret: Sanitizer.sanitizeString(
-        (request.body as Record<string, unknown>)?.['ln_markets_api_secret'] as string || ''
-      ),
-      ln_markets_passphrase: Sanitizer.sanitizeString(
-        (request.body as Record<string, unknown>)?.['ln_markets_passphrase'] as string || ''
-      ),
       coupon_code: (request.body as Record<string, unknown>)?.['coupon_code']
         ? Sanitizer.sanitizeString((request.body as Record<string, unknown>)['coupon_code'] as string)
         : undefined,
@@ -111,10 +75,6 @@ export async function validateRegisterInput(
       email: sanitizedBody.email,
       username: sanitizedBody.username,
       password: sanitizedBody.password ? '***' : 'MISSING',
-      confirmPassword: sanitizedBody.confirmPassword ? '***' : 'MISSING',
-      ln_markets_api_key: sanitizedBody.ln_markets_api_key,
-      ln_markets_api_secret: sanitizedBody.ln_markets_api_secret,
-      ln_markets_passphrase: sanitizedBody.ln_markets_passphrase,
       coupon_code: sanitizedBody.coupon_code
     });
 

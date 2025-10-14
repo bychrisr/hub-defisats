@@ -25,7 +25,6 @@ export class UserExchangeAccountService {
    * Descriptografar credenciais de uma conta
    */
   private decryptCredentials(credentials: any): Record<string, string> {
-    const authService = new AuthService(this.prisma, {} as any);
     const decryptedCredentials: Record<string, string> = {};
     
     console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Decrypting credentials:`, credentials);
@@ -34,8 +33,29 @@ export class UserExchangeAccountService {
       Object.entries(credentials).forEach(([key, value]) => {
         if (value && typeof value === 'string') {
           try {
-            decryptedCredentials[key] = authService.decryptData(value);
-            console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Decrypted ${key}: ${decryptedCredentials[key]}`);
+            // Usar a mesma lógica de descriptografia do AuthService
+            const crypto = require('crypto');
+            const { securityConfig } = require('../config/env');
+            const algorithm = 'aes-256-cbc';
+            const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+            
+            // Extrair IV e dados criptografados
+            const [ivHex, encryptedHex] = value.split(':');
+            if (!ivHex || !encryptedHex) {
+              console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Invalid encrypted format for ${key}`);
+              decryptedCredentials[key] = '';
+              return;
+            }
+            
+            const iv = Buffer.from(ivHex, 'hex');
+            const encrypted = Buffer.from(encryptedHex, 'hex');
+            
+            const decipher = crypto.createDecipheriv(algorithm, key, iv);
+            let decrypted = decipher.update(encrypted, null, 'utf8');
+            decrypted += decipher.final('utf8');
+            
+            decryptedCredentials[key] = decrypted;
+            console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Decrypted ${key}: ${decrypted}`);
           } catch (error) {
             console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to decrypt credential ${key}:`, error);
             decryptedCredentials[key] = ''; // Fallback para string vazia
@@ -168,12 +188,27 @@ export class UserExchangeAccountService {
     });
 
     // Criptografar credenciais
-    const authService = new AuthService(this.prisma, {} as any);
     const encryptedCredentials: Record<string, string> = {};
     
     Object.entries(data.credentials).forEach(([key, value]) => {
       if (value && value.trim() !== '') {
-        encryptedCredentials[key] = authService.encryptData(value);
+        try {
+          const crypto = require('crypto');
+          const { securityConfig } = require('../config/env');
+          const algorithm = 'aes-256-cbc';
+          const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+          const iv = crypto.randomBytes(16);
+          
+          const cipher = crypto.createCipheriv(algorithm, key, iv);
+          let encrypted = cipher.update(value, 'utf8', 'hex');
+          encrypted += cipher.final('hex');
+          
+          encryptedCredentials[key] = `${iv.toString('hex')}:${encrypted}`;
+          console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Encrypted credential ${key}`);
+        } catch (error) {
+          console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to encrypt credential ${key}:`, error);
+          encryptedCredentials[key] = value; // Fallback para valor não criptografado
+        }
       }
     });
 
@@ -271,12 +306,27 @@ export class UserExchangeAccountService {
 
     // Criptografar credenciais se fornecidas
     if (data.credentials) {
-      const authService = new AuthService(this.prisma, {} as any);
       const encryptedCredentials: Record<string, string> = {};
       
       Object.entries(data.credentials).forEach(([key, value]) => {
         if (value && value.trim() !== '') {
-          encryptedCredentials[key] = authService.encryptData(value);
+          try {
+            const crypto = require('crypto');
+            const { securityConfig } = require('../config/env');
+            const algorithm = 'aes-256-cbc';
+            const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+            const iv = crypto.randomBytes(16);
+            
+            const cipher = crypto.createCipheriv(algorithm, key, iv);
+            let encrypted = cipher.update(value, 'utf8', 'hex');
+            encrypted += cipher.final('hex');
+            
+            encryptedCredentials[key] = `${iv.toString('hex')}:${encrypted}`;
+            console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Encrypted credential ${key}`);
+          } catch (error) {
+            console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to encrypt credential ${key}:`, error);
+            encryptedCredentials[key] = value; // Fallback para valor não criptografado
+          }
         }
       });
 

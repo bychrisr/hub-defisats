@@ -11,10 +11,15 @@ interface MarginGuardConfig {
   id: string;
   user_id: string;
   is_active: boolean;
-  mode: 'unitario' | 'global';
+  mode: 'unitario' | 'global' | 'individual';
   margin_threshold: number; // % de distância para acionar
   add_margin_percentage: number; // % de margem a adicionar
   selected_positions: string[]; // IDs das posições (modo unitário)
+  individual_configs?: Record<string, {
+    margin_threshold: number;
+    add_margin_percentage: number;
+    is_active: boolean;
+  }>; // Configurações individuais por posição (modo individual)
   created_at: Date;
   updated_at: Date;
 }
@@ -287,6 +292,10 @@ export class MarginGuardV2Worker extends EventEmitter {
       return config.selected_positions.includes(tradeId);
     }
 
+    if (config.mode === 'individual') {
+      return config.individual_configs?.[tradeId]?.is_active || false;
+    }
+
     return false;
   }
 
@@ -308,21 +317,26 @@ export class MarginGuardV2Worker extends EventEmitter {
       throw new Error('Preços inválidos para cálculo de risco');
     }
 
-    // 2. Calcular distância absoluta
+    // 2. Obter configuração específica (individual ou global)
+    const marginThreshold = config.mode === 'individual' && config.individual_configs?.[positionData.trade_id]
+      ? config.individual_configs[positionData.trade_id].margin_threshold
+      : config.margin_threshold;
+
+    // 3. Calcular distância absoluta
     const absolute = Math.abs(entryPrice - liquidationPrice);
     
-    // 3. Calcular distância percentual
+    // 4. Calcular distância percentual
     const percentage = (absolute / liquidationPrice) * 100;
     
-    // 4. Calcular distância de ativação
-    const activationDistance = absolute * (1 - config.margin_threshold / 100);
+    // 5. Calcular distância de ativação
+    const activationDistance = absolute * (1 - marginThreshold / 100);
     
-    // 5. Calcular preço de trigger
+    // 6. Calcular preço de trigger
     const triggerPrice = side === 'b' 
       ? liquidationPrice + activationDistance
       : liquidationPrice - activationDistance;
     
-    // 6. Verificar se está em risco
+    // 7. Verificar se está em risco
     const isAtRisk = side === 'b' 
       ? currentPrice <= triggerPrice
       : currentPrice >= triggerPrice;
@@ -455,10 +469,15 @@ export class MarginGuardV2Worker extends EventEmitter {
         distancePercentage: risk.percentage
       });
 
-      // 1. Calcular margem a adicionar
+      // 1. Obter configuração específica (individual ou global)
+      const addMarginPercentage = config.mode === 'individual' && config.individual_configs?.[positionData.trade_id]
+        ? config.individual_configs[positionData.trade_id].add_margin_percentage
+        : config.add_margin_percentage;
+
+      // 2. Calcular margem a adicionar
       const marginCalculation = this.calculateMarginWithFees(
         positionData.margin,
-        config.add_margin_percentage,
+        addMarginPercentage,
         positionData.fees,
         positionData.liquidation_price,
         positionData.entry_price,

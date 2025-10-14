@@ -487,63 +487,22 @@ const worker = new Worker(
       if (!credentials) {
         console.log(`🔍 Credentials not in cache, fetching from database for user ${userId}`);
         
-        // Get user credentials from database
-        const user = await globalPrismaInstance.user.findUnique({
-          where: { id: userId },
-          select: {
-            ln_markets_api_key: true,
-            ln_markets_api_secret: true,
-            ln_markets_passphrase: true,
-          },
-        });
-
-        if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret) {
-          console.warn(`No LN Markets credentials found for user ${userId}`);
-          return { status: 'skipped', reason: 'no_credentials' };
+        // Get user credentials using the new exchange accounts system
+        const { AccountCredentialsService } = await import('../services/account-credentials.service');
+        const accountCredentialsService = new AccountCredentialsService(globalPrismaInstance);
+        
+        const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+        
+        if (!activeCredentials) {
+          console.warn(`No active exchange account found for user ${userId}`);
+          return { status: 'skipped', reason: 'no_active_account' };
         }
 
-        // Import auth service for decryption
-        const { AuthService } = await import('../services/auth.service');
-        const authService = new AuthService(globalPrismaInstance, {} as any);
+        credentials = activeCredentials.credentials;
         
-        // Decrypt credentials using AuthService with retry logic
-        let decryptionRetries = 0;
-        const maxDecryptionRetries = 2;
-        
-        while (decryptionRetries < maxDecryptionRetries) {
-          try {
-            const apiKey = authService.decryptData(user.ln_markets_api_key);
-            const apiSecret = authService.decryptData(user.ln_markets_api_secret);
-            const passphrase = authService.decryptData(user.ln_markets_passphrase);
-            
-            credentials = {
-              apiKey,
-              apiSecret,
-              passphrase,
-            };
-            
-            // Cache the credentials for future use
-            await credentialCache.set(userId, credentials);
-            console.log(`✅ MARGIN GUARD - Credentials cached for user ${userId}`);
-            break; // Success, exit retry loop
-          } catch (error: any) {
-            decryptionRetries++;
-            console.error(`❌ MARGIN GUARD - Decryption failed (attempt ${decryptionRetries}/${maxDecryptionRetries}) for user ${userId}:`, {
-              error: error.message,
-              stack: error.stack
-            });
-            
-            if (decryptionRetries >= maxDecryptionRetries) {
-              console.error(`❌ MARGIN GUARD - Max decryption retries exceeded for user ${userId}`);
-              return { status: 'error', reason: 'decryption_failed' };
-            }
-            
-            // Wait before retry
-            const delay = 1000 * decryptionRetries; // 1s, 2s
-            console.log(`⏳ MARGIN GUARD - Waiting ${delay}ms before decryption retry for user ${userId}`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-          }
-        }
+        // Cache the credentials for future use
+        await credentialCache.set(userId, credentials);
+        console.log(`✅ MARGIN GUARD - Credentials cached for user ${userId} (account: ${activeCredentials.accountName})`);
       } else {
         console.log(`✅ Credentials found in cache for user ${userId}`);
       }
@@ -799,34 +758,22 @@ export async function simulateMarginMonitoring(
         console.error('❌ SIMULATION - Prisma instance not available');
         throw new Error("Prisma Client não está inicializado no worker após retry.");
       }
-      const user = await globalPrismaInstance.user.findUnique({
-        where: { id: userId },
-        select: {
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true,
-        },
-      });
-
-      if (!user?.ln_markets_api_key || !user?.ln_markets_api_secret) {
-        console.warn(`No LN Markets credentials found for user ${userId}`);
-        return;
-      }
-
-      // Import secure storage service
-      const { secureStorage } = await import('../services/secure-storage.service');
+      // Get user credentials using the new exchange accounts system
+      const { AccountCredentialsService } = await import('../services/account-credentials.service');
+      const accountCredentialsService = new AccountCredentialsService(globalPrismaInstance);
       
-      // Decrypt credentials using SecureStorageService
-      try {
-        credentials = await secureStorage.decryptCredentials(user.ln_markets_api_key);
-        
-        // Cache the credentials for future use
-        await credentialCache.set(userId, credentials);
-        console.log(`✅ Credentials cached for user ${userId}`);
-      } catch (error) {
-        console.error(`Failed to decrypt credentials for user ${userId}:`, error);
+      const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(userId);
+      
+      if (!activeCredentials) {
+        console.warn(`No active exchange account found for user ${userId}`);
         return;
       }
+
+      credentials = activeCredentials.credentials;
+      
+      // Cache the credentials for future use
+      await credentialCache.set(userId, credentials);
+      console.log(`✅ Credentials cached for user ${userId} (account: ${activeCredentials.accountName})`);
     } else {
       console.log(`✅ Credentials found in cache for user ${userId}`);
     }

@@ -8,6 +8,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **User Exchange Accounts System (v1.0.0)**: Sistema completo de gerenciamento de contas de exchange
+  - Migração completa do sistema antigo de credenciais diretas na tabela User
+  - Novo sistema UserExchangeAccounts com múltiplas contas por usuário
+  - Criptografia robusta de credenciais com AES-256-CBC
+  - Cache de credenciais com Redis para performance
+  - Validação de segurança e fallback seguro
+  - Documentação completa seguindo DOCUMENTATION_STANDARDS.md
+  - Arquitetura modular com UserExchangeAccountService e AccountCredentialsService
+  - Suporte a mainnet e testnet com mesma lógica (apenas URL diferente)
+  - Logs de segurança para auditoria e debugging
+  - Integração com todos os controllers LN Markets
+  - Sistema de seeders para contas de teste
+  - Diagramas de arquitetura e fluxo de dados
+  - Guia de migração completo
+  - Troubleshooting detalhado
+  - Exemplos práticos e funcionais
+
+### Changed
+- **Migration from Old Credential System**: Migração completa do sistema antigo
+  - Removidos campos ln_markets_api_key, ln_markets_api_secret, ln_markets_passphrase da tabela User
+  - Atualizados todos os controllers LN Markets para usar AccountCredentialsService
+  - Atualizados todos os services para usar novo sistema de credenciais
+  - Atualizadas todas as rotas para usar novo sistema
+  - Atualizados workers e WebSocket para novo sistema
+  - Atualizado middleware de validação
+  - Atualizados schemas de API para novo sistema
+  - Atualizado sistema de autenticação
+  - Atualizado sistema de registro
+  - Atualizado sistema de perfil
+
+### Fixed
+- **Credential Encryption/Decryption**: Correção de problemas de criptografia
+  - Corrigido erro "The 'key' argument must be of type string" na criptografia
+  - Corrigido acesso incorreto à chave de criptografia em userExchangeAccount.service.ts
+  - Implementado fallback seguro para criptografia/descriptografia
+  - Corrigido erro de instanciação incorreta do AuthService
+  - Implementada criptografia direta usando crypto module
+  - Corrigido erro de conexão Redis com lazy connection e IPv4 forcing
+  - Corrigido erro 500 no endpoint PUT /api/user/exchange-accounts/{id}
+  - Implementada validação robusta de formato de credenciais
+  - Corrigido erro de ReferenceError em lnmarkets-robust.routes.ts
+
+### Added
 - **Liquid Glass Design System (v1.0.0)**: Sistema de design moderno inspirado no iOS 26 Glass Liquid
   - Implementação do LiquidGlassCard como componente base
   - Sistema de tooltips com efeito liquid glass

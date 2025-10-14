@@ -117,40 +117,32 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
       });
 
       // Get user credentials
-      console.log('🎯 LN MARKETS CONTROLLER - Fetching user credentials from database');
-      const userProfile = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          ln_markets_api_key: true,
-          ln_markets_api_secret: true,
-          ln_markets_passphrase: true,
-        },
-      });
-
-      console.log('🎯 LN MARKETS CONTROLLER - User profile from DB:', {
-        hasApiKey: !!userProfile?.ln_markets_api_key,
-        hasApiSecret: !!userProfile?.ln_markets_api_secret,
-        hasPassphrase: !!userProfile?.ln_markets_passphrase,
-        apiKeyPreview: userProfile?.ln_markets_api_key ? `${userProfile.ln_markets_api_key.substring(0, 10)}...` : 'MISSING',
-        apiSecretPreview: userProfile?.ln_markets_api_secret ? `${userProfile.ln_markets_api_secret.substring(0, 10)}...` : 'MISSING',
-        passphrasePreview: userProfile?.ln_markets_passphrase ? `${userProfile.ln_markets_passphrase.substring(0, 5)}...` : 'MISSING'
-      });
-
-      if (!userProfile?.ln_markets_api_key || !userProfile?.ln_markets_api_secret || !userProfile?.ln_markets_passphrase) {
-        console.log('❌ LN MARKETS CONTROLLER - Missing credentials, returning 400');
+      console.log('🎯 LN MARKETS CONTROLLER - Fetching user credentials from exchange accounts');
+      
+      // Get user credentials using the new exchange accounts system
+      const { AccountCredentialsService } = await import('../services/account-credentials.service');
+      const accountCredentialsService = new AccountCredentialsService(prisma);
+      
+      const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+      
+      if (!activeCredentials) {
+        console.log('❌ LN MARKETS CONTROLLER - No active exchange account, returning 400');
         return reply.status(400).send({
           success: false,
           error: 'MISSING_CREDENTIALS',
-          message: 'LN Markets credentials not configured',
+          message: 'No active exchange account found',
         });
       }
 
-      // Decrypt credentials
-      const { AuthService } = await import('../services/auth.service');
-      const authService = new AuthService(prisma, {} as any);
-      const apiKey = authService.decryptData(userProfile.ln_markets_api_key);
-      const apiSecret = authService.decryptData(userProfile.ln_markets_api_secret);
-      const passphrase = authService.decryptData(userProfile.ln_markets_passphrase);
+      console.log('✅ LN MARKETS CONTROLLER - Active account found:', {
+        accountName: activeCredentials.accountName,
+        exchangeName: activeCredentials.exchangeName,
+        hasApiKey: !!activeCredentials.credentials.apiKey,
+        hasApiSecret: !!activeCredentials.credentials.apiSecret,
+        hasPassphrase: !!activeCredentials.credentials.passphrase
+      });
+
+      const { apiKey, apiSecret, passphrase } = activeCredentials.credentials;
 
       // Initialize LN Markets service v2
       console.log('🎯 LN MARKETS CONTROLLER - Initializing LNMarketsAPIv2 service');

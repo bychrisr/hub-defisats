@@ -534,10 +534,19 @@ export class AutomationService {
           select: {
             id: true,
             email: true,
-            ln_markets_api_key: true,
-            ln_markets_api_secret: true,
           },
         },
+        user_exchange_account: {
+          include: {
+            exchange: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            }
+          }
+        }
       },
     });
 
