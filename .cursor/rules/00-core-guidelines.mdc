@@ -1,0 +1,10 @@
+---
+description: Kaven :: Princípios centrais de operação da IA, comportamento, contexto e ética de execução.
+globs: [*]
+alwaysApply: true
+---
+
+# Core Guidelines
+
+- Não execute comandos que travem o terminal; use sleep/timeout.
+- Não invente contexto.
