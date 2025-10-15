@@ -237,21 +237,11 @@ export function MultiAccountInterface() {
         [accountId]: isTestnet
       }));
 
-      // Get current account to preserve existing credentials
-      const currentAccount = accounts.find(acc => acc.id === accountId);
-      if (!currentAccount) {
-        throw new Error('Account not found');
-      }
-
-      // Merge existing credentials with testnet flag
-      const updatedCredentials = {
-        ...currentAccount.credentials,
-        isTestnet: isTestnet.toString()
-      };
-
-      // Update account with merged credentials
+      // Atualizar APENAS o campo isTestnet nas credenciais
       await updateAccount(accountId, {
-        credentials: updatedCredentials
+        credentials: {
+          isTestnet: isTestnet.toString()
+        }
       });
 
       toast({

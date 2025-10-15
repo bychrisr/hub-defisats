@@ -240,10 +240,12 @@ export async function lnmarketsCentralizedRoutes(fastify: FastifyInstance) {
         
         const serviceStartTime = Date.now();
         const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');
+        const { isTestnetCredentials } = await import('../utils/credentials.utils');
+        
         const lnMarketsService = new LNMarketsAPIv2({
           credentials: {
             ...credentials,
-            isTestnet: activeCredentials.credentials.isTestnet === 'true' || activeCredentials.credentials.testnet === 'true'
+            isTestnet: isTestnetCredentials(activeCredentials.credentials)
           },
           logger: logger
         });

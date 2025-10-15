@@ -53,6 +53,18 @@ export class CredentialCacheService {
   }
 
   /**
+   * Remover credenciais do cache por chave específica
+   */
+  async removeByKey(cacheKey: string): Promise<void> {
+    try {
+      await this.redis.del(cacheKey);
+      console.log(`🧹 CREDENTIAL CACHE - Removed cache key: ${cacheKey}`);
+    } catch (error) {
+      console.error(`Failed to remove credentials from cache for key ${cacheKey}:`, error);
+    }
+  }
+
+  /**
    * Verificar se credenciais existem no cache
    */
   async exists(userId: string): Promise<boolean> {

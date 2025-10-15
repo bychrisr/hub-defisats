@@ -42,8 +42,9 @@ export class UserExchangeAccountService {
             // Extrair IV e dados criptografados
             const [ivHex, encryptedHex] = value.split(':');
             if (!ivHex || !encryptedHex) {
-              console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Invalid encrypted format for ${key}`);
-              decryptedCredentials[key] = '';
+              // Se não está no formato criptografado, assumir que é valor plano (ex: isTestnet)
+              console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Plain text credential field: ${key} = ${value}`);
+              decryptedCredentials[key] = value;
               return;
             }
             
@@ -191,6 +192,13 @@ export class UserExchangeAccountService {
     const encryptedCredentials: Record<string, string> = {};
     
     Object.entries(data.credentials).forEach(([key, value]) => {
+      // Campo isTestnet não precisa criptografia
+      if (key === 'isTestnet' || key === 'testnet') {
+        encryptedCredentials[key] = value;
+        console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Plain text field stored: ${key} = ${value}`);
+        return;
+      }
+
       if (value && value.trim() !== '') {
         try {
           const crypto = require('crypto');
@@ -306,31 +314,63 @@ export class UserExchangeAccountService {
 
     // Criptografar credenciais se fornecidas
     if (data.credentials) {
-      const encryptedCredentials: Record<string, string> = {};
+      console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Processing credentials update:', {
+        receivedKeys: Object.keys(data.credentials),
+        accountId
+      });
+
+      // Buscar credenciais atuais do banco
+      const currentAccount = await this.prisma.userExchangeAccounts.findUnique({
+        where: { id: accountId },
+        select: { credentials: true }
+      });
+
+      // Fazer MERGE das credenciais (preservar existentes + adicionar/atualizar novas)
+      const currentCreds = (currentAccount?.credentials || {}) as Record<string, string>;
+      const mergedCredentials = { ...currentCreds };
       
       Object.entries(data.credentials).forEach(([key, value]) => {
+        // Campo isTestnet não precisa criptografia
+        if (key === 'isTestnet' || key === 'testnet') {
+          mergedCredentials[key] = value;
+          console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Plain text field updated: ${key} = ${value}`);
+          return;
+        }
+
         if (value && value.trim() !== '') {
-          try {
-            const crypto = require('crypto');
-            const { securityConfig } = require('../config/env');
-            const algorithm = 'aes-256-cbc';
-            const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
-            const iv = crypto.randomBytes(16);
-            
-            const cipher = crypto.createCipheriv(algorithm, key, iv);
-            let encrypted = cipher.update(value, 'utf8', 'hex');
-            encrypted += cipher.final('hex');
-            
-            encryptedCredentials[key] = `${iv.toString('hex')}:${encrypted}`;
-            console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Encrypted credential ${key}`);
-          } catch (error) {
-            console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to encrypt credential ${key}:`, error);
-            encryptedCredentials[key] = value; // Fallback para valor não criptografado
+          // Verificar se valor já está criptografado (formato hex:hex)
+          const isAlreadyEncrypted = /^[0-9a-f]+:[0-9a-f]+$/i.test(value);
+          
+          if (isAlreadyEncrypted) {
+            // Preservar valor do banco (já criptografado)
+            const currentValue = currentCreds[key];
+            mergedCredentials[key] = currentValue || value;
+            console.log(`🔒 USER EXCHANGE ACCOUNT SERVICE - Preserving encrypted credential: ${key}`);
+          } else {
+            // Criptografar novo valor
+            try {
+              const crypto = require('crypto');
+              const { securityConfig } = require('../config/env');
+              const algorithm = 'aes-256-cbc';
+              const encKey = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+              const iv = crypto.randomBytes(16);
+              
+              const cipher = crypto.createCipheriv(algorithm, encKey, iv);
+              let encrypted = cipher.update(value, 'utf8', 'hex');
+              encrypted += cipher.final('hex');
+              
+              mergedCredentials[key] = `${iv.toString('hex')}:${encrypted}`;
+              console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Encrypted new credential: ${key}`);
+            } catch (error) {
+              console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to encrypt credential ${key}:`, error);
+              mergedCredentials[key] = value; // Fallback para valor não criptografado
+            }
           }
         }
       });
 
-      updateData.credentials = encryptedCredentials;
+      console.log('📦 USER EXCHANGE ACCOUNT SERVICE - Final merged credentials keys:', Object.keys(mergedCredentials));
+      updateData.credentials = mergedCredentials;
     }
 
     // VALIDAÇÃO DE SEGURANÇA: Se ativando esta conta, desativar TODAS as outras contas do usuário

@@ -350,7 +350,7 @@ export class AccountCredentialsService {
       console.log(`🧹 ACCOUNT CREDENTIALS - Clearing credentials cache for account ${accountId} of user ${userId}`);
       
       const cacheKey = `credentials-${userId}-${accountId}`;
-      await this.credentialCache.delete(cacheKey);
+      await this.credentialCache.removeByKey(cacheKey);
       
       const validationKey = `validation-${userId}-${accountId}`;
       this.validationCache.delete(validationKey);

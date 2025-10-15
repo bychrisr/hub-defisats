@@ -9,6 +9,7 @@
 import { PrismaClient } from '@prisma/client';
 import { AccountCredentialsService, AccountCredentials } from './account-credentials.service';
 import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
+import { isTestnetCredentials, extractMainCredentials } from '../utils/credentials.utils';
 
 // Interface for dashboard data response
 export interface DashboardData {
@@ -75,8 +76,8 @@ export class DashboardDataService {
 
       console.log(`✅ DASHBOARD DATA - Found active account: ${credentials.accountName} (${credentials.exchangeName})`);
 
-      // 2. Detectar se deve usar testnet baseado no nome da conta
-      const isTestnet = this.detectTestnetMode(credentials.accountName, credentials.credentials);
+      // 2. Detectar se deve usar testnet baseado nas credenciais
+      const isTestnet = isTestnetCredentials(credentials.credentials);
       
       console.log(`🔍 DASHBOARD DATA - Testnet mode detected: ${isTestnet} for account ${credentials.accountName}`);
       console.log(`🔍 DASHBOARD DATA - Credentials keys:`, Object.keys(credentials.credentials));
@@ -91,12 +92,13 @@ export class DashboardDataService {
       });
 
           // 4. Criar instância do LNMarketsAPIv2 com credenciais da conta ativa
+          const mainCredentials = extractMainCredentials(credentials.credentials);
           const lnMarketsService = new LNMarketsAPIv2({
             credentials: {
-              apiKey: credentials.credentials['api_key'],
-              apiSecret: credentials.credentials['api_secret'],
-              passphrase: credentials.credentials['passphrase'],
-              isTestnet: isTestnet
+              apiKey: mainCredentials.apiKey,
+              apiSecret: mainCredentials.apiSecret,
+              passphrase: mainCredentials.passphrase,
+              isTestnet: mainCredentials.isTestnet
             },
             logger: console as any // TODO: Pass proper logger
           });

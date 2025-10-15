@@ -233,6 +233,24 @@ export class UserExchangeAccountController {
         isActive: account.is_active
       });
 
+      // ========================================================================
+      // LIMPAR CACHE DE CREDENCIAIS QUANDO CREDENCIAIS SÃO ATUALIZADAS
+      // ========================================================================
+
+      if (updateData.credentials) {
+        try {
+          console.log('🧹 USER EXCHANGE ACCOUNT CONTROLLER - Clearing credentials cache after update');
+          
+          // Limpar cache da conta específica que foi atualizada
+          await this.accountCredentialsService.clearAccountCredentialsCache(user.id, id);
+          
+          console.log('✅ USER EXCHANGE ACCOUNT CONTROLLER - Credentials cache cleared successfully');
+        } catch (cacheError) {
+          console.error('❌ USER EXCHANGE ACCOUNT CONTROLLER - Error clearing credentials cache:', cacheError);
+          // Não falhar a requisição por erro no cache
+        }
+      }
+
       return reply.status(200).send({
         success: true,
         data: {
