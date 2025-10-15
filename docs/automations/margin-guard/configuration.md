@@ -1,456 +1,757 @@
 ---
-title: "Margin Guard - Configuration"
-version: "1.0.0"
-created: "2025-01-26"
-updated: "2025-01-26"
-author: "Documentation Agent"
-status: "active"
-tags: ["automations", "margin-guard", "configuration", "trading"]
+title: Margin Guard Configuration Guide
+category: automations
+subcategory: margin-guard
+tags: [margin-guard, configuration, setup, plans, parameters]
+priority: high
+status: active
+last_updated: 2025-01-06
+version: "2.0"
+authors: ["Axisor Team"]
+reviewers: ["Backend Team"]
 ---
 
-# Margin Guard - Configuration
+# Margin Guard Configuration Guide
 
-> **Status**: Active  
-> **Última Atualização**: 2025-01-26  
-> **Versão**: 1.0.0  
-> **Responsável**: Axisor Margin Guard System  
+## Summary
 
-## Índice
+Complete configuration guide for the Margin Guard system, covering setup procedures, plan-specific parameters, configuration options, and best practices for different user plans. This document provides step-by-step instructions for configuring Margin Guard across all plan types.
 
-- [Visão Geral](#visão-geral)
-- [Configuração Básica](#configuração-básica)
-- [Modos de Operação](#modos-de-operação)
-- [Configuração por Plano](#configuração-por-plano)
-- [API Configuration](#api-configuration)
-- [Troubleshooting](#troubleshooting)
-- [Referências](#referências)
+## Configuration Overview
 
-## Visão Geral
+```mermaid
+graph TB
+    A[Margin Guard Configuration] --> B[Plan Selection]
+    B --> C[Free Plan Config]
+    B --> D[Basic Plan Config]
+    B --> E[Advanced Plan Config]
+    B --> F[Pro Plan Config]
+    
+    C --> G[Position Limits]
+    C --> H[Basic Actions]
+    C --> I[Simple Notifications]
+    
+    D --> J[Extended Limits]
+    D --> K[Multiple Actions]
+    D --> L[Enhanced Notifications]
+    
+    E --> M[Advanced Modes]
+    E --> N[Complex Actions]
+    E --> O[Multi-Channel Notifications]
+    
+    F --> P[Unlimited Features]
+    F --> Q[All Actions]
+    F --> R[Full Notification Suite]
+    
+    S[Configuration API] --> A
+    T[Frontend Interface] --> A
+    U[Admin Panel] --> A
+```
 
-O Margin Guard é um sistema de proteção automática contra liquidações que monitora as margens dos usuários e executa ações preventivas. Suporta diferentes modos de operação e configurações personalizáveis por plano de usuário.
+## Plan-Specific Configuration
 
-## Configuração Básica
+### Free Plan Configuration
 
-### Configuração do Usuário
+**Limitations**:
+- Maximum 2 positions
+- Unitário mode only
+- Close position action only
+- Email notifications only
 
+**Configuration Schema**:
 ```typescript
-interface MarginGuardConfig {
-  userId: string;
-  isActive: boolean;
-  mode: 'global' | 'individual' | 'unit';
-  marginThreshold: number; // % de distância para acionar
-  addMarginPercentage: number; // % de margem a adicionar
-  selectedPositions: string[]; // IDs das posições (modo unitário)
-  individualConfigs: Record<string, PositionConfig>;
-  autoActions: {
-    enabled: boolean;
-    addMargin: boolean;
-    closePosition: boolean;
-    reduceSize: boolean;
+interface FreePlanMarginGuardConfig {
+  margin_threshold: number; // 0.1-100 (e.g., 85 for 85%)
+  action: 'close_position';
+  enabled: boolean;
+  plan_type: 'free';
+  selected_positions: string[]; // Max 2 position IDs
+  notifications: {
+    email: boolean;
   };
+}
+```
+
+**Example Configuration**:
+```json
+{
+  "margin_threshold": 85,
+  "action": "close_position",
+  "enabled": true,
+  "plan_type": "free",
+  "selected_positions": ["pos_123", "pos_456"],
+  "notifications": {
+    "email": true
+  }
+}
+```
+
+**Setup Steps**:
+1. Select up to 2 positions to monitor
+2. Set margin threshold (default: 85%)
+3. Enable email notifications
+4. Save configuration
+
+### Basic Plan Configuration
+
+**Features**:
+- Maximum 5 positions
+- Unitário mode only
+- Close and reduce position actions
+- Email and Telegram notifications
+- Real-time monitoring
+
+**Configuration Schema**:
+```typescript
+interface BasicPlanMarginGuardConfig {
+  margin_threshold: number; // 0.1-100
+  action: 'close_position' | 'reduce_position';
+  reduce_percentage?: number; // 1-100 (for reduce_position)
+  enabled: boolean;
+  plan_type: 'basic';
+  selected_positions: string[]; // Max 5 position IDs
+  protection_mode: 'unitario';
   notifications: {
     email: boolean;
     telegram: boolean;
-    push: boolean;
-    inApp: boolean;
   };
 }
+```
 
-interface PositionConfig {
-  positionId: string;
+**Example Configuration**:
+```json
+{
+  "margin_threshold": 80,
+  "action": "reduce_position",
+  "reduce_percentage": 50,
+  "enabled": true,
+  "plan_type": "basic",
+  "selected_positions": ["pos_123", "pos_456", "pos_789"],
+  "protection_mode": "unitario",
+  "notifications": {
+    "email": true,
+    "telegram": true
+  }
+}
+```
+
+**Setup Steps**:
+1. Select up to 5 positions to monitor
+2. Choose action type (close or reduce)
+3. If reducing, set reduction percentage
+4. Configure notification channels
+5. Save and activate
+
+### Advanced Plan Configuration
+
+**Features**:
+- Maximum 15 positions
+- Unitário, Total, and Both modes
+- Close, reduce, and add margin actions
+- Multi-channel notifications
+- Advanced monitoring features
+
+**Configuration Schema**:
+```typescript
+interface AdvancedPlanMarginGuardConfig {
+  margin_threshold: number; // 0.1-100
+  action: 'close_position' | 'reduce_position' | 'add_margin';
+  reduce_percentage?: number; // 1-100
+  add_margin_amount?: number; // Satoshis
   enabled: boolean;
-  threshold: number;
-  autoActions: AutoActionConfig;
-}
-
-interface AutoActionConfig {
-  addMargin: boolean;
-  closePosition: boolean;
-  reduceSize: boolean;
-  minAmount: number;
-  maxAmount: number;
+  plan_type: 'advanced';
+  selected_positions: string[]; // Max 15 position IDs
+  protection_mode: 'unitario' | 'total' | 'both';
+  notifications: {
+    email: boolean;
+    telegram: boolean;
+    webhook: boolean;
+  };
 }
 ```
 
-### Configuração Inicial
+**Example Configuration**:
+```json
+{
+  "margin_threshold": 75,
+  "action": "add_margin",
+  "add_margin_amount": 10000,
+  "enabled": true,
+  "plan_type": "advanced",
+  "selected_positions": ["pos_123", "pos_456", "pos_789", "pos_101"],
+  "protection_mode": "both",
+  "notifications": {
+    "email": true,
+    "telegram": true,
+    "webhook": true
+  }
+}
+```
 
+**Setup Steps**:
+1. Select up to 15 positions
+2. Choose protection mode
+3. Configure action parameters
+4. Set up notification channels
+5. Configure webhook endpoint (if enabled)
+6. Test and activate
+
+### Pro Plan Configuration
+
+**Features**:
+- Unlimited positions
+- All protection modes
+- All action types
+- Full notification suite
+- Individual position configuration
+
+**Configuration Schema**:
 ```typescript
-class MarginGuardConfigService {
-  async createDefaultConfig(userId: string): Promise<MarginGuardConfig> {
-    const user = await this.getUser(userId);
-    
-    const defaultConfig: MarginGuardConfig = {
-      userId,
-      isActive: false,
-      mode: 'global',
-      marginThreshold: this.getDefaultThreshold(user.planType),
-      addMarginPercentage: 20,
-      selectedPositions: [],
-      individualConfigs: {},
-      autoActions: {
-        enabled: user.planType !== 'free',
-        addMargin: user.planType !== 'free',
-        closePosition: user.planType === 'pro',
-        reduceSize: user.planType === 'advanced' || user.planType === 'pro'
-      },
-      notifications: {
-        email: true,
-        telegram: false,
-        push: true,
-        inApp: true
-      }
-    };
+interface ProPlanMarginGuardConfig {
+  margin_threshold: number; // 0.1-100 (global default)
+  action: 'close_position' | 'reduce_position' | 'add_margin' | 'increase_liquidation_distance';
+  reduce_percentage?: number;
+  add_margin_amount?: number;
+  new_liquidation_distance?: number;
+  enabled: boolean;
+  plan_type: 'pro';
+  protection_mode: 'unitario' | 'total' | 'both';
+  individual_configs?: Record<string, {
+    margin_threshold: number;
+    action: string;
+    reduce_percentage?: number;
+    add_margin_amount?: number;
+    new_liquidation_distance?: number;
+  }>;
+  notifications: {
+    email: boolean;
+    telegram: boolean;
+    webhook: boolean;
+    sms: boolean;
+  };
+}
+```
 
-    return await this.saveConfig(defaultConfig);
-  }
-
-  private getDefaultThreshold(planType: string): number {
-    switch (planType) {
-      case 'free': return 15;
-      case 'basic': return 12;
-      case 'advanced': return 10;
-      case 'pro': return 8;
-      case 'lifetime': return 8;
-      default: return 15;
+**Example Configuration**:
+```json
+{
+  "margin_threshold": 70,
+  "action": "increase_liquidation_distance",
+  "new_liquidation_distance": 80,
+  "enabled": true,
+  "plan_type": "pro",
+  "protection_mode": "both",
+  "individual_configs": {
+    "pos_123": {
+      "margin_threshold": 60,
+      "action": "close_position"
+    },
+    "pos_456": {
+      "margin_threshold": 75,
+      "action": "reduce_position",
+      "reduce_percentage": 30
+    },
+    "pos_789": {
+      "margin_threshold": 85,
+      "action": "add_margin",
+      "add_margin_amount": 5000
     }
+  },
+  "notifications": {
+    "email": true,
+    "telegram": true,
+    "webhook": true,
+    "sms": false
   }
 }
 ```
 
-## Modos de Operação
+## Configuration API
 
-### Modo Global
+### Create/Update Configuration
 
-Monitora todas as posições do usuário com uma única configuração.
+**Endpoint**: `POST /api/user/margin-guard`
 
+**Request Body**:
 ```typescript
-class GlobalModeConfig {
-  async configure(userId: string, config: GlobalConfig): Promise<void> {
-    const marginConfig = await this.getUserConfig(userId);
-    
-    marginConfig.mode = 'global';
-    marginConfig.marginThreshold = config.threshold;
-    marginConfig.addMarginPercentage = config.addMarginPercentage;
-    marginConfig.selectedPositions = []; // Empty for global mode
-    
-    await this.saveConfig(marginConfig);
-  }
+interface MarginGuardConfigRequest {
+  margin_threshold: number;
+  action: string;
+  reduce_percentage?: number;
+  add_margin_amount?: number;
+  new_liquidation_distance?: number;
+  enabled: boolean;
+  plan_type: string;
+  protection_mode?: string;
+  selected_positions?: string[];
+  individual_configs?: Record<string, any>;
+  notifications: {
+    email?: boolean;
+    telegram?: boolean;
+    webhook?: boolean;
+    sms?: boolean;
+  };
+}
+```
 
-  async executeGlobalMonitoring(userId: string): Promise<void> {
-    const config = await this.getUserConfig(userId);
-    const positions = await this.getUserPositions(userId);
-    
-    for (const position of positions) {
-      const marginData = await this.calculateMargin(position);
-      
-      if (marginData.distancePercentage < config.marginThreshold) {
-        await this.executeAction(userId, position, config);
+**Response**:
+```json
+{
+  "success": true,
+  "config": {
+    "id": "mg_config_123",
+    "isEnabled": true,
+    "settings": {
+      "margin_threshold": 80,
+      "action": "reduce_position",
+      "reduce_percentage": 50,
+      "protection_mode": "unitario",
+      "notifications": {
+        "email": true,
+        "telegram": true
       }
-    }
+    },
+    "planFeatures": {
+      "maxPositions": 5,
+      "realTimeMonitoring": true,
+      "autoClose": true,
+      "advancedNotifications": false
+    },
+    "updatedAt": "2025-01-06T10:35:00Z"
   }
 }
 ```
 
-### Modo Individual
+### Get Configuration
 
-Configurações específicas para cada posição.
+**Endpoint**: `GET /api/user/margin-guard`
 
-```typescript
-class IndividualModeConfig {
-  async configurePosition(
-    userId: string, 
-    positionId: string, 
-    config: PositionConfig
-  ): Promise<void> {
-    const marginConfig = await this.getUserConfig(userId);
-    
-    marginConfig.mode = 'individual';
-    marginConfig.individualConfigs[positionId] = {
-      positionId,
-      enabled: config.enabled,
-      threshold: config.threshold,
-      autoActions: config.autoActions
-    };
-    
-    await this.saveConfig(marginConfig);
-  }
-
-  async executeIndividualMonitoring(userId: string): Promise<void> {
-    const config = await this.getUserConfig(userId);
-    
-    for (const [positionId, positionConfig] of Object.entries(config.individualConfigs)) {
-      if (!positionConfig.enabled) continue;
-      
-      const position = await this.getPosition(positionId);
-      const marginData = await this.calculateMargin(position);
-      
-      if (marginData.distancePercentage < positionConfig.threshold) {
-        await this.executeAction(userId, position, positionConfig);
+**Response**:
+```json
+{
+  "success": true,
+  "config": {
+    "id": "mg_config_123",
+    "isEnabled": true,
+    "settings": {
+      "margin_threshold": 80,
+      "action": "reduce_position",
+      "reduce_percentage": 50,
+      "protection_mode": "unitario",
+      "notifications": {
+        "email": true,
+        "telegram": true
       }
-    }
+    },
+    "planFeatures": {
+      "maxPositions": 5,
+      "realTimeMonitoring": true,
+      "autoClose": true,
+      "advancedNotifications": false
+    },
+    "lastExecution": {
+      "timestamp": "2025-01-06T10:30:00Z",
+      "action": "notification_sent",
+      "positionsChecked": 3,
+      "positionsAtRisk": 1
+    },
+    "createdAt": "2024-12-01T00:00:00Z",
+    "updatedAt": "2025-01-06T10:25:00Z"
   }
 }
 ```
 
-### Modo Unitário
+### Validate Configuration
 
-Monitora apenas posições selecionadas pelo usuário.
+**Endpoint**: `POST /api/user/margin-guard/validate`
 
-```typescript
-class UnitModeConfig {
-  async selectPositions(userId: string, positionIds: string[]): Promise<void> {
-    const marginConfig = await this.getUserConfig(userId);
-    
-    marginConfig.mode = 'unit';
-    marginConfig.selectedPositions = positionIds;
-    
-    await this.saveConfig(marginConfig);
-  }
+**Request Body**:
+```json
+{
+  "margin_threshold": 85,
+  "action": "reduce_position",
+  "reduce_percentage": 50,
+  "plan_type": "basic"
+}
+```
 
-  async executeUnitMonitoring(userId: string): Promise<void> {
-    const config = await this.getUserConfig(userId);
-    
-    for (const positionId of config.selectedPositions) {
-      const position = await this.getPosition(positionId);
-      const marginData = await this.calculateMargin(position);
-      
-      if (marginData.distancePercentage < config.marginThreshold) {
-        await this.executeAction(userId, position, config);
-      }
-    }
+**Response**:
+```json
+{
+  "success": true,
+  "validation": {
+    "isValid": true,
+    "warnings": [],
+    "recommendations": [
+      "Consider enabling Telegram notifications for faster alerts"
+    ]
   }
 }
 ```
 
-## Configuração por Plano
+## Protection Modes
 
-### Limitações por Plano
+### Unitário Mode
 
-```typescript
-interface PlanLimitations {
-  free: {
-    maxPositions: 1;
-    autoActions: false;
-    notifications: ['inApp'];
-    threshold: { min: 15, max: 50 };
-  };
-  basic: {
-    maxPositions: 5;
-    autoActions: ['addMargin'];
-    notifications: ['email', 'inApp'];
-    threshold: { min: 10, max: 30 };
-  };
-  advanced: {
-    maxPositions: 20;
-    autoActions: ['addMargin', 'reduceSize'];
-    notifications: ['email', 'telegram', 'push', 'inApp'];
-    threshold: { min: 5, max: 25 };
-  };
-  pro: {
-    maxPositions: -1; // unlimited
-    autoActions: ['addMargin', 'closePosition', 'reduceSize'];
-    notifications: ['email', 'telegram', 'push', 'inApp'];
-    threshold: { min: 2, max: 20 };
-  };
-  lifetime: {
-    maxPositions: -1;
-    autoActions: ['addMargin', 'closePosition', 'reduceSize'];
-    notifications: ['email', 'telegram', 'push', 'inApp'];
-    threshold: { min: 2, max: 20 };
-  };
+Processes each position individually based on its own margin threshold.
+
+**Configuration**:
+```json
+{
+  "protection_mode": "unitario",
+  "margin_threshold": 80,
+  "action": "close_position"
 }
+```
 
-class PlanValidationService {
-  validateConfig(userId: string, config: Partial<MarginGuardConfig>): ValidationResult {
-    const user = this.getUser(userId);
-    const limitations = this.getPlanLimitations(user.planType);
-    
-    const errors: string[] = [];
-    
-    // Validate threshold
-    if (config.marginThreshold) {
-      if (config.marginThreshold < limitations.threshold.min) {
-        errors.push(`Threshold must be at least ${limitations.threshold.min}%`);
-      }
-      if (config.marginThreshold > limitations.threshold.max) {
-        errors.push(`Threshold must be at most ${limitations.threshold.max}%`);
-      }
-    }
-    
-    // Validate auto actions
-    if (config.autoActions && !limitations.autoActions) {
-      if (config.autoActions.enabled) {
-        errors.push('Auto actions not available in free plan');
-      }
-    }
-    
-    // Validate position count
-    if (config.selectedPositions && limitations.maxPositions !== -1) {
-      if (config.selectedPositions.length > limitations.maxPositions) {
-        errors.push(`Maximum ${limitations.maxPositions} positions allowed`);
-      }
-    }
-    
-    return {
-      valid: errors.length === 0,
-      errors
-    };
+**Behavior**:
+- Each position is evaluated independently
+- Actions are executed per position
+- Suitable for diversified portfolios
+
+### Total Mode
+
+Processes all positions as a group based on total portfolio margin.
+
+**Configuration**:
+```json
+{
+  "protection_mode": "total",
+  "margin_threshold": 75,
+  "action": "reduce_position",
+  "reduce_percentage": 30
+}
+```
+
+**Behavior**:
+- Portfolio margin is calculated as sum of all positions
+- Actions affect the entire portfolio
+- Suitable for concentrated positions
+
+### Both Mode
+
+Combines both unitário and total modes for comprehensive protection.
+
+**Configuration**:
+```json
+{
+  "protection_mode": "both",
+  "margin_threshold": 80,
+  "action": "close_position"
+}
+```
+
+**Behavior**:
+- Individual positions are monitored
+- Portfolio margin is also monitored
+- Actions can be triggered by either condition
+- Maximum protection level
+
+## Action Types
+
+### Close Position
+
+Completely closes the position when margin threshold is reached.
+
+**Configuration**:
+```json
+{
+  "action": "close_position"
+}
+```
+
+**Use Cases**:
+- High-risk positions
+- Emergency protection
+- Simple risk management
+
+### Reduce Position
+
+Reduces position size by a specified percentage.
+
+**Configuration**:
+```json
+{
+  "action": "reduce_position",
+  "reduce_percentage": 50
+}
+```
+
+**Use Cases**:
+- Gradual risk reduction
+- Maintaining partial exposure
+- Conservative approach
+
+### Add Margin
+
+Adds additional margin to increase liquidation distance.
+
+**Configuration**:
+```json
+{
+  "action": "add_margin",
+  "add_margin_amount": 10000
+}
+```
+
+**Use Cases**:
+- Maintaining position size
+- Temporary market volatility
+- High-conviction positions
+
+### Increase Liquidation Distance
+
+Adjusts position parameters to increase liquidation distance.
+
+**Configuration**:
+```json
+{
+  "action": "increase_liquidation_distance",
+  "new_liquidation_distance": 85
+}
+```
+
+**Use Cases**:
+- Pro plan feature
+- Advanced position management
+- Custom risk parameters
+
+## Notification Configuration
+
+### Email Notifications
+
+```json
+{
+  "notifications": {
+    "email": true
   }
 }
 ```
 
-## API Configuration
+**Features**:
+- Immediate delivery
+- Detailed position information
+- Action confirmation
+- Available on all plans
 
-### Configuration Endpoints
+### Telegram Notifications
 
-```typescript
-// GET /api/margin-guard/config
-async function getMarginGuardConfig(request: FastifyRequest): Promise<MarginGuardConfig> {
-  const userId = request.user.id;
-  const config = await marginGuardService.getUserConfig(userId);
-  
-  return {
-    ...config,
-    // Remove sensitive data
-    individualConfigs: this.sanitizeConfig(config.individualConfigs)
-  };
-}
-
-// PUT /api/margin-guard/config
-async function updateMarginGuardConfig(
-  request: FastifyRequest<{ Body: Partial<MarginGuardConfig> }>
-): Promise<UpdateResult> {
-  const userId = request.user.id;
-  const newConfig = request.body;
-  
-  // Validate configuration
-  const validation = await planValidationService.validateConfig(userId, newConfig);
-  if (!validation.valid) {
-    throw new ValidationError('Invalid configuration', validation.errors);
-  }
-  
-  // Update configuration
-  const updatedConfig = await marginGuardService.updateConfig(userId, newConfig);
-  
-  // Restart monitoring if configuration changed
-  if (newConfig.isActive !== undefined) {
-    await marginGuardService.restartMonitoring(userId);
-  }
-  
-  return {
-    success: true,
-    config: updatedConfig
-  };
-}
-
-// POST /api/margin-guard/test
-async function testMarginGuardConfig(
-  request: FastifyRequest<{ Body: TestConfigRequest }>
-): Promise<TestResult> {
-  const userId = request.user.id;
-  const testConfig = request.body;
-  
-  try {
-    const positions = await lnMarketsService.getPositions(userId);
-    const results = [];
-    
-    for (const position of positions) {
-      const marginData = await marginCalculator.calculate(position);
-      const shouldTrigger = marginData.distancePercentage < testConfig.threshold;
-      
-      results.push({
-        positionId: position.id,
-        currentMargin: marginData.currentMargin,
-        distancePercentage: marginData.distancePercentage,
-        wouldTrigger: shouldTrigger
-      });
-    }
-    
-    return {
-      success: true,
-      results
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
+```json
+{
+  "notifications": {
+    "telegram": true
   }
 }
 ```
+
+**Features**:
+- Real-time delivery
+- Mobile-friendly format
+- Quick action buttons
+- Available on Basic+ plans
+
+### Webhook Notifications
+
+```json
+{
+  "notifications": {
+    "webhook": true,
+    "webhook_url": "https://your-app.com/margin-guard-webhook"
+  }
+}
+```
+
+**Features**:
+- Custom integration
+- Structured JSON payload
+- Retry mechanism
+- Available on Advanced+ plans
+
+### SMS Notifications
+
+```json
+{
+  "notifications": {
+    "sms": true
+  }
+}
+```
+
+**Features**:
+- Emergency alerts
+- Offline delivery
+- High priority
+- Available on Pro plan only
+
+## Best Practices
+
+### Threshold Selection
+
+**Conservative Approach (75-85%)**:
+- Suitable for volatile markets
+- Provides early warning
+- Reduces false positives
+- Recommended for beginners
+
+**Moderate Approach (70-80%)**:
+- Balanced risk management
+- Good for experienced traders
+- Allows for market volatility
+- Most common configuration
+
+**Aggressive Approach (60-75%)**:
+- Maximum position utilization
+- Requires active monitoring
+- Higher risk tolerance
+- Advanced users only
+
+### Action Selection Guidelines
+
+**For Beginners**:
+- Start with "close_position"
+- Simple and effective
+- No complex parameters
+- Easy to understand
+
+**For Intermediate Users**:
+- Use "reduce_position"
+- Maintain partial exposure
+- Gradual risk reduction
+- More flexible approach
+
+**For Advanced Users**:
+- Combine multiple actions
+- Use individual configurations
+- Leverage all features
+- Custom risk management
+
+### Notification Setup
+
+**Essential Notifications**:
+- Always enable email
+- Add Telegram for speed
+- Configure webhook for integration
+- Use SMS for critical alerts
+
+**Notification Timing**:
+- Immediate for close actions
+- 5-minute delay for reduce actions
+- 15-minute delay for add margin
+- Custom timing for webhooks
 
 ## Troubleshooting
 
 ### Common Configuration Issues
 
-#### Invalid Threshold Values
-
-```typescript
-async function validateThreshold(userId: string, threshold: number): Promise<boolean> {
-  const user = await getUser(userId);
-  const limitations = getPlanLimitations(user.planType);
-  
-  if (threshold < limitations.threshold.min) {
-    throw new ValidationError(
-      `Threshold too low. Minimum: ${limitations.threshold.min}%`
-    );
-  }
-  
-  if (threshold > limitations.threshold.max) {
-    throw new ValidationError(
-      `Threshold too high. Maximum: ${limitations.threshold.max}%`
-    );
-  }
-  
-  return true;
+**Invalid Position IDs**:
+```json
+{
+  "error": "Invalid position IDs",
+  "details": ["pos_999", "pos_888"],
+  "solution": "Verify position IDs exist and are accessible"
 }
 ```
 
-#### Position Not Found
-
-```typescript
-async function validatePositions(userId: string, positionIds: string[]): Promise<void> {
-  const userPositions = await lnMarketsService.getPositions(userId);
-  const userPositionIds = userPositions.map(p => p.id);
-  
-  const invalidPositions = positionIds.filter(id => !userPositionIds.includes(id));
-  
-  if (invalidPositions.length > 0) {
-    throw new ValidationError(
-      `Invalid positions: ${invalidPositions.join(', ')}`
-    );
-  }
+**Plan Limitation Exceeded**:
+```json
+{
+  "error": "Plan limitation exceeded",
+  "details": {
+    "maxPositions": 5,
+    "providedPositions": 7
+  },
+  "solution": "Reduce number of positions or upgrade plan"
 }
 ```
 
-#### Auto Actions Not Available
-
-```typescript
-async function validateAutoActions(userId: string, autoActions: AutoActions): Promise<void> {
-  const user = await getUser(userId);
-  const limitations = getPlanLimitations(user.planType);
-  
-  if (autoActions.enabled && !limitations.autoActions) {
-    throw new ValidationError('Auto actions not available in your plan');
-  }
-  
-  if (autoActions.closePosition && !limitations.autoActions.includes('closePosition')) {
-    throw new ValidationError('Close position action not available in your plan');
-  }
+**Invalid Threshold Value**:
+```json
+{
+  "error": "Invalid threshold value",
+  "details": {
+    "provided": 150,
+    "validRange": "0.1-100"
+  },
+  "solution": "Use threshold between 0.1% and 100%"
 }
 ```
 
-## Referências
+### Configuration Validation
 
-- [Margin Guard Architecture](../architecture.md)
-- [Margin Guard Plans](../../administration/plan-system/margin-guard-plans.md)
-- [LN Markets Integration](../../integrations/external-apis/ln-markets/authentication.md)
-- [User Plans](../../user-management/plan-limitations.md)
+**Pre-Save Validation**:
+```typescript
+async function validateMarginGuardConfig(config: MarginGuardConfigRequest): Promise<ValidationResult> {
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
-## Como Usar Este Documento
+  // Validate threshold
+  if (config.margin_threshold < 0.1 || config.margin_threshold > 100) {
+    errors.push('Margin threshold must be between 0.1% and 100%');
+  }
 
-• **Para Usuários**: Use como guia para configurar o Margin Guard de acordo com seu plano e necessidades.
+  // Validate action parameters
+  if (config.action === 'reduce_position' && !config.reduce_percentage) {
+    errors.push('Reduce percentage is required for reduce_position action');
+  }
 
-• **Para Desenvolvedores**: Use como referência para implementar novas funcionalidades de configuração.
+  // Validate plan limitations
+  const planFeatures = getPlanFeatures(config.plan_type);
+  if (config.selected_positions.length > planFeatures.maxPositions) {
+    errors.push(`Maximum ${planFeatures.maxPositions} positions allowed for ${config.plan_type} plan`);
+  }
 
-• **Para Administradores**: Use para entender as limitações por plano e configurar o sistema adequadamente.
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+```
+
+## Migration Between Plans
+
+### Upgrading Configuration
+
+When upgrading from a lower plan to a higher plan:
+
+1. **Preserve Existing Settings**:
+   - Keep current threshold and action
+   - Maintain notification preferences
+   - Preserve enabled status
+
+2. **Add New Features**:
+   - Enable additional protection modes
+   - Configure new action types
+   - Set up additional notifications
+
+3. **Expand Position Coverage**:
+   - Add more positions (up to plan limit)
+   - Configure individual settings (Pro plan)
+   - Enable advanced features
+
+### Downgrading Configuration
+
+When downgrading to a lower plan:
+
+1. **Remove Excess Features**:
+   - Reduce position count to plan limit
+   - Disable unavailable actions
+   - Remove premium notifications
+
+2. **Simplify Configuration**:
+   - Use only available protection modes
+   - Remove individual configurations
+   - Keep only basic notifications
+
+3. **Validate Compatibility**:
+   - Ensure all settings are valid
+   - Test configuration thoroughly
+   - Verify notifications work
+
+## How to Use This Document
+
+- **For Setup**: Follow the plan-specific configuration examples
+- **For API Integration**: Use the API endpoint documentation
+- **For Troubleshooting**: Reference the common issues and solutions
+- **For Best Practices**: Apply the recommended configurations
+- **For Migration**: Follow the plan upgrade/downgrade procedures
