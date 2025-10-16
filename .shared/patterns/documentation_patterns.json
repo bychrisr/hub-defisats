@@ -1,0 +1,349 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "extracted_from": "Axisor documentation structure and DOCUMENTATION_STANDARDS.md",
+    "last_updated": "2025-01-16",
+    "source_files": [
+      "DOCUMENTATION_STANDARDS.md",
+      "docs/templates/architecture-template.md",
+      "docs/templates/best-practices-template.md", 
+      "docs/templates/troubleshooting-template.md",
+      "docs/templates/examples-template.md",
+      "docs/architecture/system-architecture.md",
+      "docs/migrations/migration-best-practices.md"
+    ]
+  },
+  "frontmatter_schema": {
+    "required_fields": [
+      "title",
+      "status",
+      "last_updated",
+      "version",
+      "responsible"
+    ],
+    "optional_fields": [
+      "created",
+      "author",
+      "category",
+      "subcategory",
+      "priority",
+      "reviewers",
+      "description",
+      "slug"
+    ],
+    "status_values": ["Active", "Deprecated", "Draft"],
+    "date_format": "YYYY-MM-DD",
+    "version_format": "semantic (X.Y.Z)",
+    "tags_required": true,
+    "frontmatter_format": "yaml"
+  },
+  "templates": [
+    {
+      "template_name": "architecture",
+      "required_sections": [
+        "summary",
+        "architecture_diagram", 
+        "components",
+        "data_flow",
+        "design_patterns",
+        "configuration",
+        "integration",
+        "critical_points",
+        "evaluation_checklist"
+      ],
+      "optional_sections": [
+        "performance_considerations",
+        "scalability_plan",
+        "security_measures",
+        "monitoring_strategy"
+      ],
+      "content_requirements": {
+        "must_have_mermaid_diagram": true,
+        "must_have_component_list": true,
+        "must_have_checklist": true,
+        "code_examples_required": true
+      },
+      "notes": "Architecture documents must include system diagrams, component breakdown, and evaluation criteria"
+    },
+    {
+      "template_name": "best_practices",
+      "required_sections": [
+        "summary",
+        "instantiation_configuration",
+        "usage_contexts",
+        "error_handling",
+        "performance",
+        "security",
+        "logging",
+        "practical_examples"
+      ],
+      "optional_sections": [
+        "anti_patterns",
+        "common_mistakes",
+        "performance_tips",
+        "security_considerations"
+      ],
+      "content_requirements": {
+        "must_have_code_examples": true,
+        "must_show_correct_incorrect": true,
+        "must_have_error_handling": true,
+        "validation_examples_required": true
+      },
+      "notes": "Best practices must include both correct and incorrect examples with explanations"
+    },
+    {
+      "template_name": "troubleshooting",
+      "required_sections": [
+        "summary",
+        "authentication_errors",
+        "connectivity_errors", 
+        "performance_errors",
+        "validation_errors",
+        "debug_tools",
+        "logs_monitoring",
+        "error_codes",
+        "resolution_procedures"
+      ],
+      "optional_sections": [
+        "escalation_path",
+        "prevention_measures",
+        "automated_tools",
+        "diagnostic_scripts"
+      ],
+      "content_requirements": {
+        "must_have_error_categories": true,
+        "must_have_diagnostic_steps": true,
+        "must_have_solution_steps": true,
+        "must_have_prevention_tips": true
+      },
+      "notes": "Troubleshooting guides must be organized by error type with step-by-step solutions"
+    },
+    {
+      "template_name": "examples",
+      "required_sections": [
+        "summary",
+        "basic_configuration",
+        "domain_examples",
+        "advanced_examples",
+        "complete_use_cases",
+        "integration_examples",
+        "performance_optimization"
+      ],
+      "optional_sections": [
+        "edge_cases",
+        "testing_examples",
+        "deployment_examples",
+        "monitoring_examples"
+      ],
+      "content_requirements": {
+        "must_have_working_code": true,
+        "must_have_progressive_complexity": true,
+        "must_have_real_project_examples": true,
+        "must_have_integration_examples": true
+      },
+      "notes": "Examples must be tested, functional code from the actual project, not generic examples"
+    },
+    {
+      "template_name": "migration",
+      "required_sections": [
+        "summary",
+        "migration_strategy",
+        "method_mapping",
+        "migration_by_file_type",
+        "migration_examples",
+        "migration_checklist",
+        "troubleshooting"
+      ],
+      "optional_sections": [
+        "rollback_procedures",
+        "performance_impact",
+        "testing_strategy",
+        "monitoring_plan"
+      ],
+      "content_requirements": {
+        "must_have_before_after": true,
+        "must_have_step_by_step": true,
+        "must_have_checklist": true,
+        "must_have_validation_steps": true
+      },
+      "notes": "Migration guides must show before/after code and provide validation steps"
+    }
+  ],
+  "naming_conventions": {
+    "files": {
+      "format": "kebab-case",
+      "numbering": "01-, 02-, 03- for logical order",
+      "descriptive_names": "full words, no abbreviations",
+      "language": "english_preferred"
+    },
+    "folders": {
+      "format": "kebab-case", 
+      "language": "english_preferred",
+      "descriptive": "no_siglas_or_acronyms",
+      "singular_when_applicable": true
+    },
+    "examples": {
+      "correct": [
+        "01-overview.md",
+        "02-authentication.md",
+        "03-best-practices.md",
+        "balance-calculations.md",
+        "architecture-diagram.md"
+      ],
+      "incorrect": [
+        "Overview.md",
+        "auth.md", 
+        "Best_Practices.md",
+        "1-overview.md"
+      ]
+    }
+  },
+  "content_patterns": {
+    "table_of_contents": {
+      "required": true,
+      "format": "markdown_links",
+      "must_match_headers": true,
+      "include_references": true
+    },
+    "code_snippets": {
+      "syntax_highlighting": "required",
+      "inline_comments": "required",
+      "tested_functional": "required",
+      "before_after_when_applicable": true,
+      "links_to_source": "recommended"
+    },
+    "cross_references": {
+      "use_relative_links": true,
+      "test_links_work": true,
+      "structure": {
+        "internal_module": "[Best Practices](./internal-implementation/02-best-practices.md)",
+        "other_modules": "[WebSocket Architecture](../websocket/internal-implementation/01-architecture.md)",
+        "source_code": "[DashboardService](../../../backend/src/services/dashboard-data.service.ts)",
+        "external_docs": "[LN Markets API](https://docs.lnmarkets.com/)"
+      }
+    },
+    "diagrams": {
+      "preferred_format": "mermaid",
+      "ascii_art_acceptable": true,
+      "images_last_resort": true,
+      "must_be_in_code_blocks": true
+    },
+    "metadata_blocks": {
+      "status_format": "> **Status**: Active",
+      "date_format": "> **Última Atualização**: YYYY-MM-DD",
+      "version_format": "> **Versão**: 1.0.0",
+      "responsible_format": "> **Responsável**: {Feature Name} System"
+    }
+  },
+  "folder_structure_patterns": {
+    "universal_template": {
+      "required_folders": [
+        "README.md",
+        "HISTORY.md"
+      ],
+      "conditional_folders": {
+        "external-api": "when_integrating_external_apis",
+        "internal-implementation": "always_required",
+        "formulas": "when_complex_calculations",
+        "diagrams": "when_multiple_components_or_complex_flows"
+      }
+    },
+    "internal_implementation_structure": [
+      "01-architecture.md",
+      "02-best-practices.md", 
+      "03-migration-guide.md",
+      "04-troubleshooting.md",
+      "05-examples.md"
+    ],
+    "external_api_structure": [
+      "01-overview.md",
+      "02-authentication.md",
+      "03-endpoints.md",
+      "04-rate-limits.md"
+    ]
+  },
+  "quality_checklist": [
+    {
+      "category": "metadata",
+      "items": [
+        "Status, versão, data, responsável preenchidos",
+        "Tags relevantes incluídas",
+        "Data de atualização correta"
+      ]
+    },
+    {
+      "category": "structure", 
+      "items": [
+        "TOC presente e atualizado",
+        "Seções obrigatórias incluídas",
+        "Numeração de arquivos correta",
+        "Links funcionando corretamente"
+      ]
+    },
+    {
+      "category": "content",
+      "items": [
+        "Code snippets testados e funcionais",
+        "Exemplos práticos incluídos",
+        "Cross-references funcionando",
+        "Links para código fonte",
+        "Sem erros ortográficos",
+        "Markdown válido"
+      ]
+    },
+    {
+      "category": "technical",
+      "items": [
+        "Diagramas incluídos quando necessário",
+        "Mermaid preferencial",
+        "Syntax highlighting correto",
+        "Comentários explicativos inline"
+      ]
+    },
+    {
+      "category": "maintenance",
+      "items": [
+        "Changelog atualizado",
+        "Documentação não obsoleta",
+        "Links não quebrados",
+        "Exemplos ainda funcionais"
+      ]
+    }
+  ],
+  "documentation_philosophy": {
+    "principles": [
+      "Documentation as Code - versioned with git, reviewed in PRs",
+      "Single Source of Truth - avoid duplication, use cross-references",
+      "Living Documentation - continuously updated, never obsolete",
+      "Clear Separation - external APIs vs internal implementation",
+      "Practical Examples > Abstract Theory - real code, real cases"
+    ],
+    "anti_patterns": [
+      "Generic documentation copied from other projects",
+      "Outdated documentation left in main branch",
+      "Duplicated information across multiple files",
+      "Documentation without practical examples",
+      "Invented code examples not from actual project"
+    ]
+  },
+  "maintenance_rules": {
+    "update_triggers": [
+      "Before committing code changes",
+      "Every 3 months review cycle",
+      "When marking as deprecated",
+      "After 6 months of deprecated status"
+    ],
+    "deprecation_process": [
+      "Mark as Status: Deprecated",
+      "Add link to new version",
+      "Keep during transition period",
+      "Remove after 6 months"
+    ],
+    "workflow": [
+      "Update docs BEFORE committing code",
+      "Include docs in PR review",
+      "Update CHANGELOG.md",
+      "Test all links and examples"
+    ]
+  }
+}
