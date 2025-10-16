@@ -1,107 +1,107 @@
 # Axisor Documentation Navigation
 
-## 🏠 [Início](./index.md)
+## Quick Access
 
-## 🏗️ Architecture & Design
-- [Visão Geral](./architecture/)
-- [Visão do Sistema](./architecture/system-overview/)
-- [Microserviços](./architecture/microservices/)
-- [Arquitetura de Dados](./architecture/data-architecture/)
-- [Sistema de Design](./architecture/design-system/)
+- [🏠 Home](/)
+- [🚀 Getting Started](/getting-started)
+- [📖 API Reference](/api/)
+- [📚 Guides](/guides/)
 
-## 🔌 Integrations & APIs
-- [Visão Geral](./integrations/)
-- [APIs Externas](./integrations/external-apis/)
-- [APIs Internas](./integrations/internal-apis/)
-- [Webhooks](./integrations/webhooks/)
+## Main Categories
 
-## 🤖 Automations & Workers
-- [Visão Geral](./automations/)
-- [Margin Guard](./automations/margin-guard/)
-- [Engine de Automação](./automations/automation-engine/)
-- [Workers](./automations/workers/)
-- [Simulações](./automations/simulations/)
+### 🏗️ Architecture & Design
+- [System Overview](/architecture/system-overview)
+- [Microservices](/architecture/microservices)
+- [Data Architecture](/architecture/data-architecture)
+- [Design System](/architecture/design-system)
 
-## 🚀 Deployment & Infrastructure
-- [Visão Geral](./deployment/)
-- [Ambientes](./deployment/environments/)
-- [Docker](./deployment/docker/)
-- [Kubernetes](./deployment/kubernetes/)
-- [CI/CD](./deployment/ci-cd/)
+### 🔌 Integrations & APIs
+- [External APIs](/integrations/external-apis)
+- [Internal APIs](/integrations/internal-apis)
+- [WebSocket](/integrations/websocket)
+- [Authentication](/integrations/authentication)
 
-## 🔐 Security & Compliance
-- [Visão Geral](./security/)
-- [Autenticação](./security/authentication/)
-- [Proteção de Dados](./security/data-protection/)
-- [Segurança de API](./security/api-security/)
-- [Compliance](./security/compliance/)
+### 🤖 Automations & Workers
+- [Margin Guard](/automations/margin-guard)
+- [Automation Engine](/automations/automation-engine)
+- [Workers](/automations/workers)
+- [Simulations](/automations/simulations)
 
-## 👥 User Management & Accounts
-- [Visão Geral](./user-management/)
-- [Sistema Multi-Conta](./user-management/multi-account-system/)
-- [Autenticação](./user-management/authentication/)
-- [Autorização](./user-management/authorization/)
-- [Gestão de Perfis](./user-management/profile-management/)
+### 🚀 Deployment & Infrastructure
+- [Environments](/deployment/environments)
+- [Docker](/deployment/docker)
+- [Kubernetes](/deployment/kubernetes)
+- [CI/CD](/deployment/ci-cd)
 
-## 📊 Charts & Visualization
-- [Visão Geral](./charts/)
-- [Integração TradingView](./charts/tradingview-integration/)
-- [Componentes Dashboard](./charts/dashboard-components/)
-- [Processamento de Dados](./charts/data-processing/)
-- [Performance](./charts/performance/)
+### 🔒 Security & Compliance
+- [Authentication](/security/authentication)
+- [Authorization](/security/authorization)
+- [Data Protection](/security/data-protection)
+- [API Security](/security/api-security)
 
-## 🛠️ Administration & Management
-- [Visão Geral](./administration/)
-- [Painel Admin](./administration/admin-panel/)
-- [Sistema de Planos](./administration/plan-system/)
-- [Sistema de Cupons](./administration/coupon-system/)
-- [Manutenção](./administration/system-maintenance/)
+### 👥 User Management & Accounts
+- [Multi-Account](/user-management/multi-account)
+- [User Authentication](/user-management/authentication)
+- [Authorization](/user-management/authorization)
+- [Profiles](/user-management/profiles)
 
-## 🧪 Testing & Validation
-- [Visão Geral](./testing/)
-- [Testes Unitários](./testing/unit-testing/)
-- [Testes de Integração](./testing/integration-testing/)
-- [Testes E2E](./testing/end-to-end-testing/)
-- [Ferramentas de Teste](./testing/testing-tools/)
+### 📊 Charts & Visualization
+- [TradingView Integration](/charts/tradingview-integration)
+- [Dashboard Components](/charts/dashboard-components)
+- [Data Processing](/charts/data-processing)
+- [Performance](/charts/performance)
 
-## 📈 Monitoring & Observability
-- [Visão Geral](./monitoring/)
-- [Monitoramento de Aplicação](./monitoring/application-monitoring/)
-- [Monitoramento de Infraestrutura](./monitoring/infrastructure-monitoring/)
-- [Monitoramento de Negócio](./monitoring/business-monitoring/)
-- [Alertas](./monitoring/alerting/)
+### ⚙️ Administration & Management
+- [Admin Panel](/administration/admin-panel)
+- [Plan Management](/administration/plan-management)
+- [Coupon System](/administration/coupon-system)
+- [Maintenance](/administration/maintenance)
 
-## 🐛 Troubleshooting & Support
-- [Visão Geral](./troubleshooting/)
-- [Problemas Comuns](./troubleshooting/common-issues/)
-- [Guias de Debug](./troubleshooting/debugging-guides/)
-- [Códigos de Erro](./troubleshooting/error-codes/)
-- [Procedimentos de Suporte](./troubleshooting/support-procedures/)
+### 🧪 Testing & Validation
+- [Unit Testing](/testing/unit-testing)
+- [Integration Testing](/testing/integration-testing)
+- [E2E Testing](/testing/e2e-testing)
+- [Performance Testing](/testing/performance-testing)
 
-## 🔄 Migrations & Refactoring
-- [Visão Geral](./migrations/)
-- [Migrações de Database](./migrations/database-migrations/)
-- [Migrações de Código](./migrations/code-migrations/)
-- [Migrações de Features](./migrations/feature-migrations/)
-- [Migrações de Deploy](./migrations/deployment-migrations/)
+### 📈 Monitoring & Observability
+- [Application Monitoring](/monitoring/application-monitoring)
+- [Infrastructure Monitoring](/monitoring/infrastructure-monitoring)
+- [Business Monitoring](/monitoring/business-monitoring)
+- [Alerting](/monitoring/alerting)
 
-## 📋 Project Documentation
-- [Visão Geral](./project/)
-- [Requisitos](./project/requirements/)
-- [Planejamento](./project/planning/)
-- [Decisões](./project/decisions/)
-- [Padrões](./project/standards/)
+### 🔧 Troubleshooting & Support
+- [Common Issues](/troubleshooting/common-issues)
+- [Debugging](/troubleshooting/debugging)
+- [Error Codes](/troubleshooting/error-codes)
+- [Support Procedures](/troubleshooting/support-procedures)
 
-## 📚 Knowledge Base
-- [Visão Geral](./knowledge/)
-- [Melhores Práticas](./knowledge/best-practices/)
-- [Padrões](./knowledge/patterns/)
-- [Tutoriais](./knowledge/tutorials/)
-- [Referências](./knowledge/references/)
+### 🔄 Migrations & Refactoring
+- [Database Migrations](/migrations/database-migrations)
+- [Code Migrations](/migrations/code-migrations)
+- [Feature Migrations](/migrations/feature-migrations)
+- [Deployment Migrations](/migrations/deployment-migrations)
 
-## 🔧 Development Workflow
-- [Visão Geral](./workflow/)
-- [Processo de Desenvolvimento](./workflow/development-process/)
-- [Workflow Git](./workflow/git-workflow/)
-- [Setup de Ambiente](./workflow/environment-setup/)
-- [Garantia de Qualidade](./workflow/quality-assurance/)
+### 📋 Project Documentation
+- [Project Overview](/project/project-overview)
+- [Requirements](/project/requirements)
+- [Planning](/project/planning)
+- [Decisions](/project/decisions)
+
+### 📚 Knowledge Base
+- [Getting Started](/knowledge/getting-started)
+- [Trading Concepts](/knowledge/trading-concepts)
+- [Strategy Building](/knowledge/strategy-building)
+- [Risk Management](/knowledge/risk-management)
+
+### 🔄 Development Workflow
+- [Development Setup](/workflow/development-setup)
+- [Git Workflow](/workflow/git-workflow)
+- [Code Review](/workflow/code-review)
+- [Testing Strategy](/workflow/testing-strategy)
+
+## External Links
+
+- [GitHub Repository](https://github.com/axisor/axisor)
+- [Issue Tracker](https://github.com/axisor/axisor/issues)
+- [Discussions](https://github.com/axisor/axisor/discussions)
+- [Releases](https://github.com/axisor/axisor/releases)

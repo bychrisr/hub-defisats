@@ -1,181 +1,192 @@
----
-title: "Axisor Platform - Documentação Técnica"
-version: "1.0.0"
-created: "2025-01-26"
-updated: "2025-01-26"
-author: "Documentation Agent"
-status: "active"
-tags: ["documentation", "readme", "overview"]
----
+# Axisor Documentation
 
-# Axisor Platform - Documentação Técnica
+Welcome to the comprehensive documentation for the Axisor trading automation platform. This documentation covers all aspects of the system, from architecture and development to deployment and maintenance.
 
-> **Status**: Active  
-> **Versão**: 1.0.0  
-> **Última Atualização**: 2025-01-26  
-> **Responsável**: Sistema de Documentação Axisor  
+## 📚 Documentation Structure
 
-## 🎯 Sobre o Axisor
+Our documentation is organized into **15 main categories** with **180+ detailed documents**:
 
-O **Axisor** é uma plataforma completa de automação de trading para LN Markets, oferecendo funcionalidades avançadas de automação, monitoramento de margem, simulações de mercado e gestão de usuários multi-conta.
+### 🏗️ Architecture & Design (17 documents)
+- System overview and high-level architecture
+- Microservices architecture and component interactions
+- Data architecture and database design
+- Design system and UI components
 
-### 🚀 Funcionalidades Principais
+### 🔌 Integrations & APIs (8 documents)
+- External API integrations (LN Markets, LND, TradingView)
+- Internal API documentation and endpoints
+- WebSocket integration and real-time communication
+- Authentication and authorization systems
 
-- **🤖 Automações Inteligentes**: Sistema avançado de automação de trading
-- **🛡️ Margin Guard**: Proteção em tempo real contra liquidações
-- **📊 Simulações**: Cenários de mercado para teste de estratégias
-- **👥 Multi-Account**: Gestão de múltiplas contas de trading
-- **📈 Gráficos Avançados**: Integração com TradingView e Lightweight Charts
-- **🔐 Segurança Robusta**: Autenticação, criptografia e auditoria
-- **⚡ Performance**: Arquitetura escalável com workers assíncronos
+### 🤖 Automations & Workers (19 documents)
+- Margin Guard system and configuration
+- Trading automation engine and strategies
+- Worker processes and job queues
+- Market simulations and testing
 
-## 📚 Estrutura da Documentação
+### 🚀 Deployment & Infrastructure (13 documents)
+- Environment configuration and setup
+- Docker containerization and orchestration
+- Kubernetes deployment and scaling
+- CI/CD pipelines and automation
 
-Esta documentação está organizada em **15 categorias principais** com **50+ subcategorias**, cobrindo todos os aspectos técnicos da plataforma:
+### 🔒 Security & Compliance (15 documents)
+- Authentication and authorization
+- Data protection and encryption
+- API security and rate limiting
+- Compliance and audit procedures
 
-### 🏗️ Arquitetura & Design
-Documentação arquitetural completa, incluindo visão do sistema, microserviços, arquitetura de dados e sistema de design.
+### 👥 User Management & Accounts (12 documents)
+- Multi-account system and management
+- User authentication and authorization
+- Profile management and preferences
+- Access control and permissions
 
-### 🔌 Integrações & APIs
-Integrações com APIs externas (LN Markets, LND, TradingView) e documentação de APIs internas.
+### 📊 Charts & Visualization (14 documents)
+- TradingView integration and customization
+- Dashboard components and layouts
+- Data processing and real-time updates
+- Performance optimization
 
-### 🤖 Automações & Workers
-Sistema de automações, Margin Guard, workers em background e simulações de mercado.
+### ⚙️ Administration & Management (12 documents)
+- Admin panel and management interface
+- Plan management and billing
+- Coupon system and promotions
+- System maintenance and updates
 
-### 🚀 Deploy & Infraestrutura
-Deploy, Docker, Kubernetes, CI/CD e configuração de ambientes.
+### 🧪 Testing & Validation (10 documents)
+- Unit testing and test automation
+- Integration testing and API testing
+- End-to-end testing and user workflows
+- Performance testing and optimization
 
-### 🔐 Segurança & Compliance
-Autenticação, proteção de dados, segurança de API e compliance.
+### 📈 Monitoring & Observability (12 documents)
+- Application monitoring and metrics
+- Infrastructure monitoring and health checks
+- Business monitoring and analytics
+- Alerting and incident response
 
-### 👥 Gestão de Usuários
-Sistema multi-conta, autenticação, autorização e gestão de perfis.
+### 🔧 Troubleshooting & Support (12 documents)
+- Common issues and solutions
+- Debugging guides and tools
+- Error codes and diagnostics
+- Support procedures and escalation
 
-### 📊 Gráficos & Visualização
-Integração TradingView, componentes de dashboard e processamento de dados.
+### 🔄 Migrations & Refactoring (16 documents)
+- Database migrations and schema changes
+- Code migrations and refactoring
+- Feature migrations and rollouts
+- Deployment migrations and updates
 
-### 🛠️ Administração
-Painel administrativo, sistema de planos, cupons e manutenção.
+### 📋 Project Documentation (13 documents)
+- Project overview and requirements
+- Planning and timeline
+- Technical decisions and ADRs
+- Standards and guidelines
 
-### 🧪 Testes & Validação
-Testes unitários, integração, E2E e ferramentas de teste.
+### 📚 Knowledge Base (7 documents)
+- Getting started guides
+- Trading concepts and terminology
+- Strategy building and implementation
+- Risk management and best practices
 
-### 📈 Monitoramento
-Monitoramento de aplicação, infraestrutura, negócio e alertas.
-
-### 🐛 Troubleshooting
-Resolução de problemas, debugging e procedimentos de suporte.
-
-### 🔄 Migrações & Refactoring
-Migrações de database, código, features e deployment.
-
-### 📋 Documentação do Projeto
-Requisitos, planejamento, decisões arquiteturais e padrões.
-
-### 📚 Base de Conhecimento
-Melhores práticas, padrões, tutoriais e referências.
-
-### 🔧 Workflow de Desenvolvimento
-Processos de desenvolvimento, Git workflow e qualidade.
-
-## 🛠️ Stack Tecnológico
-
-### Backend
-- **Node.js 18+** com TypeScript
-- **Fastify** para API REST
-- **Prisma** como ORM
-- **PostgreSQL** como banco principal
-- **Redis** para cache e sessões
-- **BullMQ** para filas e workers
-- **WebSocket** para tempo real
-
-### Frontend
-- **React 18** com TypeScript
-- **Next.js** como framework
-- **Tailwind CSS** para styling
-- **shadcn/ui** para componentes
-- **Zustand** para estado
-- **Lightweight Charts v5.0.9** para gráficos
-
-### Infraestrutura
-- **Docker** e Docker Compose
-- **Kubernetes** para orquestração
-- **Nginx** como proxy reverso
-- **Prometheus** + **Grafana** para monitoramento
-- **GitHub Actions** para CI/CD
+### 🔄 Development Workflow (12 documents)
+- Development environment setup
+- Git workflow and branching
+- Code review and quality assurance
+- CI/CD and deployment processes
 
 ## 🚀 Quick Start
 
-### Para Desenvolvedores
-1. **Setup Local**: Consulte [Environment Setup](./workflow/environment-setup/)
-2. **Arquitetura**: Entenda o sistema em [Architecture Overview](./architecture/)
-3. **Desenvolvimento**: Siga o [Development Workflow](./workflow/development-process/)
+### For Developers
+1. [Development Setup](/workflow/development-setup) - Set up your development environment
+2. [Git Workflow](/workflow/git-workflow) - Understand our Git workflow
+3. [Code Review](/workflow/code-review) - Learn our code review process
+4. [Testing Strategy](/workflow/testing-strategy) - Set up testing
 
-### Para DevOps
-1. **Deploy**: Configure [Deployment](./deployment/)
-2. **Monitoramento**: Implemente [Monitoring](./monitoring/)
-3. **Segurança**: Configure [Security](./security/)
+### For Users
+1. [Getting Started](/knowledge/getting-started) - Learn the basics
+2. [Trading Concepts](/knowledge/trading-concepts) - Understand trading terminology
+3. [Strategy Building](/knowledge/strategy-building) - Create trading strategies
+4. [Risk Management](/knowledge/risk-management) - Manage risk effectively
 
-### Para Administradores
-1. **Admin Panel**: Configure [Administration](./administration/)
-2. **Usuários**: Gerencie [User Management](./user-management/)
-3. **Suporte**: Consulte [Troubleshooting](./troubleshooting/)
+### For Administrators
+1. [Admin Panel](/administration/admin-panel) - Access admin features
+2. [User Management](/user-management/multi-account) - Manage users and accounts
+3. [Security](/security/authentication) - Configure security settings
+4. [Monitoring](/monitoring/application-monitoring) - Monitor system health
 
-## 📖 Convenções de Documentação
+## 🔍 Navigation
 
-### Metadados
-Cada documento contém metadados YAML padronizados:
-- **title**: Título do documento
-- **version**: Versão semântica
-- **created/updated**: Datas de criação e atualização
-- **author**: Responsável pelo documento
-- **status**: Active, Draft ou Deprecated
-- **tags**: Tags para categorização
+### By Role
+- **Developers**: Architecture, Development Workflow, Testing, Deployment
+- **Users**: Knowledge Base, Getting Started, Trading Concepts
+- **Administrators**: Administration, User Management, Security, Monitoring
+- **DevOps**: Deployment, Infrastructure, Monitoring, Troubleshooting
 
-### Estrutura Padrão
-- **Índice**: Navegação interna
-- **Visão Geral**: Resumo executivo
-- **Conteúdo Principal**: Detalhes técnicos
-- **Exemplos**: Code snippets funcionais
-- **Referências**: Links para código e docs relacionadas
-- **Como Usar**: Instruções de uso do documento
+### By Topic
+- **Architecture**: System design, components, data flow
+- **Security**: Authentication, authorization, data protection
+- **Performance**: Optimization, monitoring, troubleshooting
+- **Integration**: APIs, external services, data exchange
 
-### Qualidade
-- ✅ Code snippets testados e funcionais
-- ✅ Diagramas Mermaid quando aplicável
-- ✅ Cross-references entre documentos
-- ✅ Links para código-fonte real
-- ✅ Exemplos práticos baseados no projeto
+### By Problem
+- **Setup Issues**: Development Setup, Installation, Configuration
+- **Runtime Issues**: Troubleshooting, Debugging, Common Issues
+- **Performance Issues**: Performance Optimization, Monitoring
+- **Security Issues**: Security Practices, Authentication, Authorization
 
-## 🔍 Navegação
+## 📖 Reading Guide
 
-- **Índice Principal**: [docs/index.md](./index.md)
-- **Navegação Lateral**: [docs/_sidebar.md](./_sidebar.md)
-- **Busca**: Use a funcionalidade de busca do site
-- **Tags**: Filtre por tags específicas
+### New to Axisor?
+Start with:
+1. [Project Overview](/project/project-overview)
+2. [Getting Started](/knowledge/getting-started)
+3. [Architecture Overview](/architecture/system-overview)
+4. [Development Setup](/workflow/development-setup)
 
-## 📞 Contribuição
+### Setting up Development?
+Follow:
+1. [Development Setup](/workflow/development-setup)
+2. [Git Workflow](/workflow/git-workflow)
+3. [Testing Strategy](/workflow/testing-strategy)
+4. [Code Review](/workflow/code-review)
 
-### Atualizando Documentação
-1. Siga os padrões em [DOCUMENTATION_STANDARDS.md](../DOCUMENTATION_STANDARDS.md)
-2. Use o template baseado em [system-architecture.md](./architecture/system-architecture.md)
-3. Mantenha metadados atualizados
-4. Teste todos os code snippets
-5. Atualize cross-references
+### Deploying to Production?
+Check:
+1. [Deployment Guide](/deployment/environments)
+2. [Docker Configuration](/deployment/docker)
+3. [Kubernetes Setup](/deployment/kubernetes)
+4. [Monitoring Setup](/monitoring/application-monitoring)
 
-### Reportando Problemas
-- Use GitHub Issues para problemas na documentação
-- Inclua link para o documento problemático
-- Descreva o problema específico
-- Sugira correções quando possível
+### Troubleshooting Issues?
+Look at:
+1. [Common Issues](/troubleshooting/common-issues)
+2. [Debugging Guide](/troubleshooting/debugging)
+3. [Error Codes](/troubleshooting/error-codes)
+4. [Support Procedures](/troubleshooting/support-procedures)
 
-## 📄 Licença
+## 🛠️ Contributing
 
-Esta documentação segue a mesma licença do projeto Axisor.
+We welcome contributions to our documentation! Please see our [Contributing Guide](/project/contributing) for details on how to get started.
+
+### Documentation Standards
+- Follow our [Documentation Standards](/workflow/documentation-standards)
+- Use clear and concise language
+- Include code examples and diagrams
+- Keep content up to date
+- Test all code snippets
+
+### Getting Help
+- 📖 Check our [FAQ](/knowledge/faq) for common questions
+- 🐛 Report issues on [GitHub](https://github.com/axisor/axisor/issues)
+- 💬 Join our [Discussions](https://github.com/axisor/axisor/discussions)
+- 📧 Contact our support team
+
+## 📄 License
+
+This documentation is licensed under the MIT License. See our [License](/project/license) page for more information.
 
 ---
 
-**Versão**: 1.0.0  
-**Última Atualização**: 2025-01-26  
-**Responsável**: Sistema de Documentação Axisor  
-**Compatibilidade**: GitHub Pages, GitBook, Docusaurus, VuePress
+**Ready to dive in?** Start with our [Quick Start Guide](/getting-started) or explore the [Architecture Overview](/architecture/system-overview) to understand how everything works together.
