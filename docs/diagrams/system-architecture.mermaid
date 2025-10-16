@@ -1,0 +1,113 @@
+graph TB
+    subgraph "Frontend Layer"
+        UI[React Frontend]
+        Charts[TradingView Charts]
+        Dashboard[Admin Dashboard]
+    end
+    
+    subgraph "API Gateway"
+        Gateway[Fastify API Gateway]
+        Auth[Authentication Middleware]
+        RateLimit[Rate Limiting]
+    end
+    
+    subgraph "Core Services"
+        UserService[User Service]
+        TradingService[Trading Service]
+        MarginService[Margin Guard Service]
+        AutomationService[Automation Service]
+        NotificationService[Notification Service]
+    end
+    
+    subgraph "External Integrations"
+        LNMarkets[LN Markets API]
+        LND[LND Node]
+        TradingView[TradingView API]
+    end
+    
+    subgraph "Data Layer"
+        PostgreSQL[(PostgreSQL)]
+        Redis[(Redis Cache)]
+        BullMQ[BullMQ Queue]
+    end
+    
+    subgraph "Workers"
+        MarginWorker[Margin Monitor Worker]
+        AutomationWorker[Automation Executor Worker]
+        NotificationWorker[Notification Worker]
+        PaymentWorker[Payment Validator Worker]
+    end
+    
+    subgraph "Infrastructure"
+        Docker[Docker Containers]
+        K8s[Kubernetes]
+        Nginx[Nginx Load Balancer]
+        Monitoring[Prometheus + Grafana]
+    end
+    
+    %% Frontend connections
+    UI --> Gateway
+    Charts --> Gateway
+    Dashboard --> Gateway
+    
+    %% API Gateway connections
+    Gateway --> Auth
+    Gateway --> RateLimit
+    Gateway --> UserService
+    Gateway --> TradingService
+    Gateway --> MarginService
+    Gateway --> AutomationService
+    Gateway --> NotificationService
+    
+    %% Service connections
+    UserService --> PostgreSQL
+    TradingService --> LNMarkets
+    TradingService --> LND
+    MarginService --> PostgreSQL
+    MarginService --> Redis
+    AutomationService --> BullMQ
+    NotificationService --> BullMQ
+    
+    %% External integrations
+    TradingService --> TradingView
+    MarginService --> LNMarkets
+    
+    %% Data layer connections
+    UserService --> Redis
+    TradingService --> PostgreSQL
+    AutomationService --> PostgreSQL
+    
+    %% Worker connections
+    BullMQ --> MarginWorker
+    BullMQ --> AutomationWorker
+    BullMQ --> NotificationWorker
+    BullMQ --> PaymentWorker
+    
+    %% Worker service connections
+    MarginWorker --> MarginService
+    AutomationWorker --> AutomationService
+    NotificationWorker --> NotificationService
+    PaymentWorker --> TradingService
+    
+    %% Infrastructure connections
+    Gateway --> Nginx
+    Nginx --> Docker
+    Docker --> K8s
+    K8s --> Monitoring
+    
+    %% Styling
+    classDef frontend fill:#e1f5fe
+    classDef api fill:#f3e5f5
+    classDef service fill:#e8f5e8
+    classDef external fill:#fff3e0
+    classDef data fill:#fce4ec
+    classDef worker fill:#f1f8e9
+    classDef infra fill:#e0f2f1
+    
+    class UI,Charts,Dashboard frontend
+    class Gateway,Auth,RateLimit api
+    class UserService,TradingService,MarginService,AutomationService,NotificationService service
+    class LNMarkets,LND,TradingView external
+    class PostgreSQL,Redis,BullMQ data
+    class MarginWorker,AutomationWorker,NotificationWorker,PaymentWorker worker
+    class Docker,K8s,Nginx,Monitoring infra

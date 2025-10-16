@@ -1,0 +1,91 @@
+graph TB
+    subgraph "Client Layer"
+        Browser[Web Browser]
+        Mobile[Mobile App]
+        API_Client[API Client]
+    end
+    
+    subgraph "Security Gateway"
+        WAF[Web Application Firewall]
+        DDoS[DDoS Protection]
+        SSL[SSL/TLS Termination]
+        Auth[Authentication Gateway]
+    end
+    
+    subgraph "Application Security"
+        JWT[JWT Validation]
+        RBAC[Role-Based Access Control]
+        Encryption[Data Encryption]
+        Audit[Audit Logging]
+    end
+    
+    subgraph "Data Security"
+        DB_Encryption[Database Encryption]
+        Key_Management[Key Management]
+        Backup[Secure Backup]
+        Retention[Data Retention]
+    end
+    
+    subgraph "Network Security"
+        VPN[VPN Access]
+        Firewall[Network Firewall]
+        Segmentation[Network Segmentation]
+        Monitoring[Network Monitoring]
+    end
+    
+    subgraph "Compliance"
+        GDPR[GDPR Compliance]
+        SOC2[SOC 2 Compliance]
+        PCI[PCI DSS Compliance]
+        Audit_Trail[Audit Trail]
+    end
+    
+    %% Client connections
+    Browser --> WAF
+    Mobile --> WAF
+    API_Client --> WAF
+    
+    %% Security gateway
+    WAF --> DDoS
+    WAF --> SSL
+    WAF --> Auth
+    
+    %% Application security
+    Auth --> JWT
+    JWT --> RBAC
+    RBAC --> Encryption
+    Encryption --> Audit
+    
+    %% Data security
+    Encryption --> DB_Encryption
+    DB_Encryption --> Key_Management
+    Key_Management --> Backup
+    Backup --> Retention
+    
+    %% Network security
+    VPN --> Firewall
+    Firewall --> Segmentation
+    Segmentation --> Monitoring
+    
+    %% Compliance
+    Audit --> GDPR
+    Audit --> SOC2
+    Audit --> PCI
+    GDPR --> Audit_Trail
+    SOC2 --> Audit_Trail
+    PCI --> Audit_Trail
+    
+    %% Styling
+    classDef client fill:#e3f2fd
+    classDef gateway fill:#e8f5e8
+    classDef app fill:#fff3e0
+    classDef data fill:#fce4ec
+    classDef network fill:#f1f8e9
+    classDef compliance fill:#e0f2f1
+    
+    class Browser,Mobile,API_Client client
+    class WAF,DDoS,SSL,Auth gateway
+    class JWT,RBAC,Encryption,Audit app
+    class DB_Encryption,Key_Management,Backup,Retention data
+    class VPN,Firewall,Segmentation,Monitoring network
+    class GDPR,SOC2,PCI,Audit_Trail compliance

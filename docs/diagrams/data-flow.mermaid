@@ -1,0 +1,87 @@
+graph LR
+    subgraph "User Input"
+        User[User Interface]
+        API[API Request]
+        WebSocket[WebSocket Connection]
+    end
+    
+    subgraph "Authentication Layer"
+        JWT[JWT Validation]
+        Refresh[Refresh Token]
+        Session[Session Management]
+    end
+    
+    subgraph "Business Logic"
+        Validation[Input Validation]
+        Processing[Business Processing]
+        Authorization[Authorization Check]
+    end
+    
+    subgraph "Data Processing"
+        Cache[Redis Cache]
+        Database[(PostgreSQL)]
+        Queue[BullMQ Queue]
+    end
+    
+    subgraph "External Services"
+        LNMarkets[LN Markets API]
+        LND[LND Node]
+        TradingView[TradingView API]
+    end
+    
+    subgraph "Response"
+        Data[Response Data]
+        Notification[Real-time Notification]
+        Log[Audit Log]
+    end
+    
+    %% User input flow
+    User --> API
+    User --> WebSocket
+    API --> JWT
+    WebSocket --> JWT
+    
+    %% Authentication flow
+    JWT --> Refresh
+    JWT --> Session
+    Refresh --> Validation
+    Session --> Validation
+    
+    %% Business logic flow
+    Validation --> Processing
+    Processing --> Authorization
+    Authorization --> Cache
+    Authorization --> Database
+    
+    %% Data processing flow
+    Cache --> Queue
+    Database --> Queue
+    Queue --> LNMarkets
+    Queue --> LND
+    Queue --> TradingView
+    
+    %% External service responses
+    LNMarkets --> Data
+    LND --> Data
+    TradingView --> Data
+    
+    %% Response flow
+    Data --> Notification
+    Data --> Log
+    Notification --> User
+    Log --> Database
+    
+    %% Styling
+    classDef input fill:#e3f2fd
+    classDef auth fill:#f3e5f5
+    classDef business fill:#e8f5e8
+    classDef data fill:#fff3e0
+    classDef external fill:#fce4ec
+    classDef response fill:#f1f8e9
+    
+    class User,API,WebSocket input
+    class JWT,Refresh,Session auth
+    class Validation,Processing,Authorization business
+    class Cache,Database,Queue data
+    class LNMarkets,LND,TradingView external
+    class Data,Notification,Log response

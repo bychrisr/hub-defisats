@@ -1,0 +1,72 @@
+graph TD
+    subgraph "Input"
+        Position[Position Data]
+        Market[Market Data]
+        User[User Preferences]
+    end
+    
+    subgraph "Margin Guard Engine"
+        Monitor[Position Monitor]
+        Calculate[Margin Calculation]
+        Risk[Risk Assessment]
+        Decision[Decision Engine]
+    end
+    
+    subgraph "Actions"
+        Alert[Send Alert]
+        Close[Close Position]
+        Reduce[Reduce Size]
+        Notify[Notify User]
+    end
+    
+    subgraph "External APIs"
+        LNMarkets[LN Markets API]
+        LND[LND Node]
+    end
+    
+    subgraph "Notifications"
+        Email[Email Notification]
+        SMS[SMS Alert]
+        Push[Push Notification]
+        WebSocket[WebSocket Update]
+    end
+    
+    %% Input flow
+    Position --> Monitor
+    Market --> Monitor
+    User --> Monitor
+    
+    %% Monitoring flow
+    Monitor --> Calculate
+    Calculate --> Risk
+    Risk --> Decision
+    
+    %% Decision flow
+    Decision --> Alert
+    Decision --> Close
+    Decision --> Reduce
+    Decision --> Notify
+    
+    %% Action execution
+    Close --> LNMarkets
+    Reduce --> LNMarkets
+    Notify --> LNMarkets
+    
+    %% Notification flow
+    Alert --> Email
+    Alert --> SMS
+    Alert --> Push
+    Alert --> WebSocket
+    
+    %% Styling
+    classDef input fill:#e3f2fd
+    classDef engine fill:#e8f5e8
+    classDef action fill:#fff3e0
+    classDef external fill:#fce4ec
+    classDef notification fill:#f1f8e9
+    
+    class Position,Market,User input
+    class Monitor,Calculate,Risk,Decision engine
+    class Alert,Close,Reduce,Notify action
+    class LNMarkets,LND external
+    class Email,SMS,Push,WebSocket notification

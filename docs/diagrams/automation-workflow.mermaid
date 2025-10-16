@@ -1,0 +1,92 @@
+graph TD
+    subgraph "Trigger Events"
+        Price[Price Movement]
+        Time[Time-based]
+        Indicator[Technical Indicator]
+        Manual[Manual Trigger]
+    end
+    
+    subgraph "Automation Engine"
+        Parser[Rule Parser]
+        Validator[Rule Validator]
+        Executor[Rule Executor]
+        Scheduler[Task Scheduler]
+    end
+    
+    subgraph "Rule Types"
+        TakeProfit[Take Profit]
+        StopLoss[Stop Loss]
+        AutoEntry[Auto Entry]
+        Custom[Custom Rule]
+    end
+    
+    subgraph "Execution"
+        Order[Place Order]
+        Modify[Modify Position]
+        Close[Close Position]
+        Alert[Send Alert]
+    end
+    
+    subgraph "External APIs"
+        LNMarkets[LN Markets API]
+        LND[LND Node]
+    end
+    
+    subgraph "Monitoring"
+        Log[Execution Log]
+        Metrics[Performance Metrics]
+        Audit[Audit Trail]
+    end
+    
+    %% Trigger flow
+    Price --> Parser
+    Time --> Parser
+    Indicator --> Parser
+    Manual --> Parser
+    
+    %% Engine flow
+    Parser --> Validator
+    Validator --> Executor
+    Executor --> Scheduler
+    
+    %% Rule execution
+    Scheduler --> TakeProfit
+    Scheduler --> StopLoss
+    Scheduler --> AutoEntry
+    Scheduler --> Custom
+    
+    %% Action execution
+    TakeProfit --> Order
+    StopLoss --> Close
+    AutoEntry --> Order
+    Custom --> Modify
+    
+    %% External API calls
+    Order --> LNMarkets
+    Modify --> LNMarkets
+    Close --> LNMarkets
+    Alert --> LNMarkets
+    
+    %% Monitoring
+    Order --> Log
+    Modify --> Log
+    Close --> Log
+    Alert --> Log
+    
+    Log --> Metrics
+    Metrics --> Audit
+    
+    %% Styling
+    classDef trigger fill:#e3f2fd
+    classDef engine fill:#e8f5e8
+    classDef rule fill:#fff3e0
+    classDef execution fill:#fce4ec
+    classDef external fill:#f1f8e9
+    classDef monitoring fill:#e0f2f1
+    
+    class Price,Time,Indicator,Manual trigger
+    class Parser,Validator,Executor,Scheduler engine
+    class TakeProfit,StopLoss,AutoEntry,Custom rule
+    class Order,Modify,Close,Alert execution
+    class LNMarkets,LND external
+    class Log,Metrics,Audit monitoring

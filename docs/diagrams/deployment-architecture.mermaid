@@ -1,0 +1,101 @@
+graph TB
+    subgraph "Load Balancer"
+        LB[Nginx Load Balancer]
+        SSL[SSL Termination]
+        RateLimit[Rate Limiting]
+    end
+    
+    subgraph "Application Layer"
+        API[API Servers]
+        Frontend[Frontend Servers]
+        Workers[Worker Nodes]
+    end
+    
+    subgraph "Data Layer"
+        PrimaryDB[(Primary PostgreSQL)]
+        ReplicaDB[(Read Replica)]
+        Redis[(Redis Cluster)]
+        Queue[BullMQ Queue]
+    end
+    
+    subgraph "External Services"
+        LNMarkets[LN Markets API]
+        LND[LND Node]
+        TradingView[TradingView API]
+    end
+    
+    subgraph "Monitoring"
+        Prometheus[Prometheus]
+        Grafana[Grafana]
+        AlertManager[Alert Manager]
+        Logs[Log Aggregation]
+    end
+    
+    subgraph "Infrastructure"
+        K8s[Kubernetes Cluster]
+        Docker[Docker Containers]
+        Storage[Persistent Storage]
+        Network[Network Policies]
+    end
+    
+    %% Load balancer connections
+    LB --> SSL
+    LB --> RateLimit
+    LB --> API
+    LB --> Frontend
+    
+    %% Application layer connections
+    API --> PrimaryDB
+    API --> Redis
+    API --> Queue
+    Frontend --> API
+    Workers --> Queue
+    Workers --> Redis
+    
+    %% Data layer connections
+    PrimaryDB --> ReplicaDB
+    Redis --> Queue
+    Queue --> Workers
+    
+    %% External service connections
+    API --> LNMarkets
+    API --> LND
+    API --> TradingView
+    
+    %% Monitoring connections
+    Prometheus --> API
+    Prometheus --> Frontend
+    Prometheus --> Workers
+    Prometheus --> PrimaryDB
+    Prometheus --> Redis
+    Grafana --> Prometheus
+    AlertManager --> Prometheus
+    Logs --> API
+    Logs --> Frontend
+    Logs --> Workers
+    
+    %% Infrastructure connections
+    K8s --> Docker
+    Docker --> API
+    Docker --> Frontend
+    Docker --> Workers
+    Storage --> PrimaryDB
+    Storage --> Redis
+    Network --> LB
+    Network --> API
+    Network --> Frontend
+    
+    %% Styling
+    classDef lb fill:#e3f2fd
+    classDef app fill:#e8f5e8
+    classDef data fill:#fff3e0
+    classDef external fill:#fce4ec
+    classDef monitoring fill:#f1f8e9
+    classDef infra fill:#e0f2f1
+    
+    class LB,SSL,RateLimit lb
+    class API,Frontend,Workers app
+    class PrimaryDB,ReplicaDB,Redis,Queue data
+    class LNMarkets,LND,TradingView external
+    class Prometheus,Grafana,AlertManager,Logs monitoring
+    class K8s,Docker,Storage,Network infra
