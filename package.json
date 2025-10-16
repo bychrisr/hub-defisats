@@ -1,14 +1,80 @@
 {
+  "name": "axisor-docs",
+  "version": "1.0.0",
+  "description": "Axisor Documentation Site",
+  "private": true,
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "clear": "docusaurus clear",
+    "serve": "docusaurus serve",
+    "write-translations": "docusaurus write-translations",
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docs:validate": "markdownlint docs/**/*.md",
+    "docs:validate:fix": "markdownlint docs/**/*.md --fix",
+    "docs:build": "docusaurus build",
+    "docs:serve": "docusaurus serve",
+    "docs:deploy": "docusaurus deploy"
+  },
   "dependencies": {
-    "@prisma/client": "^6.16.3",
-    "@types/ws": "^8.18.1",
-    "axios": "^1.12.2",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "lightweight-charts": "5.0.9",
-    "ws": "^8.18.3",
-    "wscat": "^6.1.0"
+    "@docusaurus/core": "^3.0.0",
+    "@docusaurus/preset-classic": "^3.0.0",
+    "@docusaurus/theme-live-codeblock": "^3.0.0",
+    "@docusaurus/theme-mermaid": "^3.0.0",
+    "@docusaurus/plugin-content-docs": "^3.0.0",
+    "@docusaurus/plugin-content-blog": "^3.0.0",
+    "@docusaurus/plugin-content-pages": "^3.0.0",
+    "@docusaurus/plugin-debug": "^3.0.0",
+    "@docusaurus/plugin-google-analytics": "^3.0.0",
+    "@docusaurus/plugin-google-gtag": "^3.0.0",
+    "@docusaurus/plugin-ideal-image": "^3.0.0",
+    "@docusaurus/plugin-pwa": "^3.0.0",
+    "@docusaurus/plugin-sitemap": "^3.0.0",
+    "@docusaurus/theme-classic": "^3.0.0",
+    "@docusaurus/theme-common": "^3.0.0",
+    "@docusaurus/theme-search-algolia": "^3.0.0",
+    "@docusaurus/types": "^3.0.0",
+    "@mdx-js/react": "^3.0.0",
+    "clsx": "^2.0.0",
+    "prism-react-renderer": "^2.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "^3.0.0",
+    "@docusaurus/tsconfig": "^3.0.0",
+    "@docusaurus/types": "^3.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "markdownlint": "^0.30.0",
+    "markdownlint-cli": "^0.35.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=18.0"
   }
 }

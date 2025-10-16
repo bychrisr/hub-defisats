@@ -1,177 +1,187 @@
 ---
-title: "Axisor Documentation"
-version: "1.0.0"
-created: "2025-01-26"
-updated: "2025-01-26"
-author: "Documentation Agent"
-status: "active"
-tags: ["documentation", "index", "navigation"]
+title: Axisor Documentation
+description: Complete Trading Automation Platform for LN Markets
+slug: /
 ---
 
-# 📚 Axisor Platform Documentation
+# Welcome to Axisor Documentation
 
-> **Status**: Active  
-> **Versão**: 1.0.0  
-> **Última Atualização**: 2025-01-26  
-> **Responsável**: Sistema de Documentação Axisor  
+<div className="axisor-card">
+  <h3>🚀 Complete Trading Automation Platform</h3>
+  <p>
+    Axisor is a comprehensive trading automation platform designed specifically for LN Markets, 
+    providing advanced margin protection, automated trading strategies, and real-time market analysis.
+  </p>
+</div>
 
-## 🎯 Visão Geral
+## What is Axisor?
 
-Bem-vindo à documentação técnica completa da plataforma Axisor - uma solução avançada de automação de trading para LN Markets. Esta documentação abrange todos os aspectos técnicos, arquiteturais e operacionais do sistema.
+Axisor is a sophisticated trading automation platform that empowers traders with:
 
-## 📋 Índice de Categorias
+- **🛡️ Margin Guard System**: Real-time margin protection with automated actions
+- **🤖 Trading Automations**: Advanced automation strategies for optimal trading
+- **📊 Market Simulations**: Real-time market scenario testing
+- **📈 Advanced Analytics**: Comprehensive performance analysis and reporting
+- **🔒 Enterprise Security**: Bank-grade security with multi-factor authentication
+- **🌐 Multi-Account Support**: Manage multiple trading accounts seamlessly
 
-### 🏗️ [Architecture & Design](./architecture/)
-Documentação arquitetural completa do sistema Axisor
-- [Visão Geral do Sistema](./architecture/system-overview/)
-- [Microserviços](./architecture/microservices/)
-- [Arquitetura de Dados](./architecture/data-architecture/)
-- [Sistema de Design](./architecture/design-system/)
+## Key Features
 
-### 🔌 [Integrations & APIs](./integrations/)
-Integrações com APIs externas e documentação de APIs internas
-- [APIs Externas](./integrations/external-apis/)
-- [APIs Internas](./integrations/internal-apis/)
-- [Webhooks](./integrations/webhooks/)
+### Margin Guard Protection
+Real-time monitoring and protection of your trading positions with:
+- Automated margin calls
+- Position liquidation alerts
+- Risk management automation
 
-### 🤖 [Automations & Workers](./automations/)
-Sistema de automações e workers em background
-- [Margin Guard](./automations/margin-guard/)
-- [Engine de Automação](./automations/automation-engine/)
-- [Workers](./automations/workers/)
-- [Simulações](./automations/simulations/)
+### Trading Automations
+Powerful automation engine supporting:
+- Take Profit strategies
+- Stop Loss protection
+- Auto-entry conditions
+- Custom automation rules
 
-### 🚀 [Deployment & Infrastructure](./deployment/)
-Deploy, infraestrutura e ambientes
-- [Ambientes](./deployment/environments/)
-- [Docker](./deployment/docker/)
-- [Kubernetes](./deployment/kubernetes/)
-- [CI/CD](./deployment/ci-cd/)
+### Market Simulations
+Test your strategies with:
+- Bull market scenarios
+- Bear market conditions
+- Sideways market analysis
+- Volatile market testing
 
-### 🔐 [Security & Compliance](./security/)
-Segurança, compliance e proteção de dados
-- [Autenticação](./security/authentication/)
-- [Proteção de Dados](./security/data-protection/)
-- [Segurança de API](./security/api-security/)
-- [Compliance](./security/compliance/)
+### Advanced Analytics
+Comprehensive insights including:
+- Performance metrics
+- Risk analysis
+- Profit/loss tracking
+- Strategy optimization
 
-### 👥 [User Management & Accounts](./user-management/)
-Gestão de usuários e sistema multi-conta
-- [Sistema Multi-Conta](./user-management/multi-account-system/)
-- [Autenticação](./user-management/authentication/)
-- [Autorização](./user-management/authorization/)
-- [Gestão de Perfis](./user-management/profile-management/)
+## Quick Start
 
-### 📊 [Charts & Visualization](./charts/)
-Sistema de gráficos e visualização de dados
-- [Integração TradingView](./charts/tradingview-integration/)
-- [Componentes Dashboard](./charts/dashboard-components/)
-- [Processamento de Dados](./charts/data-processing/)
-- [Performance](./charts/performance/)
+<div className="axisor-badge">Getting Started</div>
 
-### 🛠️ [Administration & Management](./administration/)
-Painel administrativo e gestão do sistema
-- [Painel Admin](./administration/admin-panel/)
-- [Sistema de Planos](./administration/plan-system/)
-- [Sistema de Cupons](./administration/coupon-system/)
-- [Manutenção](./administration/system-maintenance/)
+1. **Installation**: Follow our [installation guide](/getting-started)
+2. **Configuration**: Set up your [development environment](/workflow/development-setup)
+3. **First Automation**: Create your [first trading automation](/guides/quick-start/first-automation)
+4. **Margin Guard**: Configure [margin protection](/automations/margin-guard)
 
-### 🧪 [Testing & Validation](./testing/)
-Testes e validação do sistema
-- [Testes Unitários](./testing/unit-testing/)
-- [Testes de Integração](./testing/integration-testing/)
-- [Testes E2E](./testing/end-to-end-testing/)
-- [Ferramentas de Teste](./testing/testing-tools/)
+## Documentation Structure
 
-### 📈 [Monitoring & Observability](./monitoring/)
-Monitoramento e observabilidade
-- [Monitoramento de Aplicação](./monitoring/application-monitoring/)
-- [Monitoramento de Infraestrutura](./monitoring/infrastructure-monitoring/)
-- [Monitoramento de Negócio](./monitoring/business-monitoring/)
-- [Alertas](./monitoring/alerting/)
+Our documentation is organized into **15 main categories**:
 
-### 🐛 [Troubleshooting & Support](./troubleshooting/)
-Resolução de problemas e suporte
-- [Problemas Comuns](./troubleshooting/common-issues/)
-- [Guias de Debug](./troubleshooting/debugging-guides/)
-- [Códigos de Erro](./troubleshooting/error-codes/)
-- [Procedimentos de Suporte](./troubleshooting/support-procedures/)
+### 🏗️ Architecture & Design
+- [System Overview](/architecture/system-overview)
+- [Microservices Architecture](/architecture/microservices)
+- [Data Architecture](/architecture/data-architecture)
+- [Design System](/architecture/design-system)
 
-### 🔄 [Migrations & Refactoring](./migrations/)
-Migrações e refatorações
-- [Migrações de Database](./migrations/database-migrations/)
-- [Migrações de Código](./migrations/code-migrations/)
-- [Migrações de Features](./migrations/feature-migrations/)
-- [Migrações de Deploy](./migrations/deployment-migrations/)
+### 🔌 Integrations & APIs
+- [External APIs](/integrations/external-apis)
+- [Internal APIs](/integrations/internal-apis)
+- [WebSocket Integration](/integrations/websocket)
+- [Authentication](/integrations/authentication)
 
-### 📋 [Project Documentation](./project/)
-Documentação do projeto
-- [Requisitos](./project/requirements/)
-- [Planejamento](./project/planning/)
-- [Decisões](./project/decisions/)
-- [Padrões](./project/standards/)
+### 🤖 Automations & Workers
+- [Margin Guard](/automations/margin-guard)
+- [Automation Engine](/automations/automation-engine)
+- [Workers](/automations/workers)
+- [Simulations](/automations/simulations)
 
-### 📚 [Knowledge Base](./knowledge/)
-Base de conhecimento e melhores práticas
-- [Melhores Práticas](./knowledge/best-practices/)
-- [Padrões](./knowledge/patterns/)
-- [Tutoriais](./knowledge/tutorials/)
-- [Referências](./knowledge/references/)
+### 🚀 Deployment & Infrastructure
+- [Environments](/deployment/environments)
+- [Docker Configuration](/deployment/docker)
+- [Kubernetes](/deployment/kubernetes)
+- [CI/CD Pipeline](/deployment/ci-cd)
 
-### 🔧 [Development Workflow](./workflow/)
-Workflow de desenvolvimento
-- [Processo de Desenvolvimento](./workflow/development-process/)
-- [Workflow Git](./workflow/git-workflow/)
-- [Setup de Ambiente](./workflow/environment-setup/)
-- [Garantia de Qualidade](./workflow/quality-assurance/)
+### 🔒 Security & Compliance
+- [Authentication](/security/authentication)
+- [Authorization](/security/authorization)
+- [Data Protection](/security/data-protection)
+- [API Security](/security/api-security)
 
-## 🚀 Quick Start
+### 👥 User Management & Accounts
+- [Multi-Account System](/user-management/multi-account)
+- [User Authentication](/user-management/authentication)
+- [Authorization](/user-management/authorization)
+- [Profile Management](/user-management/profiles)
 
-### Para Desenvolvedores
-1. Comece com [Architecture & Design](./architecture/) para entender o sistema
-2. Consulte [Development Workflow](./workflow/) para setup local
-3. Explore [Testing & Validation](./testing/) para testes
+### 📊 Charts & Visualization
+- [TradingView Integration](/charts/tradingview-integration)
+- [Dashboard Components](/charts/dashboard-components)
+- [Data Processing](/charts/data-processing)
+- [Performance Optimization](/charts/performance)
 
-### Para DevOps
-1. Revise [Deployment & Infrastructure](./deployment/)
-2. Configure [Monitoring & Observability](./monitoring/)
-3. Implemente [Security & Compliance](./security/)
+### ⚙️ Administration & Management
+- [Admin Panel](/administration/admin-panel)
+- [Plan Management](/administration/plan-management)
+- [Coupon System](/administration/coupon-system)
+- [System Maintenance](/administration/maintenance)
 
-### Para Administradores
-1. Configure [Administration & Management](./administration/)
-2. Gerencie [User Management & Accounts](./user-management/)
-3. Monitore [Troubleshooting & Support](./troubleshooting/)
+### 🧪 Testing & Validation
+- [Unit Testing](/testing/unit-testing)
+- [Integration Testing](/testing/integration-testing)
+- [E2E Testing](/testing/e2e-testing)
+- [Performance Testing](/testing/performance-testing)
 
-## 📖 Como Navegar
+### 📈 Monitoring & Observability
+- [Application Monitoring](/monitoring/application-monitoring)
+- [Infrastructure Monitoring](/monitoring/infrastructure-monitoring)
+- [Business Monitoring](/monitoring/business-monitoring)
+- [Alerting System](/monitoring/alerting)
 
-- **Índice Principal**: Use este documento como ponto de partida
-- **Navegação Lateral**: Explore categorias organizadas hierarquicamente
-- **Busca**: Use a funcionalidade de busca para encontrar tópicos específicos
-- **Cross-references**: Siga links entre documentos relacionados
-- **Tags**: Use tags para filtrar conteúdo por tema
+### 🔧 Troubleshooting & Support
+- [Common Issues](/troubleshooting/common-issues)
+- [Debugging Guide](/troubleshooting/debugging)
+- [Error Codes](/troubleshooting/error-codes)
+- [Support Procedures](/troubleshooting/support-procedures)
 
-## 🔍 Convenções
+### 🔄 Migrations & Refactoring
+- [Database Migrations](/migrations/database-migrations)
+- [Code Migrations](/migrations/code-migrations)
+- [Feature Migrations](/migrations/feature-migrations)
+- [Deployment Migrations](/migrations/deployment-migrations)
 
-### Status dos Documentos
-- **Active**: Documento atual e mantido
-- **Draft**: Documento em desenvolvimento
-- **Deprecated**: Documento obsoleto (com link para versão nova)
+### 📋 Project Documentation
+- [Project Overview](/project/project-overview)
+- [Requirements](/project/requirements)
+- [Planning](/project/planning)
+- [Decisions](/project/decisions)
 
-### Prioridade de Conteúdo
-- **Critical**: Conteúdo essencial para operação
-- **High**: Conteúdo importante para desenvolvimento
-- **Medium**: Conteúdo útil para manutenção
-- **Low**: Conteúdo complementar
+### 📚 Knowledge Base
+- [Getting Started](/knowledge/getting-started)
+- [Trading Concepts](/knowledge/trading-concepts)
+- [Strategy Building](/knowledge/strategy-building)
+- [Risk Management](/knowledge/risk-management)
 
-## 📞 Suporte
+### 🔄 Development Workflow
+- [Development Setup](/workflow/development-setup)
+- [Git Workflow](/workflow/git-workflow)
+- [Code Review](/workflow/code-review)
+- [Testing Strategy](/workflow/testing-strategy)
 
-- **Issues**: Reporte problemas via GitHub Issues
-- **Documentação**: Mantenha docs atualizadas
-- **Contribuições**: Siga [Development Workflow](./workflow/)
+## Getting Help
+
+<div className="axisor-card">
+  <h3>💬 Need Help?</h3>
+  <p>
+    If you need assistance or have questions about Axisor, we're here to help:
+  </p>
+  <ul>
+    <li>📖 Check our [FAQ](/knowledge/faq) for common questions</li>
+    <li>🐛 Report issues on [GitHub](https://github.com/axisor/axisor/issues)</li>
+    <li>💬 Join our [Discussions](https://github.com/axisor/axisor/discussions)</li>
+    <li>📧 Contact our support team</li>
+  </ul>
+</div>
+
+## Contributing
+
+We welcome contributions to Axisor! Please see our [Contributing Guide](/project/contributing) for details on how to get started.
+
+## License
+
+Axisor is licensed under the MIT License. See our [License](/project/license) page for more information.
 
 ---
 
-**Versão**: 1.0.0  
-**Última Atualização**: 2025-01-26  
-**Responsável**: Sistema de Documentação Axisor  
-**Compatibilidade**: GitHub Pages, GitBook, Docusaurus, VuePress
+<div className="axisor-badge">Ready to Start?</div>
+
+Ready to dive into Axisor? Start with our [Quick Start Guide](/getting-started) or explore the [Architecture Overview](/architecture/system-overview) to understand how everything works together.

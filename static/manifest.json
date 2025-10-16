@@ -1,0 +1,17 @@
+{
+  "name": "Axisor Documentation",
+  "short_name": "Axisor Docs",
+  "description": "Complete Trading Automation Platform for LN Markets",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#25c2a0",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/img/axisor-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
