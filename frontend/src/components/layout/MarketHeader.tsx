@@ -50,7 +50,7 @@ const MarketHeader: React.FC = () => {
   };
 
   const formatRate = (value: number) => {
-    return `${(value * 100).toFixed(3)}%`;
+    return `${value.toFixed(3)}%`;
   };
 
   const formatRateChange = (value: number) => {

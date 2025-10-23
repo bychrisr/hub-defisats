@@ -159,7 +159,7 @@ export function UnifiedMarketHeader({
   };
 
   const formatRate = (rate: number) => {
-    return `${(rate * 100).toFixed(4)}%`;
+    return `${rate.toFixed(4)}%`;
   };
 
   // Renderizar loading

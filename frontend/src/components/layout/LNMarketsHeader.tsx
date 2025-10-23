@@ -138,7 +138,7 @@ const LNMarketsHeader: React.FC = () => {
   };
 
   const formatRate = (value: number) => {
-    return (value * 100).toFixed(4) + '%';
+    return value.toFixed(4) + '%';
   };
 
   const formatRateChange = (value: number) => {

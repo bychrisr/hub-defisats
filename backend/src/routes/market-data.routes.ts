@@ -839,7 +839,8 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           const now = new Date();
           const timeDiff = carryFeeDate.getTime() - now.getTime();
           
-          if (timeDiff > 0) {
+          // Only use real timestamp if it's in the future and reasonable (not more than 8 hours)
+          if (timeDiff > 0 && timeDiff < 8 * 60 * 60 * 1000) {
             const hours = Math.floor(timeDiff / (1000 * 60 * 60));
             const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
@@ -862,7 +863,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           index24hChange: parseFloat(marketData.change24h.toFixed(3)),
           tradingFees: 0.1, // LN Markets standard fee
           nextFunding: nextFundingReal,
-          rate: lnMarketsData?.carryFeeRate || 0.00006,
+          rate: lnMarketsData?.carryFeeRate ? (lnMarketsData.carryFeeRate * 100) : 0.006, // Convert decimal to percentage
           carryFeeTimestamp: lnMarketsData?.carryFeeTimestamp,
           exchangesWeights: lnMarketsData?.exchangesWeights,
           timestamp: new Date().toISOString(),
