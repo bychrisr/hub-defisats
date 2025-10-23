@@ -156,15 +156,19 @@ export default function VerifyEmailRequired() {
 
     setIsChecking(true);
     try {
+      const code = otpDigits.join('');
+      console.log('🔍 FRONTEND - Sending OTP verification:', { email, code, codeLength: code.length });
+      
       const response = await fetch('/api/auth/verify-email/otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, code: otpDigits.join('') }),
+        body: JSON.stringify({ email, code }),
       });
 
       const data = await response.json();
+      console.log('🔍 FRONTEND - OTP response:', { success: data.success, hasJwt: !!data.jwt, status: response.status });
 
       if (data.success) {
         // Salvar JWT e atualizar estado do auth store
