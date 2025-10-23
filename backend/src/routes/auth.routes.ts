@@ -1084,7 +1084,21 @@ export async function authRoutes(fastify: FastifyInstance) {
     }
   }, async (request, reply) => {
     try {
+      console.log('🔍 OTP ROUTE - Request received:', {
+        method: request.method,
+        url: request.url,
+        body: request.body,
+        timestamp: new Date().toISOString()
+      });
+      
       const { email, code } = request.body as { email: string; code: string };
+      
+      console.log('🔍 OTP ROUTE - Extracted data:', {
+        email,
+        code,
+        codeLength: code?.length,
+        timestamp: new Date().toISOString()
+      });
       
       const result = await authController.authService.validateOTP(email, code);
       
