@@ -761,6 +761,13 @@ export class AuthService {
         email_verified: true
       });
       
+      console.log('✅ AUTH SERVICE - JWT created:', {
+        tokenLength: token.length,
+        tokenPreview: token.substring(0, 50) + '...',
+        userId: user.id,
+        email: user.email
+      });
+      
       console.log('✅ AUTH SERVICE - OTP validation successful, JWT created');
       
       return { success: true, jwt: token };
