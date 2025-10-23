@@ -786,6 +786,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         data: {
           email_verified: true,
           account_status: 'active',
+          is_active: true,  // ✅ ADICIONADO: Ativar usuário
           email_verification_token: null // Invalidar token
         }
       });
