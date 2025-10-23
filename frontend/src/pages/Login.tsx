@@ -14,9 +14,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff, Github, CheckCircle } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Github, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/components/ui/use-toast';
+import '@/styles/login-improvements.css';
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1, 'Email or username is required'),
@@ -117,31 +118,28 @@ export default function Login() {
                 </Label>
                 <Input
                   id="emailOrUsername"
-                  type="text"
+                  type="email"
                   placeholder="Enter your email or username"
+                  autoComplete="username"
+                  autoFocus
                   {...register('emailOrUsername')}
-                  className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 ${
+                  className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 ${
                     errors.emailOrUsername ? 'border-red-500' : ''
                   }`}
                 />
                 {errors.emailOrUsername && (
-                  <p className="text-sm text-red-400">{errors.emailOrUsername.message}</p>
+                  <p className="text-sm text-red-400 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.emailOrUsername.message}
+                  </p>
                 )}
               </div>
 
               {/* Password Field */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-slate-200 text-sm font-medium">
-                    Password
-                  </Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <Label htmlFor="password" className="text-slate-200 text-sm font-medium">
+                  Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -155,7 +153,7 @@ export default function Login() {
                     data-form-type="other"
                     data-lpignore="true"
                     {...register('password')}
-                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 pr-10 ${
+                    className={`bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 pr-12 ${
                       errors.password ? 'border-red-500' : ''
                     }`}
                   />
@@ -163,8 +161,9 @@ export default function Login() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-slate-400 hover:text-slate-300"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-slate-400 hover:text-slate-300 min-w-[44px] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -174,7 +173,10 @@ export default function Login() {
                   </Button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-400">{errors.password.message}</p>
+                  <p className="text-sm text-red-400 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -187,7 +189,7 @@ export default function Login() {
                   console.log('🔄 LOGIN FORM - isLoading:', isLoading);
                   console.log('🔄 LOGIN FORM - errors:', errors);
                 }}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
+                className="login-cta-button w-full text-white font-medium py-3 min-h-[48px] transition-all duration-200 shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
               >
                 {isLoading ? (
                   <>
@@ -198,10 +200,20 @@ export default function Login() {
                   'Sign in'
                 )}
               </Button>
+
+              {/* Forgot Password Link - Single occurrence below CTA */}
+              <div className="text-center">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-2 py-1 min-h-[44px] inline-flex items-center"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </form>
 
             {/* Divider */}
-            <div className="relative my-6">
+            <div className="login-divider" role="separator" aria-label="or">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-600"></div>
               </div>
@@ -218,9 +230,11 @@ export default function Login() {
                 variant="outline"
                 onClick={handleGoogleLogin}
                 disabled={true}
-                className="w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-2.5 opacity-50 cursor-not-allowed"
+                aria-disabled="true"
+                className="login-sso-button w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-3 min-h-[48px] opacity-50 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
+                title="Google SSO unavailable in beta"
               >
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -239,6 +253,7 @@ export default function Login() {
                   />
                 </svg>
                 Continue with Google
+                <span className="ml-2 text-xs text-slate-500">(Unavailable in beta)</span>
               </Button>
 
               {/* GitHub Login */}
@@ -247,10 +262,13 @@ export default function Login() {
                 variant="outline"
                 onClick={handleGitHubLogin}
                 disabled={true}
-                className="w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-2.5 opacity-50 cursor-not-allowed"
+                aria-disabled="true"
+                className="login-sso-button w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-3 min-h-[48px] opacity-50 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
+                title="GitHub SSO unavailable in beta"
               >
-                <Github className="mr-2 h-4 w-4" />
+                <Github className="mr-2 h-4 w-4" aria-hidden="true" />
                 Continue with GitHub
+                <span className="ml-2 text-xs text-slate-500">(Unavailable in beta)</span>
               </Button>
             </div>
 
@@ -260,18 +278,25 @@ export default function Login() {
                 New to Axisor Bot?{' '}
                 <Link
                   to="/register"
-                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1 py-1 min-h-[44px] inline-flex items-center"
                 >
                   Create an account
                 </Link>
               </p>
               <p className="text-slate-400 text-sm">
-                Forgot your password?{' '}
+                Trouble signing in?{' '}
                 <Link
                   to="/forgot-password"
-                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1 py-1 min-h-[44px] inline-flex items-center"
                 >
-                  Reset it here
+                  Password reset
+                </Link>
+                {' • '}
+                <Link
+                  to="/support"
+                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1 py-1 min-h-[44px] inline-flex items-center"
+                >
+                  Contact support
                 </Link>
               </p>
             </div>
@@ -280,19 +305,10 @@ export default function Login() {
 
         {/* Bottom Links */}
         <div className="text-center">
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-slate-500">
-            <Link to="/terms" className="hover:text-slate-400 transition-colors">
-              Terms
-            </Link>
-            <Link to="/privacy" className="hover:text-slate-400 transition-colors">
-              Privacy
-            </Link>
-            <Link to="/docs" className="hover:text-slate-400 transition-colors">
-              Docs
-            </Link>
-            <Link to="/support" className="hover:text-slate-400 transition-colors">
-              Contact Support
-            </Link>
+          <div className="login-footer-links">
+            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/docs">Docs</Link>
           </div>
         </div>
       </div>

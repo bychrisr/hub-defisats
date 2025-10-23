@@ -1,0 +1,151 @@
+/* Login Page Improvements - Enhanced Accessibility & UX */
+
+/* Ensure proper contrast for gradient CTA button */
+.login-cta-button {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: white;
+  position: relative;
+}
+
+/* Add subtle overlay to ensure text contrast on purple section */
+.login-cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Enhanced focus states for better accessibility */
+.login-focus-ring:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Improved target sizes for touch devices */
+.login-touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Better visual hierarchy for error states */
+.login-error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #f87171;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Enhanced SSO button states */
+.login-sso-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.login-sso-button:disabled::after {
+  content: '(Unavailable in beta)';
+  position: absolute;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Improved divider accessibility */
+.login-divider {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.login-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #475569;
+}
+
+.login-divider span {
+  position: relative;
+  background-color: #1e293b;
+  padding: 0 0.5rem;
+  color: #94a3b8;
+}
+
+/* Enhanced footer link spacing and contrast */
+.login-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.login-footer-links a {
+  color: #64748b;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: color 0.2s ease;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.login-footer-links a:hover {
+  color: #94a3b8;
+}
+
+.login-footer-links a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  color: #3b82f6;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .login-footer-links {
+    gap: 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .login-touch-target {
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .login-cta-button {
+    background: #1d4ed8;
+    border: 2px solid #ffffff;
+  }
+  
+  .login-sso-button:disabled {
+    opacity: 0.3;
+    border: 1px solid #64748b;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .login-cta-button,
+  .login-footer-links a,
+  .login-sso-button {
+    transition: none;
+  }
+}
