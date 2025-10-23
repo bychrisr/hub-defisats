@@ -703,23 +703,38 @@ export class AuthService {
    */
   async validateOTP(email: string, code: string): Promise<{ success: boolean; jwt?: string }> {
     try {
+      console.log('🔍 AUTH SERVICE - validateOTP called with:', { email, code });
+      
       const user = await this.prisma.user.findUnique({ 
         where: { email: email.toLowerCase() } 
       });
       
+      console.log('🔍 AUTH SERVICE - User found:', { 
+        userExists: !!user, 
+        hasToken: !!user?.password_reset_token,
+        tokenExpires: user?.password_reset_expires 
+      });
+      
       if (!user || !user.password_reset_token) {
+        console.log('❌ AUTH SERVICE - No user or token found');
         return { success: false };
       }
       
       if (user.password_reset_expires && user.password_reset_expires < new Date()) {
+        console.log('❌ AUTH SERVICE - Token expired');
         return { success: false };
       }
       
+      console.log('🔍 AUTH SERVICE - Comparing code with hash...');
       const isValid = await bcrypt.compare(code, user.password_reset_token);
+      console.log('🔍 AUTH SERVICE - Code comparison result:', isValid);
       
       if (!isValid) {
+        console.log('❌ AUTH SERVICE - Invalid code');
         return { success: false };
       }
+      
+      console.log('✅ AUTH SERVICE - Code valid, updating user...');
       
       // Marcar como verificado
       await this.prisma.user.update({
@@ -732,8 +747,12 @@ export class AuthService {
         }
       });
       
+      console.log('✅ AUTH SERVICE - User updated, creating entitlement...');
+      
       // Criar entitlement FREE
       await this.ensureFreeEntitlement(user.id);
+      
+      console.log('✅ AUTH SERVICE - Creating JWT...');
       
       // Gerar JWT
       const token = await this.fastify.jwt.sign({
@@ -741,6 +760,8 @@ export class AuthService {
         email: user.email,
         email_verified: true
       });
+      
+      console.log('✅ AUTH SERVICE - OTP validation successful, JWT created');
       
       return { success: true, jwt: token };
     } catch (error) {
