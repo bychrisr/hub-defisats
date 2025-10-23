@@ -810,10 +810,79 @@ async function analyzeHistoricalData() {
 - Implement retry logic
 - Use connection pooling
 
+## Recent Fixes and Improvements
+
+### Credential Decryption Fix (2025-01-23)
+
+**Problem**: LN Markets API routes were failing due to credential decryption issues.
+
+**Solution**: Fixed key corruption in `UserExchangeAccountService.decryptCredentials()`.
+
+```typescript
+// ❌ PROBLEMA: Object.entries() causava corrupção de chaves
+Object.entries(encryptedCredentials).forEach(([key, value]) => {
+  // key seria corrompido para caracteres especiais
+});
+
+// ✅ SOLUÇÃO: Object.keys() com for...of
+const keys = Object.keys(encryptedCredentials);
+for (const key of keys) {
+  const value = encryptedCredentials[key];
+  // key permanece intacto
+}
+```
+
+### Header Data Route Fix (2025-01-23)
+
+**Problem**: `/api/lnmarkets/header-data` route was not being called due to routing issues.
+
+**Solution**: Fixed route registration and path conflicts.
+
+```typescript
+// ❌ PROBLEMA: Rota não registrada com prefixo correto
+await fastify.register(lnMarketsHeaderRoutes);
+
+// ✅ SOLUÇÃO: Registrar com prefixo correto
+await fastify.register(lnMarketsHeaderRoutes, { prefix: '/api/lnmarkets' });
+```
+
+### Testnet Detection Fix (2025-01-23)
+
+**Problem**: Testnet mode wasn't being properly detected and applied to LN Markets API calls.
+
+**Solution**: Implemented proper testnet detection in routes.
+
+```typescript
+// ✅ SOLUÇÃO: Detecção correta de testnet
+const testnetResult = TestnetDetector.detectTestnet(decryptedCredentials);
+const lnMarketsService = new LNMarketsAPIv2({
+  credentials: {
+    apiKey: decryptedCredentials['API Key'],
+    apiSecret: decryptedCredentials['API Secret'],
+    passphrase: decryptedCredentials['Passphrase'],
+    isTestnet: testnetResult.isTestnet
+  }
+});
+```
+
+### Position Listing Fix (2025-01-23)
+
+**Problem**: Position listing was failing due to credential decryption issues.
+
+**Solution**: Applied same credential decryption fix to position routes.
+
+```typescript
+// ✅ SOLUÇÃO: Descriptografia correta de credenciais
+const { UserExchangeAccountService } = await import('../services/userExchangeAccount.service');
+const userExchangeAccountService = new UserExchangeAccountService(prisma);
+const decryptedCredentials = userExchangeAccountService.decryptCredentials(activeCredentials.credentials);
+```
+
 ## How to Use This Document
 
 - **For Developers**: Reference endpoint details when implementing LN Markets integration
 - **For API Testing**: Use examples for testing individual endpoints
 - **For Error Handling**: Follow error response patterns for robust error handling
 - **For Rate Limiting**: Implement client-side throttling based on documented limits
+- **For Troubleshooting**: Refer to the recent fixes section for common issues
 
