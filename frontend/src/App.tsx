@@ -128,14 +128,13 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Se está autenticado E tem dados do usuário, redirecionar para página apropriada
   if (isAuthenticated && user) {
-    // Verificar se precisa de onboarding
-    if (!user.onboarding_completed) {
-      console.log('🔄 PUBLIC ROUTE - User needs onboarding, redirecting to onboarding');
-      return <Navigate to="/onboarding" replace />;
-    }
-    
+    // Usuário novo: vai para Dashboard Demo (não onboarding direto)
+    // Usuário existente: vai para Dashboard Normal
     const redirectTo = user.is_admin ? '/admin' : '/dashboard';
-    console.log('🔄 PUBLIC ROUTE - User is authenticated, redirecting to:', redirectTo, { is_admin: user.is_admin });
+    console.log('🔄 PUBLIC ROUTE - User is authenticated, redirecting to:', redirectTo, { 
+      is_admin: user.is_admin, 
+      onboarding_completed: user.onboarding_completed 
+    });
     return <Navigate to={redirectTo} replace />;
   }
 
