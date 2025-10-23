@@ -1,186 +1,73 @@
 import { FastifyInstance } from 'fastify';
-import { PlansController } from '../controllers/plans.controller';
-import { adminAuthMiddleware } from '../middleware/auth.middleware';
-
-const plansController = new PlansController();
+import { PrismaClient } from '@prisma/client';
+import { PlansService } from '../services/plans.service';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 export async function plansRoutes(fastify: FastifyInstance) {
-  // Listar todos os planos
-  fastify.get('/plans-public', async (request, reply) => {
-    console.log('🚀 DIRECT ROUTE CALLED!');
-    return plansController.getAllPlans(request, reply);
-  });
+  const prisma = new PrismaClient();
+  const plansService = new PlansService(prisma, fastify);
 
-  // Criar novo plano
-  fastify.post('/plans-public', {
-    preHandler: [adminAuthMiddleware]
-  }, async (request, reply) => {
-    console.log('🚀 CREATE PLAN ROUTE CALLED!');
-    return plansController.createPlan(request, reply);
-  });
+  // Middleware to require verified email
+  const requireVerified = async (request: any, reply: any) => {
+    const user = request.user;
+    if (!user.email_verified) {
+      return reply.status(403).send({
+        error: 'EMAIL_VERIFICATION_REQUIRED',
+        message: 'Please verify your email to access plan features'
+      });
+    }
+  };
 
-  // Atualizar plano
-  fastify.put('/plans-public/:id', {
-    preHandler: [adminAuthMiddleware]
-  }, async (request, reply) => {
-    console.log('🚀 UPDATE PLAN ROUTE CALLED!');
-    return plansController.updatePlan(request, reply);
-  });
-
-  // Deletar plano
-  fastify.delete('/plans-public/:id', {
-    preHandler: [adminAuthMiddleware]
-  }, async (request, reply) => {
-    console.log('🚀 DELETE PLAN ROUTE CALLED!');
-    return plansController.deletePlan(request, reply);
-  });
-
-  // Obter plano por ID
-  fastify.get('/plans-public/:id', async (request, reply) => {
-    console.log('🚀 GET PLAN BY ID ROUTE CALLED!');
-    return plansController.getPlanById(request, reply);
-  });
-
-  // Obter estatísticas de usuários por plano
-  fastify.get('/plans/user-stats', {
+  // GET /api/plans - Get available plans
+  fastify.get('/api/plans', {
+    preHandler: [authMiddleware, requireVerified],
     schema: {
-      description: 'Get plan user statistics',
+      description: 'Get available plans',
       tags: ['Plans'],
+      security: [{ bearerAuth: [] }],
       response: {
         200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              name: { type: 'string' },
+              price: { type: 'number' },
+              features: { type: 'array', items: { type: 'string' } }
+            }
           }
         }
       }
     }
-  }, plansController.getPlanUserStats.bind(plansController));
-
-  // Obter plano por ID
-  fastify.get('/plans/:id', {
-    schema: {
-      description: 'Get plan by ID',
-      tags: ['Plans'],
-      params: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' }
-        },
-        required: ['id']
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' }
-          }
-        },
-        404: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
+  }, async (request, reply) => {
+    try {
+      const plans = await plansService.getAvailablePlans();
+      return reply.send(plans);
+    } catch (error) {
+      fastify.log.error('Error getting plans:', error);
+      return reply.status(500).send({
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to get plans'
+      });
     }
-  }, plansController.getPlanById.bind(plansController));
+  });
 
-  // Criar novo plano (apenas admin)
-  fastify.post('/plans', {
-    preHandler: [adminAuthMiddleware],
+  // POST /api/plans/choose - Choose a plan
+  fastify.post('/api/plans/choose', {
+    preHandler: [authMiddleware, requireVerified],
     schema: {
-      description: 'Create new plan',
+      description: 'Choose a plan',
       tags: ['Plans'],
+      security: [{ bearerAuth: [] }],
       body: {
         type: 'object',
-        required: ['name', 'slug', 'description'],
+        required: ['plan'],
         properties: {
-          name: { type: 'string' },
-          slug: { type: 'string' },
-          description: { type: 'string' },
-          price_sats: { type: 'number', minimum: 0 },
-          price_monthly: { type: 'number', minimum: 0 },
-          price_yearly: { type: 'number', minimum: 0 },
-          features: { type: 'array', items: { type: 'string' } },
-          is_active: { type: 'boolean' },
-          has_api_access: { type: 'boolean' },
-          has_advanced: { type: 'boolean' },
-          has_priority: { type: 'boolean' },
-          max_notifications: { type: 'number', minimum: 0 },
-          order: { type: 'number', minimum: 0 }
-        }
-      },
-      response: {
-        201: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' },
-            message: { type: 'string' }
+          plan: { 
+            type: 'string',
+            enum: ['FREE', 'BASIC', 'ADVANCED', 'PRO']
           }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, plansController.createPlan.bind(plansController));
-
-  // Atualizar plano (apenas admin)
-  fastify.put('/plans/:id', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      description: 'Update plan',
-      tags: ['Plans'],
-      params: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' }
-        },
-        required: ['id']
-      },
-      body: {
-        type: 'object',
-        properties: {
-          name: { type: 'string' },
-          slug: { type: 'string' },
-          description: { type: 'string' },
-          price_sats: { type: 'number', minimum: 0 },
-          price_monthly: { type: 'number', minimum: 0 },
-          price_yearly: { type: 'number', minimum: 0 },
-          features: { type: 'array', items: { type: 'string' } },
-          is_active: { type: 'boolean' },
-          has_api_access: { type: 'boolean' },
-          has_advanced: { type: 'boolean' },
-          has_priority: { type: 'boolean' },
-          max_notifications: { type: 'number', minimum: 0 },
-          order: { type: 'number', minimum: 0 }
         }
       },
       response: {
@@ -188,52 +75,49 @@ export async function plansRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            data: { type: 'object' },
-            message: { type: 'string' }
+            entitlements: {
+              type: 'object',
+              properties: {
+                plan: { type: 'string' },
+                feature_set: { type: 'string' },
+                demo_mode: { type: 'boolean' }
+              }
+            }
           }
         },
-        500: {
+        400: {
           type: 'object',
           properties: {
-            success: { type: 'boolean' },
             error: { type: 'string' },
             message: { type: 'string' }
           }
         }
       }
     }
-  }, plansController.updatePlan.bind(plansController));
+  }, async (request, reply) => {
+    try {
+      const { plan } = request.body as { plan: string };
+      const userId = request.user.sub;
 
-  // Deletar plano (apenas admin)
-  fastify.delete('/plans/:id', {
-    preHandler: [adminAuthMiddleware],
-    schema: {
-      description: 'Delete plan',
-      tags: ['Plans'],
-      params: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' }
-        },
-        required: ['id']
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
+      const result = await plansService.choosePlan(userId, plan);
+
+      if (!result.success) {
+        return reply.status(400).send({
+          error: 'INVALID_PLAN',
+          message: 'Invalid plan selected'
+        });
       }
+
+      return reply.send({
+        success: true,
+        entitlements: result.entitlements
+      });
+    } catch (error) {
+      fastify.log.error('Error choosing plan:', error);
+      return reply.status(500).send({
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to choose plan'
+      });
     }
-  }, plansController.deletePlan.bind(plansController));
+  });
 }

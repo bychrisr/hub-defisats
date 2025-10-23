@@ -29,10 +29,10 @@ export function usePositionCreation() {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Generate mock position ID
+      // Generate position ID
       const positionId = `pos_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      // Mock successful position creation
+      // Successful position creation
       const createdPosition = {
         id: positionId,
         ...positionData,

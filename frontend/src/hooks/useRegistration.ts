@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registrationAPI } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { getDeviceFingerprint } from '@/utils/fingerprint';
 
 export interface RegistrationData {
   // Step 1: Personal Data
@@ -27,6 +28,9 @@ export interface RegistrationData {
   lnMarketsApiKey?: string;
   lnMarketsApiSecret?: string;
   lnMarketsPassphrase?: string;
+  
+  // Anti-fraud
+  fingerprint?: string;
 }
 
 export interface RegistrationProgress {
@@ -100,11 +104,10 @@ export const useRegistration = () => {
         },
       }));
 
-      // Navigate to next step
-      navigate('/register/plan', {
+      // Navigate to email verification required
+      navigate('/verify-email-required', {
         state: {
-          sessionToken: response.data.sessionToken,
-          personalData: data,
+          email: data.email,
         },
       });
 
@@ -131,10 +134,14 @@ export const useRegistration = () => {
     try {
       console.log('📋 REGISTRATION - Selecting plan:', data.planId);
 
+      // Obter fingerprint do dispositivo
+      const fingerprint = await getDeviceFingerprint();
+
       const response = await registrationAPI.selectPlan({
         planId: data.planId!,
         billingPeriod: data.billingPeriod!,
         sessionToken: data.sessionToken || state.sessionToken || undefined,
+        fingerprint,
       });
 
       console.log('✅ REGISTRATION - Plan selected:', response.data);
@@ -154,19 +161,23 @@ export const useRegistration = () => {
       }));
 
       // Navigate to next step
-      if (response.data.nextStep === 'credentials') {
-        // Free plan or 100% discount - go directly to credentials
-        navigate('/register/credentials', {
+      if (response.data.nextStep === 'completed') {
+        // Save sessionToken for onboarding
+        if (data.sessionToken) {
+          localStorage.setItem('registrationSessionToken', data.sessionToken);
+        }
+        
+        // Registration completed - redirect to onboarding
+        navigate('/onboarding', {
           state: {
-            sessionToken: state.sessionToken,
-            personalData: state.progress?.personalData,
-            selectedPlan: data,
-            couponData: response.data.couponData,
+            message: 'Registration completed successfully! Let\'s set up your account.',
+            email: state.progress?.personalData?.email,
+            sessionToken: data.sessionToken,
           },
         });
       } else {
         // Go to payment
-        navigate('/register/plan/payment', {
+        navigate('/register/payment', {
           state: {
             sessionToken: state.sessionToken,
             personalData: state.progress?.personalData,
@@ -221,13 +232,11 @@ export const useRegistration = () => {
         },
       }));
 
-      // Navigate to credentials
-      navigate('/register/credentials', {
+      // Navigate to onboarding after payment completion
+      navigate('/onboarding', {
         state: {
-          sessionToken: state.sessionToken,
-          personalData: state.progress?.personalData,
-          selectedPlan: state.progress?.selectedPlan,
-          paymentData: data,
+          message: 'Payment processed successfully! Let\'s set up your account.',
+          email: state.progress?.personalData?.email,
         },
       });
 
@@ -246,58 +255,6 @@ export const useRegistration = () => {
     }
   }, [state.sessionToken, state.progress, navigate, setLoading, clearError, setError]);
 
-  // Step 4: Save credentials
-  const saveCredentials = useCallback(async (data: Partial<RegistrationData>) => {
-    setLoading(true);
-    clearError();
-
-    try {
-      console.log('🔐 REGISTRATION - Saving credentials');
-
-      const response = await registrationAPI.saveCredentials({
-        lnMarketsApiKey: data.lnMarketsApiKey!,
-        lnMarketsApiSecret: data.lnMarketsApiSecret!,
-        lnMarketsPassphrase: data.lnMarketsPassphrase!,
-        sessionToken: state.sessionToken || undefined,
-      });
-
-      console.log('✅ REGISTRATION - Credentials saved, registration completed:', response.data);
-
-      setState(prev => ({
-        ...prev,
-        currentStep: 'completed',
-        progress: {
-          currentStep: 'completed',
-          completedSteps: [...(prev.progress?.completedSteps || []), 'credentials'],
-          credentialsData: data,
-          personalData: prev.progress?.personalData,
-          selectedPlan: prev.progress?.selectedPlan,
-          paymentData: prev.progress?.paymentData,
-          couponCode: prev.progress?.couponCode,
-        },
-      }));
-
-      // Navigate to success page or login
-      navigate('/login', {
-        state: {
-          message: 'Registration completed successfully! Please log in.',
-        },
-      });
-
-      return response.data;
-    } catch (error: any) {
-      console.error('❌ REGISTRATION - Credentials error:', error);
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.errors?.[0]?.message ||
-                          'Failed to save credentials';
-      
-      setError(errorMessage);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [state.sessionToken, state.progress, navigate, setLoading, clearError, setError]);
 
   // Get registration progress
   const getProgress = useCallback(async (sessionToken?: string) => {
@@ -352,6 +309,75 @@ export const useRegistration = () => {
     });
   }, []);
 
+  // Validate verification code
+  const validateVerificationCode = useCallback(async (code: string) => {
+    setLoading(true);
+    clearError();
+
+    try {
+      console.log('🔐 REGISTRATION - Validating verification code');
+
+      const fingerprint = await getDeviceFingerprint();
+
+      const response = await registrationAPI.validateVerificationCode({
+        sessionToken: state.sessionToken!,
+        code,
+        fingerprint,
+      });
+
+      console.log('✅ REGISTRATION - Code validated:', response.data);
+
+      // Navigate to onboarding
+      navigate('/onboarding', {
+        state: {
+          message: 'Registration completed successfully! Let\'s set up your account.',
+          email: state.progress?.personalData?.email,
+        },
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ REGISTRATION - Code validation error:', error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.errorCode ||
+                          'Invalid or expired code';
+      
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [state.sessionToken, state.progress, navigate, setLoading, clearError, setError]);
+
+  // Resend verification code
+  const resendVerificationCode = useCallback(async () => {
+    setLoading(true);
+    clearError();
+
+    try {
+      console.log('🔄 REGISTRATION - Resending verification code');
+
+      const response = await registrationAPI.resendVerificationCode({
+        sessionToken: state.sessionToken!,
+      });
+
+      console.log('✅ REGISTRATION - Code resent:', response.data);
+
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ REGISTRATION - Resend code error:', error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          'Failed to resend verification code';
+      
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [state.sessionToken, setLoading, clearError, setError]);
+
   return {
     // State
     isLoading: state.isLoading,
@@ -364,10 +390,11 @@ export const useRegistration = () => {
     savePersonalData,
     selectPlan,
     processPayment,
-    saveCredentials,
     getProgress,
     initializeRegistration,
     resetRegistration,
     clearError,
+    validateVerificationCode,
+    resendVerificationCode,
   };
 };

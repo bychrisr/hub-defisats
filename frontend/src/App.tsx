@@ -28,9 +28,11 @@ import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
-import RegisterPlan from '@/pages/RegisterPlan';
 import RegisterCredentials from '@/pages/RegisterCredentials';
-import Payment from '@/pages/Payment';
+import VerifyEmail from '@/pages/VerifyEmail';
+import VerifyEmailRequired from '@/pages/VerifyEmailRequired';
+import Onboarding from '@/pages/Onboarding';
+import Plans from '@/pages/Plans';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
@@ -67,7 +69,7 @@ import AdminCoupons from '@/pages/admin/Coupons';
 import AdminAlerts from '@/pages/admin/Alerts';
 import AdminSettings from '@/pages/admin/Settings';
 import AdminTooltips from '@/pages/admin/Tooltips';
-import { Plans } from '@/pages/admin/Plans';
+import { Plans as AdminPlans } from '@/pages/admin/Plans';
 import PlanLimitsManagement from '@/pages/admin/PlanLimitsManagement';
 import ExchangesManagement from '@/pages/admin/ExchangesManagement';
 import TradingAnalytics from '@/pages/admin/TradingAnalytics';
@@ -126,6 +128,12 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Se está autenticado E tem dados do usuário, redirecionar para página apropriada
   if (isAuthenticated && user) {
+    // Verificar se precisa de onboarding
+    if (!user.onboarding_completed) {
+      console.log('🔄 PUBLIC ROUTE - User needs onboarding, redirecting to onboarding');
+      return <Navigate to="/onboarding" replace />;
+    }
+    
     const redirectTo = user.is_admin ? '/admin' : '/dashboard';
     console.log('🔄 PUBLIC ROUTE - User is authenticated, redirecting to:', redirectTo, { is_admin: user.is_admin });
     return <Navigate to={redirectTo} replace />;
@@ -249,28 +257,36 @@ const App = () => {
                 </PublicRoute>
               }
             />
-                  <Route
-              path="/register/plan"
-                element={
-                  <PublicRoute>
-                  <RegisterPlan />
+            <Route
+              path="/verify-email"
+              element={
+                <PublicRoute>
+                  <VerifyEmail />
                 </PublicRoute>
               }
             />
             <Route
-              path="/register/credentials"
+              path="/verify-email-required"
               element={
                 <PublicRoute>
-                  <RegisterCredentials />
+                  <VerifyEmailRequired />
                 </PublicRoute>
               }
             />
             <Route
-              path="/register/plan/payment"
+              path="/onboarding"
               element={
-                <PublicRoute>
-                  <Payment />
-                </PublicRoute>
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/plans"
+              element={
+                <ProtectedRoute>
+                  <Plans />
+                </ProtectedRoute>
               }
             />
                   <Route
@@ -542,7 +558,7 @@ const App = () => {
               <Route path="rate-limiting" element={<RateLimiting />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="exchanges" element={<ExchangesManagement />} />
-              <Route path="plans" element={<Plans />} />
+              <Route path="plans" element={<AdminPlans />} />
               <Route path="plan-limits" element={<PlanLimitsManagement />} />
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="settings" element={<AdminSettings />} />

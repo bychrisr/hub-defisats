@@ -48,6 +48,9 @@ import { securityConfigRoutes } from './routes/security-config.routes';
 import { adminAdvancedRoutes } from './routes/admin-advanced.routes';
 import { planRoutes } from './routes/plan.routes';
 import { healthRoutes } from './routes/health.routes';
+import { entitlementsRoutes } from './routes/entitlements.routes';
+import { plansRoutes } from './routes/plans.routes';
+import { analyticsRoutes } from './routes/analytics.routes';
 import { swCacheRoutes } from './routes/sw-cache.routes';
 import { tooltipRoutes } from './routes/tooltip.routes';
 import { uploadRoutes } from './routes/upload.routes';
@@ -69,6 +72,10 @@ import { exchangesRoutes } from './routes/exchanges.routes';
 import { passwordResetRoutes } from './routes/password-reset.routes';
 import { registrationRoutes } from './routes/registration.routes';
 import { testnetFaucetRoutes } from './routes/testnet-faucet.routes';
+import { exchangeRoutes } from './routes/exchange.routes';
+import { registrationExchangesRoutes } from './routes/registration-exchanges.routes';
+import { onboardingRoutes } from './routes/onboarding.routes';
+import { emailRoutes } from './routes/email.routes';
 import { lndRoutes } from './routes/lnd.routes';
 import { lndSyncMonitorRoutes } from './routes/lnd-sync-monitor.routes';
 import { lndSyncSimpleRoutes } from './routes/lnd-sync-simple.routes';
@@ -545,6 +552,20 @@ async function registerRoutes() {
   await fastify.register(registrationRoutes, { prefix: '/api/registration' });
   console.log('✅ Registration routes registered');
 
+  await fastify.register(exchangeRoutes, { prefix: '/api/exchange' });
+  console.log('✅ Exchange routes registered');
+
+  await fastify.register(registrationExchangesRoutes);
+  console.log('✅ Registration exchanges routes registered');
+
+  // Onboarding routes
+  await fastify.register(onboardingRoutes);
+  console.log('✅ Onboarding routes registered');
+
+  // Email routes (dev/debug)
+  await fastify.register(emailRoutes);
+  console.log('✅ Email routes registered');
+
   // Testnet Faucet routes
   await fastify.register(testnetFaucetRoutes, { prefix: '/api/testnet-faucet' });
   console.log('✅ Testnet Faucet routes registered');
@@ -697,6 +718,9 @@ async function registerRoutes() {
   // Advanced admin routes
   await fastify.register(adminAdvancedRoutes);
   await fastify.register(planRoutes);
+  await fastify.register(entitlementsRoutes);
+  await fastify.register(plansRoutes);
+  await fastify.register(analyticsRoutes);
   console.log('✅ Advanced admin routes registered');
 
   // Validation routes (with /api prefix but without authentication)

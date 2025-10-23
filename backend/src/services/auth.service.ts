@@ -174,6 +174,11 @@ export class AuthService {
       );
     }
 
+    // Verify email before allowing login
+    if (!user.email_verified) {
+      throw new Error('EMAIL_NOT_VERIFIED');
+    }
+
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
     if (!isValidPassword) {
@@ -181,16 +186,17 @@ export class AuthService {
     }
 
     // Check if this is the first login
-    const isFirstLogin = !user.last_login_at;
+    const isFirstLogin = !user.first_login_at;
     
     if (isFirstLogin) {
       console.log('🎉 AUTH SERVICE - First login detected for user:', user.id);
       
-      // Activate user on first login
+      // Activate user on first login and set first_login_at
       await this.prisma.user.update({
         where: { id: user.id },
         data: { 
           is_active: true,
+          first_login_at: new Date(),
           last_login_at: new Date(),
           last_activity_at: new Date() 
         },
@@ -290,6 +296,9 @@ export class AuthService {
       plan_type: user.plan_type as PlanType,
       is_admin: !!adminUser,
       user_balance: userBalance,
+      requiresOnboarding: !user.onboarding_completed,
+      onboardingCompleted: user.onboarding_completed,
+      firstLoginAt: user.first_login_at,
     };
     
     console.log('📤 AUTH SERVICE - Login response:', response);
@@ -604,5 +613,216 @@ export class AuthService {
     decrypted += decipher.final('utf8');
 
     return decrypted;
+  }
+
+  /**
+   * Gera token de verificação de email
+   */
+  async generateEmailVerificationToken(userId: string): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        email_verification_token: token,
+        email_verification_expires: expires,
+      },
+    });
+
+    console.log(`📧 Email verification token generated for user: ${userId}`);
+    return token;
+  }
+
+  /**
+   * Verifica token de email e ativa conta
+   */
+  async verifyEmailToken(token: string): Promise<{ success: boolean; userId?: string; email?: string }> {
+    console.log('🔍 AUTH SERVICE - verifyEmailToken called');
+    console.log('🔍 AUTH SERVICE - Token length:', token.length);
+    console.log('🔍 AUTH SERVICE - Token preview:', token.substring(0, 10) + '...');
+    
+    try {
+      // 1. Hash o token recebido para comparar com o DB
+      const tokenHash = crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
+      
+      console.log('🔍 AUTH SERVICE - Token hash:', tokenHash.substring(0, 10) + '...');
+      
+      // 2. Buscar usuário pelo hash do token
+      const user = await this.prisma.user.findFirst({
+        where: {
+          email_verification_token: tokenHash,
+          email_verification_expires: {
+            gte: new Date(),
+          },
+        },
+      });
+      
+      if (!user) {
+        console.log('❌ AUTH SERVICE - Token not found or expired');
+        return { success: false };
+      }
+      
+      console.log('✅ AUTH SERVICE - Token valid for user:', user.email);
+      
+      return {
+        success: true,
+        userId: user.id,
+        email: user.email
+      };
+    } catch (error) {
+      console.error('❌ AUTH SERVICE - Error validating token:', error);
+      return { success: false };
+    }
+  }
+
+  /**
+   * Gera OTP para verificação de email
+   */
+  async generateOTP(userId: string): Promise<string> {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
+    
+    // Temporariamente usar password_reset_token para OTP até migração
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        password_reset_token: otpHash,
+        password_reset_expires: new Date(Date.now() + 10 * 60 * 1000) // 10 minutos
+      }
+    });
+    
+    return otp;
+  }
+
+  /**
+   * Valida OTP de verificação de email
+   */
+  async validateOTP(email: string, code: string): Promise<{ success: boolean; jwt?: string }> {
+    try {
+      const user = await this.prisma.user.findUnique({ 
+        where: { email: email.toLowerCase() } 
+      });
+      
+      if (!user || !user.password_reset_token) {
+        return { success: false };
+      }
+      
+      if (user.password_reset_expires && user.password_reset_expires < new Date()) {
+        return { success: false };
+      }
+      
+      const isValid = await bcrypt.compare(code, user.password_reset_token);
+      
+      if (!isValid) {
+        return { success: false };
+      }
+      
+      // Marcar como verificado
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          email_verified: true,
+          account_status: 'active',
+          password_reset_token: null,
+          password_reset_expires: null
+        }
+      });
+      
+      // Criar entitlement FREE
+      await this.ensureFreeEntitlement(user.id);
+      
+      // Gerar JWT
+      const token = await this.fastify.jwt.sign({
+        sub: user.id,
+        email: user.email,
+        email_verified: true
+      });
+      
+      return { success: true, jwt: token };
+    } catch (error) {
+      this.fastify.log.error('Error validating OTP:', error);
+      return { success: false };
+    }
+  }
+
+  /**
+   * Garante que o usuário tenha entitlement FREE
+   */
+  async ensureFreeEntitlement(userId: string): Promise<void> {
+    try {
+      await this.prisma.userEntitlements.upsert({
+        where: { user_id: userId },
+        create: {
+          user_id: userId,
+          plan: 'FREE',
+          feature_set: 'free',
+          demo_mode: true
+        },
+        update: {}
+      });
+    } catch (error) {
+      this.fastify.log.error('Error ensuring free entitlement:', error);
+    }
+  }
+
+  /**
+   * Reenvia email de verificação (com rate limit)
+   */
+  async resendVerificationEmail(email: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      // Não revelar se usuário existe (segurança)
+      return { success: true, message: 'If the email exists, verification email will be sent' };
+    }
+
+    if (user.email_verified) {
+      return { success: false, message: 'Email already verified' };
+    }
+
+    // Verificar rate limit (máximo 5 emails por dia)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const resendCount = await this.prisma.auditLog.count({
+      where: {
+        user_id: user.id,
+        action: 'email_verification_resent',
+        created_at: {
+          gte: today,
+        },
+      },
+    });
+
+    if (resendCount >= 5) {
+      return { success: false, message: 'Too many resend attempts. Try again tomorrow.' };
+    }
+
+    // Gerar novo token
+    const token = await this.generateEmailVerificationToken(user.id);
+
+    // Log da ação
+    await this.prisma.auditLog.create({
+      data: {
+        user_id: user.id,
+        action: 'email_verification_resent',
+        ip_address: '0.0.0.0', // Será atualizado pelo controller
+        details: { email: user.email },
+      },
+    });
+
+    // Enviar email (será implementado pelo controller usando EmailService)
+    console.log(`📧 Verification email resend requested for: ${email}`);
+    
+    return {
+      success: true,
+      message: 'Verification email sent',
+    };
   }
 }

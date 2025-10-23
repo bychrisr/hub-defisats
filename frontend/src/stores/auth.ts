@@ -11,6 +11,8 @@ export interface User {
   created_at: string;
   updated_at: string;
   last_activity_at?: string;
+  first_login_at?: string;
+  onboarding_completed?: boolean;
   ln_markets_api_key?: string;
   ln_markets_api_secret?: string;
   ln_markets_passphrase?: string;
@@ -23,6 +25,7 @@ interface AuthState {
   isLoading: boolean;
   isInitialized: boolean; // Flag para saber se a inicialização foi concluída
   error: string | null;
+  showResendEmailModal: boolean;
 }
 
 interface AuthActions {
@@ -51,6 +54,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       isLoading: false,
       isInitialized: false,
       error: null,
+      showResendEmailModal: false,
 
       // Actions
       login: async (emailOrUsername: string, password: string) => {
@@ -71,8 +75,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           console.log('🔄 AUTH STORE - response.data:', response.data);
           console.log('🔄 AUTH STORE - response.status:', response.status);
           
-          const { user_id, token, refresh_token, plan_type } = response.data;
-          console.log('🔄 AUTH STORE - Destructured response data:', { user_id, token: token ? 'EXISTS' : 'MISSING', refresh_token: refresh_token ? 'EXISTS' : 'MISSING', plan_type });
+          const { user_id, token, refresh_token, plan_type, requiresOnboarding, onboardingCompleted, firstLoginAt } = response.data;
+          console.log('🔄 AUTH STORE - Destructured response data:', { user_id, token: token ? 'EXISTS' : 'MISSING', refresh_token: refresh_token ? 'EXISTS' : 'MISSING', plan_type, requiresOnboarding, onboardingCompleted, firstLoginAt });
 
           // Store tokens
           console.log('💾 Storing token in localStorage:', '[REDACTED]');
@@ -103,7 +107,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           console.log('❌ AUTH STORE - Error status:', error.response?.status);
           console.log('❌ AUTH STORE - Error data:', error.response?.data);
           
-          const errorMessage = error.response?.data?.message || 'Login failed';
+          const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+          
+          // Verificar se é erro de email não verificado
+          if (errorMessage === 'EMAIL_NOT_VERIFIED') {
+            set({ 
+              error: 'Por favor, verifique seu email antes de fazer login. Verifique sua caixa de entrada e spam.',
+              isLoading: false,
+              showResendEmailModal: true,
+            });
+            throw new Error('EMAIL_NOT_VERIFIED');
+          }
           console.log('❌ AUTH STORE - Error message to set:', errorMessage);
           
           set({
@@ -214,6 +228,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             user: {
               ...user,
               is_admin: isAdmin,
+              first_login_at: user.first_login_at,
+              onboarding_completed: user.onboarding_completed,
             },
             isAuthenticated: true,
             isLoading: false,

@@ -228,7 +228,20 @@ export const registrationAPI = {
     planId: 'free' | 'basic' | 'advanced' | 'pro' | 'lifetime';
     billingPeriod: 'monthly' | 'quarterly' | 'yearly';
     sessionToken?: string;
+    fingerprint?: string;
   }) => api.post('/api/registration/select-plan', data),
+
+  // Validate verification code
+  validateVerificationCode: (data: {
+    sessionToken: string;
+    code: string;
+    fingerprint?: string;
+  }) => api.post('/api/registration/validate-code', data),
+
+  // Resend verification code
+  resendVerificationCode: (data: {
+    sessionToken: string;
+  }) => api.post('/api/registration/resend-code', data),
 
   // Step 3: Process payment
   processPayment: (data: {

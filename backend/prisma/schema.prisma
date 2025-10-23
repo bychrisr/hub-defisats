@@ -25,6 +25,8 @@ model User {
   email_verified             Boolean?                  @default(false)
   email_verification_token   String?
   email_verification_expires DateTime?                 @db.Timestamp(6)
+  otp_hash                   String?
+  otp_expires                DateTime?                 @db.Timestamp(6)
   password_reset_token       String?
   password_reset_expires     DateTime?                 @db.Timestamp(6)
   two_factor_enabled         Boolean?                  @default(false)
@@ -35,6 +37,9 @@ model User {
   last_login_ip              String?
   last_login_user_agent      String?
   last_login_at              DateTime?                 @db.Timestamp(6)
+  first_login_at             DateTime?                 @db.Timestamp(6)
+  onboarding_completed       Boolean                   @default(false)
+  account_status             String                    @default("pending_verification") // pending_verification | active | suspended
   plan_type                  PlanType                  @default(free)
   preferences                Json?
   bio                        String?
@@ -71,10 +76,28 @@ model User {
   in_app_notifications        InAppNotification[]
   notification_preferences    UserNotificationPreferences?
   push_tokens                 UserPushTokens[]
+  coupon_usages               CouponUsage[]
+
+  user_entitlements UserEntitlements?
 
   @@index([email], map: "idx_user_email")
   @@index([email_verification_token], map: "idx_user_email_verification_token")
   @@index([password_reset_token], map: "idx_user_password_reset_token")
+  @@map("User")
+}
+
+model UserEntitlements {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  plan        String   @default("FREE")
+  feature_set String   @default("free")
+  demo_mode   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@map("user_entitlements")
 }
 
 model Automation {
@@ -234,7 +257,11 @@ model Coupon {
   created_at          DateTime     @default(now()) @db.Timestamp(6)
   updated_at          DateTime     @default(now()) @db.Timestamp(6)
   plan_type           PlanType
+  max_uses_per_ip          Int?         @default(2)
+  max_uses_per_fingerprint Int?         @default(2)
+  cooldown_period_hours    Int?         @default(168) // 7 dias
   user_coupons        UserCoupon[] @relation("CouponUserRelation")
+  coupon_usages       CouponUsage[]
 
   @@index([code], map: "idx_coupon_code")
   @@index([is_active], map: "idx_coupon_active")
@@ -706,6 +733,9 @@ model RegistrationProgress {
   credentials_data Json?
   coupon_code      String?
   session_token    String?
+  verification_code String?
+  verification_code_expires DateTime? @db.Timestamp(6)
+  risk_score       Int?      @default(0)
   expires_at       DateTime? @db.Timestamp(6)
   created_at       DateTime  @default(now()) @db.Timestamp(6)
   updated_at       DateTime  @default(now()) @db.Timestamp(6)
@@ -907,6 +937,54 @@ model UserPushTokens {
   @@index([user_id])
   @@index([is_active])
   @@map("userPushTokens")
+}
+
+model CouponUsage {
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  coupon_id         String
+  user_id           String
+  ip_address        String
+  device_fingerprint String?
+  user_agent        String
+  risk_score        Int      @default(0)
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  
+  coupon Coupon @relation(fields: [coupon_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([coupon_id])
+  @@index([ip_address])
+  @@index([device_fingerprint])
+  @@map("coupon_usage")
+}
+
+model Blacklist {
+  id         String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  type       String    // 'ip' | 'fingerprint' | 'email_domain'
+  value      String
+  reason     String
+  auto_added Boolean   @default(false)
+  expires_at DateTime? @db.Timestamp(6)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  
+  @@unique([type, value])
+  @@index([type, value])
+  @@map("blacklist")
+}
+
+model RiskLog {
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id           String?
+  ip_address        String
+  device_fingerprint String?
+  risk_score        Int
+  factors           Json     // Array de fatores que contribuíram
+  action_taken      String   // 'approved' | 'email_verification' | 'blocked'
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  
+  @@index([ip_address])
+  @@index([risk_score])
+  @@map("risk_log")
 }
 
 enum PlanType {

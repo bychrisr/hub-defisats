@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center; color: white; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 40px 30px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+    .stat-box { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-box h3 { margin: 0 0 10px 0; font-size: 14px; color: #666; }
+    .stat-box p { margin: 0; font-size: 24px; font-weight: 700; color: #667eea; }
+    .footer { background: #f8f9fa; padding: 30px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header"><h1>📊 Relatório Diário</h1><p>{{today}}</p></div>
+    <div class="content">
+      <h2>Olá, {{userName}}!</h2>
+      <p>Aqui está o resumo das suas atividades de hoje:</p>
+      <div class="stats">
+        <div class="stat-box"><h3>PL Total</h3><p>{{totalPL}} sats</p></div>
+        <div class="stat-box"><h3>Trades</h3><p>{{totalTrades}}</p></div>
+        <div class="stat-box"><h3>Win Rate</h3><p>{{winRate}}%</p></div>
+        <div class="stat-box"><h3>ROI</h3><p>{{roi}}%</p></div>
+      </div>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="{{dashboardUrl}}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white !important; text-decoration: none; border-radius: 8px; font-weight: 600;">Ver Dashboard Completo</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p><strong>Axisor Platform</strong></p>
+      <p>© 2025 Axisor</p>
+    </div>
+  </div>
+</body>
+</html>
+
+

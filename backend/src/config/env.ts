@@ -80,6 +80,15 @@ const envSchema = z.object({
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
   LOG_FORMAT: z.enum(['json', 'simple']).default('json'),
+
+  // Feature Flags
+  FEATURE_VERIFY_BLOCK_HARD: z.string().default('false'),
+  FEATURE_GATE_ON_TOUR: z.string().default('false'),
+  FEATURE_GATE_ON_BLOCKED_ACTION: z.string().default('false'),
+  FEATURE_PLANS_POST_AUTH: z.string().default('false'),
+  PLAN_GATE_COOLDOWN_SEC: z.string().transform(Number).default(90),
+  OTP_MAX_ATTEMPTS_15M: z.string().transform(Number).default(5),
+  EMAIL_VERIF_MAX_RESENDS_PER_HOUR: z.string().transform(Number).default(3),
 });
 
 // Validate environment variables
@@ -336,6 +345,17 @@ export const securityConfig = {
   },
 };
 
+// Feature flags configuration
+export const featureFlags = {
+  verifyBlockHard: env.FEATURE_VERIFY_BLOCK_HARD === 'true',
+  gateOnTour: env.FEATURE_GATE_ON_TOUR === 'true',
+  gateOnBlockedAction: env.FEATURE_GATE_ON_BLOCKED_ACTION === 'true',
+  plansPostAuth: env.FEATURE_PLANS_POST_AUTH === 'true',
+  planGateCooldownSec: env.PLAN_GATE_COOLDOWN_SEC,
+  otpMaxAttempts15M: env.OTP_MAX_ATTEMPTS_15M,
+  emailVerifMaxResendsPerHour: env.EMAIL_VERIF_MAX_RESENDS_PER_HOUR,
+};
+
 // Export all configurations
 export const config = {
   env,
@@ -355,4 +375,5 @@ export const config = {
   monitoring: monitoringConfig,
   worker: workerConfig,
   security: securityConfig,
+  featureFlags,
 };

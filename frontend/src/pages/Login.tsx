@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,8 +14,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff, Github } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Github, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
+import { useToast } from '@/components/ui/use-toast';
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1, 'Email or username is required'),
@@ -28,6 +29,25 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+
+  // Verificar se o usuário vem da verificação de email
+  useEffect(() => {
+    const verified = searchParams.get('verified');
+    const message = searchParams.get('message');
+    const email = searchParams.get('email');
+
+    if (verified === 'true' && message === 'account_created') {
+      toast({
+        title: '🎉 Conta criada com sucesso!',
+        description: email 
+          ? `Sua conta foi verificada e está pronta para uso. Faça login com ${email} para continuar.`
+          : 'Sua conta foi verificada e está pronta para uso. Faça login para continuar.',
+        duration: 8000,
+      });
+    }
+  }, [searchParams, toast]);
 
   const {
     register,

@@ -711,4 +711,329 @@ export async function authRoutes(fastify: FastifyInstance) {
       data: rateLimitInfo,
     });
   });
+
+  /**
+   * POST /api/auth/verify-email
+   * Verifica email usando token enviado por email
+   */
+  fastify.post('/verify-email', async (request, reply) => {
+    try {
+      const { token } = request.body as { token: string };
+      
+      if (!token) {
+        return reply.status(400).send({
+          success: false,
+          message: 'Token is required',
+        });
+      }
+
+      const result = await authController.authService.verifyEmailToken(token);
+      
+      if (!result.success) {
+        return reply.status(400).send({
+          success: false,
+          message: 'Invalid or expired verification token',
+        });
+      }
+
+      return {
+        success: true,
+        message: 'Email verified successfully',
+        email: result.email,
+      };
+    } catch (error: any) {
+      fastify.log.error(error);
+      return reply.status(500).send({
+        success: false,
+        message: 'Error verifying email',
+      });
+    }
+  });
+
+  /**
+   * GET /api/auth/test-route
+   * Rota de teste para verificar se o roteamento está funcionando
+   */
+  fastify.get('/test-route', async (request, reply) => {
+    console.log('🚀 TEST ROUTE - test-route called!');
+    return reply.send({ success: true, message: 'Test route working' });
+  });
+
+  /**
+   * GET /verify-email/:token
+   * Link direto de verificação (quando usuário clica no email)
+   */
+  fastify.get('/verify-email/:token', async (request, reply) => {
+    console.log('🚀 AUTH ROUTE - verify-email route called!');
+    console.log('🚀 AUTH ROUTE - Request URL:', request.url);
+    
+    try {
+      const { token } = request.params as { token: string };
+      
+      console.log('🔍 AUTH ROUTE - Token received, length:', token.length);
+      
+      // 1. Validar token
+      const result = await authController.authService.verifyEmailToken(token);
+      
+      if (!result.success) {
+        console.log('❌ AUTH ROUTE - Token validation failed');
+        return reply.redirect(`${process.env.FRONTEND_URL}/verify-email?status=error&message=invalid_token`);
+      }
+      
+      // 2. Buscar usuário e marcar como verificado
+      const user = await prisma.user.update({
+        where: { email: result.email },
+        data: {
+          email_verified: true,
+          account_status: 'active',
+          email_verification_token: null // Invalidar token
+        }
+      });
+      
+      // 3. Criar entitlement FREE
+      await authController.authService.ensureFreeEntitlement(user.id);
+      
+      // 4. Gerar JWT
+      const jwt = await fastify.jwt.sign({
+        sub: user.id,
+        email: user.email,
+        email_verified: true
+      });
+      
+      // 5. Set cookie HttpOnly + Secure
+      reply.setCookie('access_token', jwt, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 // 7 dias
+      });
+      
+      // 6. Redirect para login com mensagem de sucesso
+      console.log('✅ AUTH ROUTE - Email verified, redirecting to login');
+      return reply.redirect(`${process.env.FRONTEND_URL}/login?verified=true&message=account_created&email=${encodeURIComponent(user.email)}`);
+    } catch (error: any) {
+      console.error('❌ AUTH ROUTE - Error:', error);
+      return reply.redirect(`${process.env.FRONTEND_URL}/verify-email?status=error&message=server_error`);
+    }
+  });
+
+  /**
+   * POST /api/auth/resend-verification
+   * Reenvia email de verificação
+   */
+  fastify.post('/resend-verification', {
+    preHandler: [fastify.rateLimit({ max: 3, timeWindow: '1 hour' })],
+  }, async (request, reply) => {
+    try {
+      const { email } = request.body as { email: string };
+      
+      if (!email) {
+        return reply.status(400).send({
+          success: false,
+          message: 'Email is required',
+        });
+      }
+
+      const result = await authController.authService.resendVerificationEmail(email);
+      
+      if (!result.success) {
+        return reply.status(400).send(result);
+      }
+
+      // Se sucesso, enviar email
+      if (result.success) {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user && user.email_verification_token) {
+          const { EmailService } = await import('../services/email.service');
+          const emailService = new EmailService();
+          await emailService.sendVerificationEmail(email, user.email_verification_token);
+        }
+      }
+
+      return result;
+    } catch (error: any) {
+      fastify.log.error(error);
+      return reply.status(500).send({
+        success: false,
+        message: 'Error resending verification email',
+      });
+    }
+  });
+
+  /**
+   * POST /api/auth/verification-status
+   * Verifica status de verificação de email (público)
+   */
+  fastify.post('/verification-status', {
+    schema: {
+      description: 'Check email verification status',
+      tags: ['Authentication'],
+      body: {
+        type: 'object',
+        required: ['email'],
+        properties: {
+          email: { type: 'string', format: 'email' }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            email_verified: { type: 'boolean' },
+            account_status: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const { email } = request.body as { email: string };
+      
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        select: { 
+          email_verified: true, 
+          account_status: true 
+        }
+      });
+      
+      if (!user) {
+        return reply.send({ 
+          email_verified: false, 
+          account_status: 'not_found' 
+        });
+      }
+      
+      return reply.send({
+        email_verified: user.email_verified,
+        account_status: user.account_status
+      });
+    } catch (error: any) {
+      fastify.log.error('Verification status error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'Failed to check verification status'
+      });
+    }
+  });
+
+  /**
+   * POST /api/auth/verify-email/otp
+   * Valida OTP de verificação de email
+   */
+  fastify.post('/verify-email/otp', {
+    preHandler: [fastify.rateLimit({ max: 5, timeWindow: '15 minutes' })],
+    schema: {
+      description: 'Verify email with OTP code',
+      tags: ['Authentication'],
+      body: {
+        type: 'object',
+        required: ['email', 'code'],
+        properties: {
+          email: { type: 'string', format: 'email' },
+          code: { type: 'string', minLength: 6, maxLength: 6 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            jwt: { type: 'string' }
+          }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const { email, code } = request.body as { email: string; code: string };
+      
+      const result = await authController.authService.validateOTP(email, code);
+      
+      if (!result.success) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INVALID_CODE'
+        });
+      }
+      
+      return reply.send({
+        success: true,
+        jwt: result.jwt
+      });
+    } catch (error: any) {
+      fastify.log.error('OTP verification error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  });
+
+  /**
+   * POST /api/email/test-send
+   * Endpoint para testar envio de email (desenvolvimento)
+   */
+  fastify.post('/api/email/test-send', {
+    schema: {
+      description: 'Test email sending functionality',
+      tags: ['Testing'],
+      body: {
+        type: 'object',
+        required: ['to'],
+        properties: {
+          to: { type: 'string', format: 'email' },
+          subject: { type: 'string' },
+          message: { type: 'string' }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            messageId: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const { to, subject = '🧪 Test Email - Axisor', message = 'This is a test email' } = request.body as any;
+      
+      const { EmailService } = await import('../services/email.service');
+      const emailService = new EmailService();
+      
+      // Enviar email de teste
+      await emailService.sendTestEmail(to, subject, message);
+      
+      return reply.send({
+        success: true,
+        message: 'Test email sent successfully',
+        messageId: 'test-' + Date.now()
+      });
+    } catch (error: any) {
+      fastify.log.error('Email test error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: error.message
+      });
+    }
+  });
 }

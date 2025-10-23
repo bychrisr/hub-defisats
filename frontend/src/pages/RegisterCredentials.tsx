@@ -121,17 +121,11 @@ export default function RegisterCredentials() {
     }
   };
 
-  // Dados mock para desenvolvimento
-  const personalData = location.state?.personalData || {
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    username: 'johndoe',
-    coupon_code: null
-  };
+  // Get data from location state
+  const personalData = location.state?.personalData;
   const selectedPlan = typeof location.state?.selectedPlan === 'string' 
     ? location.state.selectedPlan 
-    : location.state?.selectedPlan?.planId || 'free';
+    : location.state?.selectedPlan?.planId;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -281,6 +275,23 @@ export default function RegisterCredentials() {
                   </div>
                 </div>
               </div>
+
+              {/* Skip Button */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  navigate('/onboarding', {
+                    state: { 
+                      fromRegistration: true,
+                      message: 'Registration completed! Take a quick tour to learn the platform.' 
+                    }
+                  });
+                }}
+                className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
+                Skip for now (I'll add credentials later)
+              </Button>
 
               {/* Complete Registration Button */}
               <Button

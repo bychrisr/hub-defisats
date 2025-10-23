@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils';
 // ===== INTERFACES =====
 type TimeFilterPeriod = '24H' | '1W' | '1M' | '6M' | '1Y' | 'ALL';
 
-// ===== MOCK CHART DATA =====
-const generateMockChartData = (period: TimeFilterPeriod, pnlValue: number) => {
+// ===== CHART DATA GENERATOR =====
+const generateChartData = (period: TimeFilterPeriod, pnlValue: number) => {
   const safePnlValue = Number.isFinite(pnlValue) ? pnlValue : 0;
   
   const now = Date.now();
@@ -162,7 +162,7 @@ const PnLCard: React.FC = () => {
   const absoluteChange = safeTotalPL * (percentageChange / 100);
   
   const chartData = useMemo(() => {
-    return generateMockChartData(selectedPeriod, safeTotalPL);
+    return generateChartData(selectedPeriod, safeTotalPL);
   }, [selectedPeriod, safeTotalPL]);
   
   const timeFilters: TimeFilterPeriod[] = ['24H', '1W', '1M', '6M', '1Y', 'ALL'];

@@ -1,9 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { RegistrationService } from '../services/registration.service';
+import { AntiFraudService } from '../services/anti-fraud.service';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
+const antiFraudService = new AntiFraudService(prisma);
 
 // Schemas for validation
 const PersonalDataSchema = z.object({
@@ -23,6 +25,13 @@ const PlanSelectionSchema = z.object({
   planId: z.enum(['free', 'basic', 'advanced', 'pro', 'lifetime']),
   billingPeriod: z.enum(['monthly', 'quarterly', 'yearly']),
   sessionToken: z.string().optional(),
+  fingerprint: z.string().optional(),
+});
+
+const VerificationCodeSchema = z.object({
+  sessionToken: z.string().min(1, 'Session token is required'),
+  code: z.string().length(6, 'Code must be 6 digits'),
+  fingerprint: z.string().optional(),
 });
 
 const PaymentDataSchema = z.object({
@@ -31,12 +40,6 @@ const PaymentDataSchema = z.object({
   sessionToken: z.string().optional(),
 });
 
-const CredentialsDataSchema = z.object({
-  lnMarketsApiKey: z.string().min(1, 'API Key is required'),
-  lnMarketsApiSecret: z.string().min(1, 'API Secret is required'),
-  lnMarketsPassphrase: z.string().min(1, 'Passphrase is required'),
-  sessionToken: z.string().optional(),
-});
 
 export async function registrationRoutes(fastify: FastifyInstance) {
   const registrationService = new RegistrationService(prisma, fastify);
@@ -177,10 +180,23 @@ export async function registrationRoutes(fastify: FastifyInstance) {
       try {
         const body = PlanSelectionSchema.parse(request.body);
         const userId = (request as any).user?.id;
+        
+        // Extrair informações anti-fraude
+        const ipAddress = antiFraudService.extractRealIP(request);
+        const userAgent = antiFraudService.extractUserAgent(request);
+        const fingerprint = body.fingerprint;
 
         console.log('📋 REGISTRATION - Plan selection request received:', body.planId);
+        console.log('🔍 REGISTRATION - Anti-fraud data:', { ipAddress, fingerprint: fingerprint?.substring(0, 8) });
 
-        const result = await registrationService.selectPlan(body, userId, body.sessionToken);
+        const result = await registrationService.selectPlan(
+          body, 
+          undefined, 
+          body.sessionToken,
+          ipAddress,
+          userAgent,
+          fingerprint
+        );
 
         console.log('✅ REGISTRATION - Plan selected successfully');
 
@@ -276,74 +292,6 @@ export async function registrationRoutes(fastify: FastifyInstance) {
     }
   );
 
-  // Step 4: Save credentials
-  fastify.post(
-    '/credentials',
-    {
-      schema: {
-        description: 'Save LN Markets credentials (Step 4 of registration)',
-        tags: ['Registration'],
-        body: {
-          type: 'object',
-          required: ['lnMarketsApiKey', 'lnMarketsApiSecret', 'lnMarketsPassphrase'],
-          properties: {
-            lnMarketsApiKey: { type: 'string', minLength: 1 },
-            lnMarketsApiSecret: { type: 'string', minLength: 1 },
-            lnMarketsPassphrase: { type: 'string', minLength: 1 },
-            sessionToken: { type: 'string' },
-          },
-        },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
-            },
-          },
-          400: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
-            },
-          },
-        },
-      },
-    },
-    async (request, reply) => {
-      try {
-        const body = CredentialsDataSchema.parse(request.body);
-        const userId = (request as any).user?.id;
-
-        console.log('🔐 REGISTRATION - Credentials request received');
-
-        const result = await registrationService.saveCredentials(body, userId, body.sessionToken);
-
-        console.log('✅ REGISTRATION - Credentials saved, registration completed');
-
-        return reply.send(result);
-      } catch (error) {
-        console.error('❌ REGISTRATION - Credentials error:', error);
-
-        if (error instanceof z.ZodError) {
-          return reply.status(400).send({
-            success: false,
-            message: 'Validation failed',
-            errors: error.errors.map(err => ({
-              field: err.path.join('.'),
-              message: err.message,
-            })),
-          });
-        }
-
-        return reply.status(400).send({
-          success: false,
-          message: error instanceof Error ? error.message : 'Failed to save credentials',
-        });
-      }
-    }
-  );
 
   // Get registration progress
   fastify.get(
@@ -459,6 +407,128 @@ export async function registrationRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({
           success: false,
           message: 'Failed to cleanup expired progress',
+        });
+      }
+    }
+  );
+
+  // Validate verification code
+  fastify.post(
+    '/validate-code',
+    {
+      schema: {
+        description: 'Validate verification code (anti-fraud)',
+        tags: ['Registration'],
+        body: {
+          type: 'object',
+          required: ['sessionToken', 'code'],
+          properties: {
+            sessionToken: { type: 'string' },
+            code: { type: 'string', minLength: 6, maxLength: 6 },
+            fingerprint: { type: 'string' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              nextStep: { type: 'string' },
+              message: { type: 'string' },
+              userId: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const body = VerificationCodeSchema.parse(request.body);
+        
+        // Extrair informações anti-fraude
+        const ipAddress = antiFraudService.extractRealIP(request);
+        const userAgent = antiFraudService.extractUserAgent(request);
+
+        console.log('🔐 REGISTRATION - Code validation request received');
+
+        const result = await registrationService.validateVerificationCode(
+          body.sessionToken,
+          body.code,
+          ipAddress,
+          userAgent,
+          body.fingerprint
+        );
+
+        console.log('✅ REGISTRATION - Code validated successfully');
+
+        return reply.send(result);
+      } catch (error) {
+        console.error('❌ REGISTRATION - Code validation error:', error);
+
+        if (error instanceof z.ZodError) {
+          return reply.status(400).send({
+            success: false,
+            message: 'Validation failed',
+            errors: error.errors.map(err => ({
+              field: err.path.join('.'),
+              message: err.message,
+            })),
+          });
+        }
+
+        const errorMessage = error instanceof Error ? error.message : 'Failed to validate code';
+        
+        return reply.status(400).send({
+          success: false,
+          message: errorMessage,
+          errorCode: errorMessage,
+        });
+      }
+    }
+  );
+
+  // Resend verification code
+  fastify.post(
+    '/resend-code',
+    {
+      schema: {
+        description: 'Resend verification code',
+        tags: ['Registration'],
+        body: {
+          type: 'object',
+          required: ['sessionToken'],
+          properties: {
+            sessionToken: { type: 'string' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const { sessionToken } = request.body as { sessionToken: string };
+
+        console.log('🔄 REGISTRATION - Resend code request received');
+
+        const result = await registrationService.resendVerificationCode(sessionToken);
+
+        console.log('✅ REGISTRATION - Code resent successfully');
+
+        return reply.send(result);
+      } catch (error) {
+        console.error('❌ REGISTRATION - Resend code error:', error);
+
+        return reply.status(400).send({
+          success: false,
+          message: error instanceof Error ? error.message : 'Failed to resend code',
         });
       }
     }

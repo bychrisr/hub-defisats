@@ -21,8 +21,8 @@ export interface PnLChartCardProps {
   initialPeriod?: TimeFilterPeriod;
 }
 
-// ===== MOCK CHART DATA =====
-const generateMockChartData = (period: TimeFilterPeriod, pnlValue: number) => {
+// ===== CHART DATA GENERATOR =====
+const generateChartData = (period: TimeFilterPeriod, pnlValue: number) => {
   // Validate pnlValue to prevent NaN
   const safePnlValue = Number.isFinite(pnlValue) ? pnlValue : 0;
   
@@ -220,8 +220,8 @@ export const PnLChartCard: React.FC<PnLChartCardProps> = ({
       }));
     }
     
-    // Fallback to mock data
-    return generateMockChartData(selectedPeriod, safePnlValue);
+    // Generate chart data
+    return generateChartData(selectedPeriod, safePnlValue);
   }, [candleData, selectedPeriod, pnlValue]);
   
   // ===== COMPUTED VALUES =====

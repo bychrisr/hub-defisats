@@ -1,143 +1,188 @@
-/**
- * Exchanges Seeder
- * 
- * Cria exchanges padrão do sistema
- * Inclui LN Markets e estrutura para futuras exchanges
- */
+import { PrismaClient } from '@prisma/client';
 
-import { getPrisma } from '../lib/prisma';
-import { Seeder, SeederResult } from './index';
+export async function seedExchanges(prisma: PrismaClient) {
+  console.log('🌱 Seeding exchanges...');
 
-interface ExchangeData {
-  name: string;
-  slug: string;
-  description: string;
-  website?: string;
-  logo_url?: string;
-  is_active: boolean;
-  api_version?: string;
-  credential_types: {
-    name: string;
-    field_name: string;
-    field_type: 'text' | 'password' | 'url' | 'number';
-    is_required: boolean;
-    description?: string;
-    order: number;
-  }[];
-}
+  // Create LN Markets exchange
+  const lnMarkets = await prisma.exchange.upsert({
+    where: { slug: 'lnmarkets' },
+    update: {},
+    create: {
+      name: 'LN Markets',
+      slug: 'lnmarkets',
+      description: 'Lightning Network futures trading platform',
+      website: 'https://lnmarkets.com',
+      logo_url: 'https://lnmarkets.com/logo.png',
+      is_active: true,
+      api_version: 'v2',
+    },
+  });
 
-const defaultExchanges: ExchangeData[] = [
-  {
-    name: 'LN Markets',
-    slug: 'ln-markets',
-    description: 'The ultimate aggregation layer for Bitcoin derivatives',
-    website: 'https://lnmarkets.com',
-    logo_url: 'https://lnmarkets.com/favicon.ico',
-    is_active: true,
-    api_version: 'v2',
-    credential_types: [
-      {
-        name: 'API Key',
+  // Create credential types for LN Markets
+  await prisma.exchangeCredentialType.upsert({
+    where: {
+      exchange_id_field_name: {
+        exchange_id: lnMarkets.id,
         field_name: 'api_key',
-        field_type: 'password',
-        is_required: true,
-        description: 'Your LN Markets API key',
-        order: 1
       },
-      {
-        name: 'API Secret',
+    },
+    update: {},
+    create: {
+      exchange_id: lnMarkets.id,
+      name: 'API Key',
+      field_name: 'api_key',
+      field_type: 'text',
+      is_required: true,
+      description: 'Your LN Markets API key',
+      order: 1,
+    },
+  });
+
+  await prisma.exchangeCredentialType.upsert({
+    where: {
+      exchange_id_field_name: {
+        exchange_id: lnMarkets.id,
         field_name: 'api_secret',
-        field_type: 'password',
-        is_required: true,
-        description: 'Your LN Markets API secret',
-        order: 2
       },
-      {
-        name: 'Passphrase',
+    },
+    update: {},
+    create: {
+      exchange_id: lnMarkets.id,
+      name: 'API Secret',
+      field_name: 'api_secret',
+      field_type: 'password',
+      is_required: true,
+      description: 'Your LN Markets API secret',
+      order: 2,
+    },
+  });
+
+  await prisma.exchangeCredentialType.upsert({
+    where: {
+      exchange_id_field_name: {
+        exchange_id: lnMarkets.id,
         field_name: 'passphrase',
-        field_type: 'password',
-        is_required: true,
-        description: 'Your LN Markets passphrase',
-        order: 3
-      }
-    ]
-  }
-];
+      },
+    },
+    update: {},
+    create: {
+      exchange_id: lnMarkets.id,
+      name: 'Passphrase',
+      field_name: 'passphrase',
+      field_type: 'password',
+      is_required: true,
+      description: 'Your LN Markets passphrase',
+      order: 3,
+    },
+  });
 
-export const exchangesSeeder: Seeder = {
-  name: 'exchanges',
-  description: 'Creates default cryptocurrency exchanges',
+  // Create Binance exchange (example)
+  const binance = await prisma.exchange.upsert({
+    where: { slug: 'binance' },
+    update: {},
+    create: {
+      name: 'Binance',
+      slug: 'binance',
+      description: 'Global cryptocurrency exchange',
+      website: 'https://binance.com',
+      logo_url: 'https://binance.com/logo.png',
+      is_active: true,
+      api_version: 'v3',
+    },
+  });
 
-  async run(): Promise<SeederResult> {
-    try {
-      const prisma = await getPrisma();
-      
-      // Verificar se já existem exchanges
-      const existingCount = await prisma.exchange.count();
-      
-      if (existingCount > 0) {
-        return {
-          success: true,
-          message: `Exchanges already exist (${existingCount} records). Skipping seeding.`,
-          count: existingCount
-        };
-      }
+  // Create credential types for Binance
+  await prisma.exchangeCredentialType.upsert({
+    where: {
+      exchange_id_field_name: {
+        exchange_id: binance.id,
+        field_name: 'api_key',
+      },
+    },
+    update: {},
+    create: {
+      exchange_id: binance.id,
+      name: 'API Key',
+      field_name: 'api_key',
+      field_type: 'text',
+      is_required: true,
+      description: 'Your Binance API key',
+      order: 1,
+    },
+  });
 
-      let totalCreated = 0;
+  await prisma.exchangeCredentialType.upsert({
+    where: {
+      exchange_id_field_name: {
+        exchange_id: binance.id,
+        field_name: 'api_secret',
+      },
+    },
+    update: {},
+    create: {
+      exchange_id: binance.id,
+      name: 'API Secret',
+      field_name: 'api_secret',
+      field_type: 'password',
+      is_required: true,
+      description: 'Your Binance API secret',
+      order: 2,
+    },
+  });
 
-      // Inserir exchanges e seus tipos de credenciais
-      for (const exchangeData of defaultExchanges) {
-        // Criar exchange
-        const exchange = await prisma.exchange.create({
-          data: {
-            name: exchangeData.name,
-            slug: exchangeData.slug,
-            description: exchangeData.description,
-            website: exchangeData.website,
-            logo_url: exchangeData.logo_url,
-            is_active: exchangeData.is_active,
-            api_version: exchangeData.api_version,
-            created_at: new Date(),
-            updated_at: new Date()
-          }
-        });
+  // Create Bybit exchange (example)
+  const bybit = await prisma.exchange.upsert({
+    where: { slug: 'bybit' },
+    update: {},
+    create: {
+      name: 'Bybit',
+      slug: 'bybit',
+      description: 'Cryptocurrency derivatives exchange',
+      website: 'https://bybit.com',
+      logo_url: 'https://bybit.com/logo.png',
+      is_active: true,
+      api_version: 'v5',
+    },
+  });
 
-        // Criar tipos de credenciais para esta exchange
-        for (const credentialType of exchangeData.credential_types) {
-          await prisma.exchangeCredentialType.create({
-            data: {
-              exchange_id: exchange.id,
-              name: credentialType.name,
-              field_name: credentialType.field_name,
-              field_type: credentialType.field_type,
-              is_required: credentialType.is_required,
-              description: credentialType.description,
-              order: credentialType.order,
-              created_at: new Date(),
-              updated_at: new Date()
-            }
-          });
-        }
+  // Create credential types for Bybit
+  await prisma.exchangeCredentialType.upsert({
+    where: {
+      exchange_id_field_name: {
+        exchange_id: bybit.id,
+        field_name: 'api_key',
+      },
+    },
+    update: {},
+    create: {
+      exchange_id: bybit.id,
+      name: 'API Key',
+      field_name: 'api_key',
+      field_type: 'text',
+      is_required: true,
+      description: 'Your Bybit API key',
+      order: 1,
+    },
+  });
 
-        totalCreated++;
-      }
+  await prisma.exchangeCredentialType.upsert({
+    where: {
+      exchange_id_field_name: {
+        exchange_id: bybit.id,
+        field_name: 'api_secret',
+      },
+    },
+    update: {},
+    create: {
+      exchange_id: bybit.id,
+      name: 'API Secret',
+      field_name: 'api_secret',
+      field_type: 'password',
+      is_required: true,
+      description: 'Your Bybit API secret',
+      order: 2,
+    },
+  });
 
-      // Verificar quantos foram realmente criados
-      const finalExchangeCount = await prisma.exchange.count();
-      const finalCredentialTypesCount = await prisma.exchangeCredentialType.count();
-
-      return {
-        success: true,
-        message: `Successfully created ${finalExchangeCount} exchanges with ${finalCredentialTypesCount} credential types`,
-        count: finalExchangeCount
-      };
-
-    } catch (error: any) {
-      return {
-        success: false,
-        message: `Failed to seed exchanges: ${error.message}`,
-        errors: [error.message]
-      };
-    }
-  }
-};
+  console.log('✅ Exchanges seeded successfully');
+}
