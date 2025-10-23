@@ -1,0 +1,222 @@
+/* frontend/src/styles/verify-email-improvements.css */
+
+/* OTP Container - 6 caixas individuais */
+.verify-email-otp-container {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.verify-email-otp-input {
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border: 2px solid #475569;
+  border-radius: 0.5rem;
+  background: rgba(30, 41, 59, 0.5);
+  color: #f1f5f9;
+  transition: all 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.verify-email-otp-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.verify-email-otp-input:not(:placeholder-shown) {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: #3b82f6;
+}
+
+/* CTA Button - Contraste melhorado */
+.verify-email-cta-button {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  position: relative;
+  z-index: 1;
+  min-height: 48px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.verify-email-cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: -1;
+  border-radius: inherit;
+}
+
+.verify-email-cta-button:hover::before,
+.verify-email-cta-button:focus::before {
+  opacity: 1;
+}
+
+.verify-email-cta-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5), 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Resend Button */
+.verify-email-resend-button {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid #475569;
+  color: #94a3b8;
+  min-height: 44px;
+  transition: all 0.2s ease;
+}
+
+.verify-email-resend-button:hover:not(:disabled) {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: #64748b;
+  color: #cbd5e1;
+}
+
+.verify-email-resend-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.verify-email-resend-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Provider Buttons */
+.verify-email-provider-btn {
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid #475569;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  min-height: 36px;
+  transition: all 0.2s ease;
+}
+
+.verify-email-provider-btn:hover {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: #64748b;
+  color: #cbd5e1;
+}
+
+.verify-email-provider-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Back Button */
+.verify-email-back-button {
+  color: #94a3b8;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.verify-email-back-button:hover {
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.3);
+}
+
+.verify-email-back-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Change Email Modal */
+.verify-email-change-modal {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid #475569;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+/* Focus rings consistentes */
+.verify-email-cta-button:focus,
+.verify-email-resend-button:focus,
+.verify-email-provider-btn:focus,
+.verify-email-back-button:focus,
+.verify-email-otp-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .verify-email-cta-button {
+    background: #1d4ed8;
+    color: #ffffff;
+  }
+  
+  .verify-email-otp-input {
+    border-color: #ffffff;
+    background: #000000;
+    color: #ffffff;
+  }
+  
+  .verify-email-otp-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px #3b82f6;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .verify-email-otp-container {
+    gap: 0.5rem;
+  }
+  
+  .verify-email-otp-input {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+  
+  .verify-email-provider-btn {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+/* Animation for OTP inputs */
+.verify-email-otp-input {
+  animation: none;
+}
+
+.verify-email-otp-input:focus {
+  animation: pulse 0.2s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Loading state for CTA */
+.verify-email-cta-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Error state for OTP inputs */
+.verify-email-otp-input.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.verify-email-otp-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
