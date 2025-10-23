@@ -38,8 +38,8 @@ const LNMarketsHeader: React.FC = () => {
 
   // Memoizar dados do mercado para evitar re-renders desnecessários
   const memoizedMarketData = useMemo(() => {
-    // Se não estiver autenticado, usar dados públicos
-    if (!isAuthenticated && publicData) {
+    // Priorizar dados públicos se disponíveis (sempre mais confiáveis)
+    if (publicData) {
       const newMarketData = {
         index: publicData.index,
         index24hChange: publicData.index24hChange,
@@ -53,7 +53,7 @@ const LNMarketsHeader: React.FC = () => {
       return newMarketData;
     }
     
-    // Se autenticado, usar dados da LN Markets
+    // Se autenticado e dados públicos não disponíveis, usar dados da LN Markets
     if (isAuthenticated && lnMarketsData) {
       const newMarketData = {
         index: lnMarketsData.index,

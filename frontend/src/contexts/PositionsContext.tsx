@@ -642,14 +642,14 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         let marketIndex: MarketIndexData | null = null;
         let marketIndexError: string | null = null;
 
-        // ✅ USAR DADOS DO ENDPOINT UNIFICADO
-        if (indexData && indexData.index) {
+        // ✅ USAR DADOS DO ENDPOINT UNIFICADO APENAS SE VÁLIDOS
+        if (indexData && indexData.index && indexData.nextFunding && indexData.rate) {
           marketIndex = {
             index: indexData.index,
             index24hChange: indexData.index24hChange || 0,
             tradingFees: indexData.tradingFees || 0.1,
-            nextFunding: indexData.nextFunding || '1h 24m',
-            rate: indexData.rate || 0.006,
+            nextFunding: indexData.nextFunding, // Usar valor real, não fallback
+            rate: indexData.rate, // Usar valor real, não fallback
             rateChange: indexData.rateChange || 0,
             timestamp: indexData.timestamp || Date.now(),
             source: 'lnmarkets-unified'
@@ -658,7 +658,9 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
           console.log('📊 MARKET INDEX - Index value:', marketIndex.index);
           console.log('📊 MARKET INDEX - 24h change:', marketIndex.index24hChange);
         } else {
-          marketIndexError = 'No market index data in unified endpoint';
+          // Não definir marketIndex se dados não são válidos
+          // Deixar o header usar seus próprios dados
+          marketIndexError = 'No valid market index data in unified endpoint';
           console.log('❌ POSITIONS CONTEXT - Market index error:', marketIndexError);
           console.log('❌ MARKET INDEX - Unified endpoint data:', indexData);
         }
