@@ -814,6 +814,7 @@ export class AuthService {
         data: {
           email_verified: true,
           account_status: 'active',
+          is_active: true,  // ✅ ADICIONADO: Ativar usuário
           password_reset_token: null,
           password_reset_expires: null
         }
