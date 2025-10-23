@@ -919,6 +919,136 @@ export async function authRoutes(fastify: FastifyInstance) {
   });
 
   /**
+   * POST /api/auth/change-email
+   * Altera o email do usuário durante o processo de verificação
+   */
+  fastify.post('/change-email', {
+    preHandler: [fastify.rateLimit({ max: 3, timeWindow: '1 hour' })],
+    schema: {
+      description: 'Change user email during verification process',
+      tags: ['Authentication'],
+      body: {
+        type: 'object',
+        required: ['currentEmail', 'newEmail'],
+        properties: {
+          currentEmail: { type: 'string', format: 'email' },
+          newEmail: { type: 'string', format: 'email' }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' }
+          }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        409: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const { currentEmail, newEmail } = request.body as { currentEmail: string; newEmail: string };
+      
+      console.log('📧 CHANGE EMAIL - Request received');
+      console.log('📧 CHANGE EMAIL - Current email:', currentEmail);
+      console.log('📧 CHANGE EMAIL - New email:', newEmail);
+      
+      // Validar se o email atual existe
+      const currentUser = await prisma.user.findUnique({
+        where: { email: currentEmail.toLowerCase() },
+        select: { id: true, email_verified: true, account_status: true }
+      });
+      
+      if (!currentUser) {
+        console.log('❌ CHANGE EMAIL - Current user not found');
+        return reply.status(400).send({
+          success: false,
+          error: 'USER_NOT_FOUND',
+          message: 'Current email not found'
+        });
+      }
+      
+      // Verificar se o novo email já existe
+      const existingUser = await prisma.user.findUnique({
+        where: { email: newEmail.toLowerCase() }
+      });
+      
+      if (existingUser) {
+        console.log('❌ CHANGE EMAIL - New email already exists');
+        return reply.status(409).send({
+          success: false,
+          error: 'EMAIL_ALREADY_EXISTS',
+          message: 'This email is already registered'
+        });
+      }
+      
+      // Atualizar o email do usuário
+      const updatedUser = await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          email: newEmail.toLowerCase(),
+          email_verified: false, // Reset verification status
+          account_status: 'pending_verification', // Reset account status
+          email_verification_token: null, // Clear old tokens
+          email_verification_expires: null,
+          password_reset_token: null, // Clear OTP tokens
+          password_reset_expires: null
+        }
+      });
+      
+      console.log('✅ CHANGE EMAIL - Email updated successfully');
+      console.log('✅ CHANGE EMAIL - User ID:', updatedUser.id);
+      
+      // Gerar novos tokens de verificação
+      const { AuthService } = await import('../services/auth.service');
+      const authService = new AuthService(prisma, fastify);
+      
+      // Gerar novo token de verificação (Magic Link)
+      const verificationToken = await authService.generateVerificationToken(updatedUser.id);
+      
+      // Gerar novo OTP
+      const otp = await authService.generateOTP(updatedUser.id);
+      
+      // Enviar email de verificação para o novo endereço
+      const { EmailService } = await import('../services/email.service');
+      const emailService = new EmailService();
+      await emailService.sendVerificationEmail(newEmail, verificationToken, otp);
+      
+      console.log('📧 CHANGE EMAIL - Verification email sent to new address');
+      
+      return reply.send({
+        success: true,
+        message: 'Email changed successfully. Please check your new email for verification.'
+      });
+      
+    } catch (error: any) {
+      console.error('❌ CHANGE EMAIL - Error:', error);
+      fastify.log.error('Change email error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'INTERNAL_ERROR',
+        message: 'Error changing email'
+      });
+    }
+  });
+
+  /**
    * POST /api/auth/verify-email/otp
    * Valida OTP de verificação de email
    */

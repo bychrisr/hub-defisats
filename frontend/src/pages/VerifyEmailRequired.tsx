@@ -254,13 +254,53 @@ export default function VerifyEmailRequired() {
       return;
     }
 
-    setEmail(newEmail);
-    setShowChangeEmail(false);
-    setNewEmail('');
-    toast({
-      title: 'Email alterado',
-      description: 'Agora você pode reenviar o código para o novo email.',
-    });
+    if (newEmail.toLowerCase() === email.toLowerCase()) {
+      toast({
+        title: 'Email igual',
+        description: 'O novo email é igual ao atual.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/change-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentEmail: email,
+          newEmail: newEmail,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setEmail(newEmail);
+        setShowChangeEmail(false);
+        setNewEmail('');
+        setOtpDigits(['', '', '', '', '', '']); // Reset OTP
+        setOtpCode(''); // Reset OTP code
+        toast({
+          title: 'Email alterado com sucesso!',
+          description: 'Verifique sua nova caixa de entrada para o código de verificação.',
+        });
+      } else {
+        toast({
+          title: 'Erro ao alterar email',
+          description: data.message || 'Tente novamente em alguns minutos.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao alterar o email.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
