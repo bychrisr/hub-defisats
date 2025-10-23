@@ -383,7 +383,18 @@ export class AuthService {
         timestamp: new Date().toISOString()
       });
 
-      console.log('🔍 VALIDATE SESSION - Looking up user in database...');
+      console.log('🔍 VALIDATE SESSION - Looking up user in database...', {
+        userId: decoded.sub,
+        userIdType: typeof decoded.sub,
+        userIdLength: decoded.sub?.length,
+        timestamp: new Date().toISOString()
+      });
+      
+      if (!decoded.sub) {
+        console.log('❌ VALIDATE SESSION - No user ID in JWT payload');
+        throw new Error('Invalid session - no user ID');
+      }
+      
       const user = await this.prisma.user.findUnique({
         where: { id: decoded.sub },
         select: {
