@@ -160,47 +160,6 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
           },
         });
 
-        // Construir marketIndex com dados completos do ticker
-        const marketIndex = dashboardData.ticker ? {
-          index: dashboardData.ticker.index,
-          lastPrice: dashboardData.ticker.lastPrice,
-          askPrice: dashboardData.ticker.askPrice,
-          bidPrice: dashboardData.ticker.bidPrice,
-          carryFeeRate: dashboardData.ticker.carryFeeRate,
-          carryFeeTimestamp: dashboardData.ticker.carryFeeTimestamp,
-          index24hChange: 0, // Não disponível no ticker
-          tradingFees: 0.1, // Valor padrão
-          // Calcular nextFunding a partir do carryFeeTimestamp
-          nextFunding: dashboardData.ticker.carryFeeTimestamp 
-            ? (() => {
-                const now = Date.now();
-                const timeDiff = dashboardData.ticker.carryFeeTimestamp - now;
-                if (timeDiff > 0 && timeDiff < 8 * 60 * 60 * 1000) {
-                  const hours = Math.floor(timeDiff / (60 * 60 * 1000));
-                  const minutes = Math.floor((timeDiff % (60 * 60 * 1000)) / (60 * 1000));
-                  const seconds = Math.floor((timeDiff % (60 * 1000)) / 1000);
-                  return `${hours}h ${minutes}m ${seconds}s`;
-                }
-                // Fallback: calcular baseado no ciclo UTC de 8 horas
-                const hours = now / (1000 * 60 * 60);
-                const nextFundingHour = (Math.floor(hours / 8) + 1) * 8;
-                const nextFundingTime = nextFundingHour * 60 * 60 * 1000;
-                const diff = nextFundingTime - now;
-                const h = Math.floor(diff / (60 * 60 * 1000));
-                const m = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
-                const s = Math.floor((diff % (60 * 1000)) / 1000);
-                return `${h}h ${m}m ${s}s`;
-              })()
-            : "Calculating...",
-          // Converter carryFeeRate para formato de porcentagem
-          rate: dashboardData.ticker.carryFeeRate 
-            ? dashboardData.ticker.carryFeeRate * 100 
-            : 0,
-          rateChange: 0, // Não disponível no ticker
-          timestamp: dashboardData.timestamp || Date.now(),
-          source: 'lnmarkets-unified'
-        } : null;
-
         const response = {
           success: true,
           data: {
@@ -216,9 +175,6 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
             accountId: dashboardData.accountId,
             accountName: dashboardData.accountName,
             exchangeName: dashboardData.exchangeName,
-            
-            // Market Index com dados completos
-            marketIndex: marketIndex,
             
             // TODOS os dados da LN Markets estruturados
             lnMarkets: {
