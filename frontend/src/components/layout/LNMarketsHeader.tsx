@@ -83,6 +83,12 @@ const LNMarketsHeader: React.FC = () => {
     const interval = setInterval(() => {
       const now = new Date();
       
+      // Usar dados do backend se disponíveis, senão calcular fallback
+      if (marketData.nextFunding && marketData.nextFunding !== "Calculating...") {
+        // Dados do backend já estão corretos, não recalcular
+        return;
+      }
+      
       // Calcular Next Funding corretamente (LN Markets funding a cada 8h: 00:00, 08:00, 16:00 UTC)
       const currentHour = now.getUTCHours();
       const currentMinute = now.getUTCMinutes();

@@ -42,7 +42,7 @@ export const usePublicMarketData = (): UsePublicMarketDataReturn => {
 
       console.log('🌐 PUBLIC MARKET DATA - Fetching public market data...');
 
-      const response = await fetch('/api/public/market/index');
+      const response = await fetch('/api/market/index/public');
       const result = await response.json();
 
       if (result.success && result.data) {
