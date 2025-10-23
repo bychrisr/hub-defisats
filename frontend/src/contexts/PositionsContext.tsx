@@ -643,7 +643,7 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         let marketIndexError: string | null = null;
 
         // ✅ USAR DADOS DO ENDPOINT UNIFICADO APENAS SE VÁLIDOS E NÃO HARDCODED
-        if (indexData && indexData.index && indexData.nextFunding && indexData.rate) {
+        if (indexData && indexData.index) {
           // Verificar se não são dados hardcoded (valores suspeitos)
           const isHardcoded = (
             indexData.nextFunding === "1m 36s" || 
@@ -656,8 +656,8 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
               index: indexData.index,
               index24hChange: indexData.index24hChange || 0,
               tradingFees: indexData.tradingFees || 0.1,
-              nextFunding: indexData.nextFunding, // Usar valor real, não fallback
-              rate: indexData.rate, // Usar valor real, não fallback
+              nextFunding: indexData.nextFunding || "Calculating...", // Usar valor real ou fallback
+              rate: indexData.rate || 0, // Usar valor real ou fallback
               rateChange: indexData.rateChange || 0,
               timestamp: indexData.timestamp || Date.now(),
               source: 'lnmarkets-unified'
