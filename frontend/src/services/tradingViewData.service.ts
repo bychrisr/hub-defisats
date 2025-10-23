@@ -182,19 +182,43 @@ class IntelligentRateLimiter {
 
 // Validador de dados (conforme _VOLATILE_MARKET_SAFETY.md)
 class DataValidator {
-  static validateData(data: any, maxAge: number = 30000): boolean {
+  static validateData(data: any, maxAge: number = 30000): { valid: boolean; reason?: string; age?: number } {
+    console.log('🔍 TRADINGVIEW VALIDATOR - Validating data:', {
+      hasData: !!data,
+      hasTimestamp: !!data?.timestamp,
+      timestamp: data?.timestamp,
+      age: data?.timestamp ? Date.now() - data.timestamp : 'unknown'
+    });
+
     if (!data || !data.timestamp) {
-      console.warn('⚠️ VALIDATOR - Dados sem timestamp rejeitados');
-      return false;
+      console.warn('⚠️ TRADINGVIEW VALIDATOR - Dados sem timestamp rejeitados');
+      return { valid: false, reason: 'Missing timestamp' };
     }
 
     const age = Date.now() - data.timestamp;
     if (age > maxAge) {
-      console.warn(`⚠️ VALIDATOR - Dados muito antigos rejeitados (${age}ms > ${maxAge}ms)`);
-      return false;
+      console.warn(`⚠️ TRADINGVIEW VALIDATOR - Dados muito antigos rejeitados (${age}ms > ${maxAge}ms)`);
+      return { valid: false, reason: `Data too old: ${age}ms > ${maxAge}ms`, age };
     }
 
-    return true;
+    // Validar campos obrigatórios
+    const requiredFields = ['price', 'change24h'];
+    const missingFields = requiredFields.filter(field => 
+      data[field] === undefined || data[field] === null
+    );
+
+    if (missingFields.length > 0) {
+      console.warn(`⚠️ TRADINGVIEW VALIDATOR - Campos obrigatórios faltando: ${missingFields.join(', ')}`);
+      return { valid: false, reason: `Missing required fields: ${missingFields.join(', ')}` };
+    }
+
+    console.log('✅ TRADINGVIEW VALIDATOR - Dados válidos:', {
+      age: age + 'ms',
+      price: data.price,
+      change24h: data.change24h
+    });
+
+    return { valid: true, age };
   }
 
   static validateCandleData(candles: CandleData[]): boolean {
@@ -217,6 +241,28 @@ export class TradingViewDataService {
   private cache = new IntelligentCache();
   private rateLimiter = new IntelligentRateLimiter();
   private validator = DataValidator;
+
+  // ✅ CONFIGURAÇÕES POR EXCHANGE
+  private exchangeConfigs = {
+    lnmarkets: {
+      symbols: ['BINANCE:BTCUSDT', 'BYBIT:BTCUSDT', 'BITMEX:BTCUSDT'],
+      weights: [0.4, 0.3, 0.3],
+      name: 'LN Markets Index',
+      priority: 1
+    },
+    binance: {
+      symbols: ['BINANCE:BTCUSDT'],
+      weights: [1.0],
+      name: 'Binance Direct',
+      priority: 2
+    },
+    coinbase: {
+      symbols: ['COINBASE:BTCUSD'],
+      weights: [1.0],
+      name: 'Coinbase Direct',
+      priority: 3
+    }
+  };
 
   /**
    * Obter dados históricos com fallback robusto
@@ -250,7 +296,8 @@ export class TradingViewDataService {
         console.log(`🔄 TRADINGVIEW - Fetching from ${apiName}`);
         const data = await this.fetchFromAPI(apiName, symbol, timeframe, limit, startTime);
         
-        if (this.validator.validateCandleData(data)) {
+        const validation = this.validator.validateCandleData(data);
+        if (validation) {
           this.rateLimiter.recordRequest(apiName);
           this.cache.set(cacheKey, data);
           console.log(`✅ TRADINGVIEW - Data fetched from ${apiName}: ${data.length} candles`);
@@ -266,6 +313,51 @@ export class TradingViewDataService {
 
     // 3. Se todas as APIs falharam
     throw new Error('Todas as APIs falharam - dados indisponíveis por segurança');
+  }
+
+  /**
+   * ✅ NOVO: Obter dados de mercado para exchange específica
+   */
+  async getMarketDataForExchange(exchange: string, symbol: string = 'BTCUSDT'): Promise<{
+    price: number;
+    change24h: number;
+    volume: number;
+    timestamp: number;
+    source: string;
+    exchange: string;
+  }> {
+    console.log('🔄 TRADINGVIEW - Fetching market data for exchange:', {
+      exchange,
+      symbol,
+      config: this.exchangeConfigs[exchange as keyof typeof this.exchangeConfigs]
+    });
+
+    const config = this.exchangeConfigs[exchange as keyof typeof this.exchangeConfigs];
+    if (!config) {
+      throw new Error(`Exchange configuration not found: ${exchange}`);
+    }
+
+    const cacheKey = `market_${exchange}_${symbol}`;
+    
+    if (this.cache.isCacheValid(cacheKey)) {
+      console.log('📦 TRADINGVIEW - Using cached data for exchange:', exchange);
+      return this.cache.get(cacheKey);
+    }
+
+    // Buscar dados usando configuração específica da exchange
+    const marketData = await this.fetchMarketDataForExchangeConfig(config, symbol);
+    
+    if (marketData) {
+      this.cache.set(cacheKey, marketData);
+      console.log(`✅ TRADINGVIEW - Market data fetched for ${exchange}:`, {
+        price: marketData.price,
+        change24h: marketData.change24h,
+        source: marketData.source
+      });
+      return marketData;
+    }
+
+    throw new Error(`Failed to fetch market data for exchange: ${exchange}`);
   }
 
   /**
@@ -293,10 +385,18 @@ export class TradingViewDataService {
 
         const data = await this.fetchMarketDataFromAPI(apiName, symbol);
         
-        if (this.validator.validateData(data)) {
+        const validation = this.validator.validateData(data);
+        if (validation.valid) {
           this.rateLimiter.recordRequest(apiName);
           this.cache.set(cacheKey, data);
+          console.log(`✅ TRADINGVIEW - Market data fetched from ${apiName}:`, {
+            price: data.price,
+            change24h: data.change24h,
+            age: validation.age + 'ms'
+          });
           return data;
+        } else {
+          console.warn(`⚠️ TRADINGVIEW - Invalid market data from ${apiName}: ${validation.reason}`);
         }
       } catch (error) {
         console.warn(`❌ TRADINGVIEW - Market data from ${apiName} failed:`, error);
@@ -428,6 +528,70 @@ export class TradingViewDataService {
     // CoinGecko não tem dados históricos detalhados como candlesticks
     // Usar apenas para dados de mercado básicos
     throw new Error('CoinGecko não suporta dados históricos detalhados');
+  }
+
+  /**
+   * ✅ NOVO: Buscar dados de mercado para configuração de exchange específica
+   */
+  private async fetchMarketDataForExchangeConfig(config: any, symbol: string): Promise<any> {
+    console.log('🔄 TRADINGVIEW - Fetching data for exchange config:', {
+      name: config.name,
+      symbols: config.symbols,
+      weights: config.weights
+    });
+
+    // Buscar dados de cada símbolo e calcular média ponderada
+    const symbolData = [];
+    
+    for (let i = 0; i < config.symbols.length; i++) {
+      const symbolName = config.symbols[i];
+      const weight = config.weights[i];
+      
+      try {
+        console.log(`🔄 TRADINGVIEW - Fetching data for symbol ${symbolName} (weight: ${weight})`);
+        const data = await this.fetchMarketDataFromAPI('tradingview', symbolName);
+        
+        if (data && data.price) {
+          symbolData.push({
+            ...data,
+            weight,
+            symbol: symbolName
+          });
+        }
+      } catch (error) {
+        console.warn(`⚠️ TRADINGVIEW - Failed to fetch data for ${symbolName}:`, error);
+      }
+    }
+
+    if (symbolData.length === 0) {
+      throw new Error('No valid data found for any symbol');
+    }
+
+    // Calcular média ponderada
+    const totalWeight = symbolData.reduce((sum, item) => sum + item.weight, 0);
+    const weightedPrice = symbolData.reduce((sum, item) => sum + (item.price * item.weight), 0) / totalWeight;
+    const weightedChange = symbolData.reduce((sum, item) => sum + (item.change24h * item.weight), 0) / totalWeight;
+    const weightedVolume = symbolData.reduce((sum, item) => sum + ((item.volume || 0) * item.weight), 0) / totalWeight;
+
+    const result = {
+      price: weightedPrice,
+      change24h: weightedChange,
+      volume: weightedVolume,
+      timestamp: Date.now(),
+      source: `tradingview-${config.name.toLowerCase().replace(/\s+/g, '-')}`,
+      exchange: config.name,
+      symbols: symbolData.map(item => item.symbol),
+      weights: config.weights
+    };
+
+    console.log('✅ TRADINGVIEW - Weighted average calculated:', {
+      price: result.price,
+      change24h: result.change24h,
+      source: result.source,
+      symbolCount: symbolData.length
+    });
+
+    return result;
   }
 
   /**

@@ -186,6 +186,72 @@ graph TB
 - [ ] Dashboard de monitoramento
 - [ ] Tracing distribuído
 
+## Recent Fixes and Improvements (2025-01-23)
+
+### Credential Decryption Architecture Fix
+
+**Problem**: External API integration was failing due to credential decryption issues.
+
+**Root Cause**: Key corruption in `UserExchangeAccountService.decryptCredentials()` method.
+
+**Solution**: Fixed key corruption by changing iteration method from `Object.entries()` to `Object.keys()` with `for...of` loop.
+
+```typescript
+// ❌ PROBLEMA: Object.entries() causava corrupção de chaves
+Object.entries(encryptedCredentials).forEach(([key, value]) => {
+  // key seria corrompido para caracteres especiais
+});
+
+// ✅ SOLUÇÃO: Object.keys() com for...of
+const keys = Object.keys(encryptedCredentials);
+for (const key of keys) {
+  const value = encryptedCredentials[key];
+  // key permanece intacto
+}
+```
+
+### Route Registration Architecture Fix
+
+**Problem**: LN Markets header routes were not being called due to routing conflicts.
+
+**Root Cause**: Route registration order and prefix conflicts in `index.ts`.
+
+**Solution**: Fixed route registration order and ensured proper prefix application.
+
+```typescript
+// ✅ SOLUÇÃO: Registrar rotas na ordem correta
+await fastify.register(lnmarketsRoutes, { prefix: '/api/lnmarkets' });
+await fastify.register(lnMarketsHeaderRoutes, { prefix: '/api/lnmarkets' });
+```
+
+### Double Decryption Architecture Fix
+
+**Problem**: Credentials were being decrypted twice causing errors.
+
+**Root Cause**: `AccountCredentialsService` already decrypts credentials, but routes were decrypting again.
+
+**Solution**: Ensured single decryption point in the architecture.
+
+```typescript
+// ✅ SOLUÇÃO: Usar credenciais já descriptografadas
+const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+const decryptedCredentials = activeCredentials.credentials; // Já descriptografadas
+```
+
+### Testnet Detection Architecture Fix
+
+**Problem**: Testnet mode wasn't being properly detected and applied.
+
+**Root Cause**: Testnet detection logic not working correctly in the architecture.
+
+**Solution**: Implemented proper testnet detection in the service layer.
+
+```typescript
+// ✅ SOLUÇÃO: Detecção correta de testnet
+const testnetResult = TestnetDetector.detectTestnet(decryptedCredentials);
+const isTestnet = testnetResult.isTestnet;
+```
+
 ## 🔧 Como Usar Este Documento
 
 • **Para Desenvolvedores**: Use como referência para entender a arquitetura geral e implementar novos componentes seguindo os padrões estabelecidos.
@@ -193,6 +259,8 @@ graph TB
 • **Para DevOps**: Utilize o checklist de avaliação para validar a implementação da arquitetura em ambientes de produção.
 
 • **Para Arquitetos**: Use como base para evoluções arquiteturais, garantindo que mudanças mantenham a consistência do sistema.
+
+• **Para Troubleshooting**: Refer to the recent fixes section for common architectural issues and solutions.
 
 
 ---

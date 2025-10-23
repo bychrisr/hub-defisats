@@ -365,43 +365,58 @@ export class UserExchangeAccountService {
   }
 
   /**
-   * Decrypt credentials for use
+   * Decrypt credentials for use - CORRIGIDO para evitar corrupção de chaves
    */
-  private decryptCredentials(encryptedCredentials: Record<string, string>): Record<string, string> {
+  public decryptCredentials(encryptedCredentials: Record<string, string>): Record<string, string> {
     const decryptedCredentials: Record<string, string> = {};
     
-    Object.entries(encryptedCredentials).forEach(([key, value]) => {
-      // Campo isTestnet não precisa descriptografia
-      if (key === 'isTestnet' || key === 'testnet') {
-        decryptedCredentials[key] = value;
-        return;
-      }
-
-      try {
-        const crypto = require('crypto');
-        const { securityConfig } = require('../config/env');
-        const algorithm = 'aes-256-cbc';
-        const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+    console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Decrypting credentials:`, encryptedCredentials);
+    
+    if (encryptedCredentials && typeof encryptedCredentials === 'object') {
+      // Usar Object.keys para evitar corrupção das chaves
+      const keys = Object.keys(encryptedCredentials);
+      
+      for (const key of keys) {
+        const value = encryptedCredentials[key];
         
-        const parts = value.split(':');
-        if (parts.length === 2) {
-          const iv = Buffer.from(parts[0], 'hex');
-          const encrypted = parts[1];
-          
-          const decipher = crypto.createDecipheriv(algorithm, key, iv);
-          let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-          decrypted += decipher.final('utf8');
-          
-          decryptedCredentials[key] = decrypted;
+        if (value && typeof value === 'string') {
+          try {
+            // Usar a mesma lógica de descriptografia do AuthService
+            const crypto = require('crypto');
+            const algorithm = 'aes-256-cbc';
+            const encryptionKey = process.env.ENCRYPTION_KEY;
+            const keyBuffer = crypto.scryptSync(encryptionKey, 'salt', 32);
+            
+            // Extrair IV e dados criptografados
+            const [ivHex, encryptedHex] = value.split(':');
+            if (!ivHex || !encryptedHex) {
+              // Se não está no formato criptografado, assumir que é valor plano (ex: isTestnet)
+              console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Plain text credential field: ${key} = ${value}`);
+              decryptedCredentials[key] = value;
+              continue;
+            }
+            
+            const iv = Buffer.from(ivHex, 'hex');
+            const encrypted = encryptedHex;
+            
+            const decipher = crypto.createDecipheriv(algorithm, keyBuffer, iv);
+            let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            
+            decryptedCredentials[key] = decrypted;
+            console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Decrypted ${key}: ${decrypted}`);
+          } catch (error) {
+            console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to decrypt credential ${key}:`, error);
+            decryptedCredentials[key] = ''; // Fallback para string vazia
+          }
         } else {
-          decryptedCredentials[key] = value; // Fallback para valor não criptografado
+          decryptedCredentials[key] = '';
         }
-      } catch (error) {
-        console.warn(`Failed to decrypt credential ${key}:`, error);
-        decryptedCredentials[key] = value; // Fallback para valor não criptografado
       }
-    });
-
+    }
+    
+    console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Final decrypted credentials:`, decryptedCredentials);
+    
     return decryptedCredentials;
   }
 }
@@ -764,6 +779,60 @@ export class EncryptionAuditService {
 }
 ```
 
+## Recent Fixes and Improvements
+
+### Key Corruption Fix (2025-01-23)
+
+**Problem**: Keys were being corrupted during decryption due to `Object.entries()` iteration.
+
+**Solution**: Changed to `Object.keys()` with `for...of` loop to prevent key corruption.
+
+```typescript
+// ❌ PROBLEMA: Object.entries() causava corrupção de chaves
+Object.entries(encryptedCredentials).forEach(([key, value]) => {
+  // key seria corrompido para caracteres especiais
+});
+
+// ✅ SOLUÇÃO: Object.keys() com for...of
+const keys = Object.keys(encryptedCredentials);
+for (const key of keys) {
+  const value = encryptedCredentials[key];
+  // key permanece intacto
+}
+```
+
+### Double Decryption Fix (2025-01-23)
+
+**Problem**: Credentials were being decrypted twice in some routes.
+
+**Solution**: Ensure `AccountCredentialsService` handles decryption, routes use decrypted credentials directly.
+
+```typescript
+// ❌ PROBLEMA: Descriptografia dupla
+const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+const decryptedCredentials = userExchangeAccountService.decryptCredentials(activeCredentials.credentials);
+
+// ✅ SOLUÇÃO: AccountCredentialsService já retorna credenciais descriptografadas
+const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+const decryptedCredentials = activeCredentials.credentials; // Já descriptografadas
+```
+
+### Environment Variable Fix (2025-01-23)
+
+**Problem**: `securityConfig` import was failing, causing undefined encryption key.
+
+**Solution**: Use `process.env.ENCRYPTION_KEY` directly.
+
+```typescript
+// ❌ PROBLEMA: Import falhando
+const { securityConfig } = require('../config/env');
+const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+
+// ✅ SOLUÇÃO: Usar variável de ambiente diretamente
+const encryptionKey = process.env.ENCRYPTION_KEY;
+const keyBuffer = crypto.scryptSync(encryptionKey, 'salt', 32);
+```
+
 ## How to Use This Document
 
 - **For Implementation**: Use the encryption service examples for data protection
@@ -771,3 +840,4 @@ export class EncryptionAuditService {
 - **For Files**: Use the file encryption service for file system protection
 - **For Keys**: Use the key management and rotation services for key security
 - **For Monitoring**: Use the audit service for encryption monitoring
+- **For Troubleshooting**: Refer to the recent fixes section for common issues

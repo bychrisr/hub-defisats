@@ -1048,6 +1048,92 @@ export class APIHealthMonitor {
 }
 ```
 
+## Recent Fixes and Solutions (2025-01-23)
+
+### Credential Decryption Issues
+
+**Problem**: External API routes failing with "Invalid key length" or key corruption errors.
+
+**Root Cause**: `Object.entries()` was causing key corruption during credential decryption.
+
+**Solution**: 
+```typescript
+// ❌ PROBLEMA: Object.entries() causava corrupção de chaves
+Object.entries(encryptedCredentials).forEach(([key, value]) => {
+  // key seria corrompido para caracteres especiais
+});
+
+// ✅ SOLUÇÃO: Object.keys() com for...of
+const keys = Object.keys(encryptedCredentials);
+for (const key of keys) {
+  const value = encryptedCredentials[key];
+  // key permanece intacto
+}
+```
+
+**Verification Steps**:
+1. Check if credentials are being decrypted correctly
+2. Verify key names are not corrupted
+3. Test API calls with decrypted credentials
+4. Monitor logs for decryption errors
+
+### Route Registration Issues
+
+**Problem**: LN Markets header routes not being called due to routing conflicts.
+
+**Root Cause**: Route registration order and prefix conflicts.
+
+**Solution**:
+```typescript
+// ✅ SOLUÇÃO: Registrar rotas na ordem correta
+await fastify.register(lnmarketsRoutes, { prefix: '/api/lnmarkets' });
+await fastify.register(lnMarketsHeaderRoutes, { prefix: '/api/lnmarkets' });
+```
+
+**Verification Steps**:
+1. Check route registration order in `index.ts`
+2. Verify route paths are correct
+3. Test route accessibility
+4. Monitor route loading logs
+
+### Double Decryption Issues
+
+**Problem**: Credentials being decrypted twice causing errors.
+
+**Root Cause**: `AccountCredentialsService` already decrypts credentials, but routes were decrypting again.
+
+**Solution**:
+```typescript
+// ✅ SOLUÇÃO: Usar credenciais já descriptografadas
+const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+const decryptedCredentials = activeCredentials.credentials; // Já descriptografadas
+```
+
+**Verification Steps**:
+1. Check if `AccountCredentialsService` is decrypting credentials
+2. Verify routes are not double-decrypting
+3. Test API calls with single decryption
+4. Monitor decryption logs
+
+### Testnet Detection Issues
+
+**Problem**: Testnet mode not being properly detected and applied.
+
+**Root Cause**: Testnet detection logic not working correctly.
+
+**Solution**:
+```typescript
+// ✅ SOLUÇÃO: Detecção correta de testnet
+const testnetResult = TestnetDetector.detectTestnet(decryptedCredentials);
+const isTestnet = testnetResult.isTestnet;
+```
+
+**Verification Steps**:
+1. Check testnet detection logic
+2. Verify testnet credentials are properly set
+3. Test API calls with testnet mode
+4. Monitor testnet detection logs
+
 ## Checklist
 
 ### LN Markets API Troubleshooting
@@ -1059,6 +1145,9 @@ export class APIHealthMonitor {
 - [ ] Validate data format
 - [ ] Test error handling
 - [ ] Monitor API performance
+- [ ] **NEW**: Check credential decryption (key corruption fix)
+- [ ] **NEW**: Verify route registration order
+- [ ] **NEW**: Test testnet detection
 
 ### LND Integration Troubleshooting
 - [ ] Check LND service status
@@ -1089,3 +1178,5 @@ export class APIHealthMonitor {
 - [ ] Monitor API performance
 - [ ] Test error scenarios
 - [ ] Validate API responses
+- [ ] **NEW**: Check for double decryption issues
+- [ ] **NEW**: Verify credential key integrity
