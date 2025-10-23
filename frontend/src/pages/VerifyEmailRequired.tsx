@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, RefreshCw, CheckCircle, AlertCircle, Edit3, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/auth';
 import '@/styles/verify-email-improvements.css';
 
 interface VerificationStatus {
@@ -17,6 +18,7 @@ export default function VerifyEmailRequired() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getProfile } = useAuthStore();
   
   const [email, setEmail] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
@@ -165,8 +167,12 @@ export default function VerifyEmailRequired() {
       const data = await response.json();
 
       if (data.success) {
-        // Salvar JWT e redirecionar
+        // Salvar JWT e atualizar estado do auth store
         localStorage.setItem('access_token', data.jwt);
+        
+        // Atualizar estado do auth store para reconhecer usuário como autenticado
+        await getProfile();
+        
         toast({
           title: 'Email verificado!',
           description: 'Redirecionando para o dashboard...',
