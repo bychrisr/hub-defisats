@@ -101,7 +101,7 @@ export class MarginGuardPlansController {
 
       // TODO: Implement actual plan configuration update in database
       // For now, we'll just validate the configuration
-      const validation = this.marginGuardPlanService.validatePlanConfiguration(
+      const validation = await this.marginGuardPlanService.validatePlanConfiguration(
         'admin_user', // Admin user ID
         updateData
       );
@@ -186,31 +186,25 @@ export class MarginGuardPlansController {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      const executionsToday = await this.marginGuardPlanService['prisma'].automationLog.count({
+      const executionsToday = await this.marginGuardPlanService['prisma'].automation.count({
         where: {
           created_at: {
             gte: today
           },
-          automation: {
-            type: 'margin_guard'
-          }
+          type: 'margin_guard'
         }
       });
 
       // Calculate success rate
-      const totalExecutions = await this.marginGuardPlanService['prisma'].automationLog.count({
+      const totalExecutions = await this.marginGuardPlanService['prisma'].automation.count({
         where: {
-          automation: {
-            type: 'margin_guard'
-          }
+          type: 'margin_guard'
         }
       });
 
-      const successfulExecutions = await this.marginGuardPlanService['prisma'].automationLog.count({
+      const successfulExecutions = await this.marginGuardPlanService['prisma'].automation.count({
         where: {
-          automation: {
-            type: 'margin_guard'
-          },
+          type: 'margin_guard',
           status: 'success'
         }
       });

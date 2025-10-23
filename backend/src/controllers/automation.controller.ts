@@ -14,12 +14,12 @@ import { MarginGuardPlanData } from '../services/margin-guard-plan.service';
 // Validation schemas
 const CreateAutomationSchema = z.object({
   type: z.enum(['margin_guard', 'tp_sl', 'auto_entry']),
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   is_active: z.boolean().optional(),
 });
 
 const UpdateAutomationSchema = z.object({
-  config: z.record(z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
   is_active: z.boolean().optional(),
 });
 
@@ -43,7 +43,7 @@ export class AutomationController {
     try {
       const user = (request as any).user;
       console.log('🔍 AUTOMATION CONTROLLER - Create automation request body:', JSON.stringify(request.body, null, 2));
-      console.log('🔍 AUTOMATION CONTROLLER - Raw config from request:', JSON.stringify(request.body.config, null, 2));
+      console.log('🔍 AUTOMATION CONTROLLER - Raw config from request:', JSON.stringify((request.body as any).config, null, 2));
       const body = CreateAutomationSchema.parse(request.body);
       console.log('🔍 AUTOMATION CONTROLLER - Parsed body:', JSON.stringify(body, null, 2));
       console.log('🔍 AUTOMATION CONTROLLER - Parsed config:', JSON.stringify(body.config, null, 2));
@@ -65,7 +65,7 @@ export class AutomationController {
           success: false,
           error: 'VALIDATION_ERROR',
           message: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         });
       }
 
@@ -184,7 +184,7 @@ export class AutomationController {
       const user = (request as any).user;
       const params = AutomationParamsSchema.parse(request.params);
       console.log('🔍 AUTOMATION CONTROLLER - Update automation request body:', JSON.stringify(request.body, null, 2));
-      console.log('🔍 AUTOMATION CONTROLLER - Raw config from request:', JSON.stringify(request.body.config, null, 2));
+      console.log('🔍 AUTOMATION CONTROLLER - Raw config from request:', JSON.stringify((request.body as any).config, null, 2));
       const body = UpdateAutomationSchema.parse(request.body);
       console.log('🔍 AUTOMATION CONTROLLER - Parsed body:', JSON.stringify(body, null, 2));
       console.log('🔍 AUTOMATION CONTROLLER - Parsed config:', JSON.stringify(body.config, null, 2));
@@ -289,7 +289,7 @@ export class AutomationController {
           success: false,
           error: 'VALIDATION_ERROR',
           message: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         });
       }
 

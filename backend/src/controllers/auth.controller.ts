@@ -124,11 +124,11 @@ export class AuthController {
       metrics.recordAuthAttempt('register', 'failure', (error as Error).message);
 
       if (error instanceof z.ZodError) {
-        console.log('❌ Validation error:', error.errors);
+        console.log('❌ Validation error:', error.issues);
         const validationResponse = ValidationErrorResponseZodSchema.parse({
           error: 'VALIDATION_ERROR',
           message: 'Request validation failed',
-          validation_errors: error.errors.map(err => ({
+          validation_errors: error.issues.map(err => ({
             field: err.path.join('.'),
             message: err.message,
             value: (err as any).input,
@@ -175,7 +175,7 @@ export class AuthController {
         const validationResponse = ValidationErrorResponseZodSchema.parse({
           error: 'VALIDATION_ERROR',
           message: 'Request validation failed',
-          validation_errors: error.errors.map(err => ({
+          validation_errors: error.issues.map(err => ({
             field: err.path.join('.'),
             message: err.message,
             value: (err as any).input,

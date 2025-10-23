@@ -31,7 +31,7 @@ export class ExchangeCredentialsController {
     try {
       console.log('🔍 EXCHANGE CREDENTIALS - Fetching exchanges...');
 
-      const exchanges = await this.exchangeService.getActiveExchanges();
+      const exchanges = await this.exchangeService.getAvailableExchanges();
 
       console.log('✅ EXCHANGE CREDENTIALS - Exchanges fetched successfully:', exchanges.length);
 

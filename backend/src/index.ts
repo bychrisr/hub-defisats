@@ -191,6 +191,7 @@ async function registerPlugins() {
   await fastify.register(rateLimit, {
     max: config.isDevelopment ? 1000000 : 1000, // 1000000 requests per minute in dev (absurdo), 1000 in prod
     timeWindow: '1 minute',
+    redis: redis, // Use the Redis instance we created
     errorResponseBuilder: (request, context) => ({
       code: 429,
       error: 'Too Many Requests',

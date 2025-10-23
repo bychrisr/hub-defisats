@@ -130,17 +130,33 @@ export class UserExchangeAccountController {
    */
   async createUserExchangeAccount(request: FastifyRequest, reply: FastifyReply) {
     try {
+      console.log('🚀 USER EXCHANGE ACCOUNT CONTROLLER - Starting account creation process');
+      
       const user = (request as any).user;
       const { exchange_id, account_name, credentials } = request.body as CreateUserExchangeAccountData;
 
-      console.log('🔄 USER EXCHANGE ACCOUNT CONTROLLER - Creating account:', {
+      console.log('🔍 USER EXCHANGE ACCOUNT CONTROLLER - Request details:', {
         userId: user?.id,
+        userEmail: user?.email,
         exchangeId: exchange_id,
-        accountName: account_name
+        accountName: account_name,
+        credentialsKeys: credentials ? Object.keys(credentials) : [],
+        requestHeaders: {
+          contentType: request.headers['content-type'],
+          authorization: request.headers.authorization ? 'Bearer [REDACTED]' : 'None',
+          userAgent: request.headers['user-agent']
+        },
+        timestamp: new Date().toISOString()
       });
 
       // Validar dados
+      console.log('🔍 USER EXCHANGE ACCOUNT CONTROLLER - Validating input data');
       if (!exchange_id || !account_name || !credentials) {
+        console.log('❌ USER EXCHANGE ACCOUNT CONTROLLER - Validation failed:', {
+          exchange_id: !!exchange_id,
+          account_name: !!account_name,
+          credentials: !!credentials
+        });
         return reply.status(400).send({
           success: false,
           error: 'VALIDATION_ERROR',
@@ -148,6 +164,8 @@ export class UserExchangeAccountController {
         });
       }
 
+      console.log('✅ USER EXCHANGE ACCOUNT CONTROLLER - Validation passed, calling service');
+      
       const account = await this.userExchangeAccountService.createUserExchangeAccount(user.id, {
         exchange_id,
         account_name,

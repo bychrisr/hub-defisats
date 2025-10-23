@@ -337,4 +337,124 @@ export class ExchangeService {
       where: { id: accountId },
     });
   }
+
+  /**
+   * Get user credentials (legacy support)
+   */
+  async getUserCredentials(userId: string) {
+    const accounts = await this.prisma.userExchangeCredentials.findMany({
+      where: { user_id: userId },
+      include: { 
+        exchange: { 
+          include: { 
+            credential_types: {
+              orderBy: { order: 'asc' }
+            }
+          }
+        }
+      }
+    });
+    return accounts;
+  }
+
+  /**
+   * Get exchange by ID
+   */
+  async getExchangeById(exchangeId: string) {
+    return await this.prisma.exchange.findUnique({
+      where: { id: exchangeId },
+      include: { 
+        credential_types: { 
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+  }
+
+  /**
+   * Get user credentials for specific exchange
+   */
+  async getUserCredentialsForExchange(userId: string, exchangeId: string) {
+    return await this.prisma.userExchangeCredentials.findUnique({
+      where: {
+        user_id_exchange_id: { user_id: userId, exchange_id: exchangeId }
+      },
+      include: { 
+        exchange: { 
+          include: { 
+            credential_types: {
+              orderBy: { order: 'asc' }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Upsert user credentials
+   */
+  async upsertUserCredentials(userId: string, exchangeId: string, credentials: any) {
+    return await this.prisma.userExchangeCredentials.upsert({
+      where: {
+        user_id_exchange_id: { user_id: userId, exchange_id: exchangeId }
+      },
+      update: { 
+        credentials, 
+        updated_at: new Date() 
+      },
+      create: {
+        user_id: userId,
+        exchange_id: exchangeId,
+        credentials,
+        is_active: false,
+        is_verified: false
+      },
+      include: { 
+        exchange: {
+          include: {
+            credential_types: {
+              orderBy: { order: 'asc' }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Delete user credentials
+   */
+  async deleteUserCredentials(userId: string, exchangeId: string) {
+    await this.prisma.userExchangeCredentials.delete({
+      where: {
+        user_id_exchange_id: { user_id: userId, exchange_id: exchangeId }
+      }
+    });
+  }
+
+  /**
+   * Update credential verification status
+   */
+  async updateCredentialVerification(userId: string, exchangeId: string, data: any) {
+    return await this.prisma.userExchangeCredentials.update({
+      where: {
+        user_id_exchange_id: { user_id: userId, exchange_id: exchangeId }
+      },
+      data: {
+        is_verified: data.isVerified,
+        is_active: data.isActive,
+        last_test: new Date()
+      },
+      include: {
+        exchange: {
+          include: {
+            credential_types: {
+              orderBy: { order: 'asc' }
+            }
+          }
+        }
+      }
+    });
+  }
 }

@@ -227,14 +227,13 @@ export class AdminController {
    * Get notification-related metrics
    */
   private async getNotificationMetrics(startDate: Date) {
-    const notificationStats = await prisma.notification.groupBy({
-      by: ['status'],
+    const notificationStats = await prisma.notification.findMany({
       where: { created_at: { gte: startDate } },
-      _count: { status: true },
+      select: { status: true },
     });
 
-    const sentCount = notificationStats.find(n => n.status === 'sent')?._count.status || 0;
-    const failedCount = notificationStats.find(n => n.status === 'failed')?._count.status || 0;
+    const sentCount = notificationStats.filter(n => n.status === 'sent').length;
+    const failedCount = notificationStats.filter(n => n.status === 'failed').length;
     const totalNotifications = sentCount + failedCount;
     const deliveryRate = totalNotifications > 0 ? (sentCount / totalNotifications) * 100 : 0;
 
@@ -516,7 +515,7 @@ export class AdminController {
           }
           result = await prisma.user.updateMany({
             where: { id: { in: userIds } },
-            data: { plan_type: data.plan_type },
+            data: { plan_type: data.plan_type as any },
           });
           break;
 
@@ -649,7 +648,7 @@ export class AdminController {
               created_at: true,
               last_activity_at: true,
             },
-            ...(filters?.plan_type && { where: { plan_type: filters.plan_type } }),
+            ...(filters?.plan_type && { where: { plan_type: filters.plan_type as any } }),
           });
           break;
 

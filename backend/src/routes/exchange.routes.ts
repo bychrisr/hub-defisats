@@ -1,9 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { ExchangeService } from '../services/exchange.service';
 import { authMiddleware } from '../middleware/auth.middleware';
+import { getPrisma } from '../lib/prisma';
 
 export async function exchangeRoutes(fastify: FastifyInstance) {
-  const exchangeService = new ExchangeService(fastify.prisma);
+  const prisma = await getPrisma();
+  const exchangeService = new ExchangeService(prisma);
 
   // Get available exchanges (public during registration)
   fastify.get('/exchanges', {

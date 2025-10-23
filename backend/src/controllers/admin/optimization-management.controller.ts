@@ -1,9 +1,13 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { getPrisma } from '../../lib/prisma';
-import { createLogger } from '../../lib/logger';
+import { createLogger } from 'winston';
 import { UnifiedAdminOptimizationService } from '../../services/unified-admin-optimization.service';
 
-const logger = createLogger('optimization-management-controller');
+const logger = createLogger({
+  level: 'info',
+  format: require('winston').format.simple(),
+  transports: [new (require('winston').transports.Console)()]
+});
 
 interface OptimizationQuery {
   action?: 'metrics' | 'recommendations' | 'execute' | 'report';

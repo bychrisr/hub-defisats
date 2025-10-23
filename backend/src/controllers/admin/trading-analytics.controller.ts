@@ -61,7 +61,7 @@ export const getTradingAnalytics = async (
         orderBy: { created_at: 'desc' }
       }),
       prisma.user.findMany({
-        where: planType && planType !== 'all' ? { plan_type: planType } : {},
+        where: planType && planType !== 'all' ? { plan_type: planType as any } : {},
         select: { id: true, email: true, plan_type: true, created_at: true }
       })
     ]);

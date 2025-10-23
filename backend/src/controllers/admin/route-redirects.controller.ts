@@ -118,7 +118,7 @@ export async function getRouteRedirects(request: FastifyRequest<{ Querystring: R
       }
     });
   } catch (error) {
-    request.log.error('Error getting route redirects:', error);
+    request.log.error('Error getting route redirects: ' + (error as Error).message);
     return reply.status(500).send({
       error: 'INTERNAL_SERVER_ERROR',
       message: 'Failed to get route redirects'
@@ -156,7 +156,7 @@ export async function createRouteRedirect(request: FastifyRequest<{ Body: Create
 
     return reply.status(201).send(redirect);
   } catch (error) {
-    request.log.error('Error creating route redirect:', error);
+    request.log.error('Error creating route redirect: ' + (error as Error).message);
     return reply.status(500).send({
       error: 'INTERNAL_SERVER_ERROR',
       message: 'Failed to create route redirect'
@@ -190,7 +190,7 @@ export async function updateRouteRedirect(request: FastifyRequest<{ Params: { id
       });
     }
 
-    request.log.error('Error updating route redirect:', error);
+    request.log.error('Error updating route redirect: ' + (error as Error).message);
     return reply.status(500).send({
       error: 'INTERNAL_SERVER_ERROR',
       message: 'Failed to update route redirect'
@@ -215,7 +215,7 @@ export async function deleteRouteRedirect(request: FastifyRequest<{ Params: { id
       });
     }
 
-    request.log.error('Error deleting route redirect:', error);
+    request.log.error('Error deleting route redirect: ' + (error as Error).message);
     return reply.status(500).send({
       error: 'INTERNAL_SERVER_ERROR',
       message: 'Failed to delete route redirect'
@@ -240,7 +240,7 @@ export async function getRouteRedirectById(request: FastifyRequest<{ Params: { i
 
     return reply.send(redirect);
   } catch (error) {
-    request.log.error('Error getting route redirect by ID:', error);
+    request.log.error('Error getting route redirect by ID: ' + (error as Error).message);
     return reply.status(500).send({
       error: 'INTERNAL_SERVER_ERROR',
       message: 'Failed to get route redirect'
@@ -273,7 +273,7 @@ export async function toggleRouteRedirect(request: FastifyRequest<{ Params: { id
 
     return reply.send(updatedRedirect);
   } catch (error) {
-    request.log.error('Error toggling route redirect:', error);
+    request.log.error('Error toggling route redirect: ' + (error as Error).message);
     return reply.status(500).send({
       error: 'INTERNAL_SERVER_ERROR',
       message: 'Failed to toggle route redirect'

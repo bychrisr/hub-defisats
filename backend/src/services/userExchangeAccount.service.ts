@@ -155,18 +155,35 @@ export class UserExchangeAccountService {
     userId: string, 
     data: CreateUserExchangeAccountData
   ): Promise<UserExchangeAccountWithExchange> {
-    console.log('🔄 USER EXCHANGE ACCOUNT SERVICE - Creating account:', { userId, data });
+    console.log('🚀 USER EXCHANGE ACCOUNT SERVICE - Starting account creation process');
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Input data:', { 
+      userId, 
+      exchangeId: data.exchange_id,
+      accountName: data.account_name,
+      credentialsKeys: Object.keys(data.credentials),
+      timestamp: new Date().toISOString()
+    });
     
     // Verificar se a exchange existe
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Checking if exchange exists:', data.exchange_id);
     const exchange = await this.prisma.exchange.findUnique({
       where: { id: data.exchange_id }
     });
 
     if (!exchange) {
+      console.log('❌ USER EXCHANGE ACCOUNT SERVICE - Exchange not found:', data.exchange_id);
       throw new Error('Exchange not found');
     }
+    
+    console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Exchange found:', {
+      id: exchange.id,
+      name: exchange.name,
+      slug: exchange.slug,
+      isActive: exchange.is_active
+    });
 
     // Verificar se o usuário já tem uma conta com o mesmo nome para esta exchange
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Checking for existing account with same name');
     const existingAccount = await this.prisma.userExchangeAccounts.findFirst({
       where: {
         user_id: userId,
@@ -176,10 +193,17 @@ export class UserExchangeAccountService {
     });
 
     if (existingAccount) {
+      console.log('❌ USER EXCHANGE ACCOUNT SERVICE - Account with same name already exists:', {
+        existingAccountId: existingAccount.id,
+        accountName: existingAccount.account_name
+      });
       throw new Error('User already has an account with this name for this exchange');
     }
+    
+    console.log('✅ USER EXCHANGE ACCOUNT SERVICE - No existing account with same name found');
 
     // Verificar se já existe alguma conta ativa para esta exchange
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Checking for active accounts for this exchange');
     const hasActiveAccount = await this.prisma.userExchangeAccounts.findFirst({
       where: {
         user_id: userId,
@@ -187,11 +211,21 @@ export class UserExchangeAccountService {
         is_active: true
       }
     });
+    
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Active account check result:', {
+      hasActiveAccount: !!hasActiveAccount,
+      activeAccountId: hasActiveAccount?.id
+    });
 
     // Criptografar credenciais
+    console.log('🔐 USER EXCHANGE ACCOUNT SERVICE - Starting credentials encryption process');
     const encryptedCredentials: Record<string, string> = {};
     
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Processing credentials:', Object.keys(data.credentials));
+    
     Object.entries(data.credentials).forEach(([key, value]) => {
+      console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Processing credential: ${key}`);
+      
       // Campo isTestnet não precisa criptografia
       if (key === 'isTestnet' || key === 'testnet') {
         encryptedCredentials[key] = value;
@@ -201,39 +235,80 @@ export class UserExchangeAccountService {
 
       if (value && value.trim() !== '') {
         try {
+          console.log(`🔐 USER EXCHANGE ACCOUNT SERVICE - Encrypting credential: ${key}`);
           const crypto = require('crypto');
           const { securityConfig } = require('../config/env');
           const algorithm = 'aes-256-cbc';
           const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
           const iv = crypto.randomBytes(16);
-          
+
           const cipher = crypto.createCipheriv(algorithm, key, iv);
           let encrypted = cipher.update(value, 'utf8', 'hex');
           encrypted += cipher.final('hex');
-          
+
           encryptedCredentials[key] = `${iv.toString('hex')}:${encrypted}`;
-          console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Encrypted credential ${key}`);
+          console.log(`✅ USER EXCHANGE ACCOUNT SERVICE - Successfully encrypted credential: ${key}`);
         } catch (error) {
           console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to encrypt credential ${key}:`, error);
           encryptedCredentials[key] = value; // Fallback para valor não criptografado
         }
+      } else {
+        console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Skipping empty credential: ${key}`);
       }
+    });
+    
+    console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Credentials encryption completed:', {
+      encryptedKeys: Object.keys(encryptedCredentials),
+      totalCredentials: Object.keys(data.credentials).length
     });
 
     // Criar conta
-    const account = await this.prisma.userExchangeAccounts.create({
-      data: {
-        user_id: userId,
-        exchange_id: data.exchange_id,
-        account_name: data.account_name,
-        credentials: encryptedCredentials,
-        is_active: !hasActiveAccount, // Apenas ativa se não houver conta ativa
-        is_verified: false
-      },
-      include: {
-        exchange: true
-      }
+    console.log('🔄 USER EXCHANGE ACCOUNT SERVICE - Creating account with data:', {
+      user_id: userId,
+      exchange_id: data.exchange_id,
+      account_name: data.account_name,
+      credentials_keys: Object.keys(encryptedCredentials),
+      is_active: !hasActiveAccount,
+      timestamp: new Date().toISOString()
     });
+
+    console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - About to create account in database');
+    
+    try {
+      const account = await this.prisma.userExchangeAccounts.create({
+        data: {
+          user_id: userId,
+          exchange_id: data.exchange_id,
+          account_name: data.account_name,
+          credentials: encryptedCredentials,
+          is_active: !hasActiveAccount, // Apenas ativa se não houver conta ativa
+          is_verified: false
+        },
+        include: {
+          exchange: true
+        }
+      });
+
+      console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Account created successfully in database:', {
+        id: account.id,
+        account_name: account.account_name,
+        exchange_name: account.exchange.name,
+        is_active: account.is_active,
+        is_verified: account.is_verified,
+        created_at: account.created_at
+      });
+      
+      return account;
+    } catch (error) {
+      console.error('❌ USER EXCHANGE ACCOUNT SERVICE - Database creation failed:', {
+        error: error.message,
+        stack: error.stack,
+        userId,
+        exchangeId: data.exchange_id,
+        accountName: data.account_name
+      });
+      throw error;
+    }
 
     // VALIDAÇÃO DE SEGURANÇA FINAL: Verificar se apenas uma conta está ativa
     const finalActiveCount = await this.prisma.userExchangeAccounts.count({

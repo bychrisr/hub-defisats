@@ -18,15 +18,26 @@ export async function authMiddleware(
   reply: FastifyReply
 ): Promise<void> {
   try {
-    console.log('🔍 AUTH MIDDLEWARE - Starting authentication check');
-    console.log('🔍 Request URL:', request.url);
-    console.log('🔍 Headers:', request.headers.authorization);
+    console.log('🚀 AUTH MIDDLEWARE - Starting authentication check');
+    console.log('🔍 AUTH MIDDLEWARE - Request details:', {
+      url: request.url,
+      method: request.method,
+      headers: {
+        authorization: request.headers.authorization ? 'Bearer [REDACTED]' : 'None',
+        contentType: request.headers['content-type'],
+        userAgent: request.headers['user-agent']
+      },
+      timestamp: new Date().toISOString()
+    });
     
     // Get token from Authorization header
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ AUTH MIDDLEWARE - No valid authorization header');
+      console.log('❌ AUTH MIDDLEWARE - No valid authorization header:', {
+        authHeader: authHeader ? 'Present but invalid format' : 'Missing',
+        expectedFormat: 'Bearer <token>'
+      });
       return reply.status(401).send({
         error: 'UNAUTHORIZED',
         message: 'Authorization header with Bearer token is required',
@@ -45,20 +56,44 @@ export async function authMiddleware(
     });
 
     // Initialize auth service with singleton Prisma instance
+    console.log('🔍 AUTH MIDDLEWARE - Initializing auth service');
     const prisma = await getPrisma(); // Use singleton getPrisma()
     const authService = new AuthService(prisma, request.server);
 
     // Validate token and get user
-    console.log('🔍 AUTH MIDDLEWARE - Validating session...');
-    const user = await authService.validateSession(token);
-    console.log('🔍 AUTH MIDDLEWARE - User from validateSession:', user?.email, 'ID:', user?.id);
+    console.log('🔍 AUTH MIDDLEWARE - Validating session with token...');
+    try {
+      const user = await authService.validateSession(token);
+      console.log('🔍 AUTH MIDDLEWARE - User from validateSession:', {
+        userId: user?.id,
+        userEmail: user?.email,
+        username: user?.username,
+        planType: user?.plan_type,
+        hasUser: !!user
+      });
 
-    // Attach user to request
-    (request as any).user = user;
+      if (!user) {
+        console.log('❌ AUTH MIDDLEWARE - No user returned from validateSession');
+        return reply.status(401).send({
+          error: 'UNAUTHORIZED',
+          message: 'Invalid session',
+        });
+      }
 
-    // Note: No need to disconnect - using singleton instance
-    
-    console.log('✅ AUTH MIDDLEWARE - Authentication successful');
+      // Attach user to request
+      (request as any).user = user;
+      console.log('✅ AUTH MIDDLEWARE - User attached to request successfully');
+
+      // Note: No need to disconnect - using singleton instance
+      console.log('✅ AUTH MIDDLEWARE - Authentication successful');
+    } catch (validationError) {
+      console.error('❌ AUTH MIDDLEWARE - Session validation failed:', {
+        error: validationError.message,
+        stack: validationError.stack,
+        token: token.substring(0, 50) + '...'
+      });
+      throw validationError;
+    }
   } catch (error) {
     console.log('❌ AUTH MIDDLEWARE - Error:', error);
     console.log('❌ AUTH MIDDLEWARE - Error stack:', (error as Error).stack);
