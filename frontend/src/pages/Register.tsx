@@ -752,17 +752,17 @@ export default function Register() {
               </Button>
             </div>
 
-            {/* Footer Links */}
-            <div className="mt-8 text-center">
-              <p className="text-slate-400 text-sm">
-                Already have an account?{' '}
-                <Link
-                  to="/login"
-                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1 py-1 min-h-[44px] inline-flex items-center"
-                >
-                  Sign in
-                </Link>
+            {/* Footer Links - Fixed Mobile Layout */}
+            <div className="register-signin-link">
+              <p className="signin-text">
+                Already have an account?
               </p>
+              <Link
+                to="/login"
+                className="signin-link"
+              >
+                Sign in
+              </Link>
             </div>
           </CardContent>
         </Card>
