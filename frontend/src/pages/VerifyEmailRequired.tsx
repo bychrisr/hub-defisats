@@ -161,7 +161,7 @@ export default function VerifyEmailRequired() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, code: otpCode }),
+        body: JSON.stringify({ email, code: otpDigits.join('') }),
       });
 
       const data = await response.json();
