@@ -69,8 +69,8 @@ export class ExchangeCredentialsController {
           
           // Descriptografar cada campo de credencial
           // Usar Object.keys para evitar corrupção das chaves
-          const keys = Object.keys(cred.credentials as Record<string, string>);
-          for (const key of keys) {
+          const credKeys = Object.keys(cred.credentials as Record<string, string>);
+          for (const key of credKeys) {
             const value = cred.credentials[key];
             try {
               decryptedCreds[key] = this.authService.decryptData(value);
@@ -153,8 +153,8 @@ export class ExchangeCredentialsController {
         const decryptedCreds: Record<string, string> = {};
         
         // Usar Object.keys para evitar corrupção das chaves
-        const keys = Object.keys(userCredentials.credentials as Record<string, string>);
-        for (const key of keys) {
+        const userCredKeys = Object.keys(userCredentials.credentials as Record<string, string>);
+        for (const key of userCredKeys) {
           const value = userCredentials.credentials[key];
           try {
             decryptedCreds[key] = this.authService.decryptData(value);
@@ -220,8 +220,8 @@ export class ExchangeCredentialsController {
       const encryptedCredentials: Record<string, string> = {};
       
       // Usar Object.keys para evitar corrupção das chaves
-      const keys = Object.keys(credentials);
-      for (const key of keys) {
+      const encryptKeys = Object.keys(credentials);
+      for (const key of encryptKeys) {
         const value = credentials[key];
         if (value && value.trim() !== '') {
           encryptedCredentials[key] = this.authService.encryptData(value);
@@ -239,8 +239,8 @@ export class ExchangeCredentialsController {
       const decryptedCreds: Record<string, string> = {};
       
       // Usar Object.keys para evitar corrupção das chaves
-      const keys = Object.keys(userCredentials.credentials as Record<string, string>);
-      for (const key of keys) {
+      const decryptKeys = Object.keys(userCredentials.credentials as Record<string, string>);
+      for (const key of decryptKeys) {
         const value = userCredentials.credentials[key];
         try {
           decryptedCreds[key] = this.authService.decryptData(value);

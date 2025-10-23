@@ -700,7 +700,13 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           if (response.ok) {
             const data = await response.json();
             lnMarketsData = {
-              index: data.index || data.price || data.lastPrice,
+              index: data.index,
+              lastPrice: data.lastPrice,
+              askPrice: data.askPrice,
+              bidPrice: data.bidPrice,
+              carryFeeRate: data.carryFeeRate,
+              carryFeeTimestamp: data.carryFeeTimestamp,
+              exchangesWeights: data.exchangesWeights,
               source: 'lnmarkets'
             };
             console.log('✅ PUBLIC MARKET INDEX - LN Markets index success:', lnMarketsData);
@@ -826,12 +832,39 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
           ? `${minutesToNext}m ${secondsToNext}s`
           : `${hoursToNext}h ${minutesToNext}m ${secondsToNext}s`;
 
+        // Calculate Next Funding using real carryFeeTimestamp from LN Markets
+        let nextFundingReal = nextFunding;
+        if (lnMarketsData?.carryFeeTimestamp && lnMarketsData.carryFeeTimestamp > 0) {
+          const carryFeeDate = new Date(lnMarketsData.carryFeeTimestamp);
+          const now = new Date();
+          const timeDiff = carryFeeDate.getTime() - now.getTime();
+          
+          if (timeDiff > 0) {
+            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+            
+            if (hours > 0) {
+              nextFundingReal = `${hours}h ${minutes}m ${seconds}s`;
+            } else if (minutes > 0) {
+              nextFundingReal = `${minutes}m ${seconds}s`;
+            } else {
+              nextFundingReal = `${seconds}s`;
+            }
+          }
+        }
+
         const responseData = {
-          index: Math.round(marketData.index),
+          index: Math.round(lnMarketsData?.index || marketData.index),
+          lastPrice: lnMarketsData?.lastPrice ? Math.round(lnMarketsData.lastPrice) : null,
+          askPrice: lnMarketsData?.askPrice,
+          bidPrice: lnMarketsData?.bidPrice,
           index24hChange: parseFloat(marketData.change24h.toFixed(3)),
           tradingFees: 0.1, // LN Markets standard fee
-          nextFunding: nextFunding,
-          rate: 0.00006, // 0.0060% in decimal
+          nextFunding: nextFundingReal,
+          rate: lnMarketsData?.carryFeeRate || 0.00006,
+          carryFeeTimestamp: lnMarketsData?.carryFeeTimestamp,
+          exchangesWeights: lnMarketsData?.exchangesWeights,
           timestamp: new Date().toISOString(),
           source: marketData.source // Include data source
         };
