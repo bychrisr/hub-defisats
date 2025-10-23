@@ -28,6 +28,7 @@ import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Landing } from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import RegisterPlan from '@/pages/RegisterPlan';
 import RegisterCredentials from '@/pages/RegisterCredentials';
 import VerifyEmail from '@/pages/VerifyEmail';
 import VerifyEmailRequired from '@/pages/VerifyEmailRequired';
@@ -255,6 +256,14 @@ const App = () => {
                   <Register />
                 </PublicRoute>
               }
+            />
+            <Route
+              path="/register/plan"
+                element={
+                  <PublicRoute>
+                    <RegisterPlan />
+                  </PublicRoute>
+                }
             />
             <Route
               path="/verify-email"

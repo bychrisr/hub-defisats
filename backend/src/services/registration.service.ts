@@ -98,6 +98,51 @@ export class RegistrationService {
       console.log('🔍 REGISTRATION - Generated token length:', verificationToken.length);
       console.log('🔍 REGISTRATION - Token hash length:', tokenHash.length);
 
+      // Check if user has a 100% discount coupon with plan_type
+      let userPlanType = 'free'; // Default plan
+      let couponData = null;
+      
+      if (data.couponCode) {
+        console.log('🎫 REGISTRATION - Checking coupon:', data.couponCode);
+        const coupon = await this.prisma.coupon.findUnique({
+          where: { code: data.couponCode },
+          select: {
+            id: true,
+            code: true,
+            value_type: true,
+            value_amount: true,
+            plan_type: true,
+            is_active: true,
+            expires_at: true
+          }
+        });
+        
+        if (coupon && coupon.is_active && (!coupon.expires_at || coupon.expires_at > new Date())) {
+          console.log('🎫 REGISTRATION - Coupon found:', {
+            code: coupon.code,
+            value_type: coupon.value_type,
+            value_amount: coupon.value_amount,
+            plan_type: coupon.plan_type
+          });
+          
+          // If coupon has 100% discount + plan_type, use coupon's plan
+          if (coupon.value_type === 'percentage' && coupon.value_amount === 100 && coupon.plan_type) {
+            userPlanType = coupon.plan_type;
+            couponData = {
+              code: coupon.code,
+              value_type: coupon.value_type,
+              value_amount: coupon.value_amount,
+              plan_type: coupon.plan_type
+            };
+            console.log('✅ REGISTRATION - Applying coupon plan:', userPlanType);
+          } else {
+            console.log('ℹ️ REGISTRATION - Coupon found but not 100% + plan_type, using default plan');
+          }
+        } else {
+          console.log('❌ REGISTRATION - Coupon not found or inactive/expired');
+        }
+      }
+
       // Create user
       const user = await this.prisma.user.create({
         data: {
@@ -112,7 +157,7 @@ export class RegistrationService {
           email_verification_token: tokenHash, // Armazenar hash, não o token plain
           email_verification_expires: verificationExpires,
           account_status: 'pending_verification',
-          plan_type: 'free', // Default plan
+          plan_type: userPlanType, // Use coupon plan if applicable
           is_active: false, // Will be activated on first login
         }
       });
@@ -121,8 +166,10 @@ export class RegistrationService {
       const registrationProgress = await this.prisma.registrationProgress.create({
         data: {
           user_id: user.id,
-          current_step: 'plan_selection',
-          completed_steps: ['personal_data'],
+          current_step: couponData ? 'completed' : 'plan_selection', // Skip plan selection if coupon applied
+          completed_steps: couponData ? ['personal_data', 'plan_selection'] : ['personal_data'],
+          selected_plan: couponData ? couponData.plan_type : null, // Set plan if coupon applied
+          coupon_code: data.couponCode,
           personal_data: {
             firstName: data.firstName,
             lastName: data.lastName,
@@ -141,6 +188,26 @@ export class RegistrationService {
       const authService = new AuthService(this.prisma, null as any); // fastify não é necessário para generateOTP
       const generatedOtp = await authService.generateOTP(user.id);
       
+      // Register coupon usage if applied
+      if (couponData) {
+        console.log('🎫 REGISTRATION - Registering coupon usage for:', couponData.code);
+        const coupon = await this.prisma.coupon.findUnique({
+          where: { code: couponData.code }
+        });
+        if (coupon) {
+          await this.prisma.couponUsage.create({
+            data: {
+              coupon_id: coupon.id,
+              user_id: user.id,
+              ip_address: ipAddress || 'unknown',
+              user_agent: 'registration',
+              risk_score: 0
+            }
+          });
+          console.log('✅ REGISTRATION - Coupon usage registered');
+        }
+      }
+
       // Enviar email de verificação com Magic Link + OTP
       await this.emailService.sendVerificationEmail(data.email, verificationToken, generatedOtp);
       console.log('📧 REGISTRATION - Email sent with token:', verificationToken.substring(0, 10) + '...', 'and OTP:', generatedOtp);
@@ -270,7 +337,10 @@ export class RegistrationService {
           data: {
             current_step: 'completed',
             completed_steps: [...progress.completed_steps as string[], 'plan_selection'],
-            selected_plan: data.planId,
+            // If coupon has 100% discount + plan_type, use coupon's plan
+            selected_plan: (couponData && couponData.discountValue === 100 && couponData.planType) 
+              ? couponData.planType 
+              : data.planId,
             coupon_code: progress.personal_data && typeof progress.personal_data === 'object' && 'couponCode' in progress.personal_data 
               ? (progress.personal_data as any).couponCode 
               : null,
@@ -306,7 +376,10 @@ export class RegistrationService {
         data: {
           current_step: nextStep,
           completed_steps: [...progress.completed_steps as string[], 'plan_selection'],
-          selected_plan: data.planId,
+          // If coupon has 100% discount + plan_type, use coupon's plan
+          selected_plan: (couponData && couponData.discountValue === 100 && couponData.planType) 
+            ? couponData.planType 
+            : data.planId,
           coupon_code: progress.personal_data && typeof progress.personal_data === 'object' && 'couponCode' in progress.personal_data 
             ? (progress.personal_data as any).couponCode 
             : null,
@@ -317,7 +390,10 @@ export class RegistrationService {
       await this.prisma.user.update({
         where: { id: progress.user_id },
         data: {
-          plan_type: data.planId as any,
+          // If coupon has 100% discount + plan_type, use coupon's plan
+          plan_type: ((couponData && couponData.discountValue === 100 && couponData.planType) 
+            ? couponData.planType 
+            : data.planId) as any,
         }
       });
 

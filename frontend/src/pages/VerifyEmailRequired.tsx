@@ -192,7 +192,13 @@ export default function VerifyEmailRequired() {
           title: 'Email verificado!',
           description: 'Redirecionando para o dashboard...',
         });
-        navigate('/dashboard?first=true');
+        navigate('/register/plan', {
+          state: {
+            sessionToken: data.jwt, // Pass JWT as session token
+            personalData: { email },
+            couponData: null, // Will be loaded from registration progress
+          },
+        });
       } else {
         toast({
           title: 'Código inválido',

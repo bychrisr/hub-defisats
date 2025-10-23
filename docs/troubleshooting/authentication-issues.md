@@ -183,7 +183,71 @@ After fix, JWT payload now contains:
 
 **Status**: ✅ **RESOLVED** - Magic Link and OTP verification now work correctly
 
-### 6. Redirect Loop After Verification
+### 6. Coupon Plan Assignment Bug (RESOLVED)
+
+**Problem**: Users registering with 100% discount coupons (e.g., "BETATESTER") were incorrectly assigned the "Free" plan instead of the coupon's specified plan (e.g., "Lifetime").
+
+**Symptoms**:
+- User registers with coupon "BETATESTER" (100% OFF + Lifetime)
+- User gets `plan_type: 'free'` instead of `plan_type: 'lifetime'`
+- Dashboard shows "Free" plan instead of "Lifetime"
+- Features remain locked despite having valid coupon
+
+**Root Cause**: The registration flow was not checking for 100% discount coupons during user creation, defaulting to `plan_type: 'free'` regardless of coupon benefits.
+
+**Solution**: Updated `backend/src/services/registration.service.ts` to check for 100% discount coupons during `savePersonalData`:
+
+```typescript
+// Check if user has a 100% discount coupon with plan_type
+let userPlanType = 'free'; // Default plan
+let couponData = null;
+
+if (data.couponCode) {
+  const coupon = await this.prisma.coupon.findUnique({
+    where: { code: data.couponCode },
+    select: {
+      id: true,
+      code: true,
+      value_type: true,
+      value_amount: true,
+      plan_type: true,
+      is_active: true,
+      expires_at: true
+    }
+  });
+  
+  if (coupon && coupon.is_active && (!coupon.expires_at || coupon.expires_at > new Date())) {
+    // If coupon has 100% discount + plan_type, use coupon's plan
+    if (coupon.value_type === 'percentage' && coupon.value_amount === 100 && coupon.plan_type) {
+      userPlanType = coupon.plan_type;
+      couponData = {
+        code: coupon.code,
+        value_type: coupon.value_type,
+        value_amount: coupon.value_amount,
+        plan_type: coupon.plan_type
+      };
+    }
+  }
+}
+
+// Create user with correct plan
+const user = await this.prisma.user.create({
+  data: {
+    // ... other fields
+    plan_type: userPlanType, // Use coupon plan if applicable
+  }
+});
+```
+
+**Files Modified**:
+- `backend/src/services/registration.service.ts` - `savePersonalData()` method
+
+**Verification**:
+After the fix, users with 100% discount coupons are automatically assigned the coupon's plan type and skip the plan selection step.
+
+**Status**: ✅ **RESOLVED** - Coupon plan assignment now works correctly
+
+### 7. Redirect Loop After Verification
 
 **Symptoms**: User verifies email but gets stuck in redirect loop (Dashboard → Login → Dashboard).
 
