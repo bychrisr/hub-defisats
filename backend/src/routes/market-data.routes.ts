@@ -856,7 +856,7 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
         }
 
         const responseData = {
-          index: Math.round(lnMarketsData?.index || marketData.index),
+          index: Math.round(marketData.index), // ✅ SEMPRE usar TradingView Data Service para Index
           lastPrice: lnMarketsData?.lastPrice ? Math.round(lnMarketsData.lastPrice) : null,
           askPrice: lnMarketsData?.askPrice,
           bidPrice: lnMarketsData?.bidPrice,
