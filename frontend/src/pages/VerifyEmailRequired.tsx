@@ -324,6 +324,37 @@ export default function VerifyEmailRequired() {
               </button>
             )}
           </CardDescription>
+
+          {/* Modal para alterar email - Posicionado logo após o email */}
+          {showChangeEmail && (
+            <div className="verify-email-change-modal mt-4">
+              <div className="space-y-4">
+                <h4 className="font-medium text-slate-200">Alterar email</h4>
+                <Input
+                  type="email"
+                  placeholder="Digite o novo email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSaveNewEmail}
+                    className="verify-email-cta-button flex-1"
+                  >
+                    Salvar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowChangeEmail(false)}
+                    className="verify-email-resend-button flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -455,36 +486,6 @@ export default function VerifyEmailRequired() {
             </Button>
           </div>
 
-          {/* Modal para alterar email */}
-          {showChangeEmail && (
-            <div className="verify-email-change-modal">
-              <div className="space-y-4">
-                <h4 className="font-medium text-slate-200">Alterar email</h4>
-                <Input
-                  type="email"
-                  placeholder="Digite o novo email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleSaveNewEmail}
-                    className="verify-email-cta-button flex-1"
-                  >
-                    Salvar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowChangeEmail(false)}
-                    className="verify-email-resend-button flex-1"
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Link para voltar */}
           <div className="text-center">
