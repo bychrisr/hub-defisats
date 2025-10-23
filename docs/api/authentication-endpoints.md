@@ -46,6 +46,19 @@ curl -X GET "http://localhost:13010/api/auth/verify-email/abc123def456..."
   - `Set-Cookie`: `access_token=<JWT>; HttpOnly; Secure; SameSite=Lax`
   - `Location`: `/login?verified=true&message=account_created&email=user@example.com`
 
+**JWT Payload Structure**:
+```json
+{
+  "sub": "user-id-here",        // ✅ Standard JWT field
+  "email": "user@example.com",
+  "planType": "free",
+  "iat": 1761186344,
+  "exp": 1761193544
+}
+```
+
+**Note**: The JWT uses the standard `sub` field for user ID, ensuring compatibility with JWT validation middleware.
+
 **Error Response**:
 - Status: `302 Found`
 - Headers:

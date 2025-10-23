@@ -128,7 +128,62 @@ export const otpRateLimit = rateLimit({
 });
 ```
 
-### 5. Redirect Loop After Verification
+### 5. JWT Payload Inconsistency (RESOLVED)
+
+**Symptoms**: After successful email verification, users redirected to login page with "Invalid session" error. Backend logs showed:
+```
+🔍 VALIDATE SESSION - JWT decoded successfully: {
+  sub: undefined,  // ❌ PROBLEMA AQUI!
+  email: 'user@example.com',
+  email_verified: undefined
+}
+❌ VALIDATE SESSION - No user ID in JWT payload
+```
+
+**Root Cause**: **Inconsistency between JWT generation and validation:**
+- **JWT Generation**: Used `userId` in payload
+- **JWT Validation**: Expected `sub` in payload
+
+**Solution**:
+**Fixed JWT generation to use standard `sub` field:**
+
+```typescript
+// ❌ ANTES (INCORRETO)
+return this.fastify.jwt.sign({
+  userId: user.id,  // ❌ Campo não padrão
+  email: user.email,
+  planType: user.plan_type,
+});
+
+// ✅ DEPOIS (CORRETO)
+return this.fastify.jwt.sign({
+  sub: user.id,  // ✅ Campo padrão JWT
+  email: user.email,
+  planType: user.plan_type,
+});
+```
+
+**Files Modified**:
+- `backend/src/services/auth.service.ts`:
+  - `generateAccessToken()`: Changed `userId` → `sub`
+  - `generateRefreshToken()`: Changed `userId` → `sub`
+  - `refreshToken()`: Changed `decoded.userId` → `decoded.sub`
+
+**Verification**:
+After fix, JWT payload now contains:
+```json
+{
+  "sub": "user-id-here",
+  "email": "user@example.com",
+  "planType": "free",
+  "iat": 1761186344,
+  "exp": 1761193544
+}
+```
+
+**Status**: ✅ **RESOLVED** - Magic Link and OTP verification now work correctly
+
+### 6. Redirect Loop After Verification
 
 **Symptoms**: User verifies email but gets stuck in redirect loop (Dashboard → Login → Dashboard).
 
@@ -155,7 +210,7 @@ reply.setCookie('access_token', jwt, {
 return reply.redirect(`${process.env.FRONTEND_URL}/login?verified=true&message=account_created&email=${encodeURIComponent(user.email)}`);
 ```
 
-### 6. Database Connection Issues
+### 7. Database Connection Issues
 
 **Symptoms**: Prisma migration fails with authentication errors.
 

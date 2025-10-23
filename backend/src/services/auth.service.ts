@@ -328,7 +328,7 @@ export class AuthService {
       // Check if token exists in database
       const tokenRecord = await this.prisma.user.findFirst({
         where: {
-          id: decoded.userId,
+          id: decoded.sub,  // ✅ CORRIGIDO: Usar 'sub' em vez de 'userId'
           session_expires_at: {
             gt: new Date(),
           },
@@ -340,7 +340,7 @@ export class AuthService {
       }
 
       // Generate new access token
-      const newToken = this.generateAccessToken(tokenRecord);
+      const newToken = await this.generateAccessToken(tokenRecord);
 
       return {
         token: newToken,
@@ -547,7 +547,7 @@ export class AuthService {
     const expiresIn = await this.securityConfig.getJWTExpiration();
     return this.fastify.jwt.sign(
       {
-        userId: user.id,
+        sub: user.id,  // ✅ CORRIGIDO: Usar 'sub' em vez de 'userId'
         email: user.email,
         planType: user.plan_type,
       },
@@ -564,7 +564,7 @@ export class AuthService {
     const expiresIn = await this.securityConfig.getRefreshTokenExpiration();
     return this.fastify.jwt.sign(
       {
-        userId: user.id,
+        sub: user.id,  // ✅ CORRIGIDO: Usar 'sub' em vez de 'userId'
         type: 'refresh',
       },
       {

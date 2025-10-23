@@ -94,13 +94,15 @@ password_reset_expires TIMESTAMP
 **Token Structure:**
 ```typescript
 const jwtPayload = {
-  sub: user.id,
+  sub: user.id,                    // ✅ Standard JWT field
   email: user.email,
-  email_verified: true,
+  planType: user.plan_type,       // ✅ Include plan type
   iat: Math.floor(Date.now() / 1000),
   exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
 };
 ```
+
+**Important**: Always use the standard `sub` field for user ID in JWT payloads. Custom fields like `userId` cause validation issues in middleware that expect standard JWT structure.
 
 **Cookie Configuration:**
 ```typescript
