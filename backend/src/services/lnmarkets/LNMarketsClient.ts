@@ -42,6 +42,16 @@ export class LNMarketsClient {
       ? 'https://api.testnet4.lnmarkets.com/v2' 
       : 'https://api.lnmarkets.com/v2');
 
+    // ✅ LOGS DETALHADOS PARA TESTNET
+    console.log('🌐 LN MARKETS CLIENT - Network detection:', {
+      isTestnet: config.credentials.isTestnet,
+      baseURL: this.baseURL,
+      expectedTestnetURL: 'https://api.testnet4.lnmarkets.com/v2',
+      expectedMainnetURL: 'https://api.lnmarkets.com/v2',
+      network: config.credentials.isTestnet ? 'testnet' : 'mainnet',
+      timestamp: new Date().toISOString()
+    });
+
     // Create axios instance
     this.client = axios.create({
       baseURL: this.baseURL,

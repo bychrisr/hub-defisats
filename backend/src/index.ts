@@ -801,6 +801,16 @@ async function registerRoutes() {
   await fastify.register(lnMarketsAdminRoutes, { prefix: '/api/admin/lnmarkets' });
   // await fastify.register(settingsRoutes, { prefix: '/api/admin/settings' });
   // await fastify.register(lnMarketsFallbackTestRoutes, { prefix: '/api/lnmarkets-fallback' });
+  
+  // ✅ NOVO: Registrar rotas LN Markets básicas
+  const { lnmarketsRoutes } = await import('./routes/lnmarkets.routes');
+  await fastify.register(lnmarketsRoutes, { prefix: '/api/lnmarkets' });
+  console.log('✅ LN Markets basic routes registered');
+  
+  // ✅ NOVO: Registrar rotas LN Markets Header (DEPOIS das básicas)
+  const { lnMarketsHeaderRoutes } = await import('./routes/lnmarkets-header.routes');
+  await fastify.register(lnMarketsHeaderRoutes, { prefix: '/api/lnmarkets' });
+  console.log('✅ LN Markets Header routes registered');
   await fastify.register(hardwareMonitorRoutes, { prefix: '/api/admin/hardware' });
   await fastify.register(adminCacheRoutes, { prefix: '/api/admin/cache' });
   await fastify.register(loadBalancerRoutes, { prefix: '/api/admin/load-balancer' });
@@ -1047,11 +1057,12 @@ async function start() {
     console.log('✅ Margin Guard monitoring started');
     
     // Start Margin Guard V2 Worker with WebSocket integration
-    console.log('🚀 Starting Margin Guard V2 Worker...');
-    const { getMarginGuardV2Worker } = await import('./workers/margin-guard-v2.worker');
-    const marginGuardV2Worker = getMarginGuardV2Worker(prisma);
-    await marginGuardV2Worker.initialize();
-    console.log('✅ Margin Guard V2 Worker started with WebSocket integration');
+    // TEMPORARILY DISABLED - Margin Guard V2 Worker causing errors
+    // console.log('🚀 Starting Margin Guard V2 Worker...');
+    // const { getMarginGuardV2Worker } = await import('./workers/margin-guard-v2.worker');
+    // const marginGuardV2Worker = getMarginGuardV2Worker(prisma);
+    // await marginGuardV2Worker.initialize();
+    // console.log('✅ Margin Guard V2 Worker started with WebSocket integration');
     
     // Start Health Checker service
     console.log('🏥 Starting Health Checker service...');

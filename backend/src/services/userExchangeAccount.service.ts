@@ -24,20 +24,25 @@ export class UserExchangeAccountService {
   /**
    * Descriptografar credenciais de uma conta
    */
-  private decryptCredentials(credentials: any): Record<string, string> {
+  public decryptCredentials(credentials: any): Record<string, string> {
     const decryptedCredentials: Record<string, string> = {};
     
     console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Decrypting credentials:`, credentials);
     
     if (credentials && typeof credentials === 'object') {
-      Object.entries(credentials).forEach(([key, value]) => {
+      // Usar Object.keys para evitar corrupção das chaves
+      const keys = Object.keys(credentials);
+      
+      for (const key of keys) {
+        const value = credentials[key];
+        
         if (value && typeof value === 'string') {
           try {
             // Usar a mesma lógica de descriptografia do AuthService
             const crypto = require('crypto');
-            const { securityConfig } = require('../config/env');
             const algorithm = 'aes-256-cbc';
-            const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+            const encryptionKey = process.env.ENCRYPTION_KEY;
+            const keyBuffer = crypto.scryptSync(encryptionKey, 'salt', 32);
             
             // Extrair IV e dados criptografados
             const [ivHex, encryptedHex] = value.split(':');
@@ -45,14 +50,14 @@ export class UserExchangeAccountService {
               // Se não está no formato criptografado, assumir que é valor plano (ex: isTestnet)
               console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Plain text credential field: ${key} = ${value}`);
               decryptedCredentials[key] = value;
-              return;
+              continue;
             }
             
             const iv = Buffer.from(ivHex, 'hex');
-            const encrypted = Buffer.from(encryptedHex, 'hex');
+            const encrypted = encryptedHex;
             
-            const decipher = crypto.createDecipheriv(algorithm, key, iv);
-            let decrypted = decipher.update(encrypted, null, 'utf8');
+            const decipher = crypto.createDecipheriv(algorithm, keyBuffer, iv);
+            let decrypted = decipher.update(encrypted, 'hex', 'utf8');
             decrypted += decipher.final('utf8');
             
             decryptedCredentials[key] = decrypted;
@@ -64,7 +69,7 @@ export class UserExchangeAccountService {
         } else {
           decryptedCredentials[key] = '';
         }
-      });
+      }
     }
     
     console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Final decrypted credentials:`, decryptedCredentials);
@@ -223,26 +228,29 @@ export class UserExchangeAccountService {
     
     console.log('🔍 USER EXCHANGE ACCOUNT SERVICE - Processing credentials:', Object.keys(data.credentials));
     
-    Object.entries(data.credentials).forEach(([key, value]) => {
+    // Usar Object.keys para evitar corrupção das chaves
+    const keys = Object.keys(data.credentials);
+    for (const key of keys) {
+      const value = data.credentials[key];
       console.log(`🔍 USER EXCHANGE ACCOUNT SERVICE - Processing credential: ${key}`);
       
       // Campo isTestnet não precisa criptografia
       if (key === 'isTestnet' || key === 'testnet') {
         encryptedCredentials[key] = value;
         console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Plain text field stored: ${key} = ${value}`);
-        return;
+        continue;
       }
 
       if (value && value.trim() !== '') {
         try {
           console.log(`🔐 USER EXCHANGE ACCOUNT SERVICE - Encrypting credential: ${key}`);
           const crypto = require('crypto');
-          const { securityConfig } = require('../config/env');
+          const encryptionKey = process.env.ENCRYPTION_KEY;
           const algorithm = 'aes-256-cbc';
-          const key = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+          const keyBuffer = crypto.scryptSync(encryptionKey, 'salt', 32);
           const iv = crypto.randomBytes(16);
 
-          const cipher = crypto.createCipheriv(algorithm, key, iv);
+          const cipher = crypto.createCipheriv(algorithm, keyBuffer, iv);
           let encrypted = cipher.update(value, 'utf8', 'hex');
           encrypted += cipher.final('hex');
 
@@ -255,7 +263,7 @@ export class UserExchangeAccountService {
       } else {
         console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Skipping empty credential: ${key}`);
       }
-    });
+    }
     
     console.log('✅ USER EXCHANGE ACCOUNT SERVICE - Credentials encryption completed:', {
       encryptedKeys: Object.keys(encryptedCredentials),
@@ -404,12 +412,15 @@ export class UserExchangeAccountService {
       const currentCreds = (currentAccount?.credentials || {}) as Record<string, string>;
       const mergedCredentials = { ...currentCreds };
       
-      Object.entries(data.credentials).forEach(([key, value]) => {
+      // Usar Object.keys para evitar corrupção das chaves
+      const keys = Object.keys(data.credentials);
+      for (const key of keys) {
+        const value = data.credentials[key];
         // Campo isTestnet não precisa criptografia
         if (key === 'isTestnet' || key === 'testnet') {
           mergedCredentials[key] = value;
           console.log(`ℹ️ USER EXCHANGE ACCOUNT SERVICE - Plain text field updated: ${key} = ${value}`);
-          return;
+          continue;
         }
 
         if (value && value.trim() !== '') {
@@ -425,12 +436,12 @@ export class UserExchangeAccountService {
             // Criptografar novo valor
             try {
               const crypto = require('crypto');
-              const { securityConfig } = require('../config/env');
+              const encryptionKey = process.env.ENCRYPTION_KEY;
               const algorithm = 'aes-256-cbc';
-              const encKey = crypto.scryptSync(securityConfig.encryption.key, 'salt', 32);
+              const keyBuffer = crypto.scryptSync(encryptionKey, 'salt', 32);
               const iv = crypto.randomBytes(16);
               
-              const cipher = crypto.createCipheriv(algorithm, encKey, iv);
+              const cipher = crypto.createCipheriv(algorithm, keyBuffer, iv);
               let encrypted = cipher.update(value, 'utf8', 'hex');
               encrypted += cipher.final('hex');
               
@@ -442,7 +453,7 @@ export class UserExchangeAccountService {
             }
           }
         }
-      });
+      }
 
       console.log('📦 USER EXCHANGE ACCOUNT SERVICE - Final merged credentials keys:', Object.keys(mergedCredentials));
       updateData.credentials = mergedCredentials;
@@ -760,14 +771,17 @@ export class UserExchangeAccountService {
       const authService = new AuthService(this.prisma, {} as any);
       const decryptedCredentials: Record<string, string> = {};
       
-      Object.entries(account.credentials as Record<string, string>).forEach(([key, value]) => {
+      // Usar Object.keys para evitar corrupção das chaves
+      const keys = Object.keys(account.credentials as Record<string, string>);
+      for (const key of keys) {
+        const value = account.credentials[key];
         try {
           decryptedCredentials[key] = authService.decryptData(value);
         } catch (error) {
           console.warn(`⚠️ USER EXCHANGE ACCOUNT SERVICE - Failed to decrypt ${key}:`, error);
           decryptedCredentials[key] = '[ENCRYPTED]';
         }
-      });
+      }
 
       // TODO: Implementar teste de credenciais específico para cada exchange
       // Por enquanto, simular sucesso

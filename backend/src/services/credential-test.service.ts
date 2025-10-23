@@ -81,7 +81,10 @@ export class CredentialTestService {
       
       // Descriptografar credenciais da nova estrutura
       const decryptedCredentials: Record<string, string> = {};
-      for (const [key, encryptedValue] of Object.entries(userCredentials.credentials as Record<string, string>)) {
+      // Usar Object.keys para evitar corrupção das chaves
+      const keys = Object.keys(userCredentials.credentials as Record<string, string>);
+      for (const key of keys) {
+        const encryptedValue = userCredentials.credentials[key];
         try {
           decryptedCredentials[key] = authService.decryptData(encryptedValue);
         } catch (error: any) {

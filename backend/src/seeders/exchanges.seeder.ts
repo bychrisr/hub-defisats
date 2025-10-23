@@ -78,3 +78,27 @@ export async function seedExchanges(prisma: PrismaClient) {
 
   console.log('✅ Exchanges seeded successfully - LN Markets only');
 }
+
+export const exchangesSeeder = {
+  name: 'exchanges',
+  description: 'Create exchange configurations and credential types',
+  run: async () => {
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    try {
+      await seedExchanges(prisma);
+      return {
+        success: true,
+        message: 'Exchanges seeded successfully'
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: `Failed to seed exchanges: ${error.message}`
+      };
+    } finally {
+      await prisma.$disconnect();
+    }
+  }
+};

@@ -107,6 +107,13 @@ export class AccountCredentialsService {
       }
       
       console.log(`✅ ACCOUNT CREDENTIALS - Found active account: ${activeAccount.account_name} (${activeAccount.exchange.name})`);
+      console.log(`🔍 ACCOUNT CREDENTIALS - Exchange details:`, {
+        exchangeName: activeAccount.exchange.name,
+        exchangeSlug: activeAccount.exchange.slug,
+        exchangeId: activeAccount.exchange.id,
+        accountName: activeAccount.account_name,
+        isActive: activeAccount.is_active
+      });
       
       // Check cache first
       const cacheKey = `credentials-${userId}-${activeAccount.id}`;
@@ -126,8 +133,15 @@ export class AccountCredentialsService {
         };
       }
       
-      // Get credentials from database (already decrypted by UserExchangeAccountService)
-      const credentials = activeAccount.credentials;
+      // Get credentials from database and decrypt them
+      console.log('🔍 ACCOUNT CREDENTIALS - Calling UserExchangeAccountService.decryptCredentials...');
+      const credentials = this.userExchangeAccountService.decryptCredentials(activeAccount.credentials);
+      console.log('✅ ACCOUNT CREDENTIALS - Decrypted credentials:', {
+        hasApiKey: !!credentials['API Key'],
+        hasApiSecret: !!credentials['API Secret'],
+        hasPassphrase: !!credentials['Passphrase'],
+        isTestnet: credentials.isTestnet
+      });
       
       console.log(`🔍 ACCOUNT CREDENTIALS - Raw credentials for ${activeAccount.account_name}:`, credentials);
       

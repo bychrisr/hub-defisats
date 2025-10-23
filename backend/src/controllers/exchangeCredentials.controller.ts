@@ -68,14 +68,17 @@ export class ExchangeCredentialsController {
           const decryptedCreds: Record<string, string> = {};
           
           // Descriptografar cada campo de credencial
-          Object.entries(cred.credentials as Record<string, string>).forEach(([key, value]) => {
+          // Usar Object.keys para evitar corrupção das chaves
+          const keys = Object.keys(cred.credentials as Record<string, string>);
+          for (const key of keys) {
+            const value = cred.credentials[key];
             try {
               decryptedCreds[key] = this.authService.decryptData(value);
             } catch (decryptError) {
               console.warn(`⚠️ EXCHANGE CREDENTIALS - Failed to decrypt ${key}:`, decryptError);
               decryptedCreds[key] = '[ENCRYPTED]';
             }
-          });
+          }
 
           return {
             ...cred,
@@ -149,14 +152,17 @@ export class ExchangeCredentialsController {
       try {
         const decryptedCreds: Record<string, string> = {};
         
-        Object.entries(userCredentials.credentials as Record<string, string>).forEach(([key, value]) => {
+        // Usar Object.keys para evitar corrupção das chaves
+        const keys = Object.keys(userCredentials.credentials as Record<string, string>);
+        for (const key of keys) {
+          const value = userCredentials.credentials[key];
           try {
             decryptedCreds[key] = this.authService.decryptData(value);
           } catch (decryptError) {
             console.warn(`⚠️ EXCHANGE CREDENTIALS - Failed to decrypt ${key}:`, decryptError);
             decryptedCreds[key] = '[ENCRYPTED]';
           }
-        });
+        }
 
         const decryptedCredentials = {
           ...userCredentials,
@@ -213,11 +219,14 @@ export class ExchangeCredentialsController {
       // Criptografar credenciais
       const encryptedCredentials: Record<string, string> = {};
       
-      Object.entries(credentials).forEach(([key, value]) => {
+      // Usar Object.keys para evitar corrupção das chaves
+      const keys = Object.keys(credentials);
+      for (const key of keys) {
+        const value = credentials[key];
         if (value && value.trim() !== '') {
           encryptedCredentials[key] = this.authService.encryptData(value);
         }
-      });
+      }
 
       // Usar o novo serviço para upsert credenciais
       const userCredentials = await this.exchangeService.upsertUserCredentials(
@@ -229,14 +238,17 @@ export class ExchangeCredentialsController {
       // Descriptografar para resposta
       const decryptedCreds: Record<string, string> = {};
       
-      Object.entries(userCredentials.credentials as Record<string, string>).forEach(([key, value]) => {
+      // Usar Object.keys para evitar corrupção das chaves
+      const keys = Object.keys(userCredentials.credentials as Record<string, string>);
+      for (const key of keys) {
+        const value = userCredentials.credentials[key];
         try {
           decryptedCreds[key] = this.authService.decryptData(value);
         } catch (decryptError) {
           console.warn(`⚠️ EXCHANGE CREDENTIALS - Failed to decrypt ${key}:`, decryptError);
           decryptedCreds[key] = '[ENCRYPTED]';
         }
-      });
+      }
 
       const responseData = {
         ...userCredentials,

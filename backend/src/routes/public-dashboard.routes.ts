@@ -142,16 +142,73 @@ export async function publicDashboardRoutes(fastify: FastifyInstance) {
     try {
       console.log('🌐 PUBLIC MARKET - Fetching public market data...');
 
-      // Dados mockados para demonstração
-      const mockMarketData = {
-        index: 122850,
-        index24hChange: 0.856,
-        tradingFees: 0.1,
-        nextFunding: "1m 36s",
-        rate: 0.00006,
-        timestamp: new Date().toISOString(),
-        source: "lnmarkets"
-      };
+      // ✅ BUSCAR DADOS REAIS DA API PÚBLICA LN MARKETS
+      console.log('🌐 PUBLIC MARKET - Fetching real public market data...');
+      
+      try {
+        // Usar API pública LN Markets (sem autenticação)
+        const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Axisor-Public/1.0'
+          },
+          timeout: 10000
+        });
+
+        if (!response.ok) {
+          throw new Error(`LN Markets public API error: ${response.status}`);
+        }
+
+        const publicData = await response.json();
+        
+        // Validar dados recebidos
+        const { MarketDataValidator } = await import('../utils/market-data-validator');
+        const validation = MarketDataValidator.validateMarketData({
+          index: publicData.index,
+          change24h: 0, // API pública não tem change24h
+          timestamp: Date.now()
+        });
+
+        if (!validation.valid) {
+          console.warn('⚠️ PUBLIC MARKET - Data validation failed, using fallback');
+          throw new Error(`Data validation failed: ${validation.reason}`);
+        }
+
+        const realMarketData = {
+          index: publicData.index,
+          index24hChange: 0, // API pública não fornece
+          tradingFees: 0.1, // Padrão LN Markets
+          nextFunding: "Calculating...", // Não disponível na API pública
+          rate: publicData.carryFeeRate || 0.00006,
+          timestamp: new Date().toISOString(),
+          source: "lnmarkets-public-api"
+        };
+
+        console.log('✅ PUBLIC MARKET - Real data fetched successfully:', {
+          index: realMarketData.index,
+          source: realMarketData.source,
+          timestamp: realMarketData.timestamp
+        });
+
+        return reply.send({
+          success: true,
+          data: realMarketData,
+          timestamp: Date.now()
+        });
+
+      } catch (apiError: any) {
+        console.error('❌ PUBLIC MARKET - API error:', apiError);
+        
+        // ❌ NÃO USAR DADOS MOCKADOS - retornar erro transparente
+        return reply.status(503).send({
+          success: false,
+          error: 'PUBLIC_API_UNAVAILABLE',
+          message: 'Public market data temporarily unavailable - no fallback data for security',
+          details: apiError.message,
+          timestamp: Date.now()
+        });
+      }
 
       console.log('✅ PUBLIC MARKET - Data fetched successfully:', {
         index: mockMarketData.index,

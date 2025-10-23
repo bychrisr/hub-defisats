@@ -180,6 +180,148 @@ export default async function tradingViewRoutes(fastify: any) {
     }
   });
 
+  // ✅ NOVO: Endpoint enhanced para exchange específica
+  fastify.get('/tradingview/index/:exchange', async (request, reply) => {
+    try {
+      const { exchange } = request.params as { exchange: string };
+      const { symbol = 'BTCUSDT' } = request.query as { symbol?: string };
+      
+      console.log('🔄 TRADINGVIEW ENHANCED - Request received:', { exchange, symbol });
+
+      // Configurações por exchange
+      const exchangeConfigs = {
+        lnmarkets: {
+          symbols: ['BINANCE:BTCUSDT', 'BYBIT:BTCUSDT', 'BITMEX:BTCUSDT'],
+          weights: [0.4, 0.3, 0.3],
+          name: 'LN Markets Index'
+        },
+        binance: {
+          symbols: ['BINANCE:BTCUSDT'],
+          weights: [1.0],
+          name: 'Binance Direct'
+        },
+        coinbase: {
+          symbols: ['COINBASE:BTCUSD'],
+          weights: [1.0],
+          name: 'Coinbase Direct'
+        }
+      };
+
+      const config = exchangeConfigs[exchange as keyof typeof exchangeConfigs];
+      if (!config) {
+        return reply.status(400).send({
+          success: false,
+          error: 'INVALID_EXCHANGE',
+          message: `Exchange not supported: ${exchange}`,
+          supportedExchanges: Object.keys(exchangeConfigs)
+        });
+      }
+
+      // Buscar dados de cada símbolo e calcular média ponderada
+      const symbolData = [];
+      
+      for (let i = 0; i < config.symbols.length; i++) {
+        const symbolName = config.symbols[i];
+        const weight = config.weights[i];
+        
+        try {
+          console.log(`🔄 TRADINGVIEW ENHANCED - Fetching data for ${symbolName} (weight: ${weight})`);
+          
+          // Usar Binance como fonte (conforme implementação existente)
+          const binanceSymbol = symbolName.replace(/^BINANCE:/, '');
+          const binanceResponse = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (!binanceResponse.ok) {
+            console.warn(`⚠️ TRADINGVIEW ENHANCED - Binance error for ${symbolName}: ${binanceResponse.status}`);
+            continue;
+          }
+
+          const binanceData = await binanceResponse.json();
+          
+          symbolData.push({
+            price: parseFloat(binanceData.lastPrice),
+            change24h: parseFloat(binanceData.priceChangePercent),
+            volume: parseFloat(binanceData.volume),
+            weight,
+            symbol: symbolName
+          });
+          
+        } catch (error) {
+          console.warn(`⚠️ TRADINGVIEW ENHANCED - Failed to fetch data for ${symbolName}:`, error);
+        }
+      }
+
+      if (symbolData.length === 0) {
+        return reply.status(503).send({
+          success: false,
+          error: 'NO_DATA_AVAILABLE',
+          message: 'No valid data found for any symbol'
+        });
+      }
+
+      // Calcular média ponderada
+      const totalWeight = symbolData.reduce((sum, item) => sum + item.weight, 0);
+      const weightedPrice = symbolData.reduce((sum, item) => sum + (item.price * item.weight), 0) / totalWeight;
+      const weightedChange = symbolData.reduce((sum, item) => sum + (item.change24h * item.weight), 0) / totalWeight;
+      const weightedVolume = symbolData.reduce((sum, item) => sum + ((item.volume || 0) * item.weight), 0) / totalWeight;
+
+      const result = {
+        price: weightedPrice,
+        change24h: weightedChange,
+        volume: weightedVolume,
+        timestamp: Date.now(),
+        source: `tradingview-${config.name.toLowerCase().replace(/\s+/g, '-')}`,
+        exchange: config.name,
+        symbols: symbolData.map(item => item.symbol),
+        weights: config.weights
+      };
+
+      // Validar dados
+      const { MarketDataValidator } = await import('../utils/market-data-validator');
+      const validation = MarketDataValidator.validateTradingViewData(result);
+
+      if (!validation.valid) {
+        console.error('❌ TRADINGVIEW ENHANCED - Data validation failed:', validation.reason);
+        return reply.status(503).send({
+          success: false,
+          error: 'DATA_VALIDATION_FAILED',
+          message: 'TradingView data validation failed',
+          details: validation.reason
+        });
+      }
+
+      console.log('✅ TRADINGVIEW ENHANCED - Weighted average calculated:', {
+        price: result.price,
+        change24h: result.change24h,
+        source: result.source,
+        symbolCount: symbolData.length
+      });
+
+      return reply.send({
+        success: true,
+        data: result,
+        source: 'tradingview-enhanced',
+        timestamp: Date.now(),
+        headers: {
+          'X-Data-Age': '0',
+          'X-Data-Source': result.source,
+          'X-Cache-Status': 'MISS'
+        }
+      });
+
+    } catch (error: any) {
+      console.error('❌ TRADINGVIEW ENHANCED - Error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'TRADINGVIEW_ENHANCED_ERROR',
+        message: error.message || 'Internal server error'
+      });
+    }
+  });
+
   // Proxy para dados de mercado TradingView
   fastify.get('/tradingview/market/:symbol', async (request, reply) => {
     try {

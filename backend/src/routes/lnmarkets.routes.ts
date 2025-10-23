@@ -142,8 +142,27 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
         hasPassphrase: !!activeCredentials.credentials.passphrase
       });
 
-      const { apiKey, apiSecret, passphrase } = activeCredentials.credentials;
+      // Descriptografar credenciais
+      const { UserExchangeAccountService } = await import('../services/userExchangeAccount.service');
+      const userExchangeAccountService = new UserExchangeAccountService(prisma);
+      const decryptedCredentials = userExchangeAccountService.decryptCredentials(activeCredentials.credentials);
+      
+      console.log('🔍 LN MARKETS CONTROLLER - Decrypted credentials:', {
+        hasApiKey: !!decryptedCredentials['API Key'],
+        hasApiSecret: !!decryptedCredentials['API Secret'],
+        hasPassphrase: !!decryptedCredentials['Passphrase'],
+        isTestnet: decryptedCredentials.isTestnet
+      });
 
+      const { apiKey, apiSecret, passphrase } = {
+        apiKey: decryptedCredentials['API Key'],
+        apiSecret: decryptedCredentials['API Secret'],
+        passphrase: decryptedCredentials['Passphrase']
+      };
+
+      // Detectar testnet
+      const isTestnet = decryptedCredentials.isTestnet === 'true' || decryptedCredentials.isTestnet === true;
+      
       // Initialize LN Markets service v2
       console.log('🎯 LN MARKETS CONTROLLER - Initializing LNMarketsAPIv2 service');
       const lnMarketsService = new LNMarketsAPIv2({
@@ -151,7 +170,7 @@ export async function lnmarketsRoutes(fastify: FastifyInstance) {
           apiKey,
           apiSecret,
           passphrase,
-          isTestnet: false
+          isTestnet
         },
         logger: console as any
       });

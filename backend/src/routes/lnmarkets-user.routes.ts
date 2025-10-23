@@ -269,17 +269,14 @@ export async function lnmarketsUserRoutes(fastify: FastifyInstance) {
       } catch (error: any) {
         console.error('Error fetching market ticker:', error);
 
-        // Return fallback data
-        return reply.send({
-          success: true,
-          data: {
-            index: 115000,
-            lastPrice: 115000,
-            askPrice: 115100,
-            bidPrice: 114900,
-            carryFeeRate: 0.0001,
-            timestamp: Date.now()
-          }
+        // ❌ NÃO USAR FALLBACK INSEGURO - retornar erro transparente
+        console.error('❌ LN MARKETS TICKER - API error, no fallback for security:', error);
+        return reply.status(503).send({
+          success: false,
+          error: 'LN_MARKETS_API_ERROR',
+          message: 'LN Markets API temporarily unavailable - no fallback data for security',
+          details: error.message,
+          timestamp: Date.now()
         });
       }
     }

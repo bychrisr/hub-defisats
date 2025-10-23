@@ -407,18 +407,110 @@ export async function marketDataRoutes(fastify: FastifyInstance) {
         ? `${minutesToNext - 1}m ${secondsToNext}s`
         : `${hoursToNext - 1}h ${minutesToNext - 1}m ${secondsToNext}s`;
 
-      return reply.status(200).send({
-        success: true,
-        data: {
-          index: marketIndexData.price || marketIndexData.index || 0,
-          index24hChange: marketIndexData.change24h || marketIndexData.changePercent24h || 0,
-          tradingFees: 0.1, // LN Markets standard fee
-          nextFunding: nextFunding,
-          rate: 0.00006, // 0.0060% in decimal
-          rateChange: 0.00001,
-          timestamp: Date.now()
+      // ✅ BUSCAR DADOS REAIS DA API LN MARKETS
+      console.log('🔄 MARKET INDEX - Fetching real LN Markets data...');
+      
+      try {
+        // Buscar credenciais do usuário ativo
+        const { AccountCredentialsService } = await import('../services/account-credentials.service');
+        const accountCredentialsService = new AccountCredentialsService(prisma);
+        
+        const activeCredentials = await accountCredentialsService.getActiveAccountCredentials(user.id);
+        
+        if (!activeCredentials || activeCredentials.exchangeName !== 'lnmarkets') {
+          console.warn('⚠️ MARKET INDEX - No active LN Markets account found');
+          return reply.status(400).send({
+            success: false,
+            error: 'NO_LN_MARKETS_ACCOUNT',
+            message: 'No active LN Markets account found'
+          });
         }
-      });
+
+        // Detectar testnet
+        const { TestnetDetector } = await import('../utils/testnet-detector');
+        const testnetResult = TestnetDetector.detectTestnet(activeCredentials.credentials);
+        
+        console.log('🌐 MARKET INDEX - Testnet detection:', {
+          isTestnet: testnetResult.isTestnet,
+          reason: testnetResult.reason,
+          confidence: testnetResult.confidence
+        });
+
+        // Criar serviço LN Markets com credenciais reais
+        const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');
+        const lnMarketsAPI = new LNMarketsAPIv2({
+          credentials: {
+            apiKey: activeCredentials.credentials['API Key'] || activeCredentials.credentials.api_key,
+            apiSecret: activeCredentials.credentials['API Secret'] || activeCredentials.credentials.api_secret,
+            passphrase: activeCredentials.credentials['Passphrase'] || activeCredentials.credentials.passphrase,
+            isTestnet: testnetResult.isTestnet
+          },
+          logger: console
+        });
+
+        // Buscar dados reais da API
+        console.log('🔄 MARKET INDEX - Fetching ticker data...');
+        const tickerData = await lnMarketsAPI.market.getTicker();
+        
+        console.log('🔄 MARKET INDEX - Fetching futures data...');
+        const futuresData = await lnMarketsAPI.futures.getInstrument();
+
+        // Validar dados recebidos
+        const { MarketDataValidator } = await import('../utils/market-data-validator');
+        const validation = MarketDataValidator.validateLNMarketsData({
+          index: tickerData.index,
+          tradingFees: futuresData.tradingFees,
+          nextFunding: futuresData.nextFunding,
+          rate: tickerData.carryFeeRate,
+          timestamp: Date.now()
+        });
+
+        if (!validation.valid) {
+          console.error('❌ MARKET INDEX - Data validation failed:', validation.reason);
+          return reply.status(503).send({
+            success: false,
+            error: 'DATA_VALIDATION_FAILED',
+            message: 'Market data validation failed',
+            details: validation.reason
+          });
+        }
+
+        console.log('✅ MARKET INDEX - Real data fetched successfully:', {
+          index: tickerData.index,
+          tradingFees: futuresData.tradingFees,
+          nextFunding: futuresData.nextFunding,
+          rate: tickerData.carryFeeRate,
+          isTestnet: testnetResult.isTestnet,
+          dataAge: 'fresh'
+        });
+
+        return reply.status(200).send({
+          success: true,
+          data: {
+            index: tickerData.index,
+            index24hChange: marketIndexData.change24h || marketIndexData.changePercent24h || 0,
+            tradingFees: futuresData.tradingFees, // ✅ DA API REAL
+            nextFunding: futuresData.nextFunding, // ✅ DA API REAL
+            rate: tickerData.carryFeeRate, // ✅ DA API REAL
+            rateChange: 0.00001, // TODO: Calcular mudança real
+            timestamp: Date.now(),
+            source: 'lnmarkets-api',
+            network: testnetResult.isTestnet ? 'testnet' : 'mainnet'
+          }
+        });
+
+      } catch (apiError: any) {
+        console.error('❌ MARKET INDEX - API error:', apiError);
+        
+        // ❌ NÃO USAR FALLBACK INSEGURO - retornar erro transparente
+        return reply.status(503).send({
+          success: false,
+          error: 'LN_MARKETS_API_ERROR',
+          message: 'LN Markets API temporarily unavailable - no fallback data for security',
+          details: apiError.message,
+          timestamp: Date.now()
+        });
+      }
     } catch (error: any) {
       console.error('❌ MARKET INDEX - Error getting LN Markets index data:', error);
       return reply.status(500).send({
