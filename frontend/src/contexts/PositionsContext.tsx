@@ -642,21 +642,33 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         let marketIndex: MarketIndexData | null = null;
         let marketIndexError: string | null = null;
 
-        // ✅ USAR DADOS DO ENDPOINT UNIFICADO APENAS SE VÁLIDOS
+        // ✅ USAR DADOS DO ENDPOINT UNIFICADO APENAS SE VÁLIDOS E NÃO HARDCODED
         if (indexData && indexData.index && indexData.nextFunding && indexData.rate) {
-          marketIndex = {
-            index: indexData.index,
-            index24hChange: indexData.index24hChange || 0,
-            tradingFees: indexData.tradingFees || 0.1,
-            nextFunding: indexData.nextFunding, // Usar valor real, não fallback
-            rate: indexData.rate, // Usar valor real, não fallback
-            rateChange: indexData.rateChange || 0,
-            timestamp: indexData.timestamp || Date.now(),
-            source: 'lnmarkets-unified'
-          };
-          console.log('✅ POSITIONS CONTEXT - Market index processed from unified endpoint:', marketIndex);
-          console.log('📊 MARKET INDEX - Index value:', marketIndex.index);
-          console.log('📊 MARKET INDEX - 24h change:', marketIndex.index24hChange);
+          // Verificar se não são dados hardcoded (valores suspeitos)
+          const isHardcoded = (
+            indexData.nextFunding === "1m 36s" || 
+            indexData.rate === 0.00006 ||
+            indexData.index === 122850
+          );
+          
+          if (!isHardcoded) {
+            marketIndex = {
+              index: indexData.index,
+              index24hChange: indexData.index24hChange || 0,
+              tradingFees: indexData.tradingFees || 0.1,
+              nextFunding: indexData.nextFunding, // Usar valor real, não fallback
+              rate: indexData.rate, // Usar valor real, não fallback
+              rateChange: indexData.rateChange || 0,
+              timestamp: indexData.timestamp || Date.now(),
+              source: 'lnmarkets-unified'
+            };
+            console.log('✅ POSITIONS CONTEXT - Market index processed from unified endpoint:', marketIndex);
+            console.log('📊 MARKET INDEX - Index value:', marketIndex.index);
+            console.log('📊 MARKET INDEX - 24h change:', marketIndex.index24hChange);
+          } else {
+            marketIndexError = 'Hardcoded data detected in unified endpoint';
+            console.log('❌ POSITIONS CONTEXT - Hardcoded data detected:', indexData);
+          }
         } else {
           // Não definir marketIndex se dados não são válidos
           // Deixar o header usar seus próprios dados
