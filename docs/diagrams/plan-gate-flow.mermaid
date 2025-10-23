@@ -1,0 +1,48 @@
+graph TD
+    A[User Action] --> B{Action Type}
+    
+    B -->|Tour Complete| C[Tour End Trigger]
+    B -->|Skip Tour| D[Tour Skip Trigger]
+    B -->|Access Premium Feature| E[Blocked Action Trigger]
+    
+    C --> F[Check Cooldown]
+    D --> F
+    E --> F
+    
+    F --> G{Cooldown Active?}
+    G -->|Yes| H[Skip Gate Display]
+    G -->|No| I[Show Plan Gate]
+    
+    I --> J[PlanDecisionSheet]
+    J --> K{User Choice}
+    
+    K -->|Dismiss| L[Set Cooldown]
+    K -->|Choose Plan| M[Upgrade Flow]
+    
+    M --> N[POST /api/plans/choose]
+    N --> O[Update Entitlements]
+    O --> P[Grant Access]
+    
+    L --> Q[Track Dismissal]
+    P --> R[Track Conversion]
+    
+    subgraph "Cooldown Logic"
+        S[90 seconds cooldown]
+        T[Track last shown time]
+        U[Check time difference]
+    end
+    
+    F --> S
+    S --> T
+    T --> U
+    U --> G
+    
+    subgraph "Analytics"
+        V[Track Gate Shown]
+        W[Track Gate Dismissed]
+        X[Track Plan Selected]
+    end
+    
+    I --> V
+    L --> W
+    M --> X

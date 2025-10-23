@@ -59,6 +59,35 @@ private async generateAccessToken(user: User): Promise<string> {
 }
 ```
 
+### Auto-Login Token Generation (Post-Verification)
+
+```typescript
+// Auto-login after email verification
+async generatePostVerificationToken(user: User): Promise<string> {
+  return this.fastify.jwt.sign({
+    sub: user.id,
+    email: user.email,
+    email_verified: true,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+  });
+}
+```
+
+### Secure Cookie Configuration
+
+```typescript
+// HttpOnly cookie for auto-login
+reply.setCookie('access_token', jwt, {
+  httpOnly: true,           // Prevent XSS attacks
+  secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+  sameSite: 'lax',          // CSRF protection
+  path: '/',                // Available site-wide
+  maxAge: 7 * 24 * 60 * 60  // 7 days expiration
+});
+```
+```
+
 ### Refresh Token Generation
 
 ```typescript

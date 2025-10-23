@@ -1,0 +1,60 @@
+graph TB
+    subgraph "User Management"
+        U[User]
+        UE[UserEntitlements]
+        U --> UE
+    end
+    
+    subgraph "Plan Tiers"
+        FREE[FREE Plan]
+        BASIC[BASIC Plan]
+        ADVANCED[ADVANCED Plan]
+        PRO[PRO Plan]
+    end
+    
+    subgraph "Feature Sets"
+        FS_FREE[free features]
+        FS_BASIC[basic features]
+        FS_ADVANCED[advanced features]
+        FS_PRO[pro features]
+    end
+    
+    subgraph "Feature Gating"
+        FG[Feature Gate]
+        PB[ProtectedButton]
+        PG[Plan Gate]
+    end
+    
+    subgraph "Data Modes"
+        DM[Demo Mode]
+        RM[Real Mode]
+    end
+    
+    UE --> FREE
+    UE --> BASIC
+    UE --> ADVANCED
+    UE --> PRO
+    
+    FREE --> FS_FREE
+    BASIC --> FS_BASIC
+    ADVANCED --> FS_ADVANCED
+    PRO --> FS_PRO
+    
+    FS_FREE --> DM
+    FS_BASIC --> RM
+    FS_ADVANCED --> RM
+    FS_PRO --> RM
+    
+    UE --> FG
+    FG --> PB
+    FG --> PG
+    
+    subgraph "API Endpoints"
+        API1[GET /api/me/entitlements]
+        API2[POST /api/me/entitlements/check-feature]
+        API3[POST /api/plans/choose]
+    end
+    
+    UE --> API1
+    UE --> API2
+    UE --> API3

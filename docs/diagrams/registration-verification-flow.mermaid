@@ -1,0 +1,51 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant Database
+    participant EmailService
+    participant Browser
+
+    Note over User,Browser: Registration Phase
+    User->>Frontend: Submit personal data
+    Frontend->>Backend: POST /api/registration/personal-data
+    Backend->>Backend: Generate 64-char token
+    Backend->>Backend: Hash token with SHA256
+    Backend->>Database: Create user (email_verified=false, store token hash)
+    Backend->>EmailService: Send verification email (magic link + OTP)
+    Backend-->>Frontend: Success response
+    Frontend->>Frontend: Redirect to /verify-email-required
+
+    Note over User,Browser: Verification Phase
+    User->>User: Check email
+    alt Magic Link Verification
+        User->>Backend: Click magic link
+        Backend->>Backend: Hash received token with SHA256
+        Backend->>Database: Compare token hashes
+        Backend->>Database: Update email_verified=true
+        Backend->>Database: Create FREE entitlement
+        Backend->>Backend: Generate JWT
+        Backend-->>Browser: Set HttpOnly cookie
+        Backend-->>Frontend: Redirect to /login?verified=true&message=account_created&email=...
+    else OTP Verification
+        User->>Frontend: Enter OTP code
+        Frontend->>Backend: POST /api/auth/verify-email/otp
+        Backend->>Database: Validate OTP
+        Backend->>Database: Update email_verified=true
+        Backend->>Database: Create FREE entitlement
+        Backend->>Backend: Generate JWT
+        Backend-->>Frontend: Return JWT token
+        Frontend->>Frontend: Store token & redirect to dashboard
+    end
+
+    Note over User,Browser: Demo Experience Phase
+    Frontend->>Frontend: Load demo data
+    Frontend->>Frontend: Show demo mode banner
+    Frontend->>Frontend: Auto-start ProductTour
+    User->>Frontend: Interact with demo features
+    Frontend->>Frontend: Show plan gate after tour
+    User->>Frontend: Choose plan (optional)
+    Frontend->>Backend: POST /api/plans/choose
+    Backend->>Database: Update entitlements
+    Backend-->>Frontend: Updated entitlements
+    Frontend->>Frontend: Switch to real data

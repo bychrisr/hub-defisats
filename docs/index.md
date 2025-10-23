@@ -27,6 +27,14 @@ Axisor is a sophisticated trading automation platform that empowers traders with
 
 ## Key Features
 
+### 🔐 Secure Registration & Verification
+Industry-standard user onboarding with:
+- Email verification required before sensitive actions
+- Magic link + OTP verification system
+- Demo mode for unverified users
+- Contextual plan gates for conversion
+- Anti-fraud protection with rate limiting
+
 ### Margin Guard Protection
 Real-time monitoring and protection of your trading positions with:
 - Automated margin calls
@@ -179,6 +187,11 @@ We welcome contributions to Axisor! Please see our [Contributing Guide](/project
 ## License
 
 Axisor is licensed under the MIT License. See our [License](/project/license) page for more information.
+
+## 📋 Project Management
+
+### Backlog & Future Features
+Track all planned features, improvements, and technical debt in our centralized [Backlog and Future Features](/project/backlog-and-future-features) document.
 
 ---
 

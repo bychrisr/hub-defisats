@@ -45,6 +45,15 @@
 - [Authorization](/user-management/authorization)
 - [Profiles](/user-management/profiles)
 
+### 🔐 Registration & Verification Flow
+- [Registration Verification Flow](/features/registration-verification-flow)
+- [Entitlements System](/features/entitlements-system)
+- [Demo Mode](/features/demo-mode)
+- [Plan Gate System](/features/plan-gate-system)
+- [Feature Flags](/features/feature-flags)
+- [Email Verification Security](/security/authentication/email-verification)
+- [ADR-001: Registration Flow](/architecture/decisions/ADR-001-registration-verification-flow)
+
 ### 📊 Charts & Visualization
 - [TradingView Integration](/charts/tradingview-integration)
 - [Dashboard Components](/charts/dashboard-components)
