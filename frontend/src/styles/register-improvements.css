@@ -1,0 +1,300 @@
+/* Register Page Improvements - Enhanced Accessibility & UX */
+
+/* Mobile-first responsive design for name fields */
+@media (max-width: 640px) {
+  .register-name-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .register-name-fields > div {
+    width: 100%;
+  }
+}
+
+/* Progressive disclosure for coupon field */
+.register-coupon-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  min-height: 44px;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.register-coupon-toggle:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.register-coupon-toggle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.register-coupon-field {
+  display: none;
+  animation: slideDown 0.3s ease-out;
+}
+
+.register-coupon-field.expanded {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced CTA button with contrast overlay */
+.register-cta-button {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: white;
+  position: relative;
+}
+
+.register-cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Enhanced SSO button states */
+.register-sso-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.register-sso-button:disabled::after {
+  content: '(Unavailable in beta)';
+  position: absolute;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Improved touch targets for password toggle and links */
+.register-touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Enhanced focus states */
+.register-focus-ring:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Password strength indicator with text labels */
+.register-password-strength {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.register-password-strength .strength-bar {
+  flex: 1;
+  height: 4px;
+  background: #374151;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.register-password-strength .strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.register-password-strength .strength-fill.weak {
+  background: #ef4444;
+  width: 25%;
+}
+
+.register-password-strength .strength-fill.fair {
+  background: #f59e0b;
+  width: 50%;
+}
+
+.register-password-strength .strength-fill.good {
+  background: #10b981;
+  width: 75%;
+}
+
+.register-password-strength .strength-fill.strong {
+  background: #059669;
+  width: 100%;
+}
+
+.register-password-strength .strength-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  min-width: 60px;
+}
+
+/* Enhanced consent checkboxes */
+.register-consent-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 0.5rem;
+}
+
+.register-consent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.register-consent-item input[type="checkbox"] {
+  min-width: 20px;
+  min-height: 20px;
+  margin-top: 0.125rem;
+}
+
+.register-consent-item label {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.register-consent-item label a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-consent-item label a:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+/* Enhanced footer links */
+.register-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.register-footer-links a {
+  color: #64748b;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: color 0.2s ease;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.register-footer-links a:hover {
+  color: #94a3b8;
+}
+
+.register-footer-links a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  color: #3b82f6;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .register-cta-button {
+    background: #1d4ed8;
+    border: 2px solid #ffffff;
+  }
+  
+  .register-sso-button:disabled {
+    opacity: 0.3;
+    border: 1px solid #64748b;
+  }
+  
+  .register-password-strength .strength-fill {
+    border: 1px solid #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .register-coupon-field,
+  .register-password-strength .strength-fill,
+  .register-footer-links a {
+    transition: none;
+  }
+  
+  .register-coupon-field {
+    animation: none;
+  }
+}
+
+/* Enhanced error states */
+.register-error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+.register-error-message .error-icon {
+  width: 1rem;
+  height: 1rem;
+  background: #ef4444;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Success states */
+.register-success-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 0.5rem;
+  color: #6ee7b7;
+  font-size: 0.875rem;
+}
+
+.register-success-message .success-icon {
+  width: 1rem;
+  height: 1rem;
+  background: #10b981;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

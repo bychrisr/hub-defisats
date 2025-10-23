@@ -16,11 +16,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff, Github, Info } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Github, Info, AlertCircle, CheckCircle } from 'lucide-react';
 import { useUsernameValidation } from '@/hooks/useUsernameValidation';
 import { useRegistration } from '@/hooks/useRegistration';
 import SimpleEmailValidator from '@/components/SimpleEmailValidator';
 import SimplePasswordValidator from '@/components/SimplePasswordValidator';
+import '@/styles/register-improvements.css';
 
 // Schema for the first step: personal data
 const personalDataSchema = z.object({
@@ -49,6 +50,7 @@ type PersonalDataForm = z.infer<typeof personalDataSchema>;
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showCoupon, setShowCoupon] = useState(false);
   const [emailValidation, setEmailValidation] = useState({
     isValid: false,
     isAvailable: false,
@@ -242,8 +244,8 @@ export default function Register() {
                 </Alert>
               )}
 
-              {/* Name Fields */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Name Fields - Responsive Layout */}
+              <div className="register-name-fields grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-slate-200 text-sm font-medium">
                     First Name
@@ -252,22 +254,24 @@ export default function Register() {
                     id="firstName"
                     type="text"
                     placeholder="Enter your first name"
+                    autoComplete="given-name"
                     fieldName="firstName"
                     error={errors.firstName}
                     isValid={!errors.firstName && watch('firstName') && watch('firstName').length > 0}
                     value={watch('firstName')}
                     {...register('firstName')}
                     onKeyDown={e => handleKeyDown(e, 'firstName')}
+                    className="focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
                   />
                   {errors.firstName && (
-                    <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                        <span className="font-medium">First name required</span>
+                    <div className="register-error-message">
+                      <div className="error-icon"></div>
+                      <div>
+                        <div className="font-medium">First name required</div>
+                        <p className="text-xs mt-1">
+                          {errors.firstName.message}
+                        </p>
                       </div>
-                      <p className="mt-1 text-red-300 text-xs">
-                        {errors.firstName.message}
-                      </p>
                     </div>
                   )}
                 </div>
@@ -280,22 +284,24 @@ export default function Register() {
                     id="lastName"
                     type="text"
                     placeholder="Enter your last name"
+                    autoComplete="family-name"
                     fieldName="lastName"
                     error={errors.lastName}
                     isValid={!errors.lastName && watch('lastName') && watch('lastName').length > 0}
                     value={watch('lastName')}
                     {...register('lastName')}
                     onKeyDown={e => handleKeyDown(e, 'lastName')}
+                    className="focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
                   />
                   {errors.lastName && (
-                    <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                        <span className="font-medium">Last name required</span>
+                    <div className="register-error-message">
+                      <div className="error-icon"></div>
+                      <div>
+                        <div className="font-medium">Last name required</div>
+                        <p className="text-xs mt-1">
+                          {errors.lastName.message}
+                        </p>
                       </div>
-                      <p className="mt-1 text-red-300 text-xs">
-                        {errors.lastName.message}
-                      </p>
                     </div>
                   )}
                 </div>
@@ -448,8 +454,9 @@ export default function Register() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-slate-400 hover:text-slate-300"
+                    className="register-touch-target absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-slate-400 hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -503,8 +510,9 @@ export default function Register() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-slate-400 hover:text-slate-300"
+                    className="register-touch-target absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-slate-400 hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -537,96 +545,124 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Coupon Code Field */}
+              {/* Coupon Code Field - Progressive Disclosure */}
               <div className="space-y-2">
-                <Label htmlFor="coupon_code" className="text-slate-200 text-sm font-medium">
-                  Coupon Code (Optional)
-                </Label>
-                <Input
-                  id="coupon_code"
-                  type="text"
-                  placeholder="Enter coupon code if you have one"
-                  {...register('coupon_code')}
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20"
-                />
-                <div className="flex items-start space-x-2">
-                  <Info className="h-4 w-4 text-blue-400 mt-0.5" />
-                  <p className="text-xs text-slate-400">
-                    Coupon codes can unlock premium features or extend your trial period.
-                  </p>
-                </div>
-              </div>
-
-              {/* Email Marketing Consent Checkbox */}
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    id="emailMarketingConsent"
-                    checked={watch('emailMarketingConsent') || false}
-                    onCheckedChange={(checked) => {
-                      setValue('emailMarketingConsent', checked === true);
-                    }}
-                    className="mt-1"
-                  />
-                  <div className="space-y-1">
-                    <Label htmlFor="emailMarketingConsent" className="text-slate-200 text-sm">
-                      I authorize Axisor Bot to contact me by email about products, services, or events.
+                {!showCoupon ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowCoupon(true)}
+                    className="register-coupon-toggle"
+                    aria-label="I have a coupon code"
+                  >
+                    <Info className="h-4 w-4" />
+                    I have a coupon code
+                  </button>
+                ) : (
+                  <div className="register-coupon-field expanded">
+                    <Label htmlFor="coupon_code" className="text-slate-200 text-sm font-medium">
+                      Coupon Code (Optional)
                     </Label>
-                  </div>
-                </div>
-                {errors.emailMarketingConsent && (
-                  <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Email marketing consent error</span>
+                    <Input
+                      id="coupon_code"
+                      type="text"
+                      placeholder="Enter coupon code if you have one"
+                      autoComplete="off"
+                      {...register('coupon_code')}
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
+                    />
+                    <div className="flex items-start space-x-2">
+                      <Info className="h-4 w-4 text-blue-400 mt-0.5" />
+                      <p className="text-xs text-slate-400">
+                        Coupon codes can unlock premium features or extend your trial period.
+                      </p>
                     </div>
-                    <p className="mt-1 text-red-300">
-                      {errors.emailMarketingConsent.message}
-                    </p>
                   </div>
                 )}
               </div>
 
-              {/* Terms and Conditions Consent Checkbox */}
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3">
+              {/* Consent Group - Enhanced Layout */}
+              <div className="register-consent-group">
+                {/* Terms and Conditions Consent Checkbox - Required */}
+                <div className="register-consent-item">
                   <Checkbox
                     id="termsConsent"
                     checked={watch('termsConsent') || false}
                     onCheckedChange={(checked) => {
                       setValue('termsConsent', checked === true);
                     }}
-                    className="mt-1"
+                    className="register-touch-target"
+                    aria-describedby="terms-description"
                   />
                   <div className="space-y-1">
                     <Label htmlFor="termsConsent" className="text-slate-200 text-sm">
                       I accept the{' '}
-                      <Link to="/terms" className="text-blue-400 hover:text-blue-300">
+                      <Link 
+                        to="/terms" 
+                        className="text-blue-400 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1"
+                      >
                         Terms of Use
                       </Link>
                       {' '}and acknowledge the{' '}
-                      <Link to="/privacy" className="text-blue-400 hover:text-blue-300">
+                      <Link 
+                        to="/privacy" 
+                        className="text-blue-400 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1"
+                      >
                         Privacy Policy
                       </Link>
                       {' '}and{' '}
-                      <Link to="/cookies" className="text-blue-400 hover:text-blue-300">
+                      <Link 
+                        to="/cookies" 
+                        className="text-blue-400 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1"
+                      >
                         Cookie Policy
                       </Link>
                     </Label>
-                    <p className="text-xs text-slate-400">
+                    <p id="terms-description" className="text-xs text-slate-400">
                       You must accept the terms and conditions to continue.
                     </p>
                   </div>
                 </div>
                 {errors.termsConsent && (
-                  <div className="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                      <span className="font-medium">Terms and conditions required</span>
+                  <div className="register-error-message">
+                    <div className="error-icon"></div>
+                    <div>
+                      <div className="font-medium">Terms and conditions required</div>
+                      <p className="text-xs mt-1">
+                        {errors.termsConsent.message}
+                      </p>
                     </div>
-                    <p className="mt-1 text-red-300">
-                      {errors.termsConsent.message}
+                  </div>
+                )}
+
+                {/* Email Marketing Consent Checkbox - Optional */}
+                <div className="register-consent-item">
+                  <Checkbox
+                    id="emailMarketingConsent"
+                    checked={watch('emailMarketingConsent') || false}
+                    onCheckedChange={(checked) => {
+                      setValue('emailMarketingConsent', checked === true);
+                    }}
+                    className="register-touch-target"
+                    aria-describedby="marketing-description"
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="emailMarketingConsent" className="text-slate-200 text-sm">
+                      I authorize Axisor Bot to contact me by email about products, services, or events.
+                    </Label>
+                    <p id="marketing-description" className="text-xs text-slate-400">
+                      Optional. You can unsubscribe at any time.
                     </p>
+                  </div>
+                </div>
+                {errors.emailMarketingConsent && (
+                  <div className="register-error-message">
+                    <div className="error-icon"></div>
+                    <div>
+                      <div className="font-medium">Email marketing consent error</div>
+                      <p className="text-xs mt-1">
+                        {errors.emailMarketingConsent.message}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -641,21 +677,21 @@ export default function Register() {
                 🤖 Auto-fill Test Data
               </Button>
 
-              {/* Continue Button */}
-                <Button
-                  type="submit"
-                  disabled={isLoading || isSubmitting || !emailValidation.isValid || !emailValidation.isAvailable}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
-                >
-                  {isLoading || isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
-                    </>
-                  ) : (
+              {/* Continue Button - Enhanced CTA */}
+              <Button
+                type="submit"
+                disabled={isLoading || isSubmitting || !emailValidation.isValid || !emailValidation.isAvailable}
+                className="register-cta-button w-full text-white font-medium py-3 min-h-[48px] transition-all duration-200 shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
+              >
+                {isLoading || isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
                   'Continue'
-                  )}
-                </Button>
+                )}
+              </Button>
             </form>
 
             {/* Divider */}
@@ -668,16 +704,18 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Social Registration Buttons */}
+            {/* Social Registration Buttons - Enhanced States */}
             <div className="space-y-3">
               {/* Google Registration */}
               <Button
                 type="button"
                 variant="outline"
                 disabled={true}
-                className="w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-2.5 opacity-50 cursor-not-allowed"
+                aria-disabled="true"
+                className="register-sso-button w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-3 min-h-[48px] opacity-50 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
+                title="Google SSO unavailable in beta"
               >
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -696,6 +734,7 @@ export default function Register() {
                   />
                 </svg>
                 Continue with Google
+                <span className="ml-2 text-xs text-slate-500">(Unavailable in beta)</span>
               </Button>
 
               {/* GitHub Registration */}
@@ -703,10 +742,13 @@ export default function Register() {
                 type="button"
                 variant="outline"
                 disabled={true}
-                className="w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-2.5 opacity-50 cursor-not-allowed"
+                aria-disabled="true"
+                className="register-sso-button w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:text-white hover:border-slate-500 transition-all duration-200 py-3 min-h-[48px] opacity-50 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800"
+                title="GitHub SSO unavailable in beta"
               >
-                <Github className="mr-2 h-4 w-4" />
+                <Github className="mr-2 h-4 w-4" aria-hidden="true" />
                 Continue with GitHub
+                <span className="ml-2 text-xs text-slate-500">(Unavailable in beta)</span>
               </Button>
             </div>
 
@@ -716,7 +758,7 @@ export default function Register() {
                 Already have an account?{' '}
                 <Link
                   to="/login"
-                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 rounded px-1 py-1 min-h-[44px] inline-flex items-center"
                 >
                   Sign in
                 </Link>
@@ -725,19 +767,31 @@ export default function Register() {
           </CardContent>
         </Card>
 
-        {/* Bottom Links */}
+        {/* Bottom Links - Enhanced Touch Targets */}
         <div className="text-center">
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-slate-500">
-            <Link to="/terms" className="hover:text-slate-400 transition-colors">
+          <div className="register-footer-links">
+            <Link 
+              to="/terms" 
+              className="hover:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 rounded px-2 py-2 min-h-[44px] inline-flex items-center"
+            >
               Terms
             </Link>
-            <Link to="/privacy" className="hover:text-slate-400 transition-colors">
+            <Link 
+              to="/privacy" 
+              className="hover:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 rounded px-2 py-2 min-h-[44px] inline-flex items-center"
+            >
               Privacy
             </Link>
-            <Link to="/docs" className="hover:text-slate-400 transition-colors">
+            <Link 
+              to="/docs" 
+              className="hover:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 rounded px-2 py-2 min-h-[44px] inline-flex items-center"
+            >
               Docs
             </Link>
-            <Link to="/support" className="hover:text-slate-400 transition-colors">
+            <Link 
+              to="/support" 
+              className="hover:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 rounded px-2 py-2 min-h-[44px] inline-flex items-center"
+            >
               Contact Support
             </Link>
           </div>
