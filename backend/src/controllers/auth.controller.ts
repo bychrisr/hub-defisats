@@ -337,6 +337,7 @@ export class AuthController {
         plan_type: user.plan_type,
         created_at: (user as any).created_at,
         last_activity_at: (user as any).last_activity_at,
+        onboarding_completed: (user as any).onboarding_completed,
         exchange_accounts: userAccounts.map(account => ({
           id: account.id,
           account_name: account.account_name,
