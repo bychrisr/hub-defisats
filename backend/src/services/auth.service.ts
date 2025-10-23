@@ -366,12 +366,26 @@ export class AuthService {
    */
   async validateSession(token: string): Promise<User> {
     try {
-      console.log('🔍 VALIDATE SESSION - Token:', '[REDACTED]');
+      console.log('🔍 VALIDATE SESSION - Starting validation:', {
+        tokenLength: token.length,
+        tokenPreview: token.substring(0, 50) + '...',
+        tokenEnd: '...' + token.substring(token.length - 20),
+        timestamp: new Date().toISOString()
+      });
+      
       const decoded = this.fastify.jwt.verify(token) as any;
-      console.log('🔍 VALIDATE SESSION - Decoded:', { ...decoded, token: '[REDACTED]' });
+      console.log('🔍 VALIDATE SESSION - JWT decoded successfully:', {
+        sub: decoded.sub,
+        email: decoded.email,
+        email_verified: decoded.email_verified,
+        iat: decoded.iat,
+        exp: decoded.exp,
+        timestamp: new Date().toISOString()
+      });
 
+      console.log('🔍 VALIDATE SESSION - Looking up user in database...');
       const user = await this.prisma.user.findUnique({
-        where: { id: decoded.userId },
+        where: { id: decoded.sub },
         select: {
           id: true,
           email: true,
@@ -383,23 +397,55 @@ export class AuthService {
           session_expires_at: true,
         },
       });
-      console.log('🔍 VALIDATE SESSION - User found:', user?.email);
+      
+      console.log('🔍 VALIDATE SESSION - User found:', {
+        userExists: !!user,
+        userId: user?.id,
+        userEmail: user?.email,
+        isActive: user?.is_active,
+        sessionExpires: user?.session_expires_at,
+        timestamp: new Date().toISOString()
+      });
 
       if (!user || !user.is_active) {
-        console.log('❌ VALIDATE SESSION - User not found or inactive');
+        console.log('❌ VALIDATE SESSION - User not found or inactive:', {
+          userExists: !!user,
+          isActive: user?.is_active,
+          userId: user?.id,
+          timestamp: new Date().toISOString()
+        });
         throw new Error('Invalid session');
       }
 
       // Check if session is expired
       if (user.session_expires_at && user.session_expires_at < new Date()) {
-        console.log('❌ VALIDATE SESSION - Session expired');
+        console.log('❌ VALIDATE SESSION - Session expired:', {
+          sessionExpires: user.session_expires_at,
+          now: new Date(),
+          expired: user.session_expires_at < new Date(),
+          timestamp: new Date().toISOString()
+        });
         throw new Error('Session expired');
       }
 
-      console.log('✅ VALIDATE SESSION - Session valid');
+      console.log('✅ VALIDATE SESSION - Session valid:', {
+        userId: user.id,
+        email: user.email,
+        isActive: user.is_active,
+        sessionExpires: user.session_expires_at,
+        timestamp: new Date().toISOString()
+      });
+      
       return user as any;
     } catch (error) {
-      console.log('❌ VALIDATE SESSION - Error:', (error as Error).message);
+      console.log('❌ VALIDATE SESSION - Error occurred:', {
+        errorMessage: (error as Error).message,
+        errorName: (error as Error).name,
+        tokenLength: token.length,
+        tokenPreview: token.substring(0, 50) + '...',
+        timestamp: new Date().toISOString()
+      });
+      
       console.log('❌ VALIDATE SESSION - Error stack:', (error as Error).stack);
       throw new Error('Invalid session');
     }
@@ -703,7 +749,12 @@ export class AuthService {
    */
   async validateOTP(email: string, code: string): Promise<{ success: boolean; jwt?: string }> {
     try {
-      console.log('🔍 AUTH SERVICE - validateOTP called with:', { email, code });
+      console.log('🔍 AUTH SERVICE - validateOTP called with:', { 
+        email, 
+        code, 
+        codeLength: code.length,
+        timestamp: new Date().toISOString()
+      });
       
       const user = await this.prisma.user.findUnique({ 
         where: { email: email.toLowerCase() } 
@@ -711,8 +762,12 @@ export class AuthService {
       
       console.log('🔍 AUTH SERVICE - User found:', { 
         userExists: !!user, 
+        userId: user?.id,
+        userEmail: user?.email,
         hasToken: !!user?.password_reset_token,
-        tokenExpires: user?.password_reset_expires 
+        tokenExpires: user?.password_reset_expires,
+        emailVerified: user?.email_verified,
+        accountStatus: user?.account_status
       });
       
       if (!user || !user.password_reset_token) {
@@ -721,23 +776,40 @@ export class AuthService {
       }
       
       if (user.password_reset_expires && user.password_reset_expires < new Date()) {
-        console.log('❌ AUTH SERVICE - Token expired');
+        console.log('❌ AUTH SERVICE - Token expired:', {
+          expires: user.password_reset_expires,
+          now: new Date(),
+          expired: user.password_reset_expires < new Date()
+        });
         return { success: false };
       }
       
-      console.log('🔍 AUTH SERVICE - Comparing code with hash...');
+      console.log('🔍 AUTH SERVICE - Comparing code with hash...', {
+        codeToCompare: code,
+        hashLength: user.password_reset_token.length,
+        hashPreview: user.password_reset_token.substring(0, 20) + '...'
+      });
+      
       const isValid = await bcrypt.compare(code, user.password_reset_token);
-      console.log('🔍 AUTH SERVICE - Code comparison result:', isValid);
+      console.log('🔍 AUTH SERVICE - Code comparison result:', {
+        isValid,
+        code,
+        timestamp: new Date().toISOString()
+      });
       
       if (!isValid) {
         console.log('❌ AUTH SERVICE - Invalid code');
         return { success: false };
       }
       
-      console.log('✅ AUTH SERVICE - Code valid, updating user...');
+      console.log('✅ AUTH SERVICE - Code valid, updating user...', {
+        userId: user.id,
+        currentStatus: user.account_status,
+        currentVerified: user.email_verified
+      });
       
       // Marcar como verificado
-      await this.prisma.user.update({
+      const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
         data: {
           email_verified: true,
@@ -747,31 +819,51 @@ export class AuthService {
         }
       });
       
-      console.log('✅ AUTH SERVICE - User updated, creating entitlement...');
+      console.log('✅ AUTH SERVICE - User updated successfully:', {
+        userId: updatedUser.id,
+        emailVerified: updatedUser.email_verified,
+        accountStatus: updatedUser.account_status,
+        tokenCleared: !updatedUser.password_reset_token
+      });
+      
+      console.log('✅ AUTH SERVICE - Creating entitlement...');
       
       // Criar entitlement FREE
       await this.ensureFreeEntitlement(user.id);
       
-      console.log('✅ AUTH SERVICE - Creating JWT...');
+      console.log('✅ AUTH SERVICE - Entitlement created, generating JWT...');
       
       // Gerar JWT
-      const token = await this.fastify.jwt.sign({
+      const jwtPayload = {
         sub: user.id,
         email: user.email,
         email_verified: true
-      });
+      };
       
-      console.log('✅ AUTH SERVICE - JWT created:', {
+      console.log('🔍 AUTH SERVICE - JWT payload:', jwtPayload);
+      
+      const token = await this.fastify.jwt.sign(jwtPayload);
+      
+      console.log('✅ AUTH SERVICE - JWT created successfully:', {
         tokenLength: token.length,
         tokenPreview: token.substring(0, 50) + '...',
+        tokenEnd: '...' + token.substring(token.length - 20),
         userId: user.id,
-        email: user.email
+        email: user.email,
+        timestamp: new Date().toISOString()
       });
       
       console.log('✅ AUTH SERVICE - OTP validation successful, JWT created');
       
       return { success: true, jwt: token };
     } catch (error) {
+      console.log('❌ AUTH SERVICE - Error validating OTP:', {
+        error: error.message,
+        stack: error.stack,
+        email,
+        code,
+        timestamp: new Date().toISOString()
+      });
       this.fastify.log.error('Error validating OTP:', error);
       return { success: false };
     }

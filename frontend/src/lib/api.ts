@@ -65,10 +65,22 @@ api.interceptors.response.use(
       status: response.status,
       statusText: response.statusText,
       url: response.config.url,
+      method: response.config.method,
       data: response.data,
       headers: response.headers,
       timestamp: new Date().toISOString()
     });
+    
+    // Special logging for /me responses
+    if (response.config.url?.includes('/auth/me')) {
+      console.log('👤 PROFILE RESPONSE - Special logging for /me endpoint');
+      console.log('👤 PROFILE RESPONSE - Status:', response.status);
+      console.log('👤 PROFILE RESPONSE - Data:', response.data);
+      console.log('👤 PROFILE RESPONSE - Headers:', response.headers);
+      console.log('👤 PROFILE RESPONSE - User ID:', response.data?.id);
+      console.log('👤 PROFILE RESPONSE - Email:', response.data?.email);
+      console.log('👤 PROFILE RESPONSE - Is Admin:', response.data?.is_admin);
+    }
     
     // Special logging for login responses
     if (response.config.url?.includes('/auth/login')) {

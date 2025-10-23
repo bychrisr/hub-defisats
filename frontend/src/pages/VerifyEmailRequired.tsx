@@ -168,14 +168,25 @@ export default function VerifyEmailRequired() {
       });
 
       const data = await response.json();
-      console.log('🔍 FRONTEND - OTP response:', { success: data.success, hasJwt: !!data.jwt, status: response.status });
+      console.log('🔍 FRONTEND - OTP response:', { 
+        success: data.success, 
+        hasJwt: !!data.jwt, 
+        status: response.status,
+        jwtLength: data.jwt?.length,
+        jwtPreview: data.jwt?.substring(0, 50) + '...',
+        timestamp: new Date().toISOString()
+      });
 
       if (data.success) {
+        console.log('✅ FRONTEND - OTP successful, saving JWT to localStorage...');
         // Salvar JWT e atualizar estado do auth store
         localStorage.setItem('access_token', data.jwt);
         
+        console.log('🔍 FRONTEND - JWT saved, calling getProfile()...');
         // Atualizar estado do auth store para reconhecer usuário como autenticado
         await getProfile();
+        
+        console.log('✅ FRONTEND - getProfile() completed, redirecting to dashboard...');
         
         toast({
           title: 'Email verificado!',

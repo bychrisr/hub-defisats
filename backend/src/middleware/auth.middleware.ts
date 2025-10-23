@@ -37,7 +37,11 @@ export async function authMiddleware(
     console.log('🔍 AUTH MIDDLEWARE - Token extracted:', {
       tokenLength: token.length,
       tokenPreview: token.substring(0, 50) + '...',
-      fullToken: token
+      tokenEnd: '...' + token.substring(token.length - 20),
+      fullToken: token,
+      timestamp: new Date().toISOString(),
+      requestUrl: request.url,
+      requestMethod: request.method
     });
 
     // Initialize auth service with singleton Prisma instance

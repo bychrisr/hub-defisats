@@ -205,24 +205,50 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       getProfile: async () => {
-        console.log('🔄 AUTH STORE - Starting getProfile...');
+        console.log('🔄 AUTH STORE - Starting getProfile...', {
+          timestamp: new Date().toISOString(),
+          currentState: {
+            isAuthenticated: get().isAuthenticated,
+            isLoading: get().isLoading,
+            userExists: !!get().user
+          }
+        });
         
         // Check token before making request
         const tokenBeforeRequest = localStorage.getItem('access_token');
-        console.log('🔍 AUTH STORE - Token before getProfile request:', tokenBeforeRequest ? 'EXISTS' : 'MISSING');
-        console.log('🔍 AUTH STORE - Token preview:', tokenBeforeRequest?.substring(0, 50) + '...' || 'null');
+        console.log('🔍 AUTH STORE - Token before getProfile request:', {
+          exists: !!tokenBeforeRequest,
+          length: tokenBeforeRequest?.length,
+          preview: tokenBeforeRequest?.substring(0, 50) + '...' || 'null',
+          end: '...' + tokenBeforeRequest?.substring(tokenBeforeRequest.length - 20) || 'null',
+          timestamp: new Date().toISOString()
+        });
         
         set({ isLoading: true });
 
         try {
-          console.log('🔄 AUTH STORE - Calling authAPI.getProfile...');
+          console.log('🔄 AUTH STORE - Calling authAPI.getProfile...', {
+            timestamp: new Date().toISOString()
+          });
           const response = await authAPI.getProfile();
           const user = response.data;
-          console.log('✅ AUTH STORE - Profile received:', user);
+          console.log('✅ AUTH STORE - Profile received:', {
+            userId: user.id,
+            email: user.email,
+            isAdmin: user.is_admin,
+            onboardingCompleted: user.onboarding_completed,
+            planType: user.plan_type,
+            timestamp: new Date().toISOString()
+          });
 
           // Usar o campo is_admin que vem do backend
           const isAdmin = user.is_admin === true;
-          console.log('🔍 AUTH STORE - Is admin:', isAdmin, 'for email:', user.email, 'from backend:', user.is_admin);
+          console.log('🔍 AUTH STORE - Is admin:', {
+            isAdmin,
+            email: user.email,
+            backendValue: user.is_admin,
+            timestamp: new Date().toISOString()
+          });
 
           set({
             user: {
@@ -236,12 +262,21 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             isInitialized: true,
             error: null,
           });
-          console.log('✅ AUTH STORE - Profile set successfully');
+          console.log('✅ AUTH STORE - Profile set successfully:', {
+            isAuthenticated: true,
+            userId: user.id,
+            email: user.email,
+            timestamp: new Date().toISOString()
+          });
         } catch (error: any) {
-          console.log('❌ AUTH STORE - getProfile error:', error);
-          console.log('❌ AUTH STORE - Error response:', error.response);
-          console.log('❌ AUTH STORE - Error status:', error.response?.status);
-          console.log('❌ AUTH STORE - Error data:', error.response?.data);
+          console.log('❌ AUTH STORE - getProfile error:', {
+            errorMessage: error.message,
+            errorName: error.name,
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+            timestamp: new Date().toISOString()
+          });
           
           const errorMessage =
             error.response?.data?.message || 'Failed to get profile';
