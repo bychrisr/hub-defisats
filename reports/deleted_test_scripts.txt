@@ -1,0 +1,12 @@
+/home/bychrisr/projects/axisor/test-frontend-auth.js
+/home/bychrisr/projects/axisor/test-endpoint.js
+/home/bychrisr/projects/axisor/test-final-system-complete.js
+/home/bychrisr/projects/axisor/test-final-integration.js
+/home/bychrisr/projects/axisor/test-frontend-integration.js
+/home/bychrisr/projects/axisor/test-auth-redirect.js
+/home/bychrisr/projects/axisor/test-websocket.js
+/home/bychrisr/projects/axisor/test-frontend-backend-integration.js
+/home/bychrisr/projects/axisor/test-backend.js
+/home/bychrisr/projects/axisor/test-lnmarkets-testnet.js
+/home/bychrisr/projects/axisor/test-lnmarkets-signature.js
+/home/bychrisr/projects/axisor/test-websocket-final.js

@@ -1,3 +1,14 @@
+---
+title: "Decisões Técnicas (Architecture Decision Records)"
+version: "1.0.0"
+created: "2025-10-23"
+updated: "2025-10-23"
+author: "Documentation Sync Agent"
+status: "active"
+last_synced: "2025-10-23T12:12:05.344Z"
+source_of_truth: "/docs"
+---
+
 # Decisões Técnicas (Architecture Decision Records)
 
 Este documento registra as decisões técnicas importantes tomadas durante o desenvolvimento do Axisor.

@@ -1,0 +1,150 @@
+{
+  "timestamp": "2025-10-23T12:30:00Z",
+  "summary": {
+    "total_scripts_found": 22,
+    "scripts_moved": 7,
+    "scripts_deleted": 12,
+    "configs_kept": 3,
+    "errors": 0
+  },
+  "moved": [
+    {
+      "source": "setup-dev.sh",
+      "destination": "/scripts/dev/setup-dev.sh",
+      "category": "dev",
+      "executable": true,
+      "shebang": "#!/bin/bash"
+    },
+    {
+      "source": "create-test-user.sh",
+      "destination": "/scripts/dev/create-test-user.sh",
+      "category": "dev",
+      "executable": true,
+      "shebang": "#!/bin/bash"
+    },
+    {
+      "source": "simple-backend.js",
+      "destination": "/scripts/dev/simple-backend.js",
+      "category": "dev",
+      "executable": false,
+      "shebang": null
+    },
+    {
+      "source": "clean-var.sh",
+      "destination": "/scripts/ops/clean-var.sh",
+      "category": "ops",
+      "executable": true,
+      "shebang": "#!/bin/bash"
+    },
+    {
+      "source": "fix-nginx-config.sh",
+      "destination": "/scripts/ops/fix-nginx-config.sh",
+      "category": "ops",
+      "executable": true,
+      "shebang": "#!/bin/bash"
+    },
+    {
+      "source": "update-version.sh",
+      "destination": "/scripts/ops/update-version.sh",
+      "category": "ops",
+      "executable": true,
+      "shebang": "#!/bin/bash"
+    },
+    {
+      "source": "load-test.js",
+      "destination": "/scripts/test/load-test.js",
+      "category": "test",
+      "executable": false,
+      "shebang": null
+    }
+  ],
+  "deleted": [
+    {
+      "file": "test-auth-redirect.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-backend.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-endpoint.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-final-integration.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-final-system-complete.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-frontend-auth.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-frontend-backend-integration.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-frontend-integration.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-lnmarkets-signature.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-lnmarkets-testnet.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-websocket-final.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    },
+    {
+      "file": "test-websocket.js",
+      "reason": "Test script pattern",
+      "backed_up": true
+    }
+  ],
+  "kept_in_root": [
+    {
+      "file": "docusaurus.config.js",
+      "reason": "Docusaurus configuration file"
+    },
+    {
+      "file": "ecosystem.config.js",
+      "reason": "PM2 configuration file"
+    },
+    {
+      "file": "sidebars.js",
+      "reason": "Docusaurus sidebars configuration file"
+    }
+  ],
+  "documentation_created": [
+    {
+      "file": "/docs/workflow/scripts-guide.md",
+      "description": "Complete scripts documentation with usage examples, flags, and troubleshooting"
+    }
+  ],
+  "readme_updated": true,
+  "permissions_validated": true,
+  "structure_created": [
+    "/scripts/dev/",
+    "/scripts/ops/",
+    "/scripts/test/"
+  ]
+}

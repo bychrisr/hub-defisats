@@ -1,3 +1,14 @@
+---
+title: "Changelog"
+version: "1.0.0"
+created: "2025-10-23"
+updated: "2025-10-23"
+author: "Documentation Sync Agent"
+status: "active"
+last_synced: "2025-10-23T12:12:05.342Z"
+source_of_truth: "/docs"
+---
+
 # Changelog
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.

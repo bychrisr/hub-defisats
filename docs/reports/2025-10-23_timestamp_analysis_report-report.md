@@ -1,3 +1,14 @@
+---
+title: "📊 RELATÓRIO DE ANÁLISE - TIMESTAMPS ANTES E DEPOIS DA MIGRAÇÃO v5.0.9"
+version: "1.0.0"
+created: "2025-10-23"
+updated: "2025-10-23"
+author: "Documentation Sync Agent"
+status: "active"
+last_synced: "2025-10-23T12:12:05.355Z"
+source_of_truth: "/docs"
+---
+
 # 📊 RELATÓRIO DE ANÁLISE - TIMESTAMPS ANTES E DEPOIS DA MIGRAÇÃO v5.0.9
 
 **Data**: 2025-01-03  

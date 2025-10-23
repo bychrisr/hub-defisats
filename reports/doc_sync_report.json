@@ -1,0 +1,131 @@
+{
+  "timestamp": "2025-10-23T12:15:00Z",
+  "summary": {
+    "total_files_processed": 14,
+    "files_merged": 6,
+    "files_moved": 5,
+    "files_deleted": 3,
+    "reports_created": 4,
+    "errors": 1
+  },
+  "files": [
+    {
+      "source": "ANALISE_DETALHADA_DOCUMENTACAO_AXISOR.md",
+      "destination": "/docs/reports/2025-10-23_analise_detalhada_documentacao_axisor-report.md",
+      "action": "move",
+      "freshness_score": 1.0,
+      "symbols": [],
+      "decision": "Relatório temporal movido para /docs/reports/"
+    },
+    {
+      "source": "CHANGELOG.md",
+      "destination": "/docs/project/CHANGELOG.md",
+      "action": "move",
+      "freshness_score": 1.0,
+      "symbols": [],
+      "decision": "Changelog movido para /docs/project/"
+    },
+    {
+      "source": "DEBUG-CREDENTIALS-GUIDE.md",
+      "destination": "/docs/troubleshooting/authentication-issues.md",
+      "action": "merge",
+      "freshness_score": 0.8,
+      "symbols": ["/api/auth/login", "/api/auth/verify-email", "JWT", "AuthenticationController"],
+      "decision": "Mesclar com troubleshooting de autenticação"
+    },
+    {
+      "source": "DECISIONS.md",
+      "destination": "/docs/architecture/decisions/architecture-decisions.md",
+      "action": "merge",
+      "freshness_score": 0.9,
+      "symbols": ["ADR-011", "TIMESTAMP_ANALYSIS_REPORT", "Math.floor", "TradingView"],
+      "decision": "Mesclar com documentação de decisões arquiteturais"
+    },
+    {
+      "source": "DOCUMENTATION_STANDARDS.md",
+      "destination": "/docs/workflow/documentation-standards.md",
+      "action": "merge",
+      "freshness_score": 0.85,
+      "symbols": ["DOCUMENTATION_STANDARDS", "frontmatter", "YAML"],
+      "decision": "Mesclar com padrões de documentação existentes"
+    },
+    {
+      "source": "GUIA-MARGIN-GUARD-COMPLETO.md",
+      "destination": "/docs/automations/margin-guard/configuration.md",
+      "action": "merge",
+      "freshness_score": 0.9,
+      "symbols": ["MarginGuardConfig", "executeMarginGuard", "POST /api/margin-guard/execute"],
+      "decision": "Mesclar com configuração do Margin Guard"
+    },
+    {
+      "source": "MAPA_ENTENDIMENTO_SISTEMA_AXISOR.md",
+      "destination": "/docs/architecture/system-architecture.md",
+      "action": "merge",
+      "freshness_score": 0.85,
+      "symbols": ["Node.js", "Fastify", "React", "TypeScript", "PostgreSQL"],
+      "decision": "Mesclar com arquitetura do sistema"
+    },
+    {
+      "source": "RELATORIO_ESTADO_PROJETO.md",
+      "destination": "/docs/reports/2025-10-23_relatorio_estado_projeto-report.md",
+      "action": "move",
+      "freshness_score": 1.0,
+      "symbols": [],
+      "decision": "Relatório temporal movido para /docs/reports/"
+    },
+    {
+      "source": "RELATORIO_OBSERVABILIDADE_SEGURANCA_AXISOR.md",
+      "destination": "/docs/reports/2025-10-23_relatorio_observabilidade_seguranca_axisor-report.md",
+      "action": "move",
+      "freshness_score": 1.0,
+      "symbols": [],
+      "decision": "Relatório temporal movido para /docs/reports/"
+    },
+    {
+      "source": "RESUMO_TECNICO_ARQUITETURA_AXISOR.md",
+      "destination": "/docs/architecture/system-overview/technology-stack.md",
+      "action": "merge",
+      "freshness_score": 0.8,
+      "symbols": ["Fastify", "Prisma", "Redis", "BullMQ", "React", "Vite"],
+      "decision": "Mesclar com stack tecnológico"
+    },
+    {
+      "source": "TIMESTAMP_ANALYSIS_REPORT.md",
+      "destination": "/docs/reports/2025-10-23_timestamp_analysis_report-report.md",
+      "action": "move",
+      "freshness_score": 1.0,
+      "symbols": [],
+      "decision": "Relatório temporal movido para /docs/reports/"
+    },
+    {
+      "source": "fix-testnet-toggle-error.plan.md",
+      "destination": "",
+      "action": "delete",
+      "freshness_score": 0,
+      "symbols": [],
+      "decision": "Arquivo de plano implementado ou contexto histórico não essencial"
+    },
+    {
+      "source": "id.md",
+      "destination": "",
+      "action": "delete",
+      "freshness_score": 0,
+      "symbols": [],
+      "decision": "Arquivo de plano implementado ou contexto histórico não essencial"
+    },
+    {
+      "source": "plan.md",
+      "destination": "",
+      "action": "delete",
+      "freshness_score": 0,
+      "symbols": [],
+      "decision": "Arquivo de plano implementado ou contexto histórico não essencial"
+    }
+  ],
+  "needs_review": [],
+  "validation_results": {
+    "links_validated": false,
+    "reason": "Script de validação de links apresentou problemas de caminho duplicado",
+    "recommendation": "Validar links manualmente ou corrigir script de validação"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "axisor-docs-sync",
+  "version": "1.0.0",
+  "description": "Documentation synchronization scripts for Axisor",
+  "type": "module",
+  "scripts": {
+    "sync": "tsx sync_docs.ts",
+    "validate": "tsx validate_docs_links.ts"
+  },
+  "dependencies": {
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6",
+    "@types/node": "^20.0.0"
+  }
+}

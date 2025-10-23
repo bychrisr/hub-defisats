@@ -96,31 +96,38 @@ Toda a documentação está organizada na pasta `.system/`:
 
 ## 🛠️ Scripts Disponíveis
 
-### Administração
+### Desenvolvimento
 ```bash
-./scripts/admin/create-admin.js          # Criar usuário admin
+./scripts/dev/setup-dev.sh               # Setup completo do ambiente de desenvolvimento
+./scripts/dev/create-test-user.sh        # Criar usuário de teste para desenvolvimento
+./scripts/dev/simple-backend.js          # Backend simples para testes
+```
+
+### Operações
+```bash
+./scripts/ops/clean-var.sh               # Limpeza de variáveis e cache
+./scripts/ops/fix-nginx-config.sh        # Correção automática de configuração Nginx
+./scripts/ops/update-version.sh          # Atualização de versão do projeto
+```
+
+### Testes
+```bash
+./scripts/test/load-test.js              # Teste de carga e performance
+```
+
+### Administração (Legacy)
+```bash
+./scripts/admin/create-admin.js         # Criar usuário admin
 ./scripts/admin/create-super-admin.sh    # Criar super admin
 ```
 
-### Desenvolvimento
-```bash
-./scripts/dev/setup-dev.sh               # Setup de desenvolvimento
-./scripts/dev/create-dev-user.sh         # Criar usuário de teste
-./scripts/dev/fix-typescript-errors.sh   # Corrigir erros TypeScript
-```
-
-### Deploy
+### Deploy (Legacy)
 ```bash
 ./scripts/deploy/deploy-prod.sh          # Deploy em produção
 ./scripts/deploy/setup-staging.sh        # Setup de staging
 ```
 
-### Testes
-```bash
-./scripts/test/test-local.sh             # Testes locais
-./scripts/test/test-production.sh        # Testes de produção
-./scripts/test/test-user-permissions.sh  # Teste de permissões
-```
+> 📖 **Documentação Completa**: Consulte o [Guia de Scripts](docs/workflow/scripts-guide.md) para informações detalhadas sobre uso, flags, variáveis de ambiente e troubleshooting.
 
 ## 🔧 Configuração
 
