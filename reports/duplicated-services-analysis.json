@@ -1,0 +1,2946 @@
+{
+  "timestamp": "2025-10-23T20:21:34.241Z",
+  "duplicatedServices": [
+    {
+      "service": "LNMarketsRobustService",
+      "references": [
+        {
+          "file": "./backend/src/services/LNMarketsRobustService.ts",
+          "content": "export class LNMarketsRobustService {"
+        },
+        {
+          "file": "./backend/src/routes/websocket.routes.ts",
+          "content": "import { LNMarketsRobustService } from '../services/LNMarketsRobustService';"
+        },
+        {
+          "file": "./backend/src/routes/websocket.routes.ts",
+          "content": "// ✅ HANDLE INCOMING MESSAGES (integrado com LNMarketsRobustService)"
+        },
+        {
+          "file": "./backend/src/routes/websocket.routes.ts",
+          "content": "// ✅ HANDLE REFRESH DATA (integração com LNMarketsRobustService)"
+        },
+        {
+          "file": "./backend/src/routes/websocket.routes.ts",
+          "content": "console.log('🔄 WEBSOCKET - Atualizando dados via LNMarketsRobustService...');"
+        },
+        {
+          "file": "./backend/src/routes/websocket.routes.ts",
+          "content": "console.log('🔄 WEBSOCKET - Criando LNMarketsRobustService com credenciais...');"
+        },
+        {
+          "file": "./backend/src/routes/websocket.routes.ts",
+          "content": "const lnMarketsService = new LNMarketsRobustService(credentials);"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-robust.routes.ts",
+          "content": "import { LNMarketsRobustService } from '../services/LNMarketsRobustService';"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-robust.routes.ts",
+          "content": "const lnMarketsService = new LNMarketsRobustService({"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-robust.routes.ts",
+          "content": "const lnMarketsService = new LNMarketsRobustService({"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-robust.routes.ts",
+          "content": "console.log(`🔄 [${requestId}] Fetching positions data via LNMarketsRobustService...`);"
+        },
+        {
+          "file": "./docs/project/backlog-and-future-features.md",
+          "content": "- [ ] Remover LNMarketsRobustService.ts (duplicado)"
+        }
+      ],
+      "total": 12,
+      "files": [
+        "./backend/src/services/LNMarketsRobustService.ts",
+        "./backend/src/routes/websocket.routes.ts",
+        "./backend/src/routes/lnmarkets-robust.routes.ts",
+        "./docs/project/backlog-and-future-features.md"
+      ]
+    },
+    {
+      "service": "LNMarketsOptimizedService",
+      "references": [
+        {
+          "file": "./backend/src/services/lnmarkets-optimized.service.ts",
+          "content": "export class LNMarketsOptimizedService {"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-header.routes.ts",
+          "content": "import { LNMarketsOptimizedService } from '../services/lnmarkets-optimized.service';"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-header.routes.ts",
+          "content": "const lnMarketsOptimized = new LNMarketsOptimizedService({"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-header.routes.ts",
+          "content": "const lnMarketsOptimized = new LNMarketsOptimizedService({"
+        },
+        {
+          "file": "./docs/integrations/external-apis.md",
+          "content": "const lnMarketsOptimized = new LNMarketsOptimizedService("
+        }
+      ],
+      "total": 5,
+      "files": [
+        "./backend/src/services/lnmarkets-optimized.service.ts",
+        "./backend/src/routes/lnmarkets-header.routes.ts",
+        "./docs/integrations/external-apis.md"
+      ]
+    },
+    {
+      "service": "websocket-manager.service",
+      "references": [
+        {
+          "file": "./backend/src/routes/websocket-test.routes.ts",
+          "content": "// import { websocketManager } from '../services/websocket-manager.service';"
+        },
+        {
+          "file": "./backend/src/workers/margin-guard-v2.worker.ts",
+          "content": "import { websocketManager } from '../services/websocket-manager.service';"
+        },
+        {
+          "file": "./backend/src/workers/automation-worker.ts",
+          "content": "import { WebSocketManagerService } from '../services/websocket-manager.service';"
+        },
+        {
+          "file": "./docs/integrations/external-apis.md",
+          "content": "// backend/src/services/websocket-manager.service.ts"
+        },
+        {
+          "file": "./docs/project/backlog-and-future-features.md",
+          "content": "- **Notas**: websocket-manager.service.ts existe mas precisa de melhorias"
+        }
+      ],
+      "total": 5,
+      "files": [
+        "./backend/src/routes/websocket-test.routes.ts",
+        "./backend/src/workers/margin-guard-v2.worker.ts",
+        "./backend/src/workers/automation-worker.ts",
+        "./docs/integrations/external-apis.md",
+        "./docs/project/backlog-and-future-features.md"
+      ]
+    },
+    {
+      "service": "LNMarketsFallbackService",
+      "references": [
+        {
+          "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+          "content": "export class LNMarketsFallbackService {"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+          "content": "import { LNMarketsFallbackService, CoinGeckoProvider, BinanceProvider } from '../services/lnmarkets-fallback.service';"
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+          "content": "const fallbackService = new LNMarketsFallbackService("
+        },
+        {
+          "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+          "content": "const fallbackService = new LNMarketsFallbackService("
+        }
+      ],
+      "total": 4,
+      "files": [
+        "./backend/src/services/lnmarkets-fallback.service.ts",
+        "./backend/src/routes/lnmarkets-fallback-test.routes.ts"
+      ]
+    },
+    {
+      "service": "websocket-manager-optimized.service",
+      "references": [
+        {
+          "file": "./backend/src/routes/websocket-optimized.routes.ts",
+          "content": "import { WebSocketManagerOptimized, WebSocketConfig } from '../services/websocket-manager-optimized.service';"
+        },
+        {
+          "file": "./docs/integrations/websocket-manager-optimized.md",
+          "content": "import { WebSocketManagerOptimized, WebSocketConfig } from '../services/websocket-manager-optimized.service';"
+        }
+      ],
+      "total": 2,
+      "files": [
+        "./backend/src/routes/websocket-optimized.routes.ts",
+        "./docs/integrations/websocket-manager-optimized.md"
+      ]
+    }
+  ],
+  "confusingSuffixes": {
+    "v2": [
+      {
+        "file": "./backend/src/config/lnmarkets-endpoints.ts",
+        "content": "* Centralized configuration for all LN Markets API v2 endpoints"
+      },
+      {
+        "file": "./backend/src/config/env.ts",
+        "content": "LN_MARKETS_API_BASE_URL: z.string().url().default('https://api.lnmarkets.com/v2'),"
+      },
+      {
+        "file": "./backend/src/config/env.ts",
+        "content": ".default('https://api.lnmarkets.com/v2'),"
+      },
+      {
+        "file": "./backend/src/config/env.ts",
+        "content": ".default('https://api.lnmarkets.com/v2'),"
+      },
+      {
+        "file": "./backend/src/utils/testnet-detector.ts",
+        "content": "const mainnetURL = 'https://api.lnmarkets.com/v2';"
+      },
+      {
+        "file": "./backend/src/utils/testnet-detector.ts",
+        "content": "const testnetURL = 'https://api.testnet4.lnmarkets.com/v2';"
+      },
+      {
+        "file": "./backend/src/utils/lnmarkets-factory.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/utils/lnmarkets-factory.ts",
+        "content": "* Factory function to create LNMarketsAPIv2 instances"
+      },
+      {
+        "file": "./backend/src/utils/lnmarkets-factory.ts",
+        "content": "export function createLNMarketsService(credentials: any): LNMarketsAPIv2 {"
+      },
+      {
+        "file": "./backend/src/utils/lnmarkets-factory.ts",
+        "content": "return new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/utils/lnmarkets-factory.ts",
+        "content": "* Factory function to create LNMarketsAPIv2 with default test credentials"
+      },
+      {
+        "file": "./backend/src/utils/lnmarkets-factory.ts",
+        "content": "export function createTestLNMarketsService(): LNMarketsAPIv2 {"
+      },
+      {
+        "file": "./backend/src/utils/lnmarkets-factory.ts",
+        "content": "return new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-market.controller.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-market.controller.ts",
+        "content": "private async getLNMarketsService(userId: string): Promise<LNMarketsAPIv2> {"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-market.controller.ts",
+        "content": "return new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-user.controller.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-user.controller.ts",
+        "content": "return new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-futures.controller.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-futures.controller.ts",
+        "content": "return new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-options.controller.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-options.controller.ts",
+        "content": "return new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/controllers/margin-guard.controller.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/controllers/margin-guard.controller.ts",
+        "content": "import { getMarginGuardV2Worker } from '../workers/margin-guard-v2.worker';"
+      },
+      {
+        "file": "./backend/src/controllers/margin-guard.controller.ts",
+        "content": "const lnMarkets = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-trading-refactored.controller.ts",
+        "content": "// Initialize LN Markets service v2"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-trading-refactored.controller.ts",
+        "content": "console.log('🔍 TRADING CONTROLLER - Initializing LNMarketsAPIv2 service', {"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-trading-refactored.controller.ts",
+        "content": "const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-trading-refactored.controller.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-trading-refactored.controller.ts",
+        "content": "console.log('✅ TRADING CONTROLLER - Service v2 initialized, calling getRunningPositions');"
+      },
+      {
+        "file": "./backend/src/controllers/lnmarkets-trading-refactored.controller.ts",
+        "content": "// Get positions using the service v2"
+      },
+      {
+        "file": "./backend/src/seeders/exchanges.seeder.ts",
+        "content": "api_version: 'v2',"
+      },
+      {
+        "file": "./backend/src/services/testnet-faucet.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/testnet-faucet.service.ts",
+        "content": "private lnMarketsService?: LNMarketsAPIv2;"
+      },
+      {
+        "file": "./backend/src/services/testnet-faucet.service.ts",
+        "content": "// this.lnMarketsService = new LNMarketsAPIv2({...});"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "// 4. Criar instância do LNMarketsAPIv2 com credenciais da conta ativa"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "* Get user positions from LN Markets API v2"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "private async getUserPositions(lnMarketsService: LNMarketsAPIv2): Promise<any[]> {"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "* Get user balance from LN Markets API v2"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "private async getUserBalance(lnMarketsService: LNMarketsAPIv2): Promise<any | null> {"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "* Get ticker data from LN Markets API v2"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "private async getTicker(lnMarketsService: LNMarketsAPIv2): Promise<any | null> {"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "// 2. Criar instância do LNMarketsAPIv2 com credenciais da conta"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.post('/v2/wallet/address/next', params || {});"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get('/v2/wallet/addresses');"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.post('/v2/wallet/send', params);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.post('/v2/wallet/send/many', params);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get('/v2/wallet/transactions', params);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get(`/v2/wallet/transactions/${params.txid}`);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get('/v2/wallet/utxos', params);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.post('/v2/wallet/estimatefee', params);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get('/v2/wallet/balance');"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get('/v2/wallet/transactions/history', params);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get(`/v2/wallet/address/${params.address}/balance`);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get(`/v2/wallet/address/${params.address}/transactions`);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get(`/v2/wallet/address/${params.address}/utxos`);"
+      },
+      {
+        "file": "./backend/src/services/lnd/endpoints/onchain.endpoints.ts",
+        "content": "const response = await this.client.get('/v2/wallet/feerate', params);"
+      },
+      {
+        "file": "./backend/src/services/captcha.service.ts",
+        "content": "* Verify reCAPTCHA v2 token"
+      },
+      {
+        "file": "./backend/src/services/backtest.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/backtest.service.ts",
+        "content": "const lnMarkets = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/advanced-health.service.ts",
+        "content": "{ name: 'LN Markets', url: 'https://api.lnmarkets.com/v2/user' },"
+      },
+      {
+        "file": "./backend/src/services/auth.service.ts",
+        "content": "const { LNMarketsAPIv2 } = await import('./lnmarkets/LNMarketsAPIv2.service');"
+      },
+      {
+        "file": "./backend/src/services/auth.service.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/risk-management.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/machine-learning.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "{ path: '/v2/status', method: 'GET', requiresAuth: false },"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "{ path: '/v2/market', method: 'GET', requiresAuth: false },"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "{ path: '/v2/user', method: 'GET', requiresAuth: true },"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "{ path: '/api/v2/status', method: 'GET', requiresAuth: false },"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "{ path: '/api/v2/market', method: 'GET', requiresAuth: false },"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "{ path: '/api/v2/user', method: 'GET', requiresAuth: true }"
+      },
+      {
+        "file": "./backend/src/services/health-checker.service.ts",
+        "content": "const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-diagnostic.service.ts",
+        "content": "private baseURL = 'https://api.lnmarkets.com/v2';"
+      },
+      {
+        "file": "./backend/src/services/trading-validation.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-optimized.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-optimized.service.ts",
+        "content": "private lnMarketsAPI: LNMarketsAPIv2;"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-optimized.service.ts",
+        "content": "this.lnMarketsAPI = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/LNMarketsRobustService.ts",
+        "content": "? (config.lnMarkets?.testnetUrl || 'https://api.testnet4.lnmarkets.com/v2')"
+      },
+      {
+        "file": "./backend/src/services/LNMarketsRobustService.ts",
+        "content": ": (config.lnMarkets?.baseUrl || 'https://api.lnmarkets.com/v2');"
+      },
+      {
+        "file": "./backend/src/services/LNMarketsRobustService.ts",
+        "content": "// Create signature message (CORRIGIDO: LN Markets API v2 requer '/v2' na string de assinatura)"
+      },
+      {
+        "file": "./backend/src/services/LNMarketsRobustService.ts",
+        "content": "const message = timestamp + method + '/v2' + path + params;"
+      },
+      {
+        "file": "./backend/src/services/portfolio-tracking.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/ExchangeServiceFactory.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/ExchangeServiceFactory.ts",
+        "content": "private createLNMarketsService(credentials: any, logger: Logger): LNMarketsAPIv2 {"
+      },
+      {
+        "file": "./backend/src/services/ExchangeServiceFactory.ts",
+        "content": "return new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/ExchangeServiceFactory.ts",
+        "content": "description: 'LN Markets API v2 - Lightning Network futures trading'"
+      },
+      {
+        "file": "./backend/src/services/ExchangeServiceFactory.ts",
+        "content": "documentation: 'https://docs.lnmarkets.com/api/v2/'"
+      },
+      {
+        "file": "./backend/src/services/backtesting.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/lightning-payment.service.ts",
+        "content": "baseURL: 'https://api.lnmarkets.com/v2',"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "private primaryService: LNMarketsAPIv2;"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "this.primaryService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/credential-test.service.ts",
+        "content": "// Import LN Markets API v2 service dynamically to avoid circular dependencies"
+      },
+      {
+        "file": "./backend/src/services/credential-test.service.ts",
+        "content": "const { LNMarketsAPIv2 } = await import('./lnmarkets/LNMarketsAPIv2.service');"
+      },
+      {
+        "file": "./backend/src/services/credential-test.service.ts",
+        "content": "const apiService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/trading-confirmation.service.ts",
+        "content": "import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": "* LN Markets API v2 - Serviço Principal Centralizado"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": "* Ponto de entrada único para todas as operações LN Markets API v2"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": "* LN Markets API v2 Service"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": "* const api = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": "export class LNMarketsAPIv2 {"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": "this.logger.info('🚀 LN Markets API v2 Service initialized', {"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": "? 'https://api.testnet4.lnmarkets.com/v2'"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsAPIv2.service.ts",
+        "content": ": 'https://api.lnmarkets.com/v2'),"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/tests/lnmarkets-v2.test.ts",
+        "content": "* LN Markets API v2 - Test Suite"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/tests/lnmarkets-v2.test.ts",
+        "content": "import { LNMarketsAPIv2, LNMarketsCredentials } from '../LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/tests/lnmarkets-v2.test.ts",
+        "content": "const api = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/tests/lnmarkets-v2.test.ts",
+        "content": "const api = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/tests/lnmarkets-v2.test.ts",
+        "content": "console.log('🚀 LN Markets API v2 - Complete Test Suite');"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "* LN Markets HTTP Client v2"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "* Cliente base HTTP para integração com LN Markets API v2"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "? 'https://api.testnet4.lnmarkets.com/v2'"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": ": 'https://api.lnmarkets.com/v2');"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "expectedTestnetURL: 'https://api.testnet4.lnmarkets.com/v2',"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "expectedMainnetURL: 'https://api.lnmarkets.com/v2',"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "this.logger.info('🚀 LN Markets Client v2 initialized', {"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "// Create signature message (both mainnet and testnet need /v2 in path)"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets/LNMarketsClient.ts",
+        "content": "const fullPath = path.startsWith('/v2') ? path : `/v2${path}`;"
+      },
+      {
+        "file": "./backend/src/routes/public-dashboard.routes.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/routes/public-dashboard.routes.ts",
+        "content": "const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "const lnMarketsAPI = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "const response = await fetch('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "const response = await fetch('https://api.coincap.io/v2/assets/bitcoin', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const authHeaders = generateAuthHeaders('GET', '/v2/user', user);"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/user', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/futures/market', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const authHeaders = generateAuthHeaders('GET', '/v2/user', user);"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/user', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const authHeaders = generateAuthHeaders('GET', '/v2/futures/trades', user);"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/futures/trades', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const authHeaders = generateAuthHeaders('GET', '/v2/user', user);"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/user', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "axios.get('https://api.lnmarkets.com/v2/futures/market', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/futures/market', {"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "'Warning': '299 - \"This endpoint is deprecated, please use /api/lnmarkets/v2/user/dashboard instead\"'"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "// Criar instância do serviço LN Markets v2"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "console.log(`🔄 DASHBOARD OPTIMIZED - Fetching all data in parallel (LNMarketsAPIv2)...`);"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "// Buscar dados essenciais em paralelo (otimização principal) - LN Markets API v2"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "console.log('🔍 DASHBOARD OPTIMIZED - Processing responses (API v2):', {"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "estimatedBalance: balanceData.status === 'fulfilled' ? balanceData.value : null, // Same as balance in API v2"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "trades: [], // LN Markets API v2 doesn't have separate trades endpoint"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "orders: [], // LN Markets API v2 doesn't have separate orders endpoint"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "history: [], // LN Markets API v2 doesn't have separate history endpoint"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "console.log('🔍 DASHBOARD OPTIMIZED - Processed data (API v2):', {"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "console.log(`📊 DASHBOARD OPTIMIZED - Stats (API v2):`, {"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "// Initialize LN Markets service v2"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "console.log('🎯 LN MARKETS CONTROLLER - Initializing LNMarketsAPIv2 service');"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "console.log('🎯 LN MARKETS CONTROLLER - Service v2 initialized, calling getRunningPositions');"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "// Initialize LN Markets service v2"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "const prodService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets.routes.ts",
+        "content": "const testnetService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/routes/admin/lnmarkets-admin.routes.ts",
+        "content": "import { LNMarketsAPIv2 } from '../../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/routes/admin/lnmarkets-admin.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/admin/lnmarkets-admin.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/admin/lnmarkets-admin.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user-optimized.routes.ts",
+        "content": "'Warning': '299 - \"This endpoint is deprecated, please use /api/lnmarkets/v2/market/ticker instead\"'"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user-optimized.routes.ts",
+        "content": "const response = await axios.get('https://api.lnmarkets.com/v2/futures/ticker', {"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-centralized.routes.ts",
+        "content": "const { LNMarketsAPIv2 } = await import('../services/lnmarkets/LNMarketsAPIv2.service');"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-centralized.routes.ts",
+        "content": "const lnMarketsService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "await fastify.register(lnmarketsCentralizedRoutes, { prefix: '/api/lnmarkets-v2' });"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "// const { getMarginGuardV2Worker } = await import('./workers/margin-guard-v2.worker');"
+      },
+      {
+        "file": "./backend/src/tests/contracts/lnmarkets-api-v2.test.ts",
+        "content": "describe('LN Markets API v2 Contract Tests', () => {"
+      },
+      {
+        "file": "./backend/src/tests/contracts/lnmarkets-api-v2.test.ts",
+        "content": "baseURL = 'https://api.testnet4.lnmarkets.com/v2';"
+      },
+      {
+        "file": "./backend/src/workers/margin-monitor.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/workers/margin-monitor.ts",
+        "content": "const lnMarketsServices: { [userId: string]: LNMarketsAPIv2 } = {};"
+      },
+      {
+        "file": "./backend/src/workers/margin-monitor.ts",
+        "content": "function getOrCreateLNMarketsService(userId: string, credentials: any): LNMarketsAPIv2 {"
+      },
+      {
+        "file": "./backend/src/workers/margin-monitor.ts",
+        "content": "const service = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/workers/margin-monitor.ts",
+        "content": "const lnMarkets = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/workers/automation-executor.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/workers/automation-executor.ts",
+        "content": "const lnMarkets = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/workers/margin-guard-v2.worker.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/workers/margin-guard-v2.worker.ts",
+        "content": "const lnMarkets = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/workers/margin-guard-v2.worker.ts",
+        "content": "const lnMarkets = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./backend/src/workers/automation-worker.ts",
+        "content": "import { LNMarketsAPIv2 } from '../services/lnmarkets/LNMarketsAPIv2.service';"
+      },
+      {
+        "file": "./backend/src/workers/automation-worker.ts",
+        "content": "const httpService = new LNMarketsAPIv2({"
+      },
+      {
+        "file": "./frontend/src/hooks/useLNMarketsRefactored.ts",
+        "content": "* Hooks para endpoints refatorados da LN Markets API v2"
+      },
+      {
+        "file": "./frontend/src/hooks/useLNMarketsRefactored.ts",
+        "content": "* Estes hooks consomem os novos endpoints refatorados em /api/lnmarkets/v2/"
+      },
+      {
+        "file": "./frontend/src/hooks/useLNMarketsRefactored.ts",
+        "content": "console.log(`✅ REFACTORED DASHBOARD - Data received in ${duration}ms (API v2 refactored):`, {"
+      },
+      {
+        "file": "./frontend/src/hooks/useOptimizedDashboardData.ts",
+        "content": "console.log(`✅ OPTIMIZED DASHBOARD - Data received in ${duration}ms (API v2):`, {"
+      },
+      {
+        "file": "./frontend/src/hooks/useOptimizedDashboardData.ts",
+        "content": "// Calcular métricas dos dados unificados (API v2)"
+      },
+      {
+        "file": "./frontend/src/pages/Login.tsx",
+        "content": "d=\"M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z\""
+      },
+      {
+        "file": "./frontend/src/pages/Login.tsx",
+        "content": "d=\"M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z\""
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "* para consumir os endpoints da LN Markets API v2 refatorados"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "Posições da LN Markets API v2 refatorada"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'Dados da API v2 Refatorada' : 'Dados da API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'Dados da API v2 Refatorada' : 'Dados da API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/Register.tsx",
+        "content": "d=\"M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z\""
+      },
+      {
+        "file": "./frontend/src/pages/Register.tsx",
+        "content": "d=\"M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z\""
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "* para consumir os endpoints da LN Markets API v2 refatorados"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "// Hook refatorado para dados da dashboard (API v2 refatorada)"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "Dados da LN Markets API v2 refatorada"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData ? 'API v2 Refatorada' : 'API v1 Antiga'}"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<span>Preço do Bitcoin (API v2 Refatorada)</span>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className=\"text-sm font-medium\">API v2 Refatorada</p>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<span className=\"text-sm font-medium\">API v2 Refatorada</span>"
+      }
+    ],
+    "refactored": [
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "name: 'lnmarkets_refactored_endpoint_calls_total',"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "help: 'Total calls to refactored LN Markets endpoints',"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "name: 'lnmarkets_refactored_endpoint_duration_seconds',"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "help: 'Duration of refactored LN Markets endpoint calls',"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "* Record refactored endpoint call"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "* Record refactored endpoint duration"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "refactoredCalls: number;"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "const refactoredCalls = this.lnMarketsRefactoredEndpointCalls.get().values.reduce((sum, val) => sum + val.value, 0);"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "const totalCalls = refactoredCalls + deprecatedCalls;"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "const migrationProgress = totalCalls > 0 ? (refactoredCalls / totalCalls) * 100 : 0;"
+      },
+      {
+        "file": "./backend/src/services/metrics.service.ts",
+        "content": "refactoredCalls,"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-refactored.routes.ts",
+        "content": "import { LNMarketsMarketRefactoredController } from '../controllers/lnmarkets-market-refactored.controller';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-refactored.routes.ts",
+        "content": "import { LNMarketsUserRefactoredController } from '../controllers/lnmarkets-user-refactored.controller';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-refactored.routes.ts",
+        "content": "import { LNMarketsTradingRefactoredController } from '../controllers/lnmarkets-trading-refactored.controller';"
+      },
+      {
+        "file": "./backend/src/routes/__tests__/lnmarkets-refactored.routes.test.ts",
+        "content": "import { lnmarketsRefactoredRoutes } from '../lnmarkets-refactored.routes';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-centralized.routes.ts",
+        "content": "import { LNMarketsMarketRefactoredController } from '../controllers/lnmarkets-market-refactored.controller';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-centralized.routes.ts",
+        "content": "import { LNMarketsUserRefactoredController } from '../controllers/lnmarkets-user-refactored.controller';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-centralized.routes.ts",
+        "content": "import { LNMarketsTradingRefactoredController } from '../controllers/lnmarkets-trading-refactored.controller';"
+      },
+      {
+        "file": "./frontend/src/hooks/useLNMarketsRefactored.ts",
+        "content": "console.log('🚀 REFACTORED DASHBOARD - Fetching refactored dashboard data...');"
+      },
+      {
+        "file": "./frontend/src/hooks/useLNMarketsRefactored.ts",
+        "content": "console.log(`✅ REFACTORED DASHBOARD - Data received in ${duration}ms (API v2 refactored):`, {"
+      },
+      {
+        "file": "./frontend/src/hooks/useLNMarketsRefactored.ts",
+        "content": "setError(err.message || 'Failed to fetch refactored dashboard data');"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "const { positions: refactoredPositions, isLoading, error, refresh } = useLNMarketsRefactoredPositions();"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "if (refactoredPositions) {"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "setPositions(refactoredPositions);"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "const totalPnlValue = refactoredPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "const totalMarginValue = refactoredPositions.reduce((sum, pos) => sum + (pos.margin || 0), 0);"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "const totalValue = refactoredPositions.reduce((sum, pos) => sum + (pos.price * pos.size), 0);"
+      },
+      {
+        "file": "./frontend/src/pages/PositionsRefactored.tsx",
+        "content": "}, [refactoredPositions]);"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "const { positions: refactoredPositions } = useLNMarketsRefactoredPositions();"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "const { ticker: refactoredTicker } = useLNMarketsRefactoredTicker();"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData ? activeTrades : (refactoredPositions?.length || 0)}"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData && refactoredTicker && ("
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className=\"text-2xl font-bold\">${refactoredTicker.price.toLocaleString()}</p>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className={`text-xl font-bold ${refactoredTicker.changePercent24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{refactoredTicker.changePercent24h >= 0 ? '+' : ''}{refactoredTicker.changePercent24h.toFixed(2)}%"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className=\"text-lg font-semibold\">${refactoredTicker.high24h.toLocaleString()}</p>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className=\"text-lg font-semibold\">${refactoredTicker.low24h.toLocaleString()}</p>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<Badge variant=\"outline\">{refactoredPositions?.length || 0}</Badge>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{refactoredPositions && refactoredPositions.length > 0 ? ("
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{refactoredPositions.map((position) => ("
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{showRefactoredData && refactoredTicker ? ("
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className=\"text-2xl font-bold\">${refactoredTicker.price.toLocaleString()}</p>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className={`text-xl font-bold ${refactoredTicker.changePercent24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "{refactoredTicker.changePercent24h >= 0 ? '+' : ''}{refactoredTicker.changePercent24h.toFixed(2)}%"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "<p className=\"text-lg font-semibold\">{refactoredTicker.volume24h.toLocaleString()}</p>"
+      },
+      {
+        "file": "./frontend/src/App.tsx",
+        "content": "path=\"/dashboard-refactored\""
+      },
+      {
+        "file": "./frontend/src/App.tsx",
+        "content": "path=\"/positions-refactored\""
+      }
+    ],
+    "optimized": [
+      {
+        "file": "./backend/src/services/database-index-optimizer.service.ts",
+        "content": "optimized: string[];"
+      },
+      {
+        "file": "./backend/src/services/database-index-optimizer.service.ts",
+        "content": "const optimized: string[] = [];"
+      },
+      {
+        "file": "./backend/src/services/database-index-optimizer.service.ts",
+        "content": "optimized.push(table);"
+      },
+      {
+        "file": "./backend/src/services/database-index-optimizer.service.ts",
+        "content": "optimized: optimized.length,"
+      },
+      {
+        "file": "./backend/src/services/database-index-optimizer.service.ts",
+        "content": "optimized,"
+      },
+      {
+        "file": "./backend/src/services/auth.service.ts",
+        "content": "import { OptimizedQueriesService } from './optimized-queries.service';"
+      },
+      {
+        "file": "./backend/src/services/auth.service.ts",
+        "content": "private optimizedQueries: OptimizedQueriesService;"
+      },
+      {
+        "file": "./backend/src/services/auth.service.ts",
+        "content": "this.optimizedQueries = new OptimizedQueriesService(prisma);"
+      },
+      {
+        "file": "./backend/src/services/auth.service.ts",
+        "content": "await this.optimizedQueries.invalidateSystemCache();"
+      },
+      {
+        "file": "./backend/src/services/auth.service.ts",
+        "content": "await this.optimizedQueries.checkUsernameAvailability(username);"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedSize: number;"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "let optimizedContent = originalContent;"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedContent = await this.minifyCode(optimizedContent);"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedContent = await this.treeShakeCode(optimizedContent);"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "const splitResult = await this.splitCode(optimizedContent);"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedContent = splitResult.content;"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedContent = gzipSync(optimizedContent);"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedContent = brotliCompressSync(optimizedContent);"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "// Write optimized bundle"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "writeFileSync(outputPath, optimizedContent);"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "const optimizedSize = optimizedContent.length;"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "const savings = originalSize - optimizedSize;"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedSize,"
+      },
+      {
+        "file": "./backend/src/services/bundle-optimizer.service.ts",
+        "content": "optimizedSize,"
+      },
+      {
+        "file": "./backend/src/services/query-optimizer.service.ts",
+        "content": "this.logger.debug(`Dashboard data optimized for user: ${userId}`);"
+      },
+      {
+        "file": "./backend/src/services/query-optimizer.service.ts",
+        "content": "this.logger.debug(`Notifications by status optimized: ${notifications.length} ${status} notifications`);"
+      },
+      {
+        "file": "./backend/src/services/query-optimizer.service.ts",
+        "content": "this.logger.debug(`Aggregated metrics optimized for user: ${userId}`);"
+      },
+      {
+        "file": "./backend/src/services/query-optimizer.service.ts",
+        "content": "this.logger.debug(`User search optimized: \"${searchTerm}\", page ${page}/${pages}, total: ${total}`);"
+      },
+      {
+        "file": "./backend/src/services/advanced-query-optimizer.service.ts",
+        "content": "optimizedQuery: string;"
+      },
+      {
+        "file": "./backend/src/services/unified-admin-optimization.service.ts",
+        "content": "executed.push('Database indexes optimized');"
+      },
+      {
+        "file": "./backend/src/routes/websocket-optimized.routes.ts",
+        "content": "import { WebSocketManagerOptimized, WebSocketConfig } from '../services/websocket-manager-optimized.service';"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "'/lnmarkets/user/dashboard-optimized',"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "description: 'Get optimized dashboard data for LN Markets user',"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "metrics.recordDeprecatedEndpointCall('/api/lnmarkets/user/dashboard-optimized', 'GET', 500);"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "metrics.recordDeprecatedEndpointDuration('/api/lnmarkets/user/dashboard-optimized', 'GET', duration / 1000);"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "metrics.recordDeprecatedEndpointCall('/api/lnmarkets/user/dashboard-optimized', 'GET', reply.statusCode);"
+      },
+      {
+        "file": "./backend/src/routes/dashboard-optimized.routes.ts",
+        "content": "metrics.recordDeprecatedEndpointDuration('/api/lnmarkets/user/dashboard-optimized', 'GET', duration / 1000);"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "const logger = createLogger('optimized-market-routes');"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "export async function optimizedMarketRoutes(fastify: FastifyInstance) {"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "* GET /api/market/index/optimized"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "fastify.get('/api/market/index/optimized', async (request: FastifyRequest, reply: FastifyReply) => {"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "* GET /api/market/analytics/optimized"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "fastify.get('/api/market/analytics/optimized', async (request: FastifyRequest, reply: FastifyReply) => {"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "* GET /api/market/dashboard/optimized"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "fastify.get('/api/market/dashboard/optimized', async (request: FastifyRequest, reply: FastifyReply) => {"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "* GET /api/market/performance/optimized"
+      },
+      {
+        "file": "./backend/src/routes/optimized-market.routes.ts",
+        "content": "fastify.get('/api/market/performance/optimized', async (request: FastifyRequest, reply: FastifyReply) => {"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-header.routes.ts",
+        "content": "import { LNMarketsOptimizedService } from '../services/lnmarkets-optimized.service';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-header.routes.ts",
+        "content": "source: 'lnmarkets-optimized',"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user-optimized.routes.ts",
+        "content": "// ⚠️ ENDPOINTS INDIVIDUAIS REMOVIDOS - USAR APENAS /api/lnmarkets/user/dashboard-optimized"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user-optimized.routes.ts",
+        "content": "console.log('✅ LN Markets User Optimized routes registered - Only optimized endpoints');"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-robust.routes.ts",
+        "content": "serviceType: 'multi-account-optimized',"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "import { dashboardOptimizedRoutes } from './routes/dashboard-optimized.routes';"
+      },
+      {
+        "file": "./backend/src/workers/margin-monitor.ts",
+        "content": "}, 20000); // Every 20 seconds (optimized for better responsiveness)"
+      },
+      {
+        "file": "./backend/src/docs/OPTIMIZATION_INTEGRATION_SUMMARY.md",
+        "content": "- `GET /api/market/index/optimized` - Dados de mercado com segurança rigorosa"
+      },
+      {
+        "file": "./backend/src/docs/OPTIMIZATION_INTEGRATION_SUMMARY.md",
+        "content": "- `GET /api/market/analytics/optimized` - Analytics otimizados"
+      },
+      {
+        "file": "./backend/src/docs/OPTIMIZATION_INTEGRATION_SUMMARY.md",
+        "content": "- `GET /api/market/dashboard/optimized` - Dashboard otimizado"
+      },
+      {
+        "file": "./backend/src/docs/OPTIMIZATION_INTEGRATION_SUMMARY.md",
+        "content": "- `GET /api/market/performance/optimized` - Métricas de performance"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "classes.push('mobile-optimized');"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "classes.push('tablet-optimized');"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "classes.push('desktop-optimized');"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "'mobile-optimized-layout',"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "className: config.isMobile ? 'touch-optimized' : '',"
+      },
+      {
+        "file": "./frontend/src/hooks/useOptimizedMarketData.ts",
+        "content": "const response = await api.get('/api/market/index/optimized');"
+      },
+      {
+        "file": "./frontend/src/pages/Automations.tsx",
+        "content": "const { positions: optimizedPositions, isLoading: positionsLoading } = useOptimizedPositions();"
+      },
+      {
+        "file": "./frontend/src/pages/Automations.tsx",
+        "content": "optimizedPositions: optimizedPositions,"
+      },
+      {
+        "file": "./frontend/src/pages/Automations.tsx",
+        "content": "positionsLength: optimizedPositions?.length"
+      },
+      {
+        "file": "./frontend/src/pages/Automations.tsx",
+        "content": "const positions = optimizedPositions || [];"
+      },
+      {
+        "file": "./frontend/src/pages/DashboardRefactored.tsx",
+        "content": "const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "const { positions: optimizedPositions } = useOptimizedPositions();"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "if (Array.isArray(optimizedPositions) && optimizedPositions.length) {"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "candidates.push(optimizedPositions);"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "fromOptimized: Array.isArray(optimizedPositions) ? optimizedPositions.length : 'n/a',"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "}, [optimizedPositions, marketData, testPositions]);"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "if (Array.isArray(optimizedPositions) && optimizedPositions.length) candidates.push(optimizedPositions);"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "fromOptimized: Array.isArray(optimizedPositions) ? optimizedPositions.length : 'n/a',"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "}, [optimizedPositions, marketData, testPositions]);"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "const { marketIndex: optimizedMarketIndex } = useOptimizedMarketData();"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "if (!optimizedPositions) return 0;"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "return optimizedPositions.filter(pos => pos.status === 'running').length;"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "if (optimizedPositions && optimizedPositions.length > 0) {"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "const longCount = optimizedPositions.filter(pos => pos.status === 'running' && pos.side === 'long').length;"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "console.log('🔍 LONG COUNT - positions array:', longCount, optimizedPositions.map(p => ({ id: p.id, side: p.side, status: p.status })));"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "if (optimizedPositions && optimizedPositions.length > 0) {"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "const shortCount = optimizedPositions.filter(pos => pos.status === 'running' && pos.side === 'short').length;"
+      },
+      {
+        "file": "./frontend/src/pages/Dashboard.tsx",
+        "content": "console.log('🔍 SHORT COUNT - positions array:', shortCount, optimizedPositions.map(p => ({ id: p.id, side: p.side, status: p.status })));"
+      }
+    ],
+    "robust": [
+      {
+        "file": "./backend/src/services/risk-metrics.service.ts",
+        "content": "// Método Histórico (mais simples e robusto)"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "recommendations.push('Poucos endpoints funcionais - implementar fallback robusto');"
+      },
+      {
+        "file": "./backend/src/services/LNMarketsRobustService.ts",
+        "content": "* Sistema robusto e escalável que combina:"
+      },
+      {
+        "file": "./backend/src/routes/load-test.routes.ts",
+        "content": "const response = await axios.get('http://localhost:13000/api/lnmarkets-robust/dashboard', {"
+      },
+      {
+        "file": "./backend/src/routes/load-test.routes.ts",
+        "content": "const response = await axios.get('http://localhost:13000/api/lnmarkets-robust/positions', {"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-robust.routes.ts",
+        "content": "* Rotas otimizadas que usam o serviço robusto:"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-robust.routes.ts",
+        "content": "const requestId = `robust-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "import { lnmarketsRobustRoutes } from './routes/lnmarkets-robust.routes';"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "await fastify.register(lnmarketsRobustRoutes, { prefix: '/api/lnmarkets-robust' });"
+      },
+      {
+        "file": "./backend/src/middleware/development-rate-limit.middleware.ts",
+        "content": "* Detecta o ambiente atual de forma mais robusta"
+      },
+      {
+        "file": "./frontend/src/components/layout/UnifiedMarketHeader.tsx",
+        "content": "* - TradingView Data Service para index (com fallback robusto)"
+      },
+      {
+        "file": "./frontend/src/components/guards/RobustAuthGuard.tsx",
+        "content": "* RobustAuthGuard - Guard robusto que garante inicialização completa"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthGuard.tsx",
+        "content": "* AuthGuard - Componente de proteção de autenticação robusto"
+      },
+      {
+        "file": "./frontend/src/services/tradingViewData.service.ts",
+        "content": "* Arquitetura TradingView-first com fallbacks robustos:"
+      },
+      {
+        "file": "./frontend/src/services/tradingViewData.service.ts",
+        "content": "* Obter dados históricos com fallback robusto"
+      },
+      {
+        "file": "./frontend/src/lib/api.ts",
+        "content": "getPositions: () => api.get('/api/lnmarkets-robust/dashboard'),"
+      },
+      {
+        "file": "./frontend/src/lib/api.ts",
+        "content": "getMarketData: (market: string) => api.get('/api/lnmarkets-robust/dashboard'),"
+      },
+      {
+        "file": "./frontend/src/hooks/useLNMarketsRefactored.ts",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/hooks/useEstimatedBalance.ts",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/hooks/useActiveAccountData.ts",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/hooks/useActiveAccountData.ts",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/hooks/useOptimizedDashboardData.ts",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/hooks/useMarketTicker.ts",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/pages/Positions/hooks/usePositionsData.ts",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Settings.tsx",
+        "content": "const response = await api.get('/api/lnmarkets-robust/test-connection');"
+      },
+      {
+        "file": "./frontend/src/stores/centralizedDataStore.ts",
+        "content": "api.get('/api/lnmarkets-robust/dashboard'),"
+      },
+      {
+        "file": "./frontend/src/stores/centralizedDataStore.ts",
+        "content": "api.get('/api/lnmarkets-robust/dashboard'),"
+      },
+      {
+        "file": "./frontend/src/contexts/RealtimeDataContext.tsx",
+        "content": "const response = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/contexts/MarketDataContext.tsx",
+        "content": "const dashboardResponse = await api.get('/api/lnmarkets-robust/dashboard');"
+      },
+      {
+        "file": "./frontend/src/contexts/PositionsContext.tsx",
+        "content": "api.get('/api/lnmarkets-robust/dashboard'),"
+      }
+    ],
+    "fallback": [
+      {
+        "file": "./backend/src/utils/testnet-detector.ts",
+        "content": "// 3. Verificar nome da conta (fallback)"
+      },
+      {
+        "file": "./backend/src/seeders/plan-limits-management.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'auth', maxRequests: 30, windowMs: 60000, isActive: true, description: 'Auth endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/plan-limits-management.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'api', maxRequests: 75, windowMs: 60000, isActive: true, description: 'General API endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/plan-limits-management.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'trading', maxRequests: 15, windowMs: 60000, isActive: true, description: 'Trading endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/plan-limits-management.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'notifications', maxRequests: 10, windowMs: 60000, isActive: true, description: 'Notification endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/plan-limits-management.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'payments', maxRequests: 8, windowMs: 60000, isActive: true, description: 'Payment endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/plan-limits-management.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'admin', maxRequests: 30, windowMs: 60000, isActive: true, description: 'Admin endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/plan-limits-management.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'global', maxRequests: 150, windowMs: 60000, isActive: true, description: 'Global rate limit - Global fallback' }"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "// Global Environment (fallback)"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'auth', maxRequests: 30, windowMs: 60000, isActive: true, description: 'Auth endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'api', maxRequests: 75, windowMs: 60000, isActive: true, description: 'General API endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'trading', maxRequests: 15, windowMs: 60000, isActive: true, description: 'Trading endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'notifications', maxRequests: 10, windowMs: 60000, isActive: true, description: 'Notification endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'payments', maxRequests: 8, windowMs: 60000, isActive: true, description: 'Payment endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'admin', maxRequests: 30, windowMs: 60000, isActive: true, description: 'Admin endpoints - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/seeders/rate-limit-config.seeder.ts",
+        "content": "{ environment: 'global', endpointType: 'global', maxRequests: 150, windowMs: 60000, isActive: true, description: 'Global rate limit - Global fallback' },"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "* Get dashboard data with fallback for missing data"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "console.log(`🔍 DASHBOARD DATA - Getting dashboard data with fallback for user ${userId}`);"
+      },
+      {
+        "file": "./backend/src/services/dashboard-data.service.ts",
+        "content": "console.error(`❌ DASHBOARD DATA - Failed to get dashboard data with fallback for user ${userId}:`, error);"
+      },
+      {
+        "file": "./backend/src/services/lnd/types/invoice.types.ts",
+        "content": "fallback_addr?: string;"
+      },
+      {
+        "file": "./backend/src/services/lnd/types/invoice.types.ts",
+        "content": "fallback_addr?: string;"
+      },
+      {
+        "file": "./backend/src/services/lnd/types/invoice.types.ts",
+        "content": "fallback_addr?: string;"
+      },
+      {
+        "file": "./backend/src/services/lnd/types/invoice.types.ts",
+        "content": "fallback_addr?: string;"
+      },
+      {
+        "file": "./backend/src/services/lnd/types/invoice.types.ts",
+        "content": "fallback_addr?: string;"
+      },
+      {
+        "file": "./backend/src/services/lnd/LNDService.ts",
+        "content": "// Try to use environment variables first, then fallback to files"
+      },
+      {
+        "file": "./backend/src/services/captcha.service.ts",
+        "content": "* Verify CAPTCHA with fallback"
+      },
+      {
+        "file": "./backend/src/services/market-data-fallback.service.ts",
+        "content": "* Sistema crítico de fallback para dados de mercado"
+      },
+      {
+        "file": "./backend/src/services/market-data-fallback.service.ts",
+        "content": "source: 'primary' | 'fallback' | 'emergency';"
+      },
+      {
+        "file": "./backend/src/services/market-data-fallback.service.ts",
+        "content": "fallbackTimeout: number;"
+      },
+      {
+        "file": "./backend/src/services/market-data-fallback.service.ts",
+        "content": "fallbackTimeout: 5000, // 5 segundos para fallback"
+      },
+      {
+        "file": "./backend/src/services/market-data-fallback.service.ts",
+        "content": "* Obter dados de mercado com fallback automático"
+      },
+      {
+        "file": "./backend/src/services/market-data-fallback.service.ts",
+        "content": "source: 'primary' | 'fallback' | 'emergency' | 'cache' | 'unavailable';"
+      },
+      {
+        "file": "./backend/src/services/market-data-fallback.service.ts",
+        "content": "provider.priority === 2 ? 'fallback' : 'emergency'"
+      },
+      {
+        "file": "./backend/src/services/risk-management.service.ts",
+        "content": "// Retornar limites conservadores como fallback"
+      },
+      {
+        "file": "./backend/src/services/volatile-market-data.service.ts",
+        "content": "* - NUNCA usar dados simulados ou fallbacks"
+      },
+      {
+        "file": "./backend/src/services/volatile-market-data.service.ts",
+        "content": "* Obtém dados de mercado com fallback seguro"
+      },
+      {
+        "file": "./backend/src/services/volatile-market-data.service.ts",
+        "content": "// ⚠️ CRÍTICO: NUNCA usar dados antigos como fallback"
+      },
+      {
+        "file": "./backend/src/services/volatile-market-data.service.ts",
+        "content": "this.logger.warn('Market data unavailable - NOT using stale data as fallback');"
+      },
+      {
+        "file": "./backend/src/services/ln-markets-endpoint-discovery.service.ts",
+        "content": "recommendations.push('Poucos endpoints funcionais - implementar fallback robusto');"
+      },
+      {
+        "file": "./backend/src/services/historical-data.service.ts",
+        "content": "* Obtém dados históricos com fallback automático"
+      },
+      {
+        "file": "./backend/src/services/user-protection.service.ts",
+        "content": "import { marketDataFallbackService } from './market-data-fallback.service';"
+      },
+      {
+        "file": "./backend/src/services/user-protection.service.ts",
+        "content": "} else if (marketDataResult.source === 'fallback') {"
+      },
+      {
+        "file": "./backend/src/services/user-protection.service.ts",
+        "content": "return 'lnMarkets_unhealthy_fallback_active';"
+      },
+      {
+        "file": "./backend/src/services/structured-cache.service.ts",
+        "content": "* Cache with fallback function"
+      },
+      {
+        "file": "./backend/src/services/structured-cache.service.ts",
+        "content": "fallback: () => Promise<T>,"
+      },
+      {
+        "file": "./backend/src/services/structured-cache.service.ts",
+        "content": "const value = await fallback();"
+      },
+      {
+        "file": "./backend/src/services/cache.service.ts",
+        "content": "* Cache com fallback - tenta cache primeiro, depois executa função"
+      },
+      {
+        "file": "./backend/src/services/cache.service.ts",
+        "content": "fallbackFn: () => Promise<T>,"
+      },
+      {
+        "file": "./backend/src/services/cache.service.ts",
+        "content": "const result = await fallbackFn();"
+      },
+      {
+        "file": "./backend/src/services/cache.service.ts",
+        "content": "return await fallbackFn();"
+      },
+      {
+        "file": "./backend/src/services/margin-guard-plan.service.ts",
+        "content": "default: return PlanType.BASIC; // Default fallback"
+      },
+      {
+        "file": "./backend/src/services/margin-guard-plan.service.ts",
+        "content": "return PlanType.BASIC; // Default fallback"
+      },
+      {
+        "file": "./backend/src/services/planLimits.service.ts",
+        "content": "* Get default limits for a plan type (fallback)"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "fallbackTimeout: number;"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "private fallbackProviders: FallbackProvider[];"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "fallbackProviders: FallbackProvider[],"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "this.fallbackProviders = fallbackProviders;"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "fallbackTimeout: 3000,"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "* Get market data with fallback strategy"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "this.logger.warn('LN Markets circuit breaker is open, using fallback');"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "// Try fallback providers"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "* Get user positions with fallback strategy"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "// For positions, we can't use fallback (user-specific data)"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "* Get margin info with fallback strategy"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "* Try fallback providers for market data"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "for (const provider of this.fallbackProviders) {"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "this.logger.info(`Trying fallback provider: ${provider.name}`);"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "this.timeoutPromise(this.config.fallbackTimeout, 'Fallback timeout')"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "// All fallbacks failed, return default data"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "this.logger.error('All fallback providers failed, returning default data');"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "fallbackProviders: this.fallbackProviders.length,"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "fallbackProviders: this.fallbackProviders.length,"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "* CoinGecko fallback provider"
+      },
+      {
+        "file": "./backend/src/services/lnmarkets-fallback.service.ts",
+        "content": "* Binance fallback provider"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: boolean;"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: true,"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: false,"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: true,"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: true,"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: false,"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: true,"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "fallbackToDB: true,"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "async get<T>(strategy: string, key: string, fallbackFn?: () => Promise<T>): Promise<T | null> {"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "console.warn('⚠️ STRATEGIC CACHE - Redis not connected, using fallback');"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "if (fallbackFn) {"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "return await fallbackFn();"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "// Tentar fallback para banco de dados"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "if (strategyConfig.fallbackToDB && fallbackFn) {"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "const data = await fallbackFn();"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "if (strategyConfig.fallbackToDB && fallbackFn) {"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "console.log(`🔄 STRATEGIC CACHE - Redis error, using DB fallback for ${strategy}:${key}`);"
+      },
+      {
+        "file": "./backend/src/services/strategic-cache.service.ts",
+        "content": "return await fallbackFn();"
+      },
+      {
+        "file": "./backend/src/routes/public-dashboard.routes.ts",
+        "content": "console.warn('⚠️ PUBLIC MARKET - Data validation failed, using fallback');"
+      },
+      {
+        "file": "./backend/src/routes/public-dashboard.routes.ts",
+        "content": "message: 'Public market data temporarily unavailable - no fallback data for security',"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "import { LNMarketsFallbackService, CoinGeckoProvider, BinanceProvider } from '../services/lnmarkets-fallback.service';"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "* Test individual fallback providers (public endpoint)"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "* Test LN Markets with fallback providers"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "fastify.get('/test-fallback', async (request, reply) => {"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "// Create fallback providers"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "const fallbackProviders = ["
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "// Create fallback service"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "const fallbackService = new LNMarketsFallbackService("
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "fallbackProviders,"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "results.marketData = await fallbackService.getMarketData();"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "results.positions = await fallbackService.getPositions();"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "results.marginInfo = await fallbackService.getMarginInfo();"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "results.healthStatus = await fallbackService.getHealthStatus();"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "results.circuitBreakerStatus = fallbackService.getCircuitBreakerStatus();"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "fallbackProviders: fallbackProviders.map(p => p.name)"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "* Get LN Markets health status with fallback info"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "// Create fallback providers"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "const fallbackProviders = ["
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "// Create fallback service"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "const fallbackService = new LNMarketsFallbackService("
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "fallbackProviders,"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "const healthStatus = await fallbackService.getHealthStatus();"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "const circuitBreakerStatus = fallbackService.getCircuitBreakerStatus();"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-fallback-test.routes.ts",
+        "content": "fallbackProviders: fallbackProviders.map(p => p.name)"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "// Try to get current BTC price from Binance as fallback"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "console.log('⚠️ MARKET DATA - Binance failed, using fallback data');"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "console.log('⚠️ MARKET INDEX - LN Markets API failed, using Binance as fallback:', lnMarketsError?.message || lnMarketsError);"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "console.log('✅ MARKET INDEX - Using Binance fallback data:', marketIndexData);"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "message: 'LN Markets API temporarily unavailable - no fallback data for security',"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "console.log('🔍 PUBLIC MARKET INDEX - Trying CoinCap as fallback for 24h change...');"
+      },
+      {
+        "file": "./backend/src/routes/market-data.routes.ts",
+        "content": "source: lnMarketsData?.source || 'fallback'"
+      },
+      {
+        "file": "./backend/src/routes/ln-markets-guerilla-test.routes.ts",
+        "content": "recommendations.push('LN Markets está com problemas graves - implementar fallback imediato');"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user.routes.ts",
+        "content": "console.error('❌ LN MARKETS TICKER - API error, no fallback for security:', error);"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user.routes.ts",
+        "content": "message: 'LN Markets API temporarily unavailable - no fallback data for security',"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-header.routes.ts",
+        "content": "message: 'LN Markets header data temporarily unavailable - no fallback data for security',"
+      },
+      {
+        "file": "./backend/src/routes/tradingview.routes.ts",
+        "content": "// Por enquanto, retornar dados do Binance como fallback"
+      },
+      {
+        "file": "./backend/src/routes/tradingview.routes.ts",
+        "content": "source: 'binance-fallback'"
+      },
+      {
+        "file": "./backend/src/routes/tradingview.routes.ts",
+        "content": "// Por enquanto, retornar array vazio para forçar fallback"
+      },
+      {
+        "file": "./backend/src/routes/tradingview.routes.ts",
+        "content": "console.log('🔄 TRADINGVIEW PROXY - Converting data (fallback to Binance)');"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-protection.routes.ts",
+        "content": "* API endpoints for market data protection and fallback system"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-protection.routes.ts",
+        "content": "fallbackTimeout: 5, // seconds"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-protection.routes.ts",
+        "content": "fallbackActivations: 5,"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "fallbackStrategies: [],"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "recommendations.immediateActions.push('LN Markets está completamente offline - ativar fallback imediato');"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "recommendations.immediateActions.push('LN Markets com funcionalidade limitada - implementar fallback parcial');"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "// Estratégias de fallback"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "recommendations.fallbackStrategies.push('Usar CoinGecko para dados de mercado básicos');"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "recommendations.fallbackStrategies.push('Implementar cache local com TTL de 30 segundos');"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "recommendations.fallbackStrategies.push('Configurar alertas automáticos para falhas');"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-discovery.routes.ts",
+        "content": "recommendations.fallbackStrategies.push('Manter dados históricos para análise offline');"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "* API endpoints para gerenciar sistema de fallback de dados de mercado"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "import { marketDataFallbackService } from '../../services/market-data-fallback.service';"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "* Obter dados de mercado com fallback"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "logger.info('Fetching market data with fallback');"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "* Obter configuração de fallback"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "fallbackTimeout: 5000,"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "logger.error('Failed to get fallback config', { error: error.message });"
+      },
+      {
+        "file": "./backend/src/routes/admin/market-data-fallback.routes.ts",
+        "content": "message: 'Failed to get fallback config'"
+      },
+      {
+        "file": "./backend/src/routes/admin/lnmarkets-diagnostic.routes.ts",
+        "content": "'Implementar fallback para dados de mercado',"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-analysis.routes.ts",
+        "content": "'Configurar múltiplas regiões de fallback',"
+      },
+      {
+        "file": "./backend/src/routes/admin/ln-markets-analysis.routes.ts",
+        "content": "phase2: 'Use CoinGecko as fallback',"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-user-optimized.routes.ts",
+        "content": "// Return fallback data"
+      },
+      {
+        "file": "./backend/src/routes/lnmarkets-centralized.routes.ts",
+        "content": "console.log(`🔄 [${requestId}] Using fallback empty data structure`);"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "import { marketDataFallbackRoutes } from './routes/admin/market-data-fallback.routes';"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "console.log('⚠️ PUBLIC MARKET PRICES - Binance API failed, using fallback');"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "console.log('🔄 PUBLIC MARKET PRICES - Using simulated data as fallback');"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "const fallbackData: any = {};"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "fallbackData[symbol] = {"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "data: fallbackData"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "// LND Sync Simple routes (fallback)"
+      },
+      {
+        "file": "./backend/src/index.ts",
+        "content": "// await fastify.register(lnMarketsFallbackTestRoutes, { prefix: '/api/lnmarkets-fallback' });"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "expect(userStrategy.fallbackToDB).toBe(true);"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "expect(marketStrategy.fallbackToDB).toBe(false);"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "it('should fallback to database when cache miss and fallbackToDB is true', async () => {"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "const fallbackFn = jest.fn().mockResolvedValue({ id: 1, name: 'test' });"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "const result = await cacheService.get('user', '123', fallbackFn);"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "expect(fallbackFn).toHaveBeenCalled();"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "it('should not fallback to database when fallbackToDB is false', async () => {"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "const fallbackFn = jest.fn().mockResolvedValue({ id: 1, name: 'test' });"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "const result = await cacheService.get('market', 'BTC', fallbackFn);"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "expect(fallbackFn).not.toHaveBeenCalled();"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "mockStrategicCache.get = jest.fn().mockImplementation(async (strategy, key, fallbackFn) => {"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "if (fallbackFn) {"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "return await fallbackFn();"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "mockStrategicCache.get = jest.fn().mockImplementation(async (strategy, key, fallbackFn) => {"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "if (fallbackFn) {"
+      },
+      {
+        "file": "./backend/src/tests/strategic-cache.test.ts",
+        "content": "return await fallbackFn();"
+      },
+      {
+        "file": "./backend/src/tests/services/volatile-market-data.test.ts",
+        "content": "it('should never use simulated or fallback data', async () => {"
+      },
+      {
+        "file": "./backend/src/tests/historical-data.test.ts",
+        "content": "describe('getHistoricalData with fallback', () => {"
+      },
+      {
+        "file": "./backend/src/tests/historical-data.test.ts",
+        "content": "it('should fallback to CoinGecko when Binance fails', async () => {"
+      },
+      {
+        "file": "./backend/src/docs/OPTIMIZATION_INTEGRATION_SUMMARY.md",
+        "content": "- ✅ **useLatestPrices** - **CORRIGIDO** - Removido fallback perigoso"
+      },
+      {
+        "file": "./backend/src/docs/OPTIMIZATION_INTEGRATION_SUMMARY.md",
+        "content": "const fallbackData = { index: 115000, change24h: 0 };"
+      },
+      {
+        "file": "./backend/src/middleware/dynamic-rate-limit.middleware.ts",
+        "content": "// Em caso de erro, usar configuração de desenvolvimento como fallback"
+      },
+      {
+        "file": "./backend/src/middleware/dynamic-rate-limit.middleware.ts",
+        "content": "const fallbackConfig = DevelopmentRateLimiter.createDevelopmentConfig();"
+      },
+      {
+        "file": "./backend/src/middleware/dynamic-rate-limit.middleware.ts",
+        "content": "const fallbackRateLimiter = fallbackConfig[endpointType as keyof typeof fallbackConfig] || fallbackConfig.global;"
+      },
+      {
+        "file": "./backend/src/middleware/dynamic-rate-limit.middleware.ts",
+        "content": "if (typeof fallbackRateLimiter === 'function') {"
+      },
+      {
+        "file": "./backend/src/middleware/dynamic-rate-limit.middleware.ts",
+        "content": "await fallbackRateLimiter(request, reply);"
+      },
+      {
+        "file": "./backend/src/middleware/dynamic-rate-limit.middleware.ts",
+        "content": "const middleware = RateLimiter.create(fallbackRateLimiter);"
+      },
+      {
+        "file": "./frontend/src/utils/fingerprint.ts",
+        "content": "const fallbackId = 'fallback-' + Math.abs(hash).toString(36);"
+      },
+      {
+        "file": "./frontend/src/utils/fingerprint.ts",
+        "content": "console.log('⚠️ Using fallback fingerprint:', fallbackId);"
+      },
+      {
+        "file": "./frontend/src/utils/fingerprint.ts",
+        "content": "return fallbackId;"
+      },
+      {
+        "file": "./frontend/src/components/system/SystemHealth.tsx",
+        "content": "const fallbackHealth: HealthStatus = {"
+      },
+      {
+        "file": "./frontend/src/components/system/SystemHealth.tsx",
+        "content": "setHealth(fallbackHealth);"
+      },
+      {
+        "file": "./frontend/src/components/layout/LNMarketsHeader.tsx",
+        "content": "// Usar dados do backend se disponíveis, senão calcular fallback"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawerFixed.tsx",
+        "content": "const fallbackSecondaryNavigation = SECONDARY_NAVIGATION;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawerFixed.tsx",
+        "content": "const fallbackUserNavigation = USER_NAVIGATION;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawerFixed.tsx",
+        "content": "// Usar dados dinâmicos ou fallback"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawerFixed.tsx",
+        "content": "const rawMainNavigation = secondaryLoading || secondaryError ? fallbackSecondaryNavigation : secondaryMenuItems;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawerFixed.tsx",
+        "content": "const rawUserNavigation = userLoading || userError ? fallbackUserNavigation : userMenuItems;"
+      },
+      {
+        "file": "./frontend/src/components/layout/UnifiedMarketHeader.tsx",
+        "content": "* - TradingView Data Service para index (com fallback robusto)"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "fallback?: string;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "export const OptimizedImage = ({ src, alt, className, fallback }: OptimizedImageProps) => {"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileOptimizedLayout.tsx",
+        "content": "return fallback || src;"
+      },
+      {
+        "file": "./frontend/src/components/layout/DesktopNavigation.tsx",
+        "content": "const fallbackNavigation = MAIN_NAVIGATION;"
+      },
+      {
+        "file": "./frontend/src/components/layout/DesktopNavigation.tsx",
+        "content": "// Usar dados dinâmicos ou fallback"
+      },
+      {
+        "file": "./frontend/src/components/layout/DesktopNavigation.tsx",
+        "content": "const rawNavigation = (isLoading || error || !menuItems || menuItems.length === 0) ? fallbackNavigation : menuItems;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawer.tsx",
+        "content": "const fallbackSecondaryNavigation = SECONDARY_NAVIGATION;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawer.tsx",
+        "content": "const fallbackUserNavigation = USER_NAVIGATION;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawer.tsx",
+        "content": "// Usar dados dinâmicos ou fallback"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawer.tsx",
+        "content": "const rawMainNavigation = secondaryLoading || secondaryError ? fallbackSecondaryNavigation : secondaryMenuItems;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileDrawer.tsx",
+        "content": "const rawUserNavigation = userLoading || userError ? fallbackUserNavigation : userMenuItems;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileNavigation.tsx",
+        "content": "const fallbackNavigation = MAIN_NAVIGATION;"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileNavigation.tsx",
+        "content": "// Usar dados dinâmicos ou fallback"
+      },
+      {
+        "file": "./frontend/src/components/layout/MobileNavigation.tsx",
+        "content": "const rawNavigation = isLoading || error || !menuItems || menuItems.length === 0 ? fallbackNavigation : menuItems;"
+      },
+      {
+        "file": "./frontend/src/components/ProtectedButton.tsx",
+        "content": "fallback?: React.ReactNode;"
+      },
+      {
+        "file": "./frontend/src/components/ProtectedButton.tsx",
+        "content": "fallback,"
+      },
+      {
+        "file": "./frontend/src/components/ProtectedButton.tsx",
+        "content": "if (fallback) {"
+      },
+      {
+        "file": "./frontend/src/components/ProtectedButton.tsx",
+        "content": "return <>{fallback}</>;"
+      },
+      {
+        "file": "./frontend/src/components/account/AccountSelector.tsx",
+        "content": "// Recarregar contas quando o modal de criação for fechado (fallback)"
+      },
+      {
+        "file": "./frontend/src/components/TradingViewMonitor.tsx",
+        "content": "validação rigorosa de timestamps, nenhum fallback com dados simulados."
+      },
+      {
+        "file": "./frontend/src/components/TradingViewMonitor.tsx",
+        "content": "Binance e CoinGecko como fallbacks."
+      },
+      {
+        "file": "./frontend/src/components/LNMarketsGuard.tsx",
+        "content": "fallback?: React.ReactNode;"
+      },
+      {
+        "file": "./frontend/src/components/LNMarketsGuard.tsx",
+        "content": "fallback,"
+      },
+      {
+        "file": "./frontend/src/components/LNMarketsGuard.tsx",
+        "content": "if (fallback) {"
+      },
+      {
+        "file": "./frontend/src/components/LNMarketsGuard.tsx",
+        "content": "return <>{fallback}</>;"
+      },
+      {
+        "file": "./frontend/src/components/SimpleEmailValidator.tsx",
+        "content": "console.log(`📤 SimpleEmailValidator: Called onValidationChange with valid=true, available=true (fallback)`);"
+      },
+      {
+        "file": "./frontend/src/components/guards/RobustAuthGuard.tsx",
+        "content": "fallbackRoute?: string;"
+      },
+      {
+        "file": "./frontend/src/components/guards/RobustAuthGuard.tsx",
+        "content": "fallbackRoute = '/login',"
+      },
+      {
+        "file": "./frontend/src/components/guards/RobustAuthGuard.tsx",
+        "content": "console.log('❌ ROBUST AUTH GUARD - Not authenticated, redirecting to:', fallbackRoute);"
+      },
+      {
+        "file": "./frontend/src/components/guards/RobustAuthGuard.tsx",
+        "content": "return <Navigate to={fallbackRoute} replace state={{ from: location }} />;"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthMiddleware.tsx",
+        "content": "fallbackRoute?: string;"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthMiddleware.tsx",
+        "content": "fallbackRoute = '/login'"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthMiddleware.tsx",
+        "content": "console.log('❌ AUTH MIDDLEWARE - Not authenticated, redirecting to:', fallbackRoute);"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthMiddleware.tsx",
+        "content": "return <Navigate to={fallbackRoute} replace state={{ from: location }} />;"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthGuard.tsx",
+        "content": "fallbackRoute?: string;"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthGuard.tsx",
+        "content": "fallbackRoute = '/login'"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthGuard.tsx",
+        "content": "fallbackRoute"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthGuard.tsx",
+        "content": "console.log('❌ AUTH GUARD - Not authenticated, redirecting to:', fallbackRoute);"
+      },
+      {
+        "file": "./frontend/src/components/guards/AuthGuard.tsx",
+        "content": "return <Navigate to={fallbackRoute} replace />;"
+      },
+      {
+        "file": "./frontend/src/components/guards/RouteGuard.tsx",
+        "content": "fallbackRoute?: string;"
+      },
+      {
+        "file": "./frontend/src/components/guards/RouteGuard.tsx",
+        "content": "fallbackRoute,"
+      },
+      {
+        "file": "./frontend/src/components/guards/RouteGuard.tsx",
+        "content": "console.log('❌ ROUTE GUARD - Not authenticated, redirecting to login (fallback)');"
+      },
+      {
+        "file": "./frontend/src/components/guards/RouteGuard.tsx",
+        "content": "// Se tem rota de fallback específica, usar ela"
+      },
+      {
+        "file": "./frontend/src/components/guards/RouteGuard.tsx",
+        "content": "if (fallbackRoute) {"
+      },
+      {
+        "file": "./frontend/src/components/guards/RouteGuard.tsx",
+        "content": "return <Navigate to={fallbackRoute} replace />;"
+      },
+      {
+        "file": "./frontend/src/components/guards/ProtectedRouteWrapper.tsx",
+        "content": "fallbackRoute?: string;"
+      },
+      {
+        "file": "./frontend/src/components/guards/ProtectedRouteWrapper.tsx",
+        "content": "fallbackRoute = '/login',"
+      },
+      {
+        "file": "./frontend/src/components/guards/ProtectedRouteWrapper.tsx",
+        "content": "console.log('❌ PROTECTED ROUTE WRAPPER - Not authenticated, redirecting to:', fallbackRoute);"
+      },
+      {
+        "file": "./frontend/src/components/guards/ProtectedRouteWrapper.tsx",
+        "content": "return <Navigate to={fallbackRoute} replace state={{ from: location }} />;"
+      },
+      {
+        "file": "./frontend/src/components/guards/SimpleAuthGuard.tsx",
+        "content": "fallbackRoute?: string;"
+      },
+      {
+        "file": "./frontend/src/components/guards/SimpleAuthGuard.tsx",
+        "content": "fallbackRoute = '/login',"
+      },
+      {
+        "file": "./frontend/src/components/guards/SimpleAuthGuard.tsx",
+        "content": "return <Navigate to={fallbackRoute} state={{ from: location }} replace />;"
+      },
+      {
+        "file": "./frontend/src/components/guards/SecureRoute.tsx",
+        "content": "fallbackRoute?: string;"
+      },
+      {
+        "file": "./frontend/src/components/guards/SecureRoute.tsx",
+        "content": "fallbackRoute = '/login',"
+      },
+      {
+        "file": "./frontend/src/components/guards/SecureRoute.tsx",
+        "content": "console.log('❌ SECURE ROUTE - Not authenticated, redirecting to:', fallbackRoute);"
+      },
+      {
+        "file": "./frontend/src/components/guards/SecureRoute.tsx",
+        "content": "return <Navigate to={fallbackRoute} replace state={{ from: location }} />;"
+      },
+      {
+        "file": "./frontend/src/components/charts/TradingViewChart.tsx",
+        "content": "console.log('📊 TRADINGVIEW - Tentando fallback com estudo Horizontal Line');"
+      },
+      {
+        "file": "./frontend/src/components/charts/TradingViewChart.tsx",
+        "content": "// Adicionar linha de liquidação se especificada (fallback)"
+      },
+      {
+        "file": "./frontend/src/components/charts/TradingViewChart.tsx",
+        "content": "console.log('📊 TRADINGVIEW - Adicionando linha de liquidação (fallback)');"
+      },
+      {
+        "file": "./frontend/src/components/charts/BitstampTradingView.tsx",
+        "content": "// Se houver erro, mostrar fallback"
+      },
+      {
+        "file": "./frontend/src/services/api-cache.service.ts",
+        "content": "* - Nenhum fallback com dados antigos"
+      },
+      {
+        "file": "./frontend/src/services/tradingViewData.service.ts",
+        "content": "* Arquitetura TradingView-first com fallbacks robustos:"
+      },
+      {
+        "file": "./frontend/src/services/tradingViewData.service.ts",
+        "content": "* 2. Binance (fallback) - dados diretos da exchange"
+      },
+      {
+        "file": "./frontend/src/services/tradingViewData.service.ts",
+        "content": "* - Nenhum fallback com dados simulados"
+      },
+      {
+        "file": "./frontend/src/services/tradingViewData.service.ts",
+        "content": "* Obter dados históricos com fallback robusto"
+      },
+      {
+        "file": "./frontend/src/services/tradingViewData.service.ts",
+        "content": "// Por enquanto, retornar array vazio para forçar fallback"
+      },
+      {
+        "file": "./frontend/src/services/cached-api.service.ts",
+        "content": "* - Nenhum fallback com dados antigos"
+      },
+      {
+        "file": "./frontend/src/services/currency.service.ts",
+        "content": "// Use fallback values"
+      },
+      {
+        "file": "./frontend/src/services/marketData.service.ts",
+        "content": "// Try legacy market endpoint as fallback"
+      },
+      {
+        "file": "./frontend/src/services/marketData.service.ts",
+        "content": "// Try legacy ticker endpoint as fallback"
+      },
+      {
+        "file": "./frontend/src/services/planLimits.service.ts",
+        "content": "* Get default limits for a plan type (fallback)"
+      },
+      {
+        "file": "./frontend/src/hooks/useBitcoinPrice.ts",
+        "content": "// Final fallback: Use a default price (around current BTC price)"
+      },
+      {
+        "file": "./frontend/src/hooks/useBitcoinPrice.ts",
+        "content": "const fallbackPrice = 65000;"
+      },
+      {
+        "file": "./frontend/src/hooks/useBitcoinPrice.ts",
+        "content": "price: fallbackPrice,"
+      },
+      {
+        "file": "./frontend/src/hooks/useOptimizedDashboardData.ts",
+        "content": "console.log('🔄 OPTIMIZED DASHBOARD - WebSocket não disponível, usando HTTP fallback...');"
+      },
+      {
+        "file": "./frontend/src/hooks/useOptimizedMarketData.ts",
+        "content": "* Hook para dados de mercado com fallback seguro"
+      },
+      {
+        "file": "./frontend/src/hooks/useOptimizedMarketData.ts",
+        "content": "* ⚠️ IMPORTANTE: Este hook NUNCA usa dados antigos como fallback"
+      },
+      {
+        "file": "./frontend/src/i18n/index.ts",
+        "content": "fallbackLng: 'pt-BR',"
+      },
+      {
+        "file": "./frontend/src/pages/Index.tsx",
+        "content": "// Update this page (the content is just a fallback if you fail to update the page)"
+      },
+      {
+        "file": "./frontend/src/pages/RegisterLazy.tsx",
+        "content": "<Suspense fallback={<LoadingSpinner />}>"
+      },
+      {
+        "file": "./frontend/src/pages/DesignSystem.tsx",
+        "content": "// Calculate scroll progress and handle fallback for top of page"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Coupons.tsx",
+        "content": "console.log('🔍 COUPONS COMPONENT - Showing fallback error message...');"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Coupons.tsx",
+        "content": "console.log('🔍 COUPONS COMPONENT - Showing fallback error message...');"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Monitoring.tsx",
+        "content": "source: 'primary' | 'fallback' | 'emergency' | 'cache';"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Monitoring.tsx",
+        "content": "marketData.source === 'fallback' ? 'bg-yellow-500/20 text-yellow-400' :"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Monitoring.tsx",
+        "content": "<span className=\"text-sm text-text-primary\">{cacheConfig?.fallbackTimeout || 5} seconds</span>"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Monitoring.tsx",
+        "content": "// Object format (from fallback routes)"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Monitoring.tsx",
+        "content": "defaultValue={cacheConfig?.fallbackTimeout || 5}"
+      },
+      {
+        "file": "./frontend/src/pages/admin/Monitoring.tsx",
+        "content": "id=\"fallbackTimeout\""
+      },
+      {
+        "file": "./frontend/src/pages/admin/Monitoring.tsx",
+        "content": "fallbackTimeout: parseInt(data.fallbackTimeout as string) || 5"
+      },
+      {
+        "file": "./frontend/src/pages/Internationalization.tsx",
+        "content": "<li>• Cache inteligente com fallback</li>"
+      },
+      {
+        "file": "./frontend/src/pages/ErrorAndI18nDemo.tsx",
+        "content": "<li>• {t('common.fallback_support')}</li>"
+      },
+      {
+        "file": "./frontend/src/App.tsx",
+        "content": "<SimpleAuthGuard fallbackRoute=\"/login\">"
+      },
+      {
+        "file": "./frontend/src/App.tsx",
+        "content": "<SimpleAuthGuard fallbackRoute=\"/login\" requireAdmin={true}>"
+      },
+      {
+        "file": "./frontend/src/contexts/PositionsContext.tsx",
+        "content": "// Para fechamento, usar o preço de liquidação inicial (ou entry_price como fallback)"
+      },
+      {
+        "file": "./frontend/src/contexts/PositionsContext.tsx",
+        "content": "const fallbackEstimatedProfit = finalEstimatedProfit === 0 && positions.length > 0"
+      },
+      {
+        "file": "./frontend/src/contexts/PositionsContext.tsx",
+        "content": "fallback: fallbackEstimatedProfit,"
+      },
+      {
+        "file": "./frontend/src/contexts/PositionsContext.tsx",
+        "content": "estimatedProfit: fallbackEstimatedProfit,"
+      },
+      {
+        "file": "./frontend/src/contexts/PositionsContext.tsx",
+        "content": "nextFunding: indexData.nextFunding || \"Calculating...\", // Usar valor real ou fallback"
+      },
+      {
+        "file": "./frontend/src/contexts/PositionsContext.tsx",
+        "content": "rate: indexData.rate || 0, // Usar valor real ou fallback"
+      }
+    ]
+  },
+  "summary": {
+    "totalServices": 5,
+    "totalReferences": 28,
+    "totalFiles": 14
+  }
+}
