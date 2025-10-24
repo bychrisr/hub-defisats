@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -9,10 +9,9 @@ import {
   Percent,
   Activity
 } from 'lucide-react';
-import { usePositions } from '@/contexts/PositionsContext';
 import { usePublicMarketData } from '@/hooks/usePublicMarketData';
+import { usePositionsMetrics } from '@/contexts/PositionsContext';
 import { useAuthStore } from '@/stores/auth';
-import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 
 interface LNMarketsData {
   index: number;
@@ -27,104 +26,68 @@ interface LNMarketsData {
 
 const LNMarketsHeader: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
-  const { data } = usePositions();
+  const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Usar as métricas diretamente do PositionsContext (mesmo padrão do Dashboard e Title)
+  const { 
+    totalFees,
+    totalTradingFees,
+    totalFundingCost,
+    lastUpdate
+  } = usePositionsMetrics();
+  
+  // TradingView as fallback (2min TTL)
   const { data: publicData, isLoading: publicLoading, error: publicError } = usePublicMarketData();
-  const { lnMarketsData, marketData: realtimeMarketData, isConnected } = useRealtimeData();
-  
-  const lnMarketsDataOld = data.marketIndex;
-  const lnMarketsError = data.marketIndexError;
-  
-  // Debug logs removed for production
-  
-  const [marketData, setMarketData] = useState<LNMarketsData | null>(null);
 
-  // Memoizar dados do mercado para evitar re-renders desnecessários
-  const memoizedMarketData = useMemo(() => {
-    // Priorizar dados públicos se disponíveis (sempre mais confiáveis)
-    if (publicData) {
-      const newMarketData = {
-        index: publicData.index,
-        index24hChange: publicData.index24hChange,
-        tradingFees: publicData.tradingFees,
-        nextFunding: publicData.nextFunding,
-        rate: publicData.rate,
-        rateChange: 0, // Dados públicos não têm rateChange
-        lastUpdate: new Date(publicData.timestamp),
-        source: publicData.source
-      };
-      return newMarketData;
-    }
+  // Calculate data directly in render (Dashboard pattern)
+  const marketData = isAuthenticated && totalFees !== undefined ? {
+    index: publicData?.index || 0,
+    index24hChange: publicData?.index24hChange || 0,
+    tradingFees: totalFees, // direto, sem debounce
+    nextFunding: publicData?.nextFunding || 'N/A',
+    rate: publicData?.rate || 0,
+    rateChange: 0,
+    lastUpdate: new Date(lastUpdate),
+    source: 'lnmarkets'
+  } : (publicData ? {
+    index: publicData.index,
+    index24hChange: publicData.index24hChange,
+    tradingFees: publicData.tradingFees,
+    nextFunding: publicData.nextFunding,
+    rate: publicData.rate,
+    rateChange: 0,
+    lastUpdate: new Date(publicData.timestamp),
+    source: publicData.source
+  } : null);
+
+
+  // Detectar scroll para animações
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
     
-    // Se autenticado e dados públicos não disponíveis, usar dados da LN Markets
-    if (isAuthenticated && lnMarketsDataOld) {
-      const newMarketData = {
-        index: lnMarketsDataOld.index,
-        index24hChange: lnMarketsDataOld.index24hChange,
-        tradingFees: lnMarketsDataOld.tradingFees,
-        nextFunding: lnMarketsDataOld.nextFunding,
-        rate: lnMarketsDataOld.rate,
-        rateChange: lnMarketsDataOld.rateChange,
-        lastUpdate: new Date(lnMarketsDataOld.timestamp),
-        source: lnMarketsDataOld.source
-      };
-      return newMarketData;
-    }
-    
-    return null;
-  }, [isAuthenticated, publicData, lnMarketsDataOld]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  // Atualizar dados quando os dados da LN Markets mudarem
-  useEffect(() => {
-    setMarketData(memoizedMarketData);
-  }, [memoizedMarketData]);
+  // REMOVIDO: useEffects antigos que usavam RealtimeDataContext
+  // Agora tudo vem do PositionsContext (5s polling) + TradingView (fallback)
 
-  // Atualizar dados em tempo real do RealtimeDataContext
-  useEffect(() => {
-    if (lnMarketsData && marketData) {
-      // Atualizar apenas fees, funding e rate (dados LN Markets - 30s)
-      setMarketData(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          tradingFees: lnMarketsData.tradingFees,
-          nextFunding: lnMarketsData.nextFunding,
-          rate: lnMarketsData.rate,
-          rateChange: lnMarketsData.rateChange,
-          lastUpdate: new Date(lnMarketsData.timestamp)
-        };
-      });
-    }
-  }, [lnMarketsData]);
-
-  // Atualizar preço em tempo real do RealtimeDataContext (1s)
-  useEffect(() => {
-    if (realtimeMarketData?.BTCUSDT && marketData) {
-      setMarketData(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          index: realtimeMarketData.BTCUSDT.price,
-          index24hChange: realtimeMarketData.BTCUSDT.change24h,
-          lastUpdate: new Date(realtimeMarketData.BTCUSDT.timestamp)
-        };
-      });
-    }
-  }, [realtimeMarketData?.BTCUSDT]);
-
-  // Atualizar Next Funding em tempo real apenas quando há dados reais
+  // Update Next Funding in real-time when there's real data
   useEffect(() => {
     if (!marketData) return;
     
     const interval = setInterval(() => {
       const now = new Date();
       
-      // Usar dados do backend se disponíveis, senão calcular fallback
+      // Use backend data if available, otherwise calculate fallback
       if (marketData.nextFunding && marketData.nextFunding !== "Calculating...") {
-        // Dados do backend já estão corretos, não recalcular
+        // Backend data is already correct, don't recalculate
         return;
       }
       
-      // Calcular Next Funding corretamente (LN Markets funding a cada 8h: 00:00, 08:00, 16:00 UTC)
+      // Calculate Next Funding correctly (LN Markets funding every 8h: 00:00, 08:00, 16:00 UTC)
       const currentHour = now.getUTCHours();
       const currentMinute = now.getUTCMinutes();
       const currentSecond = now.getUTCSeconds();
@@ -135,10 +98,10 @@ const LNMarketsHeader: React.FC = () => {
       } else if (currentHour < 16) {
         nextFundingHour = 16;
       } else {
-        nextFundingHour = 24; // Próximo dia 00:00
+        nextFundingHour = 24; // Next day 00:00
       }
       
-      // Calcular tempo restante corretamente
+      // Calculate remaining time correctly
       const currentTimeInMinutes = currentHour * 60 + currentMinute;
       const nextFundingTimeInMinutes = nextFundingHour * 60;
       const timeDiffInMinutes = nextFundingTimeInMinutes - currentTimeInMinutes;
@@ -151,20 +114,11 @@ const LNMarketsHeader: React.FC = () => {
         ? minutesToNext + 'm ' + secondsToNext + 's'
         : hoursToNext + 'h ' + minutesToNext + 'm ' + secondsToNext + 's';
       
-      setMarketData(prev => {
-        if (!prev) return null;
-        // Só atualizar se o valor realmente mudou
-        if (prev.nextFunding === nextFunding) return prev;
-        return {
-          ...prev,
-          nextFunding: nextFunding,
-          lastUpdate: now
-        };
-      });
-    }, 1000); // Atualizar a cada segundo para contagem regressiva precisa
+      // Next Funding is now calculated in real-time in JSX
+    }, 1000); // Update every second for precise countdown
 
     return () => clearInterval(interval);
-  }, [marketData?.index, marketData?.index24hChange, marketData?.tradingFees, marketData?.rate, marketData?.rateChange]); // Dependências específicas em vez de marketData completo
+  }, [marketData]);
 
   const formatIndex = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -178,17 +132,18 @@ const LNMarketsHeader: React.FC = () => {
     return sign + value.toFixed(2) + '%';
   };
 
-  const formatRate = (value: number) => {
-    return value.toFixed(4) + '%';
-  };
-
   const formatRateChange = (value: number) => {
     const sign = value >= 0 ? '+' : '';
     return sign + (value * 100).toFixed(4) + '%';
   };
 
   const formatTradingFees = (value: number) => {
-    return value.toFixed(3) + '%';
+    // Trading fees vêm em sats, converter para porcentagem
+    return (value / 1000).toFixed(3) + '%';
+  };
+
+  const formatRate = (value: number) => {
+    return value.toFixed(4) + '%';
   };
 
   return (
@@ -200,7 +155,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center justify-center w-full mb-1 text-sm">
             <div className="flex items-center space-x-2">
               <span className="text-text-secondary font-mono text-xs font-semibold">Index:</span>
-              {lnMarketsError ? (
+              {publicError ? (
                 <div className="flex items-center space-x-1">
                   <span className="text-destructive font-mono text-xs font-semibold">Error</span>
                 </div>
@@ -240,7 +195,7 @@ const LNMarketsHeader: React.FC = () => {
               <Percent className="text-text-secondary w-3 h-3" />
               <span className="text-text-secondary font-mono text-xs font-semibold">Fees:</span>
               <span className="text-text-primary font-mono text-xs font-bold">
-                {marketData ? formatTradingFees(marketData.tradingFees) : '--'}
+                {marketData?.tradingFees ? formatTradingFees(marketData.tradingFees) : 'N/A'}
               </span>
             </div>
 
@@ -249,7 +204,7 @@ const LNMarketsHeader: React.FC = () => {
               <Clock className="text-text-secondary w-3 h-3" />
               <span className="text-text-secondary font-mono text-xs font-semibold">Funding:</span>
               <span className="text-text-primary font-mono text-xs font-bold">
-                {marketData ? marketData.nextFunding : '--'}
+                {marketData?.nextFunding || 'N/A'}
               </span>
             </div>
 
@@ -258,7 +213,7 @@ const LNMarketsHeader: React.FC = () => {
               <Activity className="text-text-secondary w-3 h-3" />
               <span className="text-text-secondary font-mono text-xs font-semibold">Rate:</span>
               <span className="text-text-primary font-mono text-xs font-bold">
-                {marketData ? formatRate(marketData.rate) : '--'}
+                {marketData?.rate ? formatRate(marketData.rate) : 'N/A'}
               </span>
             </div>
           </div>
@@ -270,7 +225,7 @@ const LNMarketsHeader: React.FC = () => {
             <div className="flex items-center space-x-2 w-1/2">
               <div className="flex flex-col items-start space-y-1">
                 <span className={'text-gray-300 font-medium transition-all duration-300 ' + (isScrolled ? 'text-xs' : 'text-sm')}>Index:</span>
-                {(isAuthenticated && lnMarketsError) || (!isAuthenticated && publicError) ? (
+                {(isAuthenticated && publicError) || (!isAuthenticated && publicError) ? (
                   <div className="flex items-center space-x-1">
                     <span className="text-red-400 text-sm">Error</span>
                   </div>
@@ -339,7 +294,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <div className="flex items-center space-x-2">
               <span className="text-text-secondary font-mono text-xs font-semibold">Index:</span>
-              {lnMarketsError ? (
+              {publicError ? (
                 <div className="flex items-center space-x-1">
                   <span className="text-destructive font-mono text-xs font-semibold">Error</span>
                 </div>
@@ -378,7 +333,7 @@ const LNMarketsHeader: React.FC = () => {
           <div className="flex items-center space-x-2 w-1/4">
             <Percent className="text-text-secondary w-3 h-3" />
             <span className="text-text-secondary font-mono text-xs font-semibold">Trading Fees:</span>
-            <span className="text-text-primary font-mono text-xs font-bold">
+            <span className="text-text-primary font-mono text-xs font-bold" data-testid="header-trading-fees">
               {marketData ? formatTradingFees(marketData.tradingFees) : '--'}
             </span>
           </div>

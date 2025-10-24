@@ -10,6 +10,7 @@ import { PrismaClient } from '@prisma/client';
 import { AccountCredentialsService, AccountCredentials } from './account-credentials.service';
 import { LNMarketsAPIv2 } from './lnmarkets/LNMarketsAPIv2.service';
 import { isTestnetCredentials, extractMainCredentials } from '../utils/credentials.utils';
+import { DashboardSchema, DashboardDTO } from '../dto/dashboard.dto';
 
 // Interface for dashboard data response
 export interface DashboardData {
@@ -85,9 +86,9 @@ export class DashboardDataService {
 
       // 3. Log das credenciais para debug
       console.log(`🔍 DASHBOARD DATA - Credentials for ${credentials.accountName}:`, {
-        apiKey: credentials.credentials['api_key'] ? '***' + credentials.credentials['api_key'].slice(-4) : 'MISSING',
-        apiSecret: credentials.credentials['api_secret'] ? '***' + credentials.credentials['api_secret'].slice(-4) : 'MISSING',
-        passphrase: credentials.credentials['passphrase'] ? '***' + credentials.credentials['passphrase'].slice(-4) : 'MISSING',
+        apiKey: credentials.credentials['API Key'] ? '***' + credentials.credentials['API Key'].slice(-4) : 'MISSING',
+        apiSecret: credentials.credentials['API Secret'] ? '***' + credentials.credentials['API Secret'].slice(-4) : 'MISSING',
+        passphrase: credentials.credentials['Passphrase'] ? '***' + credentials.credentials['Passphrase'].slice(-4) : 'MISSING',
         isTestnet: isTestnet
       });
 
@@ -170,6 +171,7 @@ export class DashboardDataService {
       
       const user = await lnMarketsService.user.getUser();
       
+      console.log(`[TRACE-T1] RAW_LN_USER_PAYLOAD`, JSON.stringify(user, null, 2));
       console.log(`✅ DASHBOARD DATA - Fetched balance:`, user.balance);
       
       return {
@@ -228,7 +230,7 @@ export class DashboardDataService {
           apiKey: credentials.credentials['API Key'],
           apiSecret: credentials.credentials['API Secret'],
           passphrase: credentials.credentials['Passphrase'],
-          isTestnet: false
+          isTestnet: credentials.credentials['isTestnet'] === 'true' || credentials.credentials['isTestnet'] === true
         },
         logger: console as any // TODO: Pass proper logger
       });
@@ -312,6 +314,71 @@ export class DashboardDataService {
         hasActiveAccount: false,
         error: error.message || 'Failed to validate active account'
       };
+    }
+  }
+
+  /**
+   * Map raw dashboard data to DashboardDTO format and validate
+   */
+  async mapToDashboardDTO(rawData: DashboardData): Promise<DashboardDTO> {
+    try {
+      // Calculate metrics from raw data
+      const positions = rawData.positions || [];
+      const balance = rawData.balance || {};
+      const ticker = rawData.ticker || {};
+
+      // Calculate total P&L from positions
+      const totalPL = positions.reduce((sum: number, pos: any) => {
+        return sum + (pos.unrealized_pnl || 0);
+      }, 0);
+
+      // Calculate total margin from positions
+      const totalMargin = positions.reduce((sum: number, pos: any) => {
+        return sum + (pos.margin || 0);
+      }, 0);
+
+      // Calculate total fees from positions
+      const totalFees = positions.reduce((sum: number, pos: any) => {
+        return sum + (pos.fees || 0);
+      }, 0);
+
+      // Calculate total trading fees from positions
+      const totalTradingFees = positions.reduce((sum: number, pos: any) => {
+        return sum + (pos.trading_fees || 0);
+      }, 0);
+
+      // Calculate total funding cost from positions
+      const totalFundingCost = positions.reduce((sum: number, pos: any) => {
+        return sum + (pos.funding_cost || 0);
+      }, 0);
+
+      // Create DTO object
+      const dto = {
+        totalPL,
+        totalMargin,
+        totalFees,
+        totalTradingFees,
+        totalFundingCost,
+        lastUpdate: rawData.timestamp
+      };
+
+      // Validate with Zod schema
+      const validated = DashboardSchema.parse(dto);
+      
+      console.log(`✅ DASHBOARD DATA - DTO validated successfully:`, {
+        totalPL: validated.totalPL,
+        totalMargin: validated.totalMargin,
+        totalFees: validated.totalFees,
+        totalTradingFees: validated.totalTradingFees,
+        totalFundingCost: validated.totalFundingCost,
+        lastUpdate: new Date(validated.lastUpdate).toISOString()
+      });
+
+      return validated;
+
+    } catch (error) {
+      console.error(`❌ DASHBOARD DATA - Failed to map and validate DTO:`, error);
+      throw new Error(`Dashboard DTO validation failed: ${error.message}`);
     }
   }
 

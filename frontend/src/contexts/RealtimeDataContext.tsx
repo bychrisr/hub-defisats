@@ -528,17 +528,57 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   }, [isAuthenticated, user?.id, isAdmin, isConnected, isConnecting, connect]);
 
-  // Heartbeat de aplicação para evitar closes passivos
+  // Heartbeat conforme documentação LN Markets
   useEffect(() => {
     if (!isConnected) return;
     
-    const heartbeatInterval = setInterval(() => {
-      console.log('💓 REALTIME - Sending heartbeat ping');
-      sendMessage({ type: 'ping', ts: Date.now() });
-    }, 15000); // 15 segundos
+    let lastMessageTime = Date.now();
+    let heartbeatTimer: NodeJS.Timeout;
+    let pingTimer: NodeJS.Timeout;
     
-    return () => clearInterval(heartbeatInterval);
-  }, [isConnected, sendMessage]);
+    // Timer de 5s para detectar silêncio (conforme documentação LN Markets)
+    const resetHeartbeatTimer = () => {
+      lastMessageTime = Date.now();
+      clearTimeout(heartbeatTimer);
+      
+      heartbeatTimer = setTimeout(() => {
+        console.log('💓 REALTIME - No messages in 5s, sending ping');
+        sendMessage({ type: 'ping', ts: Date.now() });
+        
+        // Timer de 5s para esperar pong (conforme documentação LN Markets)
+        pingTimer = setTimeout(() => {
+          console.log('❌ REALTIME - No pong received in 5s, reconnecting');
+          // Usar função de reconexão definida mais abaixo
+          disconnect();
+          setTimeout(() => {
+            if (isAuthenticated && user?.id) {
+              connect();
+            }
+          }, 1000);
+        }, 5000);
+      }, 5000);
+    };
+    
+    // Reset timer a cada mensagem recebida
+    const handleMessage = () => {
+      lastMessageTime = Date.now();
+      clearTimeout(pingTimer);
+      resetHeartbeatTimer();
+    };
+    
+    // Iniciar timer
+    resetHeartbeatTimer();
+    
+    // Listener para mensagens recebidas
+    const messageListener = () => handleMessage();
+    window.addEventListener('realtime-message', messageListener);
+    
+    return () => {
+      clearTimeout(heartbeatTimer);
+      clearTimeout(pingTimer);
+      window.removeEventListener('realtime-message', messageListener);
+    };
+  }, [isConnected, sendMessage, isAuthenticated, user?.id, connect, disconnect]);
 
   // Atualizar status de conexão
   useEffect(() => {

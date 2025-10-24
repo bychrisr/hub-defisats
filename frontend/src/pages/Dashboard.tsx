@@ -1043,7 +1043,7 @@ export default function Dashboard() {
                     
                     {/* Valor principal */}
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-fees').text}`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-fees').text}`} data-testid="dashboard-total-fees">
                         {formatSats(calculateFeesPaid(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'neutral',

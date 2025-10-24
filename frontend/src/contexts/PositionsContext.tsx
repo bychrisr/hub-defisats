@@ -1,8 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useUserPositions, useRealtimeData } from './RealtimeDataContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useRateLimiter } from '@/utils/rateLimiter';
+import { DashboardSchema } from '@/schemas/dashboard.schema';
+import { PositionsMetrics } from '@/types/metrics';
 
 // Tipos para as posições (baseado na página Positions.tsx)
 export interface LNPosition {
@@ -542,6 +545,14 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
       return;
     }
 
+    // Verificar rate limiting
+    const rateLimiter = useRateLimiter();
+    if (!rateLimiter.canMakeRequest()) {
+      const delay = rateLimiter.getDelay();
+      console.log(`⏳ POSITIONS CONTEXT - Rate limited, waiting ${delay}ms`);
+      return;
+    }
+
     try {
       console.log('🔍 POSITIONS CONTEXT - Fetching real positions, market index and menu from LN Markets...');
 
@@ -551,8 +562,27 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         api.get('/api/menu')
       ]);
 
+      // Registrar requisições no rate limiter
+      rateLimiter.recordRequest();
+      
+      // Processar headers de rate limiting
+      if (positionsResponse.headers) {
+        rateLimiter.processHeaders(positionsResponse.headers);
+      }
+
       const positionsData = positionsResponse.data;
       const menuData = menuResponse.data;
+      
+      // DEV-only validation of dashboard DTO - validate after processing
+      if (import.meta.env.DEV) {
+        // We'll validate the processed data later, not the raw API response
+        console.log('🔍 POSITIONS CONTEXT - Raw API response structure:', {
+          hasData: !!positionsData.data,
+          hasLnMarkets: !!positionsData.data?.lnMarkets,
+          hasPositions: !!positionsData.data?.lnMarkets?.positions,
+          dataKeys: positionsData.data ? Object.keys(positionsData.data) : 'no data'
+        });
+      }
       
       // Extrair dados do endpoint unificado
       const indexData = positionsData.data?.lnMarkets?.ticker || positionsData.data?.marketIndex;
@@ -683,6 +713,24 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
         // Calcular métricas incluindo profit estimado
         const metrics = calculateMetrics(transformedPositions, marketIndex, realtimeData.userBalance);
 
+        // DEV-only validation of processed dashboard DTO
+        if (import.meta.env.DEV) {
+          try {
+            const dashboardDTO = {
+              totalPL: metrics.totalPL,
+              totalMargin: metrics.totalMargin,
+              totalFees: metrics.totalFees,
+              totalTradingFees: metrics.totalTradingFees,
+              totalFundingCost: metrics.totalFundingCost,
+              lastUpdate: Date.now()
+            };
+            DashboardSchema.parse(dashboardDTO);
+            console.log('✅ POSITIONS CONTEXT - Dashboard DTO validation passed:', dashboardDTO);
+          } catch (err) {
+            console.error('❌ REGRESSION: Dashboard DTO validation failed', err);
+          }
+        }
+
         setData({
           positions: transformedPositions,
           ...metrics,
@@ -752,6 +800,10 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
     } catch (error) {
       console.error('❌ POSITIONS CONTEXT - Error fetching real positions:', error);
       
+      // Tratar erro com rate limiter
+      const rateLimiter = useRateLimiter();
+      rateLimiter.handleError(error);
+      
       // Tentar invalidar cache do menu mesmo em caso de erro
       try {
         queryClient.invalidateQueries({ queryKey: ['menus'] });
@@ -819,12 +871,65 @@ export const PositionsProvider = ({ children }: PositionsProviderProps) => {
   useEffect(() => {
     if (!isAuthenticated || isAdmin) return;
 
-    const interval = setInterval(() => {
-      console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and market index...');
-      fetchRealPositions();
-    }, 5000); // Atualizar a cada 5 segundos
+    // Polling adaptativo baseado em atividade do usuário
+    const getPollingInterval = () => {
+      // Verificar se usuário está ativo (última interação)
+      const lastActivity = localStorage.getItem('lastUserActivity');
+      const now = Date.now();
+      const timeSinceActivity = lastActivity ? now - parseInt(lastActivity) : Infinity;
+      
+      // Estratégia de polling adaptativo
+      if (timeSinceActivity < 30000) {        // Usuário ativo (últimos 30s)
+        return 10000;  // 10 segundos
+      } else if (timeSinceActivity < 300000) { // Usuário inativo (últimos 5min)
+        return 30000;  // 30 segundos
+      } else {                                 // Usuário muito inativo
+        return 60000;  // 1 minuto
+      }
+    };
 
-    return () => clearInterval(interval);
+    let interval: NodeJS.Timeout;
+    let isPolling = true;
+
+    const startPolling = () => {
+      if (!isPolling) return;
+      
+      const delay = getPollingInterval();
+      console.log(`🔄 POSITIONS CONTEXT - Adaptive polling: ${delay}ms interval`);
+      
+      interval = setTimeout(() => {
+        if (isPolling) {
+          console.log('🔄 POSITIONS CONTEXT - Periodic update of real positions and market index...');
+          fetchRealPositions().finally(() => {
+            // Recursivamente agendar próxima atualização
+            startPolling();
+          });
+        }
+      }, delay);
+    };
+
+    // Iniciar polling
+    startPolling();
+
+    // Listener para atividade do usuário
+    const handleUserActivity = () => {
+      localStorage.setItem('lastUserActivity', Date.now().toString());
+    };
+
+    // Adicionar listeners de atividade
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+    window.addEventListener('click', handleUserActivity);
+    window.addEventListener('scroll', handleUserActivity);
+
+    return () => {
+      isPolling = false;
+      clearTimeout(interval);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      window.removeEventListener('click', handleUserActivity);
+      window.removeEventListener('scroll', handleUserActivity);
+    };
   }, [isAuthenticated, isAdmin, fetchRealPositions]);
 
   // Função para refresh manual
@@ -932,4 +1037,22 @@ export const usePositionsMetrics = () => {
 export const useCredentialsError = () => {
   const { credentialsError, clearCredentialsError } = usePositions();
   return { credentialsError, clearCredentialsError };
+};
+
+// Optimized selector hook to prevent unnecessary re-renders
+export const usePositionsSelector = <T,>(
+  selector: (m: PositionsMetrics) => T,
+  equalityFn: (a: T, b: T) => boolean = (a, b) => a === b
+): T => {
+  const context = useContext(PositionsContext);
+  if (!context) throw new Error('usePositionsSelector must be used within PositionsProvider');
+  
+  const selected = selector(context.data);
+  const ref = useRef(selected);
+  
+  if (!equalityFn(ref.current, selected)) {
+    ref.current = selected;
+  }
+  
+  return ref.current;
 };

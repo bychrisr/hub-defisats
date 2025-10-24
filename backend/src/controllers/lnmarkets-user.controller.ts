@@ -80,7 +80,7 @@ export class LNMarketsUserController {
           apiKey,
           apiSecret,
           passphrase,
-          isTestnet: false
+          isTestnet: credentials.isTestnet === 'true' || credentials.isTestnet === true
         },
         logger: logger as any
       });
@@ -175,7 +175,7 @@ export class LNMarketsUserController {
       console.log('✅ USER CONTROLLER - LN Markets service obtained');
       
       console.log('🔍 USER CONTROLLER - Calling getUserBalance...');
-      const result = await lnmarkets.getUserBalance();
+      const result = await lnmarkets.user.getUser();
       console.log('✅ USER CONTROLLER - getUserBalance completed');
       
       console.log(`✅ [UserController] User balance retrieved for user ${userId}:`, JSON.stringify(result, null, 2));
@@ -290,13 +290,13 @@ export class LNMarketsUserController {
       
       // 1. Buscar saldo da wallet
       console.log('🔍 USER CONTROLLER - Fetching wallet balance...');
-      const balanceResult = await lnmarkets.getUserBalance();
+      const balanceResult = await lnmarkets.user.getUser();
       const walletBalance = balanceResult.balance || 0;
       console.log('✅ USER CONTROLLER - Wallet balance:', walletBalance);
       
       // 2. Buscar dados do ticker (funding rate, index price, last price)
       console.log('🔍 USER CONTROLLER - Fetching ticker data...');
-      const tickerData = await lnmarkets.getFuturesTicker();
+      const tickerData = await lnmarkets.market.getTicker();
       const fundingRate = tickerData.carryFeeRate || 0;
       const indexPrice = tickerData.index || 0;
       const lastPrice = tickerData.lastPrice || 0;
@@ -304,14 +304,14 @@ export class LNMarketsUserController {
       
       // 3. Buscar posições abertas
       console.log('🔍 USER CONTROLLER - Fetching open positions...');
-      const positions = await lnmarkets.getUserPositions();
+      const positions = await lnmarkets.futures.getPositions();
       console.log('✅ USER CONTROLLER - Positions found:', Array.isArray(positions) ? positions.length : 0);
       
       // 3. Buscar histórico de trades (abertas + fechadas) para calcular Total Investido
       console.log('🔍 USER CONTROLLER - Fetching ALL trades (running + closed) for Total Investido...');
       let allTrades: any[] = [];
       try {
-        allTrades = await lnmarkets.getAllUserTrades(1000); // Buscar até 1000 trades (running + closed)
+        allTrades = await lnmarkets.futures.getTrades({ limit: 1000 }); // Buscar até 1000 trades (running + closed)
         console.log('✅ USER CONTROLLER - All trades found:', Array.isArray(allTrades) ? allTrades.length : 0);
         console.log('📊 USER CONTROLLER - Sample trade data:', Array.isArray(allTrades) && allTrades.length > 0 ? allTrades[0] : 'No trades');
       } catch (error) {
@@ -787,7 +787,7 @@ export class LNMarketsUserController {
       if (offset) params.offset = parseInt(offset);
       if (type) params.type = type;
 
-      const result = await lnmarkets.getUserHistory(params);
+      const result = await lnmarkets.futures.getHistory(params);
       
       console.log(`[UserController] User history retrieved for user ${userId}`, {
         userId,
@@ -843,7 +843,7 @@ export class LNMarketsUserController {
         params.type = 'closed';
       }
 
-      const result = await lnmarkets.getUserTrades(params);
+      const result = await lnmarkets.futures.getTrades(params);
 
       console.log(`[UserController] User trades retrieved for user ${userId}`, {
         userId,
@@ -915,7 +915,7 @@ export class LNMarketsUserController {
         console.log('🔍 USER CONTROLLER - Getting LN Markets service...');
         const lnmarkets = await this.getLNMarketsService(userId);
         console.log('🔍 USER CONTROLLER - LN Markets service obtained, calling getUserPositions...');
-        const result = await lnmarkets.getUserPositions();
+        const result = await lnmarkets.futures.getPositions();
         
         console.log(`🔍 USER CONTROLLER - User positions retrieved for user ${userId}:`, {
           resultType: typeof result,
@@ -1007,7 +1007,7 @@ export class LNMarketsUserController {
       }
 
       const lnmarkets = await this.getLNMarketsService(userId);
-      const result = await lnmarkets.getUserOrders();
+      const result = await lnmarkets.futures.getOrders();
       
       console.log(`[UserController] User orders retrieved for user ${userId}`);
 

@@ -220,6 +220,12 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
           version: '4.0.0'
         };
 
+        console.log(`[TRACE-T2] DASHBOARD_DTO_FINAL`, JSON.stringify({
+          balance: response.data.lnMarkets.balance,
+          positions: response.data.lnMarkets.positions?.length,
+          hasBalance: response.data.status.dataAvailable
+        }, null, 2));
+
         logger.info(`🎉 [${requestId}] Request completed successfully in ${Date.now() - startTime}ms`);
 
         return reply.status(200).send(response);
@@ -280,7 +286,7 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
 
         const lnMarketsService = new LNMarketsRobustService({
           ...credentials,
-          isTestnet: false,
+          isTestnet: credentials.isTestnet === 'true' || credentials.isTestnet === true,
         }, logger);
 
         const testResult = await lnMarketsService.testConnection();
@@ -364,7 +370,7 @@ export async function lnmarketsRobustRoutes(fastify: FastifyInstance) {
         
         const lnMarketsService = new LNMarketsRobustService({
           ...credentials,
-          isTestnet: false,
+          isTestnet: credentials.isTestnet === 'true' || credentials.isTestnet === true,
         }, logger);
 
         console.log(`🔄 [${requestId}] Fetching positions data via LNMarketsRobustService...`);

@@ -1,0 +1,41 @@
+{
+  "accountId": "test-account-123",
+  "accountName": "Test Account",
+  "exchangeName": "LN Markets",
+  "positions": [
+    {
+      "id": "pos-1",
+      "quantity": 100,
+      "price": 50000,
+      "entry_price": 48000,
+      "liquidation": 40000,
+      "leverage": 10,
+      "margin": 1000,
+      "pl": 200,
+      "unrealized_pnl": 200,
+      "maintenance_margin": 50,
+      "opening_fee": 5,
+      "closing_fee": 5,
+      "sum_carry_fees": 10,
+      "running": true,
+      "side": "b",
+      "creation_ts": 1640995200000,
+      "market_filled_ts": 1640995200000,
+      "takeprofit": 60000,
+      "stoploss": 45000
+    }
+  ],
+  "balance": {
+    "balance": 5000,
+    "synthetic_usd_balance": 5000,
+    "uid": "test-uid",
+    "username": "testuser",
+    "role": "user"
+  },
+  "ticker": {
+    "lastPrice": 50000,
+    "index": 50000,
+    "change24h": 2.5
+  },
+  "timestamp": 1640995200000
+}

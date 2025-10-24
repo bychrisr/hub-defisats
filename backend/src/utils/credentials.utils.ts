@@ -23,9 +23,9 @@ export function extractMainCredentials(credentials: Record<string, any>): {
   isTestnet: boolean;
 } {
   return {
-    apiKey: credentials['api_key'] || credentials['apiKey'] || '',
-    apiSecret: credentials['api_secret'] || credentials['apiSecret'] || '',
-    passphrase: credentials['passphrase'] || '',
+    apiKey: credentials['API Key'] || credentials['api_key'] || credentials['apiKey'] || '',
+    apiSecret: credentials['API Secret'] || credentials['api_secret'] || credentials['apiSecret'] || '',
+    passphrase: credentials['Passphrase'] || credentials['passphrase'] || '',
     isTestnet: isTestnetCredentials(credentials)
   };
 }

@@ -83,6 +83,12 @@ export const MarketDataProvider: React.FC<MarketDataProviderProps> = ({
       const dashboardResponse = await api.get('/api/lnmarkets-robust/dashboard');
       const dashboardData = dashboardResponse.data;
 
+      console.log('[TRACE-T7] FRONT_PAYLOAD_RECEIVED', {
+        hasBalance: dashboardData.data?.lnMarkets?.balance,
+        positions: dashboardData.data?.lnMarkets?.positions?.length,
+        raw: dashboardData.data
+      });
+      
       console.log('📊 MARKET DATA - Data received from unified endpoint:', {
         dashboardSuccess: dashboardData.success,
         positionsCount: dashboardData.data?.lnMarkets?.positions?.length || 0,

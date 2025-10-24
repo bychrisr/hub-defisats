@@ -106,6 +106,13 @@ export class AccountCredentialsService {
         return null;
       }
       
+      console.log(`[TRACE-T4] ACCOUNT_SELECT`, {
+        userId,
+        activeAccount: activeAccount?.account_name,
+        isTestnet: activeAccount?.credentials?.isTestnet,
+        hasBalance: activeAccount?.credentials ? 'yes' : 'no'
+      });
+      
       console.log(`✅ ACCOUNT CREDENTIALS - Found active account: ${activeAccount.account_name} (${activeAccount.exchange.name})`);
       console.log(`🔍 ACCOUNT CREDENTIALS - Exchange details:`, {
         exchangeName: activeAccount.exchange.name,
