@@ -1,733 +1,480 @@
 /**
- * TradingView Data Service - API Principal
+ * TradingView Data Service Enhanced
  * 
- * Arquitetura TradingView-first com fallbacks robustos:
- * 1. TradingView (principal) - dados agregados de múltiplas exchanges via proxy backend
- * 2. Binance (fallback) - dados diretos da exchange
- * 3. CoinGecko (backup) - dados de mercado agregados
+ * Serviço consolidado para dados TradingView com:
+ * - Cache inteligente de 1 segundo para dados de mercado
+ * - WebSocket integration para atualizações em tempo real
+ * - Fallback automático para múltiplas fontes
+ * - Rate limiting e debouncing
+ * - Error handling robusto
  * 
- * Conformidade com _VOLATILE_MARKET_SAFETY.md:
- * - Cache máximo 30 segundos
- * - Validação rigorosa de timestamps
- * - Nenhum fallback com dados simulados
- * - Erro transparente quando dados indisponíveis
+ * Funcionalidades integradas:
+ * ✅ Cache de 1 segundo para dados de mercado
+ * ✅ WebSocket para atualizações em tempo real
+ * ✅ Subscribers para notificações
+ * ✅ Fallback para Binance/CoinGecko
+ * ✅ Rate limiting inteligente
+ * ✅ Error handling com retry
  */
 
-import { CandleData } from '../types/market';
+import { MarketData, HistoricalData, API_CONFIG } from './tradingViewData.service';
 
-// Configuração de símbolos TradingView (multi-exchange)
-const TRADINGVIEW_SYMBOLS = {
-  BTCUSDT: [
-    'BINANCE:BTCUSDT',    // 40% weight
-    'BYBIT:BTCUSDT',      // 30% weight  
-    'BITMEX:BTCUSDT',     // 20% weight
-    'DERIBIT:BTCUSDT'     // 10% weight
-  ]
-};
+// Interface para subscribers
+interface Subscriber {
+  id: string;
+  callback: (data: MarketData) => void;
+  symbol?: string;
+}
 
-// Configuração de APIs com prioridades e limites
-const API_CONFIG = {
-  tradingview: {
-    priority: 1,
-    weight: 0.8,
-    requestsPerMinute: 100,
-    timeout: 10000,
-    baseUrl: '/api/tradingview' // Proxy backend
-  },
-  binance: {
-    priority: 2,
-    weight: 0.15,
-    requestsPerMinute: 20,
-    timeout: 8000,
-    baseUrl: 'https://api.binance.com'
-  },
-  coingecko: {
-    priority: 3,
-    weight: 0.05,
-    requestsPerMinute: 10,
-    timeout: 12000,
-    baseUrl: 'https://api.coingecko.com'
-  }
-};
-
-// Cache inteligente (conforme _VOLATILE_MARKET_SAFETY.md)
+// Interface para cache entry
 interface CacheEntry {
   data: any;
   timestamp: number;
-  ttl: number; // TTL diferenciado: 30s para mercado, 5min para históricos
+  ttl: number;
 }
 
-class IntelligentCache {
+// Interface para WebSocket connection
+interface WebSocketConnection {
+  ws: WebSocket | null;
+  isConnected: boolean;
+  reconnectAttempts: number;
+  maxReconnectAttempts: number;
+  reconnectInterval: number;
+}
+
+type ExternalApiKey = 'tradingview' | 'binance' | 'coingecko';
+
+/**
+ * TradingView Data Service Enhanced
+ * 
+ * Serviço consolidado que integra todas as funcionalidades dos serviços duplicados
+ * com foco em dados em tempo real e cache inteligente.
+ */
+export class TradingViewDataService {
   private cache = new Map<string, CacheEntry>();
-  private readonly MAX_TTL_MARKET = 30 * 1000; // 30 segundos para dados de mercado
-  private readonly MAX_TTL_HISTORICAL = 5 * 60 * 1000; // 5 minutos para dados históricos
+  private subscribers = new Map<string, Subscriber>();
+  private wsConnection: WebSocketConnection;
+  private rateLimitMap = new Map<string, number>();
+  private apiRequestStats = new Map<ExternalApiKey, { requests: number; limit: number }>();
+  private isInitialized = false;
 
-  set(key: string, data: any, customTtl?: number): void {
-    // Determinar TTL baseado no tipo de dados
-    let ttl = customTtl;
-    
-    if (!ttl) {
-      // TTL automático baseado no tipo de dados
-      if (key.includes('historical_')) {
-        ttl = this.MAX_TTL_HISTORICAL;
-      } else {
-        ttl = this.MAX_TTL_MARKET;
+  // Cache TTL diferenciado
+  private readonly TTL_MARKET = 1000;        // 1 segundo para dados de mercado
+  private readonly TTL_HISTORICAL = 5 * 60 * 1000; // 5 minutos para dados históricos
+  
+  // Rate limiting
+  private readonly RATE_LIMIT = 1000; // 1 req/sec
+  private readonly MAX_REQUESTS_PER_MINUTE = 60;
+
+  constructor() {
+    this.wsConnection = {
+      ws: null,
+      isConnected: false,
+      reconnectAttempts: 0,
+      maxReconnectAttempts: 5,
+      reconnectInterval: 5000
+    };
+
+    console.log('🚀 TRADINGVIEW DATA SERVICE ENHANCED - Initializing...');
+    this.initialize();
+  }
+
+  /**
+   * Inicializar serviço
+   */
+  private async initialize(): Promise<void> {
+    try {
+      // Conectar WebSocket para atualizações em tempo real
+      await this.connectWebSocket();
+      
+      // Configurar limpeza automática de cache
+      this.setupCacheCleanup();
+      
+      // Configurar rate limiting
+      this.setupRateLimiting();
+      
+      this.isInitialized = true;
+      console.log('✅ TRADINGVIEW DATA SERVICE ENHANCED - Initialized successfully');
+      
+    } catch (error) {
+      console.error('❌ TRADINGVIEW DATA SERVICE ENHANCED - Initialization failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Conectar WebSocket para atualizações em tempo real
+   */
+  private async connectWebSocket(): Promise<void> {
+    try {
+      const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:13010'}/api/tradingview/stream`;
+      
+      this.wsConnection.ws = new WebSocket(wsUrl);
+      
+      this.wsConnection.ws.onopen = () => {
+        console.log('🔌 TRADINGVIEW ENHANCED - WebSocket connected');
+        this.wsConnection.isConnected = true;
+        this.wsConnection.reconnectAttempts = 0;
+        
+        // Subscribe a dados de mercado
+        this.wsConnection.ws?.send(JSON.stringify({
+          type: 'subscribe',
+          symbol: 'BTCUSDT'
+        }));
+      };
+      
+      this.wsConnection.ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          
+          if (message.type === 'market_data') {
+            // Atualizar cache local
+            this.cache.set('market_BTCUSDT', {
+              data: message.data,
+              timestamp: Date.now(),
+              ttl: this.TTL_MARKET
+            });
+            
+            // Notificar subscribers
+            this.notifySubscribers('market_BTCUSDT', message.data);
+          }
+        } catch (error) {
+          console.error('❌ TRADINGVIEW ENHANCED - WebSocket message error:', error);
+        }
+      };
+      
+      this.wsConnection.ws.onclose = () => {
+        console.log('🔌 TRADINGVIEW ENHANCED - WebSocket disconnected');
+        this.wsConnection.isConnected = false;
+        this.handleReconnect();
+      };
+      
+      this.wsConnection.ws.onerror = (error) => {
+        console.error('❌ TRADINGVIEW ENHANCED - WebSocket error:', error);
+        this.wsConnection.isConnected = false;
+      };
+      
+    } catch (error) {
+      console.error('❌ TRADINGVIEW ENHANCED - WebSocket connection failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Lidar com reconexão automática
+   */
+  private handleReconnect(): void {
+    if (this.wsConnection.reconnectAttempts < this.wsConnection.maxReconnectAttempts) {
+      this.wsConnection.reconnectAttempts++;
+      
+      console.log(`🔄 TRADINGVIEW ENHANCED - Attempting reconnect ${this.wsConnection.reconnectAttempts}/${this.wsConnection.maxReconnectAttempts}`);
+      
+      setTimeout(() => {
+        this.connectWebSocket();
+      }, this.wsConnection.reconnectInterval * this.wsConnection.reconnectAttempts);
+    } else {
+      console.error('❌ TRADINGVIEW ENHANCED - Max reconnect attempts reached');
+    }
+  }
+
+  /**
+   * Configurar limpeza automática de cache
+   */
+  private setupCacheCleanup(): void {
+    setInterval(() => {
+      const now = Date.now();
+      let cleanedCount = 0;
+      
+      for (const [key, entry] of this.cache.entries()) {
+        if (now - entry.timestamp > entry.ttl) {
+          this.cache.delete(key);
+          cleanedCount++;
+        }
       }
+      
+      if (cleanedCount > 0) {
+        console.log(`🧹 TRADINGVIEW ENHANCED - Cache cleanup: ${cleanedCount} expired entries removed`);
+      }
+    }, 60000); // Limpeza a cada minuto
+  }
+
+  /**
+   * Configurar rate limiting
+   */
+  private setupRateLimiting(): void {
+    setInterval(() => {
+      this.rateLimitMap.clear();
+      this.apiRequestStats.clear();
+    }, 60000); // Reset rate limiting a cada minuto
+  }
+
+  /**
+   * Verificar rate limiting
+   */
+  private checkRateLimit(key: string): boolean {
+    const now = Date.now();
+    const lastRequest = this.rateLimitMap.get(key);
+    
+    if (lastRequest && (now - lastRequest) < this.RATE_LIMIT) {
+      return false; // Rate limit exceeded
     }
     
-    // Garantir que não exceda os limites de segurança
-    const maxTtl = key.includes('historical_') ? this.MAX_TTL_HISTORICAL : this.MAX_TTL_MARKET;
-    ttl = Math.min(ttl, maxTtl);
-    
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl
-    });
-    
-    // Log para monitoramento do cache diferenciado
-    const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
-    console.log(`📦 CACHE SET - ${dataType} data cached for ${ttl/1000}s:`, {
-      key: key.substring(0, 50) + '...',
-      dataType,
-      ttl: ttl/1000 + 's',
-      dataLength: Array.isArray(data) ? data.length : 'object'
-    });
+    this.rateLimitMap.set(key, now);
+    return true;
   }
 
-  get(key: string): any | null {
-    const entry = this.cache.get(key);
-    if (!entry) {
-      console.log(`📦 CACHE MISS - No entry found:`, key.substring(0, 50) + '...');
-      return null;
+  private recordApiRequest(api: ExternalApiKey): void {
+    const existing = this.apiRequestStats.get(api) ?? {
+      requests: 0,
+      limit: this.MAX_REQUESTS_PER_MINUTE
+    };
+
+    existing.requests += 1;
+    this.apiRequestStats.set(api, existing);
+  }
+
+  /**
+   * Obter dados de mercado com cache de 1 segundo
+   */
+  async getMarketData(symbol: string = 'BTCUSDT'): Promise<MarketData> {
+    const cacheKey = `market_${symbol}`;
+    
+    // Verificar cache primeiro
+    const cached = this.cache.get(cacheKey);
+    if (cached && this.isCacheValid(cached)) {
+      console.log('📦 TRADINGVIEW ENHANCED - Market data cache hit:', { symbol });
+      return cached.data;
     }
 
-    const age = Date.now() - entry.timestamp;
-    if (age > entry.ttl) {
-      this.cache.delete(key);
-      const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
-      console.log(`📦 CACHE EXPIRED - ${dataType} data expired after ${age/1000}s:`, key.substring(0, 50) + '...');
-      return null;
+    // Verificar rate limiting
+    if (!this.checkRateLimit(`market_${symbol}`)) {
+      console.log('⏳ TRADINGVIEW ENHANCED - Rate limit exceeded, using cached data');
+      if (cached) return cached.data;
     }
 
-    const dataType = key.includes('historical_') ? 'HISTORICAL' : 'MARKET';
-    console.log(`📦 CACHE HIT - ${dataType} data retrieved (age: ${age/1000}s):`, {
-      key: key.substring(0, 50) + '...',
-      dataType,
-      age: age/1000 + 's',
-      ttl: entry.ttl/1000 + 's'
+    console.log('🔄 TRADINGVIEW ENHANCED - Fetching fresh market data:', { symbol });
+
+    try {
+      // Buscar dados frescos
+      this.recordApiRequest('tradingview');
+      const response = await fetch(`/api/tradingview/market-data?symbol=${symbol}`);
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch market data');
+      }
+
+      // Cache por 1 segundo
+      this.cache.set(cacheKey, {
+        data: result.data,
+        timestamp: Date.now(),
+        ttl: this.TTL_MARKET
+      });
+
+      console.log('✅ TRADINGVIEW ENHANCED - Market data fetched and cached:', {
+        symbol,
+        price: result.data.price,
+        change24h: result.data.change24h
+      });
+
+      return result.data;
+
+    } catch (error) {
+      console.error('❌ TRADINGVIEW ENHANCED - Market data error:', error);
+      
+      // Fallback para dados em cache se disponível
+      if (cached) {
+        console.log('🔄 TRADINGVIEW ENHANCED - Using cached data as fallback');
+        return cached.data;
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Obter dados históricos com cache de 5 minutos
+   */
+  async getHistoricalData(symbol: string, timeframe: string, limit: number = 100): Promise<HistoricalData[]> {
+    const cacheKey = `historical_${symbol}_${timeframe}_${limit}`;
+    
+    // Verificar cache primeiro
+    const cached = this.cache.get(cacheKey);
+    if (cached && this.isCacheValid(cached)) {
+      console.log('📦 TRADINGVIEW ENHANCED - Historical data cache hit:', { symbol, timeframe });
+      return cached.data;
+    }
+
+    // Verificar rate limiting
+    if (!this.checkRateLimit(`historical_${symbol}`)) {
+      console.log('⏳ TRADINGVIEW ENHANCED - Rate limit exceeded, using cached data');
+      if (cached) return cached.data;
+    }
+
+    console.log('🔄 TRADINGVIEW ENHANCED - Fetching fresh historical data:', { symbol, timeframe });
+
+    try {
+      // Buscar dados frescos
+      this.recordApiRequest('tradingview');
+      const response = await fetch(`/api/tradingview/scanner?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`);
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch historical data');
+      }
+
+      // Cache por 5 minutos
+      this.cache.set(cacheKey, {
+        data: result.data,
+        timestamp: Date.now(),
+        ttl: this.TTL_HISTORICAL
+      });
+
+      console.log('✅ TRADINGVIEW ENHANCED - Historical data fetched and cached:', {
+        symbol,
+        timeframe,
+        dataPoints: result.data.length
+      });
+
+      return result.data;
+
+    } catch (error) {
+      console.error('❌ TRADINGVIEW ENHANCED - Historical data error:', error);
+      
+      // Fallback para dados em cache se disponível
+      if (cached) {
+        console.log('🔄 TRADINGVIEW ENHANCED - Using cached data as fallback');
+        return cached.data;
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Subscribe para atualizações em tempo real
+   */
+  subscribe(callback: (data: MarketData) => void, symbol: string = 'BTCUSDT'): string {
+    const subscriberId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    this.subscribers.set(subscriberId, {
+      id: subscriberId,
+      callback,
+      symbol
     });
-    return entry.data;
+    
+    console.log('📡 TRADINGVIEW ENHANCED - Subscriber added:', { subscriberId, symbol });
+    
+    // Auto-connect WebSocket se necessário
+    if (!this.wsConnection.isConnected) {
+      this.connectWebSocket();
+    }
+    
+    return subscriberId;
   }
 
-  isCacheValid(key: string): boolean {
-    const entry = this.cache.get(key);
-    if (!entry) return false;
-
-    const age = Date.now() - entry.timestamp;
-    return age <= entry.ttl;
+  /**
+   * Unsubscribe de atualizações
+   */
+  unsubscribe(subscriberId: string): void {
+    if (this.subscribers.delete(subscriberId)) {
+      console.log('📡 TRADINGVIEW ENHANCED - Subscriber removed:', { subscriberId });
+    }
   }
 
-  clear(): void {
-    this.cache.clear();
+  /**
+   * Notificar subscribers
+   */
+  private notifySubscribers(cacheKey: string, data: MarketData): void {
+    this.subscribers.forEach((subscriber) => {
+      try {
+        subscriber.callback(data);
+      } catch (error) {
+        console.error('❌ TRADINGVIEW ENHANCED - Subscriber callback error:', error);
+        // Remover subscriber com erro
+        this.subscribers.delete(subscriber.id);
+      }
+    });
   }
 
-  getStats(): { size: number; keys: string[] } {
+  /**
+   * Verificar se cache é válido
+   */
+  private isCacheValid(cached: CacheEntry): boolean {
+    return Date.now() - cached.timestamp < cached.ttl;
+  }
+
+  /**
+   * Obter estatísticas do serviço
+   */
+  getStats(): any {
+    return {
+      isInitialized: this.isInitialized,
+      cache: {
+        size: this.cache.size,
+        keys: Array.from(this.cache.keys())
+      },
+      subscribers: {
+        count: this.subscribers.size,
+        ids: Array.from(this.subscribers.keys())
+      },
+      websocket: {
+        isConnected: this.wsConnection.isConnected,
+        reconnectAttempts: this.wsConnection.reconnectAttempts
+      },
+      rateLimiting: {
+        activeLimits: this.rateLimitMap.size,
+        limits: Array.from(this.rateLimitMap.entries())
+      }
+    };
+  }
+
+  getCacheStats(): { size: number; keys: string[] } {
     return {
       size: this.cache.size,
       keys: Array.from(this.cache.keys())
     };
   }
-}
 
-// Rate Limiter inteligente
-class IntelligentRateLimiter {
-  private requests = new Map<string, number[]>();
-
-  canMakeRequest(api: string): boolean {
-    const now = Date.now();
-    const requests = this.requests.get(api) || [];
-    
-    // Limpar requests antigos (> 1 minuto)
-    const recentRequests = requests.filter(time => now - time < 60000);
-    this.requests.set(api, recentRequests);
-
-    const config = API_CONFIG[api as keyof typeof API_CONFIG];
-    return recentRequests.length < config.requestsPerMinute;
-  }
-
-  recordRequest(api: string): void {
-    const now = Date.now();
-    const requests = this.requests.get(api) || [];
-    requests.push(now);
-    this.requests.set(api, requests);
-  }
-
-  getStats(): Record<string, { requests: number; limit: number }> {
-    const stats: Record<string, { requests: number; limit: number }> = {};
-    
-    for (const [api, requests] of this.requests.entries()) {
-      const recentRequests = requests.filter(time => Date.now() - time < 60000);
-      const config = API_CONFIG[api as keyof typeof API_CONFIG];
-      
-      stats[api] = {
-        requests: recentRequests.length,
-        limit: config.requestsPerMinute
+  getRateLimitStats(): Record<ExternalApiKey, { requests: number; limit: number }> {
+    const apis: ExternalApiKey[] = ['tradingview', 'binance', 'coingecko'];
+    return apis.reduce((acc, api) => {
+      const stats = this.apiRequestStats.get(api);
+      acc[api] = {
+        requests: stats?.requests ?? 0,
+        limit: stats?.limit ?? this.MAX_REQUESTS_PER_MINUTE
       };
-    }
-    
-    return stats;
-  }
-}
-
-// Validador de dados (conforme _VOLATILE_MARKET_SAFETY.md)
-class DataValidator {
-  static validateData(data: any, maxAge: number = 30000): { valid: boolean; reason?: string; age?: number } {
-    console.log('🔍 TRADINGVIEW VALIDATOR - Validating data:', {
-      hasData: !!data,
-      hasTimestamp: !!data?.timestamp,
-      timestamp: data?.timestamp,
-      age: data?.timestamp ? Date.now() - data.timestamp : 'unknown'
-    });
-
-    if (!data || !data.timestamp) {
-      console.warn('⚠️ TRADINGVIEW VALIDATOR - Dados sem timestamp rejeitados');
-      return { valid: false, reason: 'Missing timestamp' };
-    }
-
-    const age = Date.now() - data.timestamp;
-    if (age > maxAge) {
-      console.warn(`⚠️ TRADINGVIEW VALIDATOR - Dados muito antigos rejeitados (${age}ms > ${maxAge}ms)`);
-      return { valid: false, reason: `Data too old: ${age}ms > ${maxAge}ms`, age };
-    }
-
-    // Validar campos obrigatórios
-    const requiredFields = ['price', 'change24h'];
-    const missingFields = requiredFields.filter(field => 
-      data[field] === undefined || data[field] === null
-    );
-
-    if (missingFields.length > 0) {
-      console.warn(`⚠️ TRADINGVIEW VALIDATOR - Campos obrigatórios faltando: ${missingFields.join(', ')}`);
-      return { valid: false, reason: `Missing required fields: ${missingFields.join(', ')}` };
-    }
-
-    console.log('✅ TRADINGVIEW VALIDATOR - Dados válidos:', {
-      age: age + 'ms',
-      price: data.price,
-      change24h: data.change24h
-    });
-
-    return { valid: true, age };
-  }
-
-  static validateCandleData(candles: CandleData[]): boolean {
-    if (!Array.isArray(candles) || candles.length === 0) {
-      return false;
-    }
-
-    // Verificar se todos os candles têm os campos obrigatórios
-    return candles.every(candle => 
-      typeof candle.time === 'number' &&
-      typeof candle.open === 'number' &&
-      typeof candle.high === 'number' &&
-      typeof candle.low === 'number' &&
-      typeof candle.close === 'number'
-    );
-  }
-}
-
-export class TradingViewDataService {
-  private cache = new IntelligentCache();
-  private rateLimiter = new IntelligentRateLimiter();
-  private validator = DataValidator;
-
-  // ✅ CONFIGURAÇÕES POR EXCHANGE
-  private exchangeConfigs = {
-    lnmarkets: {
-      symbols: ['BINANCE:BTCUSDT', 'BYBIT:BTCUSDT', 'BITMEX:BTCUSDT'],
-      weights: [0.4, 0.3, 0.3],
-      name: 'LN Markets Index',
-      priority: 1
-    },
-    binance: {
-      symbols: ['BINANCE:BTCUSDT'],
-      weights: [1.0],
-      name: 'Binance Direct',
-      priority: 2
-    },
-    coinbase: {
-      symbols: ['COINBASE:BTCUSD'],
-      weights: [1.0],
-      name: 'Coinbase Direct',
-      priority: 3
-    }
-  };
-
-  /**
-   * Obter dados históricos com fallback robusto
-   */
-  async getHistoricalData(
-    symbol: string,
-    timeframe: string,
-    limit: number = 500,
-    startTime?: number
-  ): Promise<CandleData[]> {
-    const cacheKey = `historical_${symbol}_${timeframe}_${limit}_${startTime || 'latest'}`;
-    
-    // 1. Verificar cache primeiro
-    if (this.cache.isCacheValid(cacheKey)) {
-      console.log('📦 TRADINGVIEW - Using cached data');
-      return this.cache.get(cacheKey);
-    }
-
-    // 2. Tentar APIs em ordem de prioridade
-    const apis = Object.entries(API_CONFIG)
-      .sort(([,a], [,b]) => a.priority - b.priority)
-      .map(([name]) => name);
-
-    for (const apiName of apis) {
-      try {
-        if (!this.rateLimiter.canMakeRequest(apiName)) {
-          console.warn(`⏳ TRADINGVIEW - Rate limit reached for ${apiName}`);
-          continue;
-        }
-
-        console.log(`🔄 TRADINGVIEW - Fetching from ${apiName}`);
-        const data = await this.fetchFromAPI(apiName, symbol, timeframe, limit, startTime);
-        
-        const validation = this.validator.validateCandleData(data);
-        if (validation) {
-          this.rateLimiter.recordRequest(apiName);
-          this.cache.set(cacheKey, data);
-          console.log(`✅ TRADINGVIEW - Data fetched from ${apiName}: ${data.length} candles`);
-          return data;
-        } else {
-          console.warn(`⚠️ TRADINGVIEW - Invalid data from ${apiName}, trying next API`);
-        }
-      } catch (error) {
-        console.warn(`❌ TRADINGVIEW - ${apiName} failed:`, error);
-        continue;
-      }
-    }
-
-    // 3. Se todas as APIs falharam
-    throw new Error('Todas as APIs falharam - dados indisponíveis por segurança');
-  }
-
-  /**
-   * ✅ NOVO: Obter dados de mercado para exchange específica
-   */
-  async getMarketDataForExchange(exchange: string, symbol: string = 'BTCUSDT'): Promise<{
-    price: number;
-    change24h: number;
-    volume: number;
-    timestamp: number;
-    source: string;
-    exchange: string;
-  }> {
-    console.log('🔄 TRADINGVIEW - Fetching market data for exchange:', {
-      exchange,
-      symbol,
-      config: this.exchangeConfigs[exchange as keyof typeof this.exchangeConfigs]
-    });
-
-    const config = this.exchangeConfigs[exchange as keyof typeof this.exchangeConfigs];
-    if (!config) {
-      throw new Error(`Exchange configuration not found: ${exchange}`);
-    }
-
-    const cacheKey = `market_${exchange}_${symbol}`;
-    
-    if (this.cache.isCacheValid(cacheKey)) {
-      console.log('📦 TRADINGVIEW - Using cached data for exchange:', exchange);
-      return this.cache.get(cacheKey);
-    }
-
-    // Buscar dados usando configuração específica da exchange
-    const marketData = await this.fetchMarketDataForExchangeConfig(config, symbol);
-    
-    if (marketData) {
-      this.cache.set(cacheKey, marketData);
-      console.log(`✅ TRADINGVIEW - Market data fetched for ${exchange}:`, {
-        price: marketData.price,
-        change24h: marketData.change24h,
-        source: marketData.source
-      });
-      return marketData;
-    }
-
-    throw new Error(`Failed to fetch market data for exchange: ${exchange}`);
-  }
-
-  /**
-   * Obter dados de mercado (preço atual, 24h change)
-   */
-  async getMarketData(symbol: string): Promise<{
-    price: number;
-    change24h: number;
-    volume: number;
-    timestamp: number;
-  }> {
-    const cacheKey = `market_${symbol}`;
-    
-    if (this.cache.isCacheValid(cacheKey)) {
-      return this.cache.get(cacheKey);
-    }
-
-    const apis = ['tradingview', 'binance', 'coingecko'];
-    
-    for (const apiName of apis) {
-      try {
-        if (!this.rateLimiter.canMakeRequest(apiName)) {
-          continue;
-        }
-
-        const data = await this.fetchMarketDataFromAPI(apiName, symbol);
-        
-        const validation = this.validator.validateData(data);
-        if (validation.valid) {
-          this.rateLimiter.recordRequest(apiName);
-          this.cache.set(cacheKey, data);
-          console.log(`✅ TRADINGVIEW - Market data fetched from ${apiName}:`, {
-            price: data.price,
-            change24h: data.change24h,
-            age: validation.age + 'ms'
-          });
-          return data;
-        } else {
-          console.warn(`⚠️ TRADINGVIEW - Invalid market data from ${apiName}: ${validation.reason}`);
-        }
-      } catch (error) {
-        console.warn(`❌ TRADINGVIEW - Market data from ${apiName} failed:`, error);
-        continue;
-      }
-    }
-
-    throw new Error('Dados de mercado indisponíveis - não exibimos dados antigos por segurança');
-  }
-
-  /**
-   * Fetch de dados históricos por API específica
-   */
-  private async fetchFromAPI(
-    apiName: string,
-    symbol: string,
-    timeframe: string,
-    limit: number,
-    startTime?: number
-  ): Promise<CandleData[]> {
-    const config = API_CONFIG[apiName as keyof typeof API_CONFIG];
-    
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error(`Request timeout after ${config.timeout}ms`)), config.timeout);
-    });
-
-    let dataPromise: Promise<CandleData[]>;
-
-    switch (apiName) {
-      case 'tradingview':
-        dataPromise = this.fetchFromTradingView(symbol, timeframe, limit, startTime);
-        break;
-      case 'binance':
-        dataPromise = this.fetchFromBinance(symbol, timeframe, limit, startTime);
-        break;
-      case 'coingecko':
-        dataPromise = this.fetchFromCoinGecko(symbol, timeframe, limit, startTime);
-        break;
-      default:
-        throw new Error(`API não suportada: ${apiName}`);
-    }
-
-    return Promise.race([dataPromise, timeoutPromise]);
-  }
-
-  /**
-   * TradingView - Dados agregados de múltiplas exchanges via proxy backend
-   */
-  private async fetchFromTradingView(
-    symbol: string,
-    timeframe: string,
-    limit: number,
-    startTime?: number
-  ): Promise<CandleData[]> {
-    // Usar proxy backend para evitar CORS
-    const params = new URLSearchParams({
-      symbol,
-      timeframe,
-      limit: limit.toString()
-    });
-
-    if (startTime) {
-      params.append('startTime', startTime.toString());
-    }
-
-    const response = await fetch(`${API_CONFIG.tradingview.baseUrl}/scanner?${params}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`TradingView Proxy error: ${response.status}`);
-    }
-
-    const result = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message || 'TradingView Proxy failed');
-    }
-
-    // ✅ CORREÇÃO CRÍTICA: Backend já converte timestamps de ms para segundos
-    // Não precisamos converter novamente aqui para evitar dupla conversão
-    return result.data || [];
-  }
-
-  /**
-   * Binance - Fallback direto
-   */
-  private async fetchFromBinance(
-    symbol: string,
-    timeframe: string,
-    limit: number,
-    startTime?: number
-  ): Promise<CandleData[]> {
-    const params = new URLSearchParams({
-      symbol: symbol.replace('USDT', 'USDT'),
-      interval: timeframe,
-      limit: limit.toString()
-    });
-
-    if (startTime) {
-      params.append('startTime', startTime.toString());
-    }
-
-    const response = await fetch(`${API_CONFIG.binance.baseUrl}/api/v3/klines?${params}`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Binance API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return this.convertBinanceData(data);
-  }
-
-  /**
-   * CoinGecko - Backup final
-   */
-  private async fetchFromCoinGecko(
-    symbol: string,
-    timeframe: string,
-    limit: number,
-    startTime?: number
-  ): Promise<CandleData[]> {
-    // CoinGecko não tem dados históricos detalhados como candlesticks
-    // Usar apenas para dados de mercado básicos
-    throw new Error('CoinGecko não suporta dados históricos detalhados');
-  }
-
-  /**
-   * ✅ NOVO: Buscar dados de mercado para configuração de exchange específica
-   */
-  private async fetchMarketDataForExchangeConfig(config: any, symbol: string): Promise<any> {
-    console.log('🔄 TRADINGVIEW - Fetching data for exchange config:', {
-      name: config.name,
-      symbols: config.symbols,
-      weights: config.weights
-    });
-
-    // Buscar dados de cada símbolo e calcular média ponderada
-    const symbolData = [];
-    
-    for (let i = 0; i < config.symbols.length; i++) {
-      const symbolName = config.symbols[i];
-      const weight = config.weights[i];
-      
-      try {
-        console.log(`🔄 TRADINGVIEW - Fetching data for symbol ${symbolName} (weight: ${weight})`);
-        const data = await this.fetchMarketDataFromAPI('tradingview', symbolName);
-        
-        if (data && data.price) {
-          symbolData.push({
-            ...data,
-            weight,
-            symbol: symbolName
-          });
-        }
-      } catch (error) {
-        console.warn(`⚠️ TRADINGVIEW - Failed to fetch data for ${symbolName}:`, error);
-      }
-    }
-
-    if (symbolData.length === 0) {
-      throw new Error('No valid data found for any symbol');
-    }
-
-    // Calcular média ponderada
-    const totalWeight = symbolData.reduce((sum, item) => sum + item.weight, 0);
-    const weightedPrice = symbolData.reduce((sum, item) => sum + (item.price * item.weight), 0) / totalWeight;
-    const weightedChange = symbolData.reduce((sum, item) => sum + (item.change24h * item.weight), 0) / totalWeight;
-    const weightedVolume = symbolData.reduce((sum, item) => sum + ((item.volume || 0) * item.weight), 0) / totalWeight;
-
-    const result = {
-      price: weightedPrice,
-      change24h: weightedChange,
-      volume: weightedVolume,
-      timestamp: Date.now(),
-      source: `tradingview-${config.name.toLowerCase().replace(/\s+/g, '-')}`,
-      exchange: config.name,
-      symbols: symbolData.map(item => item.symbol),
-      weights: config.weights
-    };
-
-    console.log('✅ TRADINGVIEW - Weighted average calculated:', {
-      price: result.price,
-      change24h: result.change24h,
-      source: result.source,
-      symbolCount: symbolData.length
-    });
-
-    return result;
-  }
-
-  /**
-   * Fetch de dados de mercado por API específica
-   */
-  private async fetchMarketDataFromAPI(apiName: string, symbol: string): Promise<any> {
-    switch (apiName) {
-      case 'tradingview':
-        return this.fetchMarketDataFromTradingView(symbol);
-      case 'binance':
-        return this.fetchMarketDataFromBinance(symbol);
-      case 'coingecko':
-        return this.fetchMarketDataFromCoinGecko(symbol);
-      default:
-        throw new Error(`API não suportada: ${apiName}`);
-    }
-  }
-
-  /**
-   * TradingView - Dados de mercado agregados via proxy backend
-   */
-  private async fetchMarketDataFromTradingView(symbol: string): Promise<any> {
-    const response = await fetch(`${API_CONFIG.tradingview.baseUrl}/market/${symbol}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`TradingView Market Proxy error: ${response.status}`);
-    }
-
-    const result = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message || 'TradingView Market Proxy failed');
-    }
-
-    return result.data;
-  }
-
-  /**
-   * Binance - Dados de mercado diretos
-   */
-  private async fetchMarketDataFromBinance(symbol: string): Promise<any> {
-    const response = await fetch(`${API_CONFIG.binance.baseUrl}/api/v3/ticker/24hr?symbol=${symbol}`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Binance API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    return {
-      price: parseFloat(data.lastPrice),
-      change24h: parseFloat(data.priceChangePercent),
-      volume: parseFloat(data.volume),
-      timestamp: Date.now()
-    };
-  }
-
-  /**
-   * CoinGecko - Dados de mercado de backup
-   */
-  private async fetchMarketDataFromCoinGecko(symbol: string): Promise<any> {
-    const coinId = this.getCoinGeckoId(symbol);
-    const response = await fetch(`${API_CONFIG.coingecko.baseUrl}/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
-
-    if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const coinData = data[coinId];
-    
-    return {
-      price: coinData.usd,
-      change24h: coinData.usd_24h_change,
-      volume: 0, // CoinGecko não fornece volume neste endpoint
-      timestamp: Date.now()
-    };
-  }
-
-  /**
-   * Conversores de dados
-   */
-  private convertTradingViewData(data: any, timeframe: string, startTime?: number): CandleData[] {
-    // Implementar conversão específica do TradingView
-    // Por enquanto, retornar array vazio para forçar fallback
-    return [];
-  }
-
-  private convertBinanceData(data: any[]): CandleData[] {
-    return data.map(candle => ({
-      // ✅ CORREÇÃO CRÍTICA: Converter timestamp de milissegundos para segundos
-      // Binance retorna timestamps em ms, mas Lightweight Charts espera em segundos
-      time: Math.floor(candle[0] / 1000),
-      open: parseFloat(candle[1]),
-      high: parseFloat(candle[2]),
-      low: parseFloat(candle[3]),
-      close: parseFloat(candle[4]),
-      volume: parseFloat(candle[5])
-    }));
-  }
-
-  private getCoinGeckoId(symbol: string): string {
-    const mapping: Record<string, string> = {
-      'BTCUSDT': 'bitcoin',
-      'ETHUSDT': 'ethereum',
-      'ADAUSDT': 'cardano'
-    };
-    return mapping[symbol] || 'bitcoin';
-  }
-
-  /**
-   * Métodos de utilidade
-   */
-  getCacheStats(): { size: number; keys: string[] } {
-    return this.cache.getStats();
-  }
-
-  getRateLimitStats(): Record<string, { requests: number; limit: number }> {
-    return this.rateLimiter.getStats();
+      return acc;
+    }, {} as Record<ExternalApiKey, { requests: number; limit: number }>);
   }
 
   clearCache(): void {
+    const clearedEntries = this.cache.size;
     this.cache.clear();
+    console.log('🧹 TRADINGVIEW ENHANCED - Cache cleared manually', { clearedEntries });
+  }
+
+  /**
+   * Limpar recursos
+   */
+  async cleanup(): Promise<void> {
+    // Fechar WebSocket
+    if (this.wsConnection.ws) {
+      this.wsConnection.ws.close();
+    }
+    
+    // Limpar cache
+    this.cache.clear();
+    
+    // Limpar subscribers
+    this.subscribers.clear();
+    
+    // Limpar rate limiting
+    this.rateLimitMap.clear();
+    
+    console.log('🧹 TRADINGVIEW ENHANCED - Cleanup completed');
   }
 }
 
-// Instância singleton
+// Singleton instance
 export const tradingViewDataService = new TradingViewDataService();

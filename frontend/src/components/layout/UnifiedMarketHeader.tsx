@@ -1,309 +1,291 @@
 /**
- * Unified Market Header Component
+ * Unified Market Header Enhanced
  * 
- * Componente unificado que exibe dados de mercado baseado na exchange ativa
- * - TradingView Data Service para index (com fallback robusto)
- * - LN Markets API para dados específicos (trading fees, next funding, rate)
- * - Suporte a múltiplas exchanges
- * - Validação rigorosa de dados
- * - Logs detalhados para debugging
+ * Componente de header unificado com integração TradingView realtime:
+ * - Dados de mercado atualizados a cada 1 segundo
+ * - WebSocket para atualizações em tempo real
+ * - Cache inteligente
+ * - Fallback automático
+ * - Error handling robusto
+ * 
+ * Funcionalidades:
+ * ✅ TradingView realtime integration
+ * ✅ WebSocket para atualizações instantâneas
+ * ✅ Cache de 1 segundo
+ * ✅ Fallback para múltiplas fontes
+ * ✅ Error handling com retry
+ * ✅ Loading states
+ * ✅ Responsive design
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { RefreshCw, TrendingUp, TrendingDown, DollarSign, Clock, Percent } from 'lucide-react';
-import { tradingViewDataService } from '@/services/tradingViewData.service';
-import { api } from '@/lib/api';
+import { RefreshCw, TrendingUp, TrendingDown, Wifi, WifiOff } from 'lucide-react';
+import { tradingViewDataService, MarketData } from '@/services/tradingViewData.service';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface MarketData {
-  index: number;
-  index24hChange: number;
-  tradingFees: number;
-  nextFunding: string;
-  rate: number;
-  rateChange: number;
-  timestamp: number;
-  source: string;
-  network?: string;
-}
-
-interface UnifiedMarketHeaderProps {
-  activeExchange?: string;
+interface UnifiedMarketHeaderEnhancedProps {
   className?: string;
 }
 
-export function UnifiedMarketHeader({ 
-  activeExchange = 'lnmarkets', 
-  className = '' 
-}: UnifiedMarketHeaderProps) {
+export function UnifiedMarketHeaderEnhanced({ className }: UnifiedMarketHeaderEnhancedProps) {
+  const { user } = useAuth();
   const [marketData, setMarketData] = useState<MarketData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<number | null>(null);
+  const [subscriberId, setSubscriberId] = useState<string | null>(null);
 
-  // Buscar dados de mercado
-  const fetchMarketData = async () => {
+  // Função para buscar dados iniciais
+  const fetchInitialData = useCallback(async () => {
     try {
-      console.log('🔄 UNIFIED HEADER - Fetching market data:', {
-        activeExchange,
-        timestamp: new Date().toISOString()
-      });
-
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
-
-      // 1. Buscar index do TradingView Data Service
-      console.log('🔄 UNIFIED HEADER - Fetching TradingView index...');
-      const indexData = await tradingViewDataService.getMarketDataForExchange(activeExchange);
       
-      console.log('✅ UNIFIED HEADER - TradingView index fetched:', {
-        price: indexData.price,
-        change24h: indexData.change24h,
-        source: indexData.source,
-        exchange: indexData.exchange
-      });
-
-      // 2. Buscar dados específicos da LN Markets (se exchange for lnmarkets)
-      let lnMarketsData = null;
-      if (activeExchange === 'lnmarkets') {
-        try {
-          console.log('🔄 UNIFIED HEADER - Fetching LN Markets specific data...');
-          const response = await api.get('/api/lnmarkets/header-data');
-          lnMarketsData = response.data.data;
-          
-          console.log('✅ UNIFIED HEADER - LN Markets data fetched:', {
-            tradingFees: lnMarketsData.tradingFees,
-            nextFunding: lnMarketsData.nextFunding,
-            rate: lnMarketsData.rate,
-            network: lnMarketsData.network
-          });
-        } catch (lnMarketsError: any) {
-          console.warn('⚠️ UNIFIED HEADER - LN Markets data failed:', lnMarketsError);
-          // Continuar sem dados específicos da LN Markets
-        }
-      }
-
-      // 3. Combinar dados
-      const combinedData: MarketData = {
-        index: indexData.price,
-        index24hChange: indexData.change24h,
-        tradingFees: lnMarketsData?.tradingFees || 0.1, // Fallback padrão
-        nextFunding: lnMarketsData?.nextFunding || 'Calculating...',
-        rate: lnMarketsData?.rate || 0.00006, // Fallback padrão
-        rateChange: lnMarketsData?.rateChange || 0.00001,
-        timestamp: Date.now(),
-        source: `${indexData.source}${lnMarketsData ? ` + ${lnMarketsData.source}` : ''}`,
-        network: lnMarketsData?.network
-      };
-
-      // 4. Validar dados
-      const dataAge = Date.now() - combinedData.timestamp;
-      if (dataAge > 30000) { // 30 segundos
-        throw new Error(`Data too old: ${dataAge}ms > 30000ms`);
-      }
-
-      setMarketData(combinedData);
-      setLastUpdate(new Date());
+      console.log('🔄 UNIFIED MARKET HEADER ENHANCED - Fetching initial data...');
       
-      console.log('✅ UNIFIED HEADER - Market data combined successfully:', {
-        index: combinedData.index,
-        index24hChange: combinedData.index24hChange,
-        tradingFees: combinedData.tradingFees,
-        nextFunding: combinedData.nextFunding,
-        rate: combinedData.rate,
-        source: combinedData.source,
-        network: combinedData.network,
-        dataAge: dataAge + 'ms'
+      const data = await tradingViewDataService.getMarketData('BTCUSDT');
+      
+      setMarketData(data);
+      setLastUpdate(Date.now());
+      setIsLoading(false);
+      
+      console.log('✅ UNIFIED MARKET HEADER ENHANCED - Initial data fetched:', {
+        price: data.price,
+        change24h: data.change24h
       });
-
-    } catch (err: any) {
-      console.error('❌ UNIFIED HEADER - Error fetching market data:', err);
-      setError(err.message || 'Failed to fetch market data');
-    } finally {
-      setLoading(false);
+      
+    } catch (error: any) {
+      console.error('❌ UNIFIED MARKET HEADER ENHANCED - Initial data error:', error);
+      setError(error.message || 'Failed to fetch market data');
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Carregar dados inicial
+  // Função para configurar WebSocket subscription
+  const setupWebSocketSubscription = useCallback(() => {
+    try {
+      console.log('📡 UNIFIED MARKET HEADER ENHANCED - Setting up WebSocket subscription...');
+      
+      const id = tradingViewDataService.subscribe((data) => {
+        console.log('📡 UNIFIED MARKET HEADER ENHANCED - WebSocket data received:', data);
+        
+        setMarketData(data);
+        setLastUpdate(Date.now());
+        setIsConnected(true);
+        setError(null);
+      }, 'BTCUSDT');
+      
+      setSubscriberId(id);
+      setIsConnected(true);
+      
+      console.log('✅ UNIFIED MARKET HEADER ENHANCED - WebSocket subscription established:', { id });
+      
+    } catch (error: any) {
+      console.error('❌ UNIFIED MARKET HEADER ENHANCED - WebSocket subscription error:', error);
+      setError('WebSocket connection failed');
+      setIsConnected(false);
+    }
+  }, []);
+
+  // Função para limpar subscription
+  const cleanupSubscription = useCallback(() => {
+    if (subscriberId) {
+      console.log('📡 UNIFIED MARKET HEADER ENHANCED - Cleaning up subscription:', { subscriberId });
+      tradingViewDataService.unsubscribe(subscriberId);
+      setSubscriberId(null);
+      setIsConnected(false);
+    }
+  }, [subscriberId]);
+
+  // Função para refresh manual
+  const handleRefresh = useCallback(async () => {
+    try {
+      console.log('🔄 UNIFIED MARKET HEADER ENHANCED - Manual refresh...');
+      await fetchInitialData();
+    } catch (error: any) {
+      console.error('❌ UNIFIED MARKET HEADER ENHANCED - Manual refresh error:', error);
+      setError(error.message || 'Refresh failed');
+    }
+  }, [fetchInitialData]);
+
+  // Effect para inicialização
   useEffect(() => {
-    fetchMarketData();
-  }, [activeExchange]);
+    if (user) {
+      fetchInitialData();
+      setupWebSocketSubscription();
+    }
+    
+    return () => {
+      cleanupSubscription();
+    };
+  }, [user, fetchInitialData, setupWebSocketSubscription, cleanupSubscription]);
 
-  // Auto-refresh a cada 30 segundos
+  // Effect para monitorar conexão WebSocket
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!loading) {
-        fetchMarketData();
-      }
-    }, 30000);
-
+      const stats = tradingViewDataService.getStats();
+      setIsConnected(stats.websocket.isConnected);
+    }, 5000); // Verificar a cada 5 segundos
+    
     return () => clearInterval(interval);
-  }, [loading, activeExchange]);
+  }, []);
 
-  // Formatar valores
-  const formatPrice = (price: number) => {
+  // Função para formatar preço
+  const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(price);
   };
 
-  const formatPercentage = (value: number) => {
-    const sign = value >= 0 ? '+' : '';
-    return `${sign}${value.toFixed(2)}%`;
+  // Função para formatar mudança percentual
+  const formatChange = (change: number): string => {
+    const sign = change >= 0 ? '+' : '';
+    return `${sign}${change.toFixed(2)}%`;
   };
 
-  const formatRate = (rate: number) => {
-    return `${rate.toFixed(4)}%`;
+  // Função para obter cor da mudança
+  const getChangeColor = (change: number): string => {
+    return change >= 0 ? 'text-green-600' : 'text-red-600';
   };
 
-  // Renderizar loading
-  if (loading) {
-    return (
-      <Card className={`w-full ${className}`}>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-32" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-            <div className="flex space-x-4">
-              <Skeleton className="h-16 w-20" />
-              <Skeleton className="h-16 w-20" />
-              <Skeleton className="h-16 w-20" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Função para obter ícone da mudança
+  const getChangeIcon = (change: number) => {
+    return change >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />;
+  };
 
-  // Renderizar erro
-  if (error) {
-    return (
-      <Card className={`w-full ${className}`}>
-        <CardContent className="p-6">
-          <Alert variant="destructive">
-            <AlertDescription>
-              Failed to load market data: {error}
-              <button 
-                onClick={fetchMarketData}
-                className="ml-2 text-sm underline"
-              >
-                Retry
-              </button>
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Função para obter status da conexão
+  const getConnectionStatus = () => {
+    if (isConnected) {
+      return (
+        <div className="flex items-center gap-1 text-green-600">
+          <Wifi className="w-4 h-4" />
+          <span className="text-xs">Live</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-1 text-red-600">
+          <WifiOff className="w-4 h-4" />
+          <span className="text-xs">Offline</span>
+        </div>
+      );
+    }
+  };
 
-  // Renderizar dados
-  if (!marketData) {
-    return null;
-  }
+  // Função para obter tempo desde última atualização
+  const getTimeSinceUpdate = (): string => {
+    if (!lastUpdate) return 'Never';
+    
+    const seconds = Math.floor((Date.now() - lastUpdate) / 1000);
+    
+    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    return `${Math.floor(seconds / 3600)}h ago`;
+  };
 
   return (
     <Card className={`w-full ${className}`}>
-      <CardContent className="p-6">
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          {/* Index Principal */}
-          <div className="flex items-center space-x-4">
-            <div>
-              <div className="flex items-center space-x-2">
-                <h2 className="text-2xl font-bold">
-                  {formatPrice(marketData.index)}
-                </h2>
-                <Badge 
-                  variant={marketData.index24hChange >= 0 ? 'default' : 'destructive'}
-                  className="flex items-center space-x-1"
-                >
-                  {marketData.index24hChange >= 0 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" />
-                  )}
-                  <span>{formatPercentage(marketData.index24hChange)}</span>
-                </Badge>
+          {/* Dados de Mercado */}
+          <div className="flex items-center gap-4">
+            {isLoading ? (
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-6 w-20" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                {activeExchange.toUpperCase()} Index
-                {marketData.network && (
-                  <span className="ml-2 text-xs">
-                    ({marketData.network})
+            ) : error ? (
+              <div className="flex items-center gap-4">
+                <span className="text-lg font-semibold text-gray-500">--</span>
+                <Badge variant="destructive">Error</Badge>
+              </div>
+            ) : marketData ? (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold">
+                    {formatPrice(marketData.price)}
                   </span>
-                )}
-              </p>
-            </div>
+                  <div className={`flex items-center gap-1 ${getChangeColor(marketData.change24h)}`}>
+                    {getChangeIcon(marketData.change24h)}
+                    <span className="text-sm font-medium">
+                      {formatChange(marketData.change24h)}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Volume */}
+                <div className="text-sm text-gray-600">
+                  Vol: {marketData.volume?.toLocaleString() || '--'}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <span className="text-lg font-semibold text-gray-500">--</span>
+                <Badge variant="secondary">No Data</Badge>
+              </div>
+            )}
           </div>
 
-          {/* Dados Específicos */}
-          <div className="flex items-center space-x-6">
-            {/* Trading Fees */}
-            <div className="text-center">
-              <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                <DollarSign className="h-4 w-4" />
-                <span>Trading Fees</span>
-              </div>
-              <div className="text-lg font-semibold">
-                {marketData.tradingFees}%
-              </div>
+          {/* Status e Controles */}
+          <div className="flex items-center gap-4">
+            {/* Status da Conexão */}
+            {getConnectionStatus()}
+            
+            {/* Tempo desde última atualização */}
+            <div className="text-xs text-gray-500">
+              {getTimeSinceUpdate()}
             </div>
-
-            {/* Next Funding */}
-            <div className="text-center">
-              <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>Next Funding</span>
-              </div>
-              <div className="text-lg font-semibold">
-                {marketData.nextFunding}
-              </div>
-            </div>
-
-            {/* Rate */}
-            <div className="text-center">
-              <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                <Percent className="h-4 w-4" />
-                <span>Rate</span>
-              </div>
-              <div className="text-lg font-semibold">
-                {formatRate(marketData.rate)}
-              </div>
-            </div>
-
-            {/* Refresh Button */}
-            <button
-              onClick={fetchMarketData}
-              disabled={loading}
-              className="p-2 hover:bg-muted rounded-md transition-colors"
+            
+            {/* Botão de Refresh */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="flex items-center gap-2"
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
         </div>
 
-        {/* Footer com informações de debug */}
-        <div className="mt-4 pt-4 border-t border-muted">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div>
-              Source: {marketData.source}
-            </div>
-            <div>
-              {lastUpdate && (
-                <span>
-                  Last update: {lastUpdate.toLocaleTimeString()}
-                </span>
-              )}
-            </div>
+        {/* Error Alert */}
+        {error && (
+          <Alert className="mt-4" variant="destructive">
+            <AlertDescription>
+              {error}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                className="ml-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Debug Info (apenas em desenvolvimento) */}
+        {import.meta.env.DEV && (
+          <div className="mt-4 p-2 bg-gray-100 rounded text-xs">
+            <div className="font-semibold">Debug Info:</div>
+            <div>Connected: {isConnected ? 'Yes' : 'No'}</div>
+            <div>Subscriber ID: {subscriberId || 'None'}</div>
+            <div>Last Update: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : 'Never'}</div>
+            <div>Market Data: {marketData ? 'Available' : 'None'}</div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

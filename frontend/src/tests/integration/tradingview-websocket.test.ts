@@ -3,7 +3,7 @@
  * 
  * Testa a integração completa entre:
  * - TradingViewDataServiceEnhanced
- * - useWebSocketEnhanced Hook
+ * - useWebSocket Hook
  * - UnifiedMarketHeaderEnhanced
  * - DashboardClassicEnhanced
  * 
@@ -16,8 +16,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { TradingViewDataServiceEnhanced } from '../../services/tradingViewData-enhanced.service';
-import { useWebSocketEnhanced } from '../../hooks/useWebSocket-enhanced';
+import { TradingViewDataService } from '../../services/tradingViewData.service';
+import { useWebSocket } from '../../hooks/useWebSocket';
 import { renderHook, act } from '@testing-library/react';
 
 // Mock do fetch
@@ -47,11 +47,11 @@ class MockWebSocket {
 (global as any).WebSocket = MockWebSocket;
 
 describe('TradingView + WebSocket Integration (Frontend)', () => {
-  let service: TradingViewDataServiceEnhanced;
+  let service: TradingViewDataService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new TradingViewDataServiceEnhanced();
+    service = new TradingViewDataService();
   });
 
   afterEach(() => {
@@ -193,9 +193,9 @@ describe('TradingView + WebSocket Integration (Frontend)', () => {
     });
   });
 
-  describe('useWebSocketEnhanced Hook', () => {
+  describe('useWebSocket Hook', () => {
     it('deve conectar WebSocket automaticamente', () => {
-      const { result } = renderHook(() => useWebSocketEnhanced({
+      const { result } = renderHook(() => useWebSocket({
         url: 'ws://localhost:3000/ws',
         userId: 'user123',
         subscriptions: [
@@ -208,7 +208,7 @@ describe('TradingView + WebSocket Integration (Frontend)', () => {
     });
 
     it('deve reconectar automaticamente após falha', (done) => {
-      const { result } = renderHook(() => useWebSocketEnhanced({
+      const { result } = renderHook(() => useWebSocket({
         url: 'ws://localhost:3000/ws',
         userId: 'user123',
         subscriptions: [
@@ -231,7 +231,7 @@ describe('TradingView + WebSocket Integration (Frontend)', () => {
     });
 
     it('deve enviar mensagens corretamente', () => {
-      const { result } = renderHook(() => useWebSocketEnhanced({
+      const { result } = renderHook(() => useWebSocket({
         url: 'ws://localhost:3000/ws',
         userId: 'user123',
         subscriptions: [
@@ -246,7 +246,7 @@ describe('TradingView + WebSocket Integration (Frontend)', () => {
     });
 
     it('deve fazer subscriptions corretamente', () => {
-      const { result } = renderHook(() => useWebSocketEnhanced({
+      const { result } = renderHook(() => useWebSocket({
         url: 'ws://localhost:3000/ws',
         userId: 'user123',
         subscriptions: [

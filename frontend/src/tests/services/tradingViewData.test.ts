@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { TradingViewDataServiceEnhanced } from '../../services/tradingViewData-enhanced.service';
+import { TradingViewDataService } from '../../services/tradingViewData.service';
 
 // Mock do fetch
 global.fetch = jest.fn();
@@ -39,12 +39,12 @@ class MockWebSocket {
 // Substituir WebSocket global
 (global as any).WebSocket = MockWebSocket;
 
-describe('TradingViewDataServiceEnhanced', () => {
-  let service: TradingViewDataServiceEnhanced;
+describe('TradingViewDataService', () => {
+  let service: TradingViewDataService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new TradingViewDataServiceEnhanced();
+    service = new TradingViewDataService();
   });
 
   afterEach(() => {

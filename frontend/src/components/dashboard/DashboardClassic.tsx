@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RefreshCw, TrendingUp, TrendingDown, Wifi, WifiOff, Activity } from 'lucide-react';
-import { tradingViewDataServiceEnhanced, MarketData } from '@/services/tradingViewData-enhanced.service';
+import { tradingViewDataService, MarketData } from '@/services/tradingViewData.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { TradingViewChart } from '@/components/charts/TradingViewChart';
 
@@ -70,7 +70,7 @@ export function DashboardClassicEnhanced({ className }: DashboardClassicEnhanced
       console.log('🔄 DASHBOARD CLASSIC ENHANCED - Fetching initial data...');
       
       // Buscar dados de mercado
-      const marketData = await tradingViewDataServiceEnhanced.getMarketData('BTCUSDT');
+      const marketData = await tradingViewDataService.getMarketData('BTCUSDT');
       setMarketData(marketData);
       
       // Simular dados de posições (substituir por API real)
@@ -117,7 +117,7 @@ export function DashboardClassicEnhanced({ className }: DashboardClassicEnhanced
     try {
       console.log('📡 DASHBOARD CLASSIC ENHANCED - Setting up WebSocket subscription...');
       
-      const id = tradingViewDataServiceEnhanced.subscribe((data) => {
+      const id = tradingViewDataService.subscribe((data) => {
         console.log('📡 DASHBOARD CLASSIC ENHANCED - WebSocket data received:', data);
         
         setMarketData(data);
@@ -151,7 +151,7 @@ export function DashboardClassicEnhanced({ className }: DashboardClassicEnhanced
   const cleanupSubscription = useCallback(() => {
     if (subscriberId) {
       console.log('📡 DASHBOARD CLASSIC ENHANCED - Cleaning up subscription:', { subscriberId });
-      tradingViewDataServiceEnhanced.unsubscribe(subscriberId);
+      tradingViewDataService.unsubscribe(subscriberId);
       setSubscriberId(null);
       setIsConnected(false);
     }
@@ -183,7 +183,7 @@ export function DashboardClassicEnhanced({ className }: DashboardClassicEnhanced
   // Effect para monitorar conexão WebSocket
   useEffect(() => {
     const interval = setInterval(() => {
-      const stats = tradingViewDataServiceEnhanced.getStats();
+      const stats = tradingViewDataService.getStats();
       setIsConnected(stats.websocket.isConnected);
     }, 5000); // Verificar a cada 5 segundos
     
