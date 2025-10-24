@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useCentralizedData } from './useCentralizedData';
-import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
+// Removed useEstimatedBalance - using PositionsContext instead
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { usePositions } from '@/contexts/PositionsContext';
 
@@ -28,7 +28,7 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
   const isAdmin = user?.is_admin || false;
   
   const { refreshData: refreshCentralizedData, isLoading: centralizedLoading } = useCentralizedData();
-  const { refetch: refetchEstimatedBalance } = useEstimatedBalance();
+  // Removed useEstimatedBalance - using PositionsContext instead
   // Hook desabilitado - não precisamos dos dados históricos aqui
   const refetchHistoricalData = useCallback(async () => {
     // Função vazia já que o hook está desabilitado
@@ -74,13 +74,12 @@ export const useRealtimeDashboard = (config: RealtimeDashboardConfig = {}) => {
       console.log('🔄 REALTIME DASHBOARD - Updating historical data...');
       await Promise.all([
         refetchHistoricalData(),
-        refetchEstimatedBalance(),
         refreshPositions()
       ]);
     } catch (error) {
       console.error('❌ REALTIME DASHBOARD - Error updating historical data:', error);
     }
-  }, [isAuthenticated, user?.id, isAdmin, refetchHistoricalData, refetchEstimatedBalance, refreshPositions]);
+  }, [isAuthenticated, user?.id, isAdmin, refetchHistoricalData, refreshPositions]);
 
   // Função para limpar todos os intervalos
   const clearAllIntervals = useCallback(() => {

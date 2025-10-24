@@ -13,6 +13,7 @@ import { usePositionsMetrics, usePositionsList, usePositionsData } from '@/conte
 export const useTotalPL = () => {
   const { totalPL } = usePositionsMetrics();
   console.log('📊 useTotalPL - Current totalPL:', totalPL);
+  console.log('🔍 useTotalPL - usePositionsMetrics result:', { totalPL });
   return totalPL || 0;
 };
 

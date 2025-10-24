@@ -900,6 +900,18 @@ export const usePositionsList = () => {
 // Hook para métricas das posições
 export const usePositionsMetrics = () => {
   const { data } = usePositions();
+  
+  // Debug: Log detalhado dos dados
+  console.log('🔍 usePositionsMetrics - Raw data from usePositions:', {
+    totalPL: data.totalPL,
+    totalMargin: data.totalMargin,
+    estimatedBalance: data.estimatedBalance,
+    positionCount: data.positions?.length,
+    hasData: !!data,
+    dataKeys: data ? Object.keys(data) : 'no data',
+    fullData: data // Log completo para debug
+  });
+  
   return {
     positions: data.positions, // ADICIONADO: Array de posições
     totalPL: data.totalPL,

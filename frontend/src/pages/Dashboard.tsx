@@ -30,7 +30,7 @@ import { useUserPositions, useUserBalance, useConnectionStatus } from '@/context
 import { usePositionsMetrics, usePositions, useCredentialsError } from '@/contexts/PositionsContext';
 import { 
   useMarketData,
-  useOptimizedDashboardMetrics, 
+  // useOptimizedDashboardMetrics, // REMOVIDO: usando usePositionsMetrics
   useOptimizedPositions, 
   useBtcPrice,
   useOptimizedMarketData
@@ -41,7 +41,7 @@ import CoinGeckoCard from '@/components/CoinGeckoCard';
 import PriceChange from '@/components/PriceChange';
 import { useFormatSats } from '@/hooks/useFormatSats';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
-import { useEstimatedBalance } from '@/hooks/useEstimatedBalance';
+// Removed useEstimatedBalance - using PositionsContext instead
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { useActiveAccountData } from '@/hooks/useActiveAccountData';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -78,12 +78,14 @@ export default function Dashboard() {
     cacheHit
   } = useMarketData();
   
-  // Métricas otimizadas da dashboard
-  const {
-    totalPL,
-    totalMargin,
-    positionCount
-  } = useOptimizedDashboardMetrics();
+  // Métricas otimizadas da dashboard - REMOVIDO: usando usePositionsMetrics em vez disso
+  // const {
+  //   totalPL,
+  //   totalMargin,
+  //   positionCount
+  // } = useOptimizedDashboardMetrics();
+  
+  // Usar as variáveis do usePositionsMetrics - será definido depois
   
   // Dados de posições otimizados
   const { positions: optimizedPositions } = useOptimizedPositions();
@@ -155,7 +157,7 @@ export default function Dashboard() {
         if (!Number.isFinite(price) || price <= 0) return null;
         return { price: Math.round(price), label: p?.symbol ? `${p.symbol} #${idx + 1}` : `Pos #${idx + 1}` };
       })
-      .filter(Boolean) as Array<{ price: number; label?: string }>;
+      .filter(Boolean) as Array<{ price: number; label: string }>;
       
     console.log('📊 DASHBOARD - liquidationLines calculadas:', {
       positionsCount: src?.length ?? 0,
@@ -209,11 +211,11 @@ export default function Dashboard() {
         
         return { 
           price: Math.round(takeprofit), 
-          label,
+          label: label || `TP ${side} @ $${takeprofit.toLocaleString()}`,
           color: '#22c55e' // Verde para Take Profit
         };
       })
-      .filter(Boolean) as Array<{ price: number; label?: string; color?: string }>;
+      .filter(Boolean) as Array<{ price: number; label: string; color?: string }>;
     
     console.log('📊 DASHBOARD - takeProfitLines calculadas:', {
       positionsCount: src?.length ?? 0,
@@ -245,10 +247,26 @@ export default function Dashboard() {
     }
   };
   
-  // Dados de saldo estimado (hook específico)
-  const estimatedBalance = useEstimatedBalance();
+  // Dados de saldo estimado (via PositionsContext - mesma fonte do title dinâmico)
+  const { 
+    totalPL: contextTotalPL, 
+    totalMargin: contextTotalMargin,
+    estimatedBalance: contextEstimatedBalance,
+    estimatedProfit: contextEstimatedProfit,
+    totalFees: contextTotalFees,
+    totalTradingFees: contextTotalTradingFees,
+    totalFundingCost: contextTotalFundingCost,
+    estimatedFees: contextEstimatedFees,
+    positionCount: contextPositionCount,
+    lastUpdate: contextLastUpdate
+  } = usePositionsMetrics();
   
-  // Dados de posições já estão disponíveis via useOptimizedDashboardMetrics
+  // Definir as variáveis para compatibilidade com o código existente
+  const totalPL = contextTotalPL;
+  const totalMargin = contextTotalMargin;
+  const positionCount = contextPositionCount;
+  
+  // Dados de posições agora vêm do usePositionsMetrics
   
   // Dados de saldo (agora via contexto centralizado)
   const balanceData = marketData?.balance;
@@ -316,7 +334,8 @@ export default function Dashboard() {
   const isLoading = authLoading || automationLoading;
   
   // Estado de carregamento para atualizações (sem modal)
-  const isUpdating = marketLoading || estimatedBalance.isLoading;
+  const isUpdating = marketLoading;
+  // PositionsContext gerencia seu próprio estado de loading
   
   // Função para quebrar títulos em duas linhas
   const breakTitleIntoTwoLines = (title: string) => {
@@ -360,12 +379,22 @@ export default function Dashboard() {
   
   // Debug: Log dos dados principais
   console.log('🔍 DASHBOARD - Main data sources:', {
-    estimatedBalance: {
-      hasData: !!estimatedBalance.data,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error,
-      totalFees: estimatedBalance.data?.total_fees,
-      totalInvested: estimatedBalance.data?.total_invested
+    positionsContext: {
+      hasData: !!contextEstimatedBalance,
+      totalPL: contextTotalPL,
+      totalMargin: contextTotalMargin,
+      estimatedBalance: contextEstimatedBalance,
+      totalFees: contextTotalFees,
+      positionCount: contextPositionCount,
+      lastUpdate: contextLastUpdate
+    },
+    // Debug: Verificar se usePositionsMetrics está funcionando
+    usePositionsMetricsDebug: {
+      totalPL: contextTotalPL,
+      totalMargin: contextTotalMargin,
+      estimatedBalance: contextEstimatedBalance,
+      positionCount: contextPositionCount,
+      timestamp: new Date().toISOString()
     },
     historicalData: {
       hasData: !!historicalData.candleData,
@@ -400,18 +429,13 @@ export default function Dashboard() {
   };
   
   const calculateTotalInvested = useCallback(() => {
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.total_invested || 0;
-  }, [estimatedBalance.data]);
+    // Total invested = margin total das posições
+    return contextTotalMargin || 0;
+  }, [contextTotalMargin]);
   
   const calculateFeesPaid = useCallback(() => {
-    // Usar dados do estimated-balance como fonte primária para fees
-    if (estimatedBalance.data?.total_fees !== undefined) {
-      return estimatedBalance.data.total_fees;
-    }
-    // Fallback para dados históricos se disponível
-    return 0 || 0;
-  }, [estimatedBalance.data?.total_fees, 0]);
+    return contextTotalFees || contextTotalTradingFees || 0;
+  }, [contextTotalFees, contextTotalTradingFees]);
   
   const calculateNetProfit = useCallback(() => {
     const totalPnl = totalPL || 0;
@@ -427,147 +451,66 @@ export default function Dashboard() {
   };
   
   const calculateLostTrades = useCallback(() => {
-    // Usar estimatedBalance como fonte primária
-    if (estimatedBalance.data?.lost_trades !== undefined) {
-      return estimatedBalance.data.lost_trades;
-    }
-    // Fallback para historicalMetrics
-    return 0 || 0;
-  }, [estimatedBalance.data?.lost_trades, 0]);
+    // TODO: Implementar cálculo real se necessário
+    return 0;
+  }, []);
 
   // Novas funções para os cards adicionais
   const calculateSuccessRate = () => {
-    console.log('🔍 DASHBOARD - calculateSuccessRate called:', {
-      hasData: !!estimatedBalance.data,
-      successRate: estimatedBalance.data?.success_rate,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.success_rate || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   const calculateTotalTrades = () => {
-    console.log('🔍 DASHBOARD - calculateTotalTrades called:', {
-      hasData: !!estimatedBalance.data,
-      totalTrades: estimatedBalance.data?.total_trades,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.total_trades || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   const calculateWinningTrades = () => {
-    console.log('🔍 DASHBOARD - calculateWinningTrades called:', {
-      hasData: !!estimatedBalance.data,
-      winningTrades: estimatedBalance.data?.winning_trades,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.winning_trades || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
 
   const calculateAveragePnL = () => {
-    console.log('🔍 DASHBOARD - calculateAveragePnL called:', {
-      hasData: !!estimatedBalance.data,
-      averagePnL: estimatedBalance.data?.average_pnl,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.average_pnl || 0;
+    if (!contextPositionCount || contextPositionCount === 0) return 0;
+    return (contextTotalPL || 0) / contextPositionCount;
   };
 
   const calculateMaxDrawdown = () => {
-    console.log('🔍 DASHBOARD - calculateMaxDrawdown called:', {
-      hasData: !!estimatedBalance.data,
-      maxDrawdown: estimatedBalance.data?.max_drawdown,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.max_drawdown || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   const calculateSharpeRatio = () => {
-    console.log('🔍 DASHBOARD - calculateSharpeRatio called:', {
-      hasData: !!estimatedBalance.data,
-      sharpeRatio: estimatedBalance.data?.sharpe_ratio,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.sharpe_ratio || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   const calculateVolatility = () => {
-    console.log('🔍 DASHBOARD - calculateVolatility called:', {
-      hasData: !!estimatedBalance.data,
-      volatility: estimatedBalance.data?.volatility,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.volatility || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   // 4 novas funções para os cards adicionais
   const calculateWinStreak = () => {
-    console.log('🔍 DASHBOARD - calculateWinStreak called:', {
-      hasData: !!estimatedBalance.data,
-      winStreak: estimatedBalance.data?.win_streak,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.win_streak || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   const calculateBestTrade = () => {
-    console.log('🔍 DASHBOARD - calculateBestTrade called:', {
-      hasData: !!estimatedBalance.data,
-      bestTrade: estimatedBalance.data?.best_trade,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.best_trade || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   const calculateRiskRewardRatio = () => {
-    console.log('🔍 DASHBOARD - calculateRiskRewardRatio called:', {
-      hasData: !!estimatedBalance.data,
-      riskRewardRatio: estimatedBalance.data?.risk_reward_ratio,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.risk_reward_ratio || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   const calculateTradingFrequency = () => {
-    console.log('🔍 DASHBOARD - calculateTradingFrequency called:', {
-      hasData: !!estimatedBalance.data,
-      tradingFrequency: estimatedBalance.data?.trading_frequency,
-      isLoading: estimatedBalance.isLoading,
-      error: estimatedBalance.error
-    });
-    
-    if (!estimatedBalance.data) return 0;
-    return estimatedBalance.data.trading_frequency || 0;
+    // TODO: Implementar cálculo real se necessário
+    return 0;
   };
 
   // Função unificada para determinar TODAS as cores dos cards (pai, ícone, tipografia)
@@ -1200,7 +1143,7 @@ export default function Dashboard() {
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 {(() => {
-                  const colors = getCardIconColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0);
+                  const colors = getCardIconColors('estimated-balance', contextEstimatedBalance || 0);
                   return (
                     <div className={`w-8 h-8 sm:w-12 sm:h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${colors.bg} ${colors.border} ${colors.shadow}`}>
                       <Wallet className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${colors.icon}`} />
@@ -1210,7 +1153,7 @@ export default function Dashboard() {
               </div>
               
               <Card className={`gradient-card border-2 transition-all duration-300 hover:shadow-xl cursor-default ${
-                getCardColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0).card
+                getCardColors('estimated-balance', contextEstimatedBalance || 0).card
               }`}>
                 <div className="card-content">
                   <div className={`p-3 sm:p-6 transition-opacity duration-300 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
@@ -1232,12 +1175,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mb-3">
-                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0).text}`}>
+                      <div className={`${getGlobalDynamicSize().textSize} ${getCardColors('estimated-balance', contextEstimatedBalance || 0).text}`}>
                         {formatSats(calculateEstimatedBalance(), { 
                           size: getGlobalDynamicSize().iconSize, 
                           variant: 'auto',
                           forceColor: true,
-                          className: getCardColors('estimated-balance', estimatedBalance.data?.estimated_balance || 0).satsIcon
+                          className: getCardColors('estimated-balance', contextEstimatedBalance || 0).satsIcon
                         })}
                       </div>
                     </div>
@@ -1494,11 +1437,11 @@ export default function Dashboard() {
             <div className="relative group">
               <div className="absolute -top-3 -right-3 z-30 group-hover:icon-float">
                 <div className={`w-12 h-12 backdrop-blur-sm border rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-500 ease-out ${
-                  ((0 || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
+                  ((0 || 0) / Math.max(contextTotalMargin || 1, 1) * 100) >= 0 ? 'bg-green-600/20 border-green-500/30 group-hover:shadow-green-500/30' :
                   'bg-red-600/20 border-red-500/30 group-hover:shadow-red-500/30'
                 }`}>
                   <PieChart className={`w-6 h-6 stroke-2 group-hover:transition-colors duration-500 ${
-                    ((0 || 0) / Math.max(estimatedBalance.data?.total_invested || 1, 1) * 100) >= 0 ? 'text-green-300 group-hover:text-green-200' :
+                    ((0 || 0) / Math.max(contextTotalMargin || 1, 1) * 100) >= 0 ? 'text-green-300 group-hover:text-green-200' :
                     'text-red-300 group-hover:text-red-200'
                   }`} />
                 </div>
@@ -2188,14 +2131,7 @@ export default function Dashboard() {
               symbolDescription="BTCUSD: LNM FUTURES"
               logoUrl="/lnm-logo.svg"
               useApiData={true}
-              onTimeframeChange={(tf) => {
-                console.log('Timeframe changed to:', tf);
-                // Dados são automaticamente buscados via useCandleData hook
-              }}
-              onIndicatorAdd={(indicator) => {
-                console.log('Indicator added:', indicator);
-                // TODO: Implementar adição de indicadores
-              }}
+              // Removed onTimeframeChange and onIndicatorAdd - not supported by component
             />)}
           </div>
 
