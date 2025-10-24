@@ -35,6 +35,15 @@ Industry-standard user onboarding with:
 - Contextual plan gates for conversion
 - Anti-fraud protection with rate limiting
 
+### 🌐 Real-time WebSocket Communication
+Advanced WebSocket system with:
+- **Stable Connections**: FSM-based connection management
+- **Real-time Data**: Market data updates every 1 second
+- **LN Markets Integration**: Fees, funding, and rate updates every 30 seconds
+- **Heartbeat System**: Application-level ping/pong to prevent timeouts
+- **Singleton Pattern**: Consistent handler instances across hot-reloads
+- **Subscription Management**: Proper message filtering and routing
+
 ### Margin Guard Protection
 Real-time monitoring and protection of your trading positions with:
 - Automated margin calls

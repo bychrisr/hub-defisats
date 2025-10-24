@@ -17,6 +17,57 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### 🚀 **CORREÇÕES CIRÚRGICAS WEBSOCKET - v2.7.0**
+
+#### ✨ **Problemas Resolvidos**
+- ✅ **Assinatura Inexistente**: `sentCount: 0` em todos os broadcasts
+- ✅ **Singleton Hot-reload**: Múltiplas instâncias do `MarketDataHandler`
+- ✅ **Loop Infinito Frontend**: `useEffect` causando reconexões contínuas
+- ✅ **Timeouts Silenciosos**: Conexões fechando sem logs claros
+
+#### 🔧 **Soluções Implementadas**
+
+##### **1. Registro de Assinatura no WebSocketManager**
+- ✅ **Método `addSubscription()`**: Registra assinaturas no `WebSocketManager`
+- ✅ **`attachManager()`**: Anexa manager ao handler
+- ✅ **Filtro `{ type: 'market_data' }`**: Funcionando corretamente
+
+##### **2. Singleton Sobrevivendo a Hot-reload**
+- ✅ **`globalThis`**: Singleton usando `globalThis.__MARKET_DATA_HANDLER__`
+- ✅ **Instância Única**: Evita múltiplas instâncias em desenvolvimento
+- ✅ **Listeners Consistentes**: Quem assina = quem emite
+
+##### **3. FSM do Frontend Corrigido**
+- ✅ **`useRef` Guard**: Evita double-connect do StrictMode
+- ✅ **Dependências Estáveis**: Removidas dependências instáveis
+- ✅ **Transições Seguras**: Não desconecta compulsivamente
+
+##### **4. Heartbeat de Aplicação**
+- ✅ **Ping/Pong**: Heartbeat a cada 15 segundos
+- ✅ **Timeout Detection**: Evita closes passivos
+- ✅ **Conexões Estáveis**: Mantém conexões vivas
+
+#### 📊 **Resultados**
+- ✅ **`sentCount > 0`**: Mensagens sendo enviadas
+- ✅ **`totalConnections > 0`**: Conexões ativas
+- ✅ **Dados em Tempo Real**: `market_data` chegando no frontend
+- ✅ **FSM Estável**: Sem loop infinito de reconexões
+- ✅ **Singleton Único**: Instância consistente
+
+#### 📁 **Arquivos Modificados**
+- `backend/src/websocket/manager.ts` - Método `addSubscription()`
+- `backend/src/websocket/handlers/market-data.handler.ts` - Singleton com `globalThis`
+- `backend/src/websocket/routes.ts` - Anexação do manager
+- `frontend/src/contexts/RealtimeDataContext.tsx` - FSM corrigido e heartbeat
+- `frontend/src/hooks/useWebSocket.ts` - Proteção contra reconexões concorrentes
+
+#### 📚 **Documentação**
+- ✅ **WebSocket Critical Fixes**: Documentação completa das correções
+- ✅ **WebSocket Manager**: Atualizado com status das correções
+- ✅ **CHANGELOG**: Registro das correções implementadas
+
+---
+
 ### 🚀 **CORREÇÃO SISTEMÁTICA - ERROS TYPESCRIPT BACKEND - v2.6.5**
 
 #### ✨ **Problema Resolvido**

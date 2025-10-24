@@ -18,7 +18,8 @@
 ### 🔌 Integrations & APIs
 - [External APIs](/integrations/external-apis)
 - [Internal APIs](/integrations/internal-apis)
-- [WebSocket](/integrations/websocket)
+- [WebSocket Manager](/integrations/websocket-manager-optimized)
+- [WebSocket Critical Fixes](/integrations/websocket-critical-fixes)
 - [Authentication](/integrations/authentication)
 
 ### 🤖 Automations & Workers

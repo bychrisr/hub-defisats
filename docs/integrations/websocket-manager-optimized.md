@@ -486,11 +486,48 @@ const checkConnectionHealth = () => {
 };
 ```
 
+## Correções Críticas Implementadas
+
+### **Problemas Resolvidos (2025-10-24)**
+
+#### **1. Assinatura Inexistente para Filtro `{ type: 'market_data' }`**
+- **Problema**: `sentCount: 0` em todos os broadcasts
+- **Causa**: Assinaturas não registradas no `WebSocketManager`
+- **Solução**: Implementado `addSubscription()` e `attachManager()`
+
+#### **2. Singleton Não Sobrevivia a Hot-reload**
+- **Problema**: Múltiplas instâncias do `MarketDataHandler`
+- **Causa**: Hot-reload reinicializava o módulo
+- **Solução**: Singleton usando `globalThis`
+
+#### **3. Frontend com Loop Infinito de Reconexões**
+- **Problema**: `useEffect` causando reconexões contínuas
+- **Causa**: Dependências instáveis
+- **Solução**: FSM estável com guardas e `useRef`
+
+#### **4. Conexões Fechando por Timeouts Silenciosos**
+- **Problema**: Conexões sendo fechadas sem logs claros
+- **Causa**: Sem heartbeat de aplicação
+- **Solução**: Heartbeat implementado (15s)
+
+### **Status Atual**
+- ✅ **Conexões Estáveis**: `totalConnections > 0`
+- ✅ **Mensagens Enviadas**: `sentCount > 0`
+- ✅ **Dados em Tempo Real**: `market_data` chegando no frontend
+- ✅ **Singleton Único**: Instância consistente
+- ✅ **FSM Estável**: Sem loop infinito
+
+Para detalhes completos das correções, consulte:
+- [WebSocket Critical Fixes](./websocket-critical-fixes.md)
+
 ## Conclusão
 
 O `WebSocketManagerOptimized` é uma solução robusta e eficiente para gerenciamento de conexões WebSocket na plataforma Axisor. Com suas funcionalidades avançadas de reconexão, heartbeat, e gerenciamento de múltiplas conexões, ele garante comunicação em tempo real confiável e eficiente.
+
+**Última atualização**: 2025-10-24 - Correções cirúrgicas implementadas com sucesso.
 
 Para mais informações sobre integração com outros serviços, consulte:
 - [CentralizedHTTPClient](./centralized-http-client.md)
 - [StandardizedErrorHandler](./standardized-error-handler.md)
 - [IntelligentCacheStrategy](./intelligent-cache-strategy.md)
+- [WebSocket Critical Fixes](./websocket-critical-fixes.md)
