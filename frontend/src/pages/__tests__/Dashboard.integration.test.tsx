@@ -86,13 +86,7 @@ jest.mock('@/hooks/useHistoricalData', () => ({
   })),
 }));
 
-jest.mock('@/hooks/useEstimatedBalance', () => ({
-  useEstimatedBalance: jest.fn(() => ({
-    balance: 100000,
-    currency: 'BTC',
-    isLoading: false,
-  })),
-}));
+// Removed useEstimatedBalance mock - using PositionsContext instead
 
 jest.mock('@/hooks/useRealtimeDashboard', () => ({
   useRealtimeDashboard: jest.fn(() => ({
