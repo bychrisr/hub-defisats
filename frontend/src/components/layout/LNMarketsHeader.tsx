@@ -12,6 +12,7 @@ import {
 import { usePositions } from '@/contexts/PositionsContext';
 import { usePublicMarketData } from '@/hooks/usePublicMarketData';
 import { useAuthStore } from '@/stores/auth';
+import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 
 interface LNMarketsData {
   index: number;
@@ -28,8 +29,9 @@ const LNMarketsHeader: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
   const { data } = usePositions();
   const { data: publicData, isLoading: publicLoading, error: publicError } = usePublicMarketData();
+  const { lnMarketsData, marketData: realtimeMarketData, isConnected } = useRealtimeData();
   
-  const lnMarketsData = data.marketIndex;
+  const lnMarketsDataOld = data.marketIndex;
   const lnMarketsError = data.marketIndexError;
   
   // Debug logs removed for production
@@ -54,27 +56,60 @@ const LNMarketsHeader: React.FC = () => {
     }
     
     // Se autenticado e dados públicos não disponíveis, usar dados da LN Markets
-    if (isAuthenticated && lnMarketsData) {
+    if (isAuthenticated && lnMarketsDataOld) {
       const newMarketData = {
-        index: lnMarketsData.index,
-        index24hChange: lnMarketsData.index24hChange,
-        tradingFees: lnMarketsData.tradingFees,
-        nextFunding: lnMarketsData.nextFunding,
-        rate: lnMarketsData.rate,
-        rateChange: lnMarketsData.rateChange,
-        lastUpdate: new Date(lnMarketsData.timestamp),
-        source: lnMarketsData.source
+        index: lnMarketsDataOld.index,
+        index24hChange: lnMarketsDataOld.index24hChange,
+        tradingFees: lnMarketsDataOld.tradingFees,
+        nextFunding: lnMarketsDataOld.nextFunding,
+        rate: lnMarketsDataOld.rate,
+        rateChange: lnMarketsDataOld.rateChange,
+        lastUpdate: new Date(lnMarketsDataOld.timestamp),
+        source: lnMarketsDataOld.source
       };
       return newMarketData;
     }
     
     return null;
-  }, [isAuthenticated, publicData, lnMarketsData]);
+  }, [isAuthenticated, publicData, lnMarketsDataOld]);
 
   // Atualizar dados quando os dados da LN Markets mudarem
   useEffect(() => {
     setMarketData(memoizedMarketData);
   }, [memoizedMarketData]);
+
+  // Atualizar dados em tempo real do RealtimeDataContext
+  useEffect(() => {
+    if (lnMarketsData && marketData) {
+      // Atualizar apenas fees, funding e rate (dados LN Markets - 30s)
+      setMarketData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          tradingFees: lnMarketsData.tradingFees,
+          nextFunding: lnMarketsData.nextFunding,
+          rate: lnMarketsData.rate,
+          rateChange: lnMarketsData.rateChange,
+          lastUpdate: new Date(lnMarketsData.timestamp)
+        };
+      });
+    }
+  }, [lnMarketsData]);
+
+  // Atualizar preço em tempo real do RealtimeDataContext (1s)
+  useEffect(() => {
+    if (realtimeMarketData?.BTCUSDT && marketData) {
+      setMarketData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          index: realtimeMarketData.BTCUSDT.price,
+          index24hChange: realtimeMarketData.BTCUSDT.change24h,
+          lastUpdate: new Date(realtimeMarketData.BTCUSDT.timestamp)
+        };
+      });
+    }
+  }, [realtimeMarketData?.BTCUSDT]);
 
   // Atualizar Next Funding em tempo real apenas quando há dados reais
   useEffect(() => {

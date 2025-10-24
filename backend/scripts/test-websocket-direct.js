@@ -39,7 +39,7 @@ ws.on('close', (code, reason) => {
 
 // Timeout de segurança
 setTimeout(() => {
-  console.log('⏰ Test timeout (5s) - closing connection');
+  console.log('⏰ Test timeout (35s) - closing connection');
   if (ws.readyState === WebSocket.OPEN) {
     console.log('✅ Connection was successful!');
     ws.close(1000, 'Test completed');
@@ -47,4 +47,4 @@ setTimeout(() => {
     console.error('❌ Connection failed - readyState:', ws.readyState);
     process.exit(1);
   }
-}, 5000);
+}, 35000);

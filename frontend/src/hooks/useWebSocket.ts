@@ -135,8 +135,8 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       return;
     }
 
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      console.log('🔌 WEBSOCKET ENHANCED - Already connected', {
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+      console.log('🔌 WEBSOCKET ENHANCED - Already connected or connecting', {
         url: wsRef.current.url,
         readyState: wsRef.current.readyState
       });

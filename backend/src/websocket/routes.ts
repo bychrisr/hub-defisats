@@ -21,7 +21,16 @@ import { UserDataHandler } from './handlers/user-data.handler';
 import { PositionUpdatesHandler } from './handlers/position-updates.handler';
 import { Logger } from 'winston';
 
+// Flag para evitar múltiplas inicializações
+let isInitialized = false;
+
 export async function websocketConsolidatedRoutes(fastify: FastifyInstance) {
+  if (isInitialized) {
+    console.log('⚠️ WEBSOCKET ROUTES CONSOLIDADO - Already initialized, skipping...');
+    return;
+  }
+  
+  isInitialized = true;
   console.log('🚀 WEBSOCKET ROUTES CONSOLIDADO - Initializing...');
   
   const logger = fastify.log as any;
@@ -36,13 +45,22 @@ export async function websocketConsolidatedRoutes(fastify: FastifyInstance) {
     pingTimeout: 10000 // 10 segundos
   }, logger);
   
-  // Inicializar handlers especializados
-  const marketDataHandler = new MarketDataHandler(logger);
+  // Inicializar handlers especializados (usando singleton para MarketDataHandler)
+  const marketDataHandler = MarketDataHandler.getInstance(logger);
   const userDataHandler = new UserDataHandler(logger);
   const positionUpdatesHandler = new PositionUpdatesHandler(logger);
   
+  // Definir referência do WebSocketManager no handler
+  marketDataHandler.setWebSocketManager(wsManager);
+  
   // Conectar handlers ao manager
-  setupHandlerConnections(wsManager, marketDataHandler, userDataHandler, positionUpdatesHandler);
+  console.log('🔗 WEBSOCKET ROUTES - About to call setupHandlerConnections...');
+  try {
+    setupHandlerConnections(wsManager, marketDataHandler, userDataHandler, positionUpdatesHandler);
+    console.log('✅ WEBSOCKET ROUTES - setupHandlerConnections completed successfully');
+  } catch (error) {
+    console.error('❌ WEBSOCKET ROUTES - Error in setupHandlerConnections:', error);
+  }
   
   console.log('✅ WEBSOCKET ROUTES CONSOLIDADO - Dependencies initialized');
 
@@ -53,6 +71,16 @@ export async function websocketConsolidatedRoutes(fastify: FastifyInstance) {
   // Handler para mensagens do cliente (configurado UMA VEZ para todas as conexões)
   wsManager.on('message', (conn, message) => {
     handleClientMessage(wsManager, marketDataHandler, userDataHandler, positionUpdatesHandler, conn, message);
+  });
+
+  // Handler para novas conexões - notificar handlers especializados
+  wsManager.on('connection', (conn) => {
+    console.log('🔗 WEBSOCKET ROUTES - New connection detected, notifying handlers:', { connectionId: conn.id, userId: conn.userId });
+    
+    // Notificar MarketDataHandler sobre nova conexão
+    if (conn.userId) {
+      marketDataHandler.subscribe(conn.id, { symbol: 'BTCUSDT' });
+    }
   });
   
   // Handler para desconexão (configurado UMA VEZ para todas as conexões)
@@ -310,14 +338,49 @@ function setupHandlerConnections(
   positionUpdatesHandler: PositionUpdatesHandler
 ): void {
   
+  // 🔑 ANEXAR MANAGER AO HANDLER:
+  marketDataHandler.attachManager(wsManager);
+  
   // Conectar market data handler
-  marketDataHandler.on('market_data_update', (data) => {
-    wsManager.broadcast(data, { type: 'market_data' });
+  console.log('🔗 WEBSOCKET ROUTES - Registering market_data_update listener...');
+  
+  // Usar EventEmitter global para evitar problemas de múltiplas instâncias
+  const { globalMarketDataEmitter } = require('./handlers/market-data.handler');
+  
+  console.log('🔍 WEBSOCKET ROUTES - Global MarketDataEmitter:', {
+    hasOnMethod: typeof globalMarketDataEmitter.on === 'function',
+    hasEmitMethod: typeof globalMarketDataEmitter.emit === 'function',
+    listenerCount: globalMarketDataEmitter.listenerCount('market_data_update')
   });
   
+  globalMarketDataEmitter.on('market_data_update', (data) => {
+    console.log('📊 WEBSOCKET ROUTES - Market data event received:', JSON.stringify(data).substring(0, 100));
+    console.log('📊 WEBSOCKET ROUTES - Broadcasting market data to clients...');
+    try {
+      wsManager.broadcast(data, { type: 'market_data' });
+      console.log('✅ WEBSOCKET ROUTES - Market data broadcasted');
+    } catch (error) {
+      console.error('❌ WEBSOCKET ROUTES - Error broadcasting market data:', error);
+    }
+  });
+  
+  console.log('✅ WEBSOCKET ROUTES - market_data_update listener registered');
+  console.log('🔍 WEBSOCKET ROUTES - After registration listener count:', globalMarketDataEmitter.listenerCount('market_data_update'));
+  
   marketDataHandler.on('market_data_error', (data) => {
+    console.log('❌ WEBSOCKET ROUTES - Market data error event received:', data);
     wsManager.broadcast(data, { type: 'market_data' });
   });
+
+  // Conectar LN Markets data handler
+  console.log('🔗 WEBSOCKET ROUTES - Registering lnmarkets_data listener...');
+  marketDataHandler.on('lnmarkets_data', (data) => {
+    console.log('📊 WEBSOCKET ROUTES - LN Markets event received:', JSON.stringify(data).substring(0, 100));
+    console.log('📊 WEBSOCKET ROUTES - Broadcasting LN Markets data to clients...');
+    wsManager.broadcast(data, { type: 'lnmarkets_data' });
+    console.log('✅ WEBSOCKET ROUTES - LN Markets data broadcasted');
+  });
+  console.log('✅ WEBSOCKET ROUTES - lnmarkets_data listener registered');
   
   // Conectar user data handler
   userDataHandler.on('user_data_update', (data) => {

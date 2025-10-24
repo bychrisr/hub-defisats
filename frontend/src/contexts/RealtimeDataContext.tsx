@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef, ReactNode } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/lib/api';
@@ -71,6 +71,14 @@ interface RealtimeData {
     exchangeName: string;
     exchangeId: string;
   } | null;
+  // DADOS LN MARKETS (30s)
+  lnMarketsData: {
+    tradingFees: number;
+    nextFunding: string;
+    rate: number;
+    rateChange: number;
+    timestamp: number;
+  } | null;
 }
 
 interface RealtimeDataContextType {
@@ -91,6 +99,7 @@ interface RealtimeDataContextType {
     exchangeId: string;
   } | null;
   marketData: Record<string, any>;
+  lnMarketsData: RealtimeData['lnMarketsData'];
 }
 
 const RealtimeDataContext = createContext<RealtimeDataContextType | undefined>(undefined);
@@ -134,7 +143,9 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     connectionStatus: 'disconnected',
     // NOVOS CAMPOS PARA ARQUITETURA CENTRALIZADA
     dashboardData: null,
-    activeAccount: null
+    activeAccount: null,
+    // DADOS LN MARKETS (30s)
+    lnMarketsData: null
   });
 
   const [subscribedSymbols, setSubscribedSymbols] = useState<Set<string>>(new Set());
@@ -292,24 +303,39 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
             }));
             break;
 
-          case 'market_data':
-            console.log('📈 REALTIME - Processando dados de mercado:', message.data);
-            setData(prev => {
-              const newData = {
-                ...prev,
-                marketData: {
-                  ...prev.marketData,
-                  [message.data.symbol]: {
-                    ...message.data,
-                    timestamp: Date.now()
-                  }
-                },
-                lastUpdate: Date.now()
-              };
-              console.log('📈 REALTIME - Dados de mercado atualizados:', newData.marketData);
-              return newData;
-            });
-            break;
+        case 'market_data':
+          console.log('📈 REALTIME - Processando dados de mercado:', message.data);
+          setData(prev => {
+            const newData = {
+              ...prev,
+              marketData: {
+                ...prev.marketData,
+                [message.data.symbol]: {
+                  ...message.data,
+                  timestamp: Date.now()
+                }
+              },
+              lastUpdate: Date.now()
+            };
+            console.log('📈 REALTIME - Dados de mercado atualizados:', newData.marketData);
+            return newData;
+          });
+          break;
+
+        case 'lnmarkets_data':
+          console.log('📊 REALTIME - LN Markets data update:', message.data);
+          setData(prev => ({
+            ...prev,
+            lnMarketsData: {
+              tradingFees: message.data.tradingFees,
+              nextFunding: message.data.nextFunding,
+              rate: message.data.rate,
+              rateChange: message.data.rateChange,
+              timestamp: message.data.timestamp
+            },
+            lastUpdate: Date.now()
+          }));
+          break;
 
         case 'position_update':
           console.log('📊 REALTIME - Atualizando posição:', message.data);
@@ -441,37 +467,78 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     }, [])
   });
 
+  // Log de debug para verificar estado antes do useEffect
+  console.log('🔍 REALTIME - Estado antes do useEffect:', {
+    isAuthenticated,
+    userId: user?.id,
+    isAdmin,
+    isConnected,
+    timestamp: new Date().toISOString()
+  });
+
   // Conectar quando usuário estiver autenticado (apenas para usuários comuns)
+  const didTryRef = useRef(false);
+  
   useEffect(() => {
-    console.log('🔄 REALTIME - Verificando conexão:', {
+    console.log('🔄 REALTIME - useEffect de conexão executado:', {
       isAuthenticated,
       userId: user?.id,
       isAdmin,
-      isConnected, // ✅ Adicionar status de conexão
+      isConnected,
+      isConnecting,
+      didTry: didTryRef.current,
       timestamp: new Date().toISOString()
     });
 
-    if (isAuthenticated && user?.id) {
-      if (isAdmin) {
-        console.log('🔄 REALTIME - Admin user, skipping WebSocket connection...');
-        return;
-      }
+    const ready = isAuthenticated && user?.id && !isAdmin;
+    
+    if (!ready) {
+      // Não desconectar compulsivamente em transições intermediárias
+      console.log('🔄 REALTIME - Aguardando autenticação:', {
+        isAuthenticated,
+        hasUserId: !!user?.id,
+        isAdmin,
+        reason: 'waiting_for_auth'
+      });
+      return;
+    }
+    
+    if (isAdmin) {
+      // Só desconectar se for admin
+      console.log('🔄 REALTIME - Desconectando (usuário é admin):', {
+        isAuthenticated,
+        hasUserId: !!user?.id,
+        isAdmin,
+        reason: 'is_admin'
+      });
+      disconnect();
+      return;
+    }
+    
+    // Conectar apenas quando estado estiver estável e não tiver tentado ainda
+    if (!isConnected && !isConnecting && !didTryRef.current) {
+      didTryRef.current = true; // Evita double-connect do StrictMode
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
-
+      
       const endpointPreview = wsEndpoints.map((endpoint) => `${endpoint}?userId=${user.id}`);
       console.log('🔗 REALTIME - Tentando conectar usando endpoints:', endpointPreview);
       console.log('🔗 REALTIME - VITE_WS_URL env var:', import.meta.env.VITE_WS_URL);
+      
       connect();
-    } else {
-      // ✅ Só desconectar se realmente estiver conectado
-      if (isConnected) {
-        console.log('🔄 REALTIME - Desconectando - usuário não autenticado');
-        disconnect();
-      } else {
-        console.log('🔄 REALTIME - Não conectado, ignorando disconnect');
-      }
     }
-  }, [isAuthenticated, user?.id, isAdmin, isConnected]); // ✅ Adicionar isConnected nas deps
+  }, [isAuthenticated, user?.id, isAdmin, isConnected, isConnecting, connect]);
+
+  // Heartbeat de aplicação para evitar closes passivos
+  useEffect(() => {
+    if (!isConnected) return;
+    
+    const heartbeatInterval = setInterval(() => {
+      console.log('💓 REALTIME - Sending heartbeat ping');
+      sendMessage({ type: 'ping', ts: Date.now() });
+    }, 15000); // 15 segundos
+    
+    return () => clearInterval(heartbeatInterval);
+  }, [isConnected, sendMessage]);
 
   // Atualizar status de conexão
   useEffect(() => {
@@ -708,7 +775,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
     // NOVOS CAMPOS PARA ARQUITETURA CENTRALIZADA
     dashboardData: data.dashboardData,
     activeAccount: data.activeAccount,
-    marketData: data.marketData
+    marketData: data.marketData,
+    lnMarketsData: data.lnMarketsData
   };
 
   return (

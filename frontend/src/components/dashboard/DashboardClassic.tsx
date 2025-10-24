@@ -27,6 +27,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RefreshCw, TrendingUp, TrendingDown, Wifi, WifiOff, Activity } from 'lucide-react';
 import { tradingViewDataService, MarketData } from '@/services/tradingViewData.service';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRealtimeData } from '@/contexts/RealtimeDataContext';
 import { TradingViewChart } from '@/components/charts/TradingViewChart';
 
 interface DashboardClassicEnhancedProps {
@@ -52,6 +53,7 @@ interface Balance {
 
 export function DashboardClassicEnhanced({ className }: DashboardClassicEnhancedProps) {
   const { user } = useAuth();
+  const { userBalance, userPositions, marketData: realtimeMarketData, isConnected: realtimeConnected } = useRealtimeData();
   const [marketData, setMarketData] = useState<MarketData | null>(null);
   const [positions, setPositions] = useState<Position[]>([]);
   const [balance, setBalance] = useState<Balance | null>(null);
@@ -189,6 +191,51 @@ export function DashboardClassicEnhanced({ className }: DashboardClassicEnhanced
     
     return () => clearInterval(interval);
   }, []);
+
+  // Effect para atualizar balance em tempo real
+  useEffect(() => {
+    if (userBalance) {
+      setBalance({
+        balance: userBalance.total_balance,
+        currency: 'USD',
+        available: userBalance.available_balance,
+        locked: userBalance.margin_used
+      });
+      setLastUpdate(Date.now());
+    }
+  }, [userBalance]);
+
+  // Effect para atualizar positions em tempo real
+  useEffect(() => {
+    if (userPositions && userPositions.length > 0) {
+      const transformedPositions: Position[] = userPositions.map(pos => ({
+        id: pos.id,
+        side: pos.side,
+        size: pos.quantity,
+        entryPrice: pos.price,
+        currentPrice: realtimeMarketData?.BTCUSDT?.price || pos.price,
+        pl: pos.pnl,
+        plPercent: pos.pnlPercent
+      }));
+      setPositions(transformedPositions);
+      setLastUpdate(Date.now());
+    }
+  }, [userPositions, realtimeMarketData?.BTCUSDT?.price]);
+
+  // Effect para atualizar market data em tempo real
+  useEffect(() => {
+    if (realtimeMarketData?.BTCUSDT) {
+      setMarketData({
+        price: realtimeMarketData.BTCUSDT.price,
+        change24h: realtimeMarketData.BTCUSDT.change24h,
+        volume: realtimeMarketData.BTCUSDT.volume24h,
+        high24h: realtimeMarketData.BTCUSDT.high24h,
+        low24h: realtimeMarketData.BTCUSDT.low24h,
+        timestamp: realtimeMarketData.BTCUSDT.timestamp
+      });
+      setLastUpdate(Date.now());
+    }
+  }, [realtimeMarketData?.BTCUSDT]);
 
   // Função para formatar preço
   const formatPrice = (price: number): string => {

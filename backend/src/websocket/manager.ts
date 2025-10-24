@@ -145,6 +145,7 @@ export class WebSocketManager extends EventEmitter {
       id,
       userId: metadata.userId,
       totalConnections: this.connections.size,
+      activeConnectionIds: Array.from(this.connections.keys()),
       totalUsers: this.userConnections.size,
       timestamp: new Date().toISOString()
     });
@@ -319,22 +320,55 @@ export class WebSocketManager extends EventEmitter {
     console.log('📢 WEBSOCKET MANAGER - Broadcasting:', { 
       type: message.type, 
       target, 
-      excludeCount: exclude.length 
+      excludeCount: exclude.length,
+      totalConnections: this.connections.size,
+      activeConnectionIds: Array.from(this.connections.keys())
     });
 
+    console.log('🔄 WEBSOCKET MANAGER - Starting broadcast loop...');
     for (const [connectionId, connection] of this.connections) {
+      console.log('🔍 WEBSOCKET MANAGER - Checking connection:', {
+        id: connectionId,
+        userId: connection.userId,
+        subscriptions: Array.from(connection.subscriptions),
+        hasTarget: !!target,
+        isExcluded: exclude.includes(connectionId),
+        hasTypeFilter: !!type,
+        hasSubscription: type ? connection.subscriptions.has(type) : true
+      });
+
       // Pular conexões excluídas
-      if (exclude.includes(connectionId)) continue;
+      if (exclude.includes(connectionId)) {
+        console.log('⏭️ WEBSOCKET MANAGER - Skipping excluded connection:', connectionId);
+        continue;
+      }
 
       // Filtrar por target (userId)
-      if (target && connection.userId !== target) continue;
+      if (target && connection.userId !== target) {
+        console.log('⏭️ WEBSOCKET MANAGER - Skipping connection (wrong target):', {
+          connectionId,
+          connectionUserId: connection.userId,
+          target
+        });
+        continue;
+      }
 
       // Filtrar por tipo de subscription
-      if (type && !connection.subscriptions.has(type)) continue;
+      if (type && !connection.subscriptions.has(type)) {
+        console.log('⏭️ WEBSOCKET MANAGER - Skipping connection (no subscription):', {
+          connectionId,
+          requiredType: type,
+          userSubscriptions: Array.from(connection.subscriptions)
+        });
+        continue;
+      }
 
       // Enviar mensagem
       if (this.sendMessage(connectionId, message)) {
         sentCount++;
+        console.log('✅ WEBSOCKET MANAGER - Message sent to:', connectionId);
+      } else {
+        console.log('❌ WEBSOCKET MANAGER - Failed to send to:', connectionId);
       }
     }
 
@@ -398,6 +432,32 @@ export class WebSocketManager extends EventEmitter {
   }
 
   /**
+   * Adicionar subscription para uma conexão
+   */
+  addSubscription(connectionId: string, topic: string): boolean {
+    const conn = this.connections.get(connectionId);
+    if (!conn) {
+      console.log('⚠️ WEBSOCKET MANAGER - Connection not found for subscription:', { connectionId, topic });
+      return false;
+    }
+    
+    if (!conn.subscriptions) {
+      conn.subscriptions = new Set();
+    }
+    
+    conn.subscriptions.add(topic);
+    
+    console.log('📝 WEBSOCKET MANAGER - Subscription added:', {
+      connectionId,
+      topic,
+      totalSubscriptions: conn.subscriptions.size,
+      allSubscriptions: Array.from(conn.subscriptions)
+    });
+    
+    return true;
+  }
+
+  /**
    * Remover conexão
    */
   removeConnection(connectionId: string): void {
@@ -425,6 +485,9 @@ export class WebSocketManager extends EventEmitter {
 
     console.log('✅ WEBSOCKET MANAGER - Connection removed:', {
       connectionId,
+      userId: connection.userId,
+      totalConnections: this.connections.size,
+      activeConnectionIds: Array.from(this.connections.keys()),
       totalConnections: this.connections.size
     });
   }
