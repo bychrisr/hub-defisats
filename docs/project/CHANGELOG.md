@@ -15,6 +15,28 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.1.0] - 2025-10-24
+
+### Changed
+- **Header Simplificado**: Removido sistema complexo de cache/debounce do LNMarketsHeader
+- **Padrão Unificado**: Header agora usa o mesmo padrão do Dashboard e Title
+- **Performance**: Eliminado hook desnecessário `useDebouncedHeader`
+
+### Fixed
+- **Real-time Updates**: Header agora atualiza sincronizado com Dashboard e Title
+- **Re-rendering Issues**: Removido comportamento de re-mounting constante
+
+### Removed
+- Hook `frontend/src/hooks/useDebouncedHeader.ts`
+- Sistema de debounce do Header
+- Logs extensivos de debug (modo produção limpo)
+
+### Technical Details
+- Header consome `usePositionsMetrics()` diretamente
+- Eliminada complexidade desnecessária
+- Single Source of Truth mantido
+- Código mais simples e manutenível
+
 ## [2.0.1] - 2025-10-24
 
 ### Changed

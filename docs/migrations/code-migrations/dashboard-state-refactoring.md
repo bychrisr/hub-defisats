@@ -263,6 +263,81 @@ docker-compose -f docker-compose.dev.yml restart frontend
 3. **`frontend/src/hooks/useRealtimeDashboard.ts`**: Import original
 4. **`frontend/src/pages/__tests__/Dashboard.integration.test.tsx`**: Mock original
 
+## Refatoração do Header (v2.1.0)
+
+### Problema Identificado
+
+O Header (LNMarketsHeader) estava utilizando um sistema complexo que não atualizava em tempo real:
+
+- **Sistema híbrido**: WebSocket + REST + cache + debounce
+- **Múltiplas fontes**: `useUserPositions` + `usePositionsMetrics` + `usePublicMarketData`
+- **Re-rendering issues**: `useMemo` complexo + `useRef` problemático
+- **Não sincronizado**: Valores diferentes do Dashboard e Title
+
+### Sintomas Observados
+
+```typescript
+// ❌ Sistema complexo problemático
+const { data: realtimeData } = useUserPositions();
+const { data: positionsData } = usePositionsMetrics();
+const debouncedTradingFees = useDebouncedHeader(tradingFees);
+const memoizedMarketData = useMemo(() => {
+  // Cálculos complexos com múltiplas dependências
+}, [realtimeData, positionsData, debouncedTradingFees, forceUpdate]);
+```
+
+### Solução Implementada
+
+**Simplificação para padrão Dashboard:**
+
+```typescript
+// ✅ Sistema simples (atual)
+const { 
+  totalFees,
+  totalTradingFees,
+  totalFundingCost,
+  lastUpdate
+} = usePositionsMetrics();
+
+const marketData = isAuthenticated && totalFees !== undefined ? {
+  tradingFees: totalFees, // direto, sem cache/debounce
+  // ...
+} : publicData;
+```
+
+### Mudanças Realizadas
+
+1. **Removido sistema complexo:**
+   - `usePositionsSelector` e `useDebouncedHeader`
+   - Hook `useDebouncedHeader.ts` (arquivo deletado)
+   - `useMemo` complexo e `useRef` problemático
+   - Logs extensivos de debug
+
+2. **Adicionado consumo direto:**
+   - `usePositionsMetrics()` direto (mesmo padrão do Dashboard)
+   - Cálculo direto no render (sem cache intermediário)
+   - Sincronização automática com Dashboard e Title
+
+3. **Resultado:**
+   - Header sincronizado com Dashboard e Title
+   - Eliminada complexidade desnecessária
+   - Single Source of Truth mantido
+   - Código mais simples e manutenível
+
+### Arquivos Modificados
+
+```diff
+- frontend/src/hooks/useDebouncedHeader.ts (deletado)
+- frontend/src/components/layout/LNMarketsHeader.tsx (simplificado)
+```
+
+### Impacto da Mudança
+
+- **Performance**: Eliminado re-rendering excessivo
+- **Consistência**: Header agora sincronizado com Dashboard
+- **Manutenibilidade**: Código mais simples e direto
+- **Debugging**: Eliminados logs extensivos (produção limpa)
+
 ## Lições Aprendidas
 
 ### Arquitetura
@@ -271,6 +346,9 @@ docker-compose -f docker-compose.dev.yml restart frontend
 2. **Polling independente deve ser evitado** - usar contextos compartilhados
 3. **Single Source of Truth** previne inconsistências
 4. **TypeScript ajuda a identificar** problemas rapidamente
+5. **Evitar over-engineering desnecessário**
+6. **Preferir simplicidade sobre complexidade**
+7. **Alinhar padrões entre componentes relacionados**
 
 ### Debugging
 
@@ -278,6 +356,7 @@ docker-compose -f docker-compose.dev.yml restart frontend
 2. **Trace de dados** facilita identificação de problemas
 3. **Validação incremental** evita problemas em cascata
 4. **Testes de integração** validam comportamento end-to-end
+5. **Re-rendering issues podem ser complexos de resolver**
 
 ### Performance
 
@@ -285,6 +364,7 @@ docker-compose -f docker-compose.dev.yml restart frontend
 2. **Contextos React** são adequados para estado global
 3. **Memoization** previne re-renders desnecessários
 4. **Cleanup automático** evita memory leaks
+5. **Consumo direto pode ser mais eficiente que cache complexo**
 
 ## Próximos Passos
 

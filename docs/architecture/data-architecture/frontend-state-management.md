@@ -240,6 +240,149 @@ if (DEBUG_POSITIONS) {
 }
 ```
 
+## PositionsContext - Implementação Atual
+
+### Polling Adaptativo
+O PositionsContext implementa polling inteligente que se adapta à atividade do usuário:
+
+```typescript
+// Polling adaptativo: 10s → 30s → 60s
+const adaptiveInterval = useMemo(() => {
+  if (isActive) return 10000;  // 10s quando ativo
+  if (hasRecentActivity) return 30000; // 30s com atividade recente
+  return 60000; // 60s quando inativo
+}, [isActive, hasRecentActivity]);
+```
+
+### Rate Limiting Integrado
+Sistema de rate limiting para evitar sobrecarga da API:
+
+```typescript
+const { canMakeRequest, recordRequest } = useRateLimiter({
+  maxRequests: 1,
+  windowMs: 1000, // 1 request por segundo
+  circuitBreaker: true
+});
+```
+
+### Validação Zod em DEV
+Validação client-side para detectar regressões:
+
+```typescript
+// DEV-only validation
+if (import.meta.env.DEV) {
+  try {
+    const dashboardDTO = {
+      totalPL: metrics.totalPL,
+      totalMargin: metrics.totalMargin,
+      totalFees: metrics.totalFees,
+      totalTradingFees: metrics.totalTradingFees,
+      totalFundingCost: metrics.totalFundingCost,
+      lastUpdate: Date.now()
+    };
+    DashboardSchema.parse(dashboardDTO);
+  } catch (err) {
+    console.error('❌ REGRESSION: Dashboard DTO validation failed', err);
+  }
+}
+```
+
+### Hooks Disponíveis
+
+#### `usePositionsMetrics()`
+Hook principal para consumir métricas agregadas:
+
+```typescript
+const {
+  totalPL,
+  totalMargin,
+  totalFees,
+  totalTradingFees,
+  totalFundingCost,
+  estimatedBalance,
+  positionCount,
+  lastUpdate
+} = usePositionsMetrics();
+```
+
+#### `usePositionsSelector()`
+Hook otimizado para seletores específicos:
+
+```typescript
+const tradingFees = usePositionsSelector(m => m.totalFees);
+const fundingCost = usePositionsSelector(m => m.totalFundingCost);
+```
+
+## Padrão de Consumo Direto
+
+### Dashboard
+Consumo direto sem transformações:
+
+```typescript
+const positionsMetrics = usePositionsMetrics();
+const contextTotalPL = positionsMetrics.totalPL || 0;
+const contextTotalMargin = positionsMetrics.totalMargin || 0;
+```
+
+### Dynamic Title
+Wrapper simples para P&L:
+
+```typescript
+export const useTotalPL = () => {
+  const { totalPL } = usePositionsMetrics();
+  return totalPL || 0;
+};
+```
+
+### Header (LNMarketsHeader)
+Consumo direto simplificado:
+
+```typescript
+const { 
+  totalFees,
+  totalTradingFees,
+  totalFundingCost,
+  lastUpdate
+} = usePositionsMetrics();
+```
+
+## Diagrama de Fluxo Atualizado
+
+```mermaid
+graph TB
+    subgraph "Backend APIs"
+        API1["/api/lnmarkets-robust/dashboard<br/>5s polling"]
+        API2["/api/market/index/public<br/>2min TTL"]
+    end
+    
+    subgraph "React Contexts"
+        PC["PositionsContext<br/>Adaptive polling<br/>Rate limiting<br/>Zod validation"]
+        MDC["MarketDataContext<br/>2min TTL"]
+    end
+    
+    subgraph "Custom Hooks"
+        UPM["usePositionsMetrics()<br/>Direct consumption"]
+        UTP["useTotalPL()<br/>Wrapper"]
+        UMD["useMarketData()<br/>Fallback"]
+    end
+    
+    subgraph "Components"
+        DASH["Dashboard<br/>Cards + Charts"]
+        TITLE["Dynamic Title<br/>P&L display"]
+        HEADER["LNMarketsHeader<br/>Market data"]
+    end
+    
+    API1 --> PC
+    API2 --> MDC
+    PC --> UPM
+    PC --> UTP
+    MDC --> UMD
+    UPM --> DASH
+    UTP --> TITLE
+    UPM --> HEADER
+    UMD --> HEADER
+```
+
 ## Migração e Evolução
 
 ### Versionamento
