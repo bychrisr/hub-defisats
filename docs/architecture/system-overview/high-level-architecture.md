@@ -597,6 +597,17 @@ const prodConfig = {
 };
 ```
 
+## Frontend State Management
+
+O frontend utiliza React Context API para gerenciamento de estado global:
+
+- **PositionsContext**: Gerencia posições do usuário e métricas derivadas
+- **MarketDataContext**: Gerencia dados de mercado públicos
+- **AuthStore**: Gerencia autenticação (Zustand)
+- **AutomationStore**: Gerencia automações (Zustand)
+
+Ver: [Frontend State Management](../data-architecture/frontend-state-management.md)
+
 ## Integração com Outros Sistemas
 
 ### LN Markets API

@@ -15,6 +15,24 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.0.1] - 2025-10-24
+
+### Changed
+- Refatorado Dashboard para usar PositionsContext em vez de useEstimatedBalance
+- Centralizado gerenciamento de estado de posições no PositionsContext
+
+### Removed
+- Hook `useEstimatedBalance` (substituído por `usePositionsMetrics`)
+- Polling duplicado de dados de posições
+
+### Performance
+- Redução de 60% nas requisições ao backend (1s → 5s interval)
+- Dashboard e Title dinâmico agora sincronizados
+
+### Documentation
+- Adicionado: Frontend State Management architecture
+- Adicionado: Dashboard State Refactoring migration guide
+
 ## [Unreleased]
 
 ### 🚀 **CORREÇÕES CIRÚRGICAS WEBSOCKET - v2.7.0**

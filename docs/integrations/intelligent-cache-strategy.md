@@ -26,6 +26,16 @@ O `IntelligentCacheStrategy` é um sistema de cache avançado que combina cache 
 - Métricas de performance
 - Health checks
 
+## Frontend Context Caching
+
+Os contextos React implementam cache de dados em memória:
+
+- **PositionsContext**: Cache com refresh a cada 5s
+- **MarketDataContext**: Cache com TTL de 2 minutos
+- **Invalidação**: Automática em mudanças de conta ou logout
+
+Estratégia: Single Source of Truth evita inconsistências
+
 ## Configurações por Tipo de Dados
 
 ### **Market Data (Dados de Mercado)**
