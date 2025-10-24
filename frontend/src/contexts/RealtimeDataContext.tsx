@@ -1,8 +1,26 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/lib/api';
 import { accountEventManager } from '@/hooks/useAccountEvents';
+
+const resolveWebSocketBaseUrls = (): string[] => {
+  const candidates = new Set<string>();
+
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    candidates.add(`${protocol}//${window.location.host}`);
+  }
+
+  const envUrl = import.meta.env.VITE_WS_URL?.trim();
+  if (envUrl) {
+    candidates.add(envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl);
+  }
+
+  candidates.add('ws://localhost:13010');
+
+  return Array.from(candidates);
+};
 
 // Tipos de dados em tempo real
 interface MarketData {
@@ -82,6 +100,28 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const { user, isAuthenticated } = useAuthStore();
   
+  const wsBaseUrls = useMemo(() => resolveWebSocketBaseUrls(), []);
+  const wsEndpoints = useMemo(() => {
+    const endpoints = wsBaseUrls.map((baseUrl) => {
+      const normalizedBase = baseUrl.replace(/\/+$/, '');
+      if (normalizedBase.endsWith('/ws') || normalizedBase.endsWith('/api/ws')) {
+        return normalizedBase;
+      }
+      return `${normalizedBase}/api/ws`;
+    });
+    
+    // ✅ Em desenvolvimento, priorizar conexão direta (porta 13010)
+    if (import.meta.env.DEV) {
+      const directEndpoint = 'ws://localhost:13010/api/ws';
+      // Colocar conexão direta no início da lista
+      return [directEndpoint, ...endpoints.filter(e => e !== directEndpoint)];
+    }
+    
+    return Array.from(new Set(endpoints));
+  }, [wsBaseUrls]);
+  const primaryWsEndpoint = wsEndpoints[0] ?? 'ws://localhost:13010/api/ws';
+  const activeUserId = user?.id || 'anonymous';
+
   // Verificar se é admin
   const isAdmin = user?.is_admin || false;
   const [data, setData] = useState<RealtimeData>({
@@ -193,10 +233,8 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // ✅ CONEXÃO DIRETA: Removendo verificações de redirecionamento
 
-  // ✅ WEBSOCKET: URL correta para ws://localhost:13010/ws
-  const wsUrl = `ws://localhost:13010/ws?userId=${user?.id || 'anonymous'}`;
-  
-  console.log('🔗 REALTIME - URL do WebSocket gerada:', wsUrl);
+  // ✅ WEBSOCKET: URL correta para conexão direta ao backend
+  console.log('🔗 REALTIME - Endpoints WebSocket candidatos:', wsEndpoints.map((endpoint) => `${endpoint}?userId=${activeUserId}`));
   console.log('🔗 REALTIME - window.location:', {
     protocol: window.location.protocol,
     hostname: window.location.hostname,
@@ -206,7 +244,9 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // WebSocket para dados em tempo real
   const { isConnected, isConnecting, error, connect, disconnect, sendMessage } = useWebSocket({
-    url: wsUrl,
+    url: primaryWsEndpoint,
+    urls: wsEndpoints,
+    userId: activeUserId,
     onMessage: useCallback((message) => {
       console.log('📊 REALTIME - Mensagem recebida:', {
         type: message.type,
@@ -233,10 +273,10 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
             setData(prev => ({
               ...prev,
               activeAccount: {
-                accountId: message.accountId,
-                accountName: message.accountName,
-                exchangeName: message.exchangeName,
-                exchangeId: message.exchangeId
+                accountId: message.data?.accountId || '',
+                accountName: message.data?.accountName || '',
+                exchangeName: message.data?.exchangeName || '',
+                exchangeId: message.data?.exchangeId || ''
               },
               lastUpdate: Date.now()
             }));
@@ -407,6 +447,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
       isAuthenticated,
       userId: user?.id,
       isAdmin,
+      isConnected, // ✅ Adicionar status de conexão
       timestamp: new Date().toISOString()
     });
 
@@ -416,17 +457,21 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
         return;
       }
       console.log('🔄 REALTIME - Conectando para usuário:', user.id);
-      
-      // ✅ WEBSOCKET: URL correta para ws://localhost:13010/ws
-      const wsUrl = `ws://localhost:13010/ws?userId=${user.id}`;
-      console.log('🔗 REALTIME - URL do WebSocket:', wsUrl);
+
+      const endpointPreview = wsEndpoints.map((endpoint) => `${endpoint}?userId=${user.id}`);
+      console.log('🔗 REALTIME - Tentando conectar usando endpoints:', endpointPreview);
       console.log('🔗 REALTIME - VITE_WS_URL env var:', import.meta.env.VITE_WS_URL);
       connect();
     } else {
-      console.log('🔄 REALTIME - Desconectando - usuário não autenticado');
-      disconnect();
+      // ✅ Só desconectar se realmente estiver conectado
+      if (isConnected) {
+        console.log('🔄 REALTIME - Desconectando - usuário não autenticado');
+        disconnect();
+      } else {
+        console.log('🔄 REALTIME - Não conectado, ignorando disconnect');
+      }
     }
-  }, [isAuthenticated, user?.id, isAdmin, connect, disconnect]);
+  }, [isAuthenticated, user?.id, isAdmin, isConnected]); // ✅ Adicionar isConnected nas deps
 
   // Atualizar status de conexão
   useEffect(() => {
@@ -542,7 +587,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
         return {
           id: pos.id,
           symbol: 'BTC', // LN Markets only trades BTC futures
-          side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
+          side: (pos.side === 'b' ? 'long' : 'short') as 'long' | 'short', // 'b' = buy = long, 's' = sell = short
           quantity: quantity,
           price: price,
           liquidation: pos.liquidation || 0, // Valor real da API LN Markets
@@ -625,7 +670,7 @@ export const RealtimeDataProvider: React.FC<{ children: ReactNode }> = ({ childr
           return {
             id: pos.id,
             symbol: 'BTC', // LN Markets only trades BTC futures
-            side: pos.side === 'b' ? 'long' : 'short', // 'b' = buy = long, 's' = sell = short
+            side: (pos.side === 'b' ? 'long' : 'short') as 'long' | 'short', // 'b' = buy = long, 's' = sell = short
             quantity: quantity,
             price: price,
             liquidation: pos.liquidation || 0, // Valor real da API LN Markets

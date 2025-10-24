@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { LNMarketsAPIv2Enhanced } from '../../services/lnmarkets/LNMarketsAPIv2-enhanced.service';
+import { LNMarketsAPI } from '../../services/lnmarkets/LNMarketsAPI.service';
 import { Logger } from 'winston';
 
 // Mock do logger
@@ -30,12 +30,12 @@ const mockCredentials = {
   isTestnet: false
 };
 
-describe('LNMarketsAPIv2Enhanced', () => {
-  let service: LNMarketsAPIv2Enhanced;
+describe('LNMarketsAPI', () => {
+  let service: LNMarketsAPI;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new LNMarketsAPIv2Enhanced({
+    service = new LNMarketsAPI({
       credentials: mockCredentials,
       logger: mockLogger
     });

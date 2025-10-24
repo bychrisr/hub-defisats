@@ -68,6 +68,9 @@ export class WebSocketManager extends EventEmitter {
   constructor(config: Partial<WebSocketConfig> = {}, logger: Logger) {
     super();
     
+    // Increase max listeners to support many handlers
+    this.setMaxListeners(100);
+    
     this.config = {
       heartbeatInterval: 30000, // 30 segundos
       maxReconnectAttempts: 5,
@@ -97,7 +100,13 @@ export class WebSocketManager extends EventEmitter {
     ws: WebSocket,
     metadata: Record<string, any> = {}
   ): Promise<WebSocketConnection> {
-    console.log('🔌 WEBSOCKET MANAGER - Creating connection:', { id, metadata });
+    console.log('🔌 WEBSOCKET MANAGER - Creating connection:', { 
+      id, 
+      metadata,
+      wsReadyState: ws.readyState,
+      wsProtocol: ws.protocol,
+      timestamp: new Date().toISOString()
+    });
 
     const connection: WebSocketConnection = {
       id,
@@ -118,6 +127,12 @@ export class WebSocketManager extends EventEmitter {
         this.userConnections.set(metadata.userId, new Set());
       }
       this.userConnections.get(metadata.userId)!.add(id);
+      
+      console.log('👤 WEBSOCKET MANAGER - User connection mapped:', {
+        userId: metadata.userId,
+        connectionId: id,
+        totalUserConnections: this.userConnections.get(metadata.userId)!.size
+      });
     }
 
     // Configurar event listeners
@@ -129,7 +144,9 @@ export class WebSocketManager extends EventEmitter {
     console.log('✅ WEBSOCKET MANAGER - Connection created:', {
       id,
       userId: metadata.userId,
-      totalConnections: this.connections.size
+      totalConnections: this.connections.size,
+      totalUsers: this.userConnections.size,
+      timestamp: new Date().toISOString()
     });
 
     return connection;
@@ -141,13 +158,29 @@ export class WebSocketManager extends EventEmitter {
   private setupConnectionListeners(connection: WebSocketConnection): void {
     const { id, ws } = connection;
 
+    console.log('📡 WEBSOCKET MANAGER - Setting up listeners:', {
+      id,
+      wsReadyState: ws.readyState,
+      timestamp: new Date().toISOString()
+    });
+
     // Listener para mensagens
     ws.on('message', (data) => {
       try {
         const message = JSON.parse(data.toString());
+        console.log('📨 WEBSOCKET MANAGER - Message received from client:', {
+          connectionId: id,
+          userId: connection.userId,
+          messageType: message.type,
+          timestamp: new Date().toISOString()
+        });
         this.handleMessage(connection, message);
       } catch (error) {
-        console.error('❌ WEBSOCKET MANAGER - Message parse error:', error);
+        console.error('❌ WEBSOCKET MANAGER - Message parse error:', {
+          connectionId: id,
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString()
+        });
         this.sendError(connection, 'Invalid message format');
       }
     });
@@ -161,7 +194,7 @@ export class WebSocketManager extends EventEmitter {
 
     // Listener para fechamento
     ws.on('close', (code, reason) => {
-      console.log('🔌 WEBSOCKET MANAGER - Connection closed:', { id, code, reason: reason.toString() });
+      console.log('🔌 WEBSOCKET MANAGER - Connection closed:', { id, code, reason: reason?.toString() || 'No reason provided' });
       this.removeConnection(id);
     });
 

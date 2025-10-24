@@ -89,7 +89,7 @@ interface CachedData {
  * console.log('Market:', market);
  * ```
  */
-export class LNMarketsAPIv2Enhanced {
+export class LNMarketsAPI {
   public readonly user: LNMarketsUserEndpoints;
   public readonly futures: LNMarketsFuturesEndpoints;
   public readonly market: LNMarketsMarketEndpoints;

@@ -11,6 +11,7 @@
 
 import { WebSocketConnection } from '../manager';
 import { Logger } from 'winston';
+import { EventEmitter } from 'events';
 
 export interface UserDataMessage {
   type: 'user_data';
@@ -31,13 +32,14 @@ export interface UserDataCache {
   ttl: number;
 }
 
-export class UserDataHandler {
+export class UserDataHandler extends EventEmitter {
   private cache = new Map<string, UserDataCache>(); // userId -> cache
   private userSubscriptions = new Map<string, Set<string>>(); // userId -> Set<connectionIds>
   private logger: Logger;
   private readonly CACHE_TTL = 30000; // 30 segundos para dados de usuário
 
   constructor(logger: Logger) {
+    super();
     this.logger = logger;
     console.log('🚀 USER DATA HANDLER - Initializing...');
   }

@@ -14,7 +14,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { Logger } from 'winston';
-import { LNMarketsAPIv2Enhanced } from '../services/lnmarkets/LNMarketsAPIv2-enhanced.service';
+import { LNMarketsAPI } from '../services/lnmarkets/LNMarketsAPI.service';
 import { DashboardDataService } from '../services/dashboard-data.service';
 import { AccountCredentialsService } from '../services/account-credentials.service';
 
@@ -243,7 +243,7 @@ export async function lnmarketsRobustMigratedRoutes(fastify: FastifyInstance) {
         }
 
         // Initialize LN Markets Enhanced service
-        const lnMarketsEnhanced = new LNMarketsAPIv2Enhanced({
+        const lnMarketsEnhanced = new LNMarketsAPI({
           credentials: {
             apiKey: activeCredentials.credentials.apiKey,
             apiSecret: activeCredentials.credentials.apiSecret,
@@ -308,7 +308,7 @@ export async function lnmarketsRobustMigratedRoutes(fastify: FastifyInstance) {
         }
 
         // Initialize LN Markets Enhanced service
-        const lnMarketsEnhanced = new LNMarketsAPIv2Enhanced({
+        const lnMarketsEnhanced = new LNMarketsAPI({
           credentials: {
             apiKey: activeCredentials.credentials.apiKey,
             apiSecret: activeCredentials.credentials.apiSecret,

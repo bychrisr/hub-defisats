@@ -14,7 +14,7 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { LNMarketsAPIv2Enhanced } from '../services/lnmarkets/LNMarketsAPIv2-enhanced.service';
+import { LNMarketsAPI } from '../services/lnmarkets/LNMarketsAPI.service';
 import { AccountCredentialsService } from '../services/account-credentials.service';
 
 export async function lnMarketsHeaderMigratedRoutes(fastify: FastifyInstance) {
@@ -82,7 +82,7 @@ export async function lnMarketsHeaderMigratedRoutes(fastify: FastifyInstance) {
       }
 
       // Initialize LN Markets Enhanced service
-      const lnMarketsEnhanced = new LNMarketsAPIv2Enhanced({
+      const lnMarketsEnhanced = new LNMarketsAPI({
         credentials: {
           apiKey: activeCredentials.credentials.apiKey,
           apiSecret: activeCredentials.credentials.apiSecret,

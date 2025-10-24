@@ -12,6 +12,7 @@
 import { WebSocketConnection } from '../manager';
 import { Logger } from 'winston';
 import axios from 'axios';
+import { EventEmitter } from 'events';
 
 export interface MarketDataMessage {
   type: 'market_data';
@@ -34,7 +35,7 @@ export interface MarketDataCache {
   ttl: number;
 }
 
-export class MarketDataHandler {
+export class MarketDataHandler extends EventEmitter {
   private cache = new Map<string, MarketDataCache>();
   private subscribers = new Set<string>(); // connectionIds
   private updateInterval: NodeJS.Timeout | null = null;
@@ -42,6 +43,7 @@ export class MarketDataHandler {
   private readonly CACHE_TTL = 1000; // 1 segundo
 
   constructor(logger: Logger) {
+    super();
     this.logger = logger;
     console.log('🚀 MARKET DATA HANDLER - Initializing...');
     this.startMarketDataUpdates();

@@ -11,6 +11,7 @@
 
 import { WebSocketConnection } from '../manager';
 import { Logger } from 'winston';
+import { EventEmitter } from 'events';
 
 export interface PositionUpdateMessage {
   type: 'position_update';
@@ -32,13 +33,14 @@ export interface PositionUpdateCache {
   ttl: number;
 }
 
-export class PositionUpdatesHandler {
+export class PositionUpdatesHandler extends EventEmitter {
   private cache = new Map<string, PositionUpdateCache>(); // userId -> cache
   private positionSubscriptions = new Map<string, Set<string>>(); // userId -> Set<connectionIds>
   private logger: Logger;
   private readonly CACHE_TTL = 5000; // 5 segundos para dados de posição
 
   constructor(logger: Logger) {
+    super();
     this.logger = logger;
     console.log('🚀 POSITION UPDATES HANDLER - Initializing...');
   }

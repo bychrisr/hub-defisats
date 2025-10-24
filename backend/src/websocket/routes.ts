@@ -21,7 +21,7 @@ import { UserDataHandler } from './handlers/user-data.handler';
 import { PositionUpdatesHandler } from './handlers/position-updates.handler';
 import { Logger } from 'winston';
 
-export async function websocketRoutes(fastify: FastifyInstance) {
+export async function websocketConsolidatedRoutes(fastify: FastifyInstance) {
   console.log('🚀 WEBSOCKET ROUTES CONSOLIDADO - Initializing...');
   
   const logger = fastify.log as any;
@@ -47,22 +47,77 @@ export async function websocketRoutes(fastify: FastifyInstance) {
   console.log('✅ WEBSOCKET ROUTES CONSOLIDADO - Dependencies initialized');
 
   // ============================================================================
+  // SETUP GLOBAL EVENT HANDLERS (ONCE)
+  // ============================================================================
+  
+  // Handler para mensagens do cliente (configurado UMA VEZ para todas as conexões)
+  wsManager.on('message', (conn, message) => {
+    handleClientMessage(wsManager, marketDataHandler, userDataHandler, positionUpdatesHandler, conn, message);
+  });
+  
+  // Handler para desconexão (configurado UMA VEZ para todas as conexões)
+  wsManager.on('disconnection', (conn) => {
+    console.log('🔌 WEBSOCKET ROUTES - Connection closed:', { connectionId: conn.id });
+    
+    // Limpar subscriptions
+    if (conn.userId) {
+      userDataHandler.unsubscribe(conn.id, conn.userId);
+      positionUpdatesHandler.unsubscribe(conn.id, conn.userId);
+    }
+    marketDataHandler.unsubscribe(conn.id);
+  });
+
+  // ============================================================================
   // ROTA PRINCIPAL WEBSOCKET
   // ============================================================================
   
   fastify.get('/ws', { websocket: true }, async (connection, request) => {
     const connectionId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const userId = (request.query as any).userId;
+    const userId = (request.query as any)?.userId || 'anonymous';
     
-    console.log('🔌 WEBSOCKET ROUTES - New connection:', { connectionId, userId });
+    console.log('🔌 WEBSOCKET ROUTES - New WebSocket upgrade request:', {
+      connectionId,
+      userId,
+      headers: {
+        upgrade: request.headers.upgrade,
+        connection: request.headers.connection,
+        'sec-websocket-key': request.headers['sec-websocket-key'],
+        'sec-websocket-version': request.headers['sec-websocket-version'],
+        'user-agent': request.headers['user-agent']
+      },
+      url: request.url,
+      query: request.query,
+      socket: {
+        remoteAddress: connection.socket.remoteAddress,
+        remotePort: connection.socket.remotePort,
+        readyState: connection.socket.readyState
+      },
+      timestamp: new Date().toISOString()
+    });
     
     try {
+      // Log ANTES de criar conexão
+      console.log('🔌 WEBSOCKET ROUTES - About to create connection:', {
+        connectionId,
+        socketReadyState: connection.socket.readyState,
+        socketBufferedAmount: connection.socket.bufferedAmount,
+        timestamp: new Date().toISOString()
+      });
+      
       // Criar conexão gerenciada
       const wsConnection = await wsManager.createConnection(connectionId, connection.socket, {
         userId,
         userAgent: request.headers['user-agent'],
         ip: request.ip,
         timestamp: Date.now()
+      });
+      
+      // Log APÓS criar conexão
+      console.log('✅ WEBSOCKET ROUTES - Connection created successfully:', {
+        connectionId,
+        userId,
+        socketReadyState: connection.socket.readyState,
+        timestamp: new Date().toISOString()
       });
       
       // Enviar mensagem de boas-vindas
@@ -74,25 +129,20 @@ export async function websocketRoutes(fastify: FastifyInstance) {
         message: 'Connected to consolidated WebSocket system'
       });
       
-      // Handler para mensagens do cliente
-      wsManager.on('message', (conn, message) => {
-        handleClientMessage(wsManager, marketDataHandler, userDataHandler, positionUpdatesHandler, conn, message);
-      });
-      
-      // Handler para desconexão
-      wsManager.on('disconnection', (conn) => {
-        console.log('🔌 WEBSOCKET ROUTES - Connection closed:', { connectionId: conn.id });
-        
-        // Limpar subscriptions
-        if (conn.userId) {
-          userDataHandler.unsubscribe(conn.id, conn.userId);
-          positionUpdatesHandler.unsubscribe(conn.id, conn.userId);
-        }
-        marketDataHandler.unsubscribe(conn.id);
+      console.log('📤 WEBSOCKET ROUTES - Welcome message sent:', {
+        connectionId,
+        userId,
+        timestamp: new Date().toISOString()
       });
       
     } catch (error) {
-      console.error('❌ WEBSOCKET ROUTES - Connection error:', error);
+      console.error('❌ WEBSOCKET ROUTES - Connection error:', {
+        connectionId,
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
       connection.socket.close();
     }
   });
